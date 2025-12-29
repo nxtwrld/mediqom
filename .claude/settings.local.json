@@ -7,7 +7,9 @@
       "mcp__chrome-devtools__performance_start_trace",
       "Bash(curl:*)",
       "WebSearch",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(npx woff2@latest compress:*)",
+      "Bash(npx woff2@latest:*)"
     ],
     "deny": []
   }
