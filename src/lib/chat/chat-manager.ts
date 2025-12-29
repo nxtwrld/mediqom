@@ -8,6 +8,8 @@ import type {
   ChatResponse,
   ToolCallRequest,
   ToolCallResult,
+  ClarifyingQuestion,
+  ContextPrompt,
 } from "./types.d";
 import { generateId } from "$lib/utils/id";
 import ui from "$lib/ui";
@@ -257,6 +259,10 @@ export class ChatManager {
   }): void {
     const state = get(chatStore);
 
+    // Clear stale document/profile context from previous user to prevent context mixing
+    ui.clearLatest("aicontext:document");
+    ui.clearLatest("aicontext:profile");
+
     // Don't auto-initialize chat on profile switch - only initialize when chat is actually opened
     // If we don't have a context yet, just return - chat will initialize when opened
     if (!state.context) {
@@ -466,6 +472,7 @@ export class ChatManager {
    */
   private handleDocumentContext(data: {
     documentId: string;
+    profileId?: string;
     title: string;
     content: any;
     timestamp: Date;
@@ -473,6 +480,14 @@ export class ChatManager {
     // Only show prompt if chat is initialized and we're not already processing
     const state = get(chatStore);
     if (!state.context || this.isProcessing) {
+      return;
+    }
+
+    // Validate document belongs to current profile (prevent context mixing)
+    if (data.profileId && data.profileId !== state.context.currentProfileId) {
+      console.log(
+        `Ignoring document context from different profile: ${data.profileId} !== ${state.context.currentProfileId}`,
+      );
       return;
     }
 
@@ -791,7 +806,7 @@ export class ChatManager {
         );
 
       console.log(
-        `Context assembly initialized: ${this.currentContextResult.documentCount} documents available, confidence: ${this.currentContextResult.confidence}`,
+        `Context assembly initialized: ${this.currentContextResult?.documentCount} documents available, confidence: ${this.currentContextResult?.confidence}`,
       );
     } catch (error) {
       console.warn("Failed to initialize context assembly:", error);
@@ -1010,6 +1025,18 @@ export class ChatManager {
                   "🔍 [Client Debug] No tool calls received or empty array",
                 );
               }
+
+              // Handle clarifying questions
+              if (
+                event.data.clarifyingQuestions &&
+                event.data.clarifyingQuestions.length > 0
+              ) {
+                console.log(
+                  "🔍 [Client Debug] Processing clarifying questions:",
+                  event.data.clarifyingQuestions,
+                );
+                this.handleClarifyingQuestions(event.data.clarifyingQuestions);
+              }
               break;
 
             case "complete":
@@ -1058,6 +1085,65 @@ export class ChatManager {
   private handleConsentRequests(requests: any[]): void {
     // This could trigger consent dialog UI
     console.log("Consent requests:", requests);
+  }
+
+  /**
+   * Handle clarifying questions from AI (Socratic approach)
+   */
+  private handleClarifyingQuestions(questions: ClarifyingQuestion[]): void {
+    // Process only the first question (one at a time per UX decision)
+    const question = questions[0];
+    if (!question) return;
+
+    // Create a ContextPrompt for the clarifying question
+    const questionPrompt: ContextPrompt = {
+      type: "clarifyingQuestion",
+      id: question.id || generateId(),
+      title: question.question,
+      messageKey: "", // Not using translation key for dynamic question
+      acceptLabelKey: "chat.clarifyingQuestion.continue",
+      declineLabelKey: "", // No decline for questions
+      data: question,
+      timestamp: new Date(),
+      onAccept: () => {}, // Not used for questions
+      onDecline: () => {}, // Not used for questions
+      questionData: question,
+      onAnswer: (answers: string[]) => this.onQuestionAnswered(question, answers),
+    };
+
+    // Add system message with question prompt
+    const promptMessage = createMessage("system", question.question, {
+      contextPrompt: questionPrompt,
+    });
+
+    chatActions.addMessage(promptMessage);
+  }
+
+  /**
+   * Handle when user answers a clarifying question
+   */
+  private onQuestionAnswered(
+    question: ClarifyingQuestion,
+    answers: string[],
+  ): void {
+    // Format the answer as a user message
+    const answerText = answers.join(", ");
+
+    // Add user's answer to the conversation
+    const userMessage = createMessage("user", answerText);
+    chatActions.addMessage(userMessage);
+
+    // Continue the conversation with the answer
+    // This will trigger a new AI response that can ask follow-ups or provide recommendations
+    this.sendMessageWithContext(answerText);
+  }
+
+  /**
+   * Send message with current context (for follow-up after answering questions)
+   */
+  private async sendMessageWithContext(message: string): Promise<void> {
+    // Use the existing sendMessage flow to continue the conversation
+    await this.sendMessage(message);
   }
 
   /**

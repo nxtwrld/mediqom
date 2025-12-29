@@ -5,7 +5,9 @@
       "Bash(npm run build:*)",
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__performance_start_trace",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebSearch",
+      "Bash(npm run check:*)"
     ],
     "deny": []
   }

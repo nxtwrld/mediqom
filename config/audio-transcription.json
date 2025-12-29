@@ -5,8 +5,8 @@
       "apiKeyEnv": "OPENAI_API_KEY",
       "models": {
         "whisper": {
-          "name": "whisper-1",
-          "description": "OpenAI Whisper ASR model",
+          "name": "gpt-4o-mini-transcribe",
+          "description": "OpenAI GPT-4o Mini Transcribe model (improved quality over Whisper-1)",
           "supportedFormats": [
             "mp3",
             "mp4",
@@ -63,6 +63,35 @@
           "responseFormats": ["basic", "enhanced"]
         }
       }
+    },
+    "deepgram": {
+      "enabled": true,
+      "apiKeyEnv": "DEEPGRAM_API_KEY",
+      "mode": "streaming",
+      "tokenEndpoint": "/v1/transcribe/token",
+      "models": {
+        "nova-2": {
+          "name": "nova-2",
+          "description": "Deepgram Nova-2 General Model",
+          "streamingSupport": true,
+          "languages": ["en", "cs", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zh"],
+          "features": ["punctuate", "diarize", "smart_format", "interim_results"]
+        },
+        "nova-2-medical": {
+          "name": "nova-2-medical",
+          "description": "Deepgram Nova-2 Medical (optimized for healthcare)",
+          "streamingSupport": true,
+          "languages": ["en", "cs", "de", "es", "fr"],
+          "features": ["punctuate", "diarize", "smart_format", "interim_results", "medical_vocabulary"]
+        }
+      },
+      "streamingSettings": {
+        "keepAliveIntervalMs": 8000,
+        "tokenRefreshBufferMs": 60000,
+        "tokenTtlSeconds": 600,
+        "reconnectAttempts": 3,
+        "reconnectDelayMs": 1000
+      }
     }
   },
   "defaultProvider": "openai",
@@ -99,6 +128,7 @@
       "enabled": true,
       "maxSpeechDurationMs": 30000,
       "overlapDurationMs": 5000,
+      "batchDurationMs": 30000,
       "enableSmartTimeout": true,
       "energyThreshold": 0.001,
       "varianceThreshold": 0.0001,
@@ -111,9 +141,17 @@
   },
   "fallback": {
     "enableFallback": true,
-    "fallbackProviders": ["openai"],
+    "fallbackProviders": ["deepgram", "google", "openai"],
     "fallbackOnError": true,
     "fallbackOnTimeout": true
+  },
+  "streaming": {
+    "enabled": true,
+    "preferStreaming": true,
+    "defaultProvider": "deepgram",
+    "fallbackToBatch": true,
+    "batchFallbackDelayMs": 5000,
+    "maxLatencyMs": 3000
   },
   "quality": {
     "confidenceThreshold": 0.7,

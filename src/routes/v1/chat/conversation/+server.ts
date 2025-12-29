@@ -123,7 +123,7 @@ async function processAIRequest(
         );
 
         console.log(
-          `API context prepared: ${contextResult.documentCount} documents, confidence: ${contextResult.confidence}`,
+          `API context prepared: ${contextResult?.documentCount} documents, confidence: ${contextResult?.confidence}`,
         );
       } catch (error) {
         console.warn("Failed to prepare context in API route:", error);
@@ -203,11 +203,19 @@ async function processAIRequest(
 
     // Add available tools information
     if (finalTools && finalTools.length > 0) {
+      // Get document IDs already in context to avoid duplicate tool requests
+      const documentsInContext: string[] = pageContext?.documentsContent
+        ? pageContext.documentsContent.map(
+            ([docId]: [string, any]) => docId,
+          )
+        : [];
+
       content.push({
         type: "text",
-        text: formatAvailableTools(finalTools),
+        text: formatAvailableTools(finalTools, documentsInContext),
       });
       console.log("[MCP Debug] Tool instructions added to content");
+      console.log("[MCP Debug] Documents already in context:", documentsInContext);
     }
 
     // Add conversation history
@@ -306,6 +314,7 @@ async function processAIRequest(
         documentReferences: structuredData.documentReferences || [],
         consentRequests: structuredData.consentRequests || [],
         toolCalls: structuredData.toolCalls || [],
+        clarifyingQuestions: structuredData.clarifyingQuestions || [],
         tokenUsage: tokenUsage.total,
         mode,
         // Include context metadata
@@ -405,7 +414,10 @@ function formatAssembledContext(assembledContext: any): string {
 /**
  * Format available MCP tools for AI prompt
  */
-function formatAvailableTools(availableTools: string[]): string {
+function formatAvailableTools(
+  availableTools: string[],
+  documentsInContext: string[] = [],
+): string {
   if (!availableTools || availableTools.length === 0) {
     return "No medical data access tools are currently available.";
   }
@@ -426,49 +438,33 @@ function formatAvailableTools(availableTools: string[]): string {
     )
     .join("\n");
 
-  return `**🚨 CRITICAL: You have access to medical data tools. YOU MUST USE THEM! 🚨**
+  // Indicate which documents are already loaded
+  let contextNote = "";
+  if (documentsInContext.length > 0) {
+    contextNote = `**DOCUMENTS ALREADY IN YOUR CONTEXT:**
+The following document(s) are already loaded. You can answer questions about them directly WITHOUT using tools:
+${documentsInContext.map((id) => `- ${id}`).join("\n")}
 
-**Available Medical Data Tools:**
+DO NOT use getDocumentById or searchDocuments for documents listed above - their content is already available to you.
+
+`;
+  }
+
+  return `${contextNote}**Available Medical Data Tools:**
 ${toolsList}
 
-**⚠️ MANDATORY INSTRUCTIONS:**
-- When a user asks about their medications, conditions, test results, or any medical information, you MUST use these tools
-- DO NOT say "I don't have access" or "no information available" without FIRST attempting to use the relevant tools
-- DO NOT apologize for not having information - instead, USE THE TOOLS to get the information
-- If you mention accessing or checking medical data in your response, you MUST include toolCalls
-
-**🔧 How to use tools - REQUIRED FORMAT:**
-You MUST include a toolCalls array in your structured response with:
-- name: The exact tool name from the list above
-- parameters: Required parameters for the tool
-- reason: Clear explanation of why you need this information
-
-**❌ WRONG - Do not do this:**
-"Let me check your medications for you..." (without toolCalls)
-
-**✅ CORRECT - Always do this:**
-"Let me check your medications for you..." + include toolCalls: [{"name": "queryMedicalHistory", "parameters": {"queryType": "medications"}, "reason": "User asked about their current medications"}]
-
-**Examples of when to use each tool:**
-- User asks "What medications am I taking?" → Use queryMedicalHistory with { "queryType": "medications" }
-- User asks "What do my lab results show?" → Use searchDocuments with { "terms": ["laboratory", "results", "blood", "test"], "limit": 5 }
-- User asks "Tell me about my health" → Use getProfileData with {}
-- User asks "Do I have diabetes?" → Use queryMedicalHistory with { "queryType": "conditions" }
-- User asks about specific document → Use getDocumentById with { "documentId": "the_id" }
+**WHEN TO USE TOOLS:**
+- Use tools ONLY when you need information that is NOT already in your context above
+- If you already have the document content loaded, answer directly from that context
+- Use queryMedicalHistory for medications, conditions, procedures, or allergies NOT in current context
+- Use searchDocuments to find other documents NOT already loaded
+- Use getDocumentById ONLY for documents NOT listed in your context
 
 **Tool parameter examples:**
 - searchDocuments: { "terms": ["diabetes", "medications"], "limit": 5 }
-- getAssembledContext: { "conversationContext": "recent lab results", "maxTokens": 1000 }
 - getProfileData: {} (no parameters needed)
 - queryMedicalHistory: { "queryType": "medications" } (queryType: medications, conditions, procedures, allergies)
-- getDocumentById: { "documentId": "doc_123" } (use EXACT document IDs provided in context or user message)
+- getDocumentById: { "documentId": "doc_123" } (use EXACT document IDs)
 
-**CRITICAL PARAMETER REQUIREMENTS:**
-- ALWAYS include a "parameters" object in your toolCalls
-- For getDocumentById: parameters MUST contain {"documentId": "exact_id_from_context"}
-- For queryMedicalHistory: parameters MUST contain {"queryType": "medications|conditions|procedures|allergies"}
-- For searchDocuments: parameters MUST contain {"terms": ["medical", "terms", "array"], "limit": 5}
-- NEVER leave parameters empty or undefined
-
-**Remember:** The user will approve each tool use. Always attempt to use tools when asked about medical information.`;
+**Remember:** Answer from context when possible. Only use tools for additional information not already available.`;
 }

@@ -33,10 +33,20 @@ function createChatContext(
     documentsContent.set(documentData.documentId, documentData.content);
   }
 
-  // Add health document if available
+  // Add health document if available - only include basic summary to reduce token usage
   if (healthDocumentId && healthData) {
+    const basicHealthSummary = {
+      birthDate: healthData.birthDate,
+      biologicalSex: healthData.biologicalSex,
+      bloodType: healthData.bloodType,
+      height: healthData.signals?.height?.values?.[0]?.value,
+      weight: healthData.signals?.weight?.values?.[0]?.value,
+      // Include counts for context, actual data accessed via tools
+      medicationCount: healthData.medications?.length || 0,
+      conditionCount: healthData.conditions?.length || 0,
+    };
     availableDocuments.push(healthDocumentId);
-    documentsContent.set(healthDocumentId, healthData);
+    documentsContent.set(healthDocumentId, basicHealthSummary);
   }
 
   const pageContext: PageContext = {

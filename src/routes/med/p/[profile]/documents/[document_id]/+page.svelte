@@ -12,21 +12,34 @@
     interface Props {
         data: {
         document_id: string;
+        profileId: string;
     };
     }
 
     let { data }: Props = $props();
 
+    // Fields to include in AI context (matches config/chat.json documentContext.includeFields)
+    const includeFields = ['title', 'tags', 'diagnosis', 'medications', 'vitals', 'recommendations', 'signals', 'summary'];
+
     let document: Document | null = $state(null);
     onMount(async () => {
         document = await getDocument(data.document_id) || null;
-        
+
         // Emit document context event for AI chat
         if (document) {
+            const doc = document; // Capture for closure
+            // Strip document to only include essential fields (excludes sessionAnalysis, attachments, etc.)
+            const strippedContent = Object.fromEntries(
+                includeFields
+                    .filter(field => doc.content?.[field] !== undefined)
+                    .map(field => [field, doc.content[field]])
+            );
+
             ui.emit('aicontext:document', {
-                documentId: document.id,
-                title: document.content?.title || document.metadata?.title || 'Untitled Document',
-                content: document.content,
+                documentId: doc.id,
+                profileId: data.profileId, // Include profile ownership for validation
+                title: doc.content?.title || doc.metadata?.title || 'Untitled Document',
+                content: strippedContent,
                 timestamp: new Date()
             });
         }

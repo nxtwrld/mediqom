@@ -192,7 +192,19 @@ class ChatConfigManager {
     const basePrompt = this.config.prompts.base.instruction;
     const modeConfig = this.config.prompts[mode];
 
-    let systemPrompt = `${basePrompt}\n\n${modeConfig.systemPrompt.title}:\n`;
+    // Add current date for temporal awareness (healing times, procedure dates, etc.)
+    const today = new Date();
+    const dateContext = `**Current Date:** ${today.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}
+Use this date to calculate time since procedures, estimate healing progress, and provide accurate time-relative assessments.
+
+`;
+
+    let systemPrompt = `${dateContext}${basePrompt}\n\n${modeConfig.systemPrompt.title}:\n`;
 
     // Add guidelines
     modeConfig.systemPrompt.guidelines.forEach((guideline) => {
