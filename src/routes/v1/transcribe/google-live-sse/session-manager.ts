@@ -3,7 +3,6 @@ import {
   GCP_CLIENT_EMAIL,
   GCP_PRIVATE_KEY,
   GCP_PROJECT_ID,
-  GOOGLE_APPLICATION_CREDENTIALS_JSON,
 } from "$env/static/private";
 
 type OutgoingMessage =
@@ -53,14 +52,6 @@ setInterval(() => {
 }, 60 * 1000);
 
 function buildCredentials() {
-  if (GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-    try {
-      return JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    } catch (err) {
-      console.error("Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON", err);
-    }
-  }
-
   if (GCP_CLIENT_EMAIL && GCP_PRIVATE_KEY) {
     return {
       client_email: GCP_CLIENT_EMAIL,
@@ -83,16 +74,15 @@ export function mapLanguage(lang?: string) {
 
 function getSpeechClient() {
   const credentials = buildCredentials();
-  const projectId = GCP_PROJECT_ID || credentials?.project_id;
 
   return new SpeechClient(
     credentials
       ? {
           credentials,
-          projectId,
+          projectId: GCP_PROJECT_ID,
         }
-      : projectId
-        ? { projectId }
+      : GCP_PROJECT_ID
+        ? { projectId: GCP_PROJECT_ID }
         : {}
   );
 }

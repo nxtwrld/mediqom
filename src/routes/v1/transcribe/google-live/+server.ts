@@ -5,7 +5,6 @@ import {
   GCP_CLIENT_EMAIL,
   GCP_PRIVATE_KEY,
   GCP_PROJECT_ID,
-  GOOGLE_APPLICATION_CREDENTIALS_JSON,
 } from "$env/static/private";
 
 type ClientAudioMessage = {
@@ -38,14 +37,6 @@ const SAMPLE_RATE = 16000;
 const MAX_STREAM_MS = 4 * 60 * 1000; // rotate every 4 minutes to stay under provider limits
 
 function buildCredentials() {
-  if (GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-    try {
-      return JSON.parse(GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    } catch (err) {
-      console.error("Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON", err);
-    }
-  }
-
   if (GCP_CLIENT_EMAIL && GCP_PRIVATE_KEY) {
     return {
       client_email: GCP_CLIENT_EMAIL,
@@ -71,16 +62,15 @@ function decodePcmBase64(pcm: string): Buffer {
 
 function getSpeechClient() {
   const credentials = buildCredentials();
-  const projectId = GCP_PROJECT_ID || credentials?.project_id;
 
   return new SpeechClient(
     credentials
       ? {
           credentials,
-          projectId,
+          projectId: GCP_PROJECT_ID,
         }
-      : projectId
-        ? { projectId }
+      : GCP_PROJECT_ID
+        ? { projectId: GCP_PROJECT_ID }
         : {},
   );
 }

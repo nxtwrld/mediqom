@@ -1109,8 +1109,6 @@ Our use case is **server → client streaming** (transcription results), with **
 
 **Environment Variables** (Google Live only):
 ```bash
-GOOGLE_APPLICATION_CREDENTIALS_JSON='{...}'  # Preferred
-# OR
 GCP_CLIENT_EMAIL=service@project.iam.gserviceaccount.com
 GCP_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...
 GCP_PROJECT_ID=project-id
