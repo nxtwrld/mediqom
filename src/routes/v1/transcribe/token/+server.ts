@@ -108,8 +108,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Validate provider
 		if (provider !== 'deepgram' && provider !== 'auto') {
-			// Google requires server-side gRPC, can't do client-direct
-			error(501, 'Google direct streaming not supported. Use google-live-sse endpoint.');
+			error(501, 'Only Deepgram provider is supported for client-side streaming.');
 		}
 
 		// Check Deepgram API key is configured

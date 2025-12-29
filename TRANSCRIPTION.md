@@ -215,11 +215,9 @@ private findLongestOverlap(str1: string, str2: string): {
 
 ## Implementation Phases
 
-### Phase 1: Audio Test Page (Week 1)
+### Phase 1: Context and Diarization Validation
 
 **Goal**: Validate context and diarization features in isolation
-
-**Implementation**: `/src/routes/med/audio-test/+page.svelte`
 
 **Features**:
 1. Toggle between context-enabled and diarization modes
@@ -236,7 +234,6 @@ private findLongestOverlap(str1: string, str2: string): {
 
 **Code Changes**:
 ```typescript
-// NEW UI controls in audio-test page
 let transcriptionMode = $state<'context' | 'diarization'>('context');
 let contextMetrics = $state<{
   contextChars: number;
@@ -797,7 +794,7 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 This strategy provides a comprehensive, phased approach to enhancing transcription with context management and speaker diarization. By extending the existing `transcription-abstraction.ts` library, we maintain architectural consistency while adding powerful new capabilities.
 
 The three-phase rollout allows incremental validation:
-1. **Phase 1**: Isolated testing on audio-test page
+1. **Phase 1**: Context and diarization validation
 2. **Phase 2**: Production medical sessions with diarization
 3. **Phase 3**: Form-filling optimization without diarization
 
@@ -820,7 +817,7 @@ Expected outcomes:
 ### Problem: WebSocket Platform Incompatibility
 
 **Initial Implementation Issue**:
-The original `/v1/transcribe/live` and `/v1/transcribe/google-live` endpoints were built using WebSocket with `WebSocketPair` API, which is:
+The original `/v1/transcribe/live` endpoint was built using WebSocket with `WebSocketPair` API, which is:
 - **Cloudflare Workers specific** - not available in Node.js or Vercel
 - **Platform-dependent** - fails silently on incompatible platforms
 - **No error logging** - connections opened but transcripts never returned
@@ -927,49 +924,7 @@ Content-Type: application/json
 }
 ```
 
-#### Google Live SSE Variant (`/v1/transcribe/google-live-sse/`)
-
-**Differences from Standard SSE**:
-1. **Google Speech SDK Integration**: Uses `@google-cloud/speech` streaming API
-2. **Stream Rotation**: Restarts Google stream every 4 minutes (API limit)
-3. **Speaker Diarization**: Enables 2-speaker diarization with speaker tagging
-4. **Enhanced Model**: Uses `latest_long` model with automatic punctuation
-5. **Real-time Streaming**: Google processes audio incrementally, returns results faster
-
-**Speaker Tagging**:
-```typescript
-// Maps numeric speaker tags to human-readable labels
-const speakerMap = new Map<number, string>();
-mapSpeakerTag(speakerMap, 1) → "S1"
-mapSpeakerTag(speakerMap, 2) → "S2"
-```
-
-**Google Stream Configuration**:
-```typescript
-streamingRecognize({
-  config: {
-    encoding: "LINEAR16",
-    sampleRateHertz: 16000,
-    languageCode: "cs-CZ",
-    enableAutomaticPunctuation: true,
-    enableSpeakerDiarization: true,
-    diarizationSpeakerCount: 2,
-    model: "latest_long",
-    useEnhanced: true
-  },
-  interimResults: true,      // Send partial results
-  singleUtterance: false     // Continuous streaming
-})
-```
-
-**Runtime Configuration**:
-```typescript
-export const config = {
-  runtime: "nodejs"  // Required for Google SDK
-};
-```
-
-### Client Implementation (`/src/routes/med/audio-test/+page.svelte`)
+### Client Implementation
 
 **Connection Flow**:
 ```typescript
@@ -1025,9 +980,9 @@ try {
 ```
 
 **UI Updates**:
-- Transport dropdown: "Live (SSE + HTTP)" and "Google Live (SSE + HTTP)"
+- Transport dropdown: "Live (SSE + HTTP)"
 - Status indicator: "SSE connected" / "SSE will connect on start"
-- Log categories: "Live SSE" / "Google Live SSE"
+- Log categories: "Live SSE"
 
 ### Advantages Over WebSocket
 
@@ -1065,13 +1020,6 @@ Our use case is **server → client streaming** (transcription results), with **
 - [x] Processing trigger on audio ready
 - [x] Error responses for invalid sessions
 
-**Google Live SSE**:
-- [x] Stream rotation every 4 minutes
-- [x] Speaker diarization enabled
-- [x] Language mapping (cs, en, de)
-- [x] Interim and final results
-- [x] Speaker tag mapping (1→S1, 2→S2)
-
 **Client Integration**:
 - [x] EventSource connection
 - [x] Session ID capture from connected message
@@ -1105,14 +1053,6 @@ Our use case is **server → client streaming** (transcription results), with **
 - No special configuration needed
 - SSE works out-of-the-box on Vercel serverless functions
 - HTTP POST compatible with all Vercel runtimes
-- Google Live requires `runtime: "nodejs"` export
-
-**Environment Variables** (Google Live only):
-```bash
-GCP_CLIENT_EMAIL=service@project.iam.gserviceaccount.com
-GCP_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...
-GCP_PROJECT_ID=project-id
-```
 
 **Monitoring**:
 - Log SSE connection events
