@@ -21,3 +21,6 @@ vite.config.ts.timestamp-*
 !/test-data/extractions/.gitkeep
 !/test-data/analyses/.gitkeep
 !/test-data/workflows/.gitkeep
+
+
+gen-lang-client-0453401472-eb964eee450b.json

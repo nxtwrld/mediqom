@@ -130,7 +130,7 @@
         height: var(--toolbar-height, 48px);
         border-bottom: 1px solid var(--color-border, #e2e8f0);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        z-index: 10;
+        z-index: 1;
     }
     
     .tab-group-main {

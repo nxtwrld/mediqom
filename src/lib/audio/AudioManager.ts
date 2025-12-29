@@ -19,8 +19,8 @@ export class AudioManager extends EventEmitter {
   // Audio chunk buffering for optimization
   private chunkBuffer: Float32Array[] = [];
   private bufferTimer: number | null = null;
-  private readonly MIN_CHUNK_DURATION_MS = 10000; // 10 seconds
-  private readonly MIN_SAMPLES = 160000; // 10 seconds at 16kHz sample rate
+  private batchDurationMs = 30000; // 30 seconds real-time, loaded from config
+  private batchStartTime: number | null = null;
   
   // VAD timeout system for stuck speech events
   private vadTimeoutTimer: number | null = null;
@@ -50,12 +50,14 @@ export class AudioManager extends EventEmitter {
     // Set defaults that can be overridden by configuration
     this.maxSpeechDurationMs = 30000; // 30 seconds
     this.overlapDurationMs = 5000; // 5 seconds
-    
+    this.batchDurationMs = 30000; // 30 seconds real-time batch window
+
     // In a browser environment, configuration would be loaded via API
     // For now, we use reasonable defaults that can be overridden later
     logger.audio.debug('AudioManager configuration loaded with defaults', {
       maxSpeechDuration: `${this.maxSpeechDurationMs}ms`,
       overlapDuration: `${this.overlapDurationMs}ms`,
+      batchDuration: `${this.batchDurationMs}ms`,
     });
   }
 
@@ -81,11 +83,13 @@ export class AudioManager extends EventEmitter {
   }
 
   /**
-   * Check if buffer has enough samples to send for transcription
+   * Check if enough real-time has elapsed to send buffer for transcription
+   * Uses wall clock time instead of sample count to ensure consistent batch timing
    */
   private shouldSendBuffer(): boolean {
-    const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
-    return totalSamples >= this.MIN_SAMPLES;
+    if (!this.batchStartTime || this.chunkBuffer.length === 0) return false;
+    const elapsedMs = Date.now() - this.batchStartTime;
+    return elapsedMs >= this.batchDurationMs;
   }
 
   /**
@@ -183,29 +187,30 @@ export class AudioManager extends EventEmitter {
     }
 
     const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
-    const durationMs = Math.round((totalSamples / 16000) * 1000);
+    const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
+    const realTimeDurationMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
     const chunkCount = this.chunkBuffer.length;
-    const meetsThreshold = totalSamples >= this.MIN_SAMPLES;
 
     logger.audio.info('🔄 Sending buffered audio for transcription', {
       chunkCount,
       totalSamples,
-      durationMs: `${durationMs}ms`,
-      targetDurationMs: `${this.MIN_CHUNK_DURATION_MS}ms`,
-      meetsThreshold,
+      audioDurationMs: `${audioDurationMs}ms`,
+      realTimeDurationMs: `${realTimeDurationMs}ms`,
+      targetBatchDurationMs: `${this.batchDurationMs}ms`,
       forceFlush,
-      reason: forceFlush ? 'Timeout or manual flush' : 'Buffer size threshold reached',
+      reason: forceFlush ? 'Batch duration reached or manual flush' : 'Batch timer triggered',
       hasOverlap: this.overlappingBuffer.length > 0,
     });
 
     // Merge all buffered chunks into one optimized chunk
     const mergedChunk = float32Flatten(this.chunkBuffer);
-    
+
     // Create overlapping chunk with metadata for transcription
     const overlappingChunk = this.createOverlappingChunk(mergedChunk, forceFlush);
-    
-    // Clear buffer and timer
+
+    // Clear buffer, timer, and reset batch start time for next batch
     this.chunkBuffer = [];
+    this.batchStartTime = null;
     if (this.bufferTimer) {
       clearTimeout(this.bufferTimer);
       this.bufferTimer = null;
@@ -213,7 +218,7 @@ export class AudioManager extends EventEmitter {
 
     // Send the overlapping chunk with metadata for transcription processing
     this.emit('audio-chunk', overlappingChunk.audio, overlappingChunk.metadata);
-    
+
     logger.audio.debug('✅ Merged overlapping chunk sent for processing', {
       finalSamples: overlappingChunk.audio.length,
       compressionRatio: `${chunkCount}:1`,
@@ -331,38 +336,56 @@ export class AudioManager extends EventEmitter {
    * Add chunk to buffer and check if ready to send
    */
   private addToBuffer(audioData: Float32Array) {
+    // Start batch timer on first chunk
+    if (this.chunkBuffer.length === 0) {
+      this.batchStartTime = Date.now();
+      logger.audio.debug('🎬 New batch started', {
+        batchDurationMs: this.batchDurationMs,
+      });
+    }
+
     // Update energy history for smart timeout detection
     this.updateEnergyHistory(audioData);
-    
+
     this.chunkBuffer.push(audioData);
-    
+
     const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
-    const currentDurationMs = Math.round((totalSamples / 16000) * 1000);
+    const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
+    const elapsedRealTimeMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
 
     logger.audio.debug('📦 Added chunk to buffer', {
       chunkSamples: audioData.length,
       totalSamples,
-      currentDurationMs: `${currentDurationMs}ms`,
+      audioDurationMs: `${audioDurationMs}ms`,
+      elapsedRealTimeMs: `${elapsedRealTimeMs}ms`,
+      batchDurationMs: `${this.batchDurationMs}ms`,
       bufferLength: this.chunkBuffer.length,
       readyToSend: this.shouldSendBuffer(),
       energyLevel: this.calculateEnergy(audioData).toFixed(6),
     });
 
-    // Check if we have enough samples to send
+    // Check if enough real-time has elapsed to send
     if (this.shouldSendBuffer()) {
       this.mergeAndSendBuffer();
       return;
     }
 
-    // Set timeout to force send after 10 seconds if no new chunks
+    // Set timeout to send when batch duration is reached
     if (this.bufferTimer) {
       clearTimeout(this.bufferTimer);
     }
-    
-    this.bufferTimer = window.setTimeout(() => {
-      logger.audio.info('⏰ Buffer timeout reached - forcing send of smaller chunk');
-      this.mergeAndSendBuffer(true);
-    }, this.MIN_CHUNK_DURATION_MS);
+
+    if (this.batchStartTime) {
+      const elapsed = Date.now() - this.batchStartTime;
+      const remaining = Math.max(100, this.batchDurationMs - elapsed); // Min 100ms to prevent immediate firing
+
+      this.bufferTimer = window.setTimeout(() => {
+        logger.audio.info('⏰ Batch duration reached - sending accumulated audio', {
+          targetDurationMs: this.batchDurationMs,
+        });
+        this.mergeAndSendBuffer(true);
+      }, remaining);
+    }
   }
 
   /**
@@ -376,32 +399,35 @@ export class AudioManager extends EventEmitter {
       this.bufferTimer = null;
       logger.audio.debug('🕰️ Cleared pending buffer timeout');
     }
-    
+
     this.clearVadTimeout();
-    
+
     // Send any remaining chunks for processing before clearing
     if (this.chunkBuffer.length > 0) {
       const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
-      const durationMs = Math.round((totalSamples / 16000) * 1000);
-      
+      const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
+      const realTimeDurationMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
+
       logger.audio.info('🧹 Flushing remaining buffer chunks for processing', {
         chunkCount: this.chunkBuffer.length,
         totalSamples,
-        durationMs: `${durationMs}ms`,
+        audioDurationMs: `${audioDurationMs}ms`,
+        realTimeDurationMs: `${realTimeDurationMs}ms`,
         reason: 'Recording stopped - ensuring no audio data is lost',
         hasOverlap: this.overlappingBuffer.length > 0,
       });
-      
+
       // Force send remaining buffered chunks for processing
       this.mergeAndSendBuffer(true);
     } else {
       logger.audio.debug('✅ Buffer already empty - no chunks to flush');
     }
-    
-    // Clear overlapping buffer
+
+    // Clear overlapping buffer and reset batch state
     this.overlappingBuffer = [];
     this.energyHistory = [];
     this.chunkSequenceNumber = 0;
+    this.batchStartTime = null;
   }
 
   /**

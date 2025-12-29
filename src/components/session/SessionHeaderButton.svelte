@@ -160,7 +160,6 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background-color: var(--color-white);
         color: var(--color-black);
         border-radius: var(--radius);
         font-weight: var(--text-bold);
@@ -170,11 +169,6 @@
         position: relative;
     }
 
-    .session-status-btn:hover {
-        background-color: var(--color-gray-200);
-        transform: translateY(-1px);
-        transition: all 0.2s ease;
-    }
 
     .session-status-btn.listening .button-text {
         color: var(--color-interactivity);

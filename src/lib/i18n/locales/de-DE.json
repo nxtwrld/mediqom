@@ -96,6 +96,10 @@
       "greetings": {
         "patient": "Hallo! Ich bin hier, um Ihnen zu helfen, Ihre medizinischen Informationen zu verstehen und Sie auf Ihrem Gesundheitsweg zu unterstützen. Fragen Sie mich gerne nach Ihren Gesundheitsakten, Symptomen oder allen Fragen zu Ihrer Pflege.",
         "clinical": "Hallo! Ich bin hier, um bei der klinischen Analyse des medizinischen Profils von {profileName} zu helfen. Ich kann bei der Analyse von Mustern helfen, Differentialüberlegungen vorschlagen und Erkenntnisse basierend auf verfügbaren medizinischen Daten liefern."
+      },
+      "clarifyingQuestion": {
+        "placeholder": "Oder geben Sie Ihre eigene Antwort ein...",
+        "continue": "Weiter"
       }
     },
     "onboarding": {

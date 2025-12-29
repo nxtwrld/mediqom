@@ -160,6 +160,10 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
     }
 
+    header .toolbar {
+        --button-color: var(--color-gray-500-alpha);
+    }
+
     .icon {
         width: var(--toolbar-height);
         padding: .5rem;

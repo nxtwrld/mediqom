@@ -1,16 +1,37 @@
 <script lang="ts">
   import type { ContextPrompt } from '$lib/chat/types.d';
   import { t } from '$lib/i18n';
-  
+
   interface Props {
     prompt: ContextPrompt;
   }
 
   let { prompt }: Props = $props();
-  
+
+  // State for clarifying question handling
+  let selectedOptions = $state<string[]>([]);
+  let customAnswer = $state('');
+
+  const toggleOption = (option: string) => {
+    if (prompt.questionData?.multiSelect) {
+      selectedOptions = selectedOptions.includes(option)
+        ? selectedOptions.filter(o => o !== option)
+        : [...selectedOptions, option];
+    } else {
+      selectedOptions = [option];
+    }
+  };
+
+  const submitAnswer = () => {
+    const answers = customAnswer.trim()
+      ? [...selectedOptions, customAnswer.trim()]
+      : selectedOptions;
+    prompt.onAnswer?.(answers);
+  };
+
   const getToolIconName = (toolName?: string): string => {
     if (!toolName) return 'tool';
-    
+
     const icons: Record<string, string> = {
       searchDocuments: 'search',
       getProfileData: 'profile',
@@ -18,7 +39,7 @@
       getAssembledContext: 'context-assembly',
       getDocumentById: 'document'
     };
-    
+
     return icons[toolName] || 'tool';
   };
 </script>
@@ -50,21 +71,59 @@
       {$t('chat.tool.security.' + prompt.securityLevel)}
     </div>
   {/if}
-  
-  <div class="context-actions">
-    <button 
-      class="context-btn accept"
-      onclick={prompt.onAccept}
+
+  {#if prompt.type === 'clarifyingQuestion' && prompt.questionData}
+    <div class="question-options">
+      {#each prompt.questionData.options as option}
+        <button
+          class="option-btn"
+          class:selected={selectedOptions.includes(option)}
+          onclick={() => toggleOption(option)}
+        >
+          {option}
+        </button>
+      {/each}
+    </div>
+
+    {#if prompt.questionData.allowCustom !== false}
+      <input
+        type="text"
+        class="custom-answer"
+        placeholder={$t('app.chat.clarifyingQuestion.placeholder')}
+        bind:value={customAnswer}
+        onkeydown={(e) => e.key === 'Enter' && (selectedOptions.length > 0 || customAnswer.trim()) && submitAnswer()}
+      />
+    {/if}
+
+    {#if prompt.questionData.context}
+      <p class="question-context">{prompt.questionData.context}</p>
+    {/if}
+
+    <button
+      class="submit-btn"
+      disabled={selectedOptions.length === 0 && !customAnswer.trim()}
+      onclick={submitAnswer}
     >
-      {$t(prompt.acceptLabelKey)}
+      {$t('app.chat.clarifyingQuestion.continue')}
     </button>
-    <button 
-      class="context-btn decline"
-      onclick={prompt.onDecline}
-    >
-      {$t(prompt.declineLabelKey)}
-    </button>
-  </div>
+  {/if}
+
+  {#if prompt.type !== 'clarifyingQuestion'}
+    <div class="context-actions">
+      <button
+        class="context-btn accept"
+        onclick={prompt.onAccept}
+      >
+        {$t(prompt.acceptLabelKey)}
+      </button>
+      <button
+        class="context-btn decline"
+        onclick={prompt.onDecline}
+      >
+        {$t(prompt.declineLabelKey)}
+      </button>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -213,5 +272,93 @@
 
   .context-btn.decline:hover {
     background: var(--color-gray-500);
+  }
+
+  /* Clarifying Question Styles */
+  .context-prompt.clarifyingQuestion {
+    background: var(--color-gray-300);
+    border-color: var(--color-gray-500);
+  }
+
+  .question-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .option-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--color-gray-600);
+    border-radius: 20px;
+    background: var(--color-white);
+    color: var(--color-black);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .option-btn:hover {
+    background: var(--color-gray-400);
+    border-color: var(--color-gray-800);
+  }
+
+  .option-btn.selected {
+    background: var(--color-blue);
+    border-color: var(--color-blue);
+    color: var(--color-white);
+  }
+
+  .custom-answer {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--color-gray-500);
+    border-radius: var(--radius-8);
+    font-size: 14px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    background: var(--color-white);
+  }
+
+  .custom-answer:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px var(--color-gray-400-alpha);
+  }
+
+  .custom-answer::placeholder {
+    color: var(--color-gray-800);
+  }
+
+  .question-context {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--color-gray-800);
+    font-style: italic;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 10px 20px;
+    background: var(--color-blue);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--radius-8);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: var(--color-interactivity);
+    filter: brightness(0.9);
+  }
+
+  .submit-btn:disabled {
+    background: var(--color-gray-500);
+    color: var(--color-gray-800);
+    cursor: not-allowed;
   }
 </style>

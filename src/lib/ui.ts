@@ -49,6 +49,13 @@ class UIEvents extends EventEmitter {
   }
 
   /**
+   * Clear the latest event data for a specific event
+   */
+  clearLatest(event: string): void {
+    this.latestEvents.delete(event);
+  }
+
+  /**
    * Get all latest events
    */
   getAllLatest(): Record<string, { data: any; timestamp: Date }> {

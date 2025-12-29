@@ -3,7 +3,7 @@ export type ChatMode = "patient" | "clinical";
 export type ChatMessageRole = "user" | "assistant" | "system";
 
 export interface ContextPrompt {
-  type: "document" | "profile" | "tool";
+  type: "document" | "profile" | "tool" | "clarifyingQuestion";
   id: string;
   title: string;
   messageKey: string;
@@ -19,6 +19,9 @@ export interface ContextPrompt {
   toolParameters?: any;
   securityLevel?: "low" | "medium" | "high";
   dataAccessDescription?: string[];
+  // Clarifying question fields
+  questionData?: ClarifyingQuestion;
+  onAnswer?: (answers: string[]) => void;
 }
 
 export interface ChatMessage {
@@ -142,6 +145,15 @@ export interface ConsentRequest {
   reason: string;
 }
 
+export interface ClarifyingQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  allowCustom?: boolean;
+  multiSelect?: boolean;
+  context?: string;
+}
+
 export interface ToolCallRequest {
   name: string;
   parameters: any;
@@ -163,4 +175,5 @@ export interface ChatResponse {
   toolCalls?: ToolCallRequest[];
   suggestions?: AnatomySuggestion[];
   consentRequests?: ConsentRequest[];
+  clarifyingQuestions?: ClarifyingQuestion[];
 }

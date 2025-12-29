@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({
   const { file: base64, filename, type } = await request.json();
   // conver base64 to file
   const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-  const buffer = new Buffer(base64Data, "base64");
+  const buffer = Buffer.from(base64Data, "base64");
   const file = new File([buffer], filename, { type: type });
 
   const { error: errorUploading } = await supabase.storage

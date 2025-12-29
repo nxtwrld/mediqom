@@ -90,6 +90,8 @@ export interface TranscriptionOptions {
   provider?: string;
   model?: string;
   translate?: boolean;
+  chunkingStrategy?: "auto" | object;
+  includeLogprobs?: boolean;
 }
 
 export interface TranscriptionResult {
@@ -323,6 +325,7 @@ export class TranscriptionProviderAbstraction {
       language: language,
       response_format: responseFormat,
       temperature: temperature,
+      chunking_strategy: "auto", // Server-side VAD + audio normalization to prevent hallucinations
     };
 
     if (prompt) {
@@ -337,6 +340,12 @@ export class TranscriptionProviderAbstraction {
       }
     }
 
+    // Add log probabilities for quality/confidence scoring
+    if (options.includeLogprobs) {
+      transcriptionParams.include = ["logprobs"];
+      transcriptionParams.response_format = "json"; // Required for logprobs
+    }
+
     // Log key transcription parameters (keep minimal for troubleshooting)
     console.log("🎯 TRANSCRIBE: Using", {
       language: transcriptionParams.language,
@@ -349,17 +358,27 @@ export class TranscriptionProviderAbstraction {
         transcriptionParams,
       );
 
+    // Helper to strip hallucinated prompt from beginning of transcription
+    const stripHallucinatedPrompt = (text: string): string => {
+      if (!prompt || !text) return text;
+      const promptText = prompt.trim();
+      if (text.startsWith(promptText)) {
+        console.warn('⚠️ Stripped hallucinated prompt from transcription output');
+        return text.slice(promptText.length).trim();
+      }
+      return text;
+    };
 
     // Handle different response formats
     if (typeof transcription === "string") {
       return {
-        text: transcription,
+        text: stripHallucinatedPrompt(transcription),
         confidence: 0.8, // OpenAI Whisper doesn't provide confidence scores
       };
     } else if (transcription.text) {
       // Verbose JSON response with segments
       return {
-        text: transcription.text,
+        text: stripHallucinatedPrompt(transcription.text),
         confidence: 0.8,
         segments: transcription.segments?.map(
           (segment: any, index: number) => ({
@@ -553,15 +572,34 @@ export class TranscriptionProviderAbstraction {
    */
   async transcribeAudioCompatible(
     audioData: File,
-    instructions: { lang: string; translate?: boolean } = { lang: "en" },
+    instructions: {
+      lang: string;
+      translate?: boolean;
+      prompt?: string;
+      includeLogprobs?: boolean;
+      chunkingStrategy?: "auto" | object;
+    } = { lang: "en" },
   ): Promise<{ text: string }> {
     const result = await this.transcribeAudio(audioData, {
       language: instructions.lang,
       translate: instructions.translate,
+      prompt: instructions.prompt,
+      includeLogprobs: instructions.includeLogprobs,
+      chunkingStrategy: instructions.chunkingStrategy,
     });
 
+    // Guard against Whisper prompt hallucination (backup check)
+    let text = result.text;
+    if (instructions.prompt && text) {
+      const promptText = instructions.prompt.trim();
+      if (text.startsWith(promptText)) {
+        console.warn('⚠️ Stripped hallucinated prompt from transcription (backup check)');
+        text = text.slice(promptText.length).trim();
+      }
+    }
+
     return {
-      text: result.text,
+      text,
     };
   }
 }

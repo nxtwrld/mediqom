@@ -124,6 +124,10 @@
         "executed": "{toolName} executed successfully",
         "declined": "{toolName} access was denied",
         "error": "{toolName} failed: {error}"
+      },
+      "clarifyingQuestion": {
+        "placeholder": "Or type your own answer...",
+        "continue": "Continue"
       }
     },
     "onboarding": {

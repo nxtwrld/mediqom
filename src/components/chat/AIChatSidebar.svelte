@@ -532,6 +532,7 @@
   .message {
     display: flex;
     flex-direction: column;
+
   }
 
   .message.user {
@@ -553,6 +554,7 @@
     border-radius: var(--radius-8);
     position: relative;
     font-weight: 400;
+    user-select: text;
   }
 
   .message.user .message-content {

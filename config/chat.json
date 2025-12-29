@@ -54,7 +54,7 @@
   },
   "prompts": {
     "base": {
-      "instruction": "You are an AI medical assistant integrated with a 3D anatomy model. IMPORTANT: Never include technical IDs, anatomy references, or mention \"AnatomyReferences\" in your text responses. These are handled automatically by the system."
+      "instruction": "You are an AI medical assistant integrated with a 3D anatomy model. IMPORTANT: Never include technical IDs, anatomy references, or mention \"AnatomyReferences\" in your text responses. These are handled automatically by the system.\n\nBefore providing recommendations, use a Socratic approach:\n1. When the query is ambiguous or complex, ask clarifying questions using the clarifyingQuestions field\n2. Identify gaps or assumptions that need user input\n3. Understand the real goal or concern behind the question\n4. For complex medical topics, explore possible paths before recommending\n\nUse clarifyingQuestions for:\n- Ambiguous symptoms (location, duration, severity)\n- Multiple possible interpretations\n- Missing critical context\n- Complex medical decisions requiring user input\n\nStart with light clarifications; go deeper only when the topic requires it."
     },
     "patient": {
       "systemPrompt": {
@@ -68,7 +68,8 @@
           "Use language appropriate for: {language}",
           "You are discussing the medical profile for: {profileName}",
           "Do not assume the user is the patient - they may be a parent, guardian, caregiver, or family member",
-          "Address the user respectfully without assuming their relationship to the patient"
+          "Address the user respectfully without assuming their relationship to the patient",
+          "When asking clarifying questions, use gentle, empathetic language that validates concerns while gathering information"
         ],
         "anatomyInstructions": [
           "When discussing body parts, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -193,7 +194,8 @@
           "Use language appropriate for: {language}",
           "You are reviewing the medical profile for: {profileName}",
           "The user may be a healthcare provider, family member, or authorized person reviewing this profile",
-          "Maintain professional clinical language while being accessible to the intended audience"
+          "Maintain professional clinical language while being accessible to the intended audience",
+          "When asking clarifying questions, use precise clinical language to gather relevant diagnostic information systematically"
         ],
         "anatomyInstructions": [
           "When discussing anatomical structures, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -317,7 +319,7 @@
       "recommendations",
       "signals"
     ],
-    "includeAdditionalContent": true,
+    "includeAdditionalContent": false,
     "maxDocuments": 5
   },
   "responseSchema": {
@@ -358,6 +360,43 @@
               }
             },
             "description": "Consent requests for accessing documents or using anatomy model"
+          },
+          "clarifyingQuestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique question ID for tracking"
+                },
+                "question": {
+                  "type": "string",
+                  "description": "The clarifying question to ask the user"
+                },
+                "options": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "2-4 predefined answer options for the user to select from"
+                },
+                "allowCustom": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to allow the user to type a custom answer"
+                },
+                "multiSelect": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether the user can select multiple options"
+                },
+                "context": {
+                  "type": "string",
+                  "description": "Brief explanation of why this question is being asked"
+                }
+              },
+              "required": ["id", "question", "options"]
+            },
+            "description": "Clarifying questions to ask before providing recommendations. Use for ambiguous queries or complex medical topics. Only include ONE question at a time."
           },
           "toolCalls": {
             "type": "array",
