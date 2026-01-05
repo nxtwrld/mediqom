@@ -36,11 +36,17 @@ class CentralizedLogger {
   private isDev: boolean;
 
   constructor() {
-    this.isDev =
-      typeof window !== "undefined" &&
-      (window.location?.hostname === "localhost" ||
-        window.location?.hostname === "127.0.0.1" ||
-        window.location?.port !== "");
+    // Detect development mode safely (Capacitor WebView may have unusual location)
+    try {
+      this.isDev =
+        typeof window !== "undefined" &&
+        window.location &&
+        (window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          (window.location.port !== "" && window.location.port !== undefined));
+    } catch {
+      this.isDev = false;
+    }
 
     // Default configuration
     this.config = {
@@ -51,10 +57,18 @@ class CentralizedLogger {
     };
 
     // Load configuration from localStorage if available
-    this.loadConfig();
+    try {
+      this.loadConfig();
+    } catch (e) {
+      console.warn('[Logger] Failed to load config:', e);
+    }
 
     // Make config accessible via window for runtime control
-    this.exposeGlobalConfig();
+    try {
+      this.exposeGlobalConfig();
+    } catch (e) {
+      console.warn('[Logger] Failed to expose global config:', e);
+    }
   }
 
   static getInstance(): CentralizedLogger {

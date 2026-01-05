@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mediqom</string>
+    <string name="title_activity_main">Mediqom</string>
+    <string name="package_name">com.mediqom.app</string>
+    <string name="custom_url_scheme">com.mediqom.app</string>
+</resources>
