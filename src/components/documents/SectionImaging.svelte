@@ -256,7 +256,7 @@
             <div class="image-grid">
                 {#each imageUrls as imageUrl}
                     <div class="image-container">
-                        <img src={imageUrl} alt="Medical imaging" class="medical-image" />
+                        <img src={imageUrl} alt="Medical imaging" loading="lazy" class="medical-image" />
                     </div>
                 {/each}
             </div>

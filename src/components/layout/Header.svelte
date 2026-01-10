@@ -81,7 +81,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
                     <a class="profile" href="/med/p/{$profile.id}" class:-active={isActive('/med/p/' +$profile.id , $page.url.pathname)}>
                         {#if $profile.avatarUrl}
                         <div class="icon profile-image">
-                            <img src="/v1/med/profiles/{$profile.id}/avatar?path={$profile.avatarUrl}" alt="avatar" />
+                            <img src="/v1/med/profiles/{$profile.id}/avatar?path={$profile.avatarUrl}" loading="lazy" alt="avatar" />
                         </div>
                         {/if}
                         {$profile.fullName}
@@ -155,7 +155,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         top: 0;
         left: 0;
         right: 0;
-        height: var(--toolbar-height);
+        padding-top: var(--safe-area-top);
+        height: calc(var(--toolbar-height) + var(--safe-area-top));
         z-index: 1000;
         --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
     }

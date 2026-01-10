@@ -111,7 +111,7 @@
 {#if isMobile}
 	<!-- Mobile: Client-side form submission -->
 	<form class="flex -column form modal" onsubmit={handleMobileSubmit}>
-		<img src="/icon.svg" alt="Mediqom app" class="logo" />
+		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
 
 		<h1 class="h1">Authentication</h1>
 		{#if submitted && successMessage}
@@ -158,7 +158,7 @@
 			return false;
 		}
 	}}>
-		<img src="/icon.svg" alt="Mediqom app" class="logo" />
+		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
 
 		<h1 class="h1">Authentication</h1>
 		{#if form?.success}

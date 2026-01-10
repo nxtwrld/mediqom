@@ -10,9 +10,9 @@
     let { profile = null, size = 3 }: Props = $props();
 </script>
 
-<div class="avatar " style="height: {size}em; width: {size}em;">
+<div class="avatar " style="width: min({size}em, 100%);">
 {#if profile && profile.avatarUrl}
-    <img src={`/v1/med/profiles/${profile.id}/avatar?path=${profile.avatarUrl}`} alt="Photo of {profile.fullName}" class="profile-image" />
+    <img src={`/v1/med/profiles/${profile.id}/avatar?path=${profile.avatarUrl}`} loading="lazy" alt="Photo of {profile.fullName}" class="profile-image" />
 {:else}
     <svg>
         <use href="/icons.svg#user" />
@@ -35,6 +35,7 @@
         overflow: hidden;
         border: 1px solid var(--color-gray-500);
         box-shadow: 0 .3rem .2rem -.1rem var(--color-gray-800);
+        aspect-ratio: 1/1;
     }
 
     .avatar img {

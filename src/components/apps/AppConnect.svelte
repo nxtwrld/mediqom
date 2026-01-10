@@ -137,7 +137,7 @@
     {@render children?.()}
 {#each $apps.filter(filterApps) as app}
         <button onclick={() => openApp(app)} >
-            <img src={app.icon} alt={app.name} class="app-icon" />
+            <img src={app.icon} loading="lazy" alt={app.name} class="app-icon" />
             <span>{app.name}</span>
             <span class="app-credits">{app.credits}</span>
         </button>

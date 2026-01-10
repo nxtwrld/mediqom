@@ -1,5 +1,5 @@
 main.layout {
-  padding: calc(var(--toolbar-height) + var(--gap)) 0 0 0;
+  padding: calc(var(--toolbar-height) + var(--safe-area-top) + var(--gap)) var(--safe-area-right) 0 var(--safe-area-left);
   height: 100vh;
   position: relative;
 }
@@ -115,6 +115,7 @@ main.layout.chat-open section.layout-content {
     background: var(--color-background);
     transform: translateY(0);
     z-index: 1000;
+    padding-bottom: var(--safe-area-bottom);
   }
 
   /* Resize handle is already hidden by the rule above */

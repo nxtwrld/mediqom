@@ -35,15 +35,10 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
@@ -66,5 +61,7 @@
 	<string>Mediqom needs microphone access to record doctor-patient consultations for transcription and analysis.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Mediqom needs camera access to scan and import medical documents.</string>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 </dict>
 </plist>

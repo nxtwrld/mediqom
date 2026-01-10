@@ -91,10 +91,10 @@
 @media screen and (max-width: 768px) {
   .heading:has(.h1),
   .h1.heading {
-    height: calc(1.5 * var(--heading-height));
+    height: calc(2 * var(--heading-height));
   }
   .-heading-master:has(> .heading.-sticky > .h1) .heading:not(.-heading-main) {
-    --sticky-top: calc(1.5 * var(--heading-height));
+    --sticky-top: calc(2 * var(--heading-height));
   }
 
   .heading .heading-icon svg {

@@ -237,7 +237,7 @@
         transition: opacity 0.3s;
     }
     .grid-tile .unit {
-        font-size: 1.3rem;
+        font-size: .7em;
         font-weight: 300;
     }
     .indicator {

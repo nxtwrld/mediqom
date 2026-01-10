@@ -428,7 +428,7 @@
 
   .chat-sidebar {
     position: fixed;
-    top: var(--heading-height);
+    top: calc(var(--heading-height) + var(--safe-area-top));
     right: 0;
     bottom: 0;
     background: var(--color-white);

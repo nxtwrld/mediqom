@@ -22,7 +22,7 @@
     <div class="report">
         <div class="preview">
             {#if thumbnail}
-            <img src={thumbnail} alt={doc.metadata.title} class="thumbmail" />
+            <img src={thumbnail} loading="lazy" alt={doc.metadata.title} class="thumbmail" />
             {/if}
         </div>
         <div class="title">{doc.metadata.title}</div>

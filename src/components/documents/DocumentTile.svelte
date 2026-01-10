@@ -58,6 +58,9 @@
         flex-direction: column;
         justify-content: flex-end;
     }
+    .tile .tile-body .h4 {
+        font-family: var(--font-face-heading);
+    }
     .tile .tile-header {
         display: flex;
         justify-content: flex-end;

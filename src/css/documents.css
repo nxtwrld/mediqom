@@ -19,7 +19,7 @@
 .document-section .heading > h3 {
   font-size: clamp(0.8rem, 3vw, 1.5rem);
   line-height: 1.2;
-  padding: 0 0.5rem;
+  padding: 0 1rem;
 }
 
 /* Container-specific heading adjustments with named container */
@@ -38,8 +38,8 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 0.9rem;
-    padding: 0 0.25rem;
+    font-size: 1rem;
+    padding: 0 1rem;
   }
 }
 
@@ -48,7 +48,7 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 0.8rem;
+    font-size: 1rem;
     line-height: 1;
   }
 
