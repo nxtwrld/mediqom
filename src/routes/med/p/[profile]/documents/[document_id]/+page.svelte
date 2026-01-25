@@ -55,7 +55,6 @@
     <div class="page -empty  -heading-master">
 
         <DocumentHeading {document} />
-        <DocumentToolbar {document} />
         <AppConnect {document} shared={[document]}/>
         <DocumentView {document} />
     </div>

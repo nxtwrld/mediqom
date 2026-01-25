@@ -12,7 +12,7 @@
 }
 
 .-heading-master:has(> .heading.-sticky > .h1) .heading:not(.-heading-main) {
-  --sticky-top: calc(2 * var(--heading-height));
+  --sticky-top: calc(3.5 * var(--heading-height));
   --sticky-z-index: 9;
 }
 .heading.-sticky {
@@ -57,7 +57,7 @@
 }
 .heading:has(.h1),
 .h1.heading {
-  height: calc(2 * var(--heading-height));
+  height: calc(3.5 * var(--heading-height));
 }
 .heading .heading-icon {
   height: 100%;
@@ -91,10 +91,10 @@
 @media screen and (max-width: 768px) {
   .heading:has(.h1),
   .h1.heading {
-    height: calc(2 * var(--heading-height));
+    height: calc(2.5 * var(--heading-height));
   }
   .-heading-master:has(> .heading.-sticky > .h1) .heading:not(.-heading-main) {
-    --sticky-top: calc(2 * var(--heading-height));
+    --sticky-top: calc(2.5 * var(--heading-height));
   }
 
   .heading .heading-icon svg {
@@ -106,14 +106,14 @@
   .heading .heading-icon + .h2,
   .heading .heading-icon + .h3,
   .heading .heading-icon + .h4 {
-    font-size: 1rem !important;
+    font-size: 1.1rem !important;
     line-height: 1.2;
   }
 
   /* Also target headings without icons */
   .heading > .h1,
   .heading > .h2 {
-    font-size: 1rem !important;
+    font-size: 1.1rem !important;
     line-height: 1.2;
   }
 
@@ -124,12 +124,47 @@
 
   .heading .-date {
     font-size: 1rem;
+    position: static;
+    margin-bottom: .5rem;
+    /*
     position: absolute;
     right: 50%;
     bottom: 0;
     transform: translate(50%, 50%);
-    /*margin-top: -1.3rem;
+    margin-top: -1.3rem;
         */
+  }
+
+  /* Mobile: Toolbar grid layout
+     ICON    | Title
+     --------|
+     T1 | T2 | Date
+  */
+  .heading:has(.toolbar) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: calc(var(--heading-height) * 1.5)  var(--heading-height);
+    grid-template-areas:
+      "icon title"
+      "toolbar title";
+    padding: 0;
+  }
+
+  .heading:has(.toolbar) > .heading-icon {
+    grid-area: icon;
+    aspect-ratio: auto;
+  }
+
+  .heading:has(.toolbar) > .h1,
+  .heading:has(.toolbar) > h1 {
+    grid-area: title;
+    height: 100%;
+  }
+
+  .heading:has(.toolbar) > .toolbar {
+    grid-area: toolbar;
+    flex-direction: row;
+    height: var(--heading-height);
   }
 }
 
@@ -193,4 +228,62 @@
 .heading > .actions > a.-close:active {
   background-color: var(--color-negative);
   color: var(--color-negative-text);
+}
+
+/* ===========================================
+   Toolbar in Heading
+   =========================================== */
+
+.heading > .toolbar {
+  display: flex;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+}
+
+/* Icon-only square buttons */
+.heading > .toolbar > button,
+.heading > .toolbar > a {
+  aspect-ratio: 1;
+  height: var(--heading-height);
+  width: var(--heading-height);
+  min-width: var(--heading-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  background-color: var(--color-background);
+  border: 0;
+  cursor: pointer;
+}
+
+.heading > .toolbar > button svg,
+.heading > .toolbar > a svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.heading > .toolbar > button:hover,
+.heading > .toolbar > a:hover {
+  color: var(--color-interactivity);
+}
+
+/* Hide tools beyond first 2 */
+.heading > .toolbar > *:nth-child(n+3) {
+  display: none;
+}
+
+/* Desktop: Toolbar vertical single column on right */
+@media screen and (min-width: 769px) {
+  .heading:has(.toolbar) {
+    flex-wrap: nowrap;
+  }
+
+  .heading > .toolbar {
+    flex-direction: column;
+    height: 100%;
+    width: auto;
+  }
 }
