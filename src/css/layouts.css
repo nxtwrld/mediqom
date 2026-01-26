@@ -118,7 +118,7 @@ main.layout.chat-open section.layout-content {
   /* Viewer becomes bottom sheet on mobile */
   section.layout-viewer {
     position: fixed;
-    bottom: 0;
+    bottom: var(--toolbar-height);
     left: 0;
     right: 0;
     width: 100% !important;

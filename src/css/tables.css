@@ -87,3 +87,57 @@
   border-bottom: var(--gap) solid #000;
 }
 */
+
+/* Mobile List View - transforms table rows into stacked cards */
+@media (max-width: 768px) {
+  .table-list.-mobile-list {
+    border-spacing: 0;
+  }
+
+  .table-list.-mobile-list thead {
+    display: none;
+  }
+
+  .table-list.-mobile-list tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  .table-list.-mobile-list tr {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color);
+    overflow: hidden;
+  }
+
+  .table-list.-mobile-list td {
+    display: flex;
+    width: 100%;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-gray-400);
+  }
+
+  .table-list.-mobile-list td:last-child {
+    border-bottom: none;
+  }
+
+  .table-list.-mobile-list td::before {
+    content: attr(data-label);
+    flex: 0 0 40%;
+    font-weight: 600;
+    color: var(--color-text);
+    padding-right: 0.5rem;
+  }
+
+  .table-list.-mobile-list td.-empty {
+    background-color: transparent;
+    padding: 0;
+  }
+
+  /* Actions remain visible but centered */
+  .table-list.-mobile-list td .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
