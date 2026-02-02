@@ -27,6 +27,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:integration` - Run Playwright integration tests
 - `npm run test:unit` - Run Vitest unit tests
 
+### Mobile / Capacitor
+
+- `npm run mobile:build` - Build mobile version
+- `npm run mobile:sync` - Sync web assets to native projects
+- `npm run mobile:ios` - Open iOS project in Xcode
+- `npm run mobile:android` - Open Android project in Android Studio
+- `npm run mobile:dev` - Start mobile development server
+
 ## Architecture Overview
 
 ### Main Application Structure
@@ -50,14 +58,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Key Directories
 
 - `src/lib/` - Core business logic and utilities
+- `src/lib/chat/` - AI chat system (chat-manager, ai-service, client-service, MCP tools)
+- `src/lib/context/` - Context assembly pipeline (context-composer, MCP tools, integrations)
+- `src/lib/session/` - Session management (manager, stores, QOM pipeline, transport)
+- `src/lib/capacitor/` - Mobile platform adapters (auth, plugins)
+- `src/lib/encryption/` - AES/RSA encryption utilities
+- `src/lib/audio/` - Audio processing and transcription providers
+- `src/lib/langgraph/` - LangGraph document processing workflows
+- `src/lib/configurations/` - Medical extraction schemas (54 files)
+- `src/lib/import.server/` - Server-side import processing
 - `src/components/` - Reusable Svelte components organized by feature
 - `src/routes/` - SvelteKit routing with API endpoints in `v1/` subdirectory
 - `src/data/` - Medical reference data and configurations
 - `src/css/` - Global stylesheets organized by component type
+- `mobile/` - Shared mobile resources
+- `android/` - Android native project (Capacitor)
+- `ios/` - iOS native project (Capacitor)
 
 ### Important Configuration Files
 
 - `svelte.config.js` - Vercel adapter with custom aliases (`$components`, `$data`, `$media`)
+- `capacitor.config.ts` - Capacitor mobile project configuration
+- `vite.config.mobile.ts` - Mobile-specific Vite build config
+- `svelte.config.mobile.js` - Mobile-specific SvelteKit config
+- `src/app.mobile.html` - Mobile HTML entry point
 - `playwright.config.ts` - Integration testing configuration
 - Path aliases: Use `$lib`, `$components`, `$data` for imports
 
@@ -325,119 +349,72 @@ export const POST: RequestHandler = async ({
 - **Performance monitoring**: Built-in analytics and performance tracking
 - **Health checks**: Automated monitoring of critical endpoints
 
-## Session Development Context Command
+## Chat System
 
-Use this command when working on session management, AI processing, or visualization features:
+- **Library**: `src/lib/chat/` - Chat manager, AI service, client service, tool executor, MCP wrapper, store
+- **Components**: `src/components/chat/` - AIChatSidebar, ContextPrompt
+- **API**: `src/routes/v1/chat/conversation/+server.ts`
+- **Context Assembly**: `src/lib/context/` - Context composer, MCP tools, integrations
+- For detailed context, use the `@chat` command. Reference: `AI_CHAT.md`
 
-**Command**: `@session-dev`
+## Medical Configuration Schemas
 
-### Session Architecture Overview
+- 54 config files in `src/lib/configurations/` define AI extraction schemas
+- Schema pattern: `FunctionDefinition` with JSON Schema parameters
+- Core composition: `core.*.ts` properties spread into specialized schemas
+- 1:1 mapping to `src/components/documents/Section*.svelte` display components (33 files)
+- For detailed context, use the `@schema` command
 
-**Core Session Management** (`src/lib/session/manager.ts`):
+## Context Assembly System
 
-- Real-time EventEmitter system with in-memory Map-based storage for active sessions
-- Medical context integration via `sessionContextService` for patient history lookup
-- SSE transport layer for streaming real-time updates to client
-- Multi-modal state tracking: `AudioState`/`SessionState` enums control recording + UI positioning
-- OpenAI thread management for persistent AI conversations with conversation history
+- **Code**: `src/lib/context/` - Context composer, token optimization, MCP tools
+- **Integrations**: Client/server context providers, session and profile context
+- **MCP Tools**: Medical expert tools for document search, patient timeline, profile data
+- Reference: `docs/CONTEXT_MANAGEMENT_SYSTEM.md`, `CONTEXT_DEVELOPMENT_STRATEGY.md`
 
-**Store Architecture** (`src/lib/session/stores/`):
+## Audio / Transcription Pipeline
 
-- **Unified Session Store**: Combines audio, analysis, UI, transport state in single reactive store
-- **Session Data Store**: Immutable data with relationship indexing + Sankey data transformations
-- **Transcript Store**: Real-time SSE integration with medical relevance detection and streaming
-- **Session Viewer Store**: UI interaction state (selections, hover, active paths, focus management)
+- **Core Audio**: `src/lib/audio/` - AudioManager, microphone, streaming transcription
+- **Session Audio**: `src/lib/session/audio/` - Audio processing, VAD helpers, microphone utils
+- **Providers**: AssemblyAI, Google Speech SDK, Deepgram, Whisper
+- Reference: `TRANSCRIPTION.md`
 
-### AI Workflow Integration (AI_SESSION_WORKFLOW.md)
+## Mobile / Capacitor Development
 
-**Phase 1: Medical Relevance Detection**
+- **Config files**: `capacitor.config.ts`, `vite.config.mobile.ts`, `svelte.config.mobile.js`, `src/app.mobile.html`
+- **Platform adapters**: `src/lib/capacitor/auth.ts`, `src/lib/device.ts`
+- **Native directories**: `android/`, `ios/`, `mobile/`
+- For detailed context, use the `@mobile` command. Reference: `RESPONSIVE.md`
 
-- Transcript assembly with real-time medical content classification during speech-to-text
-- Client-side decision logic for triggering MoE analysis based on medical relevance metadata
-- Categories detected: symptom_mention, medication_reference, medical_history, clinical_observation, small_talk
-- Only medically relevant transcripts trigger expensive AI analysis pipeline
+## Session Development
 
-**Phase 1.5: Context Assembly System**
+For session development context, use the `@session` command. Key references: `AI_SESSION_WORKFLOW.md`, `AI_SESSION_QOM.md`, `AI_SESSION_ANALYSIS.md`
 
-- Term-based medical document search without embeddings using `MedicalExpertTools.searchDocuments()`
-- Classification-based context assembly with relevance scoring and threshold filtering
-- Document filtering by type: lab-results, prescriptions, medical-records, family-history
-- Token optimization to fit within AI model limits (default 4000 tokens)
+## Documentation Index
 
-**Phase 4: QOM-Based MoE Analysis (10 Expert Nodes)**
-Sequential expert processing pipeline:
-`transcript_parser` → `symptom_extractor` → `diagnosis_mapper` →
-(parallel: `treatment_recommender`, `question_generator`, `warning_annotator`) →
-`relationship_builder` → `schema_merger` → `user_feedback_applier` → `node_cleaner`
-
-Each expert node receives: New transcript chunk + Previous analysis JSON + Assembled context
-Output: Enhanced JSON with incremental improvements and version tracking
-
-**Phase 5: Unified Schema Structure**
-
-- **Node Types**: symptoms, diagnoses, treatments, actions (questions+alerts)
-- **Source Indicators**: transcript, medical_history, family_history, social_history, medication_history, suspected
-- **Priority Scale**: 1-10 consistent across all nodes (1=critical, 10=low priority)
-- **Embedded Relationships**: Each node contains relationships array with strength/confidence (0.0-1.0)
-- **Version Control**: `analysisVersion` increments with change tracking across QOM executions
-
-**Phase 6: Context-Enhanced Visualization**
-
-- Progressive QOM streaming with real-time expert node completion updates via SSE
-- Sankey diagram with D3.js integration, expert provenance tracking, version comparison
-- Interactive features: relationship tracing, node selection with details, context confidence indicators
-- Visual encoding: node size by priority + context confidence, color by urgency + context overlay
-
-### Key Components
-
-**Session Components** (`src/components/session/`):
-
-- `SankeyDiagram.svelte`: D3.js-powered medical relationship visualization with real-time store subscriptions
-- `SessionSidebar.svelte`: Tabbed interface (transcript, questions, details) with SSE integration
-- Node components: `SymptomNode.svelte`, `DiagnosisNode.svelte`, `TreatmentNode.svelte` with interactive actions
-- `types/visualization.d.ts`: Complete TypeScript definitions for medical nodes, links, relationships
-
-**Integration Patterns**:
-
-- `sessionDataActions`: Central API for modifying session state through store actions
-- `SSEClient`: Real-time server communication (`transport/sse-client.ts`) with reconnection handling
-- Relationship indexing: Efficient Map-based lookup of medical entity connections with bidirectional support
-- Medical analysis pipeline: Incremental AI analysis with confidence scoring and user feedback integration
-
-### Implementation Guidelines
-
-**Svelte 5 Store Integration**:
-
-- Use Svelte stores for all shared session data - avoid overusing `$effect()` and `$derived()`
-- Store subscriptions with reactive declarations: `$: data = $sessionStore`
-- Event bubbling with `createBubbler()` for component communication up the tree
-- Minimal `$effect()` usage - only for cleanup and external integrations (D3, SSE connections)
-
-**Data Flow Architecture**:
-
-- SSE Updates → Transcript Store → Session Data Store → Sankey Visualization Components
-- User Interactions → Session Viewer Store → Component Updates via Store Subscriptions
-- AI Analysis → Schema Merger → Progressive Streaming via SSE → Store Updates
-
-**TypeScript Integration**:
-
-- `SessionAnalysis` interface defines unified schema structure for medical analysis
-- `SankeyNode`/`SankeyLink` interfaces for visualization data transformation
-- `AnalysisState`/`PathState` interfaces for store state management
-- `TranscriptItem`/`SSEUpdate` interfaces for real-time data handling
-
-### Development Context Requirements
-
-When working on session features, always consider:
-
-- **Medical relevance detection**: Filter transcripts before triggering expensive AI processing
-- **QOM-based expert processing**: Sequential + parallel expert node execution for AI analysis
-- **Progressive streaming**: Real-time UI updates via SSE for long-running AI operations
-- **Context assembly**: Historical medical data integration with term-based search
-- **Version control**: `analysisVersion` tracking for conversational evolution
-- **Embedded relationships**: Complex medical entity connections with bidirectional support
-- **User feedback loops**: Accept/suppress actions that influence subsequent AI analysis
-- **Store-first architecture**: Use Svelte stores for state management, minimal rune usage
+| File | Purpose |
+|------|---------|
+| `AI_CHAT.md` | Chat system architecture and design |
+| `AI_IMPORT_USER_CONFIGURATION.md` | Import schema user configuration |
+| `AI_RESEARCH.md` | AI research notes |
+| `AI_SESSION_ANALYSIS.md` | Session analysis pipeline |
+| `AI_SESSION_QOM.md` | QOM expert pipeline architecture |
+| `AI_SESSION_WORKFLOW.md` | Full session AI workflow phases |
+| `AI_TODO.md` | AI development TODO items |
+| `CONTEXT_DEVELOPMENT_STRATEGY.md` | Context assembly roadmap |
+| `DATA_AND_PRIVACY.md` | Data handling and privacy policies |
+| `LOGGER_MIGRATION_GUIDE.md` | Logger migration instructions |
+| `LOGGER_EXAMPLE_MIGRATION.md` | Logger migration examples |
+| `MARKETING.md` | Marketing content |
+| `RESPONSIVE.md` | Mobile responsive patterns and breakpoints |
+| `TRANSCRIPTION.md` | Audio transcription providers and setup |
+| `docs/BETA_ACCESS_SYSTEM.md` | Beta access management |
+| `docs/CLINICAL_DATA_PLATFORM.md` | Clinical data platform design |
+| `docs/CONTEXT_MANAGEMENT_SYSTEM.md` | Context assembly system documentation |
+| `docs/IMPORT.md` | Import architecture documentation |
+| `docs/README.md` | Documentation index |
+| `src/routes/med/FEATURES.md` | Medical features documentation |
+| `src/components/apps/README.md` | Apps component documentation |
 
 ## Important Notes
 

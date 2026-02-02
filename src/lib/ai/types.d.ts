@@ -3,6 +3,7 @@ export interface Content {
   text?: string;
   image_url?: {
     url: string;
+    detail?: "auto" | "low" | "high";
   };
 }
 

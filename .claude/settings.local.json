@@ -15,7 +15,9 @@
       "Bash(npm run mobile:sync:*)",
       "Bash(xcodebuild:*)",
       "Bash(xcrun simctl install:*)",
-      "Bash(xcrun simctl launch:*)"
+      "Bash(xcrun simctl launch:*)",
+      "Bash(find:*)",
+      "Bash(npx svelte-check:*)"
     ],
     "deny": []
   }

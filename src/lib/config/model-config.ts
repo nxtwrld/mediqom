@@ -54,6 +54,7 @@ export interface ModelConfiguration {
 
 export type FlowType =
   | "extraction"
+  | "ocr_extraction"
   | "medical_analysis"
   | "feature_detection"
   | "signal_processing"

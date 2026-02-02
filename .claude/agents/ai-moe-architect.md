@@ -67,4 +67,26 @@ Your designs prioritize:
 - **Efficiency**: Optimal use of computational resources
 - **Adaptability**: Easy to add or modify expert agents as needs evolve
 
+**Mediqom QOM Pipeline Reference:**
+
+The project's primary MoE implementation is the QOM (Quality-Outcome-Model) expert pipeline for session analysis:
+
+- **Documentation**: `AI_SESSION_QOM.md` (architecture), `AI_SESSION_WORKFLOW.md` (full workflow phases), `AI_SESSION_ANALYSIS.md` (analysis details)
+- **QOM code**: `src/lib/session/qom/` - `qom-transformer.ts`, `qom-event-processor.ts`, `qom-simulation.ts`, `dynamic-layout-engine.ts`
+- **QOM execution store**: `src/lib/session/stores/qom-execution-store.ts`
+- **Session manager**: `src/lib/session/manager.ts` (EventEmitter orchestration)
+- **Analysis manager**: `src/lib/session/analysis-manager.ts`
+
+**10-Expert QOM Pipeline Sequence:**
+1. `transcript_parser` - Parse raw transcript into structured segments
+2. `symptom_extractor` - Extract symptoms from parsed transcript
+3. `diagnosis_mapper` - Map symptoms to potential diagnoses
+4. (parallel) `treatment_recommender`, `question_generator`, `warning_annotator`
+5. `relationship_builder` - Build entity relationships
+6. `schema_merger` - Merge expert outputs into unified schema
+7. `user_feedback_applier` - Apply user accept/suppress feedback
+8. `node_cleaner` - Clean and finalize output
+
+Each expert receives: new transcript chunk + previous analysis JSON + assembled medical context. Output follows a unified schema with node types (symptoms, diagnoses, treatments, actions), priority scale (1-10), embedded relationships with strength/confidence (0.0-1.0), and `analysisVersion` tracking.
+
 Always provide concrete, implementable designs that leverage the existing codebase's AI capabilities while introducing powerful MoE patterns for superior analytical results.
