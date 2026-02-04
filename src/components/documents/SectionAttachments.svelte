@@ -149,7 +149,7 @@
         {#each data as attachment}
             <button class="attachment" onclick={() => previewAttachment(attachment)} title="{$t('report.attachments-click-to-preview', { filename: getFileName(attachment) })}">
                 {#if attachment.thumbnail}
-                    <img src={attachment.thumbnail} alt={attachment.type} />
+                    <img src={attachment.thumbnail} loading="lazy" alt={attachment.type} />
                 {:else}
                     <div class="attachment-placeholder">
                         {#if attachment.type === 'application/pdf'}

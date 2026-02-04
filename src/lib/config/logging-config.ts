@@ -60,22 +60,25 @@ function parseBoolean(value: string): boolean {
  * Get logging configuration from environment variables
  */
 export function getLoggingConfig(): LoggingConfig {
+  // Safely access env - may be undefined in certain build configurations
+  const safeEnv = (env || {}) as Record<string, string | undefined>;
+
   return {
-    level: parseLogLevel((env as any).PUBLIC_LOG_LEVEL || "2"),
-    namespaces: parseNamespaces((env as any).PUBLIC_LOG_NAMESPACES || "*"),
-    verboseAI: parseBoolean((env as any).PUBLIC_VERBOSE_AI_LOGGING || "false"),
-    debugSSE: parseBoolean((env as any).PUBLIC_DEBUG_SSE_PROGRESS || "false"),
+    level: parseLogLevel(safeEnv.PUBLIC_LOG_LEVEL || "2"),
+    namespaces: parseNamespaces(safeEnv.PUBLIC_LOG_NAMESPACES || "*"),
+    verboseAI: parseBoolean(safeEnv.PUBLIC_VERBOSE_AI_LOGGING || "false"),
+    debugSSE: parseBoolean(safeEnv.PUBLIC_DEBUG_SSE_PROGRESS || "false"),
     debugStateTransitions: parseBoolean(
-      (env as any).PUBLIC_DEBUG_STATE_TRANSITIONS || "false",
+      safeEnv.PUBLIC_DEBUG_STATE_TRANSITIONS || "false",
     ),
     debugLangGraph: parseBoolean(
-      (env as any).PUBLIC_DEBUG_LANGGRAPH || "false",
+      safeEnv.PUBLIC_DEBUG_LANGGRAPH || "false",
     ),
     logAIResponses: parseBoolean(
-      (env as any).PUBLIC_LOG_AI_RESPONSES || "false",
+      safeEnv.PUBLIC_LOG_AI_RESPONSES || "false",
     ),
     enableWorkflowTracing: parseBoolean(
-      (env as any).PUBLIC_ENABLE_WORKFLOW_TRACING || "false",
+      safeEnv.PUBLIC_ENABLE_WORKFLOW_TRACING || "false",
     ),
   };
 }
@@ -162,4 +165,9 @@ export function isWorkflowTracingEnabled(): boolean {
 }
 
 // Auto-initialize logging when this module is imported
-initializeLogging();
+// Wrap in try-catch to prevent initialization failures from breaking the app
+try {
+  initializeLogging();
+} catch (e) {
+  console.warn('[LoggingConfig] Failed to initialize logging:', e);
+}

@@ -81,7 +81,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
                     <a class="profile" href="/med/p/{$profile.id}" class:-active={isActive('/med/p/' +$profile.id , $page.url.pathname)}>
                         {#if $profile.avatarUrl}
                         <div class="icon profile-image">
-                            <img src="/v1/med/profiles/{$profile.id}/avatar?path={$profile.avatarUrl}" alt="avatar" />
+                            <img src="/v1/med/profiles/{$profile.id}/avatar?path={$profile.avatarUrl}" loading="lazy" alt="avatar" />
                         </div>
                         {/if}
                         {$profile.fullName}
@@ -152,14 +152,21 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 <style>
     header {
         position: fixed;
-        top: 0;
+        bottom: 0;
         left: 0;
         right: 0;
+        /*padding-top: var(--safe-area-top);*/
         height: var(--toolbar-height);
         z-index: 1000;
         --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
     }
-
+    @media (min-width: 768px) { 
+        header,
+        .search-panel {
+            top: 0;
+            bottom: auto;
+        }
+    }
     header .toolbar {
         --button-color: var(--color-gray-500-alpha);
     }
@@ -299,7 +306,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
             position: fixed;
             width: 100%;
             height: calc(100vh - var(--toolbar-height));
-            top: var(--toolbar-height);
+            /*top: var(--toolbar-height);*/
             background-color: var(--color-gray-500);
             padding-top: var(--gap);
             max-height: 0;

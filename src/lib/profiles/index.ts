@@ -9,6 +9,9 @@ import { prepareKeys } from "$lib/encryption/rsa";
 import { createHash } from "$lib/encryption/hash";
 import { generatePassphrase } from "$lib/encryption/passphrase";
 
+// API base URL - empty for web (same origin), set for mobile builds
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+
 export { profiles, profile };
 
 // Simple in-memory metadata for loadProfiles
@@ -21,7 +24,7 @@ const loadProfilesMeta: { lastLoadedUserId: string | null } = {
  */
 export async function removeLinkedParent(profile_id: string) {
   const response = await fetch(
-    "/v1/med/profiles/" + profile_id + "?link_type=parent",
+    `${API_BASE}/v1/med/profiles/${profile_id}?link_type=parent`,
     {
       method: "DELETE",
       headers: {
@@ -37,7 +40,7 @@ export async function removeLinkedParent(profile_id: string) {
  *  Removes links between a profile and a parent
  */
 export async function removeLinkedProfile(profile_id: string) {
-  const response = await fetch("/v1/med/profiles/" + profile_id, {
+  const response = await fetch(`${API_BASE}/v1/med/profiles/${profile_id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -66,7 +69,7 @@ export async function loadProfiles(
   }
   if (!fetch) fetch = window.fetch;
   // fetch basic profile data
-  const profilesLoaded = await fetch("/v1/med/profiles")
+  const profilesLoaded = await fetch(`${API_BASE}/v1/med/profiles`)
     .then((r) => r.json())
     .catch((e) => {
       console.error("Error loading profiles", e);
@@ -81,7 +84,7 @@ export async function loadProfiles(
         // fetch encrypted profile and health documents
         try {
           const rootsEncrypted = await fetch(
-            `/v1/med/profiles/${d.profiles.id}/documents?types=profile,health&full=true`,
+            `${API_BASE}/v1/med/profiles/${d.profiles.id}/documents?types=profile,health&full=true`,
           )
             .then((r) => r.json())
             .catch((e) => {
@@ -203,7 +206,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
   });
 
   // 4. submit to server
-  const response = await fetch("/v1/med/profiles", {
+  const response = await fetch(`${API_BASE}/v1/med/profiles`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

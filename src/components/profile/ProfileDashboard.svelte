@@ -219,7 +219,7 @@
         </div>
     </div>
 
-    <div class="tiles">
+    <div class="tiles -vitals">
 
         {#each props as prop}
             {#if prop.source}
@@ -329,5 +329,15 @@
     }
     .tile:last-child:first-child {
         grid-column: 1 / -1;
+    }
+    @media screen and (max-width: 800px) {
+        .tiles {
+            grid-template-rows: auto;
+            grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+        }
+        .tiles :global(.value) {
+            font-size: 1.4rem;
+        
+        }
     }
 </style>

@@ -331,6 +331,8 @@
         background-color: var(--color-background);
         padding: 1rem;
         flex-shrink: 0;
+        font-size: 1rem;
+        max-width: min(7rem, 25vw);
     }
 
     .badge {

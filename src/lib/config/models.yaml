@@ -68,7 +68,14 @@ providers:
 # Flow-specific model assignments
 # ALL FLOWS USE OPENAI FOR DEVELOPMENT - Change provider/model here to switch
 flows:
-  # Document extraction (OCR + initial assessment)
+  # OCR text extraction (Pass 1 - vision call, focused on text fidelity)
+  ocr_extraction:
+    provider: "openai"
+    model: "gpt4"
+    description: "Extract raw text from document images with maximum OCR accuracy"
+    fallback_models: ["gpt4_turbo"]
+
+  # Document extraction (OCR + initial assessment - legacy single-pass)
   extraction:
     provider: "openai"
     model: "gpt4"
@@ -156,6 +163,7 @@ cost_optimization:
     - "document_type_routing"
     - "feature_detection"
   complex_tasks:
+    - "ocr_extraction"
     - "extraction"
     - "medical_analysis"
     - "signal_processing"

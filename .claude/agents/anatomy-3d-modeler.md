@@ -56,6 +56,7 @@ Your primary focus is the anatomy model implementation in src/components/anatomy
 - Ensure 3D models can be annotated with FHIR-compliant medical data
 - Support multi-language labels for anatomical structures (Czech, German, English)
 - Integrate with the existing event system via src/lib/ui.ts for global UI coordination
+- Chat-anatomy bridge: `src/lib/chat/anatomy-integration.ts` connects chat AI to 3D anatomy views
 
 **Quality Standards:**
 

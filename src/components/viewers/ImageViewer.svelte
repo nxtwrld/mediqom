@@ -100,6 +100,7 @@
                 src={imageSrc} 
                 alt="Attachment preview"
                 class="image"
+                loading="lazy"
                 class:hidden={!imageLoaded}
                 onload={handleImageLoad}
                 onerror={handleImageError}

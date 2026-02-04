@@ -1,7 +1,10 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
 	import { enhance } from '$app/forms'
+	import { browser } from '$app/environment';
 	import type { ActionData, SubmitFunction } from './$types.js'
+	import { isNativePlatform } from '$lib/config/platform';
+	import { signInWithMagicLink } from '$lib/capacitor/auth';
 
 	interface Props {
 		form: ActionData;
@@ -11,29 +14,77 @@
 
 	let loading: boolean = $state(false);
 	let submitted: boolean = $state(false);
+	let email: string = $state('');
+	let errorMessage: string = $state('');
+	let successMessage: string = $state('');
 
-	const handleSubmit: SubmitFunction = ({ formData, cancel }) => {
+	// Check if running on mobile platform
+	const isMobile = browser && isNativePlatform();
+
+	/**
+	 * Handle mobile form submission (client-side auth)
+	 */
+	async function handleMobileSubmit(event: Event) {
+		event.preventDefault();
+
+		if (loading || submitted) return;
+
+		// Validate email
+		if (!email || !email.includes('@')) {
+			errorMessage = 'Please enter a valid email address';
+			return;
+		}
+
+		loading = true;
+		errorMessage = '';
+
+		console.log('[Auth Form] Mobile submit:', email);
+
+		try {
+			const { error } = await signInWithMagicLink(email);
+
+			if (error) {
+				console.error('[Auth Form] Mobile auth error:', error);
+				errorMessage = error.message || 'Failed to send magic link';
+				loading = false;
+				return;
+			}
+
+			submitted = true;
+			successMessage = 'Magic link sent! Check your email and tap the link to sign in.';
+			loading = false;
+		} catch (err) {
+			console.error('[Auth Form] Mobile auth exception:', err);
+			errorMessage = 'An unexpected error occurred. Please try again.';
+			loading = false;
+		}
+	}
+
+	/**
+	 * Handle web form submission (server-side form action)
+	 */
+	const handleWebSubmit: SubmitFunction = ({ formData, cancel }) => {
 		console.log('[Auth Form] Submit attempt - loading:', loading, 'submitted:', submitted);
-		
+
 		// Prevent multiple submissions
 		if (loading || submitted) {
 			console.log('[Auth Form] Blocking duplicate submission');
 			cancel(); // This actually prevents the submission
 			return;
 		}
-		
+
 		loading = true;
 		submitted = true;
-		
+
 		console.log('[Auth Form] Submitting email:', formData.get('email'));
-		
+
 		return async ({ result, update }) => {
 			console.log('[Auth Form] Form result:', result);
-			
+
 			await update();
-			
+
 			loading = false;
-			
+
 			// Only reset submitted state if there was an error
 			if (result.type === 'failure') {
 				submitted = false;
@@ -48,6 +99,8 @@
 		form = null;
 		submitted = false;
 		loading = false;
+		errorMessage = '';
+		successMessage = '';
 	}
 </script>
 
@@ -55,21 +108,64 @@
 	<title>Authentication</title>
 </svelte:head>
 
-<form class="flex -column form modal" method="POST" use:enhance={handleSubmit} onsubmit={(e) => {
-	if (loading || submitted) {
-		console.log('[Auth Form] Preventing form submit via event listener');
-		e.preventDefault();
-		return false;
-	}
-}}>
-		<img src="/icon.svg" alt="Mediqom app" class="logo" />
+{#if isMobile}
+	<!-- Mobile: Client-side form submission -->
+	<form class="flex -column form modal" onsubmit={handleMobileSubmit}>
+		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
+
+		<h1 class="h1">Authentication</h1>
+		{#if submitted && successMessage}
+		<div class="success">
+			<p class="form-instructions -success">{successMessage}</p>
+			<div class="form-actions">
+				<button class="button -block" type="button" onclick={resetForm}>Send again</button>
+			</div>
+		</div>
+		{:else}
+			<p class="form-instructions">Sign in via magic link with your email below</p>
+
+			{#if errorMessage}
+			<div class="fail">
+				<p class="form-instructions -error">{errorMessage}</p>
+			</div>
+			{/if}
+
+			<div class="input">
+				<label for="email">Email address</label>
+				<input
+					id="email"
+					name="email"
+					class="inputField"
+					type="email"
+					placeholder="Your email"
+					bind:value={email}
+					disabled={loading}
+				/>
+			</div>
+			<div class="form-actions">
+				<button class="button -primary -block" disabled={loading || submitted} type="submit">
+					{ loading ? 'Sending...' : submitted ? 'Email sent!' : 'Send magic link' }
+				</button>
+			</div>
+		{/if}
+	</form>
+{:else}
+	<!-- Web: Server-side form action -->
+	<form class="flex -column form modal" method="POST" use:enhance={handleWebSubmit} onsubmit={(e) => {
+		if (loading || submitted) {
+			console.log('[Auth Form] Preventing form submit via event listener');
+			e.preventDefault();
+			return false;
+		}
+	}}>
+		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
 
 		<h1 class="h1">Authentication</h1>
 		{#if form?.success}
 		<div class="success">
 			<p class="form-instructions -success">{form?.message}</p>
 			<div class="form-actions">
-				<button class="button -block" onclick={resetForm}>Send again</button>
+				<button class="button -block" type="button" onclick={resetForm}>Send again</button>
 			</div>
 		</div>
 		{:else}
@@ -129,7 +225,8 @@
 				</button>
 			</div>
 		{/if}
-</form>
+	</form>
+{/if}
 
 
 <style>

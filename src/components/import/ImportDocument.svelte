@@ -23,10 +23,10 @@
     <div class="preview">
         {#if doc.pages?.[0]?.thumbnail}
             {#if doc.pages[0]?.thumbnail}
-                <img src={doc.pages[0].thumbnail} alt={doc.title} class="thumbmail" />
+                <img src={doc.pages[0].thumbnail} loading="lazy" alt={doc.title} class="thumbmail" />
             {/if}
         {:else if doc.thumbnail}
-            <img src={doc.thumbnail} alt={doc.title} class="thumbmail" />
+            <img src={doc.thumbnail} loading="lazy" alt={doc.title} class="thumbmail" />
         {:else if doc.icon}
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <use href="/files.svg#{doc.icon}" />

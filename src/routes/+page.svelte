@@ -1,11 +1,5 @@
 <script lang="ts">
-    
-    import { browser } from '$app/environment';
-
-    //console.log(data);
-    if (browser) {
-     //   goto('/www');
-    }
+    // Root page - redirect logic is handled in +page.ts for Capacitor builds
 </script>
 
 <div class="placer">

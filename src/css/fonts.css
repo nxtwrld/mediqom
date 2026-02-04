@@ -9,7 +9,24 @@
   font-style: normal;
   font-weight: 200 1000;
   font-display: swap;
-  src: url("/fonts/mulish/mulish-latin.woff2") format("woff2");
+  src: url("/fonts/mulish/Mulish-VariableFont_wght.woff2") format("woff2");
+}
+
+/* Fira Sans - Heading Font */
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/Fira_Sans/FiraSans-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fira Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/Fira_Sans/FiraSans-Bold.woff2") format("woff2");
 }
 
 /* Roboto Mono - Numeric Values & Code */

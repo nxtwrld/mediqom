@@ -7,7 +7,18 @@
       "mcp__chrome-devtools__performance_start_trace",
       "Bash(curl:*)",
       "WebSearch",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(npx woff2@latest compress:*)",
+      "Bash(npx woff2@latest:*)",
+      "Bash(npm run mobile:build:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(npm run mobile:sync:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(find:*)",
+      "Bash(npx svelte-check:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

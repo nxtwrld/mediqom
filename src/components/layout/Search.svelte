@@ -289,7 +289,7 @@
     .search-panel {
         position: fixed;
         left: 0;
-        top: 0;
+        bottom: 0;
         width: 100%;
         z-index: 100000;
         display: flex;
@@ -299,6 +299,12 @@
         transition: max-height .3s, box-shadow .6s;
         overflow: hidden;
         box-shadow: 0 0 0 0 var(--color-black);
+    }
+    @media (min-width: 768px) { 
+        .search-panel {
+            top: 0;
+            bottom: auto;
+        }
     }
     .search-panel.-open {
 

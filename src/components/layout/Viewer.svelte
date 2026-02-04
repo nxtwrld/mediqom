@@ -231,7 +231,7 @@
         .model-layers {
             position: fixed;
             left: 1rem;
-            top: calc(var(--top-offset) + 1rem);
+            /*top: calc(var(--top-offset) + 1rem);*/
             z-index: 100000;
         }
 

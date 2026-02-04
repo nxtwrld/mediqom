@@ -97,12 +97,12 @@
 }
 
 .button.-yes {
-  --color: var(--color-success-bg, #dcfce7);
-  --color-hover: var(--color-success, #16a34a);
-  --color-border: var(--color-success, #16a34a);
-  --color-border-hover: var(--color-success, #16a34a);
-  --color-text: var(--color-success, #16a34a);
-  --color-text-hover: var(--color-success-text, #ffffff);
+  --color: var(--color-positive-bg, #dcfce7);
+  --color-hover: var(--color-positive, #16a34a);
+  --color-border: var(--color-positive, #16a34a);
+  --color-border-hover: var(--color-positive, #16a34a);
+  --color-text: var(--color-positive, #16a34a);
+  --color-text-hover: var(--color-positive-text, #ffffff);
 }
 
 .button.-no {
@@ -124,12 +124,12 @@
 }
 
 .button.-acknowledged {
-  --color: var(--color-success-bg, #dcfce7);
-  --color-hover: var(--color-success-bg, #dcfce7);
-  --color-border: var(--color-success, #16a34a);
-  --color-border-hover: var(--color-success, #16a34a);
-  --color-text: var(--color-success, #16a34a);
-  --color-text-hover: var(--color-success, #16a34a);
+  --color: var(--color-positive-bg, #dcfce7);
+  --color-hover: var(--color-positive-bg, #dcfce7);
+  --color-border: var(--color-positive, #16a34a);
+  --color-border-hover: var(--color-positive, #16a34a);
+  --color-text: var(--color-positive, #16a34a);
+  --color-text-hover: var(--color-positive, #16a34a);
 }
 
 /* Button row container for general use */

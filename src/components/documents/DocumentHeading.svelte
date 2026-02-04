@@ -1,6 +1,7 @@
 <script lang="ts">
     import { type Document } from '$lib/documents/types.d';
     import BadgeHorizontal from '$components/ui/dates/BadgeHorizontal.svelte';
+    import DocumentToolbar from './DocumentToolbar.svelte';
     interface Props {
         document: Document;
     }
@@ -18,6 +19,7 @@
         <div class="-date"><BadgeHorizontal date={document.metadata.date} /></div>
         {document.metadata.title}</h1>
 
+    <DocumentToolbar {document} />        
 </div>
 
 <style>

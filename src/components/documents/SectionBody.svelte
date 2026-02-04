@@ -34,23 +34,26 @@
 
     <h3 class="h3 heading -sticky">{ $t('report.anatomy.body') }</h3>
 
-    <table  class="table-list">
+    <table  class="table-list -mobile-list">
+        <thead>
+            <tr>
+                <th>{ $t('report.anatomy.body-part') }</th>
+                <th></th>
+                <th>{ $t('report.anatomy.status-and-diagnosis') }</th>
+                {#if hasTreatment}
+                <th>{ $t('report.anatomy.treatment') }</th>
+                {/if}
+    
+            </tr>
+        </thead>
         <tbody>
-        <tr>
-            <th>{ $t('report.anatomy.body-part') }</th>
-            <th></th>
-            <th>{ $t('report.anatomy.status-and-diagnosis') }</th>
-            {#if hasTreatment}
-            <th>{ $t('report.anatomy.treatment') }</th>
-            {/if}
 
-        </tr>
         {#each data as { identification, status, diagnosis, treatment, urgency}}
         <tr class:selected={normalize(identification) == $focused.object} class="urgency-{urgency}">
-            <td class="body-part">
+            <td class="body-part" data-label="{ $t('report.anatomy.body-part') }">
                 {translate(identification)}
             </td>
-            <td class="-empty -actions">
+            <td class="-empty -actions" >
                 <div class="actions">
                 <button onclick={() => showBodyPart(identification)} aria-label="View body part anatomy">
                     <svg>
@@ -59,7 +62,7 @@
                 </button>
                 </div>
             </td>
-            <td>
+            <td data-label="{ $t('report.anatomy.status-and-diagnosis') }">
                     {#if status}
                     {status}
                     {/if}
@@ -68,7 +71,7 @@
                    {/if}
             </td>
             {#if hasTreatment}
-            <td>        
+            <td data-label="{ $t('report.anatomy.treatment') }">        
                    {treatment}
             </td>
             {/if}
@@ -85,15 +88,17 @@
 
 <style>
     /* SectionBody specific styles */
-    .table-list tr td {
-        width: 50%;
-    }
-    
-    .table-list td.body-part {
-        width: auto;
-    } 
-    
-    .table-list td.-actions {
-        width: auto;
+    @media (min-width: 769px) {
+        .table-list tr td {
+            width: 50%;
+        }
+        
+        .table-list td.body-part {
+            width: auto;
+        } 
+        
+        .table-list td.-actions {
+            width: auto;
+        }
     }
 </style>

@@ -45,7 +45,7 @@
 
 
     <div class="app-header">
-    <img src={app.icon} alt={app.name} class="app-icon -full" />
+    <img src={app.icon} loading="lazy" alt={app.name} class="app-icon -full" />
         <div>
         <h2 class="h2">{app.name}</h2>
         <div class="app-details">

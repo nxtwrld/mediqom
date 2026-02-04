@@ -1,8 +1,14 @@
 main.layout {
-  padding: calc(var(--toolbar-height) + var(--gap)) 0 0 0;
+  padding: 
+  var(--safe-area-top)
+  var(--safe-area-right) 
+  calc(var(--toolbar-height) + var(--gap)) 
+  var(--safe-area-left);
   height: 100vh;
   position: relative;
 }
+
+
 
 section.layout-content {
   margin-left: 0;
@@ -26,6 +32,16 @@ section.layout-viewer {
   main.layout.-viewer section.layout-content {
     margin-left: var(--viewer-width, 33vw);
   }
+  main.layout {
+    padding: 
+    calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top)) 
+    var(--safe-area-right) 
+    0
+    var(--safe-area-left);
+    height: 100vh;
+    position: relative;
+  }
+  
 }
 
 main.layout.-viewer section.layout-viewer {
@@ -102,7 +118,7 @@ main.layout.chat-open section.layout-content {
   /* Viewer becomes bottom sheet on mobile */
   section.layout-viewer {
     position: fixed;
-    bottom: 0;
+    bottom: var(--toolbar-height);
     left: 0;
     right: 0;
     width: 100% !important;
@@ -115,14 +131,15 @@ main.layout.chat-open section.layout-content {
     background: var(--color-background);
     transform: translateY(0);
     z-index: 1000;
+    padding-bottom: var(--safe-area-bottom);
   }
 
   /* Resize handle is already hidden by the rule above */
 
-  /* Content area adjustments */
+  /* Content area adjustments 
   section.layout-content {
-    padding-bottom: 20px; /* Default padding */
-  }
+    padding-bottom: 20px; 
+  }*/
 
   main.layout.-viewer section.layout-content {
     padding-bottom: var(--mobile-viewer-height, 60vh);

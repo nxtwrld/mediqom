@@ -19,6 +19,7 @@
     import { page } from '$app/stores';
     import { chatManager } from '$lib/chat/chat-manager';
     import { isOpen as chatIsOpen } from '$lib/chat/store';
+    import { device } from '$lib/device';
 
     interface Props {
         children?: import('svelte').Snippet;
@@ -153,6 +154,7 @@
 
     onMount(() => {
         logger.ui.info('UI mounted');
+        device.init();
         checkMobile();
         window.addEventListener('resize', checkMobile);
         document.addEventListener('touchmove', handleMobileResizeMove, { passive: false });
@@ -199,6 +201,7 @@
         manageOverlay();
         return () => {
             offs.forEach(off => off());
+            device.destroy();
             window.removeEventListener('beforeunload', handleBeforeUnload);
             window.removeEventListener('resize', checkMobile);
             document.removeEventListener('touchmove', handleMobileResizeMove);

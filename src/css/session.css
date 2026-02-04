@@ -846,7 +846,7 @@
 
 /* Info grid value styling */
 .session-info-item .value.source-transcript {
-  color: var(--color-success, #16a34a);
+  color: var(--color-positive, #16a34a);
 }
 
 .session-info-item .value.source-medical_history {
@@ -866,7 +866,7 @@
 }
 
 .session-info-item .value.status-answered {
-  color: var(--color-success, #16a34a);
+  color: var(--color-positive, #16a34a);
 }
 
 .session-info-item .value.status-acknowledged {

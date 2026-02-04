@@ -1,8 +1,8 @@
 .app-icon {
   display: block;
   margin: 0.3rem auto 0.5rem;
-  width: 4rem;
-  height: 4rem;
+  width: min(4rem, 60px);
+  height: min(4rem, 60px);
   fill: #fff;
 }
 

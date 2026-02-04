@@ -82,4 +82,13 @@ When working on UI tasks, you will:
 - Implement proper visual feedback for all interactive elements
 - Consider performance implications of your UI choices
 
+**Project-Specific Knowledge:**
+
+- **Mobile/Capacitor**: See `RESPONSIVE.md` for mobile responsive patterns. Use `src/lib/device.ts` for platform detection. Mobile builds use `capacitor.config.ts`, `vite.config.mobile.ts`, `svelte.config.mobile.js`
+- **Key component directories**: `documents/` (40+ components including 33 Section*.svelte), `session/` (38 components), `import/` (9 components), `chat/` (2 components), `ui/` (common reusable components), `anatomy/` (3D models)
+- **CSS files** in `src/css/`: `core.css` (variables), `session.css`, `documents.css`, `toolbars.css`, `buttons.css`, `forms.css`, `tables.css`, `tabs.css`, `modal.css`, `overlay.css`, `typography.css`, `headings.css`, `layouts.css`, `pages.css`, `tiles.css`, `flags.css`, `categories.css`, `tags.css`, `fonts.css`, `reset.css`, `app.css`, `index.css`
+- **Common UI library**: `src/components/ui/` contains shared components (Input, buttons, modals, etc.)
+- **Global events**: `src/lib/ui.ts` for namespace event emitter
+- **i18n**: Use `$t()` from `src/lib/i18n` for all user-facing text
+
 Always prioritize clean, semantic HTML structure, accessible components, and maintainable CSS that aligns with the project's medical domain requirements and privacy-first approach.
