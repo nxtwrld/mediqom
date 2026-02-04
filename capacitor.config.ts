@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
 
     // Production settings
     androidScheme: 'https',
-    iosScheme: 'capacitor',
+    iosScheme: 'https',
   },
 
   plugins: {

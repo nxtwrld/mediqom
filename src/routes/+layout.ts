@@ -6,6 +6,7 @@ import {
   isBrowser,
   parse,
 } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import {
   PUBLIC_SUPABASE_ANON_KEY,
   PUBLIC_SUPABASE_URL,
@@ -50,28 +51,40 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
   const isMobileBuild = IS_CAPACITOR || isCapacitorBuild();
 
   // Create supabase client with proper error handling
-  const supabase = (isBrowser() || isMobileBuild)
-    ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-          fetch,
+  // Mobile: use createClient with implicit flow to avoid PKCE code_verifier loss on cold start
+  // Web browser: use createBrowserClient (PKCE via @supabase/ssr)
+  // SSR: use createServerClient with cookie handling
+  const supabase = isMobileBuild
+    ? createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+        auth: {
+          flowType: 'implicit',
+          detectSessionInUrl: false,
+          persistSession: true,
+          autoRefreshToken: true,
         },
       })
-    : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-          fetch,
-        },
-        cookies: {
-          get(key: string) {
-            return data?.cookies?.find((cookie) => cookie.name === key)?.value;
+    : (isBrowser()
+      ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+          global: {
+            fetch,
           },
-          set(key: string, value: string, options?: any) {
-            // Server-side cookie setting not implemented in client context
+        })
+      : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+          global: {
+            fetch,
           },
-          remove(key: string, options?: any) {
-            // Server-side cookie removal not implemented in client context
+          cookies: {
+            get(key: string) {
+              return data?.cookies?.find((cookie) => cookie.name === key)?.value;
+            },
+            set(key: string, value: string, options?: any) {
+              // Server-side cookie setting not implemented in client context
+            },
+            remove(key: string, options?: any) {
+              // Server-side cookie removal not implemented in client context
+            },
           },
-        },
-      });
+        }));
 
   /**
    * Use session and user data from server (via safeGetSession)

@@ -2,27 +2,27 @@
  * Mobile Authentication Handler
  *
  * Handles authentication flow for Capacitor native apps:
- * - Deep link handling for magic link callbacks
- * - Client-side OTP verification
- * - Session management via Capacitor Preferences
+ * - Universal Link / deep link handling for magic link callbacks
+ * - Implicit flow (access_token/refresh_token from URL fragment)
+ * - PKCE code exchange as fallback
+ * - Cold start handling via App.getLaunchUrl()
+ * - Session management via CurrentSession store
  */
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { isNativePlatform } from '$lib/config/platform';
 import { getClient } from '$lib/supabase';
-import type { SupabaseClient, Session } from '@supabase/supabase-js';
+import { session as CurrentSession } from '$lib/user';
+import type { Session } from '@supabase/supabase-js';
 
-// Deep link configuration
-const DEEP_LINK_SCHEME = 'mediqom';
-const AUTH_CALLBACK_PATH = 'auth/callback';
-
-// Session state store for mobile
-let currentSession: Session | null = null;
+// Auth callback paths to match against
+const AUTH_CALLBACK_PATH = '/auth/callback';
+const UNIVERSAL_LINK_HOST = 'mediqom.com';
 
 /**
  * Initialize mobile authentication listeners
- * Call this once when the app starts
+ * Call this once when the app starts (from +layout.svelte onMount)
  */
 export async function initMobileAuth(): Promise<void> {
   if (!browser || !isNativePlatform()) return;
@@ -30,19 +30,28 @@ export async function initMobileAuth(): Promise<void> {
   console.log('[Mobile Auth] Initializing...');
 
   try {
-    // Dynamically import Capacitor App plugin
     const { App } = await import('@capacitor/app');
 
-    // Listen for deep links (app opened via URL)
+    // Listen for deep links while the app is running (warm start)
     App.addListener('appUrlOpen', async ({ url }) => {
       console.log('[Mobile Auth] Deep link received:', url);
       await handleDeepLink(url);
     });
 
+    // Cold start: check if the app was launched via a Universal Link
+    try {
+      const launchUrl = await App.getLaunchUrl();
+      if (launchUrl?.url) {
+        console.log('[Mobile Auth] Cold start launch URL:', launchUrl.url);
+        await handleDeepLink(launchUrl.url);
+      }
+    } catch (e) {
+      console.warn('[Mobile Auth] getLaunchUrl not available:', e);
+    }
+
     // Listen for app state changes
     App.addListener('appStateChange', async ({ isActive }) => {
       if (isActive) {
-        // Refresh session when app becomes active
         await refreshSession();
       }
     });
@@ -57,14 +66,21 @@ export async function initMobileAuth(): Promise<void> {
 }
 
 /**
- * Handle deep link URL
+ * Handle deep link URL — supports both custom scheme and Universal Links
  */
 async function handleDeepLink(url: string): Promise<void> {
   try {
     const urlObj = new URL(url);
 
-    // Check if this is an auth callback
-    if (urlObj.pathname.includes(AUTH_CALLBACK_PATH) || urlObj.host === AUTH_CALLBACK_PATH) {
+    // Match auth callback from either:
+    // - Custom scheme: mediqom://auth/callback
+    // - Universal Link: https://mediqom.com/auth/callback
+    const isCustomScheme = urlObj.protocol === 'mediqom:' &&
+      (urlObj.pathname.includes(AUTH_CALLBACK_PATH) || urlObj.host === 'auth' || urlObj.pathname.startsWith('/callback'));
+    const isUniversalLink = urlObj.hostname === UNIVERSAL_LINK_HOST &&
+      urlObj.pathname.startsWith(AUTH_CALLBACK_PATH);
+
+    if (isCustomScheme || isUniversalLink) {
       await handleAuthCallback(url);
     }
   } catch (error) {
@@ -74,27 +90,28 @@ async function handleDeepLink(url: string): Promise<void> {
 
 /**
  * Handle authentication callback from magic link
+ *
+ * Primary: implicit flow — extract access_token/refresh_token from URL fragment
+ * Fallback: PKCE code exchange (if Supabase sends a code param)
  */
 async function handleAuthCallback(url: string): Promise<void> {
   console.log('[Mobile Auth] Processing auth callback...');
 
   try {
     const urlObj = new URL(url);
-    // Check both search params and hash params (Supabase uses both)
     const searchParams = new URLSearchParams(urlObj.search);
     const hashParams = new URLSearchParams(urlObj.hash.substring(1));
 
-    // Try to get tokens from either location
-    const accessToken = searchParams.get('access_token') || hashParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token') || hashParams.get('refresh_token');
-    const tokenHash = searchParams.get('token_hash') || hashParams.get('token_hash');
-    const type = searchParams.get('type') || hashParams.get('type');
+    // Try to get tokens from URL fragment (implicit flow) or search params
+    const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
+    const code = searchParams.get('code');
 
     const supabase = getClient();
 
     if (accessToken && refreshToken) {
-      // OAuth flow or magic link with tokens
-      console.log('[Mobile Auth] Setting session from tokens...');
+      // Implicit flow: tokens directly in URL fragment
+      console.log('[Mobile Auth] Setting session from implicit flow tokens...');
       const { data, error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -106,26 +123,27 @@ async function handleAuthCallback(url: string): Promise<void> {
         return;
       }
 
-      currentSession = data.session;
-      console.log('[Mobile Auth] Session established, redirecting to /med');
-      goto('/med');
-    } else if (tokenHash && type) {
-      // Magic link OTP flow
-      console.log('[Mobile Auth] Verifying OTP...');
-      const { data, error } = await supabase.auth.verifyOtp({
-        token_hash: tokenHash,
-        type: type as 'email' | 'magiclink',
-      });
+      if (data.session) {
+        CurrentSession.set(data.session);
+        console.log('[Mobile Auth] Session established, redirecting to /med');
+        goto('/med');
+      }
+    } else if (code) {
+      // PKCE fallback: exchange authorization code for session
+      console.log('[Mobile Auth] Exchanging PKCE code for session...');
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
-        console.error('[Mobile Auth] OTP verification failed:', error);
-        goto('/auth?error=verification_failed');
+        console.error('[Mobile Auth] Code exchange failed:', error);
+        goto('/auth?error=code_exchange_failed');
         return;
       }
 
-      currentSession = data.session;
-      console.log('[Mobile Auth] OTP verified, redirecting to /med');
-      goto('/med');
+      if (data.session) {
+        CurrentSession.set(data.session);
+        console.log('[Mobile Auth] PKCE session established, redirecting to /med');
+        goto('/med');
+      }
     } else {
       console.warn('[Mobile Auth] No valid auth params in callback URL');
       goto('/auth?error=invalid_callback');
@@ -138,14 +156,12 @@ async function handleAuthCallback(url: string): Promise<void> {
 
 /**
  * Sign in with magic link (email OTP)
- * Returns the redirect URL for the magic link email
  */
 export async function signInWithMagicLink(email: string): Promise<{ error: Error | null }> {
   const supabase = getClient();
 
-  // Build redirect URL based on platform
   const redirectUrl = isNativePlatform()
-    ? `${DEEP_LINK_SCHEME}://${AUTH_CALLBACK_PATH}`
+    ? `https://${UNIVERSAL_LINK_HOST}${AUTH_CALLBACK_PATH}`
     : `${window.location.origin}/auth/confirm`;
 
   console.log('[Mobile Auth] Signing in with magic link:', { email, redirectUrl });
@@ -172,9 +188,8 @@ export async function signInWithMagicLink(email: string): Promise<{ error: Error
 export async function signOut(): Promise<void> {
   const supabase = getClient();
   await supabase.auth.signOut();
-  currentSession = null;
+  CurrentSession.set(null);
 
-  // Clear any stored session data
   if (isNativePlatform()) {
     try {
       const { Preferences } = await import('@capacitor/preferences');
@@ -198,15 +213,15 @@ export async function refreshSession(): Promise<Session | null> {
 
     if (error) {
       console.error('[Mobile Auth] Session refresh error:', error);
-      currentSession = null;
       return null;
     }
 
-    currentSession = session;
+    if (session) {
+      CurrentSession.set(session);
+    }
     return session;
   } catch (error) {
     console.error('[Mobile Auth] Session refresh failed:', error);
-    currentSession = null;
     return null;
   }
 }
@@ -215,14 +230,14 @@ export async function refreshSession(): Promise<Session | null> {
  * Get the current session
  */
 export function getSession(): Session | null {
-  return currentSession;
+  return CurrentSession.get();
 }
 
 /**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  return currentSession !== null;
+  return CurrentSession.get() !== null;
 }
 
 /**
@@ -235,7 +250,9 @@ export function onAuthStateChange(
 
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     (_event, session) => {
-      currentSession = session;
+      if (session) {
+        CurrentSession.set(session);
+      }
       callback(session);
     }
   );
@@ -274,8 +291,6 @@ export async function restoreSession(): Promise<Session | null> {
 
     if (value) {
       const session = JSON.parse(value) as Session;
-
-      // Validate and set the session
       const supabase = getClient();
       const { data, error } = await supabase.auth.setSession({
         access_token: session.access_token,
@@ -283,7 +298,7 @@ export async function restoreSession(): Promise<Session | null> {
       });
 
       if (!error && data.session) {
-        currentSession = data.session;
+        CurrentSession.set(data.session);
         return data.session;
       }
     }

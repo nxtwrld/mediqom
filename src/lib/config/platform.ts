@@ -131,14 +131,14 @@ export function getApiBaseUrl(): string {
 
 /**
  * Get the auth redirect URL for magic link callbacks
- * - Mobile: deep link scheme (mediqom://auth/callback)
+ * - Mobile: Universal Link (https://mediqom.com/auth/callback)
  * - Web: web URL (/auth/confirm)
  */
 export function getAuthRedirectUrl(): string {
   if (!browser) return '/auth/confirm';
 
   if (isNativePlatform()) {
-    return 'mediqom://auth/callback';
+    return 'https://mediqom.com/auth/callback';
   }
 
   return `${window.location.origin}/auth/confirm`;

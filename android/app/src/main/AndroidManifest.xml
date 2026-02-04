@@ -22,12 +22,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep link handler for mediqom:// scheme -->
-            <intent-filter android:autoVerify="true">
+            <!-- Deep link handler for mediqom:// scheme (backward compat) -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="mediqom" />
+            </intent-filter>
+
+            <!-- Universal Link handler for https://mediqom.com/auth/callback -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="mediqom.com" android:pathPrefix="/auth/callback" />
             </intent-filter>
 
         </activity>
