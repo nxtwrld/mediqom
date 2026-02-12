@@ -283,55 +283,53 @@
 
 <form class="form">
     <Tabs fixedHeight={true}>
-        {#if TABS.length > 1}
-            <TabHeads>
-                {#each TABS as tab}
-                    <TabHead>
-                        { $t('profile.health.tabs.' + tab.title)}
-                    </TabHead>
-                {/each}
-            </TabHeads>
-        {/if}
-        
-        <div class="tab-panels-wrapper">
-            <div class="tab-panels-grid">
-                {#each TABS as tab}
-                    <TabPanel>
+        {#snippet tabHeads()}
+            {#if TABS.length > 1}
+                <TabHeads>
+                    {#each TABS as tab}
+                        <TabHead>
+                            { $t('profile.health.tabs.' + tab.title)}
+                        </TabHead>
+                    {/each}
+                </TabHeads>
+            {/if}
+        {/snippet}
+
+        {#each TABS as tab}
+            <TabPanel>
                 {#each tab.properties as propKey}
-                {@const prop = FORM[propKey]}
-                {#if prop}
-                <div>
-                    {#if prop.type === 'time-series' && prop.items && inputs[prop.key]}
-                        {#each prop.items as item}
-                            {#if item.type == 'date'}
-                                <!-- Date fields are handled elsewhere -->
-                            {:else}
-                                <HealthFormField prop={item} bind:data={inputs[prop.key][item.key]} />
-                            {/if}
-                        {/each}
-                    {:else if prop.type === 'array' && prop.items}
-                        {#if inputs[prop.key] && inputs[prop.key].length > 0}
-                            {#each inputs[prop.key] as _, index}
+                    {@const prop = FORM[propKey]}
+                    {#if prop}
+                        <div>
+                            {#if prop.type === 'time-series' && prop.items && inputs[prop.key]}
                                 {#each prop.items as item}
-                                    <HealthFormField prop={item} bind:data={inputs[prop.key][index][item.key]} />
+                                    {#if item.type == 'date'}
+                                        <!-- Date fields are handled elsewhere -->
+                                    {:else}
+                                        <HealthFormField prop={item} bind:data={inputs[prop.key][item.key]} />
+                                    {/if}
                                 {/each}
-                            {/each}
-                        {/if}
-                        <button type="button" class="button" onclick={() => addArrayItem(prop)}>
-                            {inputs[prop.key] && inputs[prop.key].length > 0 ? 'Add Another' : 'Add'} {prop.key}
-                        </button>
+                            {:else if prop.type === 'array' && prop.items}
+                                {#if inputs[prop.key] && inputs[prop.key].length > 0}
+                                    {#each inputs[prop.key] as _, index}
+                                        {#each prop.items as item}
+                                            <HealthFormField prop={item} bind:data={inputs[prop.key][index][item.key]} />
+                                        {/each}
+                                    {/each}
+                                {/if}
+                                <button type="button" class="button" onclick={() => addArrayItem(prop)}>
+                                    {inputs[prop.key] && inputs[prop.key].length > 0 ? 'Add Another' : 'Add'} {prop.key}
+                                </button>
+                            {:else}
+                                <HealthFormField {prop} bind:data={inputs[prop.key]} />
+                            {/if}
+                        </div>
                     {:else}
-                        <HealthFormField {prop} bind:data={inputs[prop.key]} />
+                        ----- Unknown property: {propKey} -----
                     {/if}
-                </div>    
-                {:else }
-                    ----- Unknown property: {propKey} -----
-                {/if}    
                 {/each}
             </TabPanel>
-                {/each}
-            </div>
-        </div>
+        {/each}
     </Tabs>
 </form>
 

@@ -29,12 +29,13 @@
 	import { writable } from 'svelte/store';
 	interface Props {
 		children?: import('svelte').Snippet;
+		tabHeads?: import('svelte').Snippet;
 		fixedHeight?: boolean;
 		selectedTabId?: string;
 		ontabSelect?: (tabId: string) => void;
 	}
 
-	let { children, fixedHeight = true, selectedTabId, ontabSelect }: Props = $props();
+	let { children, tabHeads, fixedHeight = true, selectedTabId, ontabSelect }: Props = $props();
 
 	const tabs: number[] = [];
 	const panels: number[] = [];
@@ -147,12 +148,15 @@
 	setContext(TABS, tabContext);
 </script>
 
-<div class="tabs" 
-	class:fixed-height={fixedHeight} 
+<div class="tabs"
+	class:fixed-height={fixedHeight}
 	style:--active-panel-index={activePanelIndex}
 	style:--tab-count={tabCount}
 	style:--max-panel-height={$maxHeight > 0 ? `${$maxHeight}px` : 'auto'}
 >
+	{#if tabHeads}
+		{@render tabHeads()}
+	{/if}
 	{#if fixedHeight}
 		<div class="tab-panels-wrapper">
 			<div class="tab-panels-grid">
