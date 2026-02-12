@@ -406,6 +406,41 @@
         "B-": "B-",
         "O+": "O+",
         "O-": "O-"
+      },
+      "smokingStatus": {
+        "never": "Never smoked",
+        "former": "Former smoker",
+        "current": "Current smoker"
+      },
+      "alcoholConsumption": {
+        "none": "None",
+        "occasional": "Occasional",
+        "moderate": "Moderate",
+        "heavy": "Heavy"
+      },
+      "physicalActivity": {
+        "sedentary": "Sedentary",
+        "light": "Light",
+        "moderate": "Moderate",
+        "active": "Active",
+        "very_active": "Very active"
+      },
+      "diet": {
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "pescatarian": "Pescatarian",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Mediterranean",
+        "low_carb": "Low-carb",
+        "low_fat": "Low-fat",
+        "low_sodium": "Low-sodium",
+        "low_sugar": "Low-sugar",
+        "gluten_free": "Gluten-free",
+        "dairy_free": "Dairy-free",
+        "nut_free": "Nut-free",
+        "soy_free": "Soy-free",
+        "none": "None"
       }
     },
     "props": {
@@ -774,6 +809,8 @@
   "profile": {
     "health": {
       "health-form": "Health Profile",
+      "add": "Add",
+      "add-another": "Add Another",
       "props": {
         "absolute_basophils": "Absolute Basophils",
         "absolute_eosinophils": "Absolute Eosinophils",
@@ -784,6 +821,7 @@
         "albumin": "Albumin",
         "alcoholConsumption": "Alcohol Consumption",
         "allergen": "Allergen",
+        "allergies": "Allergies",
         "alp": "ALP",
         "alt": "ALT",
         "ast": "AST",
@@ -803,6 +841,7 @@
         "cardiac_output_index": "Cardiac Output Index",
         "chloride": "Chloride",
         "cholesterol": "Cholesterol",
+        "chronicConditions": "Chronic Conditions",
         "condition": "Condition",
         "creatinine": "Creatinine",
         "crp": "CRP",
@@ -897,6 +936,7 @@
         "uric_acid": "Uric Acid",
         "urobilinogen": "Urobilinogen",
         "vaccine": "Vaccine",
+        "vaccinations": "Vaccinations",
         "vitamin_d": "Vitamin D",
         "waist_circumference": "Waist Circumference",
         "waist_to_height_ratio": "Waist To Height Ratio",

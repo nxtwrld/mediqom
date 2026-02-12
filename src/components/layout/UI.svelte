@@ -20,6 +20,7 @@
     import { chatManager } from '$lib/chat/chat-manager';
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import { device } from '$lib/device';
+    import { saveHealthProfile } from '$lib/health/save';
 
     interface Props {
         children?: import('svelte').Snippet;
@@ -264,12 +265,19 @@
     {/if}
 
     {#if dialogs.healthForm}
-        <Modal onclose={() => {
+        <Modal onclose={async () => {
             logger.ui.debug('Health form modal close event fired');
+            // Save data before clearing
+            if (dialogs.healthFormData && $profile?.id) {
+                await saveHealthProfile({
+                    profileId: $profile.id,
+                    formData: dialogs.healthFormData
+                });
+            }
             dialogs.healthForm = false;
             dialogs.healthFormData = null;
         }}>
-            <HealthForm 
+            <HealthForm
                 config={dialogs.healthForm}
                 bind:data={dialogs.healthFormData}
             />

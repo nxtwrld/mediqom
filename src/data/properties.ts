@@ -41,7 +41,7 @@ export const getRangeByProfile = (
   property: string,
   profile: Profile,
 ): [number, number] => {
-  const p = defaults[property];
+  const p = (defaults as Record<string, any>)[property];
   if (!p) return [0, 0];
 
   //const range = p.referenceRange.find(r => {});

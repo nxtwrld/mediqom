@@ -13,6 +13,7 @@
     import { onMount } from 'svelte';
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
+    import { saveHealthProfile } from '$lib/health/save';
     
     // Local state for ProfileEdit modal
     let showProfileEdit = $state(false);
@@ -263,7 +264,16 @@
 
 <!-- ProfileEdit Modal -->
 {#if showProfileEdit}
-    <Modal onclose={() => showProfileEdit = false}>
+    <Modal onclose={async () => {
+        // Save health data before closing
+        if ($profile?.id && $profile?.health) {
+            await saveHealthProfile({
+                profileId: $profile.id,
+                formData: $profile.health
+            });
+        }
+        showProfileEdit = false;
+    }}>
         <ProfileEdit bind:profile={$profile} />
     </Modal>
 {/if}

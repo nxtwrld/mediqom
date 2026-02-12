@@ -221,7 +221,7 @@ export class AIProviderAbstraction {
     console.log("🤖 Gemini Request Language:", language);
 
     const model = new ChatGoogleGenerativeAI({
-      modelName: config.modelId,
+      model: config.modelId,
       apiKey: config.apiKey,
       temperature: options.temperature || 0,
       callbacks: [

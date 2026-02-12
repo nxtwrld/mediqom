@@ -6,6 +6,7 @@
     import { scale } from 'svelte/transition';
     import { PROFILE_NEW_ID } from '$lib/profiles/tools';
     import { t } from '$lib/i18n';
+    import { saveHealthProfile } from '$lib/health/save';
     
 
     interface Props {
@@ -46,7 +47,14 @@
         profile = safeCloneProfile(initialProfile);
         showProfile = false;
     }
-    function done() {
+    async function done() {
+        // Save health data before closing (only for existing profiles)
+        if (profile.id && profile.id !== PROFILE_NEW_ID && profile.health) {
+            await saveHealthProfile({
+                profileId: profile.id,
+                formData: profile.health
+            });
+        }
         showProfile = false;
     }
 </script>

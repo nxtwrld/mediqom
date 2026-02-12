@@ -29,13 +29,13 @@
   src: url("/fonts/Fira_Sans/FiraSans-Bold.woff2") format("woff2");
 }
 
-/* Roboto Mono - Numeric Values & Code */
+/* Roboto Mono - Numeric Values & Code (Latin Extended for Czech/German) */
 @font-face {
   font-family: "Roboto Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/roboto-mono/roboto-mono-v23-latin-regular.woff2")
+  src: url("/fonts/roboto-mono/roboto-mono-latin-ext-regular.woff2")
     format("woff2");
 }
 
@@ -44,7 +44,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("/fonts/roboto-mono/roboto-mono-v23-latin-500.woff2") format("woff2");
+  src: url("/fonts/roboto-mono/roboto-mono-latin-ext-500.woff2") format("woff2");
 }
 
 /* Montserrat - Headers (Variable Font) 
@@ -65,11 +65,11 @@
 }
 */
 
-/* Caveat - Decorative/Cursive (Variable Font) */
+/* Caveat - Decorative/Cursive (Variable Font, Latin Extended for Czech/German) */
 @font-face {
   font-family: "Caveat";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url("/fonts/caveat/caveat-latin.woff2") format("woff2");
+  src: url("/fonts/caveat/caveat-latin-ext.woff2") format("woff2");
 }

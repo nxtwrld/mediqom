@@ -8,7 +8,7 @@
 
 	interface Props {
 		size?: number;
-		url: string;
+		url?: string;
 		id: string;
 		editable?: boolean;
 	}

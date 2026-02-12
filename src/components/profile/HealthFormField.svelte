@@ -23,7 +23,7 @@
     {#if prop.type === 'select' && prop.options}
             <select id={id} bind:value={data}>
                 {#each prop.options as option}
-                <option value={option}>{option}</option>
+                <option value={option}>{$t(`medical.prop-values.${prop.key}.${option}`)}</option>
                 {/each}
             </select>
     {/if}

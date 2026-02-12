@@ -7,6 +7,25 @@ import { date }  from '$lib/datetime';
 import { t } from '$lib/i18n';
 import { get } from 'svelte/store';
 
+// Type definitions
+interface LabItem {
+    date: Date;
+    value: number;
+    [key: string]: any;
+}
+
+interface Signal {
+    date: Date;
+    value: number;
+    [key: string]: any;
+}
+
+interface Range {
+    name: string;
+    min: number;
+    max: number;
+}
+
 // Translation lookup for range labels
 const getRangeLabel = (name: string): string => {
     const translate = get(t);
@@ -52,10 +71,11 @@ let id = Math.random().toString(36).substring(7);
 
     console.log(series, referenceRange, normalExtent);
 
-let svgElement: SVGAElement = $state();
+let svgElement: SVGSVGElement | undefined = $state();
 
 function renderChart(series: Signal[] = []) {
 
+    if (!svgElement) return;
     svgElement.innerHTML = '';
 
     if (series.length == 0) {
@@ -102,10 +122,11 @@ function renderChart(series: Signal[] = []) {
     const xPadding = xRange * .05
 
     const xArea: [number, number] = [xExtent[0] - xPadding, xExtent[1] - 0 + xPadding];
+    const yMin = min(ranges, function(d: Range) { return d.min; });
+    const yMax = max(ranges, function(d: Range) { return d.max; });
     const yArea: [number, number] = [
-        min(ranges, function(d: Range) { return d.min; }),
-        max(ranges, function(d: Range) { return d.max; })
-        
+        yMin !== undefined ? yMin : 0,
+        yMax !== undefined ? yMax : 100
     ];
     // Scale the range of the data
     x.domain(xArea);
@@ -267,11 +288,11 @@ function renderChart(series: Signal[] = []) {
 
 
     // define points on the line for values
-    const points: { 
-        x: number, 
+    const points: {
+        x: number,
         y: number,
         value: number,
-        time: string    
+        date: Date
     }[] = series.map(d => {
         return {
             x: x(d.date),
@@ -307,7 +328,7 @@ function renderChart(series: Signal[] = []) {
                 .append('tspan')
                     .attr('x', (d) => d.x)
                     .attr('y', (d) => d.y - 15)
-                    .text((d) => date(d.date));
+                    .text((d) => date(d.date) || '');
 
 
 

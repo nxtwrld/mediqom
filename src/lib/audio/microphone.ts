@@ -7,6 +7,9 @@ import BitStream from "lamejs/src/js/BitStream";
 import type { AudioData } from "assemblyai";
 //import { MicVAD } from "@ricky0123/vad-web";
 
+// Declare global vad loaded from external script
+declare const vad: any;
+
 const CHUNK_SIZE = 1024;
 
 export enum AudioState {
@@ -215,7 +218,7 @@ export async function getAudio(
       };
 
       mediaRecorder.addEventListener("dataavailable", (event) => {
-        if (controls.onData) controls.onData(event.data);
+        if (controls.onData) controls.onData(event.data as AudioData);
       });
 
       // create analyzer instance

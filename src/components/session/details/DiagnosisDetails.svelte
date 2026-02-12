@@ -157,8 +157,8 @@
                             onmouseenter={() => handleNodeHover(symptom.id, true)}
                             onmouseleave={() => handleNodeHover(symptom.id, false)}
                         >
-                            <SymptomNodeComponent 
-                                node={{ id: symptom.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                            <SymptomNodeComponent
+                                node={{ id: symptom.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                 {symptom}
                                 isSelected={false}
                                 isMobile={false}

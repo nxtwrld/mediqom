@@ -84,7 +84,7 @@ export async function performSystemHealthCheck(): Promise<SystemHealthReport> {
 
   // Check 1: Profile Context Manager (simplified medical terms system)
   try {
-    const { profileContextManager } = await import("../profile-context");
+    const { profileContextManager } = await import("./profile-context");
     const contextInitCheck = checkServiceMethods(
       profileContextManager,
       ["initializeProfileContext", "isContextReady"],

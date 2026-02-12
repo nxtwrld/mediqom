@@ -370,14 +370,49 @@
         "male": "Männlich"
       },
       "bloodType": {
-        "A+": "",
-        "A-": "",
-        "AB+": "",
-        "AB-": "",
-        "B+": "",
-        "B-": "",
-        "O+": "",
-        "O-": ""
+        "A+": "A+",
+        "A-": "A-",
+        "AB+": "AB+",
+        "AB-": "AB-",
+        "B+": "B+",
+        "B-": "B-",
+        "O+": "O+",
+        "O-": "O-"
+      },
+      "smokingStatus": {
+        "never": "Nie geraucht",
+        "former": "Ehemaliger Raucher",
+        "current": "Aktueller Raucher"
+      },
+      "alcoholConsumption": {
+        "none": "Keiner",
+        "occasional": "Gelegentlich",
+        "moderate": "Mäßig",
+        "heavy": "Stark"
+      },
+      "physicalActivity": {
+        "sedentary": "Sitzend",
+        "light": "Leicht",
+        "moderate": "Mäßig",
+        "active": "Aktiv",
+        "very_active": "Sehr aktiv"
+      },
+      "diet": {
+        "vegetarian": "Vegetarisch",
+        "vegan": "Vegan",
+        "pescatarian": "Pescatarisch",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Mediterran",
+        "low_carb": "Kohlenhydratarm",
+        "low_fat": "Fettarm",
+        "low_sodium": "Natriumarm",
+        "low_sugar": "Zuckerarm",
+        "gluten_free": "Glutenfrei",
+        "dairy_free": "Laktosefrei",
+        "nut_free": "Nussfrei",
+        "soy_free": "Sojafrei",
+        "none": "Keine"
       }
     },
     "props": {
@@ -746,6 +781,8 @@
   "profile": {
     "health": {
       "health-form": "Gesundheitsprofil",
+      "add": "Hinzufügen",
+      "add-another": "Weitere hinzufügen",
       "props": {
         "absolute_basophils": "Absolute Basophile",
         "absolute_eosinophils": "Absolute Eosinophile",
@@ -756,6 +793,7 @@
         "albumin": "Albumin",
         "alcoholConsumption": "Alkoholkonsum",
         "allergen": "Allergen",
+        "allergies": "Allergien",
         "alp": "ALP",
         "alt": "ALT",
         "ast": "AST",
@@ -775,6 +813,7 @@
         "cardiac_output_index": "Herzzeitvolumenindex",
         "chloride": "Chlorid",
         "cholesterol": "Cholesterin",
+        "chronicConditions": "Chronische Erkrankungen",
         "condition": "Zustand",
         "creatinine": "Kreatinin",
         "crp": "CRP",
@@ -869,6 +908,7 @@
         "uric_acid": "Harnsäure",
         "urobilinogen": "Urobilinogen",
         "vaccine": "Impfstoff",
+        "vaccinations": "Impfungen",
         "vitamin_d": "Vitamin D",
         "waist_circumference": "Taillenumfang",
         "waist_to_height_ratio": "Verhältnis von Taille zu Höhe",

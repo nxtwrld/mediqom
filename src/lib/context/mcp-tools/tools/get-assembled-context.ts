@@ -58,7 +58,7 @@ export class GetAssembledContextTool extends BaseMedicalTool {
 
       // Get context stats
       const contextStats =
-        profileContextManager.getProfileContextStats(profileId);
+        profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -110,7 +110,7 @@ export class GetAssembledContextTool extends BaseMedicalTool {
             .filter((kp: any) => !this.isRecent(kp.date))
             .map((kp: any) => kp.text),
         },
-        medicalContext: assembledContext.medicalContext,
+        medicalContext: assembledContext.medicalContext as any,
         metadata: {
           assemblyTime: Date.now(),
           documentCount: assembledContext.relevantDocuments.length,

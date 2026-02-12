@@ -1,16 +1,18 @@
-import { google } from "@google-cloud/speech";
+import { SpeechClient } from "@google-cloud/speech";
+import * as fs from "fs";
 
-let client: google.SpeechClient;
+let client: SpeechClient;
 
 function getClient() {
   if (client) {
     return client;
   }
-  return (client = new google.SpeechClient());
+  return (client = new SpeechClient());
 }
 
 export async function transcribeAudio(
   audio_url: string = "https://assembly.ai/sports_injuries.mp3",
+  fileName?: string,
 ) {
   // Set config for Diarization
   const diarizationConfig = {
@@ -27,7 +29,7 @@ export async function transcribeAudio(
   };
 
   const audio = {
-    content: fs.readFileSync(fileName).toString("base64"),
+    content: fs.readFileSync(fileName || audio_url).toString("base64"),
   };
 
   const request = {

@@ -10,7 +10,7 @@ import {
   type MCPToolResult,
 } from "../base/base-tool";
 import { logger } from "$lib/logging/logger";
-import { profileContextManager } from "$lib/context/context-manager";
+import { profileContextManager } from "$lib/context/integration/profile-context";
 
 export class QueryMedicalHistoryTool extends BaseMedicalTool {
   getToolDefinition(): MCPTool {

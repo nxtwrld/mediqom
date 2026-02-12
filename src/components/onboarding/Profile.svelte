@@ -13,7 +13,7 @@
         bio: {
             email: string;
             fullName: string;
-            avatarUrl: string;
+            avatarUrl?: string;
             language: LanguageType;
         }
     };
@@ -45,7 +45,7 @@
 
 <div class="flex -center">
     <Avatar
-    bind:url={data.bio.avatarUrl}
+    bind:url={data.bio.avatarUrl as any}
     id={$user?.id}
     size={10}
     editable={true}

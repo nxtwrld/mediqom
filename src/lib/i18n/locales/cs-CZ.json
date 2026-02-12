@@ -370,14 +370,49 @@
         "male": "Muž"
       },
       "bloodType": {
-        "A+": "",
-        "A-": "",
-        "AB+": "",
-        "AB-": "",
-        "B+": "",
-        "B-": "",
-        "O+": "",
-        "O-": ""
+        "A+": "A+",
+        "A-": "A-",
+        "AB+": "AB+",
+        "AB-": "AB-",
+        "B+": "B+",
+        "B-": "B-",
+        "O+": "O+",
+        "O-": "O-"
+      },
+      "smokingStatus": {
+        "never": "Nikdy nekouřil/a",
+        "former": "Bývalý kuřák",
+        "current": "Aktuální kuřák"
+      },
+      "alcoholConsumption": {
+        "none": "Žádný",
+        "occasional": "Příležitostný",
+        "moderate": "Mírný",
+        "heavy": "Nadměrný"
+      },
+      "physicalActivity": {
+        "sedentary": "Sedavý",
+        "light": "Lehká",
+        "moderate": "Střední",
+        "active": "Aktivní",
+        "very_active": "Velmi aktivní"
+      },
+      "diet": {
+        "vegetarian": "Vegetariánská",
+        "vegan": "Veganská",
+        "pescatarian": "Peskatariánská",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Středomořská",
+        "low_carb": "Nízkosacharidová",
+        "low_fat": "Nízkotučná",
+        "low_sodium": "Nízkosodíková",
+        "low_sugar": "Nízkocukerná",
+        "gluten_free": "Bezlepková",
+        "dairy_free": "Bez mléčných výrobků",
+        "nut_free": "Bez ořechů",
+        "soy_free": "Bez sóji",
+        "none": "Žádná"
       }
     },
     "props": {
@@ -746,6 +781,8 @@
   "profile": {
     "health": {
       "health-form": "Zdravotní profil",
+      "add": "Přidat",
+      "add-another": "Přidat další",
       "props": {
         "absolute_basophils": "Absolutní bazofily",
         "absolute_eosinophils": "Absolutní eozinofily",
@@ -756,6 +793,7 @@
         "albumin": "Albumin",
         "alcoholConsumption": "Konzumace alkoholu",
         "allergen": "Alergen",
+        "allergies": "Alergie",
         "alp": "ALP",
         "alt": "ALT",
         "ast": "AST",
@@ -775,6 +813,7 @@
         "cardiac_output_index": "Index srdečního výdeje",
         "chloride": "Chlorid",
         "cholesterol": "Cholesterol",
+        "chronicConditions": "Chronické nemoci",
         "condition": "Stav",
         "creatinine": "Kreatinin",
         "crp": "CRP",
@@ -869,6 +908,7 @@
         "uric_acid": "Kyselina močová",
         "urobilinogen": "Urobilinogen",
         "vaccine": "Vakcína",
+        "vaccinations": "Očkování",
         "vitamin_d": "Vitamín D",
         "waist_circumference": "Obvod pasu",
         "waist_to_height_ratio": "Poměr pasu k výšce",

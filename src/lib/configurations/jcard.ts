@@ -1,4 +1,3 @@
-import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   $schemaTransformation: "http://buzzword.org.uk/2008/jCard/transformation.js",
   id: "jCard",
@@ -499,4 +498,4 @@ export default {
       },
     },
   },
-} as FunctionDefinition;
+};

@@ -83,22 +83,22 @@
                                 onmouseleave={() => handleNodeHover(rel.nodeId, false)}
                             >
                                 {#if nodeType === 'symptom'}
-                                    <SymptomNodeComponent 
-                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 }}
+                                    <SymptomNodeComponent
+                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 } as any}
                                         symptom={relatedNode}
                                         isSelected={false}
                                         isMobile={false}
                                     />
                                 {:else if nodeType === 'diagnosis'}
-                                    <DiagnosisNodeComponent 
-                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 }}
+                                    <DiagnosisNodeComponent
+                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 } as any}
                                         diagnosis={relatedNode}
                                         isSelected={false}
                                         isMobile={false}
                                     />
                                 {:else if nodeType === 'treatment'}
-                                    <TreatmentNodeComponent 
-                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 }}
+                                    <TreatmentNodeComponent
+                                        node={{ id: relatedNode.id, x0: 0, x1: 100, y0: 0, y1: 40 } as any}
                                         treatment={relatedNode}
                                         isSelected={false}
                                         isMobile={false}

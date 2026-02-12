@@ -49,7 +49,7 @@
 
     export const id: string = crypto.randomUUID();
 
-    let svgE: SVGElement = $state();
+    let svgE: SVGElement | undefined = $state();
 
 
     onMount(async () => {
@@ -58,7 +58,7 @@
 
         await loadHistoryData();
         if(svgE) {
-            let rTimer;
+            let rTimer: ReturnType<typeof setTimeout> | undefined;
             const rObserver = new ResizeObserver(entries => {
                 clearTimeout(rTimer);
                 rTimer = setTimeout(() => {
@@ -70,7 +70,7 @@
             // start listening to changes
             rObserver.observe(svgE);
 
-            return function cleanup() {
+            return () => {
                 clearTimeout(rTimer);
                 rObserver.disconnect();
             }
@@ -134,11 +134,17 @@
         });
 
         const xExtent = extent(series, function(d: LabItem) { return d.time; });
-        const xRange = (xExtent[1] && xExtent[0]) ? (xExtent[1] as any) - (xExtent[0] as any) : 0;
+        const xRange = (xExtent[1] && xExtent[0]) ?
+            (typeof xExtent[1] === 'object' ? (xExtent[1] as Date).getTime() : new Date(xExtent[1]).getTime()) -
+            (typeof xExtent[0] === 'object' ? (xExtent[0] as Date).getTime() : new Date(xExtent[0]).getTime()) : 0;
 
-        const xPadding = xRange * .05
+        const xPadding = xRange * .05;
 
-        const xArea: [number, number] = [(xExtent[0] || 0) - xPadding, (xExtent[1] || 0) - 0 + xPadding];
+        const xStart = xExtent[0] ?
+            (typeof xExtent[0] === 'object' ? (xExtent[0] as Date).getTime() : new Date(xExtent[0]).getTime()) - xPadding : 0;
+        const xEnd = xExtent[1] ?
+            (typeof xExtent[1] === 'object' ? (xExtent[1] as Date).getTime() : new Date(xExtent[1]).getTime()) + xPadding : 0;
+        const xArea: [number, number] = [xStart, xEnd];
         const yArea: [number, number] = [
             min(ranges, function(d: Range) { return d.min; }) || 0,
             max(ranges, function(d: Range) { return d.max; }) || 100
@@ -248,9 +254,9 @@
 
 
         // define the line
-        const valueline = line()
+        const valueline = line<LabItem>()
             .curve(curveCardinal)
-            .x(function(d: LabItem) { return x(d.time); })
+            .x(function(d: LabItem) { return x(typeof d.time === 'object' ? d.time : new Date(d.time)); })
             .y(function(d: LabItem) { return y(d.value); });
 
 
@@ -303,14 +309,14 @@
 
 
         // define points on the line for values
-        const points: { 
-            x: number, 
+        const points: {
+            x: number,
             y: number,
             value: number,
-            time: string    
+            time: string | Date
         }[] = series.map(d => {
             return {
-                x: x(d.time),
+                x: x(typeof d.time === 'object' ? d.time : new Date(d.time)),
                 y: y(d.value),
                 value : d.value,
                 time: d.time
@@ -386,8 +392,8 @@
         }
     }
 
-    let percentChange = $derived(getPercentageFromLastValues(series));
-    let trend = $derived(getTrendStatusFromLastValues(series));
+    let percentChange = $derived(getPercentageFromLastValues());
+    let trend = $derived(getTrendStatusFromLastValues());
 </script>
 
 
