@@ -31,7 +31,7 @@ export async function analyzeSerenityForm(
     tokenUsage,
     {
       language,
-      flowType: 'serenity_form_analysis',
+      flowType: 'serenity_form_analysis' as any,
       temperature: 0, // Deterministic extraction
     }
   );

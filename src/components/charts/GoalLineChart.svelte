@@ -47,7 +47,7 @@
         value: string | number,
         unit: string,
         date: Date,
-        lablel?: string
+        label?: string
     } | undefined = $state()
 
     const margin = { top: 15, right: 30, bottom: 30, left: 30 };
@@ -116,6 +116,8 @@
 
 
     onMount(() => {
+        if (!tooltip || !svgElement) return;
+
         document.body.appendChild(tooltip);
         renderChart(data);
         const ro: ResizeObserver = new ResizeObserver(() => {
@@ -133,13 +135,15 @@
 
 
     function clear() {
-        const svg = d3.select(svgElement);
+        if (!svgElement) return;
+        const svg: any = d3.select(svgElement);
         svg.selectAll("g").remove();
     }
 
 
     function renderChart(data: Data[]) {
-        
+        if (!svgElement) return;
+
         clear()
 
         width = (svgElement?.clientWidth || 300);
@@ -147,8 +151,8 @@
         height = (svgElement?.clientHeight || 100);
         let chartHeight = height - margin.top - margin.bottom;
 
-        const svg = d3.select(svgElement);
-        const svgg = svg.append("g")
+        const svg: any = d3.select(svgElement);
+        const svgg: any = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         const yScales = data.map(d => {
@@ -201,7 +205,7 @@
                 .call(d3.axisLeft(yScale).ticks(5));
         })
 
-        let goal = svgg.selectAll("g.goal")
+        let goal: any = svgg.selectAll("g.goal")
             .data(data)
             .enter()
                 .append('g')
@@ -222,6 +226,7 @@
                 .attr("class", "target")
                 .attr("x", 0)
                 .attr("y", (d: Data, index: number) => {
+                    if (!d.target) return 0;
                     if (Array.isArray(d.target)) {
                         return yScales[index](d.target[1])
                     } else {
@@ -251,6 +256,7 @@
             .attr("class", "target")
             .attr("x", chartWidth)
             .attr("y", (d: Data, index: number) => {
+                if (!d.target) return 0;
                 if (Array.isArray(d.target)) {
                     return yScales[index](d.target[1])
                 } else {
@@ -260,7 +266,8 @@
             .attr("dy", "1.1rem")
             .attr("dx", "-3rem")
             .attr("text-anchor", "end")
-            .text((d: Data) => { 
+            .text((d: Data) => {
+                if (!d.target) return d.label;
                 let targetValue = (Array.isArray(d.target)) ? d.target[0] + ' - ' + d.target[1] : d.target;
                 return d.label +': '+ targetValue + ' ' + (d.data[0]?.unit || '')
             });
@@ -270,13 +277,14 @@
             .append("path")
                 .attr("class", "line")
                 .attr("d", (d: Data, index: number) => {
-                    return d3.line()
+                    return (d3.line() as any)
                     .curve(d3.curveMonotoneX)
-                    .x(function(d: Value) { 
-                        return xScale(d.date) 
+                    .x(function(d: Value) {
+                        return xScale(d.date)
                     })
-                    .y(function(d: Value) { 
-                        return yScales[index](d.value);
+                    .y(function(d: Value) {
+                        const val = typeof d.value === 'number' ? d.value : parseFloat(String(d.value));
+                        return yScales[index](val);
                     })(d.data as Value[]);
                 })
         // goal events
@@ -295,7 +303,11 @@
                 .append('circle')
                     .attr('class', 'dot')
                     .attr('cx', (d: Value) => xScale(d.date))
-                    .attr('cy', (d: Value, index: number) => d.index !== undefined ? yScales[d.index](d.value) : 0)
+                    .attr('cy', (d: Value, index: number) => {
+                        if (d.index === undefined) return 0;
+                        const val = typeof d.value === 'number' ? d.value : parseFloat(String(d.value));
+                        return yScales[d.index](val);
+                    })
                     .attr('r', 8)
                     /*.on('click', function(event: MouseEvent, d: Value) {
                         if (d.href) {
@@ -312,7 +324,7 @@
                             label: d.index !== undefined ? data[d.index].valueName : ''
                         }
                         // calculate fixed position and compensate for scroll
-                        d3.select(tooltip)
+                        (d3.select(tooltip) as any)
                             .style('top', (event.clientY) + 'px')
                             .style('left', (event.clientX) + 'px')
                             .style('opacity', 1);
@@ -339,7 +351,7 @@
         if(!selectedEvent) return;
 
         d3.select(selectedEvent.node).attr('r', 8);
-        d3.select(tooltip)
+        (d3.select(tooltip) as any)
             .style('top', '-100000px')
             .style('left', '-100000px')
             .style('opacity', 0);
@@ -397,14 +409,14 @@
         </svg>
     </div>
 </div>
-<button class="tooltip" bind:this={tooltip} onclick={stopPropagation(viewDetails)}>
+<div class="tooltip" bind:this={tooltip} onclick={stopPropagation(viewDetails)} role="button" tabindex="0">
     {#if tooltipData}
         <div class="date">{date(tooltipData.date)}</div>
         <div class="property">{tooltipData.label}</div>
         <div class="value">{tooltipData.value}</div>
         <div class="unit">{tooltipData.unit}</div>
     {/if}
-</button>
+</div>
 
 
 <style>

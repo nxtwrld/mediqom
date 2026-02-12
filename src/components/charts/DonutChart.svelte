@@ -13,7 +13,7 @@
 
     let { data = [], colors = d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length).reverse(), thickness = .67 }: Props = $props();
 
-    let svgElement: SVGSVGElement = $state();
+    let svgElement: SVGSVGElement | undefined = $state();
     // set the dimensions and margins of the graph
     const width: number = 500;
     const height: number = 500;
@@ -27,36 +27,36 @@
 
 
     function renderChart(){
+        if (!svgElement) return;
+
     // append the svg object to the div called 'my_dataviz'
-        const svg = d3.select(svgElement)
-            
-        const arc = d3.arc()
+        const svg: any = d3.select(svgElement);
+
+        const arc: any = d3.arc()
             .innerRadius(radius * thickness)
             .outerRadius(radius - 1);
 
-        const pie = d3.pie()
+        const pie: any = d3.pie()
             .padAngle(1 / radius)
             .sort(null)
             .value((d: any) => d.value);
 
-        const color = d3.scaleOrdinal()
-            .domain(data.map(d => d.name))
+        const color: any = d3.scaleOrdinal()
+            .domain(data.map(d => d.name || ''))
             .range(colors);
 
         svg
-            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .attr("viewBox", [-width / 2, -height / 2, width, height]);
             //.attr("style", "max-width: 100%; height: auto;");
 
         svg.append("g")
             .selectAll()
             .data(pie(data))
             .join("path")
-            .attr("fill", (d: any, index) => {
-                return color(d.data.name || index)
-            })
-            .attr("d", arc as any)
+            .attr("fill", (d: any, index: number) => color(d.data.name || index.toString()))
+            .attr("d", arc)
             .append("title")
-            .text((d: any, index) => `${d.data.name || index}: ${d.data.value.toLocaleString()}`);
+            .text((d: any, index: number) => `${d.data.name || index}: ${d.data.value.toLocaleString()}`);
 /*
     svg.append("g")
         .attr("font-family", "sans-serif")

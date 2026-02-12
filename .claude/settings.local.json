@@ -36,7 +36,15 @@
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
       "Bash(qmd get:*)",
-      "Bash(npm run test:unit:*)"
+      "Bash(npm run test:unit:*)",
+      "Bash(du -sh:*)",
+      "Bash(__NEW_LINE_1fba8348d89969a6__ echo \"\")",
+      "Bash(wc:*)",
+      "Bash(sort -f echo \"\" echo \"FEMALE - Skeletal & Muscular Related:\" find \"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/full_female_anatomy_3ds_max_vray_with_textures\" -type f)",
+      "Bash(__NEW_LINE_58b7cfec6c65d998__ echo \"=== MUSCULAR SYSTEM TEXTURES \\(SKELETAL COMPONENTS\\) ===\")",
+      "Bash(__NEW_LINE_58b7cfec6c65d998__ echo \"\")",
+      "Bash(__NEW_LINE_449aa5c6d8017f01__ echo \"=== MATERIAL/MODEL FILES ===\")",
+      "Bash(__NEW_LINE_449aa5c6d8017f01__ find \"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/full_female_anatomy_3ds_max_vray_with_textures\" -type f -name \"*.mtl\" -o -name \"*.obj\" -o -name \"*.fbx\" -o -name \"*.gltf\" -o -name \"*.glb\" -o -name \"*.blend\" -o -name \"*.max\")"
     ],
     "deny": []
   }
