@@ -19,18 +19,17 @@ export enum BloodType {
 
 export interface Profile {
   id: string;
+  fullName: string;
   language: string;
   vcard: any;
   health: any;
-  fullName: string;
   insurance: any;
   publicKey: string;
-  avatarUrl: string;
   status: string;
-  publicKey: string;
-  language: string;
-  profileDocumentId: string;
-  healthDocumentId: string;
+  avatarUrl?: string;
+  birthDate?: string;
+  profileDocumentId?: string;
+  healthDocumentId?: string;
 }
 
 export interface ProfileNew {

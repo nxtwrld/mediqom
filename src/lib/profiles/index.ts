@@ -3,7 +3,9 @@ import profile from "./profile";
 
 import { decryptDocumentsNoStore, setDocuments, addDocument } from "$lib/documents";
 import { DocumentType } from "$lib/documents/types.d";
+import type { Document } from "$lib/documents/types.d";
 import type { ProfileNew, Profile } from "$lib/types.d";
+import type { ProfileCore, ProfileLoadResult } from "./types";
 import user from "$lib/user";
 import { prepareKeys } from "$lib/encryption/rsa";
 import { createHash } from "$lib/encryption/hash";
@@ -54,7 +56,7 @@ export async function removeLinkedProfile(profile_id: string) {
  *  Load
  */
 export async function loadProfiles(
-  fetch: any = undefined,
+  fetch: typeof window.fetch | undefined = undefined,
   force: boolean = false,
 ) {
   // Guard: avoid unnecessary reloads for the same authenticated user
@@ -77,10 +79,10 @@ export async function loadProfiles(
     });
 
   // extend profile data with decrypted roots and batch set documents once
-  const results = await Promise.all(
+  const results: ProfileLoadResult[] = await Promise.all(
     profilesLoaded
-      .filter((d) => d.profiles != null)
-      .map(async (d) => {
+      .filter((d: any) => d.profiles != null)
+      .map(async (d: ProfileCore): Promise<ProfileLoadResult> => {
         // fetch encrypted profile and health documents
         try {
           const rootsEncrypted = await fetch(
@@ -93,7 +95,7 @@ export async function loadProfiles(
             });
 
           // decrypt documents without mutating global documents store
-          const roots = await decryptDocumentsNoStore(rootsEncrypted);
+          const roots = await decryptDocumentsNoStore(rootsEncrypted) as Document[];
 
           // map profile data
           const profileData = mapProfileData(d, roots);
@@ -142,11 +144,14 @@ export function updateProfile(p: Profile) {
   }
 }
 
-export function mapProfileData(core, roots) {
-  let profile = null,
-    health = null,
-    profileDocumentId = null,
-    healthDocumentId = null;
+export function mapProfileData(
+  core: ProfileCore,
+  roots: Document[]
+): Profile {
+  let profile: any = null,
+    health: any = null,
+    profileDocumentId: string | null = null,
+    healthDocumentId: string | null = null;
 
   roots.forEach((r) => {
     if (r.type === "profile") {
@@ -158,11 +163,15 @@ export function mapProfileData(core, roots) {
       health = r.content;
       healthDocumentId = r.id;
     }
-    delete r.content.title;
-    delete r.content.tags;
+    // Remove title and tags from content object if they exist
+    if (r.content && typeof r.content === 'object') {
+      const content = r.content as any;
+      delete content.title;
+      delete content.tags;
+    }
   });
 
-  const profileData = {
+  const profileData: any = {
     ...core.profiles,
     status: core.status,
     profileDocumentId,
@@ -170,6 +179,7 @@ export function mapProfileData(core, roots) {
     insurance: {},
     health: {},
     vcard: {},
+    birthDate: undefined,
   };
 
   if (profile) {
@@ -181,7 +191,7 @@ export function mapProfileData(core, roots) {
   if (health) {
     profileData.health = health;
   }
-  return profileData;
+  return profileData as Profile;
 }
 
 /**

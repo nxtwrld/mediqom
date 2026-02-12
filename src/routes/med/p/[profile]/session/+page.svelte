@@ -1161,7 +1161,7 @@
 {/if}
 
 {#if view !== Views.report}
-    <div class="audio-recorder" class:-running={view != Views.start} class:-active={audioState === AudioState.listening || audioState === AudioState.speaking}>
+    <div class="audio-recorder" class:-running={view != Views.start} class:-active={audioState === AudioState.Listening || audioState === AudioState.Speaking}>
         <AudioButton 
             bind:speechChunks={speechChunks} 
             bind:state={audioState}
@@ -1201,7 +1201,7 @@
     <div class="canvas canvas-start">
         <div>
             <button class="uhint" onclick={testAnalyze} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); testAnalyze(); } }} aria-label="Test analysis with sample data">
-                {#if audioState === AudioState.listening || audioState === AudioState.speaking}
+                {#if audioState === AudioState.Listening || audioState === AudioState.Speaking}
                     Listening...
                 {:else}
                     Start recording your session by clicking the microphone button.

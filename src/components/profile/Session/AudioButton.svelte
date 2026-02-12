@@ -24,10 +24,10 @@
         onsessioncreated?: (sessionId: string) => void;
     }
 
-    let { 
+    let {
         hasResults = false,
         speechChunks = $bindable([]),
-        state: initialState = AudioState.Ready,
+        state = $bindable(AudioState.Ready),
         sessionId = $bindable(),
         useRealtime = false,
         language = 'en',
@@ -39,9 +39,6 @@
         onanalysis,
         onsessioncreated
     }: Props = $props();
-
-    // Local state for visual feedback (not bindable to parent)
-    let state = $state(initialState);
 
     let micAnimationContainer: HTMLDivElement;
 
