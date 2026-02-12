@@ -19,6 +19,12 @@
         tabindex?: number;
         autocomplete?: string;
         children?: import('svelte').Snippet;
+        onchange?: (event: Event) => void;
+        onblur?: (event: FocusEvent) => void;
+        onfocus?: (event: FocusEvent) => void;
+        onkeypress?: (event: KeyboardEvent) => void;
+        onkeyup?: (event: KeyboardEvent) => void;
+        onkeydown?: (event: KeyboardEvent) => void;
     }
 
     let {

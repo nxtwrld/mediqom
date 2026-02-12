@@ -152,7 +152,7 @@
     }
 
     .priority {
-        background: var(--color-primary-bg, #dbeafe););
+        background: var(--color-primary-bg, #dbeafe);
         color: var(--color-primary, #3b82f6);
     }
 

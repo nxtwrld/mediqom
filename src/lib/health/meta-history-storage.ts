@@ -168,7 +168,7 @@ async function updateCurrentDataDocument(
   newPoints: TimeSeriesPoint[],
   threshold: any,
 ): Promise<void> {
-  const content = currentDoc.content as CurrentDataDocument;
+  const content = currentDoc.content as unknown as CurrentDataDocument;
   const updatedPoints = [...content.currentData.rawPoints, ...newPoints].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
@@ -310,7 +310,7 @@ async function createArchiveDocument(
   // Update parent document's historical references
   const parentDoc = await getDocument(parentDocumentId);
   if (parentDoc) {
-    const parentContent = parentDoc.content as CurrentDataDocument;
+    const parentContent = parentDoc.content as unknown as CurrentDataDocument;
     parentContent.historicalDocumentIds.push(savedDoc.id);
     await updateDocument(parentDoc);
   }

@@ -67,7 +67,7 @@ export const audioActions = {
       // Create session if needed and realtime is enabled
       let finalSessionId = sessionId;
       if (useRealtime && !finalSessionId) {
-        finalSessionId = await audioActions.createSession(language, models);
+        finalSessionId = (await audioActions.createSession(language, models)) || undefined;
         if (!finalSessionId) {
           logger.audio.warn(
             "Failed to create session, continuing with local recording",

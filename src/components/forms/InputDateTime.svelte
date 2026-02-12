@@ -18,6 +18,9 @@
         autocomplete?: string;
         readonly?: boolean;
         children?: import('svelte').Snippet;
+        onchange?: (event: Event) => void;
+        onblur?: (event: FocusEvent) => void;
+        onfocus?: (event: FocusEvent) => void;
     }
 
     let {

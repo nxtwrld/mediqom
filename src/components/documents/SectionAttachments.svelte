@@ -147,7 +147,7 @@
 
     <div class="attachments">
         {#each data as attachment}
-            <button class="attachment" onclick={() => previewAttachment(attachment)} title="{$t('report.attachments-click-to-preview', { filename: getFileName(attachment) })}">
+            <button class="attachment" onclick={() => previewAttachment(attachment)} title="{$t('report.attachments-click-to-preview', { filename: getFileName(attachment) } as any)}">
                 {#if attachment.thumbnail}
                     <img src={attachment.thumbnail} loading="lazy" alt={attachment.type} />
                 {:else}

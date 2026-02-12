@@ -2,7 +2,7 @@
      Rename the variable and try again or migrate by hand. -->
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+    import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -227,7 +227,22 @@
 
     }
 
-    
+    let previousLabels: typeof labels = [];
+
+    $: {
+        if (ready && labels !== previousLabels) {
+            const oldLabels = previousLabels;
+            previousLabels = labels;
+            if (oldLabels.length > 0) {
+                cleanupLabels(oldLabels);
+                if (activeLayers === loadedLayers) {
+                    refreshLabels();
+                }
+            }
+        }
+    }
+
+
 
 
 
@@ -618,6 +633,32 @@
         });
     }
 
+
+    function cleanupLabels(labelsToClean: typeof labels) {
+        for (const label of labelsToClean) {
+            if (label.label) {
+                label.label.removeFromParent();
+                label.label = undefined;
+            }
+        }
+    }
+
+    async function refreshLabels() {
+        const labelIds = [...new Set(labels.map(l => l.id))];
+        const objectsToShow = activeLayers.reduce((acc, l) => {
+            return [...acc, ...objects3d[l as keyof typeof objects3d].objects];
+        }, [] as string[]);
+
+        objects.forEach(object => {
+            object.traverse(function (child: any) {
+                checkObject(child, objectsToShow, labelIds);
+            });
+        });
+
+        await tick();
+        loadLabels();
+        requestRender();
+    }
 
     function loadLabels() {
         if (!labelContainer) return;

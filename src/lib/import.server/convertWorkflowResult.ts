@@ -33,6 +33,18 @@ export function convertWorkflowResult(
     actualContent = analysisContent;
   }
 
+  // Merge bodyParts identifications into tags (matching analyzeReport.ts behavior)
+  const report = useStructuredData ? workflowResult.report : actualContent.report;
+  let tags: string[] = actualContent.tags || [];
+  if (report && !Array.isArray(report) && report.bodyParts && Array.isArray(report.bodyParts)) {
+    const bodyPartTags = report.bodyParts
+      .map((bp: any) => bp.identification)
+      .filter((id: any) => typeof id === 'string' && id.length > 0);
+    if (bodyPartTags.length > 0) {
+      tags = [...new Set([...tags, ...bodyPartTags])];
+    }
+  }
+
   return {
     type: actualContent.type || "report",
     fhirType: actualContent.fhirType || "DiagnosticReport",
@@ -40,7 +52,7 @@ export function convertWorkflowResult(
     cagegory: actualContent.category || "report",
     isMedical:
       actualContent.isMedical !== undefined ? actualContent.isMedical : true,
-    tags: actualContent.tags || [],
+    tags,
     hasPrescription: actualContent.hasPrescription || false,
     hasImmunization: actualContent.hasImmunization || false,
     hasLabOrVitals: actualContent.hasLabOrVitals || false,

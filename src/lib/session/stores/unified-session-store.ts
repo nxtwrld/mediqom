@@ -9,12 +9,11 @@ import { audioManager } from "$lib/audio/AudioManager";
 import { audioActions } from "./audio-actions";
 import { getLocale } from "$lib/i18n";
 import { locale } from "svelte-i18n";
-import type {
-  SessionAnalysis,
-  MoEAnalysisOutput,
-  ExpertContext,
-} from "../index";
 // Types extracted from legacy analysis-store (now removed)
+type SessionAnalysis = any;
+type MoEAnalysisOutput = any;
+type ExpertContext = any;
+
 interface AnalysisState {
   currentSession: SessionAnalysis | null;
   isLoading: boolean;

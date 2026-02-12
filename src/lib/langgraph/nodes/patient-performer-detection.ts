@@ -404,10 +404,9 @@ ${JSON.stringify(dicomData, null, 2)}`;
       state,
       {
         ...state,
-        patientInfo: detectionResult.patient,
         medicalPerformers: detectionResult.performers,
         patientPerformerDetection: detectionResult,
-      },
+      } as any,
       stepDuration,
       [],
       [],

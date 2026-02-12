@@ -8,6 +8,7 @@
 import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
+import anatomyTags from "$lib/configurations/tags";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import {
@@ -270,6 +271,12 @@ export abstract class BaseProcessingNode {
         throw new Error(
           `Schema module at ${importPath} does not export a default export`,
         );
+      }
+
+      // Populate empty bodyParts identification enum with anatomy tags
+      const schemaItems = (this.schema as any)?.items?.properties?.identification;
+      if (schemaItems?.enum && schemaItems.enum.length === 0) {
+        schemaItems.enum = [...anatomyTags];
       }
 
       console.log(`✅ Successfully loaded schema for ${this.config.nodeName}`);

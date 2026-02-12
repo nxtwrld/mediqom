@@ -141,7 +141,7 @@ export class SignalDataMigration {
       try {
         migratedSignals[signalName] = await this.migrateSignalEntry(
           signalName,
-          signalData,
+          signalData as LegacySignalStorage,
           document,
         );
       } catch (error) {

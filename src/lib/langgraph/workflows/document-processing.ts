@@ -205,7 +205,7 @@ export const createDocumentProcessingWorkflow = (
   workflow.addEdge("quality_gate" as any, END);
 
   // Set entry point
-  workflow.setEntryPoint("input_validation");
+  workflow.setEntryPoint("input_validation" as any);
 
   // Compile the workflow
   return workflow.compile();

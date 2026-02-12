@@ -33,7 +33,10 @@
       "Bash(file:*)",
       "mcp__plugin_supabase_supabase__get_logs",
       "mcp__plugin_supabase_supabase__execute_sql",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(qmd get:*)",
+      "Bash(npm run test:unit:*)"
     ],
     "deny": []
   }
