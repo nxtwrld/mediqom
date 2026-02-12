@@ -846,6 +846,7 @@
                 //refractionRatio: 0.985,
                 //ior: 0.1,
                 side: THREE.BackSide,
+                depthWrite: false,
             })
         })], ['body'], [], scene as any);
         toggleShade(showShade);
