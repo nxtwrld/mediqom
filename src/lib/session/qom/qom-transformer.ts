@@ -162,7 +162,7 @@ export function shouldTriggerExpert(
   for (const symptom of symptoms) {
     const normalizedSymptom = symptom.toLowerCase().replace(/\s+/g, "_");
     const mappedExperts =
-      qomConfig.triggerConditions.symptomMapping[normalizedSymptom] || [];
+      (qomConfig.triggerConditions.symptomMapping as any)[normalizedSymptom] || [];
     if (mappedExperts.includes(expertCategory)) {
       return true;
     }
@@ -170,7 +170,7 @@ export function shouldTriggerExpert(
 
   // Check context triggers
   for (const [key, value] of Object.entries(context)) {
-    const mappedExperts = qomConfig.triggerConditions.contextMapping[key] || [];
+    const mappedExperts = (qomConfig.triggerConditions.contextMapping as any)[key] || [];
     if (mappedExperts.includes(expertCategory) && value === true) {
       return true;
     }
@@ -185,7 +185,7 @@ export function getSubSpecialtyTriggers(
   symptoms: string[],
 ): string[] {
   const triggers =
-    qomConfig.triggerConditions.subSpecialtyTriggers[parentCategory] || {};
+    (qomConfig.triggerConditions.subSpecialtyTriggers as any)[parentCategory] || {};
   const triggeredSubSpecialties: string[] = [];
 
   for (const [condition, subspecialties] of Object.entries(triggers)) {
@@ -208,7 +208,7 @@ export function createExpertNode(
 ): QOMNode {
   const templateKey = `${type}_expert`;
   const template =
-    qomConfig.expertTemplates[templateKey] ||
+    (qomConfig.expertTemplates as any)[templateKey] ||
     qomConfig.expertTemplates.specialist_expert;
 
   return {
@@ -325,7 +325,7 @@ export function shouldAnimateNode(node: D3QOMNode): boolean {
 
 // Export utility to get node importance for sizing
 export function getNodeImportance(node: D3QOMNode): number {
-  const typeWeights = {
+  const typeWeights: Record<string, number> = {
     merger: 1.5,
     primary: 1.3,
     specialist: 1.0,
@@ -333,7 +333,7 @@ export function getNodeImportance(node: D3QOMNode): number {
     functional: 1.1,
   };
 
-  const stateWeights = {
+  const stateWeights: Record<string, number> = {
     running: 1.2,
     completed: 1.0,
     failed: 0.9,

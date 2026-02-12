@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import type { PartialTranscript } from "./manager";
+import type { PartialTranscript } from "../manager";
 import { convertFloat32ToMp3 } from "$lib/audio/microphone";
 
 export interface SSEOptions {

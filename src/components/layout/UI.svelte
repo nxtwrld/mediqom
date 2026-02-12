@@ -18,6 +18,7 @@
     import { profile } from '$lib/profiles';
     import { page } from '$app/stores';
     import { chatManager } from '$lib/chat/chat-manager';
+    import type { Profile } from '$lib/types.d';
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import { device } from '$lib/device';
     import { saveHealthProfile } from '$lib/health/save';
@@ -39,7 +40,7 @@
     let importJobId: string | undefined = $state(undefined);
 
     // Chat state
-    let currentProfile = $state(null);
+    let currentProfile: Profile | null = $state(null);
     let isOwnProfile = $state(false);
     let userLanguage = $state('en');
     

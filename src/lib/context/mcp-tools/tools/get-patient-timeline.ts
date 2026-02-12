@@ -92,7 +92,7 @@ export class GetPatientTimelineTool extends BaseMedicalTool {
 
         // Extract events from document content
         const extractedEvents = this.extractTimelineEvents(
-          doc,
+          doc as Document,
           params.eventTypes,
         );
         timelineEvents.push(...extractedEvents);
@@ -200,13 +200,9 @@ export class GetPatientTimelineTool extends BaseMedicalTool {
    * Extract event description from document
    */
   private extractEventDescription(doc: Document): string {
-    if (typeof doc.content === "string") {
-      return (
-        doc.content.substring(0, 200) + (doc.content.length > 200 ? "..." : "")
-      );
-    }
+    const content = doc.content;
 
-    if (typeof doc.content === "object" && doc.content !== null) {
+    if (typeof content === "object" && content !== null) {
       // Try common medical document fields
       const fields = [
         "summary",

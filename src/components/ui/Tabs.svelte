@@ -20,7 +20,8 @@
         registerTab: function(){},
         registerPanel: function(){},
         selectTab: function(){},
-        selectTabById: function(){}
+        selectTabById: function(){},
+        selectByIndex: function(){}
     };
 </script>
 

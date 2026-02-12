@@ -46,14 +46,14 @@
     let formData = $state(JSON.parse(JSON.stringify({ ...getDefaultData(), ...(data || {}) })));
 
     // Debounced sync back to parent prop
-    let timeoutId: number;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     $effect(() => {
-        clearTimeout(timeoutId);
+        if (timeoutId) clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
             data = JSON.parse(JSON.stringify(formData));
         }, 100);
-        
-        return () => clearTimeout(timeoutId);
+
+        return () => { if (timeoutId) clearTimeout(timeoutId); };
     });
 </script>
 

@@ -132,7 +132,11 @@ export class ImagingProcessingNode extends BaseProcessingNode {
 
     // Enhance modality detection if not provided
     if (!enhanced.modality || enhanced.modality === "unknown") {
-      enhanced.modality = this.detectModalityFromContent(state.content);
+      // Extract text from content array
+      const contentText = state.content
+        ?.map((c) => (c.type === "text" ? c.text : ""))
+        .join(" ") || "";
+      enhanced.modality = this.detectModalityFromContent(contentText);
     }
 
     // Add imaging urgency assessment
@@ -294,8 +298,8 @@ export class ImagingProcessingNode extends BaseProcessingNode {
     const significance = {
       level: "low",
       score: 0,
-      keyFindings: [],
-      recommendations: [],
+      keyFindings: [] as string[],
+      recommendations: [] as string[],
     };
 
     // Analyze findings for clinical significance

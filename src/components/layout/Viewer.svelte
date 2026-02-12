@@ -95,6 +95,10 @@
     <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
     {/key}
 
+    <div class="model-profile-name">
+        {$profile.fullName}
+    </div>
+
     <div class="model-layers" class:-active={showLayers}>
         <em>{activeLayers.length}</em>
 
@@ -354,6 +358,23 @@
     }
 
 
+
+    .model-profile-name {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        padding: .3rem .8rem;
+        font-size: .8rem;
+        color: #FFF;
+        background-color: rgba(0, 0, 0, .3);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        border-radius: var(--border-radius);
+        pointer-events: none;
+        z-index: 1;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
 
     @keyframes rotate {
         0% {

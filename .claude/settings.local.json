@@ -30,7 +30,13 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix high-impact type errors \\(Document.report, secureToolCall, undefined checks\\)\n\nFixed 43 TypeScript errors across three categories:\n\n1. Document.report Property \\(16 errors fixed\\):\n- Added optional ''report'' property to Document interface\n- Allows legacy LangGraph analysis data to be accessed\n- Files: src/lib/documents/types.d.ts\n- Impact: Fixes all medical-terms-migration.ts errors\n\n2. Private Property Access \\(13 errors fixed\\):\n- Changed secureToolCall from private to public in MedicalExpertTools\n- Allows secureMcpTools object to call security wrapper\n- Files: src/lib/context/mcp-tools/medical-expert-tools.ts\n- Impact: Fixes all MCP security wrapper access errors\n\n3. Object Possibly Undefined \\(14 errors fixed\\):\n- Added null checks for series[0].referenceRange access\n- Added undefined checks for d3.extent\\(\\) results  \n- Files: src/components/documents/SignalHistory.svelte\n- Impact: Prevents runtime errors in lab value charting\n\nResults:\n- Before: 806 errors\n- After: 763 errors\n- Improvement: 43 errors fixed\n\nTotal Progress:\n- Started: 858 errors, 64 warnings \\(169 files\\)\n- Current: 763 errors, 60 warnings \\(160 files\\)\n- Total fixed: 95 errors \\(11.1%\\), 4 warnings, 9 fewer files\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(xargs:*)",
       "Bash(qmd query:*)",
-      "Bash(file:*)"
+      "Bash(file:*)",
+      "mcp__plugin_supabase_supabase__get_logs",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(qmd get:*)",
+      "Bash(npm run test:unit:*)"
     ],
     "deny": []
   }

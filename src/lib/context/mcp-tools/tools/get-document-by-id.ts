@@ -55,7 +55,7 @@ export class GetDocumentByIdTool extends BaseMedicalTool {
         created: document.metadata?.date,
       };
 
-      const docText =
+      let docText =
         `**Document: ${document.metadata?.title || "Untitled"}**\n\n` +
         `Type: ${document.type}\n` +
         `Date: ${document.metadata?.date || "Unknown"}\n` +

@@ -274,7 +274,9 @@ export function findInProfiles(contact: {
       return 0;
     })
     .sort((a, b) => {
-      if (a.matchName && a.matchInsurance) return -1;
+      if (a.matchName && a.matchInsurance && !(b.matchName && b.matchInsurance)) return -1;
+      if (b.matchName && b.matchInsurance && !(a.matchName && a.matchInsurance)) return 1;
+      return 0;
     });
 
   return profilesFound.map((p) => p.profile);

@@ -1,5 +1,7 @@
-import { SpeechClient } from "@google-cloud/speech";
+import { SpeechClient, protos } from "@google-cloud/speech";
 import * as fs from "fs";
+
+const AudioEncoding = protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
 
 let client: SpeechClient;
 
@@ -21,7 +23,7 @@ export async function transcribeAudio(
   };
 
   const config = {
-    encoding: "LINEAR16",
+    encoding: AudioEncoding.LINEAR16,
     sampleRateHertz: 8000,
     languageCode: "en-US",
     diarizationConfig: diarizationConfig,
@@ -37,14 +39,16 @@ export async function transcribeAudio(
     audio: audio,
   };
 
-  const [response] = await client.recognize(request);
-  const transcription = response.results
-    .map((result: any) => result.alternatives[0].transcript)
+  const response = await client.recognize(request);
+  const [recognizeResponse] = response;
+  const transcription = recognizeResponse.results
+    ?.map((result: any) => result.alternatives?.[0]?.transcript)
     .join("\n");
   console.log(`Transcription: ${transcription}`);
   console.log("Speaker Diarization:");
-  const result = response.results[response.results.length - 1];
-  const wordsInfo = result.alternatives[0].words;
+  const results = recognizeResponse.results || [];
+  const result = results[results.length - 1];
+  const wordsInfo = result?.alternatives?.[0]?.words || [];
   // Note: The transcript within each result is separate and sequential per result.
   // However, the words list within an alternative includes all the words
   // from all the results thus far. Thus, to get all the words with speaker

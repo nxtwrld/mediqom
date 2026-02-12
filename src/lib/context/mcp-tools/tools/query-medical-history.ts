@@ -50,7 +50,7 @@ export class QueryMedicalHistoryTool extends BaseMedicalTool {
   async execute(params: any, profileId: string): Promise<MCPToolResult> {
     try {
       const contextStats =
-        profileContextManager.getProfileContextStats(profileId);
+        profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -94,7 +94,7 @@ export class QueryMedicalHistoryTool extends BaseMedicalTool {
       // Filter by timeframe if specified
       let filteredResults = searchResults;
       if (params.timeframe) {
-        filteredResults = searchResults.filter((result) => {
+        filteredResults = searchResults.filter((result: any) => {
           const docDate = new Date(result.metadata.date);
           const start = params.timeframe.start
             ? new Date(params.timeframe.start)
@@ -117,7 +117,7 @@ export class QueryMedicalHistoryTool extends BaseMedicalTool {
         timeframe: params.timeframe,
         totalDocuments: filteredResults.length,
         extractedData,
-        documents: filteredResults.slice(0, 10).map((result) => ({
+        documents: filteredResults.slice(0, 10).map((result: any) => ({
           id: result.documentId,
           title: result.metadata.title,
           date: result.metadata.date,

@@ -19,6 +19,7 @@ export enum BloodType {
 
 export interface Profile {
   id: string;
+  owner_id?: string;
   fullName: string;
   language: string;
   vcard: any;

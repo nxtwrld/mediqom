@@ -101,7 +101,7 @@ const STANDARD_SECTIONS = {
       data: {
         original: doc.content.content,
         text: doc.content.localizedContent,
-        language: doc.language || "en",
+        language: (doc as any).language || "en",
       },
     }),
   },
@@ -208,25 +208,25 @@ export function createDocumentSectionPlan(
   const sections: SectionConfiguration[] = [];
 
   // Process each available section
-  for (const [sectionId, sectionDef] of Object.entries(STANDARD_SECTIONS)) {
+  for (const [sectionId, sectionDef] of Object.entries(STANDARD_SECTIONS) as [keyof typeof STANDARD_SECTIONS, typeof STANDARD_SECTIONS[keyof typeof STANDARD_SECTIONS]][]) {
     // Skip excluded sections for this document type
-    if (typeConfig.excludeSections.includes(sectionId)) {
+    if (typeConfig.excludeSections.includes(sectionId as any)) {
       continue;
     }
 
     // Check if section should be included based on content availability
     if (!sectionDef.condition(document)) {
       // Required sections show even if empty (with placeholder)
-      if (!typeConfig.requiredSections.includes(sectionId)) {
+      if (!typeConfig.requiredSections.includes(sectionId as any)) {
         continue;
       }
     }
 
     // Calculate section priority based on document type
     let priority = sectionDef.priority;
-    if (typeConfig.requiredSections.includes(sectionId)) {
+    if (typeConfig.requiredSections.includes(sectionId as any)) {
       priority += 50; // Boost required sections
-    } else if (typeConfig.prioritySections.includes(sectionId)) {
+    } else if (typeConfig.prioritySections.includes(sectionId as any)) {
       priority += 25; // Boost priority sections
     }
 

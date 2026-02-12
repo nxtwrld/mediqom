@@ -141,7 +141,7 @@ export class SignalDataMigration {
       try {
         migratedSignals[signalName] = await this.migrateSignalEntry(
           signalName,
-          signalData,
+          signalData as LegacySignalStorage,
           document,
         );
       } catch (error) {
@@ -411,7 +411,7 @@ export class SignalDataMigration {
         "$data/lab.properties.defaults.json"
       );
 
-      const definition = propertiesDefinition.default[signalName.toLowerCase()];
+      const definition = (propertiesDefinition.default as any)[signalName.toLowerCase()];
       if (definition) {
         return {
           name: signalName,

@@ -293,9 +293,16 @@
       "name": "Jméno",
       "phone": "Telefon",
       "setup-profile": "Nastavit profil",
+      "edit-profile": "Upravit profil",
       "upload": "Nahrát",
       "uploading": "Nahrávání ...",
-      "value-age": "{value, plural, =0 {# let} one {# rok} two {# roky} few {# roky} other {# let}}"
+      "value-age": "{value, plural, =0 {# let} one {# rok} two {# roky} few {# roky} other {# let}}",
+      "crop-image": "Oříznout obrázek",
+      "zoom": "Přiblížení"
+    },
+    "general": {
+      "cancel": "Zrušit",
+      "confirm": "Potvrdit"
     },
     "profiles": {
       "add": "Přidat profil",
@@ -918,11 +925,25 @@
       },
       "tabs": {
         "allergies": "Alergie",
+        "chart": "Graf",
         "chronicConditions": "Chronické nemoci",
+        "history": "Historie",
         "lifeStyle": "Životní styl",
         "profile": "Profil",
         "vaccinations": "Očkování",
         "vitals": "Životní funkce"
+      },
+      "history": {
+        "add-entry": "Přidat záznam",
+        "cancel": "Zrušit",
+        "confirm-delete": "Opravdu chcete smazat tento záznam?",
+        "date": "Datum",
+        "delete": "Smazat",
+        "edit": "Upravit",
+        "from-document": "Z dokumentu",
+        "no-chart-data": "Nedostatek dat pro graf",
+        "no-entries": "Žádné záznamy",
+        "save": "Uložit"
       }
     },
     "insurance": {

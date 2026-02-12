@@ -11,8 +11,8 @@
     let { data = [] }: Props = $props();
 
  let byType = $derived(data.reduce((acc, {type, id}) => {
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(id);
+    if (!(acc as any)[type]) (acc as any)[type] = [];
+    (acc as any)[type].push(id);
     return acc;
  }, {}) as Record<string, string[]>);
 

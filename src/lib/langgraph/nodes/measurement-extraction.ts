@@ -160,7 +160,7 @@ export class MeasurementExtractionNode extends BaseProcessingNode {
     );
 
     const typeList = Object.entries(measurementTypes)
-      .map(([type, count]) => `${count} ${type}${count > 1 ? "s" : ""}`)
+      .map(([type, count]) => `${count as number} ${type}${(count as number) > 1 ? "s" : ""}`)
       .join(", ");
 
     return `Extracted ${measurements.length} measurement${measurements.length > 1 ? "s" : ""}: ${typeList}.`;

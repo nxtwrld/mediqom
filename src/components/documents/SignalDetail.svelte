@@ -68,7 +68,7 @@
     let kb: any = $state(undefined);
     let level: any = $state(undefined);
 
-    let tabs: Tabs = $state();
+    let tabs: Tabs | undefined = $state();
     onMount(() => {
         const key = getMeasurementInfoCode(code, unit);
         fetch('/knowledgebase/lab/'+ key+'.json')
@@ -126,6 +126,7 @@
 
             <ReferenceRange
                 {value}
+                reference={item?.reference || `${referenceRange.low.value}-${referenceRange.high.value}`}
                 {referenceRange} />
             </div>
             {:else}

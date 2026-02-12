@@ -49,11 +49,9 @@ export const createMedicalImagingWorkflow = (
 
           if (state.progressCallback) {
             state.progressCallback({
-              type: "progress",
               stage,
               progress: Math.min(nodeProgress, 100),
               message,
-              timestamp: Date.now(),
             });
           }
 
@@ -161,11 +159,9 @@ export const processMedicalImaging = async (
   // Initialize progress tracking
   if (progressCallback) {
     progressCallback({
-      type: "progress",
       stage: "medical_imaging_init",
       progress: 0,
       message: "Initializing medical imaging analysis",
-      timestamp: Date.now(),
     });
   }
 
@@ -175,9 +171,9 @@ export const processMedicalImaging = async (
     // Check for workflow replay mode
     if (isWorkflowReplayMode()) {
       console.log("🔄 Running in replay mode");
-      const replay = createWorkflowReplay("medical-imaging");
+      const replay = createWorkflowReplay("medical-imaging" as any);
       if (replay) {
-        finalState = await replay.executeStep(state);
+        finalState = await (replay as any).executeStep(state);
       } else {
         // Fallback to normal execution if replay fails
         const workflow = createMedicalImagingWorkflow(config, progressCallback);
@@ -186,7 +182,7 @@ export const processMedicalImaging = async (
     } else {
       // Start workflow recording if enabled
       if (isWorkflowRecordingEnabled()) {
-        await startWorkflowRecording("medical-imaging", state);
+        await startWorkflowRecording("medical-imaging" as any, state);
       }
 
       // Create and execute the workflow
@@ -202,11 +198,9 @@ export const processMedicalImaging = async (
     // Final progress update
     if (progressCallback) {
       progressCallback({
-        type: "progress",
         stage: "medical_imaging_complete",
         progress: 100,
         message: "Medical imaging analysis complete",
-        timestamp: Date.now(),
       });
     }
 
@@ -218,21 +212,31 @@ export const processMedicalImaging = async (
 
     // Record error state if recording is enabled
     if (isWorkflowRecordingEnabled()) {
-      workflowRecorder.recordState("error", { error: errorMessage });
+      const errorObject = {
+        node: "medical-imaging-workflow",
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+      };
+      workflowRecorder.recordStep(
+        "error",
+        state,
+        { ...state, errors: [...(state.errors || []), errorObject] },
+        0,
+        [],
+        [errorMessage],
+      );
       await finishWorkflowRecording({
         ...state,
-        errors: [...(state.errors || []), errorMessage],
+        errors: [...(state.errors || []), errorObject],
       });
     }
 
     // Error progress update
     if (progressCallback) {
       progressCallback({
-        type: "error",
         stage: "medical_imaging_error",
         progress: 0,
         message: `Medical imaging analysis failed: ${errorMessage}`,
-        timestamp: Date.now(),
       });
     }
 

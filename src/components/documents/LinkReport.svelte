@@ -55,7 +55,7 @@
     <Modal onclose={() => showModal = false}>
         <h3 class="h3">Link Report</h3>
         <div class="list">
-            {#each $store as item}
+            {#each $store.links as item}
             <button onclick={() => link(item)} class="item panel">
                 <div class="icon">
                     <Label type="{item.metadata.category}" />

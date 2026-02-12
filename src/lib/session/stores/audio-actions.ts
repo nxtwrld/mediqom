@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import { AudioState } from "$lib/audio/microphone";
 import { audioManager } from "$lib/audio/AudioManager";
-import type { PartialTranscript } from "../transport/sse-client";
+import type { PartialTranscript } from "../manager";
 import { SSEClient } from "../transport/sse-client";
 import { logger } from "$lib/logging/logger";
 import ui from "$lib/ui";
@@ -67,7 +67,7 @@ export const audioActions = {
       // Create session if needed and realtime is enabled
       let finalSessionId = sessionId;
       if (useRealtime && !finalSessionId) {
-        finalSessionId = await audioActions.createSession(language, models);
+        finalSessionId = (await audioActions.createSession(language, models)) || undefined;
         if (!finalSessionId) {
           logger.audio.warn(
             "Failed to create session, continuing with local recording",

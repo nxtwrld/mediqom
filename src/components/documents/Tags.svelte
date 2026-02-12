@@ -22,7 +22,7 @@
 
 	
 
-	let tagContainer: HTMLElement = $state();
+	let tagContainer: HTMLElement | undefined = $state();
 
 	function focus(event: MouseEvent, tag: string) {
 		event.preventDefault();
@@ -32,7 +32,7 @@
 	}
 
 	const checkIfInView = throttle(500, function () {
-		if (isElementInViewport(tagContainer)) {
+		if (tagContainer && isElementInViewport(tagContainer)) {
 			focused.set({ object: focusableTags[0]});
 		}
 	});

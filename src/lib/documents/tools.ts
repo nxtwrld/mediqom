@@ -34,7 +34,7 @@ export function groupByTags(user_id: string | undefined = undefined): {
       if (!groups[t]) {
         groups[t] = [];
       }
-      groups[t].push(d);
+      groups[t].push(d as Document);
     });
   });
   return groups;

@@ -5,6 +5,7 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import { t } from '$lib/i18n';
 	import { logger } from '$lib/logging/logger';
+	import ImageCropModal from '$components/ui/ImageCropModal.svelte';
 
 	interface Props {
 		size?: number;
@@ -24,6 +25,10 @@
 	let uploading = $state(false)
 	let files: FileList | undefined = $state()
 	let loaded: boolean = $state(false);
+	let showCropModal = $state(false);
+	let imageToCrop: string | null = $state(null);
+	let fileInputElement: HTMLInputElement | undefined = $state();
+	let skipNextDownload = $state(false);
 
 	const dispatch = createEventDispatcher()
 
@@ -44,30 +49,41 @@
 		}
 	}
 
-	const uploadAvatar = async () => {
+	const handleFileSelect = async () => {
+		if (!files || files.length === 0) {
+			return;
+		}
+
+		const file = files[0];
+		const base64 = await toBase64(file) as string;
+		imageToCrop = base64;
+		showCropModal = true;
+	}
+
+	const handleCrop = async (croppedImage: string) => {
+		showCropModal = false;
+		imageToCrop = null;
+
 		try {
-			uploading = true
-
-			if (!files || files.length === 0) {
-				throw new Error('You must select an image to upload.')
-			}
-
-			const file = files[0]
-			const fileExt = file.name.split('.').pop()
-			const filenameNew = `${Math.random()}.${fileExt}`
-
-			const base64 = await toBase64(file)
+			uploading = true;
+			const filenameNew = `${Math.random()}.png`;
 
 			const { filename } = await fetch(`/v1/med/profiles/${id}/avatar`, {
 				method: 'POST',
-				body: JSON.stringify({ file: base64, filename: filenameNew, type: file.type }),
+				body: JSON.stringify({ file: croppedImage, filename: filenameNew, type: 'image/png' }),
 			})
 			.then((res) => res.json())
 			.catch((error) => {
 				logger.api.error('Error uploading avatar:', error)
 			})
 
+			// Set flag to skip re-download since we already have the image
+			skipNextDownload = true;
+			// Set the cropped image for immediate display
+			avatarUrl = croppedImage;
+			// Update the URL binding
 			url = filename;
+
 			setTimeout(() => {
 				dispatch('upload')
 			}, 100)
@@ -76,9 +92,24 @@
 				alert(error.message)
 			}
 		} finally {
-			uploading = false
+			uploading = false;
+			resetFileInput();
 		}
 	}
+
+	const handleCropCancel = () => {
+		showCropModal = false;
+		imageToCrop = null;
+		resetFileInput();
+	}
+
+	const resetFileInput = () => {
+		if (fileInputElement) {
+			fileInputElement.value = '';
+		}
+		files = undefined;
+	}
+
 	async function toBase64(file: File) {
 		return new Promise((resolve, reject) => {
 			const reader = new FileReader();
@@ -89,7 +120,13 @@
 	}
 
 	run(() => {
-		if (loaded && url) downloadImage(url)
+		if (loaded && url) {
+			if (skipNextDownload) {
+				skipNextDownload = false;
+				return;
+			}
+			downloadImage(url);
+		}
 	});
 
 	onMount(() => {
@@ -126,12 +163,21 @@
 			accept="image/*"
             class="button"
 			bind:files
-			onchange={uploadAvatar}
+			bind:this={fileInputElement}
+			onchange={handleFileSelect}
 			disabled={uploading}
 		/>
 	</div>
 	{/if}
 </div>
+
+{#if showCropModal && imageToCrop}
+	<ImageCropModal
+		image={imageToCrop}
+		oncrop={handleCrop}
+		oncancel={handleCropCancel}
+	/>
+{/if}
 
 
 <style>

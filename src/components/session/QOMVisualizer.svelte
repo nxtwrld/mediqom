@@ -129,6 +129,8 @@
   }
 
   function initializeVisualization() {
+    if (!container) return;
+
     // Create SVG - responsive to container
     svg = d3.select(container)
       .append('svg')

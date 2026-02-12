@@ -10,6 +10,10 @@
     
 
     
+    interface Link {
+        [key: string]: any;
+    }
+
     interface Props {
         /*import xp, { spendCredits } from '$lib/xp/store';*/
         app: AppRecord;

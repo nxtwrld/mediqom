@@ -145,15 +145,13 @@ export const POST: RequestHandler = async ({
 
         // Create progress callback to connect workflow to SSE
         const workflowProgressCallback = (event: {
-          type: "progress" | "complete" | "error";
           stage: string;
           progress: number;
           message: string;
           data?: any;
-          timestamp: number;
+          nodeResults?: any;
         }) => {
           console.log("🔗 SSE: Workflow progress callback:", {
-            type: event.type,
             stage: event.stage,
             progress: event.progress,
             message: event.message,
@@ -161,12 +159,12 @@ export const POST: RequestHandler = async ({
 
           // Forward workflow progress to SSE stream
           sendEvent({
-            type: event.type,
+            type: "progress",
             stage: event.stage,
             progress: event.progress,
             message: event.message,
             data: event.data,
-            timestamp: event.timestamp,
+            timestamp: Date.now(),
           });
         };
 

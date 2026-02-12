@@ -13,7 +13,14 @@
         label?: string | undefined;
         style?: string;
         class?: string;
+        disabled?: boolean;
+        tabindex?: number;
+        autocomplete?: string;
+        readonly?: boolean;
         children?: import('svelte').Snippet;
+        onchange?: (event: Event) => void;
+        onblur?: (event: FocusEvent) => void;
+        onfocus?: (event: FocusEvent) => void;
     }
 
     let {
@@ -26,6 +33,10 @@
         label = undefined,
         style = '',
         class: className = 'input',
+        disabled = false,
+        tabindex = undefined,
+        autocomplete = undefined,
+        readonly = false,
         children
     }: Props = $props();
     

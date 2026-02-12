@@ -15,7 +15,16 @@
         label?: string | undefined;
         style?: string;
         class?: string;
+        disabled?: boolean;
+        tabindex?: number;
+        autocomplete?: string;
         children?: import('svelte').Snippet;
+        onchange?: (event: Event) => void;
+        onblur?: (event: FocusEvent) => void;
+        onfocus?: (event: FocusEvent) => void;
+        onkeypress?: (event: KeyboardEvent) => void;
+        onkeyup?: (event: KeyboardEvent) => void;
+        onkeydown?: (event: KeyboardEvent) => void;
     }
 
     let {
@@ -28,6 +37,9 @@
         label = $t('app.forms.browse-file'),
         style = '',
         class: className = 'button',
+        disabled = false,
+        tabindex = undefined,
+        autocomplete = undefined,
         children
     }: Props = $props();
     

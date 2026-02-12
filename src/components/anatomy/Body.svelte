@@ -2,13 +2,13 @@
      Rename the variable and try again or migrate by hand. -->
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+    import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-    import { state } from '$lib/ui';
+    import ui, { state } from '$lib/ui';
     import objects3d, { isObject } from '$lib/context/objects';
     import Label from '$components/documents/Label.svelte';
     import { fade } from 'svelte/transition';
@@ -143,7 +143,9 @@
     let objects: any[] = [];
     let currentContext: IContext | null = null;
 
-
+    let animationFrameId: number | null = null;
+    let idleFrames: number = 0;
+    const MAX_IDLE_FRAMES: number = 60; // ~1s at 60fps
 
 
     let initialViewState: ViewState;
@@ -225,7 +227,22 @@
 
     }
 
-    
+    let previousLabels: typeof labels = [];
+
+    $: {
+        if (ready && labels !== previousLabels) {
+            const oldLabels = previousLabels;
+            previousLabels = labels;
+            if (oldLabels.length > 0) {
+                cleanupLabels(oldLabels);
+                if (activeLayers === loadedLayers) {
+                    refreshLabels();
+                }
+            }
+        }
+    }
+
+
 
 
 
@@ -239,6 +256,7 @@
             }
             highlight(null);
             selected = null;
+            requestRender();
         }
     }
     
@@ -255,7 +273,8 @@
                     .onUpdate(() => {
                         controls.update(); // Update the controls on each tween update
                     })
-                    .start(); 
+                    .start();
+        requestRender();
     }
 
 
@@ -282,6 +301,11 @@
            }
         });
 
+        const unsubscribeProfileSwitch = ui.listen("chat:profile_switch", () => {
+            if (!ready) return;
+            resetFocus();
+        });
+
         // Apply initial values after initialization
         const checkReady = () => {
             if (ready) {
@@ -303,7 +327,13 @@
         return () => {
             unsubscibeFocus();
             unsubscibeContext();
-            
+            unsubscribeProfileSwitch();
+
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
             // clear all three.js objects from the scene
             clearObjects(scene);
 
@@ -376,7 +406,7 @@
         })
         objects = [...objects, ...newObjects];
 
-        animate();
+        requestRender();
         loadLabels();
         setHighlight($focused.object ?? null);
 
@@ -604,13 +634,41 @@
     }
 
 
+    function cleanupLabels(labelsToClean: typeof labels) {
+        for (const label of labelsToClean) {
+            if (label.label) {
+                label.label.removeFromParent();
+                label.label = undefined;
+            }
+        }
+    }
+
+    async function refreshLabels() {
+        const labelIds = [...new Set(labels.map(l => l.id))];
+        const objectsToShow = activeLayers.reduce((acc, l) => {
+            return [...acc, ...objects3d[l as keyof typeof objects3d].objects];
+        }, [] as string[]);
+
+        objects.forEach(object => {
+            object.traverse(function (child: any) {
+                checkObject(child, objectsToShow, labelIds);
+            });
+        });
+
+        await tick();
+        loadLabels();
+        requestRender();
+    }
+
     function loadLabels() {
         if (!labelContainer) return;
 //        console.log(labelContainer.children);
         for (const [index, labelEl] of [...labelContainer.children].entries()) {
             if(labels[index].geometry) {
+                const geom = labels[index].geometry as THREE.BufferGeometry;
+                if (!geom.boundingSphere) geom.computeBoundingSphere();
                 const label = new CSS2DObject( labelEl as HTMLElement );
-                const position = (labels[index].geometry as any).boundingSphere.center.toArray() as [number, number, number];
+                const position = geom.boundingSphere!.center.toArray() as [number, number, number];
                 label.position.set( ...position );
                 label.center.set( 0, 1 );
                 (labels[index].object as any)?.add( label );
@@ -636,7 +694,7 @@
 
     async function init () {
 
-        resizeObserverListener = new ResizeObserver(resize);
+        resizeObserverListener = new ResizeObserver(() => { resize(); requestRender(); });
         resizeObserverListener.observe(container);
         let w = container.offsetWidth;
         let h = container.offsetHeight;
@@ -668,7 +726,7 @@
         //THREE.WebGLRenderer.useLegacyLights = true;
         renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } );
         renderer.setClearColor( 0x000000, 0 ); // the default
-        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setPixelRatio( Math.min(window.devicePixelRatio, 2) );
         renderer.setSize( container.offsetWidth, container.offsetHeight );
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -704,6 +762,7 @@
         controls.addEventListener('start', () => {
             //console.log('start');
             dragged = true;
+            requestRender();
         });
         
         /*
@@ -720,7 +779,7 @@
         controls.maxPolarAngle = Math.PI / 2;
 
         await loadShade();
-        animate();
+        requestRender();
         //window.scene = scene;
 
         console.log('🧍', 'Ready');
@@ -784,6 +843,7 @@
         }
         if (contextToRun.animation) {
             currentContext.animation = new contextToRun.animation(scene);
+            requestRender();
         }
 
 /*        if (contextToRun.focus) {
@@ -840,6 +900,7 @@
                 //refractionRatio: 0.985,
                 //ior: 0.1,
                 side: THREE.BackSide,
+                depthWrite: false,
             })
         })], ['body'], [], scene as any);
         toggleShade(showShade);
@@ -859,25 +920,39 @@
         if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
     }
 
+    function requestRender() {
+        idleFrames = 0;
+        if (animationFrameId === null) {
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    }
+
     function animate() {
-        if (!controls) return;
-
-        TWEEN.update();
-        controls.update();
-        resize();
-
-        /*Object.keys(shaders).forEach(shaderName => {
-            if (shaders[shaderName].uniforms.time) {
-                shaders[shaderName].uniforms.time.value += 0.05;
-            }
-        });*/
-
-        if (currentContext && currentContext.animation) {
-            currentContext.animation.update();
+        if (!controls || !renderer) {
+            animationFrameId = null;
+            return;
         }
 
-        render();
-        if (renderer) requestAnimationFrame( animate );
+        const hasTweens = TWEEN.getAll().length > 0;
+        const hasAnimation = !!(currentContext && currentContext.animation);
+
+        if (hasTweens) TWEEN.update();
+        const controlsChanged = controls.update();
+        if (hasAnimation) currentContext!.animation!.update();
+
+        if (controlsChanged || hasTweens || hasAnimation) {
+            render();
+            idleFrames = 0;
+        } else {
+            idleFrames++;
+        }
+
+        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation) {
+            animationFrameId = requestAnimationFrame(animate);
+        } else {
+            render(); // final clean frame
+            animationFrameId = null;
+        }
     }
 
     function render() {
@@ -989,7 +1064,7 @@
             })
             .start();
 
-
+        requestRender();
     }
 
     //let pointTimer: ReturnType<typeof setTimeout>;

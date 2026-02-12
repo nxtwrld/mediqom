@@ -6,7 +6,6 @@
     import user from '$lib/user';
     import ui from '$lib/ui';
     import Avatar from '$components/onboarding/Avatar.svelte';
-    import ProfileImage from './ProfileImage.svelte';
     import Documents from '$components/documents/Index.svelte';
     import { t } from '$lib/i18n';
     import { ConstitutionalPrinciple } from 'langchain/chains';
@@ -14,9 +13,19 @@
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
     import { saveHealthProfile } from '$lib/health/save';
+    import { getPropertyCategory } from '$lib/health/property-categories';
     
     // Local state for ProfileEdit modal
     let showProfileEdit = $state(false);
+    let editingProfile: any = $state(null);
+    let originalProfile: any = $state(null);
+
+    function openProfileEdit() {
+        // Create a deep copy to avoid direct store mutations
+        editingProfile = JSON.parse(JSON.stringify($profile));
+        originalProfile = JSON.parse(JSON.stringify($profile)); // Store original for comparison
+        showProfileEdit = true;
+    }
     
     interface Property {
         key?: string;
@@ -32,6 +41,7 @@
         fn?: (v: any) => any;
         urgency?: number;
         reference?: any;
+        category?: string;
     }
 
     interface PropertyBlock {
@@ -126,11 +136,30 @@
     function openTile(prop: Property) {
         console.log('openTile', prop.signal || prop.editable, prop);
 
+        const signalName = prop.signal || prop.editable || '';
+        const values = Array.isArray(prop.source) ? prop.source.flat() : (prop.source || []);
+        const category = getPropertyCategory(signalName, values);
+
+        // Static properties open HealthForm modal with filtered keys
+        if (category === 'static') {
+            ui.emit('modal.healthForm', {
+                keys: ['birthDate', 'biologicalSex', 'bloodType'],
+                values: [
+                    $profile?.health?.birthDate,
+                    $profile?.health?.biologicalSex,
+                    $profile?.health?.bloodType
+                ]
+            });
+            return;
+        }
+
+        // All other categories use the tabbed modal
         let property: Property = {
-            signal: prop.signal || prop.editable,
+            signal: signalName,
             value: prop.source ? (Array.isArray(prop.source) ? prop.source[0]?.value : prop.source?.value) : prop.value,
             reference: prop.source ? (Array.isArray(prop.source) ? prop.source[0]?.reference : prop.source?.reference) : undefined,
-            unit: prop.unit
+            unit: prop.unit,
+            category
         }
 
         ui.emit('modal.healthProperty', property);
@@ -183,15 +212,19 @@
 {#if $profile}
     <div class="profile-header">
         <div class="avatar">
-
-            <ProfileImage profile={$profile} size={8} />
-            <!--Avatar id={$profile.id} bind:url={$profile.avatarUrl} editable={$user.id == $profile.id} /-->
-
+            <Avatar id={$profile.id} bind:url={$profile.avatarUrl} editable={false} size={8} />
         </div>
         
 
         <div class="profile-details">
-            <h1 class="h1">{$profile.fullName}</h1>
+            <h1 class="h1">
+                {$profile.fullName}
+                {#if $user?.id === $profile.owner_id}
+                    <button class="edit-profile-btn" onclick={openProfileEdit} title={$t('app.profile.edit-profile')} aria-label={$t('app.profile.edit-profile')}>
+                        <svg><use href="/icons.svg#edit"></use></svg>
+                    </button>
+                {/if}
+            </h1>
             <div class="rest">
                 
                 <div class="profile">
@@ -202,7 +235,7 @@
                     {#if isInsuranceSet}
                     <div>{ $t('app.profile.insurance') }: {$profile.insurance.provider} - {$profile.insurance.number}</div>
                     {:else}
-                    <button class="button" onclick={() => showProfileEdit = true}>{ $t('app.profile.setup-profile') }</button>
+                    <button class="button" onclick={openProfileEdit}>{ $t('app.profile.setup-profile') }</button>
                     {/if}
                     
                     
@@ -263,18 +296,25 @@
 </div>
 
 <!-- ProfileEdit Modal -->
-{#if showProfileEdit}
+{#if showProfileEdit && editingProfile}
     <Modal onclose={async () => {
-        // Save health data before closing
-        if ($profile?.id && $profile?.health) {
+        // Only save if data actually changed
+        const hasChanges = JSON.stringify(editingProfile) !== JSON.stringify(originalProfile);
+
+        if (hasChanges && editingProfile?.id && editingProfile?.health) {
             await saveHealthProfile({
-                profileId: $profile.id,
-                formData: $profile.health
+                profileId: editingProfile.id,
+                formData: editingProfile.health
             });
+            // Update the store with edited data
+            profile.set(editingProfile);
         }
+
+        editingProfile = null;
+        originalProfile = null;
         showProfileEdit = false;
     }}>
-        <ProfileEdit bind:profile={$profile} />
+        <ProfileEdit bind:profile={editingProfile} />
     </Modal>
 {/if}
 
@@ -307,6 +347,33 @@
     }
     .profile-header .h1 {
         width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .edit-profile-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        color: var(--color-text-muted, #666);
+        border-radius: var(--radius-small, 4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .edit-profile-btn:hover {
+        background: var(--color-gray-200, #e5e5e5);
+        color: var(--color-text, #333);
+    }
+
+    .edit-profile-btn svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        fill: currentColor;
     }
 
 

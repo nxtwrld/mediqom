@@ -431,11 +431,11 @@ export const medicalImagingAnalysisNode = async (
       state,
       {
         ...state,
-        medicalImagingAnalysis: unifiedResult,
+        medicalAnalysis: unifiedResult,
         imageAnalysis: analysisResult,
         detectedBodyParts: analysisResult.bodyParts,
         detectedAnomalies: analysisResult.anomalies,
-      },
+      } as any,
       stepDuration,
       [],
       [],

@@ -258,7 +258,15 @@ index.
 ### Styling
 
 - **common styles**: All common styles are loaded from `src/css`
-- **css varaibles**: The common css variables are loaded from `src/css/core.css`
+- **css variables**: The common css variables are loaded from `src/css/core.css`
+
+### Icons
+
+- **Icon sprites**: Three SVG sprite files in `static/` - `icons.svg`, `icons-o.svg`, `files.svg`
+- **Source files**: Add new icons to `assets-src/icons/`, `assets-src/icons-outline/`, or `assets-src/files/`
+- **Generate sprites**: Run `node svgToSprite.js` from `assets-src/` directory
+- **Usage**: `<svg><use href="/icons.svg#icon-name"></use></svg>` (use `href` not `xlink:href`)
+- For detailed reference, use the `/icons` command
 
 ### Localisation
 

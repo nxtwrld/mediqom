@@ -15,7 +15,7 @@
         onalertAcknowledge
     }: Props = $props();
 
-    const bubble = createBubbler();
+    const bubble = createBubbler() as any;
 
     function handleAcknowledge() {
         if (alert.status !== 'acknowledged') {
@@ -152,7 +152,7 @@
     }
 
     .priority {
-        background: var(--color-primary-bg, #dbeafe););
+        background: var(--color-primary-bg, #dbeafe);
         color: var(--color-primary, #3b82f6);
     }
 

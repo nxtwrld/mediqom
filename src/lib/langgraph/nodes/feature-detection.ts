@@ -1,6 +1,7 @@
 import type { DocumentProcessingState } from "../state";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import featureDetection from "$lib/configurations/feature-detection";
+import anatomyTags from "$lib/configurations/tags";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { log } from "$lib/logging/logger";
 import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
@@ -69,6 +70,12 @@ export const featureDetectionNode = async (
     // Use existing feature detection configuration
     emitProgress?.("feature_detection", 20, "Loading feature detection schema");
     const schema = featureDetection as FunctionDefinition;
+
+    // Populate tags enum with anatomy tags for constrained AI output
+    const params = schema.parameters as any;
+    if (params?.properties?.tags?.items) {
+      params.properties.tags.items.enum = [...anatomyTags];
+    }
 
     // Perform feature detection using enhanced AI provider
     emitProgress?.(

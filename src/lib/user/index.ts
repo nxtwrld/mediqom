@@ -99,9 +99,18 @@ export async function setUser(
       //subscriptionStats
     });
 
-    // Auto-unlock with stored key_pass if available
-    if (key_pass) {
-      await unlock(key_pass);
+    // Set up encryption keys directly (no store update to avoid cascading re-renders)
+    if (key_pass && userProfile.key_hash && userProfile.privateKey && userProfile.publicKey) {
+      try {
+        const privateKeyString = await decryptString(userProfile.privateKey, key_pass);
+        if (privateKeyString && privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") === 0) {
+          const privateKey = await pemToKey(privateKeyString, true);
+          const publicKey = await pemToKey(userProfile.publicKey, false);
+          keyPair.set(publicKey, privateKey);
+        }
+      } catch (e) {
+        console.error("[User] Error setting up keys:", e);
+      }
     }
 
     return get(user);

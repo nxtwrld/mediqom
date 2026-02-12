@@ -7,9 +7,10 @@
         node: SankeyNode;
         symptom: SymptomData;
         isMobile: boolean;
+        isSelected?: boolean;
     }
-    
-    let { node, symptom, isMobile }: Props = $props();
+
+    let { node, symptom, isMobile, isSelected = false }: Props = $props();
     
     function truncateText(text: string, maxLength: number): string {
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;

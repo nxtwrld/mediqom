@@ -96,7 +96,11 @@ async function storeRegularEntries(
         tags: ["meta_history", "entries"],
         date: new Date().toISOString(),
       },
-      content: metaHistoryDoc,
+      content: {
+        title: "META_HISTORIES Entries",
+        tags: ["meta_history", "entries"],
+        ...metaHistoryDoc,
+      },
       attachments: [],
     };
 
@@ -164,7 +168,7 @@ async function updateCurrentDataDocument(
   newPoints: TimeSeriesPoint[],
   threshold: any,
 ): Promise<void> {
-  const content = currentDoc.content as CurrentDataDocument;
+  const content = currentDoc.content as unknown as CurrentDataDocument;
   const updatedPoints = [...content.currentData.rawPoints, ...newPoints].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
@@ -239,7 +243,11 @@ async function createCurrentDataDocument(
       date: new Date().toISOString(),
       measurementType,
     },
-    content: currentData,
+    content: {
+      title: `${measurementType} Current Data`,
+      tags: ["meta_history", "timeseries", measurementType],
+      ...currentData,
+    },
     attachments: [],
   };
 
@@ -289,7 +297,11 @@ async function createArchiveDocument(
       timeRange,
       parentDocumentId,
     },
-    content: archiveData,
+    content: {
+      title: `${measurementType} Archive ${timeRange.start}`,
+      tags: ["meta_history", "archive", measurementType],
+      ...archiveData,
+    },
     attachments: [],
   };
 
@@ -298,7 +310,7 @@ async function createArchiveDocument(
   // Update parent document's historical references
   const parentDoc = await getDocument(parentDocumentId);
   if (parentDoc) {
-    const parentContent = parentDoc.content as CurrentDataDocument;
+    const parentContent = parentDoc.content as unknown as CurrentDataDocument;
     parentContent.historicalDocumentIds.push(savedDoc.id);
     await updateDocument(parentDoc);
   }
@@ -440,7 +452,7 @@ function calculateStatistics(points: TimeSeriesPoint[]) {
   const stdDev = Math.sqrt(variance);
 
   // Simple trend calculation (compare first and last values)
-  const trend =
+  const trend: "rising" | "falling" | "stable" =
     points.length > 1
       ? points[0].value > points[points.length - 1].value
         ? "falling"

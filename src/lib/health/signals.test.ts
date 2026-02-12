@@ -51,14 +51,16 @@ describe("Enhanced Health Signals Processing", () => {
         medications: [],
         allergies: [],
       },
-    });
+    } as any);
 
     vi.mocked(getDocument).mockResolvedValue({
       id: mockDocumentId,
       content: {
+        title: 'Test Document',
+        tags: [],
         signals: {},
       },
-    });
+    } as any);
 
     vi.mocked(updateDocument).mockResolvedValue(undefined);
     vi.mocked(updateProfile).mockResolvedValue(undefined);
@@ -267,7 +269,7 @@ describe("Enhanced Health Signals Processing", () => {
           allergies: [{ allergen: "Penicillin", severity: "moderate" }],
           signals: {},
         },
-      });
+      } as any);
 
       const dashboardData = await getDashboardData(mockPatientId);
 
@@ -289,7 +291,7 @@ describe("Enhanced Health Signals Processing", () => {
         id: mockPatientId,
         healthDocumentId: mockDocumentId,
         health: {},
-      });
+      } as any);
 
       const dashboardData = await getDashboardData(mockPatientId);
 

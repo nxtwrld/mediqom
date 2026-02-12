@@ -107,8 +107,7 @@
 
     
     function renderChart() {
-
-
+        if (!svgE) return;
 
         svgE.innerHTML = '';
 

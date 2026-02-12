@@ -117,11 +117,15 @@ function renderChart(series: Signal[] = []) {
     series = deduplicatedSeries;
 
     const xExtent = extent(series, function(d: LabItem) { return d.date; });
-    const xRange = xExtent[1] - xExtent[0];
+    const xRange = (xExtent[1] && xExtent[0]) ?
+        (xExtent[1] as Date).getTime() - (xExtent[0] as Date).getTime() : 0;
 
-    const xPadding = xRange * .05
+    const xPadding = xRange * .05;
 
-    const xArea: [number, number] = [xExtent[0] - xPadding, xExtent[1] - 0 + xPadding];
+    const xArea: [Date, Date] = [
+        xExtent[0] ? new Date((xExtent[0] as Date).getTime() - xPadding) : new Date(),
+        xExtent[1] ? new Date((xExtent[1] as Date).getTime() + xPadding) : new Date()
+    ];
     const yMin = min(ranges, function(d: Range) { return d.min; });
     const yMax = max(ranges, function(d: Range) { return d.max; });
     const yArea: [number, number] = [
@@ -140,8 +144,8 @@ function renderChart(series: Signal[] = []) {
         const normalMax: number = ranges[1].max;
 
         // Calculate data bounds
-        const dataMin = min(series, d => d.value);
-        const dataMax = max(series, d => d.value);
+        const dataMin = min(series, d => d.value) ?? normalMin - 10;
+        const dataMax = max(series, d => d.value) ?? normalMax + 10;
         //const dataMin = ranges[0].min
         //const dataMax = ranges[ranges.length-1].max;
 

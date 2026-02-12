@@ -68,7 +68,7 @@ export async function crossValidationAggregatorNode(
 
     // Aggregate all feature refinements
     const aggregated = aggregateRefinements(
-      state.featureDetectionResults || {},
+      (state.featureDetectionResults || {}) as AIFeatureDetectionResults,
       processingResults,
     );
 
@@ -94,7 +94,7 @@ export async function crossValidationAggregatorNode(
 
     // Build updated feature detection results
     const updatedFeatureDetection = buildUpdatedFeatureDetection(
-      state.featureDetectionResults || {},
+      (state.featureDetectionResults || {}) as AIFeatureDetectionResults,
       aggregated,
     );
 
@@ -184,12 +184,12 @@ function aggregateRefinements(
 
   // Collect all flags from original detection
   Object.keys(originalDetection).forEach((key) => {
-    if (key.startsWith("has") && typeof originalDetection[key] === "boolean") {
+    if (key.startsWith("has") && typeof (originalDetection as any)[key] === "boolean") {
       allFlags.add(key);
       flagVotes[key] = [
         {
           processorId: "ai-feature-detection",
-          value: originalDetection[key],
+          value: (originalDetection as any)[key],
           confidence: 0.8, // Base confidence for AI detection
         },
       ];

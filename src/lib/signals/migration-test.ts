@@ -345,18 +345,19 @@ export class SignalMigrationTester {
       const signals = migratedDocument.content.signals;
 
       for (const [signalName, signalData] of Object.entries(signals)) {
+        const data = signalData as any;
         // Should still have log property
-        if (!signalData.log) {
+        if (!data.log) {
           throw new Error(`Missing log property for signal ${signalName}`);
         }
 
         // Should still have values array
-        if (!Array.isArray(signalData.values)) {
+        if (!Array.isArray(data.values)) {
           throw new Error(`Values is not an array for signal ${signalName}`);
         }
 
         // Each value should have original fields
-        for (const value of signalData.values) {
+        for (const value of data.values) {
           if (!value.signal || !value.value || !value.date) {
             throw new Error(`Missing required fields in signal value`);
           }

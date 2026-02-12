@@ -18,7 +18,7 @@ import type { WorkflowRecording } from "./workflow-recorder";
 import { workflowRecorder } from "./workflow-recorder";
 
 interface CLIOptions {
-  command: string;
+  command?: string;
   file?: string;
   step?: string;
   output?: string;
