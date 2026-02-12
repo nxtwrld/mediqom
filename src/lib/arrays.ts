@@ -12,7 +12,8 @@ export function typedArrayToBuffer(array: Uint8Array): ArrayBuffer {
     new Uint8Array(arrayBuffer).set(array);
     return arrayBuffer;
   }
-  return buffer.slice(array.byteOffset, array.byteLength + array.byteOffset);
+  // At this point, buffer is guaranteed to be ArrayBuffer
+  return (buffer as ArrayBuffer).slice(array.byteOffset, array.byteLength + array.byteOffset);
 }
 
 export async function toBase64(array: ArrayBuffer): Promise<string> {
@@ -37,7 +38,8 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   for (var i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  return bytes.buffer;
+  // Use typedArrayToBuffer to handle potential SharedArrayBuffer
+  return typedArrayToBuffer(bytes);
 }
 
 export function stringToUint(str: string) {

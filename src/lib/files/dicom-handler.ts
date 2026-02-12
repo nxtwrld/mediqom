@@ -114,8 +114,9 @@ export class DicomHandler {
       this.isInitialized = true;
       console.log("✅ DICOM Handler initialized successfully");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("❌ Failed to initialize DICOM Handler:", error);
-      throw new Error(`DICOM Handler initialization failed: ${error.message}`);
+      throw new Error(`DICOM Handler initialization failed: ${errorMessage}`);
     }
   }
 

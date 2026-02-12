@@ -810,8 +810,9 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to search documents", {
-        error: error.message,
+        error: errorMessage,
         profileId,
         terms: params.terms,
       });
@@ -819,7 +820,7 @@ export class MedicalExpertTools {
         content: [
           {
             type: "text",
-            text: `Error: Document search failed: ${error.message}`,
+            text: `Error: Document search failed: ${errorMessage}`,
           },
         ],
         isError: true,
@@ -915,15 +916,16 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to assemble context", {
-        error: error.message,
+        error: errorMessage,
         profileId,
       });
       return {
         content: [
           {
             type: "text",
-            text: `Error: Context assembly failed: ${error.message}`,
+            text: `Error: Context assembly failed: ${errorMessage}`,
           },
         ],
         isError: true,
@@ -1007,15 +1009,16 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to get profile data", {
-        error: error.message,
+        error: errorMessage,
         profileId,
       });
       return {
         content: [
           {
             type: "text",
-            text: `Error: Profile data access failed: ${error.message}`,
+            text: `Error: Profile data access failed: ${errorMessage}`,
           },
         ],
         isError: true,
@@ -1152,8 +1155,9 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to query medical history", {
-        error: error.message,
+        error: errorMessage,
         profileId,
         queryType: params.queryType,
       });
@@ -1161,7 +1165,7 @@ export class MedicalExpertTools {
         content: [
           {
             type: "text",
-            text: `Error: Medical history query failed: ${error.message}`,
+            text: `Error: Medical history query failed: ${errorMessage}`,
           },
         ],
         isError: true,
@@ -1218,15 +1222,16 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to get document", {
-        error: error.message,
+        error: errorMessage,
         documentId: params.documentId,
       });
       return {
         content: [
           {
             type: "text",
-            text: `Error: Document access failed: ${error.message}`,
+            text: `Error: Document access failed: ${errorMessage}`,
           },
         ],
         isError: true,
