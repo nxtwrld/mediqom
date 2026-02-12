@@ -25,6 +25,7 @@
     import type { IContext } from './context/types.d';
     import contexts from './context/index';
 	import store from './store';
+    import { createMuscleMaterial, createMuscleMatcapMaterial, isMuscularSystem } from './muscle-materials';
 	//import { linkPage } from '$lib/app';
     //import { addExperience } from '$lib/xp/store';
 	import { sounds } from '$components/ui/Sounds.svelte';
@@ -142,6 +143,7 @@
 
     let objects: any[] = [];
     let currentContext: IContext | null = null;
+    let muscleMatcapTexture: THREE.Texture | null = null;
 
     let animationFrameId: number | null = null;
     let idleFrames: number = 0;
@@ -559,40 +561,8 @@
 
             const mtlLoader = new MTLLoader();
             mtlLoader.load('/anatomy_models/' + model + '_' + setup.id + '_obj/' + setup.id + '.mtl', function(materialsCreator) {
-                materialsCreator.preload();     
-                
-/*
-                for (const materialName in materialsCreator.materials) {
-                    const oldMat = materialsCreator.materials[materialName];
-                    
-                    // Create a new MeshStandardMaterial
-                    const newMat = new THREE.MeshStandardMaterial();
-                    
-                    // Copy basic properties
-                    if (oldMat.color) newMat.color.copy(oldMat.color);
-                    if (oldMat.map) newMat.map = oldMat.map;
-                    if (oldMat.emissive) newMat.emissive.copy(oldMat.emissive);
-                    if (oldMat.emissiveMap) newMat.emissiveMap = oldMat.emissiveMap;
-                    if (oldMat.normalMap) newMat.normalMap = oldMat.normalMap;
-                    if (oldMat.alphaMap) newMat.alphaMap = oldMat.alphaMap;
+                materialsCreator.preload();
 
-                    // Convert shininess (Phong) to roughness (Standard):
-                    // Phong shininess range is typically 0-100+, standard roughness is 0-1.
-                    // A higher shininess means smoother surface -> lower roughness.
-                    // Rough guess: roughness ≈ 1 - (shininess / 100), clamp it between 0 and 1.
-                    const shininess = oldMat.shininess !== undefined ? oldMat.shininess : 30;
-                    newMat.roughness = THREE.MathUtils.clamp(1 - shininess / 100, 0, 1);
-                    
-                    // Phong specular isn't directly used in standard materials.
-                    // If needed, you can approximate metalness. If specular is strong (like white),
-                    // you might set a lower roughness or slightly increase metalness for shiny surfaces.
-                    // But a common approach is to just leave metalness at 0 unless you know it's a metal.
-                    newMat.metalness = 0.0;
-
-                    // Replace the old material in the material creator
-                    materialsCreator.materials[materialName] = newMat;
-                }
-*/
                 const objLoader = new OBJLoader( );
                 if (setup.material) {
                     console.log('setup.material', setup.material)
@@ -600,32 +570,38 @@
                     Object.keys(materialsCreator.materials).forEach(key => {
                         materialsCreator.materials[key] = material;
                     });
-
                 }
 
-                
-                objLoader.setMaterials( materialsCreator );
-            
-                
+                // For non-muscular systems, use the MTL materials as-is
+                if (!isMuscularSystem(setup.id) || setup.material) {
+                    objLoader.setMaterials( materialsCreator );
+                }
+
                 objLoader.load( '/anatomy_models/' + model + '_' + setup.id + '_obj/' + setup.id + '.obj', function ( object ) {
                         object.name = setup.rename || setup.name;
 
+                        const useMuscle = isMuscularSystem(setup.id) && !setup.material;
 
+                        object.traverse( function ( child: any ) {
+                            if ( child.isMesh ) {
+                                child.geometry.computeVertexNormals();
 
-                        if (setup.opacity) {
-                            object.traverse( function ( child: any ) {
-                                if ( child.isMesh ) {
-                                    child.geometry.computeVertexNormals();
-                                    if (setup.color) {
-
-                                    }
-                                    if (setup.opacity) {
-                                        child.material.transparent = true;
-                                        child.material.opacity = setup.opacity;
+                                if (useMuscle) {
+                                    // Per-muscle adaptive PBR material
+                                    if (isTouchDevice() && muscleMatcapTexture) {
+                                        child.material = createMuscleMatcapMaterial(child.name, muscleMatcapTexture);
+                                    } else {
+                                        child.material = createMuscleMaterial(child.name);
                                     }
                                 }
-                            });
-                        }
+
+                                if (setup.opacity) {
+                                    child.material.transparent = true;
+                                    child.material.opacity = setup.opacity;
+                                }
+                            }
+                        });
+
                         loadedFiles.push(setup.rename || setup.id);
                         resolve(object);
                 }, onProgress, onError );
@@ -713,14 +689,17 @@
 
         scene.add(group);
 
-        const ambientLight = new THREE.AmbientLight( 0xffffff, 0.3 );
+        // Hemisphere light for natural ambient fill (warm sky, cool ground)
+        const hemiLight = new THREE.HemisphereLight( 0xffeedd, 0x8899aa, 0.5 );
+        scene.add( hemiLight );
+
+        const ambientLight = new THREE.AmbientLight( 0xffffff, 0.25 );
         scene.add( ambientLight );
 
-        const light = new THREE.PointLight( 0xffffff, .8 );
+        const light = new THREE.PointLight( 0xffffff, 1.0 );
         light.position.set( 1, 1, 1 ).normalize();
         camera.add( light );
         scene.add( camera );
-        //scene.add( light )
 
         // Renderer
         //THREE.WebGLRenderer.useLegacyLights = true;
@@ -777,6 +756,14 @@
         });
 
         controls.maxPolarAngle = Math.PI / 2;
+
+        // Preload matcap texture for mobile muscle rendering
+        if (isTouchDevice()) {
+            const texLoader = new THREE.TextureLoader();
+            texLoader.load('/anatomy_models/matcaps/muscle.png', (tex) => {
+                muscleMatcapTexture = tex;
+            });
+        }
 
         await loadShade();
         requestRender();

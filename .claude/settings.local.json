@@ -44,7 +44,10 @@
       "Bash(__NEW_LINE_58b7cfec6c65d998__ echo \"=== MUSCULAR SYSTEM TEXTURES \\(SKELETAL COMPONENTS\\) ===\")",
       "Bash(__NEW_LINE_58b7cfec6c65d998__ echo \"\")",
       "Bash(__NEW_LINE_449aa5c6d8017f01__ echo \"=== MATERIAL/MODEL FILES ===\")",
-      "Bash(__NEW_LINE_449aa5c6d8017f01__ find \"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/full_female_anatomy_3ds_max_vray_with_textures\" -type f -name \"*.mtl\" -o -name \"*.obj\" -o -name \"*.fbx\" -o -name \"*.gltf\" -o -name \"*.glb\" -o -name \"*.blend\" -o -name \"*.max\")"
+      "Bash(__NEW_LINE_449aa5c6d8017f01__ find \"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/full_female_anatomy_3ds_max_vray_with_textures\" -type f -name \"*.mtl\" -o -name \"*.obj\" -o -name \"*.fbx\" -o -name \"*.gltf\" -o -name \"*.glb\" -o -name \"*.blend\" -o -name \"*.max\")",
+      "Bash(# Look for any existing texture assets anywhere in the project find /Users/nxtwrld/Documents/GitHub/mediqom -name \"\"*muscle*\"\" -o -name \"\"*matcap*\"\" -o -name \"\"*CM.*\"\" -o -name \"\"*NM.*\"\" -o -name \"\"*DM.*\"\" -o -name \"\"*BM.*\"\")",
+      "Bash(python3:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
