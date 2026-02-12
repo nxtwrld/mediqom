@@ -66,7 +66,7 @@ export const today = readable(new Date(), (set) => {
 });
 
 export function getAge(birthDate: string | Date): number {
-  let date: Date;
+  let date: Date | undefined;
   if (typeof birthDate === "string") {
     date = new Date(birthDate);
   } else if (birthDate instanceof Date) {
@@ -96,10 +96,11 @@ export function parseDate(text: string): string {
     if (match) {
       const dates = match
         .map((date) => {
-          return new Date(chrono.parseDate(date));
+          const parsed = chrono.parseDate(date);
+          return parsed ? new Date(parsed) : null;
         })
         .filter((date) => {
-          return date != undefined;
+          return date != null;
         })
         .sort((a, b) => {
           return a.getTime() - b.getTime();

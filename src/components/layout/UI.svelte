@@ -20,6 +20,7 @@
     import { chatManager } from '$lib/chat/chat-manager';
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import { device } from '$lib/device';
+    import { saveHealthProfile } from '$lib/health/save';
 
     interface Props {
         children?: import('svelte').Snippet;
@@ -33,6 +34,9 @@
         healthProperty: false,
         healthFormData: null as any
     });
+
+    // Import overlay state
+    let importJobId: string | undefined = $state(undefined);
 
     // Chat state
     let currentProfile = $state(null);
@@ -172,10 +176,16 @@
                 dialogs.healthForm = config === false ? false : (config || true);
                 dialogs.healthFormData = config?.data || $profile?.health || {};
             }),
-            ui.listen('overlay.import', (state: boolean = true) => {
+            ui.listen('overlay.import', (state: any = true) => {
                 logger.ui.debug('import');
-                if (state == true) location.hash = '#overlay-import';
+                if (state && typeof state === 'object' && state.jobId) {
+                    importJobId = state.jobId;
+                } else {
+                    importJobId = undefined;
+                }
+                if (state) location.hash = '#overlay-import';
                 else  {
+                    importJobId = undefined;
                     if (location.hash.indexOf('#overlay-') == 0) {
                     history.back();
                 }
@@ -250,17 +260,24 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            <Import />
+            <Import jobId={importJobId} oncomplete={() => { importJobId = undefined; }} />
             </div>
     {/if}
 
     {#if dialogs.healthForm}
-        <Modal onclose={() => {
+        <Modal onclose={async () => {
             logger.ui.debug('Health form modal close event fired');
+            // Save data before clearing
+            if (dialogs.healthFormData && $profile?.id) {
+                await saveHealthProfile({
+                    profileId: $profile.id,
+                    formData: dialogs.healthFormData
+                });
+            }
             dialogs.healthForm = false;
             dialogs.healthFormData = null;
         }}>
-            <HealthForm 
+            <HealthForm
                 config={dialogs.healthForm}
                 bind:data={dialogs.healthFormData}
             />

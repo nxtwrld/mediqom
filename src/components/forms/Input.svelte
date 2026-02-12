@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createBubbler } from 'svelte/legacy';
+    import { t } from '$lib/i18n';
 
     const bubble = createBubbler();
     import InputDateTime from "./InputDateTime.svelte";
@@ -36,7 +37,7 @@
         value = $bindable(''),
         checked = $bindable(false),
         group = $bindable(''),
-        placeholder = 'Input',
+        placeholder = $t('app.forms.input'),
         type = 'text',
         id = (window as any)?.crypto.getRandomValues(new Uint32Array(1))[0].toString(16),
         name = id,
@@ -56,7 +57,9 @@
         class: className = 'input',
         children
     }: Props = $props();
-    
+
+    // Cast autocomplete to proper type for HTML input
+    const autocompleteAttr = autocomplete as any;
 </script>
 
 {#if (children || label) && type != 'checkbox' && type != 'radio'}
@@ -70,15 +73,15 @@
 {/if}
 <div class="input-field">
 {#if type == 'text'}
-    <input type="text" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="text" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'password'}
     
         {#if view == false}
-        <input type="password" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable} class:viewable={viewable}
+        <input type="password" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable} class:viewable={viewable}
             onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
         {:else}
-        <input type="text" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable} class:viewable={viewable}
+        <input type="text" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable} class:viewable={viewable}
             onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
         {/if}
 
@@ -96,38 +99,38 @@
             </button>
         {/if}
 {:else if type == 'search'}
-    <input type="search" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="search" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'email'}
-    <input type="email" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="email" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'number'}
-    <input type="number" {id} {name} {step} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="number" {id} {name} {step} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         {min} {max}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'time'}
-    <input type="time" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="time" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'tel'}
-    <input type="tel" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="tel" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'url'}
-    <input type="url" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="url" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'week'}
-    <input type="week" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="week" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'month'}
-    <input type="month" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly} class:copyable={copyable}
+    <input type="month" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'file'}
-    <InputFile {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete}  
+    <InputFile {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any}  
         on:change on:blur on:focus on:keypress on:keyup on:keydown/>
 {:else if type == 'datetime-local' || type == 'datetime' || type == 'date-local' || type == 'date' || type == 'time'}
-    <InputDateTime {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} {autocomplete} {readonly}  on:change on:blur on:focus/>
+    <InputDateTime {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly}  on:change on:blur on:focus/>
 {:else if type == 'checkbox'}
     <div class="input-line" class:checked={checked}>
-        <input type="checkbox" {id} {name} class={className} {tabindex} {disabled} bind:checked={checked} {style} {autocomplete} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
+        <input type="checkbox" {id} {name} class={className} {tabindex} {disabled} bind:checked={checked} {style} autocomplete={autocomplete as any} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
             {#if (children || label)}
             <label class="label" for={id}>
                 {#if label}
@@ -140,7 +143,7 @@
     </div>
 {:else if type == 'radio'}
     <div class="input-line" class:checked={checked}>
-        <input type="radio" {id} {name} class={className} {tabindex} {disabled} bind:group={group} {value} {style} {autocomplete} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
+        <input type="radio" {id} {name} class={className} {tabindex} {disabled} bind:group={group} {value} {style} autocomplete={autocomplete as any} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
             {#if (children || label)}
             <label class="label" for={id}>
                 {#if label}

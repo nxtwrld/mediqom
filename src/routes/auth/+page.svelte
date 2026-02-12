@@ -5,6 +5,7 @@
 	import type { ActionData, SubmitFunction } from './$types.js'
 	import { isNativePlatform } from '$lib/config/platform';
 	import { signInWithMagicLink } from '$lib/capacitor/auth';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		form: ActionData;
@@ -31,7 +32,7 @@
 
 		// Validate email
 		if (!email || !email.includes('@')) {
-			errorMessage = 'Please enter a valid email address';
+			errorMessage = $t('app.auth.invalid-email');
 			return;
 		}
 
@@ -45,17 +46,17 @@
 
 			if (error) {
 				console.error('[Auth Form] Mobile auth error:', error);
-				errorMessage = error.message || 'Failed to send magic link';
+				errorMessage = error.message || $t('app.auth.magic-link-failed');
 				loading = false;
 				return;
 			}
 
 			submitted = true;
-			successMessage = 'Magic link sent! Check your email and tap the link to sign in.';
+			successMessage = $t('app.auth.magic-link-sent');
 			loading = false;
 		} catch (err) {
 			console.error('[Auth Form] Mobile auth exception:', err);
-			errorMessage = 'An unexpected error occurred. Please try again.';
+			errorMessage = $t('app.auth.unexpected-error');
 			loading = false;
 		}
 	}
@@ -105,7 +106,7 @@
 </script>
 
 <svelte:head>
-	<title>Authentication</title>
+	<title>{$t('app.auth.title')}</title>
 </svelte:head>
 
 {#if isMobile}
@@ -113,16 +114,16 @@
 	<form class="flex -column form modal" onsubmit={handleMobileSubmit}>
 		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
 
-		<h1 class="h1">Authentication</h1>
+		<h1 class="h1">{$t('app.auth.title')}</h1>
 		{#if submitted && successMessage}
 		<div class="success">
 			<p class="form-instructions -success">{successMessage}</p>
 			<div class="form-actions">
-				<button class="button -block" type="button" onclick={resetForm}>Send again</button>
+				<button class="button -block" type="button" onclick={resetForm}>{$t('app.auth.send-again')}</button>
 			</div>
 		</div>
 		{:else}
-			<p class="form-instructions">Sign in via magic link with your email below</p>
+			<p class="form-instructions">{$t('app.auth.magic-link-instruction')}</p>
 
 			{#if errorMessage}
 			<div class="fail">
@@ -131,20 +132,20 @@
 			{/if}
 
 			<div class="input">
-				<label for="email">Email address</label>
+				<label for="email">{$t('app.auth.email-label')}</label>
 				<input
 					id="email"
 					name="email"
 					class="inputField"
 					type="email"
-					placeholder="Your email"
+					placeholder={$t('app.auth.email-placeholder')}
 					bind:value={email}
 					disabled={loading}
 				/>
 			</div>
 			<div class="form-actions">
 				<button class="button -primary -block" disabled={loading || submitted} type="submit">
-					{ loading ? 'Sending...' : submitted ? 'Email sent!' : 'Send magic link' }
+					{ loading ? $t('app.auth.sending') : submitted ? $t('app.auth.email-sent') : $t('app.auth.send-magic-link') }
 				</button>
 			</div>
 		{/if}
@@ -160,40 +161,40 @@
 	}}>
 		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
 
-		<h1 class="h1">Authentication</h1>
+		<h1 class="h1">{$t('app.auth.title')}</h1>
 		{#if form?.success}
 		<div class="success">
 			<p class="form-instructions -success">{form?.message}</p>
 			<div class="form-actions">
-				<button class="button -block" type="button" onclick={resetForm}>Send again</button>
+				<button class="button -block" type="button" onclick={resetForm}>{$t('app.auth.send-again')}</button>
 			</div>
 		</div>
 		{:else}
-			<p class="form-instructions">Sign in via magic link with your email below</p>
+			<p class="form-instructions">{$t('app.auth.magic-link-instruction')}</p>
 
 			{#if form?.message !== undefined}
 			<div class="{form?.success ? '' : 'fail'}">
 				<p class="form-instructions -error">{form?.message}</p>
 				{#if form?.message?.includes('Beta access required')}
 					<div class="beta-notice">
-						<h3>Need Beta Access?</h3>
-						<p>Mediqom is currently in beta. To get access:</p>
+						<h3>{$t('app.auth.beta-need-access')}</h3>
+						<p>{$t('app.auth.beta-in-beta')}</p>
 						<ol>
-							<li>Apply for beta access on our <a href="/www/en/beta">beta page</a></li>
-							<li>Wait for approval (usually within 48 hours)</li>
-							<li>Check your email for the magic link</li>
+							<li>{$t('app.auth.beta-step-apply')} <a href="/www/en/beta">{$t('app.auth.beta-page')}</a></li>
+							<li>{$t('app.auth.beta-step-wait')}</li>
+							<li>{$t('app.auth.beta-step-check')}</li>
 						</ol>
 					</div>
 				{:else if form?.message?.includes('application is under review')}
 					<div class="beta-notice">
-						<h3>Application Under Review</h3>
-						<p>Your beta application is being reviewed. We'll email you within 48 hours once approved.</p>
-						<p>Check your spam folder if you don't see our email.</p>
+						<h3>{$t('app.auth.beta-under-review')}</h3>
+						<p>{$t('app.auth.beta-review-message')}</p>
+						<p>{$t('app.auth.beta-check-spam')}</p>
 					</div>
 				{:else if form?.message?.includes('application was not approved')}
 					<div class="beta-notice">
-						<h3>Application Status</h3>
-						<p>Your beta application was not approved. If you believe this is an error, please contact us at <a href="mailto:beta@mediqom.com">beta@mediqom.com</a>.</p>
+						<h3>{$t('app.auth.beta-status')}</h3>
+						<p>{$t('app.auth.beta-not-approved')} <a href="mailto:beta@mediqom.com">beta@mediqom.com</a>.</p>
 					</div>
 				{/if}
 			</div>
@@ -203,13 +204,13 @@
 			<input type="hidden" name="redirectPath" value="/med" />
 
 			<div class="input">
-				<label for="email">Email address</label>
+				<label for="email">{$t('app.auth.email-label')}</label>
 				<input
 					id="email"
 					name="email"
 					class="inputField"
 					type="email"
-					placeholder="Your email"
+					placeholder={$t('app.auth.email-placeholder')}
 					value={form?.email ?? ''}
 					disabled={loading}
 				/>
@@ -221,7 +222,7 @@
 			{/if}
 			<div class="form-actions">
 				<button class="button -primary -block" disabled={loading || submitted} type="submit">
-					{ loading ? 'Sending...' : submitted ? 'Email sent!' : 'Send magic link' }
+					{ loading ? $t('app.auth.sending') : submitted ? $t('app.auth.email-sent') : $t('app.auth.send-magic-link') }
 				</button>
 			</div>
 		{/if}

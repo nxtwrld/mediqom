@@ -63,7 +63,7 @@ export interface PromptConfig {
 }
 
 class ChatConfigManager {
-  private config: ChatConfig = chatConfig as ChatConfig;
+  private config: ChatConfig = chatConfig as unknown as ChatConfig;
 
   /**
    * Get the current chat configuration

@@ -5,6 +5,8 @@
     import ProfileEdit from '$components/profile/ProfileEdit.svelte';
     import { scale } from 'svelte/transition';
     import { PROFILE_NEW_ID } from '$lib/profiles/tools';
+    import { t } from '$lib/i18n';
+    import { saveHealthProfile } from '$lib/health/save';
     
 
     interface Props {
@@ -45,7 +47,14 @@
         profile = safeCloneProfile(initialProfile);
         showProfile = false;
     }
-    function done() {
+    async function done() {
+        // Save health data before closing (only for existing profiles)
+        if (profile.id && profile.id !== PROFILE_NEW_ID && profile.health) {
+            await saveHealthProfile({
+                profileId: profile.id,
+                formData: profile.health
+            });
+        }
         showProfile = false;
     }
 </script>
@@ -61,7 +70,7 @@
     {#if profile.insurance?.number}<div class="insurance">({profile.insurance.number})</div>{/if}
 
     {#if isNewProfile}
-        <div class="status">New</div>
+        <div class="status">{$t('app.import.status-new')}</div>
     {/if}
 </button>
 
@@ -71,13 +80,13 @@
         
         {#snippet heading()}
                 <div  class="heading">
-                <h3 class="h3 heading">{isNewProfile ? 'New Profile' : 'Profile'} - {profile.fullName}</h3>
+                <h3 class="h3 heading">{isNewProfile ? $t('app.import.new-profile') : $t('app.import.profile')} - {profile.fullName}</h3>
                 <div class="actions">
                     <button class="-danger" onclick={reset}>
-                        Reset
+                        {$t('app.buttons.reset')}
                     </button>
                     <button class="-primary" onclick={done}>
-                        Done
+                        {$t('app.buttons.done')}
                     </button>
                 </div>
             </div>

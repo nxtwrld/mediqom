@@ -104,7 +104,7 @@
       disabled={selectedOptions.length === 0 && !customAnswer.trim()}
       onclick={submitAnswer}
     >
-      {$t('app.chat.clarifyingQuestion.continue')}
+      {$t('app.buttons.continue')}
     </button>
   {/if}
 

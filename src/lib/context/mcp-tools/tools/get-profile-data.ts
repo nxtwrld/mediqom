@@ -57,17 +57,17 @@ export class GetProfileDataTool extends BaseMedicalTool {
           language: profile.language,
         },
         conditions:
-          profile.health?.chronicConditions?.map((condition) => ({
+          profile.health?.chronicConditions?.map((condition: any) => ({
             name: condition,
             status: "active",
           })) || [],
         medications:
-          profile.health?.currentMedications?.map((med) => ({
+          profile.health?.currentMedications?.map((med: any) => ({
             name: med,
             status: "active" as const,
           })) || [],
         allergies:
-          profile.health?.allergies?.map((allergy) => ({
+          profile.health?.allergies?.map((allergy: any) => ({
             substance: allergy,
           })) || [],
         recentDocuments: 0, // This would be calculated from document store

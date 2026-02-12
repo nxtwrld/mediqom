@@ -181,28 +181,28 @@ export const createDocumentProcessingWorkflow = (
   workflow.addNode("quality_gate", createNodeWrapper(qualityGateNode));
 
   // Define simplified workflow edges for unified processing
-  workflow.addEdge("input_validation", "document_type_router");
-  workflow.addEdge("document_type_router", "provider_selection");
-  workflow.addEdge("provider_selection", "feature_detection");
+  workflow.addEdge("input_validation" as any, "document_type_router" as any);
+  workflow.addEdge("document_type_router" as any, "provider_selection" as any);
+  workflow.addEdge("provider_selection" as any, "feature_detection" as any);
 
   // Conditional routing after feature detection - now goes to unified multi-node processing
-  workflow.addConditionalEdges("feature_detection", shouldProcessMedical, {
-    medical: "multi_node_processing",
+  workflow.addConditionalEdges("feature_detection" as any, shouldProcessMedical, {
+    medical: "multi_node_processing" as any,
     error: END,
   });
 
   // Conditional external validation after multi-node processing
   workflow.addConditionalEdges(
-    "multi_node_processing",
+    "multi_node_processing" as any,
     shouldValidateExternally,
     {
-      validate: "external_validation",
-      skip: "quality_gate",
+      validate: "external_validation" as any,
+      skip: "quality_gate" as any,
     },
   );
 
-  workflow.addEdge("external_validation", "quality_gate");
-  workflow.addEdge("quality_gate", END);
+  workflow.addEdge("external_validation" as any, "quality_gate" as any);
+  workflow.addEdge("quality_gate" as any, END);
 
   // Set entry point
   workflow.setEntryPoint("input_validation");

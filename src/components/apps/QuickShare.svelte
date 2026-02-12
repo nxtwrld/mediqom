@@ -2,6 +2,7 @@
     import ImportFileContainer from "$components/import/ImportFileContainer.svelte";
     import type { JOURNEY } from '$components/user/Onboarding.svelte';
     import { logger } from '$lib/logging/logger';
+    import { t } from '$lib/i18n';
 
     interface Props {
         journey?: JOURNEY | undefined;
@@ -15,10 +16,10 @@
 </script>
 
 <div>
-Quick Share
+{$t('app.apps.quick-share')}
 
 <ImportFileContainer {callback}/>
 
 
-Add Contact
+{$t('app.apps.add-contact')}
 </div>

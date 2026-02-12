@@ -1,4 +1,3 @@
-import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   title: "jCard",
   description:
@@ -205,4 +204,4 @@ export default {
     },
   },
   required: ["fn", "n", "org", "tel", "email", "adr", "role", "title"],
-} as FunctionDefinition;
+};

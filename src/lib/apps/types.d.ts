@@ -7,7 +7,7 @@ export interface AppRecord {
   author: string;
   category: string;
   credits: number;
-  connect: AppUri;
+  connect?: AppUri;
   tags: string[];
   requires: string[];
   permissions: string[];

@@ -4,6 +4,7 @@
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
     import ui from '$lib/ui';
+    import { t } from '$lib/i18n';
 
   /*  $: {
         if ($user && $user.subscription == 'individual') {
@@ -21,9 +22,9 @@
 
     </script>
 
-<h1 class="h1">Mediqom - Electronic Health Records</h1>
+<h1 class="h1">{$t('app.med.title')}</h1>
 
-<p>Mediqom helps you with your medical reports management. Just scan you medical report and Mediqom will help you understand it:</p>
+<p>{$t('app.med.description')}</p>
 
-<button class="a" onclick={()=> ui.emit('overlay.import')}>Import files</button>
+<button class="a" onclick={()=> ui.emit('overlay.import')}>{$t('app.search.commands.import-files')}</button>
 

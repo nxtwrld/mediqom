@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { t } from '$lib/i18n';
 	
 	let loading = true;
 	let error = '';
@@ -20,7 +21,7 @@
 		
 		if (!code) {
 			console.error('[Client Code Confirm] No code parameter found');
-			error = 'No authentication code found. Please try again.';
+			error = $t('app.auth.no-auth-code');
 			loading = false;
 			return;
 		}
@@ -92,32 +93,32 @@
 			
 			// If we get here, authentication failed
 			console.error('[Client Code Confirm] Authentication timed out - no session established');
-			error = 'Authentication timed out. Please try again.';
+			error = $t('app.auth.auth-timed-out');
 			loading = false;
-			
+
 		} catch (err) {
 			console.error('[Client Code Confirm] Unexpected error:', err);
-			error = 'An unexpected error occurred. Please try again.';
+			error = $t('app.auth.unexpected-error');
 			loading = false;
 		}
 	});
 </script>
 
 <svelte:head>
-	<title>Confirming Authentication...</title>
+	<title>{$t('app.auth.confirming-title')}</title>
 </svelte:head>
 
 {#if loading}
 	<div class="confirmation-container">
 		<div class="loading-spinner"></div>
-		<h1>Confirming your authentication...</h1>
-		<p>Please wait while we log you in.</p>
+		<h1>{$t('app.auth.confirming-authentication')}</h1>
+		<p>{$t('app.auth.please-wait')}</p>
 	</div>
 {:else if error}
 	<div class="confirmation-container error">
-		<h1>Authentication Failed</h1>
+		<h1>{$t('app.auth.auth-failed')}</h1>
 		<p>{error}</p>
-		<a href="/auth" class="button">Try Again</a>
+		<a href="/auth" class="button">{$t('app.auth.try-again')}</a>
 	</div>
 {/if}
 

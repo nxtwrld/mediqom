@@ -3,7 +3,7 @@ import labs from "$data/lab.synonyms.json";
 
 const anatomy: string[] = Object.keys(objects)
   .reduce((acc, key) => {
-    return [...acc, ...objects[key].objects];
+    return [...acc, ...(objects as Record<string, any>)[key].objects];
   }, [] as string[])
   .map((obj) => obj.toLowerCase());
 

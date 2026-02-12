@@ -84,20 +84,20 @@ let localizedSchemas = updateLanguage(JSON.parse(JSON.stringify(schemas)));
 
 // extend common schemas
 
-((signals as ExtendedFunctionDefinition).items!.properties.signal
+((signals as any as ExtendedFunctionDefinition).items!.properties.signal
   .enum as string[]) = Object.keys(propertiesDefition); //testPropserties.map((item: any) => item[0]);
 ((featureDetection as ExtendedFunctionDefinition).parameters.properties.tags
   .items.enum as string[]) = [
   ...tags,
-  ...((signals as ExtendedFunctionDefinition).items!.properties.signal
+  ...((signals as any as ExtendedFunctionDefinition).items!.properties.signal
     .enum as string[]),
 ];
 
-(performer as ExtendedFunctionDefinition).properties = (
-  jcard as ExtendedFunctionDefinition
+(performer as any as ExtendedFunctionDefinition).properties = (
+  jcard as any as ExtendedFunctionDefinition
 ).properties;
-(performer as ExtendedFunctionDefinition).required = (
-  jcard as ExtendedFunctionDefinition
+(performer as any as ExtendedFunctionDefinition).required = (
+  jcard as any as ExtendedFunctionDefinition
 ).required;
 
 (report as ExtendedFunctionDefinition).parameters.properties.performer =
@@ -126,7 +126,7 @@ let localizedSchemas = updateLanguage(JSON.parse(JSON.stringify(schemas)));
 (dental as ExtendedFunctionDefinition).parameters.properties.diagnosis =
   diagnosis;
 
-((bodyParts as ExtendedFunctionDefinition).items!.properties.identification
+((bodyParts as any as ExtendedFunctionDefinition).items!.properties.identification
   .enum as string[]) = [...tags];
 
 (report as ExtendedFunctionDefinition).parameters.properties.bodyParts =

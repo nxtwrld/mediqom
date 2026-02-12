@@ -1,18 +1,18 @@
 <script lang="ts">
-    
-    import { type Profile, SexEnum } from "$lib/types.d";
+
+    import { type ProfileNew, SexEnum } from "$lib/types.d";
     import user from "$lib/user";
+    import { t } from '$lib/i18n';
 
     //console.log("user", $user);
 
-    let newProfile: Profile = $state({
-        id: "NEW",
+    let newProfile: ProfileNew = $state({
         fullName: "",
-        sex: SexEnum.male,
-        birthdate: new Date(),
-        location: "",
-        phone: "",
-        email: ""
+        birthDate: undefined,
+        language: undefined,
+        insurance: undefined,
+        vcard: undefined,
+        health: undefined
     })
 
     async function createNewProfile() {
@@ -33,15 +33,15 @@
 </script>
 
 <div class="page">
-    <h1 class="h1">Add new profile</h1>
+    <h1 class="h1">{$t('app.med.add-profile')}</h1>
     {#if $user && 'subscriptionStats' in $user && $user.subscriptionStats.profiles == 0}
-        <p class="p">You have reached the maximum number of profiles.</p>
-        <a href="/med/upgrade" class="button -primary -large">Upgrade</a>
+        <p class="p">{$t('app.med.max-profiles-reached')}</p>
+        <a href="/med/upgrade" class="button -primary -large">{$t('app.med.upgrade')}</a>
     {:else}
-        <p class="p">You can add {($user as any)?.subscriptionStats?.profiles} more profiles.</p>
+        <p class="p">{$t('app.med.profiles-remaining', { values: { count: ($user as any)?.subscriptionStats?.profiles } })}</p>
 
 
         <input type="text" bind:value={newProfile.fullName} onclick={createNewProfile} />
-        <button>Create</button>
+        <button>{$t('app.buttons.create')}</button>
     {/if}
 </div>

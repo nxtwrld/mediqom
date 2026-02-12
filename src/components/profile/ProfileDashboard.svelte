@@ -13,17 +13,25 @@
     import { onMount } from 'svelte';
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
+    import { saveHealthProfile } from '$lib/health/save';
     
     // Local state for ProfileEdit modal
     let showProfileEdit = $state(false);
     
     interface Property {
-        signal: string;
-        value: string;
+        key?: string;
+        signal?: string;
+        test?: string;
+        property?: string;
+        value?: any;
         editable?: string;
-        label: string;
-        unit: string;
-        icon: string;
+        label?: string;
+        unit?: string;
+        icon?: string;
+        source?: any;
+        fn?: (v: any) => any;
+        urgency?: number;
+        reference?: any;
     }
 
     interface PropertyBlock {
@@ -81,9 +89,9 @@
             return acc;
 
         }, [] as Property[]))
-    ] : []).map((p) => {
+    ] : []).map((p: Property) => {
         if (p.signal) {
-            let source = (Array.isArray(p.source)) ? p.source.map(s => s && s.values ) : p.source?.values;
+            let source = (Array.isArray(p.source)) ? p.source.map((s: any) => s && s.values ) : p.source?.values;
             return {
                 ...p,
                 source
@@ -120,11 +128,11 @@
 
         let property: Property = {
             signal: prop.signal || prop.editable,
-            value: prop.source ? prop.source[0].value : prop.value,
-            reference: prop.source ? prop.source[0].reference : undefined,
+            value: prop.source ? (Array.isArray(prop.source) ? prop.source[0]?.value : prop.source?.value) : prop.value,
+            reference: prop.source ? (Array.isArray(prop.source) ? prop.source[0]?.reference : prop.source?.reference) : undefined,
             unit: prop.unit
         }
-        
+
         ui.emit('modal.healthProperty', property);
     }
 
@@ -256,7 +264,16 @@
 
 <!-- ProfileEdit Modal -->
 {#if showProfileEdit}
-    <Modal onclose={() => showProfileEdit = false}>
+    <Modal onclose={async () => {
+        // Save health data before closing
+        if ($profile?.id && $profile?.health) {
+            await saveHealthProfile({
+                profileId: $profile.id,
+                formData: $profile.health
+            });
+        }
+        showProfileEdit = false;
+    }}>
         <ProfileEdit bind:profile={$profile} />
     </Modal>
 {/if}

@@ -28,9 +28,7 @@
     import * as d3 from 'd3';
 	import { onMount } from 'svelte';
     import Input from '$components/forms/Input.svelte';
-    import colorFn from 'color';
-    import { date } from '$lib/dateTime';
-	import { linkPage } from '$lib/app';
+    import { date } from '$lib/datetime';
 
 
 
@@ -43,19 +41,27 @@
     }
 
     let { data = $bindable(), showToday = false, colors = ["#9B68C5","#6291FF", "#F69D26","#6554C4","#73C34D","#E73784","#ffd92f","#e5c494","#b3b3b3"] }: Props = $props();
-    
-    let tooltip: HTMLDivElement = $state();
+
+    let tooltip: HTMLDivElement | undefined = $state();
     let tooltipData: {
         value: string | number,
         unit: string,
         date: Date,
         lablel?: string
-    } = $state()
+    } | undefined = $state()
 
     const margin = { top: 15, right: 30, bottom: 30, left: 30 };
 
+    // Helper function to convert hex color to rgba
+    function hexToRgba(hex: string, alpha: number): string {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
 
-    let svgElement: SVGSVGElement = $state();
+
+    let svgElement: SVGSVGElement | undefined = $state();
 
     let width: number = $state(300);
     let height: number = $state(100);
@@ -70,6 +76,7 @@
 
     function checkVisibility(data: Data[]) {
         // hide and show goals
+        if (!svgElement) return;
         data.forEach((d, index) => {
             if (d.data.length == 0) {
                 d.visible = false;
@@ -140,7 +147,7 @@
         let chartHeight = height - margin.top - margin.bottom;
 
         const svg = d3.select(svgElement);
-        const svgg: d3.Selection<SVGGElement>  = svg.append("g")
+        const svgg: d3.Selection<SVGGElement, unknown, null, undefined>  = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         const yScales = data.map(d => {
@@ -157,8 +164,9 @@
                 }
                 
             }
+            const extentValues = d3.extent(extent, d => typeof d.value === 'number' ? d.value : parseFloat(String(d.value)));
             return d3.scaleLinear()
-                .domain(d3.extent(extent, d => d.value))
+                .domain(extentValues[0] !== undefined && extentValues[1] !== undefined ? extentValues as [number, number] : [0, 100])
                 .range([ chartHeight, 0 ]);
         })
 
@@ -169,8 +177,9 @@
             timeExtent.push({ date: new Date(), value: 0 });
         }
 
+        const dateExtent = d3.extent(timeExtent, (d: Value) => d.date);
         const xScale = d3.scaleTime()
-            .domain(d3.extent(timeExtent, (d: Value) => d.date))
+            .domain(dateExtent[0] !== undefined && dateExtent[1] !== undefined ? dateExtent as [Date, Date] : [new Date(), new Date()])
             .range([ 0, chartWidth ])
 
 
@@ -285,7 +294,7 @@
                 .append('circle')
                     .attr('class', 'dot')
                     .attr('cx', (d: Value) => xScale(d.date))
-                    .attr('cy', (d: Value, index: number) => yScales[d.index](d.value))
+                    .attr('cy', (d: Value, index: number) => d.index !== undefined ? yScales[d.index](d.value) : 0)
                     .attr('r', 8)
                     /*.on('click', function(event: MouseEvent, d: Value) {
                         if (d.href) {
@@ -299,17 +308,17 @@
                             value: d.value,
                             unit: d.unit,
                             date: d.date,
-                            label: data[d.index].valueName
+                            label: d.index !== undefined ? data[d.index].valueName : ''
                         }
                         // calculate fixed position and compensate for scroll
                         d3.select(tooltip)
                             .style('top', (event.clientY) + 'px')
                             .style('left', (event.clientX) + 'px')
                             .style('opacity', 1);
-                
-                        d3.select(this).attr('r', 12);
+
+                        d3.select(event.currentTarget as SVGCircleElement).attr('r', 12);
                         selectedEvent = {
-                            node: this,
+                            node: event.currentTarget as SVGCircleElement,
                             d
                         };
                     })/*
@@ -340,7 +349,7 @@
         console.log('viewDetails', selectedEvent);
         if(!selectedEvent) return;
         if (selectedEvent.d.href) {
-                            goto(linkPage(selectedEvent.d.href));
+                            goto(selectedEvent.d.href);
         }
         
     }
@@ -369,7 +378,7 @@
         <Input type="checkbox" {label} 
             disabled={item.data.length == 0}
             bind:checked={item.visible}
-            style="--color-form-input-checkbox-on: {colors[index]}; --color-form-input-checkbox-off: {colors[index]}; --color-form-input-active-border: {colors[index]}; --color-form-input: {colorFn(colors[index]).alpha(.3)}"/>
+            style="--color-form-input-checkbox-on: {colors[index]}; --color-form-input-checkbox-off: {colors[index]}; --color-form-input-active-border: {colors[index]}; --color-form-input: {hexToRgba(colors[index], 0.3)}"/>
 
     {/each}
     </div>

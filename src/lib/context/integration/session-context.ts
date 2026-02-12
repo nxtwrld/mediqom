@@ -53,7 +53,7 @@ export class SessionContextService {
       const startTime = performance.now();
 
       // Check if profile has available context
-      const contextStats = profileContextManager.getProfileContextStats(
+      const contextStats = profileContextManager.getContextStats(
         options.profileId,
       );
       if (!contextStats) {
@@ -85,7 +85,7 @@ export class SessionContextService {
       // Filter by priority types if specified
       let filteredResults = searchResults;
       if (options.priorityTypes && options.priorityTypes.length > 0) {
-        filteredResults = searchResults.filter((result) =>
+        filteredResults = searchResults.filter((result: any) =>
           options.priorityTypes!.some(
             (type) =>
               result.metadata.documentType === type ||
@@ -109,7 +109,6 @@ export class SessionContextService {
             includeMetadata: true,
             includeMedicalContext: true,
             priorityTypes: options.priorityTypes,
-            optimizeForRealtime: true, // New flag for session optimization
           },
         );
 
@@ -153,10 +152,11 @@ export class SessionContextService {
 
       return result;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to initialize session context", {
-          error: error.message,
+          error: errorMessage,
           sessionId,
           profileId: options.profileId,
         });
@@ -234,10 +234,11 @@ export class SessionContextService {
 
       return result;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to update session context", {
-          error: error.message,
+          error: errorMessage,
           sessionId,
         });
 
@@ -290,10 +291,11 @@ export class SessionContextService {
         contextSummary: `Context for ${analysisType} analysis: ${relevantHistory.length} relevant medical history items found`,
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to get context for analysis", {
-          error: error.message,
+          error: errorMessage,
           sessionId,
           analysisType,
         });

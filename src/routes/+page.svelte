@@ -1,13 +1,14 @@
 <script lang="ts">
     // Root page - redirect logic is handled in +page.ts for Capacitor builds
+    import { t } from '$lib/i18n';
 </script>
 
 <div class="placer">
     <div>
-        <img src="/icon.svg" alt="mediqom logo" />
+        <img src="/icon.svg" alt={$t('app.name')} />
 
-        <h1>mediqom</h1>
-        <h2>Medical Intelligence to Query, Organize, and Monitor</h2>
+        <h1>{$t('app.name')}</h1>
+        <h2>{$t('app.tagline')}</h2>
         <!--h2>query cure</h2-->
     </div>
 </div>

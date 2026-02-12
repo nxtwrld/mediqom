@@ -82,6 +82,7 @@ async function processDicomImages(
 interface AssessmentPagesClient extends AssessmentPage {
   image?: string;
   thumbnail?: string;
+  type?: string;
 }
 
 interface AssessmentClient extends Assessment {
@@ -396,13 +397,13 @@ async function processMultipageAssessmentToDocumnets(
           break;
         case "images":
           // merge images into a single pdf
-          const imageBuffers = pages.map((p) => p.image);
+          const imageBuffers = pages.map((p) => p.image).filter((img): img is string => img !== undefined);
           attachment = {
             path: "", // Will be set by addDocument
             url: "", // Will be set by addDocument
             thumbnail: pages[0].thumbnail,
             type: "application/pdf",
-            file: await toBase64(await createPdfFromImageBuffers(imageBuffers)),
+            file: await toBase64(await createPdfFromImageBuffers(imageBuffers as any)),
           };
           break;
         case "application/dicom":
@@ -428,7 +429,7 @@ async function processMultipageAssessmentToDocumnets(
         files: task.data,
         attachments: [attachment],
         task,
-      });
+      } as any);
     }),
   );
   return documents;

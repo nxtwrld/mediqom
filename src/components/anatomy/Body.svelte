@@ -113,7 +113,8 @@
                 tag: k,
                 count: v.length,
                 geometry: null,
-                object: null
+                object: null,
+                label: undefined as any
             }
         });
     }
@@ -129,11 +130,11 @@
     let labelContainer: HTMLDivElement;
     let resizeObserverListener: ResizeObserver;
 
-    let camera: THREE.PerspectiveCamera; 
+    let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let renderer: THREE.WebGLRenderer;
-    let controls: THREE.OrbitControls;
-    let labelRenderer: THREE.CSS2DRenderer;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let controls: OrbitControls;
+    let labelRenderer: CSS2DRenderer | null = null;
     let raycaster: THREE.Raycaster;
     let pointer: THREE.Vector2 = new THREE.Vector2();
     let group: THREE.Group = new THREE.Group();
@@ -211,11 +212,11 @@
             let toLoad = activeLayers.filter(l => !loadedLayers.includes(l));
             //console.log('toLoad', toLoad);
             let filesToLoad = toLoad.reduce((acc, l) => {
-                return [...acc, ...objects3d[l].files]
+                return [...acc, ...objects3d[l as keyof typeof objects3d].files]
             }, [] as string[]).filter(f => !loadedFiles.includes(f));
             let objectsToShow = activeLayers.reduce((acc, l) => {
-                return [...acc, ...objects3d[l].objects]
-            }, []);
+                return [...acc, ...objects3d[l as keyof typeof objects3d].objects]
+            }, [] as string[]);
             loadedLayers = activeLayers;
             updateModel(filesToLoad, objectsToShow);
         }
@@ -268,7 +269,7 @@
         
         const unsubscibeFocus = focused.subscribe((f) => {
             if (!ready) return;
-            setHighlight(f.object);
+            setHighlight(f.object ?? null);
 
         });
 
@@ -304,16 +305,18 @@
             unsubscibeContext();
             
             // clear all three.js objects from the scene
-            clearObjects(scene); 
+            clearObjects(scene);
 
-            renderer.forceContextLoss();
-            renderer.dispose();
-            renderer.context = null;
-            renderer.domElement = null;
-            renderer = null;
+            if (renderer) {
+                renderer.forceContextLoss();
+                renderer.dispose();
+                (renderer as any).context = null;
+                (renderer as any).domElement = null;
+                renderer = null;
+            }
 
-            labelRenderer.context = null;
-            labelRenderer.domElement = null;
+            (labelRenderer as any).context = null;
+            (labelRenderer as any).domElement = null;
             labelRenderer = null;
 
 
@@ -322,8 +325,8 @@
             if (resizeObserverListener) resizeObserverListener.disconnect();
             if (labelContainer) {
                 for (const labelEl of labelContainer.children) {
-                    labelEl.removeEventListener('click', clickLabel);
-                    labelEl.removeEventListener('mouseup', mouseUpLabel);
+                    (labelEl as HTMLElement).removeEventListener('click', clickLabel);
+                    (labelEl as HTMLElement).removeEventListener('mouseup', mouseUpLabel);
                 };
             }
 
@@ -335,24 +338,24 @@
     });
 
 
-    function clearObjects(scene) {
+    function clearObjects(scene: THREE.Scene) {
 
         for(let i=scene.children.length-1; i>=0; i--){
             let obj = scene.children[i];
             //dispose all object geometries and materials
-            if (obj.geometry) obj.geometry.dispose();
-            if (obj.material) {
-                if (obj.material instanceof Array) {
-                    obj.material.forEach(m => m.dispose());
+            if ((obj as any).geometry) (obj as any).geometry.dispose();
+            if ((obj as any).material) {
+                if ((obj as any).material instanceof Array) {
+                    (obj as any).material.forEach((m: any) => m.dispose());
                 } else {
-                    obj.material.dispose();
+                    (obj as any).material.dispose();
                 }
             }
             scene.remove(obj);
         }
     }
 
-    async function updateModel(filesToLoad, objectsToShow) {
+    async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
         //console.log('updateModel', filesToLoad, objectsToShow);
         let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
             id: f,
@@ -366,7 +369,7 @@
 
         
         objects.forEach(object => {
-            object.traverse( function ( child ) {
+            object.traverse( function ( child: any ) {
                 // mark labeled objects
                 checkObject(child, objectsToShow, labelIds);
             } );
@@ -375,7 +378,7 @@
 
         animate();
         loadLabels();
-        setHighlight($focused.object);
+        setHighlight($focused.object ?? null);
 
         if (!initialViewState) initialViewState = {
             position: camera.position.clone(),
@@ -387,13 +390,13 @@
     }
 
     //let names = {}
-    function insertObject(o, objectsToShow, labelIds, group) {
+    function insertObject(o: any[], objectsToShow: string[], labelIds: string[], group: THREE.Group) {
 
         //let onames = [];
 
-        o.forEach(object => {
+        o.forEach((object: any) => {
             //console.log(object);
-            object.traverse( function ( child ) {
+            object.traverse( function ( child: any ) {
                 // mark labeled objects
                 //onames.push(child.name);
                 //console.log('child', child.name, child)
@@ -422,7 +425,7 @@
 
 
 
-    function checkObject(child, objectsToShow, labelIds) {
+    function checkObject(child: any, objectsToShow: string[], labelIds: string[]) {
         if (!child.isMesh)  return;
 
         if ( objectsToShow.includes(child.name)) {
@@ -446,8 +449,10 @@
                 material.color.set( FOCUS_COLOR );
                 child.material = material;*/
                 let label = labels.find(l => l.id === child.name)
-                label.geometry = child.geometry;
-                label.object = child;
+                if (label) {
+                    label.geometry = child.geometry;
+                    label.object = child;
+                }
 
 
             }
@@ -456,8 +461,10 @@
             child.visible = false;
             if ( labelIds.includes(child.name)) {
                 let label = labels.find(l => l.id === child.name)
-                label.geometry = null;
-                label.object = null;
+                if (label) {
+                    label.geometry = null;
+                    label.object = null;
+                }
             }
 
         }
@@ -475,14 +482,14 @@
         if (Array.isArray(material )) {
             return material.map((m: THREE.Material) => {
                 return updateMaterial(m, options);
-            });
+            }) as THREE.Material[];
         } else {
             const newMaterial = material.clone();
             Object.keys(options).forEach(key => {
-                if (newMaterial[key] && newMaterial[key].set) {
-                    newMaterial[key].set(options[key]);
-                } else if (newMaterial[key]) {
-                    newMaterial[key] = options[key];
+                if ((newMaterial as any)[key] && (newMaterial as any)[key].set) {
+                    (newMaterial as any)[key].set((options as any)[key]);
+                } else if ((newMaterial as any)[key]) {
+                    (newMaterial as any)[key] = (options as any)[key];
                 }
             });
             //options.color && newMaterial.color.set( options.color );
@@ -559,10 +566,11 @@
                 const objLoader = new OBJLoader( );
                 if (setup.material) {
                     console.log('setup.material', setup.material)
+                    const material = setup.material;
                     Object.keys(materialsCreator.materials).forEach(key => {
-                        materialsCreator.materials[key] = setup.material;
+                        materialsCreator.materials[key] = material;
                     });
-                    
+
                 }
 
                 
@@ -575,7 +583,7 @@
 
 
                         if (setup.opacity) {
-                            object.traverse( function ( child ) {
+                            object.traverse( function ( child: any ) {
                                 if ( child.isMesh ) {
                                     child.geometry.computeVertexNormals();
                                     if (setup.color) {
@@ -601,14 +609,15 @@
 //        console.log(labelContainer.children);
         for (const [index, labelEl] of [...labelContainer.children].entries()) {
             if(labels[index].geometry) {
-                const label = new CSS2DObject( labelEl );
-                label.position.set( ...labels[index].geometry.boundingSphere.center.toArray() );
+                const label = new CSS2DObject( labelEl as HTMLElement );
+                const position = (labels[index].geometry as any).boundingSphere.center.toArray() as [number, number, number];
+                label.position.set( ...position );
                 label.center.set( 0, 1 );
-                labels[index].object.add( label );
+                (labels[index].object as any)?.add( label );
                 label.layers.set( 0 );
-                labelEl.addEventListener('click', clickLabel, false);
-                labelEl.addEventListener('mousedown', mouseUpLabel, false);
-                labelEl.addEventListener('mouseup', mouseUpLabel, false);
+                (labelEl as HTMLElement).addEventListener('click', clickLabel, false);
+                (labelEl as HTMLElement).addEventListener('mousedown', mouseUpLabel, false);
+                (labelEl as HTMLElement).addEventListener('mouseup', mouseUpLabel, false);
                 labels[index].label = label;
             }
         };
@@ -627,7 +636,8 @@
 
     async function init () {
 
-        resizeObserverListener = new ResizeObserver(resize).observe(container);
+        resizeObserverListener = new ResizeObserver(resize);
+        resizeObserverListener.observe(container);
         let w = container.offsetWidth;
         let h = container.offsetHeight;
         const minZoom = defaultState.minZoom;
@@ -726,9 +736,9 @@
         
         ready = true;
 
-        
 
-        setContext($store.context);
+
+        if ($store.context) setContext($store.context);
 
         //dispatch('ready');
 
@@ -755,9 +765,9 @@
         //console.log('🧍', 'Setting Context', context);
 
         if (!context) return;
-        if (typeof context === 'string' && !contexts[context]) return;
+        if (typeof context === 'string' && !(contexts as any)[context]) return;
 
-        const contextToRun = (typeof context === 'string') ? contexts[context] : context;
+        const contextToRun = (typeof context === 'string') ? (contexts as any)[context] : context;
         const storeState: boolean = currentContext == null
 
         currentContext = {
@@ -831,12 +841,12 @@
                 //ior: 0.1,
                 side: THREE.BackSide,
             })
-        })], ['body'], [], scene);
+        })], ['body'], [], scene as any);
         toggleShade(showShade);
     }
 
     function toggleShade(state: boolean) {
-        if (scene && !shade) shade = scene.getObjectByName('shade_skin');
+        if (scene && !shade) shade = scene.getObjectByName('shade_skin') as any;
         if (shade) shade.visible = state;
     }
 
@@ -846,7 +856,7 @@
         camera.aspect = container.offsetWidth / container.offsetHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( container.offsetWidth, container.offsetHeight );
-        labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+        if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
     }
 
     function animate() {
@@ -882,16 +892,19 @@
         event.preventDefault();
         console.log('click label')
         sounds.focus.play();
-        $state.focusView = false;
+        ($state as any).focusView = false;
     }
 
     function mouseUpLabel(event: MouseEvent) {
-        $state.focusView = true;
+        ($state as any).focusView = true;
         event.stopPropagation();
         event.preventDefault();
-        const a = event.target.closest('a');
-        goto(a.getAttribute('href'));
-        focused.set({ object: a.dataset.id });
+        const a = (event.target as HTMLElement)?.closest('a');
+        if (a) {
+            const href = a.getAttribute('href');
+            if (href) goto(href);
+            focused.set({ object: a.dataset.id });
+        }
     }
 
 
@@ -901,9 +914,10 @@
 
         const processObjects: THREE.Object3D[] = [];
 
+        if (!objects) return;
         if (!Array.isArray(objects)) objects = [objects];
 
-        objects.forEach(o => {
+        objects.forEach((o: any) => {
             if (typeof o === 'string') {
                 const object = scene.getObjectByName(o);
                 if (object) processObjects.push(object);
@@ -1032,7 +1046,7 @@
 
     function highlight (object: THREE.Object3D | null) {
         if (selected) {
-            selected.traverse( function ( child: THREE.Mesh ) {
+            selected.traverse( function ( child: any ) {
                 if ( child.isMesh ) {
                     child.material = child.oldMaterial;
                 }
@@ -1040,13 +1054,13 @@
         }
 
         // traverse all object and set material opacity to .5
-        scene.traverse( function ( child: THREE.Mesh ) {
+        scene.traverse( function ( child: any ) {
             if ( child.isMesh && child.material) {
                 // material needs to cloned to distinguish from original
                 if(!child.parent || child.parent?.name !== 'shade_skin') {
                     // material needs to cloned to distinguish from original
                     child.oldMaterial = child.material;
-                    child.material = updateMaterial(child.material, { opacity: (object == null) ? DEFAULT_OPACITY : UNFOCUSED_OPACITY , transparent: true });
+                    child.material = updateMaterial(child.material, { opacity: (object == null) ? DEFAULT_OPACITY : UNFOCUSED_OPACITY , transparent: true }) as any;
                 }
 
 
@@ -1057,11 +1071,11 @@
 
         if (object) {
             //ui.emit('highlight-object', object.name);
-            object.traverse( function ( child: THREE.Mesh ) {
+            object.traverse( function ( child: any ) {
                 if ( child.isMesh && child.material) {
                     // material needs to cloned to distinguish from original
                     child.oldMaterial = child.material;
-                    child.material = updateMaterial(child.material, { color: HIGHLIGHT_COLOR, opacity: 1 });
+                    child.material = updateMaterial(child.material, { color: HIGHLIGHT_COLOR, opacity: 1 }) as any;
 
                     //console.log('highlight', child.name, child.material);
                     /*

@@ -4,6 +4,7 @@
     const bubble = createBubbler();
     import { onMount } from 'svelte';
     import { scale, fade } from 'svelte/transition';
+    import { t } from '$lib/i18n';
 
     export function closeModal() {
         console.log('Modal closeModal function called, calling onclose callback');
@@ -56,7 +57,7 @@
     }
 }} class:-shade={showShade}  bind:this={modalContainer} onkeydown={handleKeydown} transition:fade>
     <div class="modal-content" role="document" onclick={(e) => e.stopPropagation()} transition:scale>
-        <button class="close" aria-label="Close modal" onclick={closeModal}>
+        <button class="close" aria-label={$t('aria.ui.close-modal')} onclick={closeModal}>
             <svg>
                 <use href="/icons.svg#close"></use>
             </svg>

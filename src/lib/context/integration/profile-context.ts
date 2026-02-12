@@ -133,6 +133,25 @@ export class ProfileContextManager {
       totalDocuments: documents.length,
       documentsWithMedicalTerms: documentsWithTerms.length,
       isReady: this.isContextReady(profileId),
+      // TODO: Replace embedding-based search with medical terms classification search
+      database: {
+        search: async (_embedding: any, _options: any) => {
+          // Placeholder: Return documents with medical terms as fallback
+          return documentsWithTerms.map(doc => ({
+            documentId: doc.id,
+            similarity: 0.7, // Placeholder similarity
+            relevanceScore: 0.7, // Placeholder relevance
+            metadata: {
+              documentId: doc.id,
+              summary: doc.metadata?.title || 'Untitled',
+              title: doc.metadata?.title || 'Untitled',
+              date: (doc as any).created_at || new Date().toISOString(),
+              documentType: doc.type,
+            },
+            excerpt: typeof doc.content === 'string' ? doc.content.substring(0, 200) : ''
+          }));
+        }
+      }
     };
   }
 

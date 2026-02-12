@@ -1,16 +1,18 @@
-import { google } from "@google-cloud/speech";
+import { SpeechClient } from "@google-cloud/speech";
+import * as fs from "fs";
 
-let client: google.SpeechClient;
+let client: SpeechClient;
 
 function getClient() {
   if (client) {
     return client;
   }
-  return (client = new google.SpeechClient());
+  return (client = new SpeechClient());
 }
 
 export async function transcribeAudio(
   audio_url: string = "https://assembly.ai/sports_injuries.mp3",
+  fileName?: string,
 ) {
   // Set config for Diarization
   const diarizationConfig = {
@@ -27,7 +29,7 @@ export async function transcribeAudio(
   };
 
   const audio = {
-    content: fs.readFileSync(fileName).toString("base64"),
+    content: fs.readFileSync(fileName || audio_url).toString("base64"),
   };
 
   const request = {
@@ -37,7 +39,7 @@ export async function transcribeAudio(
 
   const [response] = await client.recognize(request);
   const transcription = response.results
-    .map((result) => result.alternatives[0].transcript)
+    .map((result: any) => result.alternatives[0].transcript)
     .join("\n");
   console.log(`Transcription: ${transcription}`);
   console.log("Speaker Diarization:");
@@ -47,7 +49,7 @@ export async function transcribeAudio(
   // However, the words list within an alternative includes all the words
   // from all the results thus far. Thus, to get all the words with speaker
   // tags, you only have to take the words list from the last result:
-  wordsInfo.forEach((a) =>
+  wordsInfo.forEach((a: any) =>
     console.log(` word: ${a.word}, speakerTag: ${a.speakerTag}`),
   );
 }

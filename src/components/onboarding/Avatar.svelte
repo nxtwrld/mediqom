@@ -8,7 +8,7 @@
 
 	interface Props {
 		size?: number;
-		url: string;
+		url?: string;
 		id: string;
 		editable?: boolean;
 	}
@@ -22,7 +22,7 @@
 
 	let avatarUrl: string | null = $state(null)
 	let uploading = $state(false)
-	let files: FileList = $state()
+	let files: FileList | undefined = $state()
 	let loaded: boolean = $state(false);
 
 	const dispatch = createEventDispatcher()

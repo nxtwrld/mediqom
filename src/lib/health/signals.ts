@@ -14,10 +14,13 @@ import {
  */
 export async function getHealthDocument(profileId: string): Promise<Document> {
   const profile = (await profiles.get(profileId)) as Profile;
+  if (!profile.healthDocumentId) {
+    throw new Error(`Profile ${profileId} has no health document ID`);
+  }
   let document = (await getDocument(profile.healthDocumentId)) as Document;
 
   // Check and perform signal migration if needed
-  document = SignalDataMigration.checkAndMigrate(document);
+  document = await SignalDataMigration.checkAndMigrate(document);
 
   return document;
 }
@@ -479,10 +482,10 @@ async function getRecentMedicationEvents(profileId: string): Promise<any[]> {
   const medicationEvents = await queryMetaHistory({
     patientId: profileId,
     entryTypes: [
-      "medication_current",
-      "medication_historical",
-      "adverse_reaction",
-      "medication_effectiveness",
+      MetaHistoryEntryType.MEDICATION_CURRENT,
+      MetaHistoryEntryType.MEDICATION_HISTORICAL,
+      MetaHistoryEntryType.ADVERSE_REACTION,
+      MetaHistoryEntryType.MEDICATION_EFFECTIVENESS,
     ],
     limit: 20,
     orderBy: "timestamp",
@@ -497,7 +500,7 @@ async function getClinicalTrends(profileId: string): Promise<any[]> {
 
   const trends = await queryMetaHistory({
     patientId: profileId,
-    entryTypes: ["measurement_vital", "measurement_lab"],
+    entryTypes: [MetaHistoryEntryType.MEASUREMENT_VITAL, MetaHistoryEntryType.MEASUREMENT_LAB],
     timeRange: {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
       end: new Date().toISOString(),

@@ -4,6 +4,12 @@ import type { Document } from "$lib/documents/types.d";
 
 type Universal = Document;
 
+// Placeholder store objects - TODO: implement proper stores
+const focus = { get: async (_uid: string) => undefined as Universal | undefined };
+const questions = { get: async (_uid: string) => undefined as Universal | undefined };
+const contacts = { get: async (_uid: string) => undefined as Universal | undefined };
+const reports = { get: async (_uid: string) => undefined as Universal | undefined };
+
 export type Item = {
   type: LinkTypeEnum;
   data: Universal;

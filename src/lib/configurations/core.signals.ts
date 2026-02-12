@@ -1,4 +1,3 @@
-import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   type: "array",
   description: `
@@ -90,4 +89,4 @@ export default {
     },
     required: ["signal", "date", "value", "valueType", "unit", "reference"],
   },
-} as FunctionDefinition;
+};

@@ -149,9 +149,9 @@ export function detectMode(): ChatMode {
   const currentProfile = get(profile);
   if (!currentProfile) return "patient";
 
-  // This would need to be implemented based on your user authentication
-  // For now, assuming it's based on profile ownership
-  return currentProfile.isOwnProfile ? "patient" : "clinical";
+  // TODO: This would need to be implemented based on your user authentication
+  // For now, defaulting to patient role
+  return "patient";
 }
 
 // Remove automatic profile subscription - let the chat component handle initialization

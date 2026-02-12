@@ -5,6 +5,8 @@
     import { confirm} from '$lib/ui';
     import contacts from '$lib/contact/store';
 	import ListSwipe from "$components/ui/ListSwipe.svelte";
+    import { t, _ } from '$lib/i18n';
+    import { get } from 'svelte/store';
 
     interface Props {
         shares?: ShareRecord[];
@@ -14,7 +16,8 @@
 
     async function removeShare(share: ShareRecord) {
         let contact = contacts.get(share.contact);
-        if (await confirm(`This will remove the shared item and ${contact.fn} will no longer be able to access it.`)) 
+        const message = get(_)('app.apps.confirm-remove-share', { values: { name: contact.fn } });
+        if (await confirm(message))
             store.remove(share.uid);
     }
 </script>
@@ -26,8 +29,8 @@
             <ListSwipe>
             <a href={share.href} class="a">
                 {share.title}
-                (on {date(share.created)})
-                Items linked: {share.links.length}
+                ({$t('app.apps.shared-on-date', { values: { date: date(share.created) } })})
+                {$t('app.apps.items-linked-count', { values: { count: share.links.length } })}
             </a>
             <div class="tools">
                 <button class="tool -negative" onclick={() => removeShare(share)}>

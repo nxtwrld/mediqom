@@ -3,6 +3,7 @@
     import type { AppRecord } from '$lib/apps/types.d';
     import { onMount } from 'svelte';
     import { logger } from '$lib/logging/logger';
+    import { t } from '$lib/i18n';
 
     interface Props {
         data: any;
@@ -44,7 +45,7 @@
         {#if id}
         <iframe src="{app.connect.uri}?id={id}" frameborder="0" class="app-iframe"></iframe>
         {:else}
-        Loading data...
+        {$t('app.apps.loading-data')}
         {/if}
 
 </div>

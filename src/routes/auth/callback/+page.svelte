@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { getClient } from '$lib/supabase';
 	import { session as CurrentSession } from '$lib/user';
+	import { t } from '$lib/i18n';
 
 	let status = $state('Processing authentication...');
 	let error = $state('');
@@ -21,7 +22,7 @@
 			const supabase = getClient();
 
 			if (accessToken && refreshToken) {
-				status = 'Setting up your session...';
+				status = $t('app.auth.setting-up-session');
 				const { data, error: sessionError } = await supabase.auth.setSession({
 					access_token: accessToken,
 					refresh_token: refreshToken,
@@ -38,7 +39,7 @@
 					return;
 				}
 			} else if (code) {
-				status = 'Exchanging authorization code...';
+				status = $t('app.auth.exchanging-code');
 				const { data, error: codeError } = await supabase.auth.exchangeCodeForSession(code);
 
 				if (codeError) {
@@ -52,19 +53,19 @@
 					return;
 				}
 			} else {
-				error = 'No authentication parameters found in URL.';
+				error = $t('app.auth.no-auth-params');
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'An unexpected error occurred.';
+			error = e instanceof Error ? e.message : $t('app.auth.unexpected-error');
 		}
 	});
 </script>
 
 <div class="auth-callback">
 	{#if error}
-		<h2>Authentication failed</h2>
+		<h2>{$t('app.auth.auth-failed')}</h2>
 		<p>{error}</p>
-		<a href="/auth">Try again</a>
+		<a href="/auth">{$t('app.auth.try-again')}</a>
 	{:else}
 		<p>{status}</p>
 	{/if}

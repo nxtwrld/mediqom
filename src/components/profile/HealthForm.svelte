@@ -6,6 +6,7 @@
     import TabHeads from '$components/ui/TabHeads.svelte';
     import TabHead from '$components/ui/TabHead.svelte';
     import TabPanel from '$components/ui/TabPanel.svelte';
+    import { untrack } from 'svelte';
 
     interface Props {
         config?: {
@@ -18,19 +19,10 @@
 
     let { config = true, data = $bindable({}) }: Props = $props();
 
-    // DEBUG: Log initial props
-    console.log('🔍 HealthForm - Initial props:', { 
-        config: $state.snapshot(config), 
-        data: $state.snapshot(data) 
-    });
-    console.log('🔍 HealthForm - FORM_DEFINITION keys:', FORM_DEFINITION.map(def => def.key));
-
     const FORM = FORM_DEFINITION.reduce((acc, prop) => {
         acc[prop.key] = prop;
         return acc;
     }, {} as { [key: string]: any });
-
-    console.log('🔍 HealthForm - FORM object keys:', Object.keys(FORM));
 
     // Compute TABS based on config
     let TABS = $derived([
@@ -59,51 +51,36 @@
             properties: ['chronicConditions']
         }
     ].reduce((acc, tab) => {
-        console.log(`🔍 TABS - Processing tab: ${tab.title}, config:`, $state.snapshot(config));
-        
         // if config has a value of true, show all properties
         if (config === true) {
-            console.log(`🔍 TABS - Config is true, adding tab: ${tab.title}`);
             acc.push(tab);
             return acc;
         }
         // if config has a data property (from modal), show all properties
         if (config && typeof config === 'object' && 'data' in config) {
-            console.log(`🔍 TABS - Config has data property, showing all properties for tab: ${tab.title}`);
             acc.push(tab);
             return acc;
         }
         // otherwise, filter the properties based on config.keys
         if (config && typeof config === 'object' && config.keys) {
-            console.log(`🔍 TABS - Config has keys:`, config.keys);
             const filteredTab = {
                 ...tab,
                 properties: tab.properties.filter(prop => config.keys.includes(prop))
             };
-            console.log(`🔍 TABS - Filtered tab ${tab.title}:`, filteredTab);
             if (filteredTab.properties.length > 0) {
                 acc.push(filteredTab);
             }
-        } else {
-            console.log(`🔍 TABS - Config doesn't match expected structure, skipping tab: ${tab.title}`);
         }
         return acc;
     }, [] as { title: string, properties: string[] }[]));
 
-    // DEBUG: Log computed TABS
-    $effect(() => {
-        console.log('🔍 HealthForm - Computed TABS:', $state.snapshot(TABS));
-        console.log('🔍 HealthForm - TABS length:', TABS.length);
-    });
-
+    
     function mapFromToInputs() {
-        console.log('🔍 mapFromToInputs - Called with config:', $state.snapshot(config), 'data:', $state.snapshot(data));
-        
         // Always initialize ALL fields from FORM_DEFINITION
         const result = FORM_DEFINITION.reduce((acc, prop) => {
             // Check for existing data from various sources
             let value = null;
-            
+
             // Check if config has specific values (for filtered forms)
             const configObj = (config && typeof config === 'object') ? config : null;
             if (configObj?.keys) {
@@ -116,13 +93,11 @@
             // Check if config has data property (our current modal structure)
             if (configObj && 'data' in configObj && configObj.data && configObj.data[prop.key]) {
                 value = configObj.data[prop.key];
-                console.log(`🔍 mapFromToInputs - Found value in config.data for ${prop.key}:`, value);
             }
 
             // Check direct data prop
             if (data && data[prop.key]) {
                 value = data[prop.key];
-                console.log(`🔍 mapFromToInputs - Found value in data for ${prop.key}:`, value);
             }
 
             // Initialize based on field type - ALWAYS create the field structure
@@ -138,7 +113,6 @@
                     }
                     return itemAcc;
                 }, {} as { [key: string]: any });
-                console.log(`🔍 mapFromToInputs - Initialized time-series ${prop.key}:`, acc[prop.key]);
                 return acc;
             }
 
@@ -150,17 +124,14 @@
                 } else {
                     acc[prop.key] = []; // Start with empty array, user can add items
                 }
-                console.log(`🔍 mapFromToInputs - Initialized array ${prop.key}:`, acc[prop.key]);
                 return acc;
             }
-            
+
             // Initialize regular fields
             acc[prop.key] = value || '';
-            console.log(`🔍 mapFromToInputs - Set ${prop.key}:`, acc[prop.key]);
             return acc;
         }, {} as { [key: string]: any });
 
-        console.log('🔍 mapFromToInputs - Final result:', result);
         return result;
     }
 
@@ -250,29 +221,36 @@
     let hasInitialized = $state(false);
     
     $effect(() => {
-        console.log('🔍 $effect[init] - Checking if inputs need update');
         const currentConfigSnapshot = $state.snapshot(config);
-        console.log('🔍 $effect[init] - config changed:', JSON.stringify(currentConfigSnapshot) !== JSON.stringify(lastConfigSnapshot));
-        console.log('🔍 $effect[init] - hasInitialized:', hasInitialized);
-        
+
         // Only reinitialize if config changed or this is the first initialization
         if (!hasInitialized || JSON.stringify(currentConfigSnapshot) !== JSON.stringify(lastConfigSnapshot)) {
-            console.log('🔍 $effect[init] - Updating inputs');
-            inputs = mapFromToInputs();
+            // Use untrack to read data without creating a reactive dependency
+            // This prevents the circular loop: inputs -> data -> inputs
+            inputs = untrack(() => mapFromToInputs());
             lastConfigSnapshot = currentConfigSnapshot;
             hasInitialized = true;
-            console.log('🔍 $effect[init] - New inputs:', $state.snapshot(inputs));
         }
     });
 
     // Update data when inputs change
+    // Track the last mapped data to avoid unnecessary updates
+    let lastMappedData = $state(null as any);
+
     $effect(() => {
-        console.log('🔍 $effect[data] - inputs changed, keys:', Object.keys(inputs));
         if (Object.keys(inputs).length > 0) {
             const newData = mapInputsToData(inputs);
-            console.log('🔍 $effect[data] - Mapped new data:', newData);
-            Object.assign(data, newData);
-            console.log('🔍 $effect[data] - Updated data:', $state.snapshot(data));
+            const newDataStr = JSON.stringify(newData);
+            const lastDataStr = lastMappedData ? JSON.stringify(lastMappedData) : '';
+
+            // Only update if data actually changed to prevent unnecessary re-renders
+            if (newDataStr !== lastDataStr) {
+                lastMappedData = newData;
+                // Use untrack to prevent this write from triggering other effects
+                untrack(() => {
+                    Object.assign(data, newData);
+                });
+            }
         }
     });
 
@@ -283,55 +261,53 @@
 
 <form class="form">
     <Tabs fixedHeight={true}>
-        {#if TABS.length > 1}
-            <TabHeads>
-                {#each TABS as tab}
-                    <TabHead>
-                        { $t('profile.health.tabs.' + tab.title)}
-                    </TabHead>
-                {/each}
-            </TabHeads>
-        {/if}
-        
-        <div class="tab-panels-wrapper">
-            <div class="tab-panels-grid">
-                {#each TABS as tab}
-                    <TabPanel>
+        {#snippet tabHeads()}
+            {#if TABS.length > 1}
+                <TabHeads>
+                    {#each TABS as tab}
+                        <TabHead>
+                            { $t('profile.health.tabs.' + tab.title)}
+                        </TabHead>
+                    {/each}
+                </TabHeads>
+            {/if}
+        {/snippet}
+
+        {#each TABS as tab}
+            <TabPanel>
                 {#each tab.properties as propKey}
-                {@const prop = FORM[propKey]}
-                {#if prop}
-                <div>
-                    {#if prop.type === 'time-series' && prop.items && inputs[prop.key]}
-                        {#each prop.items as item}
-                            {#if item.type == 'date'}
-                                <!-- Date fields are handled elsewhere -->
-                            {:else}
-                                <HealthFormField prop={item} bind:data={inputs[prop.key][item.key]} />
-                            {/if}
-                        {/each}
-                    {:else if prop.type === 'array' && prop.items}
-                        {#if inputs[prop.key] && inputs[prop.key].length > 0}
-                            {#each inputs[prop.key] as _, index}
+                    {@const prop = FORM[propKey]}
+                    {#if prop}
+                        <div>
+                            {#if prop.type === 'time-series' && prop.items && inputs[prop.key]}
                                 {#each prop.items as item}
-                                    <HealthFormField prop={item} bind:data={inputs[prop.key][index][item.key]} />
+                                    {#if item.type == 'date'}
+                                        <!-- Date fields are handled elsewhere -->
+                                    {:else}
+                                        <HealthFormField prop={item} bind:data={inputs[prop.key][item.key]} />
+                                    {/if}
                                 {/each}
-                            {/each}
-                        {/if}
-                        <button type="button" class="button" onclick={() => addArrayItem(prop)}>
-                            {inputs[prop.key] && inputs[prop.key].length > 0 ? 'Add Another' : 'Add'} {prop.key}
-                        </button>
+                            {:else if prop.type === 'array' && prop.items}
+                                {#if inputs[prop.key] && inputs[prop.key].length > 0}
+                                    {#each inputs[prop.key] as _, index}
+                                        {#each prop.items as item}
+                                            <HealthFormField prop={item} bind:data={inputs[prop.key][index][item.key]} />
+                                        {/each}
+                                    {/each}
+                                {/if}
+                                <button type="button" class="button" onclick={() => addArrayItem(prop)}>
+                                    {inputs[prop.key] && inputs[prop.key].length > 0 ? $t('profile.health.add-another') : $t('profile.health.add')} {$t('profile.health.props.' + prop.key)}
+                                </button>
+                            {:else}
+                                <HealthFormField {prop} bind:data={inputs[prop.key]} />
+                            {/if}
+                        </div>
                     {:else}
-                        <HealthFormField {prop} bind:data={inputs[prop.key]} />
+                        ----- Unknown property: {propKey} -----
                     {/if}
-                </div>    
-                {:else }
-                    ----- Unknown property: {propKey} -----
-                {/if}    
                 {/each}
             </TabPanel>
-                {/each}
-            </div>
-        </div>
+        {/each}
     </Tabs>
 </form>
 

@@ -11,8 +11,8 @@ import {
 } from "../base/base-tool";
 import type { AssembledContext } from "../base/types";
 import { logger } from "$lib/logging/logger";
-import { profileContextManager } from "$lib/context/context-manager";
-import { contextAssembler } from "$lib/context/context-assembler";
+import { profileContextManager } from "$lib/context/integration/profile-context";
+import { contextAssembler } from "$lib/context/context-assembly/context-composer";
 
 export class GetAssembledContextTool extends BaseMedicalTool {
   getToolDefinition(): MCPTool {
@@ -58,7 +58,7 @@ export class GetAssembledContextTool extends BaseMedicalTool {
 
       // Get context stats
       const contextStats =
-        profileContextManager.getProfileContextStats(profileId);
+        profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -92,8 +92,8 @@ export class GetAssembledContextTool extends BaseMedicalTool {
 
       const contextData: AssembledContext = {
         summary: assembledContext.summary,
-        keyFindings: assembledContext.keyPoints.map((kp) => kp.text),
-        relevantDocuments: assembledContext.relevantDocuments.map((doc) => ({
+        keyFindings: assembledContext.keyPoints.map((kp: any) => kp.text),
+        relevantDocuments: assembledContext.relevantDocuments.map((doc: any) => ({
           document: {
             id: doc.documentId,
             metadata: { type: doc.type, date: doc.date },
@@ -104,13 +104,13 @@ export class GetAssembledContextTool extends BaseMedicalTool {
         })),
         temporalContext: {
           recent: assembledContext.keyPoints
-            .filter((kp) => this.isRecent(kp.date))
-            .map((kp) => kp.text),
+            .filter((kp: any) => this.isRecent(kp.date))
+            .map((kp: any) => kp.text),
           historical: assembledContext.keyPoints
-            .filter((kp) => !this.isRecent(kp.date))
-            .map((kp) => kp.text),
+            .filter((kp: any) => !this.isRecent(kp.date))
+            .map((kp: any) => kp.text),
         },
-        medicalContext: assembledContext.medicalContext,
+        medicalContext: assembledContext.medicalContext as any,
         metadata: {
           assemblyTime: Date.now(),
           documentCount: assembledContext.relevantDocuments.length,

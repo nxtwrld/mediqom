@@ -48,37 +48,37 @@
   {
     "key": "smokingStatus",
     "type": "select",
-    "options": ["Never smoked", "Former smoker", "Current smoker"]
+    "options": ["never", "former", "current"]
   },
   {
     "key": "alcoholConsumption",
     "type": "select",
-    "options": ["None", "Occasional", "Moderate", "Heavy"]
+    "options": ["none", "occasional", "moderate", "heavy"]
   },
   {
     "key": "physicalActivity",
     "type": "select",
-    "options": ["Sedentary", "Light", "Moderate", "Active", "Very active"]
+    "options": ["sedentary", "light", "moderate", "active", "very_active"]
   },
   {
     "key": "diet",
     "type": "select",
     "options": [
-      "Vegetarian",
-      "Vegan",
-      "Pescatarian",
-      "Keto",
-      "Paleo",
-      "Mediterranean",
-      "Low-carb",
-      "Low-fat",
-      "Low-sodium",
-      "Low-sugar",
-      "Gluten-free",
-      "Dairy-free",
-      "Nut-free",
-      "Soy-free",
-      "None"
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "keto",
+      "paleo",
+      "mediterranean",
+      "low_carb",
+      "low_fat",
+      "low_sodium",
+      "low_sugar",
+      "gluten_free",
+      "dairy_free",
+      "nut_free",
+      "soy_free",
+      "none"
     ]
   },
   {

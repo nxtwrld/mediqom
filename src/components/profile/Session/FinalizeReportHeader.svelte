@@ -1,7 +1,8 @@
 <script lang="ts">
     import { profile } from '$lib/profiles';
+    import { t } from '$lib/i18n';
 
-    
+
     interface Props {
         report: any;
     }
@@ -11,15 +12,15 @@
 </script>
 
 
-       
+
 <div class="report-header">
-    
-    <h1>Zpráva o ambulatním vyšetření</h1>
-    
-<div><strong>Pacient:</strong> {$profile.fullName} </div>
-<div><strong>Bydliště:</strong> {$profile.vcard?.address?.[0]} </div>
+
+    <h1>{$t('session.report.title')}</h1>
+
+<div><strong>{$t('session.report.patient')}</strong> {$profile.fullName} </div>
+<div><strong>{$t('session.report.residence')}</strong> {$profile.vcard?.address?.[0]} </div>
 <br/>
-<div><strong>Datum:</strong> {report.date.toLocaleDateString()}</div>
+<div><strong>{$t('session.report.date')}</strong> {report.date.toLocaleDateString()}</div>
 </div>
 
 

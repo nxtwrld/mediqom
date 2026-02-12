@@ -21,11 +21,11 @@
     }
 
     type Property = {
-        key: string;
-        signal: string;
-        test: string;
-        source: any;
-        value: any;
+        key?: string;
+        signal?: string;
+        test?: string;
+        source?: any;
+        value?: any;
         fn?: (v: any) => any;
         reference?: string;
         urgency?: number;
@@ -114,7 +114,7 @@
     }
 
     let signal = $derived(getSignalFromProperty(property));
-    let defaultSetup = $derived(properties[signal.signal?.toLowerCase().replace(/ /ig, '_')] || {});
+    let defaultSetup = $derived((signal.signal && properties[signal.signal.toLowerCase().replace(/ /ig, '_')]) || {});
     //$: ageOfEntry = (signal.date) ? durationFrom(signal.date) : undefined;
     // how much is the value expiring  1== recent  < 1 == older
     //$: isExpired = (signal.date) ? durationFromFormatted('days', signal.date) -  defaultSetup.valueExpirationInDays > 0 : false;

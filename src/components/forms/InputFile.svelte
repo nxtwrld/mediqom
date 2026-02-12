@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createBubbler, stopPropagation } from 'svelte/legacy';
+    import { t } from '$lib/i18n';
 
     const bubble = createBubbler();
 
@@ -19,12 +20,12 @@
 
     let {
         value = $bindable(''),
-        placeholder = 'Files',
+        placeholder = $t('app.forms.files'),
         accept = undefined,
         id = (window as any)?.crypto.getRandomValues(new Uint32Array(1))[0].toString(16),
         name = id,
         required = false,
-        label = 'Browse file',
+        label = $t('app.forms.browse-file'),
         style = '',
         class: className = 'button',
         children

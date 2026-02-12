@@ -301,7 +301,7 @@ export class WorkflowCLI {
       // List available steps
       const summary = replay.getWorkflowSummary();
       console.log(`\n📋 Available steps in ${summary.recordingId}:\n`);
-      summary.steps.forEach((step, index) => {
+      summary.steps.forEach((step: any, index: number) => {
         console.log(`  ${index + 1}. ${step.stepName} (${step.duration}ms)`);
       });
       console.log(`\nUse --step <step_name> to extract a specific step.`);

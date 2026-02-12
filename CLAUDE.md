@@ -35,6 +35,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run mobile:android` - Open Android project in Android Studio
 - `npm run mobile:dev` - Start mobile development server
 
+
+## Rule: always use qmd before reading files
+
+Before reading files or exploring directories, always use qmd to search for information in local projects.
+
+Available tools:
+- `qmd search “query”` - fast keyword search (BM25)
+- `qmd query “query”` - hybrid search with reranking (best quality)
+- `qmd vsearch “query”` - semantic vector search
+- `qmd get <file>` - retrieve a specific document
+
+Use qmd search for quick lookups and qmd query for complex questions.
+
+Use Read/Glob only if qmd doesn’t return enough results.
+Once this is in place, Claude will always search the index first. It will only fall back to reading full files when it genuinely can’t find what it needs through the
+index.
+
 ## Architecture Overview
 
 ### Main Application Structure
@@ -246,6 +263,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Localisation
 
 - **localisation library**: Using $t() key translation from `src/lib/i18n`
+- **translator agent**: Use the `translator` sub-agent to scan Svelte files for hardcoded text and convert them to `$t()` calls. The agent extracts text from element content, aria-labels, placeholders, and titles, generates keys following `namespace.category.kebab-case` conventions, and updates both Svelte and JSON locale files. Czech/German values are left empty for human review. Invoke via `/translate <file-or-directory>`.
 
 ## UI event
 

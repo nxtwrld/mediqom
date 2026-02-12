@@ -15,6 +15,7 @@
     import { AnalysisMerger } from '$lib/session-deprecated/analysis-merger';
     import { sessionStorage, loadSessionData, removeSessionData, hasStoredSessionData, type StoredSessionData } from '$lib/session-deprecated/local-storage';
     import { log } from '$lib/logging/logger';
+    import { t } from '$lib/i18n';
   
     
     const MIN_AUDIO_SIZE: number = 10000 * 8;
@@ -1148,10 +1149,10 @@
                 <use href="/icons.svg#restore"></use>
             </svg>
             <div class="notice-text">
-                <strong>Session Restored</strong>
-                <span>Your previous session data has been restored from local storage (Session: {dataRestoredFromSessionId.substring(0, 8)}...)</span>
+                <strong>{$t('session.blocks.session-restored')}</strong>
+                <span>{$t('session.blocks.session-restored-description')} (Session: {dataRestoredFromSessionId.substring(0, 8)}...)</span>
             </div>
-            <button class="notice-dismiss" onclick={() => { hasRestoredData = false; dataRestoredFromSessionId = null; }} aria-label="Dismiss notification">
+            <button class="notice-dismiss" onclick={() => { hasRestoredData = false; dataRestoredFromSessionId = null; }} aria-label={$t('aria.session.dismiss-notification')}>
                 <svg>
                     <use href="/icons.svg#x"></use>
                 </svg>
@@ -1161,7 +1162,7 @@
 {/if}
 
 {#if view !== Views.report}
-    <div class="audio-recorder" class:-running={view != Views.start} class:-active={audioState === AudioState.listening || audioState === AudioState.speaking}>
+    <div class="audio-recorder" class:-running={view != Views.start} class:-active={audioState === AudioState.Listening || audioState === AudioState.Speaking}>
         <AudioButton 
             bind:speechChunks={speechChunks} 
             bind:state={audioState}
@@ -1200,11 +1201,11 @@
 {#if view === Views.start}
     <div class="canvas canvas-start">
         <div>
-            <button class="uhint" onclick={testAnalyze} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); testAnalyze(); } }} aria-label="Test analysis with sample data">
-                {#if audioState === AudioState.listening || audioState === AudioState.speaking}
-                    Listening...
+            <button class="uhint" onclick={testAnalyze} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); testAnalyze(); } }} aria-label={$t('aria.session.test-analysis')}>
+                {#if audioState === AudioState.Listening || audioState === AudioState.Speaking}
+                    {$t('session.blocks.listening')}
                 {:else}
-                    Start recording your session by clicking the microphone button.
+                    {$t('session.blocks.start-recording')}
                 {/if}
             </button>
 
@@ -1218,22 +1219,22 @@
                         <svg>
                             <use href="/icons-o.svg#diagnosis"></use>
                         </svg>
-                        <h3 class="h3">Assisted Analysis</h3>
+                        <h3 class="h3">{$t('session.blocks.assisted-analysis')}</h3>
                         {#if finalizeReportState === 'processing'}
                             <div class="loader">
-                                <div>Finalizing</div> <LoaderThinking />
+                                <div>{$t('session.blocks.finalizing')}</div> <LoaderThinking />
                             </div>
                         {:else}
-                            <button class="button -primary" onclick={finalizeReport}>Finalize Report</button>
+                            <button class="button -primary" onclick={finalizeReport}>{$t('session.blocks.finalize-report')}</button>
                         {/if}
-                        
+
                         <!-- Session Management Controls -->
                         <button class="button -danger" onclick={() => {
-                            const confirmed = confirm('Are you sure you want to end this session? All data will be cleared.');
+                            const confirmed = confirm($t('session.blocks.end-session-confirm'));
                             if (confirmed) {
                                 endSession();
                             }
-                        }}>End Session</button>
+                        }}>{$t('session.blocks.end-session')}</button>
 
                 </div>
                 <div class="dashboard">
@@ -1248,7 +1249,7 @@
                     <svg>
                         <use href="/icons-o.svg#transcript"></use>
                     </svg>
-                    <h3 class="h3">Transcript</h3>
+                    <h3 class="h3">{$t('session.blocks.transcript')}</h3>
                 </div>
 
                 {#if analysis && analysis.conversation}
@@ -1267,11 +1268,11 @@
                 <svg>
                     <use href="/icons-o.svg#report"></use>
                 </svg>
-                <h3 class="h3">Report</h3>
-                <button class="button" onclick={backToAnalysis}>Back</button>
-                <button class="button" onclick={copyReportText}>Copy</button>
-                <button class="button" onclick={printReport}>Print</button>
-                <button class="button -primary">Save</button>
+                <h3 class="h3">{$t('session.blocks.report')}</h3>
+                <button class="button" onclick={backToAnalysis}>{$t('session.blocks.back')}</button>
+                <button class="button" onclick={copyReportText}>{$t('session.blocks.copy')}</button>
+                <button class="button" onclick={printReport}>{$t('session.blocks.print')}</button>
+                <button class="button -primary">{$t('session.blocks.save')}</button>
             </div>
             <div class="report-background">
                 <div class="report-page">

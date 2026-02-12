@@ -62,7 +62,7 @@
                 <strong>{app.requires.join(', ')}</strong>
             </div>
             <div>
-                <h5>Permissions:</h5>
+                <h5>{$t('app.apps.permissions')}:</h5>
                 {#each app.permissions as permission}
                     <strong>{$t('app-connect.permissions.'+permission)}</strong>
 
@@ -99,12 +99,12 @@
     {/if}
 
     <div class="buttons-row">
-        <button class="button" onclick={() => dispatch('abort')}>{ $t('app.cancel') }</button>
+        <button class="button" onclick={() => dispatch('abort')}>{ $t('app.buttons.cancel') }</button>
 
         {#if !reviewData}
-            <button class="button -primary" onclick={() => reviewData = !reviewData}>{ $t('app.continue') }</button>
+            <button class="button -primary" onclick={() => reviewData = !reviewData}>{ $t('app.buttons.continue') }</button>
         {:else}
-            <button class="button -primary" onclick={confirm}>{ $t('app-cconect.get') }</button>
+            <button class="button -primary" onclick={confirm}>{ $t('app-connect.get') }</button>
         {/if}
     </div>
 </div>

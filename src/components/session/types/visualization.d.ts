@@ -107,6 +107,14 @@ export interface ActionNode {
   recommendation?: string;
   type?: "confirmatory" | "exclusionary" | "exploratory"; // Legacy field
   connectionType?: "symptom_to_diagnosis" | "diagnosis_to_treatment"; // Legacy field
+  description?: string;
+  expectedAnswerType?: string;
+  answerContext?: string;
+  severity?: string;
+  alertMessage?: string;
+  reasoning?: string;
+  clinicalContext?: string;
+  followUpActions?: string[];
 }
 
 // Unified relationship structure (embedded in nodes)

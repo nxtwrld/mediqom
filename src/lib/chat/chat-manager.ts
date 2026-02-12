@@ -1101,7 +1101,7 @@ export class ChatManager {
       id: question.id || generateId(),
       title: question.question,
       messageKey: "", // Not using translation key for dynamic question
-      acceptLabelKey: "chat.clarifyingQuestion.continue",
+      acceptLabelKey: "app.buttons.continue",
       declineLabelKey: "", // No decline for questions
       data: question,
       timestamp: new Date(),

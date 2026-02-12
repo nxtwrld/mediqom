@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SearchDocumentsTool } from "./tools/search-documents";
 import { medicalExpertTools } from "./medical-expert-tools";
 import type { Document } from "$lib/documents/types.d";
+import { DocumentType } from "$lib/documents/types.d";
 
 // Mock document store
 vi.mock("$lib/documents", () => ({
@@ -123,7 +124,7 @@ const integrationTestDocuments: Document[] = [
     ],
     created_at: "2024-01-15T09:30:00Z",
     profile_id: "test-profile",
-    type: "document",
+    type: DocumentType.document,
   },
   {
     id: "imaging-2024-001",
@@ -151,7 +152,7 @@ const integrationTestDocuments: Document[] = [
     ],
     created_at: "2024-01-20T14:15:00Z",
     profile_id: "test-profile",
-    type: "document",
+    type: DocumentType.document,
   },
   {
     id: "med-2024-001",
@@ -184,7 +185,7 @@ const integrationTestDocuments: Document[] = [
     ],
     created_at: "2024-01-25T11:00:00Z",
     profile_id: "test-profile",
-    type: "document",
+    type: DocumentType.document,
   },
   {
     id: "lab-2023-001",
@@ -200,7 +201,7 @@ const integrationTestDocuments: Document[] = [
     medicalTerms: ["blood", "glucose", "cholesterol", "historical"],
     created_at: "2023-08-15T10:00:00Z",
     profile_id: "test-profile",
-    type: "document",
+    type: DocumentType.document,
   },
 ];
 
@@ -520,7 +521,8 @@ describe("Search Documents Integration Tests", () => {
         // Should not reach here
         expect(true).toBe(false);
       } catch (error) {
-        expect(error.message).toContain("Profile not found");
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        expect(errorMessage).toContain("Profile not found");
       }
     });
 

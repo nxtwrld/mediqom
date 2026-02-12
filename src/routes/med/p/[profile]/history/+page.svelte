@@ -1,5 +1,6 @@
 <script lang="ts">
     import { type Profile } from '$lib/types.d';
+    import { t } from '$lib/i18n';
 
     interface Props {
         data: {
@@ -10,5 +11,5 @@
     let { data }: Props = $props();
     const profile: Profile = data.profile;
 </script>
- 
-<h1>History</h1>
+
+<h1>{$t('app.nav.history')}</h1>

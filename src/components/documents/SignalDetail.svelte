@@ -97,11 +97,13 @@
 {#if kb}
 
 <Tabs bind:this={tabs}>
-    <TabHeads>
-        <TabHead>Overview</TabHead>
-        <TabHead>Trends</TabHead>
-        <TabHead>Info</TabHead>
-    </TabHeads>
+    {#snippet tabHeads()}
+        <TabHeads>
+            <TabHead>Overview</TabHead>
+            <TabHead>Trends</TabHead>
+            <TabHead>Info</TabHead>
+        </TabHeads>
+    {/snippet}
     <TabPanel>
 
         <div class="status {status}">

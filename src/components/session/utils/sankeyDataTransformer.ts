@@ -578,7 +578,7 @@ function getActionColumn(
   let totalColumn = 0;
   let count = 0;
 
-  relationships.forEach((rel) => {
+  relationships.forEach((rel: any) => {
     const relatedNode = nodeMap.get(rel.nodeId);
     if (relatedNode) {
       totalColumn += relatedNode.column;

@@ -1,6 +1,5 @@
 <script lang="ts">
-
-
+    import { t } from '$lib/i18n';
 
     interface Props {
         value: number;
@@ -57,17 +56,17 @@
     <figure class="bar">
         <div class="bar__low" class:active={status == 'low'}  style="width: {referenceRangeLowPercent}%">
             {#if labels}
-                LOW
+                {$t('charts.reference-range.low')}
             {/if}
         </div>
         <div class="bar__ok" class:active={status == 'ok'} style="width: {referenceRangeOkPercent }%">
             {#if labels}
-            NORMAL
+                {$t('charts.reference-range.normal')}
             {/if}
         </div>
         <div class="bar__high" class:active={status == 'high'} style="width: {referenceRangeHighPercent}%">
             {#if labels}
-            HIGH
+                {$t('charts.reference-range.high')}
             {/if}
         </div>
         <div class="bar__indicator" style="left: {referenceRangeValuePercent}%"></div>
@@ -128,6 +127,7 @@
         align-items: center;
         justify-content: center;
         font-weight: bold;
+        text-transform: uppercase;
     }
     .bar__low.active,
     .bar__ok.active,

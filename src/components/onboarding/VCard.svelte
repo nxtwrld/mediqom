@@ -111,29 +111,39 @@
     let { data = $bindable(), profileForm }: Props = $props();
 
 
-    function addItem(id) {
-        vcard[id] = [...vcard[id], {
-            type: 'work',
-            value: ''
-        }]
+    function addItem(id: 'email' | 'tel' | 'adr') {
+        if (id === 'adr') {
+            vcard[id] = [...vcard[id], {
+                type: 'work',
+                street: '',
+                city: '',
+                state: '',
+                postalCode: ''
+            }] as any;
+        } else {
+            vcard[id] = [...vcard[id], {
+                type: 'work',
+                value: ''
+            }] as any;
+        }
     }
 
-    function removeItem(id, index) {
-        vcard[id].splice(index, 1);
-        vcard[id] = [...vcard[id]];
+    function removeItem(id: 'email' | 'tel' | 'adr', index: number) {
+        (vcard[id] as any).splice(index, 1);
+        vcard[id] = [...vcard[id]] as any;
     }
     run(() => {
         Object.entries(vcard).forEach(([key, value]) => {
             const path = key.split('__');
             if (path.length === 1) {
-                data.vcard[path[0]] = value;
+                (data.vcard as any)[path[0]] = value;
                 return;
             }
-            if (!data.vcard[path[0]]) {
-                data.vcard[path[0]] = {};
+            if (!(data.vcard as any)[path[0]]) {
+                (data.vcard as any)[path[0]] = {};
             }
-            data.vcard[path[0]][path[1]] = value;
-        })        
+            (data.vcard as any)[path[0]][path[1]] = value;
+        })
         //logger.api.debug('VCard data:', data.vcard);
     });
 </script>
@@ -143,7 +153,7 @@
 
 <div class="tab-heads">
 {#each Object.keys(formSets) as key}
-    <button  onclick={() => currentSet = key} class:-active={currentSet == key}>{key}</button>
+    <button  onclick={() => currentSet = key as 'n' | 'contacts' | 'adr'} class:-active={currentSet == key}>{key}</button>
 {/each}
 </div>
 
@@ -152,12 +162,12 @@
         <!--label for={id}>{label}</label-->
         {#if type == 'text'}
         <div class="input">
-        <input id={id} name={id} type="text" bind:value={vcard[bind]} placeholder={label} />
+        <input id={id} name={id} type="text" bind:value={(vcard as any)[bind]} placeholder={label} />
     </div>
         {:else if type == 'array'}
         <div class="form-block">
             <h4 class="h4">{label}</h4>
-            {#each vcard[bind] as arr, index}
+            {#each (vcard as any)[bind] as arr, index}
             <div class="flex contact-item">
                 <div class="input">
                 <select id={id + 'type' +index} name={id + 'type' +index}  bind:value={arr.type}>
@@ -181,14 +191,14 @@
                     </div>
                 {/each}
                 </div>
-                <button class="button" onclick={() => removeItem(id, index)}>
+                <button class="button" aria-label="Remove item" onclick={() => removeItem(id as 'email' | 'tel' | 'adr', index)}>
                     <svg>
                         <use href="/icons.svg#close" />
                     </svg>
                 </button>
             </div>
             {/each}
-            <button class="button" onclick={() => addItem(id)}>Add</button>
+            <button class="button" onclick={() => addItem(id as 'email' | 'tel' | 'adr')}>Add</button>
         </div>
         {/if}
 

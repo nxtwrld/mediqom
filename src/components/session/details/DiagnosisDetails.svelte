@@ -50,9 +50,9 @@
         if (!allNodes?.symptoms) return [];
         
         // Find all symptoms that have a relationship supporting this diagnosis
-        return allNodes.symptoms.filter(symptom => 
-            symptom.relationships?.some(rel => 
-                rel.nodeId === diagnosisId && 
+        return allNodes.symptoms.filter((symptom: any) =>
+            symptom.relationships?.some((rel: any) =>
+                rel.nodeId === diagnosisId &&
                 ['supports', 'suggests', 'indicates'].includes(rel.relationship.toLowerCase())
             )
         );
@@ -157,8 +157,8 @@
                             onmouseenter={() => handleNodeHover(symptom.id, true)}
                             onmouseleave={() => handleNodeHover(symptom.id, false)}
                         >
-                            <SymptomNodeComponent 
-                                node={{ id: symptom.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                            <SymptomNodeComponent
+                                node={{ id: symptom.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                 {symptom}
                                 isSelected={false}
                                 isMobile={false}

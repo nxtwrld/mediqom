@@ -120,19 +120,19 @@
             {/if}
             <div class="actions">
                 <button onclick={() => deleteBlock(block.id)} class="danger" aria-label="Delete block"><svg>
-                    <use href="/icons.svg#minus">
+                    <use href="/icons.svg#minus"></use>
                 </svg></button>
                 <button onclick={() => moveBlock(block.id, -1)} aria-label="Move block up"><svg>
-                    <use href="/icons.svg#arrow-round-up">
+                    <use href="/icons.svg#arrow-round-up"></use>
                 </svg></button>
                 <button onclick={() => moveBlock(block.id, 1)} aria-label="Move block down"><svg>
-                    <use href="/icons.svg#arrow-round-down">
+                    <use href="/icons.svg#arrow-round-down"></use>
                 </svg></button>
             </div>
         </div>
         <button class="add" aria-label="Add new block" onclick={() => addBlock(index+1)}>
             <svg>
-                <use href="/icons.svg#plus">
+                <use href="/icons.svg#plus"></use>
             </svg>
         </button>
         {/if}

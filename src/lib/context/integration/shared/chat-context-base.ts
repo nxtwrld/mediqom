@@ -44,10 +44,10 @@ export abstract class BaseChatContextService {
       const startTime = performance.now();
 
       // Check if context is available
-      const contextData = profileContextManager.getProfileContext(
+      const isReady = profileContextManager.isContextReady(
         options.profileId,
       );
-      if (!contextData) {
+      if (!isReady) {
         logger.namespace("ChatContext").warn("No context available for chat", {
           profileId: options.profileId,
         });
@@ -403,7 +403,7 @@ export abstract class BaseChatContextService {
   /**
    * Create empty context result
    */
-  private createEmptyContextResult(): ChatContextResult {
+  protected createEmptyContextResult(): ChatContextResult {
     return {
       availableTools: this.getAvailableTools(),
       contextSummary:

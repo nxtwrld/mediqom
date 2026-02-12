@@ -104,24 +104,25 @@ export class DynamicSignalRegistry {
     for (const [signalName, definition] of Object.entries(
       propertiesDefinition as any,
     )) {
+      const def = definition as any;
       const signalDef: SignalDefinition = {
         name: signalName,
-        description: definition.description || signalName,
-        unit: definition.unit || "",
+        description: def.description || signalName,
+        unit: def.unit || "",
         normalRange: {
-          min: definition.min,
-          max: definition.max,
-          reference: definition.reference || "",
+          min: def.min,
+          max: def.max,
+          reference: def.reference || "",
         },
-        category: definition.category || "laboratory",
-        synonyms: definition.synonyms || [],
+        category: def.category || "laboratory",
+        synonyms: def.synonyms || [],
       };
 
       this.knownSignals.set(this.normalizeSignalName(signalName), signalDef);
 
       // Index synonyms
-      if (definition.synonyms) {
-        definition.synonyms.forEach((synonym: string) => {
+      if (def.synonyms) {
+        def.synonyms.forEach((synonym: string) => {
           this.knownSignals.set(this.normalizeSignalName(synonym), signalDef);
         });
       }

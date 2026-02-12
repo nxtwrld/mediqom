@@ -5,6 +5,8 @@
  * in context assembly to stay within model limits.
  */
 
+import type { KeyPoint } from "../types";
+
 export class TokenOptimizer {
   /**
    * Estimate token count from text (rough approximation)
@@ -126,14 +128,9 @@ export class TokenOptimizer {
    * Optimize key points to fit within token budget
    */
   static optimizeKeyPoints(
-    keyPoints: Array<{
-      text: string;
-      type: string;
-      confidence: number;
-      date?: string;
-    }>,
+    keyPoints: KeyPoint[],
     maxTokens: number,
-  ): Array<{ text: string; type: string; confidence: number; date?: string }> {
+  ): KeyPoint[] {
     if (!keyPoints.length) return [];
 
     // Sort by confidence (higher first)

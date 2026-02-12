@@ -358,6 +358,10 @@ export interface QOMVisualizationConfig {
         strokeWidth: number;
         opacity: number;
         radius?: number;
+        strokeDasharray?: string;
+        glow?: string;
+        innerStroke?: string;
+        pattern?: string;
       };
     };
     links: {

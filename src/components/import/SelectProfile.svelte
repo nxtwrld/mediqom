@@ -41,13 +41,13 @@
     });
 </script>
 
-<button 
-class="button selected-profile link-{linkFrom}" 
-    class:-new={selected.id === PROFILE_NEW_ID }
+<button
+class="button selected-profile link-{linkFrom}"
+    class:-new={selected!.id === PROFILE_NEW_ID }
     onclick={() => showSelectProfileModal = true}
     transition:scale={{delay: 1000}}
     >
-    {selected.fullName} {#if selected.insurance?.number}({selected.insurance.number}){/if}
+    {selected!.fullName} {#if selected!.insurance?.number}({selected!.insurance.number}){/if}
 </button>
 
 {#if showSelectProfileModal}
@@ -55,14 +55,14 @@ class="button selected-profile link-{linkFrom}"
     <ul class="list">
         {#if profilesFound.length == 0}
         
-            <li><button value="NEW" class:-selected={selected.id == PROFILE_NEW_ID }>
+            <li><button value="NEW" class:-selected={selected!.id == PROFILE_NEW_ID }>
                 {capitalizeFirstLetters(contact.fullName)} - {$t('app.profiles.add')}
             </button></li>
         {/if}
         {#each $profiles as profile}
-            <li><button 
-                onclick={() => selectProfile(profile)}  
-                class:-selected={(selected.id == profile.id)}>
+            <li><button
+                onclick={() => selectProfile(profile)}
+                class:-selected={(selected!.id == profile.id)}>
                     <ProfileImage {profile} />
                 
                     {profile.fullName} {#if profile.insurance?.number}({profile.insurance.number}){/if}

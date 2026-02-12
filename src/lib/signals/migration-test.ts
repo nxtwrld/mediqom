@@ -105,7 +105,7 @@ export class SignalMigrationTester {
       return {
         testName: "Basic Migration",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -187,7 +187,7 @@ export class SignalMigrationTester {
       return {
         testName: "Data Preservation",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -235,7 +235,7 @@ export class SignalMigrationTester {
       return {
         testName: "Idempotent Migration",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -289,7 +289,7 @@ export class SignalMigrationTester {
       return {
         testName: "Edge Cases",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -327,7 +327,7 @@ export class SignalMigrationTester {
       return {
         testName: "Migration Performance",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -375,7 +375,7 @@ export class SignalMigrationTester {
       return {
         testName: "Backwards Compatibility",
         passed: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

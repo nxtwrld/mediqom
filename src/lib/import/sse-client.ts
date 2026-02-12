@@ -341,7 +341,7 @@ export class SSEImportClient {
   }
 
   // Make SSE request with progress tracking
-  private async makeSSERequest<T>(
+  public async makeSSERequest<T>(
     endpoint: string,
     data: any,
     fileId: string,

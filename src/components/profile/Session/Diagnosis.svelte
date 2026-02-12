@@ -5,6 +5,7 @@
     import { ANALYZE_STEPS } from '$lib/types.d';
     import PropertyTile from '../PropertyTile.svelte';
     import { log } from '$lib/logging/logger';
+    import { t } from '$lib/i18n';
 
     interface Props {
         analysis: any;
@@ -219,7 +220,7 @@
 
 {#if analysis.signals}
 <div class="block block-results">
-    <h4 class="h4">Signals</h4>
+    <h4 class="h4">{$t('session.diagnosis.signals')}</h4>
     <div class="block-grid">
         {#each analysis.signals as signal}
             <PropertyTile property={signal} />
@@ -230,14 +231,14 @@
 
 {#if analysis.symptoms}
 <div class="block block-symptoms">
-    <h4 class="h4">Symptoms</h4>
+    <h4 class="h4">{$t('session.diagnosis.symptoms')}</h4>
     {#each getSortedSymptoms() as symptom}
     <div class="list-item severity -{symptom.severity}">
         <div class="list-title">{symptom.name}</div>
         <div>{symptom.duration}</div>
         <div>{symptom.bodyParts}</div>
         <div class="actions">
-            <button class="list-action remove" aria-label="Remove symptom" onclick={stopPropagation(() => removeItem(symptom, analysis.symptoms))}>
+            <button class="list-action remove" aria-label={$t('aria.session.remove-symptom')} onclick={stopPropagation(() => removeItem(symptom, analysis.symptoms))}>
                 <svg>
                     <use href="/icons.svg#minus"></use>
                 </svg>
@@ -251,7 +252,7 @@
 <!-- Enhanced Diagnosis Section -->
 {#if analysis.diagnosis}
 <div class="block block-diagnosis">
-    <h4 class="h4">Diagnostic Results</h4>
+    <h4 class="h4">{$t('session.diagnosis.diagnostic-results')}</h4>
     {#each getSortedDiagnosis() as diagnosis}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -263,15 +264,15 @@
                 {formatConfidence(diagnosis.probability)}
             </div>
         </div>
-        
+
         <div class="diagnosis-details">
             <div class="basis">{diagnosis.basis}</div>
             {#if diagnosis.rationale}
-                <div class="rationale"><strong>Clinical Reasoning:</strong> {diagnosis.rationale}</div>
+                <div class="rationale"><strong>{$t('session.diagnosis.clinical-reasoning')}:</strong> {diagnosis.rationale}</div>
             {/if}
             {#if diagnosis.supportingSymptoms && diagnosis.supportingSymptoms.length > 0}
                 <div class="supporting-symptoms">
-                    <strong>Supporting Symptoms:</strong>
+                    <strong>{$t('session.diagnosis.supporting-symptoms')}:</strong>
                     <div class="symptom-tags">
                         {#each diagnosis.supportingSymptoms as symptom}
                             <span class="symptom-tag">{symptom}</span>
@@ -282,12 +283,12 @@
         </div>
 
         <div class="actions">
-            <button class="list-action pin" aria-label="Pin diagnosis" onclick={stopPropagation(() => togglePin(diagnosis))}>
+            <button class="list-action pin" aria-label={$t('aria.session.pin-diagnosis')} onclick={stopPropagation(() => togglePin(diagnosis))}>
                 <svg>
                     <use href="/icons.svg#pin"></use>
                 </svg>
             </button>
-            <button class="list-action remove" aria-label="Remove diagnosis" onclick={stopPropagation(() => removeItem(diagnosis, analysis.diagnosis))}>
+            <button class="list-action remove" aria-label={$t('aria.session.remove-diagnosis')} onclick={stopPropagation(() => removeItem(diagnosis, analysis.diagnosis))}>
                 <svg>
                     <use href="/icons.svg#minus"></use>
                 </svg>
@@ -296,18 +297,18 @@
             {#if diagnosis.origin === 'suggestion'}
                 <div class="feedback-controls">
                     {#if diagnosis.doctorFeedback === 'approved'}
-                        <button class="feedback-btn approved" aria-label="Clear approval" onclick={stopPropagation(() => clearFeedback(diagnosis))}>
-                            ✓ Approved
+                        <button class="feedback-btn approved" aria-label={$t('aria.session.clear-approval')} onclick={stopPropagation(() => clearFeedback(diagnosis))}>
+                            ✓ {$t('session.diagnosis.approved')}
                         </button>
                     {:else if diagnosis.doctorFeedback === 'rejected'}
-                        <button class="feedback-btn rejected" aria-label="Clear rejection" onclick={stopPropagation(() => clearFeedback(diagnosis))}>
-                            ✗ Rejected
+                        <button class="feedback-btn rejected" aria-label={$t('aria.session.clear-rejection')} onclick={stopPropagation(() => clearFeedback(diagnosis))}>
+                            ✗ {$t('session.diagnosis.rejected')}
                         </button>
                     {:else}
-                        <button class="feedback-btn approve" aria-label="Approve suggestion" onclick={stopPropagation(() => approveItem(diagnosis))}>
+                        <button class="feedback-btn approve" aria-label={$t('aria.session.approve-suggestion')} onclick={stopPropagation(() => approveItem(diagnosis))}>
                             ✓
                         </button>
-                        <button class="feedback-btn reject" aria-label="Reject suggestion" onclick={stopPropagation(() => rejectItem(diagnosis))}>
+                        <button class="feedback-btn reject" aria-label={$t('aria.session.reject-suggestion')} onclick={stopPropagation(() => rejectItem(diagnosis))}>
                             ✗
                         </button>
                     {/if}
@@ -322,7 +323,7 @@
 <!-- Doctor Recommendations Section -->
 {#if analysis.doctorRecommendations && analysis.doctorRecommendations.length > 0}
 <div class="block block-recommendations">
-    <h4 class="h4">🎯 Clinical Recommendations</h4>
+    <h4 class="h4">🎯 {$t('session.diagnosis.clinical-recommendations')}</h4>
     {#each getSortedRecommendations() as recommendation}
     <div class="recommendation-item priority-{recommendation.priority}">
         <div class="recommendation-header">
@@ -344,7 +345,7 @@
 <!-- Clarifying Questions Section -->
 {#if analysis.clarifyingQuestions && analysis.clarifyingQuestions.length > 0}
 <div class="block block-questions">
-    <h4 class="h4">❓ Clarifying Questions</h4>
+    <h4 class="h4">❓ {$t('session.diagnosis.clarifying-questions')}</h4>
     {#each getSortedQuestions() as question}
         <div class="clarifying-question {getFeedbackClass(question)}">
             <div class="question-header">
@@ -357,7 +358,7 @@
                     </span>
                 </div>
                 <div class="question-actions">
-                    <button class="list-action remove" aria-label="Remove question" onclick={() => removeItem(question, analysis.clarifyingQuestions)}>
+                    <button class="list-action remove" aria-label={$t('aria.session.remove-question')} onclick={() => removeItem(question, analysis.clarifyingQuestions)}>
                         <svg>
                             <use href="/icons.svg#minus"></use>
                         </svg>
@@ -365,18 +366,18 @@
                     <!-- Doctor Feedback Controls -->
                     <div class="feedback-controls">
                         {#if question.doctorFeedback === 'approved'}
-                            <button class="feedback-btn approved" aria-label="Clear approval" onclick={() => clearFeedback(question)}>
-                                ✓ Approved
+                            <button class="feedback-btn approved" aria-label={$t('aria.session.clear-approval')} onclick={() => clearFeedback(question)}>
+                                ✓ {$t('session.diagnosis.approved')}
                             </button>
                         {:else if question.doctorFeedback === 'rejected'}
-                            <button class="feedback-btn rejected" aria-label="Clear rejection" onclick={() => clearFeedback(question)}>
-                                ✗ Rejected
+                            <button class="feedback-btn rejected" aria-label={$t('aria.session.clear-rejection')} onclick={() => clearFeedback(question)}>
+                                ✗ {$t('session.diagnosis.rejected')}
                             </button>
                         {:else}
-                            <button class="feedback-btn approve" aria-label="Approve suggestion" onclick={() => approveItem(question)}>
+                            <button class="feedback-btn approve" aria-label={$t('aria.session.approve-suggestion')} onclick={() => approveItem(question)}>
                                 ✓
                             </button>
-                            <button class="feedback-btn reject" aria-label="Reject suggestion" onclick={() => rejectItem(question)}>
+                            <button class="feedback-btn reject" aria-label={$t('aria.session.reject-suggestion')} onclick={() => rejectItem(question)}>
                                 ✗
                             </button>
                         {/if}
@@ -397,7 +398,7 @@
 <!-- Enhanced Treatment Section -->
 {#if analysis.treatment}
 <div class="block block-treatment">
-    <h4 class="h4">Treatment Plan</h4>
+    <h4 class="h4">{$t('session.diagnosis.treatment-plan')}</h4>
     {#each analysis.treatment as treatment}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -406,25 +407,25 @@
             <div class="list-title">{treatment.description}</div>
             {#if treatment.effectiveness}
                 <div class="effectiveness-badge effectiveness-{treatment.effectiveness}">
-                    {(treatment.effectiveness || '').toUpperCase()} effectiveness
+                    {(treatment.effectiveness || '').toUpperCase()} {$t('session.diagnosis.effectiveness')}
                 </div>
             {/if}
         </div>
         {#if treatment.targetDiagnosis && treatment.targetDiagnosis.length > 0}
             <div class="target-diagnosis">
-                <strong>Targets:</strong>
+                <strong>{$t('session.diagnosis.targets')}:</strong>
                 {#each treatment.targetDiagnosis as target}
                     <span class="target-tag">{target}</span>
                 {/each}
             </div>
         {/if}
         <div class="actions">
-            <button class="list-action pin" aria-label="Pin treatment" onclick={stopPropagation(() => togglePin(treatment))}>
+            <button class="list-action pin" aria-label={$t('aria.session.pin-treatment')} onclick={stopPropagation(() => togglePin(treatment))}>
                 <svg>
                     <use href="/icons.svg#pin"></use>
                 </svg>
             </button>
-            <button class="list-action remove" aria-label="Remove treatment" onclick={stopPropagation(() => removeItem(treatment, analysis.treatment))}>
+            <button class="list-action remove" aria-label={$t('aria.session.remove-treatment')} onclick={stopPropagation(() => removeItem(treatment, analysis.treatment))}>
                 <svg>
                     <use href="/icons.svg#minus"></use>
                 </svg>
@@ -433,18 +434,18 @@
             {#if treatment.origin === 'suggestion'}
                 <div class="feedback-controls">
                     {#if treatment.doctorFeedback === 'approved'}
-                        <button class="feedback-btn approved" aria-label="Clear approval" onclick={stopPropagation(() => clearFeedback(treatment))}>
-                            ✓ Approved
+                        <button class="feedback-btn approved" aria-label={$t('aria.session.clear-approval')} onclick={stopPropagation(() => clearFeedback(treatment))}>
+                            ✓ {$t('session.diagnosis.approved')}
                         </button>
                     {:else if treatment.doctorFeedback === 'rejected'}
-                        <button class="feedback-btn rejected" aria-label="Clear rejection" onclick={stopPropagation(() => clearFeedback(treatment))}>
-                            ✗ Rejected
+                        <button class="feedback-btn rejected" aria-label={$t('aria.session.clear-rejection')} onclick={stopPropagation(() => clearFeedback(treatment))}>
+                            ✗ {$t('session.diagnosis.rejected')}
                         </button>
                     {:else}
-                        <button class="feedback-btn approve" aria-label="Approve suggestion" onclick={stopPropagation(() => approveItem(treatment))}>
+                        <button class="feedback-btn approve" aria-label={$t('aria.session.approve-suggestion')} onclick={stopPropagation(() => approveItem(treatment))}>
                             ✓
                         </button>
-                        <button class="feedback-btn reject" aria-label="Reject suggestion" onclick={stopPropagation(() => rejectItem(treatment))}>
+                        <button class="feedback-btn reject" aria-label={$t('aria.session.reject-suggestion')} onclick={stopPropagation(() => rejectItem(treatment))}>
                             ✗
                         </button>
                     {/if}
@@ -459,7 +460,7 @@
 <!-- Enhanced Follow-up Section -->
 {#if analysis.followUp}
 <div class="block block-follow-up">
-    <h4 class="h4">Follow Up</h4>
+    <h4 class="h4">{$t('session.diagnosis.follow-up')}</h4>
     {#each analysis.followUp as followUp}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -475,12 +476,12 @@
         </div>
         <div class="list-description">{followUp.reason}</div>
         <div class="actions">
-            <button class="list-action pin" aria-label="Pin follow-up" onclick={stopPropagation(() => togglePin(followUp))}>
+            <button class="list-action pin" aria-label={$t('aria.session.pin-follow-up')} onclick={stopPropagation(() => togglePin(followUp))}>
                 <svg>
                     <use href="/icons.svg#pin"></use>
                 </svg>
             </button>
-            <button class="list-action remove" aria-label="Remove follow-up" onclick={stopPropagation(() => removeItem(followUp, analysis.followUp))}>
+            <button class="list-action remove" aria-label={$t('aria.session.remove-follow-up')} onclick={stopPropagation(() => removeItem(followUp, analysis.followUp))}>
                 <svg>
                     <use href="/icons.svg#minus"></use>
                 </svg>
@@ -494,7 +495,7 @@
 <!-- Enhanced Medication Section -->
 {#if analysis.medication}
 <div class="block block-prescriptions">
-    <h4 class="h4">Suggested Medication</h4>
+    <h4 class="h4">{$t('session.diagnosis.suggested-medication')}</h4>
     {#each analysis.medication as medication}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -507,23 +508,23 @@
             </div>
         </div>
         {#if medication.purpose}
-            <div class="medication-purpose"><strong>Purpose:</strong> {medication.purpose}</div>
+            <div class="medication-purpose"><strong>{$t('session.diagnosis.purpose')}:</strong> {medication.purpose}</div>
         {/if}
         {#if medication.alternatives && medication.alternatives.length > 0}
             <div class="medication-alternatives">
-                <strong>Alternatives:</strong>
+                <strong>{$t('session.diagnosis.alternatives')}:</strong>
                 {#each medication.alternatives as alternative}
                     <span class="alternative-tag">{alternative}</span>
                 {/each}
             </div>
         {/if}
         <div class="actions">
-            <button class="list-action pin" aria-label="Pin medication" onclick={stopPropagation(() => togglePin(medication))}>
+            <button class="list-action pin" aria-label={$t('aria.session.pin-medication')} onclick={stopPropagation(() => togglePin(medication))}>
                 <svg>
                     <use href="/icons.svg#pin"></use>
                 </svg>
             </button>
-            <button class="list-action remove" aria-label="Remove medication" onclick={stopPropagation(() => removeItem(medication, analysis.medication))}>
+            <button class="list-action remove" aria-label={$t('aria.session.remove-medication')} onclick={stopPropagation(() => removeItem(medication, analysis.medication))}>
                 <svg>
                     <use href="/icons.svg#minus"></use>
                 </svg>

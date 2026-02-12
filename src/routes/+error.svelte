@@ -1,11 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { t } from '$lib/i18n';
 </script>
 
 <div class="error-page">
-  <h1>Error {$page.status}</h1>
-  <p>{$page.error?.message || 'An unexpected error occurred'}</p>
-  <a href="/auth">Go to Login</a>
+  <h1>{$t('app.error.title', { values: { status: $page.status } })}</h1>
+  <p>{$page.error?.message || $t('app.error.unexpected')}</p>
+  <a href="/auth">{$t('app.error.go-to-login')}</a>
 </div>
 
 <style>

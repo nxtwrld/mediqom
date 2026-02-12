@@ -16,7 +16,7 @@ ui.on("context", (context: IContext) => {
     if (context && context.focus && context.focus[0]) {
       focused.set({ object: context.focus[0] });
     } else {
-      focused.set({ object: null });
+      focused.set({ object: undefined });
     }
 
     return state;

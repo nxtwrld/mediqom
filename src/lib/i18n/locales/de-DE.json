@@ -1,4 +1,19 @@
 {
+  "app-connect": {
+    "author": "Autor",
+    "credits": "Credits",
+    "get": "Abrufen",
+    "permissions": {
+      "read": "Lesen",
+      "write": "Schreiben"
+    },
+    "price": "Preis",
+    "requires": "Erfordert",
+    "review-data": "Daten überprüfen",
+    "total-privacy-warning": "Datenschutzwarnung",
+    "you-are-about-to-leave-mediqom-total-privacy-realm": "Sie sind dabei, den vollständigen Datenschutzbereich von Mediqom zu verlassen.",
+    "you-are-about-to-share-data-withe-a-third-party-service": "Sie sind dabei, Daten mit einem Drittanbieter zu teilen."
+  },
   "anatomy": {
     "layers": {
       "connective": "",
@@ -22,6 +37,17 @@
     }
   },
   "app": {
+    "apps": {
+      "add-contact": "",
+      "confirm-remove-share": "",
+      "download": "",
+      "items-linked-count": "",
+      "loading-data": "",
+      "permissions": "",
+      "quick-share": "",
+      "share": "",
+      "shared-on-date": ""
+    },
     "duration": {
       "days-ago": "",
       "months-ago": "",
@@ -40,7 +66,114 @@
       "maxium-scans-reached": "Sie haben Ihr monatliches Limit von {limit} Importen erreicht.",
       "preview-disabled": "Im Vorschaumodus sind alle Interaktionen deaktiviert.",
       "save": "Speichern",
-      "you-still-have-scans-in-your-yearly-subscription": "Ihr Jahresabonnement enthält noch {scans}-Importe."
+      "you-still-have-scans-in-your-yearly-subscription": "Ihr Jahresabonnement enthält noch {scans}-Importe.",
+      "status-pending": "Ausstehend",
+      "status-extracting": "Extrahieren...",
+      "status-analyzing": "Analysieren...",
+      "status-ready": "Bereit",
+      "status-complete": "Abgeschlossen",
+      "status-error": "Fehler",
+      "status-processing": "Verarbeitung",
+      "status-new": "Neu",
+      "processing-failed": "Verarbeitung fehlgeschlagen",
+      "processing-medical-documents": "Medizinische Dokumente verarbeiten",
+      "stage-extracting-text": "Text extrahieren",
+      "stage-analyzing-content": "Inhalt analysieren",
+      "stage-text-extraction": "1. Textextraktion",
+      "stage-medical-analysis": "2. Medizinische Analyse",
+      "stage-extraction-description": "Text aus Bildern und Dokumenten mit OCR-Technologie extrahieren",
+      "stage-analysis-description": "Medizinischen Inhalt analysieren und strukturierte Gesundheitsdaten extrahieren",
+      "files-processed": "{completed} von {total} Dateien verarbeitet",
+      "processing-failed-try-again": "Verarbeitung fehlgeschlagen. Bitte versuchen Sie es erneut oder verwenden Sie den einzelnen Datei-Upload.",
+      "file-count": "{count, plural, one {# Datei} other {# Dateien}}",
+      "review": "Überprüfen",
+      "review-and-save": "Überprüfen & Speichern",
+      "new-profile": "Neues Profil",
+      "profile": "Profil",
+      "doc-status-new": "Neu",
+      "doc-status-assessing": "Bewertung",
+      "doc-status-processing": "Verarbeitung",
+      "doc-status-processed": "Verarbeitet",
+      "doc-status-error": "Fehler",
+      "no-cached-files-warning": "Originaldateien sind auf diesem Gerät nicht verfügbar. Sie können ohne Anhänge speichern oder auf dem Gerät abschließen, auf dem Sie den Import gestartet haben.",
+      "extracting-text-and-data": "Text und Daten extrahieren...",
+      "analyzing-medical-content": "Medizinischen Inhalt analysieren..."
+    },
+    "buttons": {
+      "retry": "Wiederholen",
+      "remove": "Entfernen",
+      "reset": "Zurücksetzen",
+      "done": "Fertig",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "create": "Erstellen",
+      "continue": "Weiter"
+    },
+    "auth": {
+      "title": "Authentifizierung",
+      "magic-link-instruction": "Melden Sie sich mit Ihrer E-Mail-Adresse über einen Magic Link an",
+      "email-label": "E-Mail-Adresse",
+      "email-placeholder": "Ihre E-Mail",
+      "send-magic-link": "Magic Link senden",
+      "sending": "Wird gesendet...",
+      "email-sent": "E-Mail gesendet!",
+      "send-again": "Erneut senden",
+      "magic-link-sent": "Magic Link gesendet! Prüfen Sie Ihre E-Mail und tippen Sie auf den Link zum Anmelden.",
+      "magic-link-failed": "Magic Link konnte nicht gesendet werden",
+      "invalid-email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "unexpected-error": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "no-auth-code": "Kein Authentifizierungscode gefunden. Bitte versuchen Sie es erneut.",
+      "auth-timed-out": "Authentifizierung abgelaufen. Bitte versuchen Sie es erneut.",
+      "confirming-title": "Authentifizierung wird bestätigt...",
+      "confirming-authentication": "Ihre Authentifizierung wird bestätigt...",
+      "please-wait": "Bitte warten Sie, während wir Sie anmelden.",
+      "auth-failed": "Authentifizierung fehlgeschlagen",
+      "try-again": "Erneut versuchen",
+      "setting-up-session": "Sitzung wird eingerichtet...",
+      "exchanging-code": "Autorisierungscode wird ausgetauscht...",
+      "no-auth-params": "Keine Authentifizierungsparameter in der URL gefunden.",
+      "error-title": "Authentifizierungsfehler",
+      "unknown-error": "Ein unbekannter Fehler ist aufgetreten",
+      "return-to-app": "Zurück zur Anwendung",
+      "show-details": "Technische Details anzeigen",
+      "hide-details": "Technische Details ausblenden",
+      "beta-need-access": "Beta-Zugang benötigt?",
+      "beta-in-beta": "Mediqom befindet sich derzeit in der Beta-Phase. Um Zugang zu erhalten:",
+      "beta-step-apply": "Beantragen Sie Beta-Zugang auf unserer",
+      "beta-page": "Beta-Seite",
+      "beta-step-wait": "Warten Sie auf die Genehmigung (normalerweise innerhalb von 48 Stunden)",
+      "beta-step-check": "Prüfen Sie Ihre E-Mail auf den Magic Link",
+      "beta-under-review": "Antrag wird geprüft",
+      "beta-review-message": "Ihr Beta-Antrag wird geprüft. Wir senden Ihnen innerhalb von 48 Stunden eine E-Mail, sobald er genehmigt wurde.",
+      "beta-check-spam": "Prüfen Sie Ihren Spam-Ordner, wenn Sie unsere E-Mail nicht sehen.",
+      "beta-status": "Antragsstatus",
+      "beta-not-approved": "Ihr Beta-Antrag wurde nicht genehmigt. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie uns bitte unter"
+    },
+    "forms": {
+      "files": "Dateien",
+      "browse-file": "Datei durchsuchen",
+      "input": "Eingabe"
+    },
+    "med": {
+      "title": "Mediqom - Elektronische Gesundheitsakten",
+      "description": "Mediqom hilft Ihnen bei der Verwaltung Ihrer medizinischen Berichte. Scannen Sie einfach Ihren medizinischen Bericht und Mediqom hilft Ihnen, ihn zu verstehen:",
+      "add-profile": "Neues Profil hinzufügen",
+      "max-profiles-reached": "Sie haben die maximale Anzahl an Profilen erreicht.",
+      "upgrade": "Upgrade",
+      "profiles-remaining": "Sie können noch {count} weitere Profile hinzufügen.",
+      "upgrade-page": "Upgrade"
+    },
+    "tagline": "Medizinische Intelligenz zum Abfragen, Organisieren und Überwachen",
+    "error": {
+      "title": "Fehler {status}",
+      "unexpected": "Ein unerwarteter Fehler ist aufgetreten",
+      "go-to-login": "Zur Anmeldung"
+    },
+    "account": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "loading": "Wird geladen...",
+      "sign-out": "Abmelden"
     },
     "languages": {
       "cs": "",
@@ -98,8 +231,7 @@
         "clinical": "Hallo! Ich bin hier, um bei der klinischen Analyse des medizinischen Profils von {profileName} zu helfen. Ich kann bei der Analyse von Mustern helfen, Differentialüberlegungen vorschlagen und Erkenntnisse basierend auf verfügbaren medizinischen Daten liefern."
       },
       "clarifyingQuestion": {
-        "placeholder": "Oder geben Sie Ihre eigene Antwort ein...",
-        "continue": "Weiter"
+        "placeholder": "Oder geben Sie Ihre eigene Antwort ein..."
       }
     },
     "onboarding": {
@@ -188,7 +320,8 @@
         "view-history": "Verlauf anzeigen",
         "view-profile": "Profil ansehen"
       },
-      "no-results": "Keine Ergebnisse"
+      "no-results": "Keine Ergebnisse",
+      "search-profiles": "Profile suchen"
     },
     "unlock": {
       "invalid-passphrase": "Ungültige Passphrase",
@@ -198,6 +331,13 @@
     },
     "upgrade": {
       "please-upgrade-your-subscription-to-continue": "Bitte aktualisieren Sie Ihr Abonnement, um fortzufahren."
+    }
+  },
+  "charts": {
+    "reference-range": {
+      "low": "Niedrig",
+      "normal": "Normal",
+      "high": "Hoch"
     }
   },
   "click-here": "",
@@ -230,14 +370,49 @@
         "male": "Männlich"
       },
       "bloodType": {
-        "A+": "",
-        "A-": "",
-        "AB+": "",
-        "AB-": "",
-        "B+": "",
-        "B-": "",
-        "O+": "",
-        "O-": ""
+        "A+": "A+",
+        "A-": "A-",
+        "AB+": "AB+",
+        "AB-": "AB-",
+        "B+": "B+",
+        "B-": "B-",
+        "O+": "O+",
+        "O-": "O-"
+      },
+      "smokingStatus": {
+        "never": "Nie geraucht",
+        "former": "Ehemaliger Raucher",
+        "current": "Aktueller Raucher"
+      },
+      "alcoholConsumption": {
+        "none": "Keiner",
+        "occasional": "Gelegentlich",
+        "moderate": "Mäßig",
+        "heavy": "Stark"
+      },
+      "physicalActivity": {
+        "sedentary": "Sitzend",
+        "light": "Leicht",
+        "moderate": "Mäßig",
+        "active": "Aktiv",
+        "very_active": "Sehr aktiv"
+      },
+      "diet": {
+        "vegetarian": "Vegetarisch",
+        "vegan": "Vegan",
+        "pescatarian": "Pescatarisch",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Mediterran",
+        "low_carb": "Kohlenhydratarm",
+        "low_fat": "Fettarm",
+        "low_sodium": "Natriumarm",
+        "low_sugar": "Zuckerarm",
+        "gluten_free": "Glutenfrei",
+        "dairy_free": "Laktosefrei",
+        "nut_free": "Nussfrei",
+        "soy_free": "Sojafrei",
+        "none": "Keine"
       }
     },
     "props": {
@@ -606,6 +781,8 @@
   "profile": {
     "health": {
       "health-form": "Gesundheitsprofil",
+      "add": "Hinzufügen",
+      "add-another": "Weitere hinzufügen",
       "props": {
         "absolute_basophils": "Absolute Basophile",
         "absolute_eosinophils": "Absolute Eosinophile",
@@ -616,6 +793,7 @@
         "albumin": "Albumin",
         "alcoholConsumption": "Alkoholkonsum",
         "allergen": "Allergen",
+        "allergies": "Allergien",
         "alp": "ALP",
         "alt": "ALT",
         "ast": "AST",
@@ -635,6 +813,7 @@
         "cardiac_output_index": "Herzzeitvolumenindex",
         "chloride": "Chlorid",
         "cholesterol": "Cholesterin",
+        "chronicConditions": "Chronische Erkrankungen",
         "condition": "Zustand",
         "creatinine": "Kreatinin",
         "crp": "CRP",
@@ -729,6 +908,7 @@
         "uric_acid": "Harnsäure",
         "urobilinogen": "Urobilinogen",
         "vaccine": "Impfstoff",
+        "vaccinations": "Impfungen",
         "vitamin_d": "Vitamin D",
         "waist_circumference": "Taillenumfang",
         "waist_to_height_ratio": "Verhältnis von Taille zu Höhe",
@@ -768,6 +948,80 @@
       "suffix": "Suffix",
       "tel": "Telefon",
       "title": "Titel"
+    }
+  },
+  "share": {
+    "title": "",
+    "share-with": "",
+    "review-items": "",
+    "privacy": "",
+    "uploading": "",
+    "share-it": "",
+    "sharing-with": "",
+    "description": "",
+    "public-key-info": "",
+    "password-info": "",
+    "password-placeholder": "",
+    "password-label": "",
+    "generate": "",
+    "encrypting-uploading": "",
+    "password-note": "",
+    "url-label": "",
+    "message-label": "",
+    "cancel": "",
+    "back": "",
+    "next": "",
+    "done": "",
+    "create-share": "",
+    "open-email-app": "",
+    "open-sms-app": "",
+    "message-template": ""
+  },
+  "aria": {
+    "import": {
+      "remove-file": "Datei entfernen",
+      "retry-file": "Dateiverarbeitung wiederholen",
+      "preview-file": "Dateivorschau",
+      "delete-job": "Import löschen",
+      "open-document": "Dokument öffnen: {title}"
+    },
+    "session": {
+      "dismiss-notification": "",
+      "test-analysis": "",
+      "remove-symptom": "",
+      "pin-diagnosis": "",
+      "remove-diagnosis": "",
+      "clear-approval": "",
+      "clear-rejection": "",
+      "approve-suggestion": "",
+      "reject-suggestion": "",
+      "remove-question": "",
+      "pin-treatment": "",
+      "remove-treatment": "",
+      "pin-follow-up": "",
+      "remove-follow-up": "",
+      "pin-medication": "",
+      "remove-medication": ""
+    },
+    "ui": {
+      "close-modal": "Dialog schließen",
+      "close-overlay": "Overlay schließen",
+      "toggle-menu": "Menü umschalten"
+    },
+    "anatomy": {
+      "rotate-model": "",
+      "zoom-in": "",
+      "zoom-out": "",
+      "reset-view": ""
+    },
+    "documents": {
+      "view-document": "",
+      "remove-document": ""
+    },
+    "report": {
+      "print-report": "",
+      "copy-report": "",
+      "download-report": ""
     }
   },
   "report": {
@@ -845,6 +1099,47 @@
   "session": {
     "diagram": "Diagramm",
     "qom": "Quorum Orchestrierte Modelle",
+    "report": {
+      "title": "",
+      "patient": "",
+      "residence": "",
+      "date": ""
+    },
+    "blocks": {
+      "assisted-analysis": "",
+      "finalizing": "",
+      "finalize-report": "",
+      "end-session": "",
+      "end-session-confirm": "",
+      "transcript": "",
+      "report": "",
+      "back": "",
+      "copy": "",
+      "print": "",
+      "save": "",
+      "session-restored": "",
+      "session-restored-description": "",
+      "start-recording": "",
+      "listening": ""
+    },
+    "diagnosis": {
+      "signals": "",
+      "symptoms": "",
+      "diagnostic-results": "",
+      "clinical-reasoning": "",
+      "supporting-symptoms": "",
+      "clinical-recommendations": "",
+      "clarifying-questions": "",
+      "treatment-plan": "",
+      "targets": "",
+      "follow-up": "",
+      "suggested-medication": "",
+      "purpose": "",
+      "alternatives": "",
+      "approved": "",
+      "rejected": "",
+      "effectiveness": ""
+    },
     "actions": {
       "accept": "Akzeptieren",
       "suppress": "Unterdrücken",
