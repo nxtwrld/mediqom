@@ -137,7 +137,7 @@ export class MedicalExpertTools {
   /**
    * Security wrapper for all MCP tool calls
    */
-  private async secureToolCall<T>(
+  public async secureToolCall<T>(
     toolName: string,
     operation: string,
     context: MCPSecurityContext,

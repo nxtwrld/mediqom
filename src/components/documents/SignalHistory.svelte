@@ -83,24 +83,26 @@
             return new Date(a.time).getTime() - new Date(b.time).getTime();
         });
 
-        normalExtent = series[0].referenceRange.high.value - series[0].referenceRange.low.value;
-        ranges = [
-            {
-                name: 'Low',
-                min: series[0].referenceRange.low.value - normalExtent,
-                max: series[0].referenceRange.low.value
-            },
-            {
-                name: 'Normal',
-                min: series[0].referenceRange.low.value,
-                max: series[0].referenceRange.high.value
-            },
-            {
-                name: 'High',
-                min: series[0].referenceRange.high.value,
-                max: series[0].referenceRange.high.value + normalExtent
-            }
-        ]
+        if (series.length > 0 && series[0].referenceRange?.high?.value && series[0].referenceRange?.low?.value) {
+            normalExtent = series[0].referenceRange.high.value - series[0].referenceRange.low.value;
+            ranges = [
+                {
+                    name: 'Low',
+                    min: series[0].referenceRange.low.value - normalExtent,
+                    max: series[0].referenceRange.low.value
+                },
+                {
+                    name: 'Normal',
+                    min: series[0].referenceRange.low.value,
+                    max: series[0].referenceRange.high.value
+                },
+                {
+                    name: 'High',
+                    min: series[0].referenceRange.high.value,
+                    max: series[0].referenceRange.high.value + normalExtent
+                }
+            ];
+        }
     }
 
     
@@ -132,11 +134,11 @@
         });
 
         const xExtent = extent(series, function(d: LabItem) { return d.time; });
-        const xRange = xExtent[1] - xExtent[0];
+        const xRange = (xExtent[1] && xExtent[0]) ? (xExtent[1] as any) - (xExtent[0] as any) : 0;
 
         const xPadding = xRange * .05
 
-        const xArea: [number, number] = [xExtent[0] - xPadding, xExtent[1] - 0 + xPadding];
+        const xArea: [number, number] = [(xExtent[0] || 0) - xPadding, (xExtent[1] || 0) - 0 + xPadding];
         const yArea: [number, number] = [
             min(ranges, function(d: Range) { return d.min; }) || 0,
             max(ranges, function(d: Range) { return d.max; }) || 100

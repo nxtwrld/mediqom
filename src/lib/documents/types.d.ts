@@ -77,6 +77,9 @@ export interface Document {
   // Unified medical terms for search
   medicalTerms?: string[]; // Single array: categories + bodyParts + diagnoses + temporal + procedures
   temporalType?: TemporalType; // Simple temporal classification
+
+  // Legacy report analysis data (from LangGraph workflows)
+  report?: any;
 }
 
 export interface DocumentNew {
