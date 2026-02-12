@@ -37,7 +37,7 @@
         const pie = d3.pie()
             .padAngle(1 / radius)
             .sort(null)
-            .value(d => d.value);
+            .value((d: any) => d.value);
 
         const color = d3.scaleOrdinal()
             .domain(data.map(d => d.name))
@@ -51,12 +51,12 @@
             .selectAll()
             .data(pie(data))
             .join("path")
-            .attr("fill", (d, index) => {
+            .attr("fill", (d: any, index) => {
                 return color(d.data.name || index)
             })
-            .attr("d", arc)
+            .attr("d", arc as any)
             .append("title")
-            .text((d, index) => `${d.data.name || index}: ${d.data.value.toLocaleString()}`);
+            .text((d: any, index) => `${d.data.name || index}: ${d.data.value.toLocaleString()}`);
 /*
     svg.append("g")
         .attr("font-family", "sans-serif")

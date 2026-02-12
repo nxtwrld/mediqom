@@ -8,7 +8,7 @@
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-    import { state } from '$lib/ui';
+    import ui, { state } from '$lib/ui';
     import objects3d, { isObject } from '$lib/context/objects';
     import Label from '$components/documents/Label.svelte';
     import { fade } from 'svelte/transition';
@@ -282,6 +282,11 @@
            }
         });
 
+        const unsubscribeProfileSwitch = ui.listen("chat:profile_switch", () => {
+            if (!ready) return;
+            resetFocus();
+        });
+
         // Apply initial values after initialization
         const checkReady = () => {
             if (ready) {
@@ -303,6 +308,7 @@
         return () => {
             unsubscibeFocus();
             unsubscibeContext();
+            unsubscribeProfileSwitch();
             
             // clear all three.js objects from the scene
             clearObjects(scene);

@@ -29,13 +29,13 @@
 <div class="report {doc.state}" onclick={() => onclick?.(doc)} transition:scale role="button" tabindex="0" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onclick?.(doc); } }} aria-label={$t('aria.import.open-document', { values: { title: doc.title } })}>
     
     <div class="preview">
-        {#if doc.pages?.[0]?.thumbnail}
+        {#if 'pages' in doc && doc.pages?.[0]?.thumbnail}
             {#if doc.pages[0]?.thumbnail}
                 <img src={doc.pages[0].thumbnail} loading="lazy" alt={doc.title} class="thumbmail" />
             {/if}
-        {:else if doc.thumbnail}
+        {:else if 'thumbnail' in doc && doc.thumbnail}
             <img src={doc.thumbnail} loading="lazy" alt={doc.title} class="thumbmail" />
-        {:else if doc.icon}
+        {:else if 'icon' in doc && doc.icon}
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <use href="/files.svg#{doc.icon}" />
             </svg>

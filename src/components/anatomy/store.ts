@@ -10,6 +10,11 @@ export interface State {
 
 export const store: Writable<State> = writable({} as State);
 
+ui.on("chat:profile_switch", () => {
+  store.set({} as State);
+  focused.set({ object: undefined });
+});
+
 ui.on("context", (context: IContext) => {
   store.update((state) => {
     state.context = context;

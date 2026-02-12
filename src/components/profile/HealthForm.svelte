@@ -91,14 +91,12 @@
             }
 
             // Check if config has data property (our current modal structure)
-            if (configObj && 'data' in configObj && configObj.data && configObj.data[prop.key]) {
-                value = configObj.data[prop.key];
+            if (configObj && 'data' in configObj && configObj.data && (configObj.data as any)[prop.key]) {
+                value = (configObj.data as any)[prop.key];
             }
 
-            // Check direct data prop
-            if (data && data[prop.key]) {
-                value = data[prop.key];
-            }
+            // NOTE: We intentionally do NOT read from `data` prop here to avoid circular dependency.
+            // The second $effect already syncs inputs -> data, so reading data here would create a loop.
 
             // Initialize based on field type - ALWAYS create the field structure
             if (prop.type === 'time-series' && prop.items) {
@@ -141,9 +139,7 @@
         const index = configObj?.keys ? configObj.keys.indexOf(prop.key) : -1;
         let values = (configObj && index >= 0) ? configObj.values[index] : currentValues;
 
-        if (data && data[prop.key]) {
-            values = data[prop.key];
-        }
+        // NOTE: We intentionally do NOT read from `data` prop here to avoid circular dependency.
 
         return [...values];
     }

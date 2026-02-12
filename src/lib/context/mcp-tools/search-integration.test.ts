@@ -95,7 +95,7 @@ vi.mock("$lib/config/classification", () => ({
 }));
 
 // Integration test data that simulates real medical documents
-const integrationTestDocuments: Document[] = [
+const integrationTestDocuments: any[] = [
   {
     id: "lab-2024-001",
     content: {
@@ -103,8 +103,10 @@ const integrationTestDocuments: Document[] = [
       summary:
         "Blood test results showing normal white blood cell count, slightly elevated glucose levels at 110 mg/dL, cholesterol within normal range at 180 mg/dL.",
       text: "Patient: John Doe. Test Date: 2024-01-15. Results: WBC: 7,200/μL (Normal), RBC: 4.8M/μL (Normal), Glucose: 110 mg/dL (Slightly High), Total Cholesterol: 180 mg/dL (Normal), HDL: 45 mg/dL, LDL: 120 mg/dL, Triglycerides: 150 mg/dL",
+      tags: ["blood", "cbc", "glucose", "cholesterol", "routine"],
     },
     metadata: {
+      title: "Complete Blood Count (CBC)",
       category: "laboratory",
       tags: ["blood", "cbc", "glucose", "cholesterol", "routine"],
     },
@@ -133,8 +135,10 @@ const integrationTestDocuments: Document[] = [
       summary:
         "Chest X-ray shows clear lungs with no signs of pneumonia or other abnormalities. Heart size appears normal.",
       text: "EXAMINATION: Chest X-ray PA and lateral views. FINDINGS: Lungs are clear bilaterally. No pneumonia, pleural effusion, or pneumothorax. Heart size is normal. Mediastinum is not widened. IMPRESSION: Normal chest X-ray.",
+      tags: ["chest", "x-ray", "lungs", "heart", "radiology"],
     },
     metadata: {
+      title: "Chest X-Ray",
       category: "imaging",
       tags: ["chest", "x-ray", "lungs", "heart", "radiology"],
     },
@@ -161,8 +165,16 @@ const integrationTestDocuments: Document[] = [
       summary:
         "Prescription for Lisinopril 10mg daily for blood pressure management and cardiovascular health.",
       text: "PRESCRIPTION: Lisinopril 10mg, Take one tablet by mouth daily. Quantity: 30 tablets, Refills: 2. INDICATION: Hypertension management, cardiovascular protection. NOTES: Monitor blood pressure weekly, report any dizziness or cough.",
+      tags: [
+        "heart",
+        "medication",
+        "prescription",
+        "blood pressure",
+        "lisinopril",
+      ],
     },
     metadata: {
+      title: "Cardiac Medication Prescription",
       category: "medications",
       tags: [
         "heart",
@@ -227,9 +239,9 @@ describe("Search Documents Integration Tests", () => {
 
   describe("MCP Tools Integration", () => {
     it("should integrate with medicalExpertTools.searchDocuments", async () => {
-      const result = await medicalExpertTools.searchDocuments("test-profile", {
+      const result = await medicalExpertTools.searchDocuments({
         terms: ["blood", "glucose"],
-      });
+      }, "test-profile");
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
@@ -242,9 +254,9 @@ describe("Search Documents Integration Tests", () => {
         new Error("Database error"),
       );
 
-      const result = await medicalExpertTools.searchDocuments("test-profile", {
+      const result = await medicalExpertTools.searchDocuments({
         terms: ["blood"],
-      });
+      }, "test-profile");
 
       // Should handle error gracefully
       expect(result).toBeDefined();

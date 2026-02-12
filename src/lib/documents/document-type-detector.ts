@@ -68,7 +68,7 @@ export function detectDocumentType(document: Document): DocumentTypeInfo {
       primaryType: enhancedType,
       confidence: document.content.enhancedFields?.confidence || 0.9,
       specializedViewer: mapping.viewer || undefined,
-      requiredSections: mapping.sections,
+      requiredSections: [...mapping.sections],
       optionalSections: getOptionalSections(enhancedType),
       useSpecializedUI: !!mapping.viewer,
     };
@@ -106,7 +106,7 @@ export function detectDocumentType(document: Document): DocumentTypeInfo {
     primaryType: bestMatch.type,
     confidence: bestMatch.confidence,
     specializedViewer: bestMatch.mapping.viewer || undefined,
-    requiredSections: bestMatch.mapping.sections,
+    requiredSections: [...bestMatch.mapping.sections],
     optionalSections: getOptionalSections(bestMatch.type),
     useSpecializedUI: !!bestMatch.mapping.viewer && bestMatch.confidence > 0.6,
   };

@@ -243,7 +243,7 @@ export function extractVitalSigns(searchResults: any[]): Array<{
         value: bpMatch[1],
         unit: "mmHg",
         date: result.metadata?.date,
-        normal: this.isBloodPressureNormal(bpMatch[1]),
+        normal: isBloodPressureNormal(bpMatch[1]),
       });
     }
 
@@ -255,7 +255,7 @@ export function extractVitalSigns(searchResults: any[]): Array<{
         value: parseInt(hrMatch[1]),
         unit: "bpm",
         date: result.metadata?.date,
-        normal: this.isHeartRateNormal(parseInt(hrMatch[1])),
+        normal: isHeartRateNormal(parseInt(hrMatch[1])),
       });
     }
 
@@ -267,7 +267,7 @@ export function extractVitalSigns(searchResults: any[]): Array<{
         value: parseFloat(tempMatch[1]),
         unit: "°C",
         date: result.metadata?.date,
-        normal: this.isTemperatureNormal(parseFloat(tempMatch[1])),
+        normal: isTemperatureNormal(parseFloat(tempMatch[1])),
       });
     }
   }

@@ -101,7 +101,7 @@ const STANDARD_SECTIONS = {
       data: {
         original: doc.content.content,
         text: doc.content.localizedContent,
-        language: doc.language || "en",
+        language: (doc as any).language || "en",
       },
     }),
   },

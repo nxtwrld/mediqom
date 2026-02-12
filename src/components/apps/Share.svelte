@@ -166,12 +166,12 @@ Kindest regards,
     let slidesCount = $derived(lastStep + 1);
     let stepTitle = $derived(getTitle(step));
     let isNextAllowed = $derived(checkIsNextAllowed(step, contact, password, uploadProgress));
-    let routes = $derived((contact) ? [...(contact.email || []).map(e => {
+    let routes = $derived((contact) ? [...(contact.email || []).map((e: any) => {
         return {
             ...e,
             type: 'email'
         };
-    }), ... (contact.tel || []).map(e => {
+    }), ... (contact.tel || []).map((e: any) => {
         return {
             ...e,
             type: 'tel'

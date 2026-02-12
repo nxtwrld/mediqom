@@ -59,7 +59,7 @@
         const file = await decrypt([encryptedData], key);
         // parse the decrypted JSON and extract the file data
         logger.api.debug('Decrypted file:', file);
-        const json = JSON.parse(file);
+        const json = JSON.parse(file[0]);
         const arrayBuffer = base64ToArrayBuffer(json.file);
         
         // Cache the result
@@ -205,12 +205,10 @@
                         </button>
                     </div>
                 {:else if currentAttachment && currentAttachmentData}
-                    <DocumentViewer 
+                    <DocumentViewer
                         data={currentAttachmentData}
                         mimeType={currentAttachment.type}
                         fileName={getFileName(currentAttachment)}
-                        on:download={handleViewerDownload}
-                        on:close={closeModal}
                     />
                 {/if}
             </div>

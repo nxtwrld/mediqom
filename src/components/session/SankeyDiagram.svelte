@@ -124,15 +124,15 @@
         if (!svg) return { symptomColumn: null, diagnosisColumn: null, treatmentColumn: null };
 
         // Get the actual rendered nodes from D3 (these have x0, x1, y0, y1 coordinates)
-        const allNodes = svg.selectAll('.node').data();
-        
+        const allNodes = svg.selectAll<SVGGElement, any>('.node').data();
+
         if (!allNodes || allNodes.length === 0) {
             return { symptomColumn: null, diagnosisColumn: null, treatmentColumn: null };
         }
 
-        const symptomNodes = allNodes.filter((n: any) => n.type === 'symptom');
-        const diagnosisNodes = allNodes.filter((n: any) => n.type === 'diagnosis');
-        const treatmentNodes = allNodes.filter((n: any) => n.type === 'treatment');
+        const symptomNodes = allNodes.filter((n) => n.type === 'symptom');
+        const diagnosisNodes = allNodes.filter((n) => n.type === 'diagnosis');
+        const treatmentNodes = allNodes.filter((n) => n.type === 'treatment');
 
         const calculateColumnInfo = (nodes: any[]) => {
             if (!nodes.length) return null;
@@ -345,7 +345,7 @@
         const dataHash = data ? JSON.stringify({
             nodeCount: data.nodes?.length || 0,
             linkCount: data.links?.length || 0,
-            nodeIds: data.nodes?.map(n => n.id).join(',') || ''
+            nodeIds: data.nodes?.map((n: SankeyNode) => n.id).join(',') || ''
         }) : '';
         
         // Check if data hash changed
@@ -509,7 +509,7 @@
         // Transform data for D3 with error handling
         let sankeyResult: any;
         try {
-            const nodesForD3 = currentSankeyData.nodes.map(d => ({ 
+            const nodesForD3 = currentSankeyData.nodes.map((d: any) => ({
                 ...d,
                 // Ensure all required properties exist
                 sourceLinks: [],
@@ -517,8 +517,8 @@
                 // Use our calculated node value for height (default to 50 if not set)
                 value: d.value || 50
             }));
-            
-            const linksForD3 = currentSankeyData.links.map(d => ({ 
+
+            const linksForD3 = currentSankeyData.links.map((d: any) => ({ 
                 ...d,
                 // Ensure source and target are properly set
                 source: d.source,
@@ -695,18 +695,20 @@
         applyParallelLinkSpacing(sankeyResult.links);
 
         // Get the appropriate link path generator
-        const baseLinkGenerator = LINK_CONFIG.ALGORITHM === 'default' 
-            ? sankeyLinkHorizontal()
+        const baseLinkGenerator: ((link: any) => string | null) = LINK_CONFIG.ALGORITHM === 'default'
+            ? sankeyLinkHorizontal<any, any>()
             : getLinkPathGenerator(LINK_CONFIG.ALGORITHM, LINK_CONFIG.RENDER_MODE);
-        
+
         // Create enhanced generator that handles parallel links
-        const linkPathGenerator = LINK_CONFIG.ALGORITHM === 'default' 
-            ? sankeyLinkHorizontal()
-            : createEnhancedLinkGenerator(baseLinkGenerator);
+        const linkPathGenerator: (link: any) => string = LINK_CONFIG.ALGORITHM === 'default'
+            ? (link: any) => sankeyLinkHorizontal<any, any>()(link) || ''
+            : createEnhancedLinkGenerator(getLinkPathGenerator(LINK_CONFIG.ALGORITHM, LINK_CONFIG.RENDER_MODE));
 
         // Render links
+        if (!linkGroup) return;
+
         const linkSelection = linkGroup
-            .selectAll('.link')
+            .selectAll<SVGPathElement, any>('.link')
             .data(sankeyResult.links, (d: any) => `${d.source.id}-${d.target.id}`);
 
         const linkEnter = linkSelection.enter()
@@ -723,7 +725,7 @@
             .duration(linkEntranceConfig.duration * 0.4) // Shorter opacity transition
             .delay(linkEntranceConfig.duration * 0.3) // Start after nodes begin moving
             .ease(d3.easeCubicOut)
-            .style('opacity', OPACITY.LINK_DEFAULT);
+            .style('opacity', OPACITY.DEFAULT_LINK);
 
         linkSelection.merge(linkEnter)
             .attr('id', (d: any) => {
@@ -736,9 +738,10 @@
             .attr('d', (d: any) => {
                 // Use configured link generator or fall back to D3's default
                 if (LINK_CONFIG.ALGORITHM === 'default') {
-                    return sankeyLinkHorizontal()(d);
+                    const result = sankeyLinkHorizontal<any, any>()(d);
+                    return result || '';
                 }
-                return linkPathGenerator(d);
+                return linkPathGenerator(d) || '';
             })
             .classed('interactive-element', true)
             .each(function(d: any) {
@@ -757,8 +760,10 @@
             .remove();
 
         // Render nodes
+        if (!nodeGroup) return;
+
         const nodeSelection = nodeGroup
-            .selectAll('.node')
+            .selectAll<SVGGElement, any>('.node')
             .data(sankeyResult.nodes, (d: any) => d.id);
 
         const nodeEnter = nodeSelection.enter()
@@ -836,6 +841,9 @@
      */
     function renderShowMoreButtons() {
         if (!svg) return;
+
+        const mainGroup = svg.select('.main-group');
+        if (mainGroup.empty()) return;
         
         // Use requestAnimationFrame to ensure DOM has updated with new nodes
         requestAnimationFrame(() => {
@@ -843,6 +851,7 @@
             const currentPositions = calculateColumnPositions();
             if (!currentPositions) return;
 
+            if (!svg) return;
             const mainGroup = svg.select('.main-group');
             
             // Remove existing show-more buttons
@@ -995,14 +1004,14 @@
         // Recalculate positions using existing node data
         let updatedResult: any;
         try {
-            const nodesForD3 = currentSankeyData.nodes.map(d => ({ 
+            const nodesForD3 = currentSankeyData.nodes.map((d: any) => ({
                 ...d,
                 sourceLinks: [],
                 targetLinks: [],
                 value: d.value || 50
             }));
-            
-            const linksForD3 = currentSankeyData.links.map(d => ({ 
+
+            const linksForD3 = currentSankeyData.links.map((d: any) => ({ 
                 ...d,
                 source: d.source,
                 target: d.target,
@@ -1186,18 +1195,18 @@
             .attr('height', (d: any) => d.y1! - d.y0!);
         
         // Update link paths using the same generator as in renderSankey
-        const baseLinkGenerator = LINK_CONFIG.ALGORITHM === 'default' 
-            ? sankeyLinkHorizontal()
+        const baseLinkGenerator: ((link: any) => string | null) = LINK_CONFIG.ALGORITHM === 'default'
+            ? sankeyLinkHorizontal<any, any>()
             : getLinkPathGenerator(LINK_CONFIG.ALGORITHM, LINK_CONFIG.RENDER_MODE);
-        
-        const linkPathGenerator = LINK_CONFIG.ALGORITHM === 'default' 
-            ? sankeyLinkHorizontal()
-            : createEnhancedLinkGenerator(baseLinkGenerator);
+
+        const linkPathGenerator: (link: any) => string = LINK_CONFIG.ALGORITHM === 'default'
+            ? (link: any) => sankeyLinkHorizontal<any, any>()(link) || ''
+            : createEnhancedLinkGenerator(getLinkPathGenerator(LINK_CONFIG.ALGORITHM, LINK_CONFIG.RENDER_MODE));
         
         // Handle link transitions with enter/update/exit pattern - use same timing as nodes
         const pathConfig = transitionConfig; // Use same config as nodes for perfect synchronization
         const linkGroup = svg.select('.link-group');
-        const linkSelection = linkGroup.selectAll('.link')
+        const linkSelection = linkGroup.selectAll<SVGPathElement, any>('.link')
             .data(updatedResult.links, (d: any) => `${d.source.id}-${d.target.id}`);
         
         // Handle new links (enter) - appear immediately with opacity fade-in
@@ -1236,9 +1245,10 @@
             .ease(pathConfig.easing)
             .attr('d', (d: any) => {
                 if (LINK_CONFIG.ALGORITHM === 'default') {
-                    return sankeyLinkHorizontal()(d);
+                    const result = sankeyLinkHorizontal<any, any>()(d);
+                    return result || '';
                 }
-                return linkPathGenerator(d);
+                return linkPathGenerator(d) || '';
             });
         
         // Remove old links (exit)

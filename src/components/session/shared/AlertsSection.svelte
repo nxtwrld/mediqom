@@ -20,7 +20,7 @@
         onalertAcknowledge
     }: Props = $props();
 
-    const bubble = createBubbler();
+    const bubble = createBubbler() as any;
 
     let alertFilter: 'all' | 'pending' | 'acknowledged' = $state('all');
 

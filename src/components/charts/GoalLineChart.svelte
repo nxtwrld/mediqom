@@ -147,7 +147,7 @@
         let chartHeight = height - margin.top - margin.bottom;
 
         const svg = d3.select(svgElement);
-        const svgg: d3.Selection<SVGGElement, unknown, null, undefined>  = svg.append("g")
+        const svgg = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         const yScales = data.map(d => {

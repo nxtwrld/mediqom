@@ -15,7 +15,7 @@
         onalertAcknowledge
     }: Props = $props();
 
-    const bubble = createBubbler();
+    const bubble = createBubbler() as any;
 
     function handleAcknowledge() {
         if (alert.status !== 'acknowledged') {

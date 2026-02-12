@@ -18,7 +18,7 @@
         showFilters = false
     }: Props = $props();
 
-    const bubble = createBubbler();
+    const bubble = createBubbler() as any;
 
     let expandedItems = $state(new Set<string>());
     let questionFilter: 'all' | 'pending' | 'answered' = $state('pending');

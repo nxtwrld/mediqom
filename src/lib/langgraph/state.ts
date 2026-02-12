@@ -175,6 +175,10 @@ export interface DocumentProcessingState {
   imaging?: any;
   medications?: any;
   procedures?: any;
+  visualAnalysis?: any;
+  anomalyDetection?: any;
+  bodyPartsDetection?: any;
+  measurementExtraction?: any;
 
   // Document type routing
   documentTypeAnalysis?: DocumentTypeAnalysis;

@@ -78,6 +78,9 @@ export interface TreatmentNode {
   contraindications?: string[];
   sideEffects?: string[];
   relationships?: Relationship[];
+  instructions?: string;
+  monitoring?: string;
+  notes?: string;
 }
 
 export interface ActionNode {

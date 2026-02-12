@@ -440,7 +440,7 @@ function calculateStatistics(points: TimeSeriesPoint[]) {
   const stdDev = Math.sqrt(variance);
 
   // Simple trend calculation (compare first and last values)
-  const trend =
+  const trend: "rising" | "falling" | "stable" =
     points.length > 1
       ? points[0].value > points[points.length - 1].value
         ? "falling"

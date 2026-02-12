@@ -271,7 +271,7 @@ ${JSON.stringify(dicomData, null, 2)}`;
     finalContent.forEach((content, index) => {
       if (content.type === "text") {
         const text = content.text;
-        if (text.length > 2000) {
+        if (text && text.length > 2000) {
           // For long text, show first 1000 chars, indication of truncation, and last 500 chars
           console.log(
             `📝 Content[${index}] (truncated ${text.length} chars):`,
@@ -280,7 +280,7 @@ ${JSON.stringify(dicomData, null, 2)}`;
               text.substring(text.length - 500),
           );
         } else {
-          console.log(`📝 Content[${index}]:`, text);
+          console.log(`📝 Content[${index}]:`, text || '');
         }
       } else {
         console.log(`📝 Content[${index}]:`, content);

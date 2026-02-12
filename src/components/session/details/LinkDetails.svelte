@@ -102,8 +102,8 @@
         onnodeAction?.(action, linkId, `${action} relationship from link details`);
     }
 
-    const sourceNode = $derived(typeof link.source === 'object' ? link.source : findNodeById(link.source));
-    const targetNode = $derived(typeof link.target === 'object' ? link.target : findNodeById(link.target));
+    const sourceNode = $derived(typeof link.source === 'object' ? link.source : findNodeById(String(link.source)));
+    const targetNode = $derived(typeof link.target === 'object' ? link.target : findNodeById(String(link.target)));
     const sourceData = $derived(sourceNode ? findNodeById(sourceNode.id) : null);
     const targetData = $derived(targetNode ? findNodeById(targetNode.id) : null);
 
@@ -180,22 +180,22 @@
                             onkeydown={(e) => e.key === 'Enter' && handleNodeClick(sourceData.id)}
                         >
                             {#if nodeType === 'symptom'}
-                                <SymptomNodeComponent 
-                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <SymptomNodeComponent
+                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     symptom={sourceData}
                                     isSelected={false}
                                     isMobile={false}
                                 />
                             {:else if nodeType === 'diagnosis'}
-                                <DiagnosisNodeComponent 
-                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <DiagnosisNodeComponent
+                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     diagnosis={sourceData}
                                     isSelected={false}
                                     isMobile={false}
                                 />
                             {:else if nodeType === 'treatment'}
-                                <TreatmentNodeComponent 
-                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <TreatmentNodeComponent
+                                    node={{ id: sourceData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     treatment={sourceData}
                                     isSelected={false}
                                     isMobile={false}
@@ -228,22 +228,22 @@
                             onkeydown={(e) => e.key === 'Enter' && handleNodeClick(targetData.id)}
                         >
                             {#if nodeType === 'symptom'}
-                                <SymptomNodeComponent 
-                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <SymptomNodeComponent
+                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     symptom={targetData}
                                     isSelected={false}
                                     isMobile={false}
                                 />
                             {:else if nodeType === 'diagnosis'}
-                                <DiagnosisNodeComponent 
-                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <DiagnosisNodeComponent
+                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     diagnosis={targetData}
                                     isSelected={false}
                                     isMobile={false}
                                 />
                             {:else if nodeType === 'treatment'}
-                                <TreatmentNodeComponent 
-                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 }}
+                                <TreatmentNodeComponent
+                                    node={{ id: targetData.id, x0: 0, x1: 120, y0: 0, y1: 50 } as any}
                                     treatment={targetData}
                                     isSelected={false}
                                     isMobile={false}

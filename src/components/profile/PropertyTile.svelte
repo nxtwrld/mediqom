@@ -114,7 +114,7 @@
     }
 
     let signal = $derived(getSignalFromProperty(property));
-    let defaultSetup = $derived((signal.signal && properties[signal.signal.toLowerCase().replace(/ /ig, '_')]) || {});
+    let defaultSetup = $derived((signal.signal && (properties as any)[signal.signal.toLowerCase().replace(/ /ig, '_')]) || {});
     //$: ageOfEntry = (signal.date) ? durationFrom(signal.date) : undefined;
     // how much is the value expiring  1== recent  < 1 == older
     //$: isExpired = (signal.date) ? durationFromFormatted('days', signal.date) -  defaultSetup.valueExpirationInDays > 0 : false;
@@ -163,7 +163,7 @@
                 <span class="trend">{signal.trend > 0 ? '↑' : '↓'}</span>
             {/if}
             <strong>
-            {#if properties[title]?.localize}
+            {#if (properties as any)[title]?.localize}
                 { $t(`medical.prop-values.${title}.${signal.value}`) }
             {:else if signal.signal == 'age'}
                 {$t({id: 'app.profile.value-age', values: { value: signal.value}})}

@@ -71,11 +71,11 @@
         <p>{$t('session.empty-states.no-data')}: {nodeType}</p>
         <pre>{JSON.stringify({
             id: node?.id,
-            name: node?.name,
-            type: node?.type,
-            value: node?.value,
+            name: (node as any)?.name,
+            type: (node as any)?.type,
+            value: (node as any)?.value,
             // Avoid circular references from D3 Sankey
-            data: node?.data
+            data: (node as any)?.data
         }, null, 2)}</pre>
     </div>
 {/if}

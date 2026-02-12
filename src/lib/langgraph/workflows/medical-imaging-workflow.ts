@@ -161,7 +161,7 @@ export const processMedicalImaging = async (
   // Initialize progress tracking
   if (progressCallback) {
     progressCallback({
-      type: "progress",
+      type: "progress" as const,
       stage: "medical_imaging_init",
       progress: 0,
       message: "Initializing medical imaging analysis",
@@ -202,7 +202,7 @@ export const processMedicalImaging = async (
     // Final progress update
     if (progressCallback) {
       progressCallback({
-        type: "progress",
+        type: "progress" as const,
         stage: "medical_imaging_complete",
         progress: 100,
         message: "Medical imaging analysis complete",
@@ -218,7 +218,7 @@ export const processMedicalImaging = async (
 
     // Record error state if recording is enabled
     if (isWorkflowRecordingEnabled()) {
-      workflowRecorder.recordState("error", { error: errorMessage });
+      workflowRecorder.recordStep("error", { error: errorMessage });
       await finishWorkflowRecording({
         ...state,
         errors: [...(state.errors || []), errorMessage],
@@ -228,7 +228,7 @@ export const processMedicalImaging = async (
     // Error progress update
     if (progressCallback) {
       progressCallback({
-        type: "error",
+        type: "error" as const,
         stage: "medical_imaging_error",
         progress: 0,
         message: `Medical imaging analysis failed: ${errorMessage}`,

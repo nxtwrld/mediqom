@@ -156,7 +156,7 @@
     </div>
 {/if}
 {#if copyable}
-    <button type="button" class="input-tool input-copy" onclick={() => navigator.clipboard.writeText(value)} disabled={value == ''}>
+    <button type="button" class="input-tool input-copy" onclick={() => navigator.clipboard.writeText(String(value))} disabled={value == ''}>
         <svg>
             <use xlink:href="/sprite.svg#copy"></use>
         </svg>

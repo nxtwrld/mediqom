@@ -411,7 +411,7 @@ export class SignalDataMigration {
         "$data/lab.properties.defaults.json"
       );
 
-      const definition = propertiesDefinition.default[signalName.toLowerCase()];
+      const definition = (propertiesDefinition.default as any)[signalName.toLowerCase()];
       if (definition) {
         return {
           name: signalName,

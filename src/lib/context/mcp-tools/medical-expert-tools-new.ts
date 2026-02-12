@@ -69,8 +69,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId,
       user: profileId as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("searchDocuments", params, context);
   }
@@ -79,8 +77,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId,
       user: profileId as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("getAssembledContext", params, context);
   }
@@ -89,8 +85,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId,
       user: profileId as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("getProfileData", params, context);
   }
@@ -99,8 +93,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId,
       user: profileId as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("queryMedicalHistory", params, context);
   }
@@ -109,8 +101,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId: profileId || "",
       user: (profileId || "") as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("getDocumentById", params, context);
   }
@@ -119,8 +109,6 @@ export class MedicalExpertTools {
     const context: MCPSecurityContext = {
       profileId: profileId || "",
       user: (profileId || "") as any,
-      requestId: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
     };
     return executeTool("getPatientTimeline", params, context);
   }

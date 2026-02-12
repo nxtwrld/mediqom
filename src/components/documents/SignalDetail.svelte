@@ -126,6 +126,7 @@
 
             <ReferenceRange
                 {value}
+                reference={item?.reference || `${referenceRange.low.value}-${referenceRange.high.value}`}
                 {referenceRange} />
             </div>
             {:else}

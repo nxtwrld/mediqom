@@ -46,7 +46,7 @@
 <div class="flex -center">
     <Avatar
     bind:url={data.bio.avatarUrl as any}
-    id={$user?.id}
+    id={$user?.id || ''}
     size={10}
     editable={true}
     on:upload={() => {

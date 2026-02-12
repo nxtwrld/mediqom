@@ -293,6 +293,7 @@
       "name": "Name",
       "phone": "Telefon",
       "setup-profile": "Setup-Profil",
+      "edit-profile": "Profil bearbeiten",
       "upload": "Hochladen",
       "uploading": "Hochladen ...",
       "value-age": ""
@@ -918,11 +919,25 @@
       },
       "tabs": {
         "allergies": "Allergien",
+        "chart": "Diagramm",
         "chronicConditions": "Chronische Erkrankungen",
+        "history": "Verlauf",
         "lifeStyle": "Lebensstil",
         "profile": "Profil",
         "vaccinations": "Impfungen",
         "vitals": "Vitalwerte"
+      },
+      "history": {
+        "add-entry": "Eintrag hinzufügen",
+        "cancel": "Abbrechen",
+        "confirm-delete": "Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?",
+        "date": "Datum",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "from-document": "Aus Dokument",
+        "no-chart-data": "Nicht genügend Datenpunkte für Diagramm",
+        "no-entries": "Keine Einträge vorhanden",
+        "save": "Speichern"
       }
     },
     "insurance": {

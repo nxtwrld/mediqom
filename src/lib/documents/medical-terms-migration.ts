@@ -9,6 +9,7 @@ import { byUser, getDocument, updateDocument } from "$lib/documents";
 import type { Document, DocumentPreload } from "$lib/documents/types.d";
 import { logger } from "$lib/logging/logger";
 import { get } from "svelte/store";
+import type { TemporalType } from "$lib/config/classification";
 
 export interface MigrationOptions {
   batchSize?: number;
@@ -171,7 +172,7 @@ export class MedicalTermsMigration {
       }
 
       const medicalTerms = new Set<string>();
-      let temporalType: string | undefined;
+      let temporalType: TemporalType | undefined;
 
       // Extract from diagnosis analysis
       if (document.report.diagnosis?.diagnoses) {
@@ -242,13 +243,13 @@ export class MedicalTermsMigration {
         textLower.includes("current") ||
         textLower.includes("recent")
       ) {
-        temporalType = "latest";
+        temporalType = "latest" as TemporalType;
       } else if (
         textLower.includes("previous") ||
         textLower.includes("historical") ||
         textLower.includes("past")
       ) {
-        temporalType = "previous";
+        temporalType = "previous" as TemporalType;
       }
 
       // Add document type category terms

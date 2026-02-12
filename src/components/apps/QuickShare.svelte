@@ -1,11 +1,11 @@
 <script lang="ts">
-    import ImportFileContainer from "$components/import/ImportFileContainer.svelte";
-    import type { JOURNEY } from '$components/user/Onboarding.svelte';
+    // import ImportFileContainer from "$components/import/ImportFileContainer.svelte";
+    // import type { JOURNEY } from '$components/user/Onboarding.svelte';
     import { logger } from '$lib/logging/logger';
     import { t } from '$lib/i18n';
 
     interface Props {
-        journey?: JOURNEY | undefined;
+        journey?: any; // JOURNEY type not available
     }
 
     let { journey = undefined }: Props = $props();
@@ -18,7 +18,8 @@
 <div>
 {$t('app.apps.quick-share')}
 
-<ImportFileContainer {callback}/>
+<!-- ImportFileContainer component not available -->
+<!-- <ImportFileContainer {callback}/> -->
 
 
 {$t('app.apps.add-contact')}
