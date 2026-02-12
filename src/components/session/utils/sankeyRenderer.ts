@@ -213,15 +213,15 @@ export function calculateSankeyLayout(
     ...d,
     sourceLinks: [],
     targetLinks: [],
-    value: calculateNodeSize(d.data, d.type),
-  }));
+    value: calculateNodeSize(d.data as any, d.type),
+  })) as any;
 
   const linksForD3 = links.map((d) => ({
     ...d,
     source: d.source,
     target: d.target,
     value: d.value || 1,
-  }));
+  })) as any;
 
   // Calculate layout
   const result = sankeyGenerator({

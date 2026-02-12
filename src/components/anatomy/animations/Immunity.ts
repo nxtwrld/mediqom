@@ -26,16 +26,17 @@ export default class Vaccination implements IAnimation {
     maxZ: 2000,
   };
   private scene: THREE.Scene;
-  private objectBounced: THREE.Mesh;
+  private objectBounced: THREE.Object3D | null = null;
   private velocity: number = 0.03;
   private group: THREE.Group = new THREE.Group();
   private objectCount: number = 100;
 
   constructor(scene: THREE.Scene, boundaries?: any) {
     this.scene = scene;
-    this.objectBounced = this.scene
-      .getObjectByName("shade_skin")
-      .getObjectByName("body");
+    const shadeSkin = this.scene.getObjectByName("shade_skin");
+    if (shadeSkin) {
+      this.objectBounced = shadeSkin.getObjectByName("body") || null;
+    }
 
     if (boundaries) this.sceneBoundaries = boundaries;
 
@@ -48,11 +49,11 @@ export default class Vaccination implements IAnimation {
 
     const objs: THREE.Mesh[] = await Promise.all(
       models.map((m) => {
-        return new Promise((resolve, reject) => {
+        return new Promise<THREE.Mesh>((resolve, reject) => {
           loader.load(
             "/models/biology/" + m,
-            (object: THREE.Mesh) => {
-              resolve(object.children[0]);
+            (object: THREE.Group) => {
+              resolve(object.children[0] as THREE.Mesh);
             },
             () => {},
             (error: Error) => {

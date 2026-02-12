@@ -129,11 +129,11 @@
     let labelContainer: HTMLDivElement;
     let resizeObserverListener: ResizeObserver;
 
-    let camera: THREE.PerspectiveCamera; 
+    let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let renderer: THREE.WebGLRenderer;
-    let controls: THREE.OrbitControls;
-    let labelRenderer: THREE.CSS2DRenderer;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let controls: OrbitControls;
+    let labelRenderer: CSS2DRenderer | null = null;
     let raycaster: THREE.Raycaster;
     let pointer: THREE.Vector2 = new THREE.Vector2();
     let group: THREE.Group = new THREE.Group();
@@ -308,12 +308,12 @@
 
             renderer.forceContextLoss();
             renderer.dispose();
-            renderer.context = null;
-            renderer.domElement = null;
+            (renderer as any).context = null;
+            (renderer as any).domElement = null;
             renderer = null;
 
-            labelRenderer.context = null;
-            labelRenderer.domElement = null;
+            (labelRenderer as any).context = null;
+            (labelRenderer as any).domElement = null;
             labelRenderer = null;
 
 

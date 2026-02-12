@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export function fillWithPoints(
-  geometry: THREE.geometry,
+  geometry: THREE.BufferGeometry,
   count: number,
 ): THREE.BufferGeometry {
   const dummyTarget = new THREE.Vector3(); // to prevent logging of warnings from ray.at() method
@@ -11,6 +11,11 @@ export function fillWithPoints(
   const size = new THREE.Vector3();
   geometry.computeBoundingBox();
   let bbox = geometry.boundingBox;
+
+  if (!bbox) {
+    // If no bounding box, return empty geometry
+    return new THREE.BufferGeometry();
+  }
 
   let points = [];
 
