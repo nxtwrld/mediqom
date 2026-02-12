@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import { AudioState } from "$lib/audio/microphone";
 import { audioManager } from "$lib/audio/AudioManager";
-import type { PartialTranscript } from "../transport/sse-client";
+import type { PartialTranscript } from "../manager";
 import { SSEClient } from "../transport/sse-client";
 import { logger } from "$lib/logging/logger";
 import ui from "$lib/ui";

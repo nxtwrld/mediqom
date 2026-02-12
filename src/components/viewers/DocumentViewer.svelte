@@ -159,11 +159,11 @@
 
 <div class="document-viewer" class:preview-mode={isPreview}>
     <div class="viewer-content">
-        <svelte:component 
-            this={ViewerComponent} 
+        <svelte:component
+            this={ViewerComponent}
             {...viewerProps}
-            on:error={handleViewerEvent}
-            on:loaded={handleViewerEvent}
+            onerror={handleViewerEvent}
+            onloaded={handleViewerEvent}
         />
     </div>
 </div> 

@@ -96,7 +96,11 @@ async function storeRegularEntries(
         tags: ["meta_history", "entries"],
         date: new Date().toISOString(),
       },
-      content: metaHistoryDoc,
+      content: {
+        title: "META_HISTORIES Entries",
+        tags: ["meta_history", "entries"],
+        ...metaHistoryDoc,
+      },
       attachments: [],
     };
 
@@ -239,7 +243,11 @@ async function createCurrentDataDocument(
       date: new Date().toISOString(),
       measurementType,
     },
-    content: currentData,
+    content: {
+      title: `${measurementType} Current Data`,
+      tags: ["meta_history", "timeseries", measurementType],
+      ...currentData,
+    },
     attachments: [],
   };
 
@@ -289,7 +297,11 @@ async function createArchiveDocument(
       timeRange,
       parentDocumentId,
     },
-    content: archiveData,
+    content: {
+      title: `${measurementType} Archive ${timeRange.start}`,
+      tags: ["meta_history", "archive", measurementType],
+      ...archiveData,
+    },
     attachments: [],
   };
 

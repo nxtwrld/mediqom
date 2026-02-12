@@ -218,7 +218,7 @@ export async function getAudio(
       };
 
       mediaRecorder.addEventListener("dataavailable", (event) => {
-        if (controls.onData) controls.onData(event.data as AudioData);
+        if (controls.onData) controls.onData(event.data as unknown as AudioData);
       });
 
       // create analyzer instance

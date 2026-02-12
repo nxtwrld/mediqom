@@ -80,7 +80,7 @@
         //console.log('value  done', p, value);
 
         return {
-            ...(properties[p.signal] || {}),
+            ...(p.signal ? (properties as any)[p.signal] || {} : {}),
             ...p,
             date,
             trend,
@@ -100,7 +100,7 @@
             case 'biologicalSex':
                 return 'biologicalSex-' + signal.value;
             default:
-                return (supportedIcons.includes(property.signal)) ? property.signal : 'laboratory';
+                return (property.signal && supportedIcons.includes(property.signal)) ? property.signal : 'laboratory';
         }
     }
 

@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
-  MetaHistoryEntry,
+  type MetaHistoryEntry,
   MetaHistoryEntryType,
   type MetaHistoryQuery,
 } from "./meta-history-types";
@@ -460,7 +460,7 @@ describe("META_HISTORIES Storage System", () => {
   describe("Error Cases", () => {
     it("should handle missing required fields gracefully", () => {
       // Test what happens when required fields are missing
-      const incompleteEntry = {
+      const incompleteEntry: Partial<MetaHistoryEntry> = {
         entryId: "incomplete",
         // Missing patientId, entryType, etc.
       };

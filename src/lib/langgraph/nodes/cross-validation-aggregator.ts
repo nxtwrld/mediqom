@@ -68,7 +68,7 @@ export async function crossValidationAggregatorNode(
 
     // Aggregate all feature refinements
     const aggregated = aggregateRefinements(
-      state.featureDetectionResults || {},
+      (state.featureDetectionResults || {}) as AIFeatureDetectionResults,
       processingResults,
     );
 
@@ -94,7 +94,7 @@ export async function crossValidationAggregatorNode(
 
     // Build updated feature detection results
     const updatedFeatureDetection = buildUpdatedFeatureDetection(
-      state.featureDetectionResults || {},
+      (state.featureDetectionResults || {}) as AIFeatureDetectionResults,
       aggregated,
     );
 

@@ -325,7 +325,7 @@ export function shouldAnimateNode(node: D3QOMNode): boolean {
 
 // Export utility to get node importance for sizing
 export function getNodeImportance(node: D3QOMNode): number {
-  const typeWeights = {
+  const typeWeights: Record<string, number> = {
     merger: 1.5,
     primary: 1.3,
     specialist: 1.0,
@@ -333,7 +333,7 @@ export function getNodeImportance(node: D3QOMNode): number {
     functional: 1.1,
   };
 
-  const stateWeights = {
+  const stateWeights: Record<string, number> = {
     running: 1.2,
     completed: 1.0,
     failed: 0.9,

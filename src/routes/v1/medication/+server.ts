@@ -52,7 +52,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
   return json(
     data.data.map((item) => {
-      if (routes[item.cestaPodani.kod]) {
+      if ((routes as any)[item.cestaPodani.kod]) {
         console.log("route not found", item.cestaPodani);
       }
       if ((form as any)[item.lekovaForma.kod]) {
@@ -62,7 +62,7 @@ export const GET: RequestHandler = async ({ url }) => {
         title: item.nazevLP,
         dosage: item.sila,
         more: item.doplenkNazvu,
-        route: routes[item.cestaPodani.kod],
+        route: (routes as any)[item.cestaPodani.kod],
         form: (form as any)[item.lekovaForma.kod],
       };
     }),

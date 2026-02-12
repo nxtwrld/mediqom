@@ -18,10 +18,12 @@
     // Local state for ProfileEdit modal
     let showProfileEdit = $state(false);
     let editingProfile: any = $state(null);
+    let originalProfile: any = $state(null);
 
     function openProfileEdit() {
         // Create a deep copy to avoid direct store mutations
         editingProfile = JSON.parse(JSON.stringify($profile));
+        originalProfile = JSON.parse(JSON.stringify($profile)); // Store original for comparison
         showProfileEdit = true;
     }
     
@@ -296,16 +298,20 @@
 <!-- ProfileEdit Modal -->
 {#if showProfileEdit && editingProfile}
     <Modal onclose={async () => {
-        // Save edited profile data before closing
-        if (editingProfile?.id && editingProfile?.health) {
+        // Only save if data actually changed
+        const hasChanges = JSON.stringify(editingProfile) !== JSON.stringify(originalProfile);
+
+        if (hasChanges && editingProfile?.id && editingProfile?.health) {
             await saveHealthProfile({
                 profileId: editingProfile.id,
                 formData: editingProfile.health
             });
+            // Update the store with edited data
+            profile.set(editingProfile);
         }
-        // Update the store with edited data
-        profile.set(editingProfile);
+
         editingProfile = null;
+        originalProfile = null;
         showProfileEdit = false;
     }}>
         <ProfileEdit bind:profile={editingProfile} />

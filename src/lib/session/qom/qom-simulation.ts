@@ -112,7 +112,7 @@ export function createRealisticMedicalQOMEvents(
       qomModelId: "universal_medical_qom_v2",
       nodes: [], // Empty - store will preserve existing nodes from configuration
       links: [], // Empty - store will preserve existing links from configuration
-    } as QOMInitializedEvent,
+    } as unknown as QOMInitializedEvent,
     delayAfter: 0, // Immediate transition to first node
   });
 
@@ -144,7 +144,7 @@ export function createRealisticMedicalQOMEvents(
           "Patient presents with fatigue, heavy menstruation, and mood changes",
         sessionMetadata: { sessionId },
       },
-    } as NodeCompletedEvent,
+    } as unknown as NodeCompletedEvent,
     delayAfter: 0, // Immediate child start - no delay
   });
 
@@ -189,7 +189,7 @@ export function createRealisticMedicalQOMEvents(
         medicalRelevance: 0.9,
         analysisDecision: "proceed_with_analysis",
       },
-    } as NodeCompletedEvent,
+    } as unknown as NodeCompletedEvent,
     delayAfter: 0, // Immediate start of parallel analysis nodes
   });
 
@@ -255,7 +255,7 @@ export function createRealisticMedicalQOMEvents(
         riskAssessment: "low",
         contraindications: [],
       },
-    } as NodeCompletedEvent,
+    } as unknown as NodeCompletedEvent,
     delayAfter: 1000, // Brief delay before starting expert processing
   });
 
@@ -302,7 +302,7 @@ export function createRealisticMedicalQOMEvents(
           ({ expert }) => expert.expertId,
         ),
       },
-    } as NodeCompletedEvent,
+    } as unknown as NodeCompletedEvent,
     delayAfter: 0, // No delay - children (expert processing) can begin immediately
   });
 
@@ -327,7 +327,7 @@ export function createRealisticMedicalQOMEvents(
           output: 1100,
         },
         output: analysis,
-      } as NodeCompletedEvent,
+      } as unknown as NodeCompletedEvent,
       delayAfter: isLastExpert ? 0 : 500, // No delay for last expert (triggers consensus), brief gap for others
     });
   });
@@ -357,7 +357,7 @@ export function createRealisticMedicalQOMEvents(
           output: 1200,
         },
         output: generateConsensusAnalysis(triggeredExperts),
-      } as NodeCompletedEvent,
+      } as unknown as NodeCompletedEvent,
       delayAfter: 0, // Immediate transition to final output
     });
   }
@@ -390,7 +390,7 @@ export function createRealisticMedicalQOMEvents(
         confidenceScores: { overall: 0.85 },
         expertAttributions: triggeredExperts.map(({ expert }) => expert.name),
       },
-    } as NodeCompletedEvent,
+    } as unknown as NodeCompletedEvent,
     delayAfter: 0, // Immediate QOM completion
   });
 

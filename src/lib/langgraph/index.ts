@@ -23,7 +23,7 @@ export async function analyzeWithLangGraph(
     streamResults: false,
   };
 
-  return runDocumentProcessingWorkflow(images, text, language, config);
+  return runDocumentProcessingWorkflow(images || [], text, language, config);
 }
 
 // Export types for use in other parts of the application

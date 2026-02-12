@@ -91,8 +91,8 @@
     async function checkPassphrase() {
         let credentials = await navigator.credentials.get({ password: true });
         testPassphrase = '';
-        if (credentials) {
-            testPassphrase = credentials.password;
+        if (credentials && 'password' in credentials) {
+            testPassphrase = (credentials as PasswordCredential).password;
         }
 
 
@@ -127,10 +127,10 @@
         
     }
 
-    function clickedToCopy(e: PointerEvent) {
+    function clickedToCopy(e: FocusEvent | MouseEvent) {
         const target = e?.target as HTMLInputElement;
         target.select();
-        navigator.clipboard.writeText(passphrase); 
+        navigator.clipboard.writeText(passphrase);
     }
 
     onMount(async () => {

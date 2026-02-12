@@ -543,8 +543,8 @@ export const qomActions = {
       if (state.layoutEngine) {
         const layoutResult = state.layoutEngine.addLink({
           id: link.id,
-          source: link.source,
-          target: link.target,
+          source: typeof link.source === 'string' ? link.source : link.source.id,
+          target: typeof link.target === 'string' ? link.target : link.target.id,
           type: link.type as any,
         });
         updateStoreFromLayoutResult(state, layoutResult);

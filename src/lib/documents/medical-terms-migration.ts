@@ -243,13 +243,13 @@ export class MedicalTermsMigration {
         textLower.includes("current") ||
         textLower.includes("recent")
       ) {
-        temporalType = "latest" as TemporalType;
+        temporalType = "latest";
       } else if (
         textLower.includes("previous") ||
         textLower.includes("historical") ||
         textLower.includes("past")
       ) {
-        temporalType = "previous" as TemporalType;
+        temporalType = "previous";
       }
 
       // Add document type category terms
@@ -274,7 +274,7 @@ export class MedicalTermsMigration {
       const updatedDocument: Document = {
         ...document,
         medicalTerms: Array.from(medicalTerms),
-        temporalType,
+        temporalType: temporalType as unknown as TemporalType | undefined,
       };
 
       // Save updated document

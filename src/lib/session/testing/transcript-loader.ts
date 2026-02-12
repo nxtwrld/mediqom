@@ -1,4 +1,4 @@
-import type { PartialTranscript } from "./manager";
+import type { PartialTranscript } from "../manager";
 import { logger } from "$lib/logging/logger";
 
 // Test transcript data interface (matches testData/transcripts format)

@@ -77,11 +77,12 @@
     function checkVisibility(data: Data[]) {
         // hide and show goals
         if (!svgElement) return;
+        const svg = svgElement; // Capture in const for type narrowing
         data.forEach((d, index) => {
             if (d.data.length == 0) {
                 d.visible = false;
             }
-            let goal = svgElement.querySelector('.goal-' + index);
+            let goal = svg.querySelector('.goal-' + index);
             if (goal) {
                 if (!d.visible) {
                     goal.classList.add('-hidden');
@@ -99,13 +100,13 @@
             return acc;
         }, [] as number[]);
         if (visiblesItems.length == 1) {
-            let axis = svgElement.querySelector('#y-axis-' + visiblesItems[0]);
+            let axis = svg.querySelector('#y-axis-' + visiblesItems[0]);
             if (axis) {
                 axis.classList.remove('-hidden');
             }
         } else {
             data.forEach((d, index) => {
-                let axis = svgElement.querySelector('#y-axis-' + index);
+                let axis = svg.querySelector('#y-axis-' + index);
                 if (axis) {
                     axis.classList.add('-hidden');
                 }

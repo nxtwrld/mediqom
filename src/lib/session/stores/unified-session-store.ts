@@ -35,7 +35,7 @@ interface PathState {
   };
 }
 import { SSEClient } from "../transport/sse-client";
-import type { PartialTranscript } from "../transport/sse-client";
+import type { PartialTranscript } from "../manager";
 
 // Re-export AudioState from microphone.ts as single source of truth
 export { AudioState } from "$lib/audio/microphone";

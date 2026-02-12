@@ -15,6 +15,9 @@
         label?: string | undefined;
         style?: string;
         class?: string;
+        disabled?: boolean;
+        tabindex?: number;
+        autocomplete?: string;
         children?: import('svelte').Snippet;
     }
 
@@ -28,6 +31,9 @@
         label = $t('app.forms.browse-file'),
         style = '',
         class: className = 'button',
+        disabled = false,
+        tabindex = undefined,
+        autocomplete = undefined,
         children
     }: Props = $props();
     

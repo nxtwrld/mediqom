@@ -3,6 +3,7 @@
 	import Cropper from 'svelte-easy-crop';
 	import type { CropArea, OnCropCompleteEvent } from 'svelte-easy-crop';
 	import Modal from './Modal.svelte';
+	import Input from '$components/forms/Input.svelte';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -93,10 +94,10 @@
 		</div>
 
 		<div class="zoom-control">
-			<label for="zoom-slider">{$t('app.profile.zoom')}</label>
-			<input
-				id="zoom-slider"
+			<Input
 				type="range"
+				id="zoom-slider"
+				label={$t('app.profile.zoom')}
 				min="1"
 				max="3"
 				step="0.1"
@@ -139,58 +140,13 @@
 
 	.zoom-control {
 		display: flex;
-		align-items: center;
-		gap: 1rem;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
-	.zoom-control label {
-		flex-shrink: 0;
+	.zoom-control :global(.label) {
 		font-size: 0.875rem;
 		color: var(--color-text-secondary);
-	}
-
-	.zoom-control input[type="range"] {
-		flex: 1;
-		height: 6px;
-		-webkit-appearance: none;
-		appearance: none;
-		background: var(--color-gray-500);
-		border-radius: 3px;
-		outline: none;
-		border: 1px solid var(--color-gray-600);
-	}
-
-	.zoom-control input[type="range"]::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		background: var(--color-blue);
-		border-radius: 50%;
-		cursor: pointer;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-		border: 2px solid var(--color-white);
-	}
-
-	.zoom-control input[type="range"]::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		background: var(--color-blue);
-		border-radius: 50%;
-		cursor: pointer;
-		border: 2px solid var(--color-white);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.zoom-control input[type="range"]::-webkit-slider-runnable-track {
-		height: 6px;
-		border-radius: 3px;
-	}
-
-	.zoom-control input[type="range"]::-moz-range-track {
-		height: 6px;
-		border-radius: 3px;
-		background: var(--color-gray-500);
 	}
 
 	.actions {

@@ -5,6 +5,7 @@
     const bubble = createBubbler();
     import InputDateTime from "./InputDateTime.svelte";
     import InputFile from "./InputFile.svelte";
+    import InputRange from "./InputRange.svelte";
 
 
 
@@ -123,11 +124,14 @@
 {:else if type == 'month'}
     <input type="month" {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} class:copyable={copyable}
         onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
+{:else if type == 'range'}
+    <InputRange {id} {name} class={className} {tabindex} {disabled} bind:value {style} {readonly} min={parseFloat(min) || 0} max={parseFloat(max) || 100} step={parseFloat(step) || 1}
+        onchange={bubble('change')} oninput={bubble('input')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
 {:else if type == 'file'}
-    <InputFile {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any}  
-        on:change on:blur on:focus on:keypress on:keyup on:keydown/>
+    <InputFile {id} {name} class={className} {tabindex} {disabled} bind:value={value as string} {placeholder} {required} {style} autocomplete={autocomplete as any}
+        onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')} onkeypress={bubble('keypress')} onkeyup={bubble('keyup')} onkeydown={bubble('keydown')}/>
 {:else if type == 'datetime-local' || type == 'datetime' || type == 'date-local' || type == 'date' || type == 'time'}
-    <InputDateTime {id} {name} class={className} {tabindex} {disabled} bind:value {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly}  on:change on:blur on:focus/>
+    <InputDateTime {id} {name} class={className} {tabindex} {disabled} bind:value={value as string} {placeholder} {required} {style} autocomplete={autocomplete as any} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>
 {:else if type == 'checkbox'}
     <div class="input-line" class:checked={checked}>
         <input type="checkbox" {id} {name} class={className} {tabindex} {disabled} bind:checked={checked} {style} autocomplete={autocomplete as any} {readonly} onchange={bubble('change')} onblur={bubble('blur')} onfocus={bubble('focus')}/>

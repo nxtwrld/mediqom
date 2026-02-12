@@ -19,7 +19,7 @@
     $effect(() => {
         if (provider || number) {
             // Only create the data object when user enters something
-            if (!data) data = {};
+            if (!data) data = { provider: '', number: '' };
             data.provider = provider;
             data.number = number;
         }
