@@ -324,7 +324,13 @@
       "edit-profile": "Edit profile",
       "upload": "Upload",
       "uploading": "Uploading ...",
-      "value-age": "{value, plural, =0 {# years} one {1 year} other {# years}}"
+      "value-age": "{value, plural, =0 {# years} one {1 year} other {# years}}",
+      "crop-image": "Crop Image",
+      "zoom": "Zoom"
+    },
+    "general": {
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "profiles": {
       "add": "Add Profile",

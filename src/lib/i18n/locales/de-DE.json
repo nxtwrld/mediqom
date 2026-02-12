@@ -296,7 +296,13 @@
       "edit-profile": "Profil bearbeiten",
       "upload": "Hochladen",
       "uploading": "Hochladen ...",
-      "value-age": ""
+      "value-age": "",
+      "crop-image": "Bild zuschneiden",
+      "zoom": "Zoom"
+    },
+    "general": {
+      "cancel": "Abbrechen",
+      "confirm": "Bestätigen"
     },
     "profiles": {
       "add": "Profil hinzufügen",

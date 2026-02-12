@@ -296,7 +296,13 @@
       "edit-profile": "Upravit profil",
       "upload": "Nahrát",
       "uploading": "Nahrávání ...",
-      "value-age": "{value, plural, =0 {# let} one {# rok} two {# roky} few {# roky} other {# let}}"
+      "value-age": "{value, plural, =0 {# let} one {# rok} two {# roky} few {# roky} other {# let}}",
+      "crop-image": "Oříznout obrázek",
+      "zoom": "Přiblížení"
+    },
+    "general": {
+      "cancel": "Zrušit",
+      "confirm": "Potvrdit"
     },
     "profiles": {
       "add": "Přidat profil",

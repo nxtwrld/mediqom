@@ -116,6 +116,7 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.9.155",
     "remark-mermaid": "^0.2.0",
+    "svelte-easy-crop": "^5.0.0",
     "svelte-file-dropzone": "^2.0.9",
     "svelte-i18n": "^4.0.1",
     "sveltekit-io": "^1.0.11",
