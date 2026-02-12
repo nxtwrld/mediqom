@@ -1,4 +1,3 @@
-import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import coreDiagnosis from "./core.diagnosis";
 import coreBodyParts from "./core.bodyParts";
 import corePerformer from "./core.performer";
@@ -172,4 +171,4 @@ export default {
     },
     required: ["recommendations"],
   },
-} as FunctionDefinition;
+};

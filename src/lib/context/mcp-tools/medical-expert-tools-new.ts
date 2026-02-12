@@ -68,7 +68,7 @@ export class MedicalExpertTools {
   async searchDocuments(params: any, profileId: string) {
     const context: MCPSecurityContext = {
       profileId,
-      userId: profileId,
+      user: profileId,
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };
@@ -78,7 +78,7 @@ export class MedicalExpertTools {
   async getAssembledContext(params: any, profileId: string) {
     const context: MCPSecurityContext = {
       profileId,
-      userId: profileId,
+      user: profileId,
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };
@@ -88,7 +88,7 @@ export class MedicalExpertTools {
   async getProfileData(params: any, profileId: string) {
     const context: MCPSecurityContext = {
       profileId,
-      userId: profileId,
+      user: profileId,
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };
@@ -98,7 +98,7 @@ export class MedicalExpertTools {
   async queryMedicalHistory(params: any, profileId: string) {
     const context: MCPSecurityContext = {
       profileId,
-      userId: profileId,
+      user: profileId,
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };
@@ -108,7 +108,7 @@ export class MedicalExpertTools {
   async getDocumentById(params: any, profileId?: string) {
     const context: MCPSecurityContext = {
       profileId: profileId || "",
-      userId: profileId || "",
+      user: profileId || "",
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };
@@ -118,7 +118,7 @@ export class MedicalExpertTools {
   async getPatientTimeline(params: any, profileId?: string) {
     const context: MCPSecurityContext = {
       profileId: profileId || "",
-      userId: profileId || "",
+      user: profileId || "",
       requestId: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
     };

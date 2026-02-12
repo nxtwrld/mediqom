@@ -8,7 +8,7 @@
 import type { DocumentProcessingState } from "../state";
 import type { TemporalType } from "$lib/documents/types";
 import { logger } from "$lib/logging/logger";
-import { BODY_PARTS } from "$lib/configurations/tags";
+import BODY_PARTS from "$lib/configurations/tags";
 
 /**
  * Generate unified medical terms for document search
@@ -240,7 +240,7 @@ export async function medicalTermsGenerationNode(
           medicalTerms: finalMedicalTerms,
           temporalType,
           metadata: {
-            language: state.language,
+            language: state.language || "en",
             documentType:
               state.documentTypeAnalysis?.documentType || "document",
             processingDate: new Date().toISOString(),

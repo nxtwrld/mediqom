@@ -166,7 +166,14 @@ export function mergeNamesOnReports(reports: DocumentNew[]): {
     } else {
       patientMap.set("unknown-" + Math.random(), {
         profile: {
+          id: "unknown-" + Math.random(),
           fullName: "unknown",
+          language: "en",
+          vcard: null,
+          health: null,
+          insurance: null,
+          publicKey: "",
+          status: "unknown",
         },
         reports: [report],
       });
@@ -199,20 +206,24 @@ export function findInProfiles(contact: {
 }): Profile[] {
   if (!contact.fullName && !contact.insurance?.number) return [];
 
-  let name = normalizeName(contact.fullName);
+  let name = contact.fullName ? normalizeName(contact.fullName) : "";
   let insurance_number = contact.insurance?.number;
 
-  const profilesArray = [...profiles.get()] as Profile[];
+  const profilesData = profiles.get();
+  const profilesArray = (Array.isArray(profilesData) ? profilesData : [profilesData]) as Profile[];
 
-  let names = [];
-  let insurance_numbers = [];
+  let names: string[] = [];
+  let insurance_numbers: string[] = [];
   if (name) {
     name = name.trim();
     names.push(name);
     names.push(searchOptimize(name));
     if (name.indexOf(" ") > 0) {
-      names.push(name.split(" ").pop());
-      names.push(searchOptimize(name.split(" ").pop()));
+      const lastName = name.split(" ").pop();
+      if (lastName) {
+        names.push(lastName);
+        names.push(searchOptimize(lastName));
+      }
     }
   }
   if (insurance_number) {
@@ -222,8 +233,8 @@ export function findInProfiles(contact: {
   }
 
   // remove empty string from names and insurance_numbers
-  names.filter((n) => n.length > 0);
-  insurance_numbers.filter((n) => n.length > 0);
+  names = names.filter((n: string) => n && n.length > 0);
+  insurance_numbers = insurance_numbers.filter((n: string) => n && n.length > 0);
 
   // search profiles based on names and insurance_numbers
   const profilesFound = profilesArray
@@ -235,8 +246,8 @@ export function findInProfiles(contact: {
       };
       if (names.length > 0) {
         if (
-          names.some((n) =>
-            searchOptimize(normalizeName(p.fullName)).includes(n),
+          names.some((n: string) =>
+            n && searchOptimize(normalizeName(p.fullName || "")).includes(n),
           )
         ) {
           r.matchName = true;
@@ -244,7 +255,7 @@ export function findInProfiles(contact: {
       }
       if (insurance_numbers.length > 0) {
         if (
-          insurance_numbers.some((n) => p.insurance && n === p.insurance.number)
+          insurance_numbers.some((n: string) => p.insurance && n === p.insurance.number)
         ) {
           r.matchInsurance = true;
         }
@@ -253,10 +264,14 @@ export function findInProfiles(contact: {
     })
     .filter((p) => p.matchName || p.matchInsurance)
     .sort((a, b) => {
-      if (a.matchName) return -1;
+      if (a.matchName && !b.matchName) return -1;
+      if (!a.matchName && b.matchName) return 1;
+      return 0;
     })
     .sort((a, b) => {
-      if (a.matchInsurance) return -1;
+      if (a.matchInsurance && !b.matchInsurance) return -1;
+      if (!a.matchInsurance && b.matchInsurance) return 1;
+      return 0;
     })
     .sort((a, b) => {
       if (a.matchName && a.matchInsurance) return -1;

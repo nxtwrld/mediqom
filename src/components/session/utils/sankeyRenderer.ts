@@ -153,7 +153,7 @@ export function renderLinks(
     .attr("stroke-width", (d) => Math.max(1, (d as any).width || 2));
 
   // Transition new links in
-  linkEnter.transition().duration(300).style("opacity", OPACITY.LINK_DEFAULT);
+  linkEnter.transition().duration(300).style("opacity", OPACITY.DEFAULT_LINK);
 
   // UPDATE - Update existing links
   const linkUpdate = linkSelection.merge(linkEnter);
@@ -166,11 +166,11 @@ export function renderLinks(
     .attr("stroke", (d) => {
       const sourceNode = typeof d.source === "object" ? d.source : null;
       if (sourceNode && (sourceNode as any).type === "symptom") {
-        return COLORS.SYMPTOM;
+        return COLORS.NODES.SYMPTOM_TRANSCRIPT.replace("{intensity}", "1");
       } else if (sourceNode && (sourceNode as any).type === "diagnosis") {
-        return COLORS.DIAGNOSIS;
+        return COLORS.NODES.DIAGNOSIS.replace("{intensity}", "1");
       }
-      return COLORS.TREATMENT;
+      return COLORS.NODES.TREATMENT.replace("{intensity}", "1");
     });
 
   // Attach event handlers
@@ -194,7 +194,7 @@ export function calculateSankeyLayout(
 
   // Create sankey generator
   const sankeyGenerator = sankey<SankeyNode, SankeyLink>()
-    .nodeWidth(NODE_SIZE.WIDTH)
+    .nodeWidth(NODE_SIZE.NODE_WIDTH)
     .nodePadding(isMobile ? 8 : 12)
     .extent([
       [0, 0],
@@ -213,7 +213,7 @@ export function calculateSankeyLayout(
     ...d,
     sourceLinks: [],
     targetLinks: [],
-    value: calculateNodeSize(d.data as any, d.type),
+    value: calculateNodeSize(d as any, isMobile),
   })) as any;
 
   const linksForD3 = links.map((d) => ({
@@ -295,7 +295,7 @@ export function updateNodePositions(
     ? nodeSelection.transition().duration(500)
     : nodeSelection;
 
-  update
+  (update as any)
     .select("foreignObject")
     .attr("x", (d: any) => d.x0 || 0)
     .attr("y", (d: any) => d.y0 || 0)
@@ -314,7 +314,7 @@ export function updateLinkPaths(
     ? linkSelection.transition().duration(500)
     : linkSelection;
 
-  update
+  (update as any)
     .attr("d", sankeyLinkHorizontal())
     .attr("stroke-width", (d: any) => Math.max(1, d.width || 2));
 }

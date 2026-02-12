@@ -8,8 +8,8 @@
 import { StateGraph, END } from "@langchain/langgraph";
 import type {
   MedicalImagingState,
-  WorkflowConfig,
-  ProgressCallback,
+  MedicalImagingWorkflowConfig as WorkflowConfig,
+  MedicalImagingProgressCallback as ProgressCallback,
 } from "../state-medical-imaging";
 import {
   startWorkflowRecording,
@@ -143,9 +143,9 @@ export const createMedicalImagingWorkflow = (
 
   // Define 2-node sequential workflow
   workflow
-    .addEdge("__start__", "patient_performer_detection")
-    .addEdge("patient_performer_detection", "medical_imaging_analysis")
-    .addEdge("medical_imaging_analysis", END);
+    .addEdge("__start__", "patient_performer_detection" as any)
+    .addEdge("patient_performer_detection" as any, "medical_imaging_analysis" as any)
+    .addEdge("medical_imaging_analysis" as any, END);
 
   return workflow.compile();
 };
@@ -175,8 +175,14 @@ export const processMedicalImaging = async (
     // Check for workflow replay mode
     if (isWorkflowReplayMode()) {
       console.log("🔄 Running in replay mode");
-      const replay = createWorkflowReplay();
-      finalState = await replay.executeWorkflow(state, "medical-imaging");
+      const replay = createWorkflowReplay("medical-imaging");
+      if (replay) {
+        finalState = await replay.executeStep(state);
+      } else {
+        // Fallback to normal execution if replay fails
+        const workflow = createMedicalImagingWorkflow(config, progressCallback);
+        finalState = await workflow.invoke(state);
+      }
     } else {
       // Start workflow recording if enabled
       if (isWorkflowRecordingEnabled()) {

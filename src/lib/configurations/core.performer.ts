@@ -1,5 +1,3 @@
-import type { FunctionDefinition } from "@langchain/core/language_models/base";
-
 /**
  * Core Performer Schema with Multi-Language Support
  *
@@ -139,4 +137,4 @@ export default {
     },
   },
   required: ["role", "name"],
-} as FunctionDefinition;
+};

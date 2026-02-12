@@ -162,6 +162,7 @@ export const featureDetectionNode = async (
     // Create AI feature detection results for router compatibility
     const aiFeatureDetectionResults = {
       isMedical: !parsedResult.notMedical,
+      isMedicalImaging: parsedResult.isMedicalImaging || false,
       language: parsedResult.language || state.language || "English",
       documentType:
         parsedResult.documentType || parsedResult.category || "unknown",

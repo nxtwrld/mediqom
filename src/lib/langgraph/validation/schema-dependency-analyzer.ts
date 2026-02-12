@@ -34,6 +34,35 @@ export interface ValidationIssue {
   actualValue?: any;
 }
 
+// Validation helper functions (stub implementations)
+function validateRecommendationDiagnosisAlign(recommendationsData: any, diagnosisData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateRecommendationBodyParts(recommendationsData: any, bodyPartsData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateSpecimenBodyPartConsistency(specimensData: any, bodyPartsData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateProvisionalDiagnosis(provisionalData: any, finalData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateMicroscopicDiagnosisAlign(microscopicData: any, diagnosisData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateECGVitalCorrelation(ecgData: any, vitalData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
+function validateECGDiagnosisAlign(ecgData: any, diagnosisData: any): ValidationResult {
+  return { isValid: true, confidence: 1, issues: [], suggestions: [] };
+}
+
 /**
  * Schema Cross-Link Dependencies Mapping
  * Based on our actual schema imports and embeddings

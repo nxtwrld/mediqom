@@ -172,6 +172,9 @@ export interface DocumentProcessingState {
   medicalAnalysis?: MedicalAnalysis;
   signals?: EnhancedSignal[];
   report?: any; // Add report field
+  imaging?: any;
+  medications?: any;
+  procedures?: any;
 
   // Document type routing
   documentTypeAnalysis?: DocumentTypeAnalysis;
