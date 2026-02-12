@@ -33,5 +33,5 @@ function escapeHtml(text) {
     '"': "&quot;",
     "'": "&#039;",
   };
-  return text.replace(/[&<>"']/g, (/** @type {string} */ m) => map[m]);
+  return text.replace(/[&<>"']/g, (/** @type {string} */ m) => map[m] || m);
 }

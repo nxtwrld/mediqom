@@ -177,6 +177,7 @@ export function getImageMimeTypeFromBuffer(
     if (riffType === "WEBP") {
       return "image/webp";
     }
+    return "application/octet-stream";
   } else {
     return "application/octet-stream";
   }
