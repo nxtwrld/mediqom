@@ -10,6 +10,7 @@
 	import { prepareKey, encrypt as encryptAES, exportKey } from '$lib/encryption/aes.js';
 	import { encrypt as encryptRSA, pemToKey } from '$lib/encryption/rsa.js';
 	import { log } from '$lib/logging/logger';
+	import { t } from '$lib/i18n';
 
 	let STEP = $state(0);
 
@@ -226,7 +227,7 @@
 					class="button -block"
 					onclick={() => setStep(STEP - 1)}
 				>
-					Back
+					{$t('app.account.back')}
 				</button>
 			{/if}
 
@@ -234,7 +235,7 @@
 				<input
 					type="submit"
 					class="button -block -primary -large"
-					value={loading ? 'Loading...' : 'Save'}
+					value={loading ? $t('app.account.loading') : $t('app.buttons.save')}
 					disabled={!readyNext || loading}
 				/>
 			{:else}
@@ -244,7 +245,7 @@
 					onclick={() => setStep(STEP + 1)}
 					disabled={!readyNext}
 				>
-					Next
+					{$t('app.account.next')}
 				</button>
 			{/if}
 
@@ -253,7 +254,7 @@
 	</div>
 	<form class="signout" method="post" action="?/signout" use:enhance={handleSignOut}>
 		<div>
-			<button class="button block" disabled={loading}>Sign Out</button>
+			<button class="button block" disabled={loading}>{$t('app.account.sign-out')}</button>
 		</div>
 	</form>
 	

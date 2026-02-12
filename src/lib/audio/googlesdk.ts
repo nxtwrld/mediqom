@@ -37,7 +37,7 @@ export async function transcribeAudio(
 
   const [response] = await client.recognize(request);
   const transcription = response.results
-    .map((result) => result.alternatives[0].transcript)
+    .map((result: any) => result.alternatives[0].transcript)
     .join("\n");
   console.log(`Transcription: ${transcription}`);
   console.log("Speaker Diarization:");
@@ -47,7 +47,7 @@ export async function transcribeAudio(
   // However, the words list within an alternative includes all the words
   // from all the results thus far. Thus, to get all the words with speaker
   // tags, you only have to take the words list from the last result:
-  wordsInfo.forEach((a) =>
+  wordsInfo.forEach((a: any) =>
     console.log(` word: ${a.word}, speakerTag: ${a.speakerTag}`),
   );
 }

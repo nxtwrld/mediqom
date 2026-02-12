@@ -26,6 +26,7 @@ export function createMermaidHighlighter() {
  * @returns {string}
  */
 function escapeHtml(text) {
+  /** @type {Record<string, string>} */
   const map = {
     "&": "&amp;",
     "<": "&lt;",

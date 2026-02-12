@@ -12,6 +12,7 @@
     import share from "$lib/share/store";
 	import ProgressBar from "$components/ui/ProgressBar.svelte";
     //import createShares from "$lib/share/create";
+    import { t } from '$lib/i18n';
 
     import ShareLinkedItems from "./ShareLinkedItems.svelte";
 
@@ -66,17 +67,17 @@
     function getTitle(step: number) {
         switch (step) {
             case 0:
-                return `Share ${items[0]?.title}`;
+                return $t('share.title', { values: { title: items[0]?.title || '' } });
             case 1:
-                return `Share with ${contact?.fn || '...'}`;
+                return $t('share.share-with', { values: { name: contact?.fn || '...' } });
             case 2:
-                return `Share with ${contact?.fn || '...'}- Review Items`;
+                return $t('share.share-with', { values: { name: contact?.fn || '...' } }) + ' - ' + $t('share.review-items');
             case 3:
-                return `Share with ${contact?.fn || '...'}- Privacy`;
+                return $t('share.share-with', { values: { name: contact?.fn || '...' } }) + ' - ' + $t('share.privacy');
             case 4:
-                return 'Uploading enrypted data...';
+                return $t('share.uploading');
             case 5:
-                return 'Share It!';
+                return $t('share.share-it');
         }
     }
 
@@ -182,7 +183,7 @@ Kindest regards,
 <h3 class="h3">{stepTitle}</h3>
 
 {#if contact && step > 1}
-    <p class="p">You are sharing with <strong>{contact.fn}</strong></p>
+    <p class="p">{$t('share.sharing-with')} <strong>{contact.fn}</strong></p>
 {/if}
 
 
@@ -191,7 +192,7 @@ Kindest regards,
 
         <div class="step">
             <div class="step-contents">
-                <p class="p">Sharing will create an encrypted store on our server for the selected medical record. The records can be accessed via generated link and password.</p>
+                <p class="p">{$t('share.description')}</p>
             </div>
         </div>
 
@@ -217,24 +218,21 @@ Kindest regards,
                     <use href="/sprite.svg#public-key" />
                 </svg>
                     <p class="p">
-                        Your records will be stored on our server encrypted. {contact.fn} has configured a Public Key 
-                        and we will use it to encrypt the records. We will not be able to access your records.
+                        {$t('share.public-key-info', { values: { name: contact.fn } })}
                     </p>
                         <PublicKey value={contact.publicKey} />
                 {:else}
                 <svg>
                     <use href="/sprite.svg#encrypted-data" />
                 </svg>
-                <p class="p">You records will be stored on our server encrypted. You have to create a custom password,
-                    that you will be able to share with your contact. We will not be able to access your records.
-                </p>
+                <p class="p">{$t('share.password-info')}</p>
 
                 <div class="password-row">
                     <div>
-                        <Input type="password" bind:value={password} placeholder="Password protect your record" label="Password" required copyable autocomplete="off" />
+                        <Input type="password" bind:value={password} placeholder={$t('share.password-placeholder')} label={$t('share.password-label')} required copyable autocomplete="off" />
                     </div>
                     <div>
-                        <button class="button" onclick={generatePassword}>Generate</button>
+                        <button class="button" onclick={generatePassword}>{$t('share.generate')}</button>
                     </div>
                 </div>
                 {/if}
@@ -247,7 +245,7 @@ Kindest regards,
             <div class="step-contents">
 
                 <div class="centered">
-                    <h4 class="h4">Encrypting keys and uploading data to the server</h4>
+                    <h4 class="h4">{$t('share.encrypting-uploading')}</h4>
                     <div class="upload-progress">
                         <ProgressBar value={uploadProgress} />
                     </div>
@@ -260,8 +258,8 @@ Kindest regards,
         <div class="step">
 
             <div class="step-contents">
-            
-                <p class="p">Please note, that the password is kept only in your app. You have to share it with your contact.</p>
+
+                <p class="p">{$t('share.password-note')}</p>
 
                 {#each routes as route, index}
                 <div>
@@ -270,35 +268,35 @@ Kindest regards,
                 {/each}
 
 
-                <Input type="text" bind:value={url} placeholder="URL" label="URL" readonly copyable />
+                <Input type="text" bind:value={url} placeholder={$t('share.url-label')} label={$t('share.url-label')} readonly copyable />
 
-                <Textarea bind:value={message} placeholder="Message" label="Message" />
+                <Textarea bind:value={message} placeholder={$t('share.message-label')} label={$t('share.message-label')} />
             </div>
         </div>
     </div>
     <div class="buttons-row">
-        
+
         <button class="button" onclick={previous}>
             {#if step == 0}
-                Cancel
+                {$t('share.cancel')}
             {:else}
-                Back
+                {$t('share.back')}
             {/if}
         </button>
 
         {#if step == lastStep}
             {#if route?.type == 'email'}
-                <a href="mailto:{route.value}?subject={sharedMessage.subject}&body={sharedMessage.body}" class="button">Open email app</a>
+                <a href="mailto:{route.value}?subject={sharedMessage.subject}&body={sharedMessage.body}" class="button">{$t('share.open-email-app')}</a>
             {:else if routes[selectedRoute].type == 'tel'}
-                <a href="sms:{route.value}?body={sharedMessage.body}" class="button" >Open sms app</a>
+                <a href="sms:{route.value}?body={sharedMessage.body}" class="button">{$t('share.open-sms-app')}</a>
             {/if}
-            <button class="button -primary" onclick={abort}>Done</button>
+            <button class="button -primary" onclick={abort}>{$t('share.done')}</button>
         {:else if step == lastStep -2}
-        <button class="button -primary" onclick={createShare} disabled={isNextAllowed}>Create Share</button>
+        <button class="button -primary" onclick={createShare} disabled={isNextAllowed}>{$t('share.create-share')}</button>
         {:else}
-            <button class="button -primary" onclick={next} disabled={isNextAllowed}>Next</button>
+            <button class="button -primary" onclick={next} disabled={isNextAllowed}>{$t('share.next')}</button>
         {/if}
-        
+
     </div>
 </div>
 

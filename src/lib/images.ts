@@ -128,7 +128,7 @@ export async function merge(base64Images: string[]): Promise<string> {
 // Helper function to get image MIME type from ArrayBuffer
 export function getImageMimeTypeFromBuffer(
   input: ArrayBuffer | string,
-): string {
+): string | undefined {
   let arr: Uint8Array;
   if (typeof input === "string") {
     // Detect and strip data URL prefix if present

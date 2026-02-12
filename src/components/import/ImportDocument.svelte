@@ -5,6 +5,14 @@
     import { type Document, DocumentState, type Task, TaskState }  from '$lib/import';
     import ScanningAnimation from '$components/import/ScanningAnimation.svelte';
     import { scale } from 'svelte/transition';
+    import { t } from '$lib/i18n';
+
+    // Status label mapping function
+    function getStatusLabel(state: DocumentState | TaskState): string {
+        const stateStr = state as string;
+        const key = `app.import.doc-status-${stateStr.toLowerCase()}`;
+        return $t(key);
+    }
 
     interface Props {
         doc: Document | Task;
@@ -18,7 +26,7 @@
     // console.log('ImportDocument:', $state.snapshot(doc));
 </script>
 
-<div class="report {doc.state}" onclick={() => onclick?.(doc)} transition:scale role="button" tabindex="0" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onclick?.(doc); } }} aria-label="Open document: {doc.title}">
+<div class="report {doc.state}" onclick={() => onclick?.(doc)} transition:scale role="button" tabindex="0" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onclick?.(doc); } }} aria-label={$t('aria.import.open-document', { values: { title: doc.title } })}>
     
     <div class="preview">
         {#if doc.pages?.[0]?.thumbnail}
@@ -37,7 +45,7 @@
     <div class="title">{doc.title}</div>
 
     {#if removable && !(doc.state === DocumentState.PROCESSING || doc.state == TaskState.ASSESSING)}
-        <button class="remove" aria-label="Remove document" onclick={stopPropagation(() => onremove?.(doc))}>
+        <button class="remove" aria-label={$t('aria.import.remove-file')} onclick={stopPropagation(() => onremove?.(doc))}>
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <use href="/icons.svg#close" />
             </svg>
@@ -45,7 +53,7 @@
     {/if}
     {#if doc.state != DocumentState.PROCESSED}
         <div class="status">
-            {doc.state}
+            {getStatusLabel(doc.state)}
         </div>
     {/if}
 </div>

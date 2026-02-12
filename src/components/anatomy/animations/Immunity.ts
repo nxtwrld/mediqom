@@ -25,7 +25,7 @@ export default class Vaccination implements IAnimation {
     minZ: -2000,
     maxZ: 2000,
   };
-  private scene: THREE.Scene;
+  private scene: THREE.Scene | null;
   private objectBounced: THREE.Object3D | null = null;
   private velocity: number = 0.03;
   private group: THREE.Group = new THREE.Group();
@@ -56,7 +56,7 @@ export default class Vaccination implements IAnimation {
               resolve(object.children[0] as THREE.Mesh);
             },
             () => {},
-            (error: Error) => {
+            (error: unknown) => {
               console.log(error);
               reject(error);
             },
@@ -109,12 +109,16 @@ export default class Vaccination implements IAnimation {
         this.objects.splice(index, 1); // Remove object from array
       }
     });
-    this.scene.remove(this.group);
+    if (this.scene) {
+      this.scene.remove(this.group);
+    }
     this.scene = null;
     this.objectBounced = null;
   }
 
   update() {
+    if (!this.objectBounced) return;
+
     const bouncedBoundingBox = new THREE.Box3().setFromObject(
       this.objectBounced,
     );
@@ -125,10 +129,12 @@ export default class Vaccination implements IAnimation {
     );
 
     this.objects.forEach((object: THREE.Mesh) => {
+      if (!object.velocity || !object.initialVelocity) return;
+
       // Calculate attraction force towards the cube
       const attractionForce = this.calculateAttractionForce(
         object,
-        this.objectBounced,
+        this.objectBounced!,
         attractionStrength,
       );
       object.velocity.add(attractionForce);
@@ -165,7 +171,7 @@ export default class Vaccination implements IAnimation {
 
   randomVelocity(maxSpeed: number, object: THREE.Mesh) {
     // random velocity - some elemetns just float around and others will be attracted to body
-    if (Math.random() > 0.7) {
+    if (Math.random() > 0.7 || !this.objectBounced) {
       return new THREE.Vector3(
         (Math.random() - 0.5) * 2 * maxSpeed,
         (Math.random() - 0.5) * 2 * maxSpeed,
@@ -193,7 +199,7 @@ export default class Vaccination implements IAnimation {
       object.position.copy(position);
 
       if (retries-- <= 0) break; // Avoid infinite loop, give up after certain retries
-    } while (this.isOverlapping(object, this.objectBounced));
+    } while (this.objectBounced && this.isOverlapping(object, this.objectBounced));
     return position;
   }
 
@@ -205,7 +211,7 @@ export default class Vaccination implements IAnimation {
     );
   }
 
-  isOverlapping(newObject: THREE.Mesh, existingObject: THREE.Mesh) {
+  isOverlapping(newObject: THREE.Mesh, existingObject: THREE.Object3D) {
     const newObjectBoundingBox = new THREE.Box3().setFromObject(newObject);
 
     const existingObjectBoundingBox = new THREE.Box3().setFromObject(
@@ -220,7 +226,7 @@ export default class Vaccination implements IAnimation {
 
   calculateAttractionForce(
     object: THREE.Mesh,
-    target: THREE.Mesh,
+    target: THREE.Object3D,
     strength: number,
   ) {
     const direction = new THREE.Vector3().subVectors(

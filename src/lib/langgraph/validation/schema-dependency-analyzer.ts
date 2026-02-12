@@ -271,6 +271,7 @@ export class SchemaDependencyAnalyzer {
           const result = rule.validate(sourceData, targetData);
           schemaResults.push(result);
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           schemaResults.push({
             isValid: false,
             confidence: 0,
@@ -278,7 +279,7 @@ export class SchemaDependencyAnalyzer {
               {
                 severity: "error",
                 field: dependency.fieldPath,
-                message: `Validation failed: ${error.message}`,
+                message: `Validation failed: ${errorMessage}`,
               },
             ],
             suggestions: ["Review data extraction for this section"],

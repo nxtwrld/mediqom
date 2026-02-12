@@ -21,7 +21,7 @@
 
 <div class="page -empty">
 
-<h1 class="h1 heading">Documents</h1>
+<h1 class="h1 heading">{$t('app.nav.documents')}</h1>
 
 <Documents user={$profile.id}/>
 

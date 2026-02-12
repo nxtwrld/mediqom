@@ -1,4 +1,19 @@
 {
+  "app-connect": {
+    "author": "Autor",
+    "credits": "kredity",
+    "get": "Získat",
+    "permissions": {
+      "read": "Čtení",
+      "write": "Zápis"
+    },
+    "price": "Cena",
+    "requires": "Vyžaduje",
+    "review-data": "Zkontrolovat data",
+    "total-privacy-warning": "Varování o soukromí",
+    "you-are-about-to-leave-mediqom-total-privacy-realm": "Chystáte se opustit prostor úplného soukromí Mediqom.",
+    "you-are-about-to-share-data-withe-a-third-party-service": "Chystáte se sdílet data se službou třetí strany."
+  },
   "anatomy": {
     "layers": {
       "connective": "",
@@ -22,6 +37,17 @@
     }
   },
   "app": {
+    "apps": {
+      "add-contact": "",
+      "confirm-remove-share": "",
+      "download": "",
+      "items-linked-count": "",
+      "loading-data": "",
+      "permissions": "",
+      "quick-share": "",
+      "share": "",
+      "shared-on-date": ""
+    },
     "duration": {
       "days-ago": "{value, plural, =0 {právě teď} one {včera} other {před # dny}}",
       "months-ago": "{value, plural, =0 {právě teď} one {před měsícem} other {před # měsíci}}",
@@ -40,7 +66,114 @@
       "maxium-scans-reached": "Dosáhli jste měsíčního limitu {limit} importů.",
       "preview-disabled": "Interakce nejsou v režimu náhledu povoleny.",
       "save": "Uložit",
-      "you-still-have-scans-in-your-yearly-subscription": "Ve svém ročním předplatném stále máte {scans} importů."
+      "you-still-have-scans-in-your-yearly-subscription": "Ve svém ročním předplatném stále máte {scans} importů.",
+      "status-pending": "Čeká",
+      "status-extracting": "Extrahování...",
+      "status-analyzing": "Analyzování...",
+      "status-ready": "Připraveno",
+      "status-complete": "Hotovo",
+      "status-error": "Chyba",
+      "status-processing": "Zpracování",
+      "status-new": "Nový",
+      "processing-failed": "Zpracování selhalo",
+      "processing-medical-documents": "Zpracování lékařských dokumentů",
+      "stage-extracting-text": "Extrahování textu",
+      "stage-analyzing-content": "Analýza obsahu",
+      "stage-text-extraction": "1. Extrakce textu",
+      "stage-medical-analysis": "2. Lékařská analýza",
+      "stage-extraction-description": "Extrahování textu z obrázků a dokumentů pomocí technologie OCR",
+      "stage-analysis-description": "Analýza lékařského obsahu a extrakce strukturovaných zdravotních údajů",
+      "files-processed": "{completed} z {total} souborů zpracováno",
+      "processing-failed-try-again": "Zpracování selhalo. Zkuste to znovu nebo použijte jednotlivé nahrávání souborů.",
+      "file-count": "{count, plural, one {# soubor} few {# soubory} other {# souborů}}",
+      "review": "Zkontrolovat",
+      "review-and-save": "Zkontrolovat a uložit",
+      "new-profile": "Nový profil",
+      "profile": "Profil",
+      "doc-status-new": "Nový",
+      "doc-status-assessing": "Hodnocení",
+      "doc-status-processing": "Zpracování",
+      "doc-status-processed": "Zpracováno",
+      "doc-status-error": "Chyba",
+      "no-cached-files-warning": "Původní soubory nejsou na tomto zařízení k dispozici. Můžete uložit bez příloh, nebo dokončit na zařízení, kde jste import zahájili.",
+      "extracting-text-and-data": "Extrahování textu a dat...",
+      "analyzing-medical-content": "Analýza lékařského obsahu..."
+    },
+    "buttons": {
+      "retry": "Opakovat",
+      "remove": "Odstranit",
+      "reset": "Resetovat",
+      "done": "Hotovo",
+      "save": "Uložit",
+      "cancel": "Zrušit",
+      "create": "Vytvořit",
+      "continue": "Pokračovat"
+    },
+    "auth": {
+      "title": "Přihlášení",
+      "magic-link-instruction": "Přihlaste se pomocí magického odkazu zadáním svého e-mailu",
+      "email-label": "E-mailová adresa",
+      "email-placeholder": "Váš e-mail",
+      "send-magic-link": "Odeslat magický odkaz",
+      "sending": "Odesílání...",
+      "email-sent": "E-mail odeslán!",
+      "send-again": "Odeslat znovu",
+      "magic-link-sent": "Magický odkaz odeslán! Zkontrolujte svůj e-mail a klikněte na odkaz pro přihlášení.",
+      "magic-link-failed": "Nepodařilo se odeslat magický odkaz",
+      "invalid-email": "Zadejte prosím platnou e-mailovou adresu",
+      "unexpected-error": "Nastala neočekávaná chyba. Zkuste to prosím znovu.",
+      "no-auth-code": "Nebyl nalezen ověřovací kód. Zkuste to prosím znovu.",
+      "auth-timed-out": "Ověření vypršelo. Zkuste to prosím znovu.",
+      "confirming-title": "Potvrzování přihlášení...",
+      "confirming-authentication": "Potvrzování vašeho přihlášení...",
+      "please-wait": "Prosím počkejte, přihlašujeme vás.",
+      "auth-failed": "Přihlášení selhalo",
+      "try-again": "Zkusit znovu",
+      "setting-up-session": "Nastavování relace...",
+      "exchanging-code": "Výměna autorizačního kódu...",
+      "no-auth-params": "V URL nebyly nalezeny ověřovací parametry.",
+      "error-title": "Chyba přihlášení",
+      "unknown-error": "Nastala neznámá chyba",
+      "return-to-app": "Zpět do aplikace",
+      "show-details": "Zobrazit technické detaily",
+      "hide-details": "Skrýt technické detaily",
+      "beta-need-access": "Potřebujete beta přístup?",
+      "beta-in-beta": "Mediqom je aktuálně v beta verzi. Pro získání přístupu:",
+      "beta-step-apply": "Zažádejte o beta přístup na naší",
+      "beta-page": "beta stránce",
+      "beta-step-wait": "Počkejte na schválení (obvykle do 48 hodin)",
+      "beta-step-check": "Zkontrolujte svůj e-mail pro magický odkaz",
+      "beta-under-review": "Žádost se posuzuje",
+      "beta-review-message": "Vaše beta žádost se posuzuje. Jakmile bude schválena, pošleme vám e-mail do 48 hodin.",
+      "beta-check-spam": "Pokud e-mail nevidíte, zkontrolujte složku spam.",
+      "beta-status": "Stav žádosti",
+      "beta-not-approved": "Vaše beta žádost nebyla schválena. Pokud si myslíte, že jde o chybu, kontaktujte nás na"
+    },
+    "forms": {
+      "files": "Soubory",
+      "browse-file": "Procházet soubory",
+      "input": "Vstup"
+    },
+    "med": {
+      "title": "Mediqom - Elektronické zdravotní záznamy",
+      "description": "Mediqom vám pomáhá se správou lékařských zpráv. Stačí naskenovat vaši lékařskou zprávu a Mediqom vám pomůže ji pochopit:",
+      "add-profile": "Přidat nový profil",
+      "max-profiles-reached": "Dosáhli jste maximálního počtu profilů.",
+      "upgrade": "Upgradovat",
+      "profiles-remaining": "Můžete přidat ještě {count} profilů.",
+      "upgrade-page": "Upgrade"
+    },
+    "tagline": "Lékařská inteligence pro dotazování, organizaci a monitorování",
+    "error": {
+      "title": "Chyba {status}",
+      "unexpected": "Nastala neočekávaná chyba",
+      "go-to-login": "Přejít na přihlášení"
+    },
+    "account": {
+      "back": "Zpět",
+      "next": "Další",
+      "loading": "Načítání...",
+      "sign-out": "Odhlásit se"
     },
     "languages": {
       "cs": "",
@@ -98,8 +231,7 @@
         "clinical": "Ahoj! Jsem tu, abych asistoval s klinickou analýzou lékařského profilu {profileName}. Mohu pomoci analyzovat vzory, navrhnout diferenciální úvahy a poskytnout poznatky založené na dostupných lékařských datech."
       },
       "clarifyingQuestion": {
-        "placeholder": "Nebo napište vlastní odpověď...",
-        "continue": "Pokračovat"
+        "placeholder": "Nebo napište vlastní odpověď..."
       }
     },
     "onboarding": {
@@ -188,7 +320,8 @@
         "view-history": "Zobrazit historii",
         "view-profile": "Zobrazit profil"
       },
-      "no-results": "Žádné výsledky"
+      "no-results": "Žádné výsledky",
+      "search-profiles": "Hledat profily"
     },
     "unlock": {
       "invalid-passphrase": "Neplatná přístupová fráze",
@@ -198,6 +331,13 @@
     },
     "upgrade": {
       "please-upgrade-your-subscription-to-continue": "Chcete-li pokračovat, upgradujte své předplatné."
+    }
+  },
+  "charts": {
+    "reference-range": {
+      "low": "Nízká",
+      "normal": "Normální",
+      "high": "Vysoká"
     }
   },
   "click-here": "",
@@ -770,6 +910,80 @@
       "title": "Titul"
     }
   },
+  "share": {
+    "title": "",
+    "share-with": "",
+    "review-items": "",
+    "privacy": "",
+    "uploading": "",
+    "share-it": "",
+    "sharing-with": "",
+    "description": "",
+    "public-key-info": "",
+    "password-info": "",
+    "password-placeholder": "",
+    "password-label": "",
+    "generate": "",
+    "encrypting-uploading": "",
+    "password-note": "",
+    "url-label": "",
+    "message-label": "",
+    "cancel": "",
+    "back": "",
+    "next": "",
+    "done": "",
+    "create-share": "",
+    "open-email-app": "",
+    "open-sms-app": "",
+    "message-template": ""
+  },
+  "aria": {
+    "import": {
+      "remove-file": "Odebrat soubor",
+      "retry-file": "Opakovat zpracování souboru",
+      "preview-file": "Náhled souboru",
+      "delete-job": "Smazat import",
+      "open-document": "Otevřít dokument: {title}"
+    },
+    "session": {
+      "dismiss-notification": "",
+      "test-analysis": "",
+      "remove-symptom": "",
+      "pin-diagnosis": "",
+      "remove-diagnosis": "",
+      "clear-approval": "",
+      "clear-rejection": "",
+      "approve-suggestion": "",
+      "reject-suggestion": "",
+      "remove-question": "",
+      "pin-treatment": "",
+      "remove-treatment": "",
+      "pin-follow-up": "",
+      "remove-follow-up": "",
+      "pin-medication": "",
+      "remove-medication": ""
+    },
+    "ui": {
+      "close-modal": "Zavřít dialog",
+      "close-overlay": "Zavřít překrytí",
+      "toggle-menu": "Přepnout menu"
+    },
+    "anatomy": {
+      "rotate-model": "",
+      "zoom-in": "",
+      "zoom-out": "",
+      "reset-view": ""
+    },
+    "documents": {
+      "view-document": "",
+      "remove-document": ""
+    },
+    "report": {
+      "print-report": "",
+      "copy-report": "",
+      "download-report": ""
+    }
+  },
   "report": {
     "anatomy": {
       "body": "Anatomie",
@@ -845,6 +1059,47 @@
   "session": {
     "diagram": "Diagram",
     "qom": "QOM Analyzér",
+    "report": {
+      "title": "Zpráva o ambulantním vyšetření",
+      "patient": "Pacient:",
+      "residence": "Bydliště:",
+      "date": "Datum:"
+    },
+    "blocks": {
+      "assisted-analysis": "",
+      "finalizing": "",
+      "finalize-report": "",
+      "end-session": "",
+      "end-session-confirm": "",
+      "transcript": "",
+      "report": "",
+      "back": "",
+      "copy": "",
+      "print": "",
+      "save": "",
+      "session-restored": "",
+      "session-restored-description": "",
+      "start-recording": "",
+      "listening": ""
+    },
+    "diagnosis": {
+      "signals": "",
+      "symptoms": "",
+      "diagnostic-results": "",
+      "clinical-reasoning": "",
+      "supporting-symptoms": "",
+      "clinical-recommendations": "",
+      "clarifying-questions": "",
+      "treatment-plan": "",
+      "targets": "",
+      "follow-up": "",
+      "suggested-medication": "",
+      "purpose": "",
+      "alternatives": "",
+      "approved": "",
+      "rejected": "",
+      "effectiveness": ""
+    },
     "actions": {
       "accept": "Přijmout",
       "suppress": "Potlačit",

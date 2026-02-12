@@ -145,9 +145,10 @@ export class SignalDataMigration {
           document,
         );
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Failed to migrate signal ${signalName}:`, error);
         warnings.push(
-          `Failed to migrate signal ${signalName}: ${error.message}`,
+          `Failed to migrate signal ${signalName}: ${errorMessage}`,
         );
 
         // Create a minimal enhanced version to preserve data

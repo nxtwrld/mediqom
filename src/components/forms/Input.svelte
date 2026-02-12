@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createBubbler } from 'svelte/legacy';
+    import { t } from '$lib/i18n';
 
     const bubble = createBubbler();
     import InputDateTime from "./InputDateTime.svelte";
@@ -36,7 +37,7 @@
         value = $bindable(''),
         checked = $bindable(false),
         group = $bindable(''),
-        placeholder = 'Input',
+        placeholder = $t('app.forms.input'),
         type = 'text',
         id = (window as any)?.crypto.getRandomValues(new Uint32Array(1))[0].toString(16),
         name = id,

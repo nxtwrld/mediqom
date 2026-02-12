@@ -1,4 +1,19 @@
 {
+  "app-connect": {
+    "author": "Author",
+    "credits": "credits",
+    "get": "Get",
+    "permissions": {
+      "read": "Read",
+      "write": "Write"
+    },
+    "price": "Price",
+    "requires": "Requires",
+    "review-data": "Review Data",
+    "total-privacy-warning": "Total Privacy Warning",
+    "you-are-about-to-leave-mediqom-total-privacy-realm": "You are about to leave Mediqom's total privacy realm.",
+    "you-are-about-to-share-data-withe-a-third-party-service": "You are about to share data with a third-party service."
+  },
   "anatomy": {
     "layers": {
       "connective": "Connective",
@@ -22,6 +37,17 @@
     }
   },
   "app": {
+    "apps": {
+      "add-contact": "Add Contact",
+      "confirm-remove-share": "This will remove the shared item and {name} will no longer be able to access it.",
+      "download": "Download",
+      "items-linked-count": "Items linked: {count}",
+      "loading-data": "Loading data...",
+      "permissions": "Permissions",
+      "quick-share": "Quick Share",
+      "share": "Share",
+      "shared-on-date": "on {date}"
+    },
     "duration": {
       "days-ago": "{value, plural, =0 {just now} one {a day ago} other {# days ago}}",
       "months-ago": "{value, plural, =0 {just now} one {a month ago} other {# months ago}}",
@@ -40,7 +66,114 @@
       "maxium-scans-reached": "You have reached your monthly limit of {limit} imports.",
       "preview-disabled": "All interactions are disabled in preview mode.",
       "save": "Save",
-      "you-still-have-scans-in-your-yearly-subscription": "You still have {scans} imports in your yearly subscription."
+      "you-still-have-scans-in-your-yearly-subscription": "You still have {scans} imports in your yearly subscription.",
+      "status-pending": "Pending",
+      "status-extracting": "Extracting...",
+      "status-analyzing": "Analyzing...",
+      "status-ready": "Ready",
+      "status-complete": "Complete",
+      "status-error": "Error",
+      "status-processing": "Processing",
+      "status-new": "New",
+      "processing-failed": "Processing failed",
+      "processing-medical-documents": "Processing Medical Documents",
+      "stage-extracting-text": "Extracting Text",
+      "stage-analyzing-content": "Analyzing Content",
+      "stage-text-extraction": "1. Text Extraction",
+      "stage-medical-analysis": "2. Medical Analysis",
+      "stage-extraction-description": "Extracting text from images and documents using OCR technology",
+      "stage-analysis-description": "Analyzing medical content and extracting structured health data",
+      "files-processed": "{completed} of {total} files processed",
+      "processing-failed-try-again": "Processing failed. Please try again or use individual file upload.",
+      "file-count": "{count, plural, one {# file} other {# files}}",
+      "review": "Review",
+      "review-and-save": "Review & Save",
+      "new-profile": "New Profile",
+      "profile": "Profile",
+      "doc-status-new": "New",
+      "doc-status-assessing": "Assessing",
+      "doc-status-processing": "Processing",
+      "doc-status-processed": "Processed",
+      "doc-status-error": "Error",
+      "no-cached-files-warning": "Original files are not available on this device. You can save without attachments, or finalize on the device where you started the import.",
+      "extracting-text-and-data": "Extracting text and data...",
+      "analyzing-medical-content": "Analyzing medical content..."
+    },
+    "buttons": {
+      "retry": "Retry",
+      "remove": "Remove",
+      "reset": "Reset",
+      "done": "Done",
+      "save": "Save",
+      "cancel": "Cancel",
+      "create": "Create",
+      "continue": "Continue"
+    },
+    "auth": {
+      "title": "Authentication",
+      "magic-link-instruction": "Sign in via magic link with your email below",
+      "email-label": "Email address",
+      "email-placeholder": "Your email",
+      "send-magic-link": "Send magic link",
+      "sending": "Sending...",
+      "email-sent": "Email sent!",
+      "send-again": "Send again",
+      "magic-link-sent": "Magic link sent! Check your email and tap the link to sign in.",
+      "magic-link-failed": "Failed to send magic link",
+      "invalid-email": "Please enter a valid email address",
+      "unexpected-error": "An unexpected error occurred. Please try again.",
+      "no-auth-code": "No authentication code found. Please try again.",
+      "auth-timed-out": "Authentication timed out. Please try again.",
+      "confirming-title": "Confirming Authentication...",
+      "confirming-authentication": "Confirming your authentication...",
+      "please-wait": "Please wait while we log you in.",
+      "auth-failed": "Authentication Failed",
+      "try-again": "Try Again",
+      "setting-up-session": "Setting up your session...",
+      "exchanging-code": "Exchanging authorization code...",
+      "no-auth-params": "No authentication parameters found in URL.",
+      "error-title": "Authentication Error",
+      "unknown-error": "An unknown error occurred",
+      "return-to-app": "Return to Application",
+      "show-details": "Show Technical Details",
+      "hide-details": "Hide Technical Details",
+      "beta-need-access": "Need Beta Access?",
+      "beta-in-beta": "Mediqom is currently in beta. To get access:",
+      "beta-step-apply": "Apply for beta access on our",
+      "beta-page": "beta page",
+      "beta-step-wait": "Wait for approval (usually within 48 hours)",
+      "beta-step-check": "Check your email for the magic link",
+      "beta-under-review": "Application Under Review",
+      "beta-review-message": "Your beta application is being reviewed. We'll email you within 48 hours once approved.",
+      "beta-check-spam": "Check your spam folder if you don't see our email.",
+      "beta-status": "Application Status",
+      "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at"
+    },
+    "forms": {
+      "files": "Files",
+      "browse-file": "Browse file",
+      "input": "Input"
+    },
+    "med": {
+      "title": "Mediqom - Electronic Health Records",
+      "description": "Mediqom helps you with your medical reports management. Just scan your medical report and Mediqom will help you understand it:",
+      "add-profile": "Add new profile",
+      "max-profiles-reached": "You have reached the maximum number of profiles.",
+      "upgrade": "Upgrade",
+      "profiles-remaining": "You can add {count} more profiles.",
+      "upgrade-page": "Upgrade"
+    },
+    "tagline": "Medical Intelligence to Query, Organize, and Monitor",
+    "error": {
+      "title": "Error {status}",
+      "unexpected": "An unexpected error occurred",
+      "go-to-login": "Go to Login"
+    },
+    "account": {
+      "back": "Back",
+      "next": "Next",
+      "loading": "Loading...",
+      "sign-out": "Sign Out"
     },
     "languages": {
       "cs": "",
@@ -126,8 +259,7 @@
         "error": "{toolName} failed: {error}"
       },
       "clarifyingQuestion": {
-        "placeholder": "Or type your own answer...",
-        "continue": "Continue"
+        "placeholder": "Or type your own answer..."
       }
     },
     "onboarding": {
@@ -216,7 +348,8 @@
         "view-history": "View history",
         "view-profile": "View profile"
       },
-      "no-results": "No results"
+      "no-results": "No results",
+      "search-profiles": "Search profiles"
     },
     "unlock": {
       "invalid-passphrase": "Invalid passphrase",
@@ -226,6 +359,13 @@
     },
     "upgrade": {
       "please-upgrade-your-subscription-to-continue": "Please upgrade your subscription to continue."
+    }
+  },
+  "charts": {
+    "reference-range": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
     }
   },
   "click-here": "click here",
@@ -801,6 +941,47 @@
   "session": {
     "diagram": "Diagram",
     "qom": "Quorum Operated Models",
+    "report": {
+      "title": "Ambulatory Examination Report",
+      "patient": "Patient:",
+      "residence": "Residence:",
+      "date": "Date:"
+    },
+    "blocks": {
+      "assisted-analysis": "Assisted Analysis",
+      "finalizing": "Finalizing",
+      "finalize-report": "Finalize Report",
+      "end-session": "End Session",
+      "end-session-confirm": "Are you sure you want to end this session? All data will be cleared.",
+      "transcript": "Transcript",
+      "report": "Report",
+      "back": "Back",
+      "copy": "Copy",
+      "print": "Print",
+      "save": "Save",
+      "session-restored": "Session Restored",
+      "session-restored-description": "Your previous session data has been restored from local storage",
+      "start-recording": "Start recording your session by clicking the microphone button.",
+      "listening": "Listening..."
+    },
+    "diagnosis": {
+      "signals": "Signals",
+      "symptoms": "Symptoms",
+      "diagnostic-results": "Diagnostic Results",
+      "clinical-reasoning": "Clinical Reasoning",
+      "supporting-symptoms": "Supporting Symptoms",
+      "clinical-recommendations": "Clinical Recommendations",
+      "clarifying-questions": "Clarifying Questions",
+      "treatment-plan": "Treatment Plan",
+      "targets": "Targets",
+      "follow-up": "Follow Up",
+      "suggested-medication": "Suggested Medication",
+      "purpose": "Purpose",
+      "alternatives": "Alternatives",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "effectiveness": "effectiveness"
+    },
     "actions": {
       "accept": "Accept",
       "suppress": "Suppress",
@@ -1079,6 +1260,80 @@
       "version": "Version",
       "noData": "No session data available",
       "loadingAnalysis": "Loading analysis..."
+    }
+  },
+  "share": {
+    "title": "Share {title}",
+    "share-with": "Share with {name}",
+    "review-items": "Review Items",
+    "privacy": "Privacy",
+    "uploading": "Uploading encrypted data...",
+    "share-it": "Share It!",
+    "sharing-with": "You are sharing with",
+    "description": "Sharing will create an encrypted store on our server for the selected medical record. The records can be accessed via generated link and password.",
+    "public-key-info": "Your records will be stored on our server encrypted. {name} has configured a Public Key and we will use it to encrypt the records. We will not be able to access your records.",
+    "password-info": "Your records will be stored on our server encrypted. You have to create a custom password, that you will be able to share with your contact. We will not be able to access your records.",
+    "password-placeholder": "Password protect your record",
+    "password-label": "Password",
+    "generate": "Generate",
+    "encrypting-uploading": "Encrypting keys and uploading data to the server",
+    "password-note": "Please note, that the password is kept only in your app. You have to share it with your contact.",
+    "url-label": "URL",
+    "message-label": "Message",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "create-share": "Create Share",
+    "open-email-app": "Open email app",
+    "open-sms-app": "Open sms app",
+    "message-template": "Dear {name}, \nI would like to share my medical records with you. \nPlease, use the following link to access them: {url}\n\nPassword: {password}\n\nKindest regards,"
+  },
+  "aria": {
+    "import": {
+      "remove-file": "Remove file",
+      "retry-file": "Retry processing file",
+      "preview-file": "Preview file",
+      "delete-job": "Delete import job",
+      "open-document": "Open document: {title}"
+    },
+    "session": {
+      "dismiss-notification": "Dismiss notification",
+      "test-analysis": "Test analysis with sample data",
+      "remove-symptom": "Remove symptom",
+      "pin-diagnosis": "Pin diagnosis",
+      "remove-diagnosis": "Remove diagnosis",
+      "clear-approval": "Clear approval",
+      "clear-rejection": "Clear rejection",
+      "approve-suggestion": "Approve suggestion",
+      "reject-suggestion": "Reject suggestion",
+      "remove-question": "Remove question",
+      "pin-treatment": "Pin treatment",
+      "remove-treatment": "Remove treatment",
+      "pin-follow-up": "Pin follow-up",
+      "remove-follow-up": "Remove follow-up",
+      "pin-medication": "Pin medication",
+      "remove-medication": "Remove medication"
+    },
+    "ui": {
+      "close-modal": "Close modal",
+      "close-overlay": "Close overlay",
+      "toggle-menu": "Toggle menu"
+    },
+    "anatomy": {
+      "rotate-model": "Rotate anatomy model",
+      "zoom-in": "Zoom in",
+      "zoom-out": "Zoom out",
+      "reset-view": "Reset view"
+    },
+    "documents": {
+      "view-document": "View document",
+      "remove-document": "Remove document"
+    },
+    "report": {
+      "print-report": "Print report",
+      "copy-report": "Copy report text",
+      "download-report": "Download report"
     }
   },
   "report": {

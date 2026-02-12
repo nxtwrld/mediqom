@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { scale, fly } from 'svelte/transition';
+  import { t } from '$lib/i18n';
 
   interface Props {
     overallProgress: number; // 0-100
@@ -43,15 +44,15 @@
   let stageLabel = $derived(() => {
     switch (currentStage) {
       case 'extract':
-        return 'Extracting Text';
+        return $t('app.import.stage-extracting-text');
       case 'analyze':
-        return 'Analyzing Content';
+        return $t('app.import.stage-analyzing-content');
       case 'complete':
-        return 'Complete';
+        return $t('app.import.status-complete');
       case 'error':
-        return 'Error';
+        return $t('app.import.status-error');
       default:
-        return 'Processing';
+        return $t('app.import.status-processing');
     }
   });
 
@@ -64,7 +65,7 @@
   <!-- Overall Progress Bar -->
   <div class="overall-progress">
     <div class="progress-header">
-      <h3>Processing Medical Documents</h3>
+      <h3>{$t('app.import.processing-medical-documents')}</h3>
       <span class="progress-percentage">{Math.round(overallProgress)}%</span>
     </div>
     <div class="progress-bar overall">
@@ -90,7 +91,7 @@
             <div class="spinner"></div>
           {/if}
         </div>
-        <h4>1. Text Extraction</h4>
+        <h4>{$t('app.import.stage-text-extraction')}</h4>
         <span class="stage-progress">{Math.round(extractProgress)}%</span>
       </div>
       <div class="progress-bar stage-bar">
@@ -101,7 +102,7 @@
         ></div>
       </div>
       <p class="stage-description">
-        Extracting text from images and documents using OCR technology
+        {$t('app.import.stage-extraction-description')}
       </p>
     </div>
 
@@ -125,7 +126,7 @@
             <div class="stage-number">2</div>
           {/if}
         </div>
-        <h4>2. Medical Analysis</h4>
+        <h4>{$t('app.import.stage-medical-analysis')}</h4>
         <span class="stage-progress">{Math.round(analyzeProgress)}%</span>
       </div>
       <div class="progress-bar stage-bar">
@@ -136,7 +137,7 @@
         ></div>
       </div>
       <p class="stage-description">
-        Analyzing medical content and extracting structured health data
+        {$t('app.import.stage-analysis-description')}
       </p>
     </div>
   </div>
@@ -150,7 +151,7 @@
     
     {#if showDetails && filesTotal > 0}
       <div class="file-counter" transition:scale={{ duration: 200 }}>
-        <span>{filesCompleted} of {filesTotal} files processed</span>
+        <span>{$t('app.import.files-processed', { values: { completed: filesCompleted, total: filesTotal } })}</span>
       </div>
     {/if}
   </div>
@@ -159,7 +160,7 @@
   {#if currentStage === 'error'}
     <div class="error-state" transition:fly={{ y: 20, duration: 300 }}>
       <div class="error-icon">⚠️</div>
-      <p>Processing failed. Please try again or use individual file upload.</p>
+      <p>{$t('app.import.processing-failed-try-again')}</p>
     </div>
   {/if}
 </div>

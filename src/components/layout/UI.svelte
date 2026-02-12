@@ -34,6 +34,9 @@
         healthFormData: null as any
     });
 
+    // Import overlay state
+    let importJobId: string | undefined = $state(undefined);
+
     // Chat state
     let currentProfile = $state(null);
     let isOwnProfile = $state(false);
@@ -172,10 +175,16 @@
                 dialogs.healthForm = config === false ? false : (config || true);
                 dialogs.healthFormData = config?.data || $profile?.health || {};
             }),
-            ui.listen('overlay.import', (state: boolean = true) => {
+            ui.listen('overlay.import', (state: any = true) => {
                 logger.ui.debug('import');
-                if (state == true) location.hash = '#overlay-import';
+                if (state && typeof state === 'object' && state.jobId) {
+                    importJobId = state.jobId;
+                } else {
+                    importJobId = undefined;
+                }
+                if (state) location.hash = '#overlay-import';
                 else  {
+                    importJobId = undefined;
                     if (location.hash.indexOf('#overlay-') == 0) {
                     history.back();
                 }
@@ -250,7 +259,7 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            <Import />
+            <Import jobId={importJobId} oncomplete={() => { importJobId = undefined; }} />
             </div>
     {/if}
 

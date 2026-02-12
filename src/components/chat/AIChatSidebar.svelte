@@ -323,21 +323,21 @@
                   {$t('app.chat.document.add-prompt', { title: message.metadata.documentPrompt.title })}
                 </p>
                 <div class="document-actions">
-                  <button 
+                  <button
                     class="document-btn accept"
                     onclick={() => acceptDocument(
-                      message.metadata.documentPrompt.documentId,
-                      message.metadata.documentPrompt.title,
-                      message.metadata.documentPrompt.content
+                      message.metadata!.documentPrompt!.documentId,
+                      message.metadata!.documentPrompt!.title,
+                      message.metadata!.documentPrompt!.content
                     )}
                   >
                     {$t('app.chat.document.add-yes')}
                   </button>
-                  <button 
+                  <button
                     class="document-btn decline"
                     onclick={() => declineDocument(
-                      message.metadata.documentPrompt.documentId,
-                      message.metadata.documentPrompt.title
+                      message.metadata!.documentPrompt!.documentId,
+                      message.metadata!.documentPrompt!.title
                     )}
                   >
                     {$t('app.chat.document.add-no')}
@@ -353,21 +353,21 @@
                   {$t('app.chat.profile.switch-prompt', { profileName: message.metadata.profilePrompt.profileName })}
                 </p>
                 <div class="profile-actions">
-                  <button 
+                  <button
                     class="profile-btn accept"
                     onclick={() => acceptProfile(
-                      message.metadata.profilePrompt.profileId,
-                      message.metadata.profilePrompt.profileName,
-                      message.metadata.profilePrompt.profileData
+                      message.metadata!.profilePrompt!.profileId,
+                      message.metadata!.profilePrompt!.profileName,
+                      message.metadata!.profilePrompt!.profileData
                     )}
                   >
                     {$t('app.chat.profile.switch-yes')}
                   </button>
-                  <button 
+                  <button
                     class="profile-btn decline"
                     onclick={() => declineProfile(
-                      message.metadata.profilePrompt.profileId,
-                      message.metadata.profilePrompt.profileName
+                      message.metadata!.profilePrompt!.profileId,
+                      message.metadata!.profilePrompt!.profileName
                     )}
                   >
                     {$t('app.chat.profile.switch-no')}

@@ -5,6 +5,7 @@
 
 import type { SessionAnalysis } from '$components/session/types/visualization';
 import type { DocumentNew } from '$lib/documents/types.d';
+import { DocumentType } from '$lib/documents/types.d';
 import { addDocument } from '$lib/documents';
 import { logger } from '$lib/logging/logger';
 
@@ -76,7 +77,7 @@ export async function saveSessionAsDocument(
     
     // Create document object
     const newDocument: DocumentNew = {
-      type: 'document',
+      type: DocumentType.document,
       user_id: patientId,
       content: documentContent,
       metadata

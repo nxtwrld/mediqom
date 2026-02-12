@@ -70,7 +70,7 @@ export class OpenAIProvider {
       });
 
       const executionTime = Date.now() - startTime;
-      const tokensUsed = tokenUsage[schema.description] || 0;
+      const tokensUsed = (schema.description && tokenUsage[schema.description]) || 0;
       const cost = modelConfig.calculateCost(
         "openai",
         modelInfo.model_id.replace("gpt-4o-2024-08-06", "gpt4"),
@@ -130,7 +130,9 @@ export class OpenAIProvider {
           handleLLMEnd(output, runId, parentRunId, tags) {
             const tokens = output.llmOutput?.tokenUsage?.totalTokens || 0;
             tokenUsage.total += tokens;
-            tokenUsage[schema.description] = tokens;
+            if (schema.description) {
+              tokenUsage[schema.description] = tokens;
+            }
           },
         },
       ],

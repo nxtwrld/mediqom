@@ -207,14 +207,15 @@ export const processMedicalImaging = async (
     console.log("✅ Medical Imaging Workflow completed successfully");
     return finalState;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("❌ Medical Imaging Workflow failed:", error);
 
     // Record error state if recording is enabled
     if (isWorkflowRecordingEnabled()) {
-      workflowRecorder.recordState("error", { error: error.message });
+      workflowRecorder.recordState("error", { error: errorMessage });
       await finishWorkflowRecording({
         ...state,
-        errors: [...(state.errors || []), error.message],
+        errors: [...(state.errors || []), errorMessage],
       });
     }
 
@@ -224,7 +225,7 @@ export const processMedicalImaging = async (
         type: "error",
         stage: "medical_imaging_error",
         progress: 0,
-        message: `Medical imaging analysis failed: ${error.message}`,
+        message: `Medical imaging analysis failed: ${errorMessage}`,
         timestamp: Date.now(),
       });
     }

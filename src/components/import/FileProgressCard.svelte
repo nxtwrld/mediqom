@@ -1,6 +1,7 @@
 <script lang="ts">
   import { scale, fly } from 'svelte/transition';
   import type { SSEProgressEvent } from '$lib/import/sse-client';
+  import { t } from '$lib/i18n';
 
   interface FileProgress {
     fileId: string;
@@ -37,15 +38,15 @@
   let stageLabel = $derived(() => {
     switch (fileProgress.stage) {
       case 'extract':
-        return 'Extracting';
+        return $t('app.import.status-extracting');
       case 'analyze':
-        return 'Analyzing';
+        return $t('app.import.status-analyzing');
       case 'complete':
-        return 'Complete';
+        return $t('app.import.status-complete');
       case 'error':
-        return 'Error';
+        return $t('app.import.status-error');
       default:
-        return 'Processing';
+        return $t('app.import.status-processing');
     }
   });
 
@@ -151,7 +152,7 @@
   {#if hasError}
     <div class="error-section" transition:fly={{ y: 10, duration: 200 }}>
       <div class="error-message">
-        {fileProgress.error || 'Processing failed'}
+        {fileProgress.error || $t('app.import.processing-failed')}
       </div>
       <div class="error-actions">
         {#if onRetry}
@@ -159,7 +160,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 4v6h6m16-6v6h-6M5 10a8 8 0 1114 6m-14-6a8 8 0 0114-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Retry
+            {$t('app.buttons.retry')}
           </button>
         {/if}
         {#if onRemove}
@@ -167,7 +168,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Remove
+            {$t('app.buttons.remove')}
           </button>
         {/if}
       </div>

@@ -53,6 +53,13 @@ export async function initMobileAuth(): Promise<void> {
     App.addListener('appStateChange', async ({ isActive }) => {
       if (isActive) {
         await refreshSession();
+        // Check for pending import jobs on app resume
+        try {
+          const { checkPendingJobs } = await import('$lib/import/job-manager');
+          await checkPendingJobs();
+        } catch {
+          // Import job check is non-critical
+        }
       }
     });
 

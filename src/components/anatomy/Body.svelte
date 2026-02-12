@@ -335,7 +335,7 @@
     });
 
 
-    function clearObjects(scene) {
+    function clearObjects(scene: THREE.Scene) {
 
         for(let i=scene.children.length-1; i>=0; i--){
             let obj = scene.children[i];
@@ -343,7 +343,7 @@
             if (obj.geometry) obj.geometry.dispose();
             if (obj.material) {
                 if (obj.material instanceof Array) {
-                    obj.material.forEach(m => m.dispose());
+                    obj.material.forEach((m: any) => m.dispose());
                 } else {
                     obj.material.dispose();
                 }
@@ -352,7 +352,7 @@
         }
     }
 
-    async function updateModel(filesToLoad, objectsToShow) {
+    async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
         //console.log('updateModel', filesToLoad, objectsToShow);
         let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
             id: f,
@@ -387,13 +387,13 @@
     }
 
     //let names = {}
-    function insertObject(o, objectsToShow, labelIds, group) {
+    function insertObject(o: any[], objectsToShow: string[], labelIds: string[], group: THREE.Group) {
 
         //let onames = [];
 
-        o.forEach(object => {
+        o.forEach((object: any) => {
             //console.log(object);
-            object.traverse( function ( child ) {
+            object.traverse( function ( child: any ) {
                 // mark labeled objects
                 //onames.push(child.name);
                 //console.log('child', child.name, child)
@@ -422,7 +422,7 @@
 
 
 
-    function checkObject(child, objectsToShow, labelIds) {
+    function checkObject(child: any, objectsToShow: string[], labelIds: string[]) {
         if (!child.isMesh)  return;
 
         if ( objectsToShow.includes(child.name)) {
@@ -903,7 +903,7 @@
 
         if (!Array.isArray(objects)) objects = [objects];
 
-        objects.forEach(o => {
+        objects.forEach((o: any) => {
             if (typeof o === 'string') {
                 const object = scene.getObjectByName(o);
                 if (object) processObjects.push(object);

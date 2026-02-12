@@ -8,6 +8,7 @@
     //import type { Link } from "$lib/common.types.d";
     import './style.css';
     import { logger } from '$lib/logging/logger';
+    import { t } from '$lib/i18n';
 
     interface Props {
         type?: AppConnectionTypeEnum;
@@ -123,7 +124,7 @@
                 <svg class="app-icon">
                     <use xlink:href="/icons.svg#share"></use>
                 </svg>
-                <span>Share</span>
+                <span>{$t('app.apps.share')}</span>
             </button>
         {/if}
 
@@ -132,7 +133,7 @@
             <svg class="app-icon">
                 <use xlink:href="/icons.svg#download"></use>
             </svg>
-            <span>Download</span>
+            <span>{$t('app.apps.download')}</span>
         </button>
     {@render children?.()}
 {#each $apps.filter(filterApps) as app}

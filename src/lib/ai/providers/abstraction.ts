@@ -177,7 +177,9 @@ export class AIProviderAbstraction {
           handleLLMEnd(output, runId, parentRunId, tags) {
             const tokens = output.llmOutput?.tokenUsage.totalTokens || 0;
             tokenUsage.total += tokens;
-            tokenUsage[schema.description] = tokens;
+            if (schema.description) {
+              tokenUsage[schema.description] = tokens;
+            }
           },
         },
       ],
@@ -228,7 +230,9 @@ export class AIProviderAbstraction {
             // Gemini token counting may differ, estimate for now
             const estimatedTokens = this.estimateTokens(content);
             tokenUsage.total += estimatedTokens;
-            tokenUsage[schema.description] = estimatedTokens;
+            if (schema.description) {
+              tokenUsage[schema.description] = estimatedTokens;
+            }
           },
         },
       ],
@@ -278,7 +282,9 @@ export class AIProviderAbstraction {
           handleLLMEnd: (output, runId, parentRunId, tags) => {
             const estimatedTokens = this.estimateTokens(content);
             tokenUsage.total += estimatedTokens;
-            tokenUsage[schema.description] = estimatedTokens;
+            if (schema.description) {
+              tokenUsage[schema.description] = estimatedTokens;
+            }
           },
         },
       ],

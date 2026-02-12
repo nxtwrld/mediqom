@@ -61,7 +61,7 @@ export function extractTestResults(searchResults: any[]): TestResult[] {
         name: result.metadata?.title || "Test Result",
         date: result.metadata?.date || new Date().toISOString(),
         category: result.metadata?.category || "lab-result",
-        value: this.extractNumericValue(content),
+        value: extractNumericValue(content),
       });
     }
   }
@@ -122,7 +122,7 @@ export function extractConditionsFromSearchResults(
           name: conditionMatch[1].trim(),
           date: result.metadata?.date,
           documentId: result.documentId,
-          severity: this.extractSeverity(content),
+          severity: extractSeverity(content),
         });
       }
     }
@@ -162,7 +162,7 @@ export function extractProceduresFromSearchResults(
         name: result.metadata?.title || "Medical procedure",
         date: result.metadata?.date,
         documentId: result.documentId,
-        outcome: this.extractOutcome(content),
+        outcome: extractOutcome(content),
       });
     }
   }
@@ -202,8 +202,8 @@ export function extractAllergiesFromSearchResults(searchResults: any[]): Array<{
       if (allergenMatch) {
         allergies.push({
           substance: allergenMatch[1].trim(),
-          reaction: this.extractReaction(content),
-          severity: this.extractSeverity(content),
+          reaction: extractReaction(content),
+          severity: extractSeverity(content),
           date: result.metadata?.date,
         });
       }

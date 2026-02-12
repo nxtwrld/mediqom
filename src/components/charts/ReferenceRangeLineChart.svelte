@@ -4,6 +4,19 @@
 import { select, line, curveCardinal, scaleTime, scaleLinear, extent, min, max, axisBottom, axisLeft } from 'd3';
 import { onMount } from 'svelte';
 import { date }  from '$lib/datetime';
+import { t } from '$lib/i18n';
+import { get } from 'svelte/store';
+
+// Translation lookup for range labels
+const getRangeLabel = (name: string): string => {
+    const translate = get(t);
+    const labels: Record<string, string> = {
+        'low': translate('charts.reference-range.low'),
+        'normal': translate('charts.reference-range.normal'),
+        'high': translate('charts.reference-range.high')
+    };
+    return labels[name] || name;
+};
 
 
 let currentDate = new Date();
@@ -239,7 +252,7 @@ function renderChart(series: Signal[] = []) {
             .attr('text-anchor', 'middle')
             .attr('alignment-baseline', 'middle')
             .attr('y', y(r.max) + (y(r.min) - y(r.max) - rangeGap)/2)
-            .text(r.name);
+            .text(getRangeLabel(r.name));
     })
 
 
@@ -368,9 +381,11 @@ onMount(() => {
     .panel svg :global(.rangeLabelText) {
         color: var(--color-positive-text);
         fill: currentColor;
+        font-size: .7em;
         /*transform: rotate(-90deg);*/
         transform-box: fill-box;
-        transform-origin: center; 
+        transform-origin: center;
+        text-transform: uppercase;
     }
 
     .panel svg :global(.text) {

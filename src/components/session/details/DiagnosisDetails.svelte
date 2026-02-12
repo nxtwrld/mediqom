@@ -50,9 +50,9 @@
         if (!allNodes?.symptoms) return [];
         
         // Find all symptoms that have a relationship supporting this diagnosis
-        return allNodes.symptoms.filter(symptom => 
-            symptom.relationships?.some(rel => 
-                rel.nodeId === diagnosisId && 
+        return allNodes.symptoms.filter((symptom: any) =>
+            symptom.relationships?.some((rel: any) =>
+                rel.nodeId === diagnosisId &&
                 ['supports', 'suggests', 'indicates'].includes(rel.relationship.toLowerCase())
             )
         );

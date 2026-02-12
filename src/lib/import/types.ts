@@ -78,3 +78,42 @@ export interface ReportAnalysis {
   title?: string;
   summary?: string;
 }
+
+// ---- Import Job types for resilient import flow ----
+
+export type ImportJobStatus = 'created' | 'extracting' | 'analyzing' | 'completed' | 'error' | 'expired';
+
+export interface FileManifestEntry {
+  name: string;
+  type: string;
+  size: number;
+  taskType: 'application/pdf' | 'images' | 'application/dicom';
+  processedImages: string[]; // base64 strings of resized images for OCR
+  dicomMetadata?: any;
+  thumbnail?: string;
+}
+
+export interface ImportJob {
+  id: string;
+  user_id: string;
+  status: ImportJobStatus;
+  stage: string | null;
+  progress: number;
+  message: string | null;
+  error: string | null;
+  scan_deducted: boolean;
+  processing_started_at: string | null;
+  file_count: number;
+  file_manifest: FileManifestEntry[];
+  language: string;
+  extraction_result: Assessment[] | null;
+  analysis_results: ReportAnalysis[];
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+export interface ImportJobCreateInput {
+  files: FileManifestEntry[];
+  language: string;
+}

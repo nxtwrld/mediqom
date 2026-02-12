@@ -117,7 +117,7 @@ export async function getAudioVAD(
       } else {
         // Manual cleanup for VAD's internal MediaStream (critical for Chrome tab indicator)
         if (mvad.stream) {
-          mvad.stream.getTracks().forEach((track) => track.stop());
+          mvad.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
           console.log("[VAD] VAD MediaStream tracks stopped");
         }
 
@@ -125,7 +125,7 @@ export async function getAudioVAD(
         if (mvad.audioContext && mvad.audioContext.state !== "closed") {
           mvad.audioContext
             .close()
-            .catch((err) =>
+            .catch((err: Error) =>
               console.warn("[VAD] AudioContext close error:", err),
             );
         }

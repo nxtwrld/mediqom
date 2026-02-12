@@ -2,6 +2,7 @@ import { error, type RequestHandler } from "@sveltejs/kit";
 import { runDocumentProcessingWorkflow } from "$lib/langgraph/workflows/document-processing";
 import { log } from "$lib/logging/logger";
 import { isSSEProgressDebuggingEnabled } from "$lib/config/logging-config";
+import { convertWorkflowResult } from "$lib/import.server/convertWorkflowResult";
 
 interface ProgressEvent {
   type: "progress" | "complete" | "error";
@@ -74,82 +75,7 @@ export const POST: RequestHandler = async ({ request }) => {
         );
 
         // Convert LangGraph workflow result to ReportAnalysis format
-        // This ensures compatibility with SSE client expectations
-
-        console.log("📦 SSE: Processing workflow result for client");
-
-        // Use structured data from multi-node processing if available, otherwise fall back to legacy
-        const useStructuredData =
-          workflowResult.report &&
-          typeof workflowResult.report === "object" &&
-          !Array.isArray(workflowResult.report);
-
-        let actualContent;
-
-        if (useStructuredData) {
-          console.log("✅ Using structured report");
-          // Use the structured data from multi-node processing
-          actualContent = {
-            ...workflowResult,
-            // Ensure backward compatibility fields are present
-            type: workflowResult.report?.type || "report",
-            category: workflowResult.report?.category || "report",
-            isMedical:
-              workflowResult.report?.isMedical !== undefined
-                ? workflowResult.report.isMedical
-                : true,
-          };
-        } else {
-          console.log("⚠️ Falling back to legacy structure");
-          // Fall back to legacy structure
-          const medicalAnalysis = workflowResult.medicalAnalysis;
-          const analysisContent =
-            medicalAnalysis?.content || workflowResult.content || {};
-          actualContent = analysisContent;
-        }
-
-        const result = {
-          // Preserve the original ReportAnalysis structure if it exists
-          type: actualContent.type || "report",
-          fhirType: actualContent.fhirType || "DiagnosticReport",
-          fhir: actualContent.fhir || {},
-          category: actualContent.category || "report",
-          isMedical:
-            actualContent.isMedical !== undefined
-              ? actualContent.isMedical
-              : true,
-          tags: actualContent.tags || [],
-          hasPrescription: actualContent.hasPrescription || false,
-          hasImmunization: actualContent.hasImmunization || false,
-          hasLabOrVitals: actualContent.hasLabOrVitals || false,
-          content: actualContent.content || data.text,
-
-          // Use structured report data if available, otherwise fall back
-          report: useStructuredData
-            ? workflowResult.report
-            : actualContent.report || [
-                { type: "text", text: actualContent.text || data.text },
-              ],
-
-          text: actualContent.text || data.text || "",
-          tokenUsage: workflowResult.tokenUsage ||
-            actualContent.tokenUsage || { total: 0 },
-
-          // Include additional fields from analysis if available
-          results: actualContent.results,
-          recommendations: actualContent.recommendations,
-
-          // Include enhanced fields from workflow
-          documentType: actualContent.documentType,
-          schemaUsed: actualContent.schemaUsed,
-          confidence: actualContent.confidence,
-          processingComplexity: actualContent.processingComplexity,
-          enhancedFields: actualContent.enhancedFields,
-        };
-
-        console.log(
-          `📤 SSE: Sending ${useStructuredData ? "structured" : "legacy"} report to client`,
-        );
+        const result = convertWorkflowResult(workflowResult, data.text);
 
         // Send completion event with the result
         sendEvent({

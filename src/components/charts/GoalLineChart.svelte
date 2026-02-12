@@ -285,7 +285,7 @@
                 .append('circle')
                     .attr('class', 'dot')
                     .attr('cx', (d: Value) => xScale(d.date))
-                    .attr('cy', (d: Value, index: number) => yScales[d.index](d.value))
+                    .attr('cy', (d: Value, index: number) => d.index !== undefined ? yScales[d.index](d.value) : 0)
                     .attr('r', 8)
                     /*.on('click', function(event: MouseEvent, d: Value) {
                         if (d.href) {
@@ -299,17 +299,17 @@
                             value: d.value,
                             unit: d.unit,
                             date: d.date,
-                            label: data[d.index].valueName
+                            label: d.index !== undefined ? data[d.index].valueName : ''
                         }
                         // calculate fixed position and compensate for scroll
                         d3.select(tooltip)
                             .style('top', (event.clientY) + 'px')
                             .style('left', (event.clientX) + 'px')
                             .style('opacity', 1);
-                
-                        d3.select(this).attr('r', 12);
+
+                        d3.select(event.currentTarget as SVGCircleElement).attr('r', 12);
                         selectedEvent = {
-                            node: this,
+                            node: event.currentTarget as SVGCircleElement,
                             d
                         };
                     })/*

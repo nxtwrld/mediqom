@@ -251,8 +251,8 @@
                 <span class="command">&nbsp; &gt;&gt; {commands[selectedCommand].translation}</span>
             {/if}
         </div>
-        <input type="search" 
-            placeholder="Search profiles"
+        <input type="search"
+            placeholder={$t('app.search.search-profiles')}
             bind:this={inputElement} 
             bind:value={inputValue} 
             onblur={blurredInput}

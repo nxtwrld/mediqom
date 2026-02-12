@@ -155,8 +155,8 @@
             const normalMax: number = ranges[1].max;
 
             // Calculate data bounds
-            const dataMin = min(series, d => d.value);
-            const dataMax = max(series, d => d.value);
+            const dataMin = min(series, d => d.value) ?? 0;
+            const dataMax = max(series, d => d.value) ?? 100;
             //const dataMin = ranges[0].min
             //const dataMax = ranges[ranges.length-1].max;
 
