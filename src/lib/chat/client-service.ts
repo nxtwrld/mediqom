@@ -106,7 +106,7 @@ export class ChatClientService {
         reader.releaseLock();
       }
     } catch (error) {
-      if (error.name === "AbortError") {
+      if (error instanceof Error && error.name === "AbortError") {
         console.log("Chat request aborted");
         return;
       }
