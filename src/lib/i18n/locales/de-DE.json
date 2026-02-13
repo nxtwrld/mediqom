@@ -468,7 +468,8 @@
       "import": "Import",
       "logout": "Abmelden",
       "new-session": "Neue Sitzung",
-      "profiles": "Profile"
+      "profiles": "Profile",
+      "settings": ""
     },
     "chat": {
       "title": "KI-Medizinassistent",
@@ -514,6 +515,80 @@
         "placeholder": "Oder geben Sie Ihre eigene Antwort ein..."
       }
     },
+    "settings": {
+      "title": "",
+      "tabs": {
+        "general": "",
+        "profile": "",
+        "privacy": "",
+        "about": ""
+      },
+      "general": {
+        "title": "",
+        "language": {
+          "title": "",
+          "description": "",
+          "current": "",
+          "save": "",
+          "saved": ""
+        }
+      },
+      "profile": {
+        "title": "",
+        "description": "",
+        "edit": "",
+        "edit-full": "",
+        "view": "",
+        "save": "",
+        "saved": ""
+      },
+      "privacy": {
+        "title": "",
+        "encryption": {
+          "title": "",
+          "status": "",
+          "enabled": "",
+          "not-enabled": "",
+          "method": "",
+          "passphrase": "",
+          "passkey": "",
+          "change": "",
+          "setup-recovery": ""
+        },
+        "account": {
+          "title": "",
+          "created": "",
+          "last-login": "",
+          "email": ""
+        },
+        "data": {
+          "title": "",
+          "export": "",
+          "delete": "",
+          "coming-soon": ""
+        }
+      },
+      "about": {
+        "title": "",
+        "version": "",
+        "version-info": "",
+        "build": "",
+        "commit": "",
+        "links": {
+          "title": "",
+          "documentation": "",
+          "privacy": "",
+          "terms": "",
+          "github": "",
+          "support": ""
+        },
+        "credits": {
+          "title": "",
+          "licenses": "",
+          "description": ""
+        }
+      }
+    },
     "onboarding": {
       "basic-profile": "",
       "click-here": "",
@@ -543,7 +618,54 @@
         "to-generate-a-random-passphrase": "",
         "try-again": "",
         "your-passphrase-is-not-yet-set": "",
-        "your-total-privacy-is-configured": ""
+        "your-total-privacy-is-configured": "",
+        "choose-security-level": "",
+        "convenience-mode": "",
+        "recommended": "",
+        "convenience-backup": "",
+        "convenience-recovery": "",
+        "convenience-encrypted": "",
+        "zero-knowledge-mode": "",
+        "maximum-security": "",
+        "zero-knowledge-only-you": "",
+        "zero-knowledge-no-access": "",
+        "zero-knowledge-recovery-required": "",
+        "zero-knowledge-warning": "",
+        "continue-with-convenience": "",
+        "continue-with-zero-knowledge": "",
+        "setting-up": "",
+        "choose-unlock-method": "",
+        "passkey": "",
+        "passkey-description": "",
+        "passphrase": "",
+        "passphrase-description": "",
+        "passkey-not-supported": "",
+        "back": "",
+        "continue": "",
+        "passkey-setup-instructions": "",
+        "setting-up-passkey": "",
+        "create-passkey": "",
+        "passphrase-setup-instructions": "",
+        "your-passphrase": "",
+        "strength": "",
+        "hide-passphrase": "",
+        "view-passphrase": "",
+        "use-custom": "",
+        "generate-random": "",
+        "recovery-document-intro": "",
+        "generating-recovery": "",
+        "recovery-key-label": "",
+        "download-pdf": "",
+        "print": "",
+        "confirm-saved": "",
+        "confirm-understand": "",
+        "recovery-warning": "",
+        "complete-setup": "",
+        "zero-knowledge-configured": "",
+        "using-passkey": "",
+        "using-passphrase": "",
+        "convenience-configured": "",
+        "convenience-explanation": ""
       },
       "privacy-and-amp-encryption": "",
       "required": "",
@@ -618,6 +740,47 @@
     },
     "upgrade": {
       "please-upgrade-your-subscription-to-continue": "Bitte aktualisieren Sie Ihr Abonnement, um fortzufahren."
+    },
+    "recover": {
+      "title": "",
+      "enter-key-description": "",
+      "email": "",
+      "recovery-key": "",
+      "verify-key": "",
+      "help-text": "",
+      "verifying": "",
+      "invalid-key-format": "",
+      "verification-failed": "",
+      "key-verified": "",
+      "choose-new-method": "",
+      "passkey": "",
+      "passkey-description": "",
+      "passphrase": "",
+      "passphrase-description": "",
+      "continue": "",
+      "setup-new-passkey": "",
+      "setting-up": "",
+      "create-passkey": "",
+      "back": "",
+      "setup-new-passphrase": "",
+      "new-passphrase": "",
+      "hide": "",
+      "show": "",
+      "copy": "",
+      "use-custom": "",
+      "generate-random": "",
+      "set-passphrase": "",
+      "credentials-updated": "",
+      "generate-new-recovery": "",
+      "generating": "",
+      "download-pdf": "",
+      "confirm-saved": "",
+      "complete": "",
+      "success-title": "",
+      "success-description": "",
+      "go-to-login": "",
+      "error-title": "",
+      "try-again": ""
     }
   },
   "charts": {

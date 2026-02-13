@@ -39,30 +39,31 @@
 
 </script>
 
-{#if children || label}
-    <label class="label" for={id}>
-        {#if label}
-            {label}
-        {:else}
-            {@render children?.()}
-        {/if}
-    </label>
-{/if}
+<div class={className}>
+    {#if children || label}
+        <label for={id}>
+            {#if label}
+                {label}
+            {:else}
+                {@render children?.()}
+            {/if}
+        </label>
+    {/if}
 
-
-{#if multiple}
-    <select class={className} {tabindex} {disabled} bind:value {id} {required} multiple {size}>
-        {#each options as {key, value}}
-            <option value={key}>{value}</option>
-        {/each}
-    </select>
-{:else}
-    <select class={className}  {tabindex} bind:value {id} {required}>
-        {#if placeholder}
-            <option value="" disabled selected>{placeholder}</option>
-        {/if}
-        {#each options as {key, value}}
-            <option value={key}>{value}</option>
-        {/each}
-    </select>
-{/if}
+    {#if multiple}
+        <select {tabindex} {disabled} bind:value {id} {required} multiple {size}>
+            {#each options as {key, value}}
+                <option value={key}>{value}</option>
+            {/each}
+        </select>
+    {:else}
+        <select {tabindex} bind:value {id} {required}>
+            {#if placeholder}
+                <option value="" disabled selected>{placeholder}</option>
+            {/if}
+            {#each options as {key, value}}
+                <option value={key}>{value}</option>
+            {/each}
+        </select>
+    {/if}
+</div>

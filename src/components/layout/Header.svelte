@@ -129,6 +129,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 
                     </div>
                 </li>
+                <li><a href="/med/settings">{ $t('app.nav.settings') }</a></li>
                 <li><button onclick={logout}>{ $t('app.nav.logout') }</button></li>
             </ul>
         </div>
@@ -262,15 +263,20 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         margin-top: var(--gap);
     }
 
-    .menu > ul.menu li button {
+    .menu > ul.menu li button,
+    .menu > ul.menu li a {
         background-color: var(--color-gray-300);
         border: none;
         padding: .5rem;
         width: 100%;
         margin: 0;
         text-align: left;
+        display: block;
+        text-decoration: none;
+        color: inherit;
     }
-    .menu > ul.menu li button:hover {
+    .menu > ul.menu li button:hover,
+    .menu > ul.menu li a:hover {
         background-color: var(--color-white);
     }
 

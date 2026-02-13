@@ -80,8 +80,8 @@
         },
         {
             signal: 'bloodPressure',
-            source: [$profile?.health?.signals?.systolic, $profile?.health?.signals?.diastolic],
-            fn: (v: any) => v.join('/'),
+            source: $profile?.health?.signals?.bloodPressure,
+            fn: (v: any) => v?.systolic != null && v?.diastolic != null ? `${v.systolic}/${v.diastolic}` : undefined,
         },
         // add high priority signals to the set
         

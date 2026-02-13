@@ -5,6 +5,12 @@ import auth from "$lib/auth";
 import { decryptString } from "../encryption/passphrase";
 import { verifyHash } from "../encryption/hash";
 import { KeyPair, pemToKey } from "../encryption/rsa";
+import {
+  authenticateWithPasskeyPRF,
+  decryptWithPRFKey,
+  type KeyDerivationMethod
+} from "../encryption/passkey-prf";
+import { recoverPrivateKey } from "../encryption/recovery";
 //import { loadSubscription } from "./subscriptions";
 
 export type UserFirstTime = {
@@ -33,6 +39,11 @@ export type User = {
   key_pass: string;
   unlocked: boolean | undefined;
   isMedical: boolean;
+  // New encryption fields
+  key_derivation_method?: KeyDerivationMethod;
+  passkey_credential_id?: string;
+  passkey_prf_salt?: string;
+  recovery_encrypted_key?: string;
 };
 
 const keys: {
@@ -87,6 +98,12 @@ export async function setUser(
     userProfile.key_hash = userProfile.private_keys?.key_hash;
     const key_pass = userProfile.private_keys?.key_pass;
 
+    // Extract new encryption fields
+    userProfile.key_derivation_method = userProfile.private_keys?.key_derivation_method;
+    userProfile.passkey_credential_id = userProfile.private_keys?.passkey_credential_id;
+    userProfile.passkey_prf_salt = userProfile.private_keys?.passkey_prf_salt;
+    userProfile.recovery_encrypted_key = userProfile.private_keys?.recovery_encrypted_key;
+
     delete userProfile.private_keys;
 
     user.set({
@@ -137,6 +154,9 @@ function getId(): string | null {
   return $user ? $user.id : null;
 }
 
+/**
+ * Unlock with passphrase (traditional method)
+ */
 async function unlock(passphrase: string | null): Promise<boolean> {
   const { update } = user;
   const $user = get(user);
@@ -206,6 +226,175 @@ async function unlock(passphrase: string | null): Promise<boolean> {
   }
 }
 
+/**
+ * Unlock with passkey PRF
+ * Uses WebAuthn PRF extension to derive decryption key
+ */
+async function unlockWithPasskey(): Promise<boolean> {
+  const { update } = user;
+  const $user = get(user);
+
+  if (!$user) {
+    return false;
+  }
+
+  const fullUser = $user as User;
+
+  // Check if user has passkey credentials
+  if (
+    fullUser.key_derivation_method !== 'passkey_prf' ||
+    !fullUser.passkey_credential_id ||
+    !fullUser.passkey_prf_salt ||
+    !fullUser.privateKey ||
+    !fullUser.publicKey
+  ) {
+    console.warn("[User] Missing passkey credentials for unlock");
+    return false;
+  }
+
+  try {
+    // Authenticate with passkey and get PRF-derived key
+    const prfDerivedKey = await authenticateWithPasskeyPRF(
+      fullUser.passkey_credential_id,
+      fullUser.passkey_prf_salt
+    );
+
+    // Decrypt private key with PRF-derived key
+    const privateKeyString = await decryptWithPRFKey(
+      fullUser.privateKey,
+      prfDerivedKey
+    );
+
+    if (
+      !privateKeyString ||
+      privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") !== 0
+    ) {
+      console.error("[User] Invalid private key format after passkey decryption");
+      return false;
+    }
+
+    // Import keys
+    const privateKey = await pemToKey(privateKeyString, true);
+    const publicKey = await pemToKey(fullUser.publicKey, false);
+    keyPair.set(publicKey, privateKey);
+
+    update((user) => {
+      if (user) {
+        user.unlocked = true;
+      }
+      return user;
+    });
+
+    console.log("[User] Successfully unlocked with passkey");
+    return true;
+  } catch (error) {
+    console.error("[User] Error during passkey unlock:", error);
+    keyPair.destroy();
+
+    update((user) => {
+      if (user) {
+        user.unlocked = false;
+      }
+      return user;
+    });
+    return false;
+  }
+}
+
+/**
+ * Unlock with recovery key
+ * Used when passphrase or passkey is lost
+ */
+async function unlockWithRecoveryKey(recoveryKey: string): Promise<boolean> {
+  const { update } = user;
+  const $user = get(user);
+
+  if (!$user) {
+    return false;
+  }
+
+  const fullUser = $user as User;
+
+  if (!fullUser.recovery_encrypted_key || !fullUser.publicKey) {
+    console.warn("[User] No recovery key available for this account");
+    return false;
+  }
+
+  try {
+    // Decrypt private key with recovery key
+    const privateKeyString = await recoverPrivateKey(
+      fullUser.recovery_encrypted_key,
+      recoveryKey
+    );
+
+    if (
+      !privateKeyString ||
+      privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") !== 0
+    ) {
+      console.error("[User] Invalid private key format after recovery");
+      return false;
+    }
+
+    // Import keys
+    const privateKey = await pemToKey(privateKeyString, true);
+    const publicKey = await pemToKey(fullUser.publicKey, false);
+    keyPair.set(publicKey, privateKey);
+
+    update((user) => {
+      if (user) {
+        user.unlocked = true;
+      }
+      return user;
+    });
+
+    console.log("[User] Successfully recovered with recovery key");
+    return true;
+  } catch (error) {
+    console.error("[User] Error during recovery:", error);
+    keyPair.destroy();
+
+    update((user) => {
+      if (user) {
+        user.unlocked = false;
+      }
+      return user;
+    });
+    return false;
+  }
+}
+
+/**
+ * Get the current key derivation method for the user
+ */
+function getKeyDerivationMethod(): KeyDerivationMethod | null {
+  const $user = get(user);
+  if (!$user) return null;
+  return (($user as User).key_derivation_method as KeyDerivationMethod) || 'passphrase';
+}
+
+/**
+ * Check if user has recovery key set up
+ */
+function hasRecoveryKey(): boolean {
+  const $user = get(user);
+  if (!$user) return false;
+  return !!($user as User).recovery_encrypted_key;
+}
+
+/**
+ * Check if user has passkey set up
+ */
+function hasPasskey(): boolean {
+  const $user = get(user);
+  if (!$user) return false;
+  const fullUser = $user as User;
+  return !!(
+    fullUser.key_derivation_method === 'passkey_prf' &&
+    fullUser.passkey_credential_id &&
+    fullUser.passkey_prf_salt
+  );
+}
+
 export async function encrypt(data: string): Promise<string> {
   if (!keyPair.isReady()) {
     throw new Error("Keys not available");
@@ -256,4 +445,9 @@ export default {
   },
   set: setUser,
   unlock,
+  unlockWithPasskey,
+  unlockWithRecoveryKey,
+  getKeyDerivationMethod,
+  hasRecoveryKey,
+  hasPasskey,
 };

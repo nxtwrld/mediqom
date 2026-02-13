@@ -107,9 +107,8 @@
 		formData.append('privateKey', editData.privacy.privateKey as string);
 		formData.append('key_hash', editData.privacy.key_hash as string);
 		
-		// TODO Create health and profile documents
-
-
+		// Sync birthDate from bio to health document
+		editData.health.birthDate = editData.bio.birthDate;
 
 		const documents = [{
 			type: 'health',

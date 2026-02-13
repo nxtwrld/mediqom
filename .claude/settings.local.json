@@ -50,7 +50,8 @@
       "WebFetch(domain:github.com)",
       "mcp__ide__getDiagnostics",
       "Bash(sort:*)",
-      "Bash(# Check if the textures directory has additional organized textures find \"\"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/textures\"\" -type f -name \"\"*.png\"\" -o -name \"\"*.jpg\"\" -o -name \"\"*.tif\"\" -o -name \"\"*.bmp\"\")"
+      "Bash(# Check if the textures directory has additional organized textures find \"\"/Users/nxtwrld/Documents/GitHub/aouros/assets-src/AnatomyModel/textures\"\" -type f -name \"\"*.png\"\" -o -name \"\"*.jpg\"\" -o -name \"\"*.tif\"\" -o -name \"\"*.bmp\"\")",
+      "mcp__plugin_supabase_supabase__search_docs"
     ],
     "deny": []
   }

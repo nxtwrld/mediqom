@@ -469,7 +469,8 @@
       "import": "Import",
       "logout": "Logout",
       "new-session": "New Session",
-      "profiles": "Profiles"
+      "profiles": "Profiles",
+      "settings": "Settings"
     },
     "chat": {
       "title": "AI Medical Assistant",
@@ -542,6 +543,84 @@
         "placeholder": "Or type your own answer..."
       }
     },
+    "settings": {
+      "title": "Settings",
+      "tabs": {
+        "general": "General",
+        "profile": "Profile",
+        "privacy": "Privacy",
+        "about": "About"
+      },
+      "general": {
+        "title": "General Settings",
+        "language": {
+          "title": "Language",
+          "description": "Choose your preferred language for the interface",
+          "current": "Current language",
+          "save": "Save Language",
+          "saved": "Language updated successfully"
+        }
+      },
+      "profile": {
+        "title": "Profile Information",
+        "description": "Manage your personal, insurance, contact, and health information",
+        "edit": "Edit Profile",
+        "edit-full": "Edit your complete profile including personal information, insurance details, contacts, and health data.",
+        "view": "View Profile",
+        "save": "Save Profile",
+        "saved": "Profile saved successfully",
+        "reset": "Reset Changes",
+        "no-changes": "No changes to save",
+        "save-error": "Failed to save profile. Please try again.",
+        "loading": "Loading profile..."
+      },
+      "privacy": {
+        "title": "Privacy & Security",
+        "encryption": {
+          "title": "Encryption",
+          "status": "Encryption Status",
+          "enabled": "Encryption Enabled",
+          "not-enabled": "Encryption is not enabled",
+          "method": "Method",
+          "passphrase": "Passphrase",
+          "passkey": "Passkey",
+          "change": "Change Encryption Method",
+          "setup-recovery": "Setup Recovery Key"
+        },
+        "account": {
+          "title": "Account Information",
+          "created": "Account Created",
+          "last-login": "Last Login",
+          "email": "Email"
+        },
+        "data": {
+          "title": "Data Management",
+          "export": "Export All Data",
+          "delete": "Delete Account",
+          "coming-soon": "These features are coming soon"
+        }
+      },
+      "about": {
+        "title": "About Mediqom",
+        "version": "Version",
+        "version-info": "Version Information",
+        "build": "Build",
+        "commit": "Commit",
+        "links": {
+          "title": "Links",
+          "documentation": "Documentation",
+          "privacy": "Privacy Policy",
+          "terms": "Terms of Service",
+          "github": "GitHub",
+          "support": "Support"
+        },
+        "credits": {
+          "title": "Credits",
+          "licenses": "Open Source Licenses",
+          "description": "Mediqom is built with open source technologies and contributions from the community. Thank you to all contributors and maintainers."
+        }
+      }
+    },
     "onboarding": {
       "basic-profile": "Basic Profile",
       "click-here": "click here.",
@@ -571,7 +650,54 @@
         "to-generate-a-random-passphrase": "To generate a random passphrase,",
         "try-again": "Try again",
         "your-passphrase-is-not-yet-set": "Your passphrase is not yet set.",
-        "your-total-privacy-is-configured": "Your total privacy is configured."
+        "your-total-privacy-is-configured": "Your total privacy is configured.",
+        "choose-security-level": "Choose your security level",
+        "convenience-mode": "Convenience Mode",
+        "recommended": "Recommended",
+        "convenience-backup": "We securely store an encrypted backup",
+        "convenience-recovery": "Account recovery is always possible",
+        "convenience-encrypted": "Your data is still encrypted",
+        "zero-knowledge-mode": "Zero-Knowledge Mode",
+        "maximum-security": "Maximum Security",
+        "zero-knowledge-only-you": "Only you can decrypt your data",
+        "zero-knowledge-no-access": "Server has NO access to your keys",
+        "zero-knowledge-recovery-required": "Recovery document is REQUIRED",
+        "zero-knowledge-warning": "Lost passphrase = lost data forever",
+        "continue-with-convenience": "Continue with Convenience Mode",
+        "continue-with-zero-knowledge": "Continue with Zero-Knowledge Mode",
+        "setting-up": "Setting up...",
+        "choose-unlock-method": "Choose your unlock method",
+        "passkey": "Passkey",
+        "passkey-description": "Use Face ID, Touch ID, or Windows Hello. No passphrase to remember.",
+        "passphrase": "Passphrase",
+        "passphrase-description": "Create a strong master passphrase. Store in password manager or memorize.",
+        "passkey-not-supported": "Passkey PRF is not supported in this browser",
+        "back": "Back",
+        "continue": "Continue",
+        "passkey-setup-instructions": "Click the button below to create a passkey using your device's biometric authentication.",
+        "setting-up-passkey": "Setting up passkey...",
+        "create-passkey": "Create Passkey",
+        "passphrase-setup-instructions": "Create a strong passphrase or use the generated one below.",
+        "your-passphrase": "Your Passphrase",
+        "strength": "Strength",
+        "hide-passphrase": "Hide passphrase",
+        "view-passphrase": "View passphrase",
+        "use-custom": "Use custom passphrase",
+        "generate-random": "Generate random",
+        "recovery-document-intro": "Download your recovery document. This is your ONLY way to recover access if you lose your passphrase or passkey.",
+        "generating-recovery": "Generating recovery document...",
+        "recovery-key-label": "Your Recovery Key",
+        "download-pdf": "Download PDF",
+        "print": "Print",
+        "confirm-saved": "I have saved the recovery document",
+        "confirm-understand": "I understand this is my only way to recover",
+        "recovery-warning": "Anyone with this key can access your data. Store it securely offline.",
+        "complete-setup": "Complete Setup",
+        "zero-knowledge-configured": "Zero-Knowledge encryption is configured!",
+        "using-passkey": "Your data is protected with your passkey.",
+        "using-passphrase": "Your data is protected with your passphrase.",
+        "convenience-configured": "Convenience mode is configured!",
+        "convenience-explanation": "Your data is encrypted and we can help you recover access if needed."
       },
       "privacy-and-amp-encryption": "Privacy &amp; Encryption",
       "required": "required",
@@ -646,6 +772,47 @@
     },
     "upgrade": {
       "please-upgrade-your-subscription-to-continue": "Please upgrade your subscription to continue."
+    },
+    "recover": {
+      "title": "Account Recovery",
+      "enter-key-description": "Enter your recovery key to regain access to your encrypted data.",
+      "email": "Email Address",
+      "recovery-key": "Recovery Key",
+      "verify-key": "Verify Recovery Key",
+      "help-text": "Your recovery key is in the recovery document you downloaded during setup.",
+      "verifying": "Verifying your recovery key...",
+      "invalid-key-format": "Invalid recovery key format. Please check and try again.",
+      "verification-failed": "Recovery verification failed. Please check your email and recovery key.",
+      "key-verified": "Recovery key verified successfully!",
+      "choose-new-method": "Choose a new unlock method for your account.",
+      "passkey": "Passkey",
+      "passkey-description": "Use biometric authentication (Face ID, Touch ID, Windows Hello)",
+      "passphrase": "Passphrase",
+      "passphrase-description": "Create a new passphrase to protect your data",
+      "continue": "Continue",
+      "setup-new-passkey": "Click to set up a new passkey for your account.",
+      "setting-up": "Setting up...",
+      "create-passkey": "Create Passkey",
+      "back": "Back",
+      "setup-new-passphrase": "Create a new passphrase for your account.",
+      "new-passphrase": "New Passphrase",
+      "hide": "Hide",
+      "show": "Show",
+      "copy": "Copy",
+      "use-custom": "Use custom",
+      "generate-random": "Generate random",
+      "set-passphrase": "Set Passphrase",
+      "credentials-updated": "Your credentials have been updated!",
+      "generate-new-recovery": "Generate a new recovery document. Your old recovery key will no longer work.",
+      "generating": "Generating new recovery document...",
+      "download-pdf": "Download PDF",
+      "confirm-saved": "I have saved the new recovery document",
+      "complete": "Complete Recovery",
+      "success-title": "Recovery Complete!",
+      "success-description": "Your account has been recovered successfully. You can now log in with your new credentials.",
+      "go-to-login": "Go to Login",
+      "error-title": "Recovery Failed",
+      "try-again": "Try Again"
     }
   },
   "charts": {
