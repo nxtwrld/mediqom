@@ -15,6 +15,8 @@ export interface ApiRequestOptions extends RequestInit {
   skipAuth?: boolean;
   /** Custom timeout in milliseconds */
   timeout?: number;
+  /** Pass SvelteKit's fetch for SSR compatibility */
+  fetch?: typeof globalThis.fetch;
 }
 
 export interface ApiResponse<T = unknown> extends Response {
@@ -65,7 +67,7 @@ export async function apiFetch(
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<Response> {
-  const { skipAuth = false, timeout = 30000, ...fetchOptions } = options;
+  const { skipAuth = false, timeout = 30000, fetch: fetchFn = globalThis.fetch, ...fetchOptions } = options;
 
   const url = buildUrl(endpoint);
 
@@ -94,7 +96,7 @@ export async function apiFetch(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchFn(url, {
       ...fetchOptions,
       headers,
       // On web, include credentials (cookies); on mobile, omit them

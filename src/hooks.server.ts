@@ -48,6 +48,42 @@ const supabase: Handle = async ({ event, resolve }) => {
     } = await event.locals.supabase.auth.getSession();
 
     if (!session) {
+      // Fallback: Bearer token auth (mobile Capacitor)
+      const authHeader = event.request.headers.get('Authorization');
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.slice(7);
+        const tokenClient = createServerClient(
+          PUBLIC_SUPABASE_URL,
+          PUBLIC_SUPABASE_ANON_KEY,
+          {
+            global: { headers: { Authorization: `Bearer ${token}` } },
+            cookies: {
+              get: () => undefined as unknown as string,
+              set: () => {},
+              remove: () => {},
+            },
+          },
+        );
+        const {
+          data: { user },
+          error,
+        } = await tokenClient.auth.getUser();
+        if (user && !error) {
+          // Replace locals.supabase with the token-authenticated client
+          // so downstream endpoints use the mobile user's RLS context
+          event.locals.supabase = tokenClient;
+          return {
+            session: {
+              access_token: token,
+              refresh_token: '',
+              expires_in: 0,
+              token_type: 'bearer',
+              user,
+            },
+            user,
+          };
+        }
+      }
       return { session: null, user: null };
     }
 

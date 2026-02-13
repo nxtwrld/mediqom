@@ -4,6 +4,7 @@ import type { Profile } from "$lib/types.d";
 import { profiles, profile } from "$lib/profiles";
 import { importDocuments } from "$lib/documents";
 import { profileContextManager } from "$lib/context/integration/profile-context";
+import { apiFetch } from "$lib/api/client";
 
 export const load: LayoutLoad = async ({ parent, params, fetch }) => {
   await parent();
@@ -19,8 +20,9 @@ export const load: LayoutLoad = async ({ parent, params, fetch }) => {
   // set the profile
   profile.set(p);
 
-  const documentsResponse = await fetch(
+  const documentsResponse = await apiFetch(
     `/v1/med/profiles/${params.profile}/documents`,
+    { fetch },
   );
 
   if (documentsResponse.status === 401) {

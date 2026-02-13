@@ -191,6 +191,44 @@ index.
 - **Error handling**: Standardized error responses with proper HTTP status codes
 - **SSE integration**: Real-time features use Server-Sent Events for streaming updates
 
+### apiFetch & SvelteKit `fetch` (CRITICAL)
+
+All API calls go through `apiFetch()` from `$lib/api/client.ts`. It handles both web (cookies) and Capacitor/mobile (Bearer token) automatically.
+
+**Rule: Always pass `{ fetch }` in load functions.**
+
+SvelteKit load functions receive a special `fetch` that supports relative URLs during SSR, deduplicates requests, and avoids `window.fetch` warnings. Even when `ssr = false`, SvelteKit still expects its own `fetch` to be used inside load functions.
+
+```typescript
+// In any +layout.ts or +page.ts load function:
+export const load: LayoutLoad = async ({ fetch }) => {
+  const data = await apiFetch('/v1/med/user', { fetch });
+};
+```
+
+**Rule: Functions called from load functions must accept and forward `fetch`.**
+
+If a utility function (like `loadProfiles`) uses `apiFetch` internally and is called from a load function, it must accept an optional `fetchFn` parameter and pass it through:
+
+```typescript
+// In utility module:
+export async function loadProfiles(
+  force = false,
+  fetchFn?: typeof globalThis.fetch,
+) {
+  const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
+  const data = await apiFetch('/v1/med/profiles', fetchOpts);
+}
+
+// In load function:
+await loadProfiles(false, fetch);
+```
+
+**SSR configuration:**
+- `med/` routes: `ssr = false` — all load functions run client-side, but still pass `{ fetch }`
+- Root `+layout.ts`: SSR enabled — `{ fetch }` is required for `/account` route SSR
+- Capacitor builds: SSR always disabled, `apiFetch` uses Bearer tokens via `getAccessToken()`
+
 ## Configuration System
 
 ### Feature Flags
