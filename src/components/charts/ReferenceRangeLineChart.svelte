@@ -237,7 +237,7 @@ function renderChart(series: Signal[] = []) {
 
 
     // define the line
-    const valueline = line()
+    const valueline = line<LabItem>()
         .curve(curveCardinal.tension(0))
         .x(function(d: LabItem) { return x(d.date); })
         .y(function(d: LabItem) { return y(d.value); });

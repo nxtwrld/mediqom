@@ -161,7 +161,7 @@
     <div class="viewer-content">
         <svelte:component
             this={ViewerComponent}
-            {...viewerProps}
+            {...(viewerProps as any)}
             onerror={handleViewerEvent}
             onloaded={handleViewerEvent}
         />

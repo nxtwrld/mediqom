@@ -1,5 +1,6 @@
-import { Buffer, File } from "node:buffer";
+import { Buffer } from "node:buffer";
 import { error, type RequestHandler } from "@sveltejs/kit";
+// File is available globally in Node 18+
 import { transcriptionProvider } from "$lib/ai/providers/transcription-abstraction";
 
 type ClientAudioMessage = {
@@ -143,7 +144,8 @@ export const GET: RequestHandler = async ({ request }) => {
 
   const pair = new (globalThis as any).WebSocketPair();
   const [client, server] = [pair[0], pair[1]] as WebSocket[];
-  server.accept();
+  // Cloudflare Workers WebSocket API
+  (server as any).accept();
 
   const chunks: Float32Array[] = [];
   let processing = false;
@@ -222,8 +224,9 @@ export const GET: RequestHandler = async ({ request }) => {
     chunks.length = 0;
   });
 
+  // Cloudflare Workers WebSocket response
   return new Response(null, {
     status: 101,
     webSocket: client,
-  });
+  } as any);
 };

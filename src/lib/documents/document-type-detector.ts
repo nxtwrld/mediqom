@@ -98,7 +98,7 @@ export function detectDocumentType(document: Document): DocumentTypeInfo {
     );
 
     if (confidence > bestMatch.confidence) {
-      bestMatch = { type, confidence, mapping };
+      bestMatch = { type, confidence, mapping } as typeof bestMatch;
     }
   }
 

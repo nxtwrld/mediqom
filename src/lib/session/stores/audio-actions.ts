@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import { AudioState } from "$lib/audio/microphone";
-import { audioManager } from "$lib/audio/AudioManager";
+import { getAudioManager } from "$lib/audio/AudioManager";
 import type { PartialTranscript } from "../manager";
 import { SSEClient } from "../transport/sse-client";
 import { logger } from "$lib/logging/logger";
@@ -86,9 +86,9 @@ export const audioActions = {
       }
 
       // Initialize AudioManager
-      if (!audioManager.getIsInitialized()) {
+      if (!getAudioManager().getIsInitialized()) {
         logger.audio.debug("Initializing AudioManager...");
-        const initialized = await audioManager.initialize();
+        const initialized = await getAudioManager().initialize();
         
         if (!initialized) {
           throw new Error("Failed to initialize AudioManager");
@@ -96,7 +96,7 @@ export const audioActions = {
       }
 
       logger.audio.info("AudioManager successfully initialized", {
-        hasStream: !!audioManager.getAudioStream(),
+        hasStream: !!getAudioManager().getAudioStream(),
       });
 
       // Set up event handlers for audio processing
@@ -115,8 +115,8 @@ export const audioActions = {
       };
 
       // Subscribe to AudioManager events
-      audioManager.on('audio-chunk', handleAudioChunk);
-      audioManager.on('state-change', handleStateChange);
+      getAudioManager().on('audio-chunk', handleAudioChunk);
+      getAudioManager().on('state-change', handleStateChange);
 
       // Update store with successful initialization
       unifiedSessionStore.update((state) => ({
@@ -157,13 +157,13 @@ export const audioActions = {
   async startRecording(): Promise<boolean> {
     logger.audio.info("Starting audio recording with AudioManager...");
 
-    if (!audioManager.getIsInitialized()) {
+    if (!getAudioManager().getIsInitialized()) {
       logger.audio.error("AudioManager not initialized");
       return false;
     }
 
     try {
-      const success = await audioManager.start();
+      const success = await getAudioManager().start();
 
       if (success) {
         unifiedSessionStore.update((state) => ({
@@ -171,7 +171,7 @@ export const audioActions = {
           audio: {
             ...state.audio,
             isRecording: true,
-            state: audioManager.getState(),
+            state: getAudioManager().getState(),
           },
           ui: {
             ...state.ui,
@@ -210,7 +210,7 @@ export const audioActions = {
 
     try {
       // Stop AudioManager
-      await audioManager.stop();
+      await getAudioManager().stop();
       logger.audio.info("AudioManager stopped successfully");
 
       // Disconnect SSE
@@ -501,9 +501,9 @@ export const audioActions = {
    */
   getAudioProcessor(): { audio: any; sseClient: any; isInitialized: boolean } {
     return {
-      audio: audioManager.getIsInitialized() ? audioManager : null,
+      audio: getAudioManager().getIsInitialized() ? getAudioManager() : null,
       sseClient: sseClient,
-      isInitialized: audioManager.getIsInitialized(),
+      isInitialized: getAudioManager().getIsInitialized(),
     };
   },
 
@@ -511,14 +511,14 @@ export const audioActions = {
    * Check if audio is currently recording
    */
   isRecording(): boolean {
-    return audioManager.getIsRecording();
+    return getAudioManager().getIsRecording();
   },
 
   /**
    * Get current audio state
    */
   getAudioState(): AudioState {
-    return audioManager.getState();
+    return getAudioManager().getState();
   },
 };
 

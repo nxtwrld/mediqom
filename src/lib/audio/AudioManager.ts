@@ -679,8 +679,10 @@ export class AudioManager extends EventEmitter {
   }
 }
 
-// Export singleton instance for direct import
-export const audioManager = AudioManager.getInstance();
+// Export lazy getter for singleton instance (avoids eager initialization on import)
+export function getAudioManager(): AudioManager {
+  return AudioManager.getInstance();
+}
 
 // Export type for external use
 export type { AudioManager as AudioManagerType };

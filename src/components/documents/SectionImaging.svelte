@@ -21,7 +21,7 @@
     
     // Cornerstone.js variables
     let cornerstoneElements: HTMLDivElement[] = [];
-    let cornerstoneLoaded = false;
+    let cornerstoneLoaded = $state(false);
     
     // Load Cornerstone.js on mount - BROWSER ONLY
     onMount(async () => {

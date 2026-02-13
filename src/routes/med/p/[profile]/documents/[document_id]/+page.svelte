@@ -52,11 +52,12 @@
 {#if !document}
 <Loading/>
 {:else}
+    {@const doc = document as Document}
     <div class="page -empty  -heading-master">
 
-        <DocumentHeading {document} />
-        <AppConnect {document} shared={[document]}/>
-        <DocumentView {document} />
+        <DocumentHeading document={doc} />
+        <AppConnect shared={[doc]}/>
+        <DocumentView document={doc} />
     </div>
-    
+
 {/if}

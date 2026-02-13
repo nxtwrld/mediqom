@@ -2,6 +2,7 @@
     import focused from '$lib/focused';
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
+    import { translateAnatomy } from '$lib/i18n/anatomy';
 
     interface Props {
         data: any;
@@ -18,14 +19,6 @@
     }
 
     let hasTreatment = $derived(data && data.some((item: any) => item.treatment));
-
-    function translate(str: string) {
-        const translation = $t('anatomy.'+str);
-        if (translation == 'anatomy.'+str) {
-            return str;
-        }
-        return translation;
-    }
 
 </script>
 
@@ -51,7 +44,7 @@
         {#each data as { identification, status, diagnosis, treatment, urgency}}
         <tr class:selected={normalize(identification) == $focused.object} class="urgency-{urgency}">
             <td class="body-part" data-label="{ $t('report.anatomy.body-part') }">
-                {translate(identification)}
+                {translateAnatomy(normalize(identification), $t)}
             </td>
             <td class="-empty -actions" >
                 <div class="actions">

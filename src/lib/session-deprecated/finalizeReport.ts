@@ -79,6 +79,7 @@ export async function finalize(input: Input): Promise<Report> {
 
   if (DEBUG) {
     await sleep(200);
+    // @ts-expect-error - Test data structure mismatch with Report interface
     return Promise.resolve(
       TEST_DATA[Math.floor(Math.random() * TEST_DATA.length)],
     );

@@ -30,6 +30,7 @@
     //import { addExperience } from '$lib/xp/store';
 	import { sounds } from '$components/ui/Sounds.svelte';
     import { t } from '$lib/i18n';
+    import { translateAnatomy } from '$lib/i18n/anatomy';
 	//import Error from '../../../routes/+error.svelte';
 
     const dispatch = createEventDispatcher();
@@ -126,6 +127,8 @@
     let loadedLayers: string[] = [];
     let loadedFiles: string[] = [];
     let ready: boolean = false;
+    let pendingFocus: string | null = null;
+    let modelLoaded: boolean = false;
 
     let container: HTMLDivElement;
     let labelContainer: HTMLDivElement;
@@ -281,17 +284,54 @@
 
 
     onMount(() => {
-        if (container) init();
         console.log('🧍', 'Mounted');
-        
-        // Capture initial store values for hydration
+
+        // Capture initial store values immediately before any async operations
         let initialFocused = $focused;
         let initialStore = $store;
-        
-        const unsubscibeFocus = focused.subscribe((f) => {
-            if (!ready) return;
-            setHighlight(f.object ?? null);
 
+        // Wait for valid dimensions before initializing Three.js
+        const waitForDimensions = (): Promise<void> => {
+            return new Promise((resolve) => {
+                // Check if dimensions are already valid
+                if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+                    resolve();
+                    return;
+                }
+
+                // Wait for ResizeObserver to report valid dimensions
+                const observer = new ResizeObserver((entries) => {
+                    const entry = entries[0];
+                    if (entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                        observer.disconnect();
+                        resolve();
+                    }
+                });
+                observer.observe(container);
+            });
+        };
+
+        // Initialize once dimensions are valid
+        const initializeViewer = async () => {
+            await waitForDimensions();
+            await init();
+
+            // Apply captured initial context AFTER init completes with valid dimensions
+            // Note: Focus is deferred to updateModel() when actual body models are loaded
+            if (initialStore && initialStore.context) {
+                setContext(initialStore.context);
+            }
+        };
+
+        if (container) initializeViewer();
+
+        // Store subscription - queue focus if models not yet loaded
+        const unsubscibeFocus = focused.subscribe((f) => {
+            if (!modelLoaded) {
+                pendingFocus = f.object ?? null;
+                return;
+            }
+            setHighlight(f.object ?? null);
         });
 
         const unsubscibeContext = store.subscribe((state) => {
@@ -307,24 +347,6 @@
             if (!ready) return;
             resetFocus();
         });
-
-        // Apply initial values after initialization
-        const checkReady = () => {
-            if (ready) {
-                // Apply initial focused state if it exists
-                if (initialFocused && initialFocused.object) {
-                    setHighlight(initialFocused.object);
-                }
-                // Apply initial store context if it exists
-                if (initialStore && initialStore.context) {
-                    setContext(initialStore.context);
-                }
-            } else {
-                // Check again if not ready yet
-                setTimeout(checkReady, 100);
-            }
-        };
-        checkReady();
 
         return () => {
             unsubscibeFocus();
@@ -410,7 +432,15 @@
 
         requestRender();
         loadLabels();
-        setHighlight($focused.object ?? null);
+
+        // Mark model as loaded and apply any pending focus
+        modelLoaded = true;
+        if (pendingFocus) {
+            setHighlight(pendingFocus);
+            pendingFocus = null;
+        } else {
+            setHighlight($focused.object ?? null);
+        }
 
         if (!initialViewState) initialViewState = {
             position: camera.position.clone(),
@@ -770,7 +800,7 @@
         //window.scene = scene;
 
         console.log('🧍', 'Ready');
-        
+
         // TODO: better way to handle this - more generic
         /*
         ui.on('context', (context) => {
@@ -779,10 +809,14 @@
         setContext(ui.context);
         */
 
-        
+
         ready = true;
 
-
+        // Ensure camera aspect is correct after CSS transition settles
+        requestAnimationFrame(() => {
+            resize();
+            requestRender();
+        });
 
         if ($store.context) setContext($store.context);
 
@@ -995,7 +1029,10 @@
         }
 
         const object = processObjects[0];
-       // console.log('Object', object);
+
+        // Ensure world matrices are up to date for accurate bounding box
+        object.updateWorldMatrix(true, true);
+
         // store original position and rotation
         if (!selected) {
             previousViewState = {
@@ -1173,11 +1210,7 @@
 {#if selected}
     {#key selected}
     <div class="selected" transition:fade >
-        {#if $t('anatomy.'+ selected.name) == 'anatomy.'+ selected.name}
-            {selected.name}
-        {:else}
-            {$t('anatomy.'+ selected.name)}
-        {/if}
+        {translateAnatomy(selected.name, $t)}
         <button on:click={resetFocus} aria-label="Reset focus">
             <svg>
                 <use href="/icons.svg#close"></use>

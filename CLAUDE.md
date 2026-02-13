@@ -441,6 +441,7 @@ For session development context, use the `@session` command. Key references: `AI
 | `docs/README.md` | Documentation index |
 | `src/routes/med/FEATURES.md` | Medical features documentation |
 | `src/components/apps/README.md` | Apps component documentation |
+| `3D_TEXTURES.md` | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
 
 ## Important Notes
 

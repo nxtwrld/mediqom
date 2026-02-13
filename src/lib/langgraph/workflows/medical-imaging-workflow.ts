@@ -49,9 +49,11 @@ export const createMedicalImagingWorkflow = (
 
           if (state.progressCallback) {
             state.progressCallback({
+              type: "progress" as const,
               stage,
               progress: Math.min(nodeProgress, 100),
               message,
+              timestamp: Date.now(),
             });
           }
 

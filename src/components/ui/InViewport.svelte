@@ -6,13 +6,17 @@
         clearOnExit?: boolean;
         component?: ComponentType;
         componentProps?: any;
+        onenter?: () => void;
+        onexit?: () => void;
     }
 
     let {
         isIntersecting = $bindable(false),
         clearOnExit = false,
         component = undefined,
-        componentProps = {}
+        componentProps = {},
+        onenter = undefined,
+        onexit = undefined
     }: Props = $props();
 
     let intersectionObserver : IntersectionObserver | null = null;
@@ -23,8 +27,11 @@
     intersectionObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
-                    const eventName = entry.isIntersecting ? 'enterViewport' : 'exitViewport';
-                    entry.target.dispatchEvent(new CustomEvent(eventName));
+                    if (entry.isIntersecting) {
+                        enter();
+                    } else {
+                        exit();
+                    }
                 });
             }
         );
@@ -51,14 +58,16 @@
 
     function enter() {
         isIntersecting = true;
+        onenter?.();
     }
     function exit() {
         if (clearOnExit) isIntersecting = false;
+        onexit?.();
     }
 
 </script>
 
-<div use:viewport onenterViewport={enter} onexitViewport={exit}>
+<div use:viewport>
     {#if isIntersecting}
         {#if component}
             <svelte:component this={component} {...componentProps} />

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { audioManager } from '$lib/audio/AudioManager';
+  import { getAudioManager } from '$lib/audio/AudioManager';
   import { convertFloat32ToMp3 } from '$lib/audio/microphone';
   import { float32Flatten } from '$lib/array';
   import { onDestroy } from 'svelte';
@@ -66,15 +66,15 @@
   async function startRecording() {
     try {
       // Initialize audioManager (user interaction context required)
-      const initialized = await audioManager.initialize();
+      const initialized = await getAudioManager().initialize();
       if (!initialized) {
         alert('Failed to access microphone');
         return;
       }
 
       // Subscribe to audio-chunk events
-      audioManager.on('audio-chunk', handleAudioChunk);
-      await audioManager.start();
+      getAudioManager().on('audio-chunk', handleAudioChunk);
+      await getAudioManager().start();
       isRecording = true;
 
       // Start duration timer
@@ -99,8 +99,8 @@
   }
 
   async function stopRecording() {
-    await audioManager.stop();
-    audioManager.off('audio-chunk', handleAudioChunk);
+    await getAudioManager().stop();
+    getAudioManager().off('audio-chunk', handleAudioChunk);
 
     // Stop timer
     if (recordingTimer) {
@@ -151,7 +151,7 @@
       clearInterval(recordingTimer);
     }
     if (isRecording) {
-      audioManager.off('audio-chunk', handleAudioChunk);
+      getAudioManager().off('audio-chunk', handleAudioChunk);
     }
   });
 </script>

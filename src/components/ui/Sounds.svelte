@@ -29,7 +29,7 @@
     }
     function enableSoundEffects() {
         Howler.volume(0.3);
-        Howler.mobileAutoEnable = true;
+        (Howler as any).mobileAutoEnable = true;
         
         soundSprite = new Howl({
             src: ["/sounds/sprite.mp3"],
@@ -52,7 +52,7 @@
                 }
             }
         }
-        sounds.play = (soundName: string) => {
+        (sounds as any).play = (soundName: string) => {
             soundSprite.play(soundName);
         }
 

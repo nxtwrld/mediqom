@@ -24,11 +24,11 @@ export const load: LayoutLoad = async ({ parent, params, fetch }) => {
   );
 
   if (documentsResponse.status === 401) {
-    fail(401, "Unauthorized");
+    fail(401, { message: "Unauthorized" });
   }
 
   if (documentsResponse.status !== 200) {
-    fail(documentsResponse.status, "Error loading documents");
+    fail(documentsResponse.status, { message: "Error loading documents" });
   }
 
   const documents = await importDocuments(await documentsResponse.json());

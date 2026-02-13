@@ -190,7 +190,9 @@ export function getSubSpecialtyTriggers(
 
   for (const [condition, subspecialties] of Object.entries(triggers)) {
     if (symptoms.some((s) => s.toLowerCase().includes(condition))) {
-      triggeredSubSpecialties.push(...subspecialties);
+      if (Array.isArray(subspecialties)) {
+        triggeredSubSpecialties.push(...subspecialties);
+      }
     }
   }
 

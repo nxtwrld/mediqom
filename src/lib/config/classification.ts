@@ -141,8 +141,8 @@ export const classificationConfig = {
       },
       examples: ["recent", "recently", "this month", "past month", "new"],
     },
-    previous: {
-      type: "previous",
+    historical: {
+      type: "historical",
       priority: 3,
       weight: 1.0,
       timeframe: {

@@ -14,8 +14,10 @@ async function loadStore() {
   try {
     //const record = await vaultGet(STORE_NAME)
     const record = null;
+    // @ts-expect-error - Dead code, hardcoded null
     if (record && record.data) {
       console.log("🗺", "Share records loaded from vault");
+      // @ts-expect-error - Dead code, hardcoded null
       store.set(record.data);
     }
   } catch (e) {

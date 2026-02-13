@@ -17,7 +17,7 @@ ui.on('vault-ready', async () => {
 */
 //loadStore();
 
-const sharedItemsStore = writable<[]>([]);
+const sharedItemsStore = writable<any[]>([]);
 
 export const sharedItems = {
   subscribe: sharedItemsStore.subscribe,

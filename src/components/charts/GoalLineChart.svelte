@@ -322,12 +322,14 @@
                             unit: d.unit,
                             date: d.date,
                             label: d.index !== undefined ? data[d.index].valueName : ''
-                        }
+                        } as any;
                         // calculate fixed position and compensate for scroll
-                        (d3.select(tooltip) as any)
-                            .style('top', (event.clientY) + 'px')
-                            .style('left', (event.clientX) + 'px')
-                            .style('opacity', 1);
+                        if (tooltip) {
+                            (d3.select(tooltip) as any)
+                                .style('top', (event.clientY) + 'px')
+                                .style('left', (event.clientX) + 'px')
+                                .style('opacity', 1);
+                        }
 
                         d3.select(event.currentTarget as SVGCircleElement).attr('r', 12);
                         selectedEvent = {
@@ -351,10 +353,12 @@
         if(!selectedEvent) return;
 
         d3.select(selectedEvent.node).attr('r', 8);
-        (d3.select(tooltip) as any)
-            .style('top', '-100000px')
-            .style('left', '-100000px')
-            .style('opacity', 0);
+        if (tooltip) {
+            (d3.select(tooltip) as any)
+                .style('top', '-100000px')
+                .style('left', '-100000px')
+                .style('opacity', 0);
+        }
         selectedEvent = null;
     }
 

@@ -210,30 +210,30 @@ export function createDocumentSectionPlan(
   // Process each available section
   for (const [sectionId, sectionDef] of Object.entries(STANDARD_SECTIONS) as [keyof typeof STANDARD_SECTIONS, typeof STANDARD_SECTIONS[keyof typeof STANDARD_SECTIONS]][]) {
     // Skip excluded sections for this document type
-    if (typeConfig.excludeSections.includes(sectionId as any)) {
+    if ((typeConfig.excludeSections as unknown as any[]).includes(sectionId as any)) {
       continue;
     }
 
     // Check if section should be included based on content availability
     if (!sectionDef.condition(document)) {
       // Required sections show even if empty (with placeholder)
-      if (!typeConfig.requiredSections.includes(sectionId as any)) {
+      if (!(typeConfig.requiredSections as unknown as any[]).includes(sectionId as any)) {
         continue;
       }
     }
 
     // Calculate section priority based on document type
     let priority = sectionDef.priority;
-    if (typeConfig.requiredSections.includes(sectionId as any)) {
+    if ((typeConfig.requiredSections as unknown as any[]).includes(sectionId as any)) {
       priority += 50; // Boost required sections
-    } else if (typeConfig.prioritySections.includes(sectionId as any)) {
+    } else if ((typeConfig.prioritySections as unknown as any[]).includes(sectionId as any)) {
       priority += 25; // Boost priority sections
     }
 
     // Create section configuration
     sections.push({
       id: sectionId,
-      component: sectionDef.component,
+      component: sectionDef.component as any,
       props: sectionDef.propsMapper(document),
       priority,
       condition: sectionDef.condition,
