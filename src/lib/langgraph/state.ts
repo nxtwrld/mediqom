@@ -154,6 +154,7 @@ export interface DocumentProcessingState {
   language?: string;
   options?: any;
   metadata?: Record<string, any>;
+  jobId?: string; // For debug output correlation
 
   // Progress tracking
   progressCallback?: ProgressCallback;
@@ -171,7 +172,7 @@ export interface DocumentProcessingState {
   featureDetectionResults?: AIFeatureDetectionResults;
   medicalAnalysis?: MedicalAnalysis;
   signals?: EnhancedSignal[];
-  report?: any; // Add report field
+  report?: any; // Main report object with all medical sections
   imaging?: any;
   medications?: any;
   procedures?: any;
@@ -179,6 +180,32 @@ export interface DocumentProcessingState {
   anomalyDetection?: any;
   bodyPartsDetection?: any;
   measurementExtraction?: any;
+
+  // Additional medical section results (populated by specialized nodes)
+  diagnosis?: any[];
+  performer?: any;
+  patient?: any;
+  bodyParts?: any[];
+  ecg?: any[];
+  echo?: any;
+  allergies?: any[];
+  anesthesia?: any[];
+  microscopic?: any;
+  triage?: any[];
+  immunizations?: any[];
+  specimens?: any[];
+  admission?: any[];
+  dental?: any;
+  tumorCharacteristics?: any;
+  treatmentPlan?: any;
+  treatmentResponse?: any;
+  imagingFindings?: any;
+  grossFindings?: any;
+  specialStains?: any[];
+  socialHistory?: any;
+  treatments?: any[];
+  assessment?: any;
+  molecular?: any;
 
   // Document type routing
   documentTypeAnalysis?: DocumentTypeAnalysis;
@@ -264,4 +291,5 @@ export interface WorkflowConfig {
   enableExternalValidation?: boolean;
   preferredProvider?: string;
   streamResults?: boolean;
+  jobId?: string; // For debug output correlation
 }

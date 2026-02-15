@@ -101,6 +101,30 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+
+  /* Spacing - UI Padding (consistent scale) */
+  --ui-pad-small: 0.5rem;      /* 8px */
+  --ui-pad-medium: 1rem;       /* 16px */
+  --ui-pad-large: 1.5rem;      /* 24px */
+  --ui-pad-xlarge: 2rem;       /* 32px */
+
+  /* Border Radius - UI */
+  --ui-radius-small: 0.25rem;  /* 4px */
+  --ui-radius-medium: 0.5rem;  /* 8px */
+  --ui-radius-large: 1rem;     /* 16px */
+
+  /* Surface Colors */
+  --color-surface: var(--color-white);
+  --color-gray-50: #f9fafb;
+
+  /* Text Colors */
+  --color-text-primary: var(--color-black);
+  --color-text-secondary: var(--color-gray-800);
+
+  /* Status Light Colors */
+  --color-positive-light: #d4edda;
+  --color-negative-light: #f8d7da;
+  --color-warning-light: #fff3cd;
 }
 
 html,

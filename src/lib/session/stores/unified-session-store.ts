@@ -5,7 +5,7 @@ import { page } from "$app/stores";
 import { logger } from "$lib/logging/logger";
 import ui from "$lib/ui";
 import { AudioState, convertFloat32ToMp3 } from "$lib/audio/microphone";
-import { audioManager } from "$lib/audio/AudioManager";
+import { getAudioManager } from "$lib/audio/AudioManager";
 import { audioActions } from "./audio-actions";
 import { getLocale } from "$lib/i18n";
 import { locale } from "svelte-i18n";
@@ -295,7 +295,7 @@ export const unifiedSessionActions = {
     logger.session.info("Stopping session and resetting to Ready state");
     
     // Stop AudioManager first to ensure proper cleanup
-    await audioManager.stop();
+    await getAudioManager().stop();
     
     // Reset to clean Ready state
     await this.resetSession();
@@ -347,9 +347,9 @@ export const unifiedSessionActions = {
 
     try {
       // Initialize AudioManager if needed (this must be done in user interaction context)
-      if (!audioManager.getIsInitialized()) {
+      if (!getAudioManager().getIsInitialized()) {
         logger.audio.debug('Initializing AudioManager for recording session...');
-        const initialized = await audioManager.initialize();
+        const initialized = await getAudioManager().initialize();
         
         if (!initialized) {
           throw new Error('Failed to initialize AudioManager');
@@ -357,9 +357,9 @@ export const unifiedSessionActions = {
       }
       
       logger.audio.info('AudioManager ready for session', {
-        hasStream: !!audioManager.getAudioStream(),
-        streamId: audioManager.getAudioStream()?.id,
-        trackCount: audioManager.getAudioStream()?.getTracks().length || 0
+        hasStream: !!getAudioManager().getAudioStream(),
+        streamId: getAudioManager().getAudioStream()?.id,
+        trackCount: getAudioManager().getAudioStream()?.getTracks().length || 0
       });
       
       // Set up AudioManager event handlers for this session
@@ -379,8 +379,8 @@ export const unifiedSessionActions = {
       };
       
       // Subscribe to AudioManager events
-      audioManager.on('audio-chunk', handleAudioChunk);
-      audioManager.on('state-change', handleStateChange);
+      getAudioManager().on('audio-chunk', handleAudioChunk);
+      getAudioManager().on('state-change', handleStateChange);
       
       // Create session on server (server will generate the session ID)
       const createSessionResponse = await fetch('/v1/session/start', {
@@ -421,12 +421,12 @@ export const unifiedSessionActions = {
       }));
       
       // Start recording with AudioManager (this is also async)
-      const success = await audioManager.start();
+      const success = await getAudioManager().start();
       
       if (!success) {
         // Clean up event listeners and rollback on failure
-        audioManager.off('audio-chunk', handleAudioChunk);
-        audioManager.off('state-change', handleStateChange);
+        getAudioManager().off('audio-chunk', handleAudioChunk);
+        getAudioManager().off('state-change', handleStateChange);
         await unifiedSessionActions.resetSession();
         logger.session.error('Failed to start AudioManager recording');
         return false;
@@ -569,7 +569,7 @@ export const unifiedSessionActions = {
     }));
 
     // Stop AudioManager
-    await audioManager.stop();
+    await getAudioManager().stop();
 
     // Disconnect SSE
     await unifiedSessionActions.disconnectSSE();

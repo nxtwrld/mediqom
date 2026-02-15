@@ -181,12 +181,12 @@ export const audioProcessing = {
 
     // Simple high-pass filter (removes low-frequency noise)
     if (options.highPassFilter) {
-      processedData = audioProcessing.applyHighPassFilter(processedData);
+      processedData = audioProcessing.applyHighPassFilter(processedData) as Float32Array<ArrayBuffer>;
     }
 
     // Basic noise reduction (spectral subtraction)
     if (options.noiseReduction) {
-      processedData = audioProcessing.applyNoiseReduction(processedData);
+      processedData = audioProcessing.applyNoiseReduction(processedData) as Float32Array<ArrayBuffer>;
     }
 
     return processedData;

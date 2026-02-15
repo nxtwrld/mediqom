@@ -1,4 +1,4 @@
-import { init, register, _, t, locale } from "svelte-i18n";
+import { init, register, _, t as svelteT, locale } from "svelte-i18n";
 import { get } from "svelte/store";
 
 const defaultLocale = "en";
@@ -24,12 +24,17 @@ function getLocale() {
 }
 
 function getLanguage() {
-  return get(t)("languages." + getLocale());
+  return get(svelteT)("languages." + getLocale());
 }
 
 function getLanguageEnglishName() {
   const locale = getLocale();
   return locale ? languages[locale as keyof typeof languages] : "English";
 }
+
+// Flexible wrapper around svelte-i18n's t function to accept any parameters
+const t = svelteT as unknown as typeof svelteT & {
+  (id: string, values?: Record<string, any>): string;
+};
 
 export { _, t, getLocale, getLanguage, getLanguageEnglishName };

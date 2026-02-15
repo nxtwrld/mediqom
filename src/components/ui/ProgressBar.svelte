@@ -26,7 +26,7 @@
     }: Props = $props();
     
 
-    function getOffset(offset) {
+    function getOffset(offset: any) {
         return Object.assign({
             right: '0px',
             left: '0px'

@@ -9,7 +9,7 @@ import { byUser, getDocument, updateDocument } from "$lib/documents";
 import type { Document, DocumentPreload } from "$lib/documents/types.d";
 import { logger } from "$lib/logging/logger";
 import { get } from "svelte/store";
-import type { TemporalType } from "$lib/config/classification";
+import { TemporalType } from "$lib/documents/types.d";
 
 export interface MigrationOptions {
   batchSize?: number;
@@ -243,13 +243,13 @@ export class MedicalTermsMigration {
         textLower.includes("current") ||
         textLower.includes("recent")
       ) {
-        temporalType = "latest";
+        temporalType = TemporalType.LATEST;
       } else if (
         textLower.includes("previous") ||
         textLower.includes("historical") ||
         textLower.includes("past")
       ) {
-        temporalType = "previous";
+        temporalType = TemporalType.HISTORICAL;
       }
 
       // Add document type category terms
@@ -274,7 +274,7 @@ export class MedicalTermsMigration {
       const updatedDocument: Document = {
         ...document,
         medicalTerms: Array.from(medicalTerms),
-        temporalType: temporalType as unknown as TemporalType | undefined,
+        temporalType: temporalType,
       };
 
       // Save updated document

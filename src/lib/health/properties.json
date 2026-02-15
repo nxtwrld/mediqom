@@ -28,15 +28,11 @@
     "type": "number",
     "unit": "cm"
   },
-  "systolic": {
-    "signal": "systolic",
-    "type": "number",
-    "unit": "mmHg"
-  },
-  "diastolic": {
-    "signal": "diastolic",
-    "type": "number",
-    "unit": "mmHg"
+  "bloodPressure": {
+    "signal": "bloodPressure",
+    "type": "compound",
+    "unit": "mmHg",
+    "fields": ["systolic", "diastolic"]
   },
   "heartRate": {
     "signal": "heartRate",

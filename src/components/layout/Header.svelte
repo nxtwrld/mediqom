@@ -70,7 +70,29 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         </div>
         
         <div class="navigation toolbar" class:-open={activeMenu == Menu.tools}>
-
+            {#if $user}
+            <div class="menu icon user-menu" class:-open={activeMenu == Menu.user}>
+                <button onclick={(e) => { e.stopPropagation(); toggleMenu(Menu.user); }}>
+                  <ProfileImage profile={$user.id ? (() => {
+                    try {
+                      return profiles.get($user.id) as Profile;
+                    } catch {
+                      return null;
+                    }
+                  })() : null} size={2} />
+                </button>
+                <ul class="menu">
+                    <li>
+                        <div class="user">
+                            <h3 class="h3">{'fullName' in $user ? $user.fullName : $user.email}</h3>
+    
+                        </div>
+                    </li>
+                    <li><a href="/med/settings">{ $t('app.nav.settings') }</a></li>
+                    <li><button onclick={logout}>{ $t('app.nav.logout') }</button></li>
+                </ul>
+            </div>
+            {/if}
             
             {#if $user && 'subscription' in $user && $user.subscription != 'individual'}
                 <a href="/med/p/" class:-active={$page.url.pathname == '/med/p/'}>{ $t('app.nav.profiles') }</a>
@@ -111,28 +133,10 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
             <!--a href="/med/import" class:-active={$page.url.pathname == '/med/import/'}>Import</a-->
             <button onclick={() => ui.emit('overlay.import')} class:-active={$uiState.overlay == Overlay.import}>{ $t('app.nav.import') }</button>
         </div>
-        {#if $user}
-        <div class="menu icon user-menu" class:-open={activeMenu == Menu.user}>
-            <button onclick={(e) => { e.stopPropagation(); toggleMenu(Menu.user); }}>
-              <ProfileImage profile={$user.id ? (() => {
-                try {
-                  return profiles.get($user.id) as Profile;
-                } catch {
-                  return null;
-                }
-              })() : null} size={2} />
-            </button>
-            <ul class="menu">
-                <li>
-                    <div class="user">
-                        <h3 class="h3">{'fullName' in $user ? $user.fullName : $user.email}</h3>
+        <button onclick={() => emit('find')} class="icon" aria-label="Search"><svg >
+            <use href="/icons.svg#search"></use>
+        </svg></button>
 
-                    </div>
-                </li>
-                <li><button onclick={logout}>{ $t('app.nav.logout') }</button></li>
-            </ul>
-        </div>
-        {/if}
         {#if $profile?.id}
         <button onclick={() => ui.emit('chat:toggle')} class="icon" class:-active={$chatIsOpen} aria-label={$chatIsOpen ? $t('app.chat.actions.close') : $t('app.chat.actions.open')} title={$chatIsOpen ? $t('app.chat.actions.close') : $t('app.chat.actions.open')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -140,9 +144,6 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
             </svg>
         </button>
         {/if}
-        <button onclick={() => emit('find')} class="icon" aria-label="Search"><svg >
-            <use href="/icons.svg#search"></use>
-        </svg></button>
 
 </nav>
 </header>
@@ -241,7 +242,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
     .menu > ul.menu {
         position: absolute;
         top: calc(100% + var(--gap));
-        right: 0;
+        left: 0;
         max-height: 0;
         min-width: 10rem;
         background-color: var(--color-gray-500);
@@ -262,15 +263,20 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         margin-top: var(--gap);
     }
 
-    .menu > ul.menu li button {
+    .menu > ul.menu li button,
+    .menu > ul.menu li a {
         background-color: var(--color-gray-300);
         border: none;
         padding: .5rem;
         width: 100%;
         margin: 0;
         text-align: left;
+        display: block;
+        text-decoration: none;
+        color: inherit;
     }
-    .menu > ul.menu li button:hover {
+    .menu > ul.menu li button:hover,
+    .menu > ul.menu li a:hover {
         background-color: var(--color-white);
     }
 

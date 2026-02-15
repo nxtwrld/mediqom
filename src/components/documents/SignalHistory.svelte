@@ -52,11 +52,14 @@
     let svgE: SVGElement | undefined = $state();
 
 
-    onMount(async () => {
+    onMount(() => {
         if (series.length > 1 && unit != 'arb.j.') renderChart();
         //initialized = true;
 
-        await loadHistoryData();
+        loadHistoryData().then(() => {
+            if (series.length > 1 && unit != 'arb.j.') renderChart();
+        });
+
         if(svgE) {
             let rTimer: ReturnType<typeof setTimeout> | undefined;
             const rObserver = new ResizeObserver(entries => {
@@ -132,7 +135,9 @@
             d.value = +d.value;
         });
 
-        const xExtent = extent(series, function(d: LabItem) { return d.time; });
+        const xExtent = extent(series, function(d: LabItem) {
+            return typeof d.time === 'string' ? new Date(d.time) : d.time;
+        }) as [Date, Date];
         const xRange = (xExtent[1] && xExtent[0]) ?
             (typeof xExtent[1] === 'object' ? (xExtent[1] as Date).getTime() : new Date(xExtent[1]).getTime()) -
             (typeof xExtent[0] === 'object' ? (xExtent[0] as Date).getTime() : new Date(xExtent[0]).getTime()) : 0;

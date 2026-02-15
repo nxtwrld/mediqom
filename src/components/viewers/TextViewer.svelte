@@ -10,9 +10,9 @@
 
     const dispatch = createEventDispatcher();
 
-    let textContent = '';
-    let isLoaded = false;
-    let hasError = false;
+    let textContent = $state('');
+    let isLoaded = $state(false);
+    let hasError = $state(false);
 
     onMount(() => {
         try {

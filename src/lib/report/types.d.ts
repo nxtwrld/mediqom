@@ -20,10 +20,11 @@ export type ReportFinal = {
 
 export interface ReportLink {
   id: string;
+  uid: string;
   title: string;
   type: string;
+  date: string;
   metadata: {
     category: string;
-    date: string;
   };
 }

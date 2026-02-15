@@ -120,6 +120,7 @@ interface ExtendedFunctionDefinition extends FunctionDefinition {
   required?: string[];
 }
 
+// @ts-expect-error - Deprecated code, type workaround for legacy signal enum
 ((signals as ExtendedFunctionDefinition).items!.properties.signal
   .enum as string[]) = Object.keys(propertiesDefition);
 // Only add signals to diagnosis schema if it has the signals property

@@ -44,7 +44,7 @@
         {:else if key !== undefined}
             <Prop value={key.type} >Key Type</Prop>
             <Prop value={key.algorithm.name} >Algorithm</Prop>
-            <Prop value={key.algorithm?.hash.name} >HASH</Prop>
+            <Prop value={(key.algorithm as any)?.hash?.name} >HASH</Prop>
             <Prop value={key.usages.join(', ')} >Usages</Prop>
         {/if}
     </div>

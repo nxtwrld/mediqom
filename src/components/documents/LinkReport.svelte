@@ -39,7 +39,7 @@
         //console.log('Linking', item);
         if (item) dispatch('link', {
             uid: item.uid,
-            type: LinkType.Report
+            type: LinkType.REPORT
         });
         showModal = false;
     }

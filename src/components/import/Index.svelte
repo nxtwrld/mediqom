@@ -20,7 +20,7 @@
 
     // Job-based import
     import { createJob, processJob, fetchJob, deleteJob } from '$lib/import/job-manager';
-    import { assembleDocuments, saveDocuments } from '$lib/import/finalizer';
+    import { assembleDocuments, saveDocuments, decryptJobResults } from '$lib/import/finalizer';
     import { getFiles as getCachedFiles, clearFiles } from '$lib/import/file-cache';
     import type { ImportJob } from '$lib/import/types';
 
@@ -108,14 +108,22 @@
 
             currentJobId = id;
 
-            if (job.status === 'completed' && job.extraction_result && job.analysis_results) {
+            if (job.status === 'completed') {
                 // Job completed - show review UI
                 const cachedFiles = await getCachedFiles(id);
                 noCachedFiles = !cachedFiles;
 
+                // Use decryptJobResults to handle both encrypted and plaintext jobs
+                const { extraction, analysis } = await decryptJobResults(job);
+
+                console.log('Resume flow - extraction:', extraction);
+                console.log('Resume flow - analysis:', analysis);
+                console.log('Resume flow - extraction type:', Array.isArray(extraction));
+                console.log('Resume flow - analysis type:', Array.isArray(analysis));
+
                 const documents = await assembleDocuments(
-                    job.extraction_result,
-                    job.analysis_results,
+                    extraction,
+                    analysis,
                     cachedFiles,
                 );
 
@@ -209,12 +217,18 @@
 
             // Assemble documents from results
             const cachedFiles = await getCachedFiles(id);
-            const extractionResults = completedJob.extraction_result || [];
-            const analysisResults = completedJob.analysis_results || [];
+
+            // Use decryptJobResults to handle both encrypted and plaintext jobs
+            const { extraction, analysis } = await decryptJobResults(completedJob);
+
+            console.log('Normal flow - extraction:', extraction);
+            console.log('Normal flow - analysis:', analysis);
+            console.log('Normal flow - extraction type:', Array.isArray(extraction));
+            console.log('Normal flow - analysis type:', Array.isArray(analysis));
 
             const documents = await assembleDocuments(
-                extractionResults,
-                analysisResults,
+                extraction,
+                analysis,
                 cachedFiles,
             );
 

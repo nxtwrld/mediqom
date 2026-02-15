@@ -487,7 +487,7 @@
                         {#if diag.teethAffected?.length > 0}
                             <div class="detail-item">
                                 <span class="label">{$t('report.teeth-affected')}:</span>
-                                <span class="value">{diag.teethAffected.map(t => formatToothNumber(t)).join(', ')}</span>
+                                <span class="value">{diag.teethAffected.map((t: number) => formatToothNumber(t)).join(', ')}</span>
                             </div>
                         {/if}
                         

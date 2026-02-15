@@ -33,9 +33,9 @@
         children
     }: Props = $props();
     let oldValue = $state(value);
-    
 
-    let element: HTMLTextAreaElement = $state();
+
+    let element: HTMLTextAreaElement | undefined = $state();
     function keydown(e: KeyboardEvent) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -56,7 +56,7 @@
 
     onMount(() => {
         sizeTextarea();
-        if (focus) element.focus();
+        if (focus) element?.focus();
     })
 
 

@@ -100,11 +100,12 @@ export const NODE_CONFIGURATIONS: NodeRegistry = {
     nodeName: "signal-processing",
     description:
       "Lab results and medical signals analysis (includes laboratory data)",
-    schemaPath: "$lib/configurations/core.signals",
+    schemaPath: "$lib/configurations/signals.extraction",
     triggers: ["hasSignals"],
     priority: 1,
     outputMapping: {
       reportField: "signals",
+      unwrapField: "signals",
     },
   },
 
@@ -425,10 +426,22 @@ export class UniversalProcessingNode extends BaseProcessingNode {
     const processingTime = Date.now();
     const tokensUsed = state.tokenUsage?.[this.config.nodeName] || 0;
 
+    // Build documentContext for metadata/debugging only (not in data payload)
+    const documentContext = {
+      documentType:
+        state.featureDetectionResults?.documentType ||
+        `${this.getSectionName()}_record`,
+      language: state.language || "English",
+      extractedFrom: "universal_schema_driven_analysis",
+      processingTimestamp: new Date().toISOString(),
+      nodeId: this.nodeConfig.nodeName,
+      priority: this.nodeConfig.priority,
+    };
+
     // Apply custom validation if provided (supports async)
     const enhancedData = this.nodeConfig.customValidation
       ? await this.nodeConfig.customValidation(aiResult, state)
-      : this.applyDefaultEnhancement(aiResult, state);
+      : this.applyDefaultEnhancement(aiResult);
 
     return {
       data: enhancedData,
@@ -437,40 +450,94 @@ export class UniversalProcessingNode extends BaseProcessingNode {
         tokensUsed,
         confidence: this.calculateUniversalConfidence(enhancedData),
         provider: "enhanced-openai",
+        documentContext,
       },
     };
   }
 
   /**
    * Default enhancement applied to all nodes
+   *
+   * IMPORTANT: Don't wrap data with section name here - BaseProcessingNode.process()
+   * will handle that wrapping. Returns clean data without debugging metadata.
    */
-  private applyDefaultEnhancement(
-    aiResult: any,
-    state: DocumentProcessingState,
-  ): any {
-    return {
-      ...aiResult,
-      documentContext: {
-        documentType:
-          state.featureDetectionResults?.documentType ||
-          `${this.getSectionName()}_record`,
-        language: state.language || "English",
-        extractedFrom: "universal_schema_driven_analysis",
-        processingTimestamp: new Date().toISOString(),
-        nodeId: this.nodeConfig.nodeName,
-        priority: this.nodeConfig.priority,
-      },
-    };
+  private applyDefaultEnhancement(aiResult: any): any {
+    const unwrapField = this.nodeConfig.outputMapping?.unwrapField;
+
+    // Handle null/undefined AI results
+    if (!aiResult) {
+      console.warn(`${this.nodeConfig.nodeName}: AI returned null/undefined result`);
+      return null;
+    }
+
+    // Special handling for array results (e.g., signals)
+    if (Array.isArray(aiResult)) {
+      if (aiResult.length === 0) {
+        console.warn(`${this.nodeConfig.nodeName}: AI returned empty array`);
+        return [];
+      }
+      return aiResult;
+    }
+
+    // Handle empty object results
+    if (Object.keys(aiResult).length === 0) {
+      console.warn(`${this.nodeConfig.nodeName}: AI returned empty object`);
+      return null;
+    }
+
+    // Implement unwrapField: extract nested field from AI result wrapper
+    // e.g., unwrapField: "patient" → extract aiResult.patient
+    // e.g., unwrapField: "bodyParts" → extract aiResult.bodyParts
+    if (unwrapField && aiResult[unwrapField] !== undefined) {
+      const unwrapped = aiResult[unwrapField];
+      console.log(
+        `🔧 ${this.nodeConfig.nodeName}: unwrapped field "${unwrapField}"`,
+        { type: Array.isArray(unwrapped) ? 'array' : typeof unwrapped },
+      );
+      return unwrapped;
+    }
+
+    // Safety net: always strip processing metadata wrapper properties
+    // These are schema-level metadata that should never persist in saved data
+    return this.stripWrapperProperties(aiResult);
+  }
+
+  /**
+   * Strip processingConfidence, processingNotes, documentContext from object results.
+   * These are schema-level metadata added for AI extraction but should not be stored.
+   */
+  private stripWrapperProperties(data: any): any {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return data;
+    const { processingConfidence, processingNotes, documentContext, ...clean } = data;
+    if (processingConfidence !== undefined || processingNotes !== undefined || documentContext !== undefined) {
+      console.log(
+        `🧹 ${this.nodeConfig.nodeName}: stripped wrapper properties`,
+        { processingConfidence, processingNotes: !!processingNotes, documentContext: !!documentContext },
+      );
+    }
+    return clean;
   }
 
   /**
    * Universal confidence calculation based on data completeness
    */
   protected calculateUniversalConfidence(data: any): number {
+    // Handle null/empty data
+    if (data === null || data === undefined) return 0;
+
+    // Handle array data (e.g., signals, bodyParts)
+    if (Array.isArray(data)) {
+      if (data.length === 0) return 0;
+      return Math.min(0.5 + data.length * 0.1, 1.0);
+    }
+
+    // Handle non-object data
+    if (typeof data !== "object") return 0.5;
+
     let confidence = 0.5; // Base confidence
 
     // Generic confidence indicators
-    if (data && Object.keys(data).length > 1) confidence += 0.1; // Has data beyond just documentContext
+    if (Object.keys(data).length > 0) confidence += 0.1;
 
     // Check for boolean trigger field (e.g., hasECG, hasTriage)
     const triggerField = this.nodeConfig.triggers[0];
@@ -479,7 +546,6 @@ export class UniversalProcessingNode extends BaseProcessingNode {
     // Check for structured data presence
     const structuredFields = Object.keys(data).filter(
       (key) =>
-        key !== "documentContext" &&
         typeof data[key] === "object" &&
         data[key] !== null,
     );
@@ -492,11 +558,20 @@ export class UniversalProcessingNode extends BaseProcessingNode {
    * Universal required fields check
    */
   protected hasRequiredFields(data: any): boolean {
-    // At minimum, check if any trigger field is true or if we have meaningful data
-    return (
-      this.nodeConfig.triggers.some((trigger) => data[trigger] === true) ||
-      (data && Object.keys(data).length > 1)
-    ); // More than just documentContext
+    if (data === null || data === undefined) return false;
+
+    // Array data: non-empty means has required data
+    if (Array.isArray(data)) return data.length > 0;
+
+    // Object data: check triggers or meaningful content
+    if (typeof data === "object") {
+      return (
+        this.nodeConfig.triggers.some((trigger) => data[trigger] === true) ||
+        Object.keys(data).length > 0
+      );
+    }
+
+    return false;
   }
 }
 

@@ -14,6 +14,7 @@
             email: string;
             fullName: string;
             avatarUrl?: string;
+            birthDate?: string;
             language: LanguageType;
         }
     };
@@ -24,8 +25,10 @@
 
     run(() => {
 
-        if (data.bio.fullName && data.bio.fullName?.trim() != '') {
+        if (data.bio.fullName && data.bio.fullName?.trim() != '' && data.bio.birthDate && data.bio.birthDate?.trim() != '') {
             ready = true;
+        } else {
+            ready = false;
         }
      });
 
@@ -65,6 +68,11 @@
 <div class="input">
     <label for="fullName">{ $t('app.onboarding.full-name') }  ({ $t('app.onboarding.required') })</label>
     <input id="fullName" name="fullName" type="text" bind:value={data.bio.fullName} required />
+</div>
+
+<div class="input">
+    <label for="birthDate">{ $t('app.onboarding.date-of-birth') } ({ $t('app.onboarding.required') })</label>
+    <input id="birthDate" name="birthDate" type="date" bind:value={data.bio.birthDate} required />
 </div>
 
 <div class="input">

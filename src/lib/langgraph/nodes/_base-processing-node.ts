@@ -35,6 +35,7 @@ export interface ProcessingNodeResult {
     tokensUsed: number;
     confidence: number;
     provider: string;
+    documentContext?: any;
   };
 }
 

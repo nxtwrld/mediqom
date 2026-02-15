@@ -59,7 +59,7 @@
         </button>
     {/each}
     <div class="input-inline">
-        <Input {id} bind:value={newTag} {placeholder} type="text" on:keypress={keyPress} />
+        <Input {id} bind:value={newTag} {placeholder} type="text" onkeypress={keyPress} />
         <button class="button" type="button" onclick={addTag}>Add</button>
     </div>
 </div>

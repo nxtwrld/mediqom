@@ -20,6 +20,8 @@ import {
   workflowRecorder,
 } from "$lib/debug/workflow-recorder";
 import { createWorkflowReplay } from "$lib/debug/workflow-replay";
+import { saveNodeResult } from "$lib/import.server/debug-output";
+import { DEBUG_IMPORT } from "$env/static/private";
 
 // Import essential workflow nodes only
 import { inputValidationNode } from "../nodes/input-validation";
@@ -30,8 +32,9 @@ import { qualityGateNode } from "../nodes/quality-gate";
 import { documentTypeRouterNode } from "../nodes/document-type-router";
 import { medicalTermsGenerationNode } from "../nodes/medical-terms-generation";
 
-// Import unified multi-node processing
-import { executeMultiNodeProcessing } from "./multi-node-orchestrator";
+// Import new LangGraph-native multi-node system
+import { multiNodeDispatcherNode } from "../nodes/multi-node-dispatcher";
+import { resultsAggregatorNode } from "../nodes/results-aggregator";
 
 // Simplified conditional edge functions
 const shouldProcessMedical = (state: DocumentProcessingState): string => {
@@ -113,7 +116,15 @@ export const createUnifiedDocumentProcessingWorkflow = (
       content: { reducer: (current: any, update: any) => update ?? current },
 
       // Core processing channels
-      tokenUsage: { reducer: (current: any, update: any) => update ?? current },
+      // Token usage: accumulate across all nodes
+      tokenUsage: {
+        reducer: (current: any, update: any) => {
+          if (!update) return current || { total: 0 };
+          return {
+            total: (current?.total || 0) + (update?.total || 0),
+          };
+        },
+      },
       featureDetection: {
         reducer: (current: any, update: any) => update ?? current,
       },
@@ -122,19 +133,222 @@ export const createUnifiedDocumentProcessingWorkflow = (
       },
 
       // Multi-node results channels
+      // These receive updates from MULTIPLE parallel nodes via Send API
       medicalAnalysis: {
         reducer: (current: any, update: any) => update ?? current,
       },
-      signals: { reducer: (current: any, update: any) => update ?? current },
-      imaging: { reducer: (current: any, update: any) => update ?? current },
+      // Signals: accumulate arrays from all signal-processing nodes
+      signals: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ signals reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      // Imaging: merge objects from imaging nodes
+      imaging: {
+        reducer: (current: any, update: any) => {
+          if (!update) return current;
+          return { ...(current || {}), ...(update || {}) };
+        },
+      },
+      // Medications: accumulate arrays from medication-processing nodes
       medications: {
-        reducer: (current: any, update: any) => update ?? current,
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ medications reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
       },
-      procedures: { reducer: (current: any, update: any) => update ?? current },
+      // Procedures: accumulate arrays from procedure-processing nodes
+      procedures: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ procedures reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      // Multi-node results: merge metadata from dispatcher and aggregator
       multiNodeResults: {
+        reducer: (current: any, update: any) => {
+          if (!update) return current;
+          return {
+            ...current,
+            ...update,
+            processedNodes: [
+              ...(current?.processedNodes || []),
+              ...(update?.processedNodes || []),
+            ],
+          };
+        },
+      },
+      // Report: merge objects from all medical processing nodes
+      report: {
+        reducer: (current: any, update: any) => {
+          if (!update) return current;
+          return { ...(current || {}), ...(update || {}) };
+        },
+      },
+
+      // Additional medical section channels (populated by specialized nodes)
+      diagnosis: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ diagnosis reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      performer: {
         reducer: (current: any, update: any) => update ?? current,
       },
-      report: { reducer: (current: any, update: any) => update ?? current },
+      patient: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      bodyParts: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ bodyParts reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      ecg: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ ecg reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      echo: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      allergies: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ allergies reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      anesthesia: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ anesthesia reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      microscopic: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      triage: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ triage reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      immunizations: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ immunizations reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      specimens: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ specimens reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      admission: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ admission reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      dental: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      tumorCharacteristics: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      treatmentPlan: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      treatmentResponse: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      imagingFindings: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      grossFindings: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      specialStains: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ specialStains reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      socialHistory: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      treatments: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (update && !Array.isArray(update)) {
+            console.warn('⚠️ treatments reducer received non-array update, ignoring:', typeof update);
+            return current || [];
+          }
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
+      assessment: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
+      molecular: {
+        reducer: (current: any, update: any) => update ?? current,
+      },
 
       // Medical terms generation channel
       medicalTermsGeneration: {
@@ -155,7 +369,13 @@ export const createUnifiedDocumentProcessingWorkflow = (
         reducer: (current: any, update: any) => update ?? current,
       },
       confidence: { reducer: (current: any, update: any) => update ?? current },
-      errors: { reducer: (current: any, update: any) => update ?? current },
+      // Errors: accumulate error arrays from all nodes
+      errors: {
+        reducer: (current: any[] | undefined, update: any[] | undefined) => {
+          if (!update || update.length === 0) return current || [];
+          return [...(current || []), ...update];
+        },
+      },
 
       // Progress tracking channels
       progressCallback: {
@@ -191,13 +411,27 @@ export const createUnifiedDocumentProcessingWorkflow = (
     "feature_detection",
     createNodeWrapper(featureDetectionNode, { start: 60, end: 70 }),
   );
+
+  // Add new multi-node dispatcher (executes specialized nodes directly)
+  // Note: In LangGraph v0.0.26, Send API is not available, so the dispatcher
+  // executes nodes directly using the nodeRegistry instead of routing via LangGraph.
+  // Specialized nodes don't need to be registered in the workflow - they're
+  // managed by the nodeRegistry and executed within the dispatcher node.
   workflow.addNode(
-    "multi_node_processing",
-    createNodeWrapper(executeMultiNodeProcessing, { start: 70, end: 85 }),
+    "multi_node_dispatcher",
+    createNodeWrapper(multiNodeDispatcherNode, { start: 70, end: 85 }),
   );
+
+  // Add results aggregator to collect and validate parallel node results
+  workflow.addNode(
+    "results_aggregator",
+    createNodeWrapper(resultsAggregatorNode, { start: 85, end: 87 }),
+  );
+
+  // Add medical terms generation node (runs after aggregation)
   workflow.addNode(
     "medical_terms_generation",
-    createNodeWrapper(medicalTermsGenerationNode, { start: 85, end: 90 }),
+    createNodeWrapper(medicalTermsGenerationNode, { start: 87, end: 90 }),
   );
   workflow.addNode(
     "external_validation",
@@ -213,14 +447,18 @@ export const createUnifiedDocumentProcessingWorkflow = (
   workflow.addEdge("document_type_router" as any, "provider_selection" as any);
   workflow.addEdge("provider_selection" as any, "feature_detection" as any);
 
-  // Route to unified multi-node processing or end
+  // Route to LangGraph-native multi-node dispatcher or end
   workflow.addConditionalEdges("feature_detection" as any, shouldProcessMedical, {
-    medical: "multi_node_processing" as any,
+    medical: "multi_node_dispatcher" as any,
     error: END,
   });
 
-  // Add medical terms generation after multi-node processing
-  workflow.addEdge("multi_node_processing" as any, "medical_terms_generation" as any);
+  // Dispatcher uses Send API to route to specialized nodes in parallel
+  // After all Send nodes complete, continue to results aggregator
+  workflow.addEdge("multi_node_dispatcher" as any, "results_aggregator" as any);
+
+  // After aggregation, continue to medical terms generation
+  workflow.addEdge("results_aggregator" as any, "medical_terms_generation" as any);
 
   // External validation (optional)
   workflow.addConditionalEdges(
@@ -302,12 +540,35 @@ export async function runUnifiedDocumentProcessingWorkflow(
       progressCallback,
       // Explicitly initialize report as empty to prevent any default array assignment
       report: undefined,
+      // Add jobId for debug output correlation
+      jobId: config.jobId,
     };
 
     console.log("🚀 Executing unified workflow...");
 
-    // Execute workflow
-    const result = await workflow.invoke(initialState);
+    // Execute workflow with streaming to capture node results
+    let currentState = initialState;
+    const nodeResults: Record<string, any> = {};
+    const debugImportEnabled = DEBUG_IMPORT === 'true';
+
+    // Generate timestamp once for all nodes in this run
+    const runTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+    // Stream the workflow to capture each node's output
+    for await (const chunk of await workflow.stream(initialState)) {
+      const nodeName = Object.keys(chunk)[0];
+      const nodeOutput = chunk[nodeName];
+
+      currentState = { ...currentState, ...nodeOutput };
+      nodeResults[nodeName] = nodeOutput;
+
+      // Save node result if debugging is enabled and we have a jobId
+      if (debugImportEnabled && config.jobId) {
+        saveNodeResult(config.jobId, nodeName, nodeOutput, runTimestamp);
+      }
+    }
+
+    const result = currentState;
 
     console.log("✅ Unified workflow completed successfully");
 

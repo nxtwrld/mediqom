@@ -1,15 +1,23 @@
-import { error, type RequestHandler } from "@sveltejs/kit";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
-import { PUBLIC_SUPABASE_URL } from "$env/static/public";
-import assess from "$lib/import.server/assessInputs";
-import { runDocumentProcessingWorkflow } from "$lib/langgraph/workflows/document-processing";
-import { convertWorkflowResult } from "$lib/import.server/convertWorkflowResult";
+import { error, type RequestHandler } from '@sveltejs/kit'
+import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private'
+import { PUBLIC_SUPABASE_URL } from '$env/static/public'
+import assess from '$lib/import.server/assessInputs'
+import { runDocumentProcessingWorkflow } from '$lib/langgraph/workflows/document-processing'
+import { convertWorkflowResult } from '$lib/import.server/convertWorkflowResult'
 import {
-  loadSubscription,
-  updateSubscription,
-} from "$lib/user/subscriptions.server.js";
-import type { ImportJob, FileManifestEntry, ReportAnalysis } from "$lib/import/types";
+	loadSubscription,
+	updateSubscription
+} from '$lib/user/subscriptions.server.js'
+import type { ImportJob, FileManifestEntry, ReportAnalysis } from '$lib/import/types'
+import { prepareKey, exportKey, encrypt as encryptAES } from '$lib/encryption/aes'
+import { encrypt as encryptRSA, pemToKey } from '$lib/encryption/rsa'
+import {
+	saveExtractionResults,
+	saveAnalysisResults,
+	saveDocumentWorkflow,
+	saveCompleteWorkflow
+} from '$lib/import.server/debug-output'
 
 interface ProgressEvent {
   type: "progress" | "complete" | "error";
@@ -27,20 +35,42 @@ function getServiceClient() {
 }
 
 async function updateJob(supabase: any, jobId: string, updates: Partial<ImportJob>) {
-  const { error: dbError } = await supabase
-    .from("import_jobs")
-    .update(updates)
-    .eq("id", jobId);
+	const { error: dbError } = await supabase
+		.from('import_jobs')
+		.update(updates)
+		.eq('id', jobId)
 
-  if (dbError) {
-    console.error("Failed to update import job:", dbError);
-  }
+	if (dbError) {
+		console.error('Failed to update import job:', dbError)
+	}
+}
+
+/**
+ * Retrieve user's RSA public key for wrapping job encryption key
+ * Returns null if user doesn't have encryption keys set up yet
+ */
+async function getUserPublicKey(supabase: any, userId: string): Promise<string | null> {
+	const { data, error } = await supabase
+		.from('private_keys')
+		.select('public_key')
+		.eq('user_id', userId)
+		.single()
+
+	if (error || !data) {
+		console.warn('User public key not found - encryption will be skipped:', userId)
+		return null
+	}
+
+	return data.public_key
 }
 
 export const POST: RequestHandler = async ({
   params,
   locals: { safeGetSession, user },
 }) => {
+  // Debug: Check if DEBUG_IMPORT is loaded
+  console.log('🔍 [Import] DEBUG_IMPORT environment variable:', process.env.DEBUG_IMPORT);
+
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -113,28 +143,49 @@ export const POST: RequestHandler = async ({
       }, 30000);
 
       try {
+				// Check if user has encryption keys set up
+				const userPublicKey = await getUserPublicKey(supabase, user.id)
+				const useEncryption = userPublicKey !== null
+
+				// Generate job-specific encryption key if encryption is available
+				// Note: With encryption enabled, job resume is not supported (would require
+				// client-side decryption). Jobs are processed in one session with 1-hour TTL.
+				let jobKey: CryptoKey | null = null
+				if (useEncryption) {
+					const userPublicKeyCrypto = await pemToKey(userPublicKey!)
+					jobKey = await prepareKey()
+					const jobKeyExported = await exportKey(jobKey)
+					const wrappedKey = await encryptRSA(userPublicKeyCrypto, jobKeyExported)
+
+					// Store wrapped key in job
+					await updateJob(supabase, job.id, {
+						result_encryption_key: wrappedKey
+					} as any)
+					console.log('Import job encryption enabled for job:', job.id)
+				} else {
+					console.warn('Import job encryption disabled - user has no encryption keys')
+				}
+
         const fileManifest: FileManifestEntry[] = job.file_manifest || [];
 
         // ---- STAGE 1: Extraction ----
-        let extractionResults = job.extraction_result || [];
-        const needsExtraction = extractionResults.length < fileManifest.length;
+        let extractionResults: any[] = []
 
-        if (needsExtraction) {
-          sendEvent({
-            type: "progress",
-            stage: "extraction",
-            progress: 5,
-            message: "Starting document extraction...",
-            timestamp: Date.now(),
-          });
+				sendEvent({
+					type: "progress",
+					stage: "extraction",
+					progress: 5,
+					message: "Starting document extraction...",
+					timestamp: Date.now(),
+				});
 
-          await updateJob(supabase, job.id, {
-            status: "extracting",
-            stage: "extraction",
-            progress: 5,
-          } as any);
+				await updateJob(supabase, job.id, {
+					status: "extracting",
+					stage: "extraction",
+					progress: 5,
+				} as any);
 
-          for (let i = extractionResults.length; i < fileManifest.length; i++) {
+				for (let i = 0; i < fileManifest.length; i++) {
             const file = fileManifest[i];
             const fileProgress = Math.round(5 + ((i / fileManifest.length) * 25));
 
@@ -168,25 +219,36 @@ export const POST: RequestHandler = async ({
 
             extractionResults.push(assessResult);
 
-            // Persist after each file
-            await updateJob(supabase, job.id, {
-              extraction_result: extractionResults,
-              progress: Math.round(5 + (((i + 1) / fileManifest.length) * 25)),
-            } as any);
+            // Persist after each file (with encryption if available)
+						if (useEncryption && jobKey) {
+							const encryptedExtraction = await encryptAES(jobKey, JSON.stringify(extractionResults))
+							await updateJob(supabase, job.id, {
+								encrypted_extraction_result: encryptedExtraction,
+								progress: Math.round(5 + (((i + 1) / fileManifest.length) * 25)),
+							} as any);
+						} else {
+							// Fallback to plaintext for users without encryption keys
+							await updateJob(supabase, job.id, {
+								extraction_result: extractionResults,
+								progress: Math.round(5 + (((i + 1) / fileManifest.length) * 25)),
+							} as any);
+						}
           }
 
-          // Deduct scan (once per job)
-          if (!job.scan_deducted) {
-            const subscription = await loadSubscription(user.id);
-            if (subscription && subscription.scans > 0) {
-              subscription.scans -= 1;
-              await updateSubscription(subscription, user.id);
-              await updateJob(supabase, job.id, {
-                scan_deducted: true,
-              } as any);
-            }
-          }
-        }
+				// Save extraction results for debugging
+				saveExtractionResults(job.id, extractionResults);
+
+				// Deduct scan (once per job)
+				if (!job.scan_deducted) {
+					const subscription = await loadSubscription(user.id);
+					if (subscription && subscription.scans > 0) {
+						subscription.scans -= 1;
+						await updateSubscription(subscription, user.id);
+						await updateJob(supabase, job.id, {
+							scan_deducted: true,
+						} as any);
+					}
+				}
 
         // ---- STAGE 2: Analysis ----
         sendEvent({
@@ -203,7 +265,7 @@ export const POST: RequestHandler = async ({
           progress: 30,
         } as any);
 
-        let analysisResults: ReportAnalysis[] = job.analysis_results || [];
+        let analysisResults: ReportAnalysis[] = []
 
         // Build flat list of documents to analyze
         const allDocuments: { assessmentIndex: number; docIndex: number; text: string; title: string }[] = [];
@@ -224,10 +286,7 @@ export const POST: RequestHandler = async ({
           }
         }
 
-        // Resume: skip already-analyzed documents
-        const startFrom = analysisResults.length;
-
-        for (let i = startFrom; i < allDocuments.length; i++) {
+        for (let i = 0; i < allDocuments.length; i++) {
           const doc = allDocuments[i];
           const docProgress = Math.round(30 + ((i / allDocuments.length) * 65));
 
@@ -254,6 +313,7 @@ export const POST: RequestHandler = async ({
               useEnhancedSignals: true,
               enableExternalValidation: false,
               streamResults: true,
+              jobId: job.id, // Add jobId for debug output
             },
             (event: any) => {
               sendEvent({
@@ -269,24 +329,43 @@ export const POST: RequestHandler = async ({
           const result = convertWorkflowResult(workflowResult, doc.text);
           analysisResults.push(result);
 
-          // Persist after each document
-          await updateJob(supabase, job.id, {
-            analysis_results: analysisResults,
-            progress: Math.round(30 + (((i + 1) / allDocuments.length) * 65)),
-          } as any);
+          // Save individual document workflow for debugging
+          saveDocumentWorkflow(job.id, i, workflowResult);
+
+          // Persist after each document (with encryption if available)
+					if (useEncryption && jobKey) {
+						const encryptedAnalysis = await encryptAES(jobKey, JSON.stringify(analysisResults))
+						await updateJob(supabase, job.id, {
+							encrypted_analysis_results: encryptedAnalysis,
+							progress: Math.round(30 + (((i + 1) / allDocuments.length) * 65)),
+						} as any);
+					} else {
+						// Fallback to plaintext for users without encryption keys
+						await updateJob(supabase, job.id, {
+							analysis_results: analysisResults,
+							progress: Math.round(30 + (((i + 1) / allDocuments.length) * 65)),
+						} as any);
+					}
         }
 
-        // ---- COMPLETE ----
-        // Extend TTL to 7 days for completed jobs
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        // Save analysis results for debugging
+        saveAnalysisResults(job.id, analysisResults);
 
+        // ---- COMPLETE ----
+        // TTL is managed by database trigger (1 hour for completed jobs)
         await updateJob(supabase, job.id, {
           status: "completed",
           stage: "completed",
           progress: 100,
           message: "Processing completed",
-          expires_at: expiresAt,
         } as any);
+
+        // Save complete workflow state for debugging
+        saveCompleteWorkflow(job.id, extractionResults, analysisResults, {
+          jobId: job.id,
+          status: 'completed',
+          timestamp: new Date().toISOString(),
+        });
 
         sendEvent({
           type: "complete",

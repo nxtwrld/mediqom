@@ -295,11 +295,11 @@
             {#if message.metadata?.anatomyFocus && message.metadata.anatomyFocus.length > 0}
               <div class="anatomy-actions">
                 {#each message.metadata.anatomyFocus as bodyPart}
-                  <button 
+                  <button
                     class="anatomy-btn"
                     onclick={() => focusAnatomy(bodyPart)}
-                    aria-label={$t('app.chat.anatomy.view-aria', { bodyPart })}
-                    title={$t('app.chat.anatomy.view', { bodyPart })}
+                    aria-label={$t('app.chat.anatomy.view-aria', { bodyPart } as any)}
+                    title={$t('app.chat.anatomy.view', { bodyPart } as any)}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
@@ -320,7 +320,7 @@
             {#if message.metadata?.documentPrompt}
               <div class="document-prompt">
                 <p class="document-prompt-text">
-                  {$t('app.chat.document.add-prompt', { title: message.metadata.documentPrompt.title })}
+                  {$t('app.chat.document.add-prompt', { title: message.metadata.documentPrompt.title } as any)}
                 </p>
                 <div class="document-actions">
                   <button
@@ -350,7 +350,7 @@
             {#if message.metadata?.profilePrompt}
               <div class="profile-prompt">
                 <p class="profile-prompt-text">
-                  {$t('app.chat.profile.switch-prompt', { profileName: message.metadata.profilePrompt.profileName })}
+                  {$t('app.chat.profile.switch-prompt', { profileName: message.metadata.profilePrompt.profileName } as any)}
                 </p>
                 <div class="profile-actions">
                   <button

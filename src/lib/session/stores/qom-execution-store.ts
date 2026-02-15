@@ -1,5 +1,6 @@
 // QOM Execution Store
 // Manages the dynamic state of the QOM execution with real-time updates
+// Store is null until initialize() is called - no JavaScript execution until needed
 
 import { writable, derived, get } from "svelte/store";
 import type { Writable, Readable } from "svelte/store";
@@ -40,129 +41,13 @@ interface QOMStoreState {
   layoutEngine?: DynamicLayoutEngine; // Dynamic layout engine instance
 }
 
-// Initialize store with default state
-function createInitialState(): QOMStoreState {
-  console.log("🏗️ Initializing QOM Store State");
-
-  const nodes = new Map<string, QOMNode>();
-  const links = new Map<string, QOMLink>();
-
-  // Use imported configuration
-  const configuration = qomConfiguration;
-  console.log("📋 QOM Configuration source:", {
-    id: configuration?.id || "unknown",
-    hasDefaultFlow: !!configuration?.defaultFlow,
-    nodeCount: configuration?.defaultFlow?.nodes?.length || 0,
-    configType: typeof configuration,
-    firstNodeId: configuration?.defaultFlow?.nodes?.[0]?.id || "none",
-  });
-
-  // Log the actual node IDs being loaded
-  if (configuration?.defaultFlow?.nodes) {
-    console.log(
-      "🔍 Node IDs from configuration:",
-      configuration.defaultFlow.nodes.map((n: any) => n.id),
-    );
-  }
-
-  const layoutEngine = createLayoutEngine(DEFAULT_LAYOUT_CONFIG);
-
-  // Generate layout from configuration synchronously
-  const { nodes: layoutNodes, links: layoutLinks } =
-    layoutEngine.generateLayout(configuration);
-
-  // Convert layout nodes to QOM nodes
-  layoutNodes.forEach((layoutNode) => {
-    const node: QOMNode = {
-      id: layoutNode.id,
-      name: layoutNode.name,
-      type: layoutNode.type as QOMNode["type"],
-      category: layoutNode.category,
-      layer: layoutNode.layer,
-      parent: layoutNode.parentNodes[0], // Take first parent as primary
-      children: layoutNode.childNodes,
-      state: "pending",
-      provider: "openai",
-      model: "gpt-4",
-      x: layoutNode.x,
-      y: layoutNode.y,
-    };
-    nodes.set(node.id, node);
-  });
-
-  // Convert layout links to QOM links
-  layoutLinks.forEach((layoutLink) => {
-    const link: QOMLink = {
-      id: layoutLink.id,
-      source: layoutLink.source,
-      target: layoutLink.target,
-      type: layoutLink.type as QOMLink["type"],
-      direction: "forward",
-      strength: 0.6,
-      active: true, // Default flow links should be active to show proper arrows
-    };
-    links.set(link.id, link);
-  });
-
-  return {
-    nodes,
-    links,
-    nodeStates: new Map(),
-    configuration,
-    layoutEngine,
-    executionState: {
-      sessionId: "",
-      qomModelId: configuration.id,
-      status: "idle",
-      currentLayer: 0,
-      activeNodes: [],
-      completedNodes: [],
-      failedNodes: [],
-      totalNodes: nodes.size,
-      totalCost: 0,
-      totalDuration: 0,
-      successRate: 0,
-    },
-    lastUpdate: Date.now(),
-  };
-
-  const state = {
-    nodes,
-    links,
-    nodeStates: new Map(),
-    configuration,
-    layoutEngine,
-    executionState: {
-      sessionId: "",
-      qomModelId: configuration.id,
-      status: "idle" as const,
-      currentLayer: 0,
-      activeNodes: [],
-      completedNodes: [],
-      failedNodes: [],
-      totalNodes: nodes.size,
-      totalCost: 0,
-      totalDuration: 0,
-      successRate: 0,
-    },
-    lastUpdate: Date.now(),
-  };
-
-  console.log(
-    `✅ QOM Store initialized with ${nodes.size} nodes and ${links.size} links`,
-  );
-  console.groupEnd();
-
-  return state;
-}
-
-// Main store - now synchronous
-const qomStore: Writable<QOMStoreState> = writable(createInitialState());
+// Main store - starts as null until initialize() is called
+const qomStore: Writable<QOMStoreState | null> = writable(null);
 
 // Derived store for D3 data format
 export const d3QOMData: Readable<{ nodes: D3QOMNode[]; links: D3QOMLink[] }> =
   derived(qomStore, ($qomStore) => {
-    // Handle asynchronous initialization
+    // Handle null/uninitialized state
     if (!$qomStore || !$qomStore.nodes) {
       return { nodes: [], links: [] };
     }
@@ -200,7 +85,7 @@ export const d3QOMData: Readable<{ nodes: D3QOMNode[]; links: D3QOMLink[] }> =
 
 // Derived store for execution metrics
 export const qomMetrics = derived(qomStore, ($qomStore) => {
-  // Handle asynchronous initialization
+  // Handle null/uninitialized state
   if (!$qomStore || !$qomStore.executionState) {
     return {
       totalNodes: 0,
@@ -371,19 +256,108 @@ function recalculateLayoutInternal(
 
 // Store actions
 export const qomActions = {
-  // Initialize QOM for a session
+  // Initialize QOM for a session - creates full state
   initialize(sessionId: string) {
-    qomStore.update((state) => {
-      state.executionState.sessionId = sessionId;
-      state.executionState.status = "initializing";
-      state.lastUpdate = Date.now();
-      return state;
+    const currentState = get(qomStore);
+
+    // Skip if already initialized for this session
+    if (currentState?.executionState.sessionId === sessionId) {
+      return;
+    }
+
+    // Create full state now
+    console.log("🏗️ Initializing QOM Store State");
+
+    const nodes = new Map<string, QOMNode>();
+    const links = new Map<string, QOMLink>();
+
+    // Use imported configuration
+    const configuration = qomConfiguration;
+    console.log("📋 QOM Configuration source:", {
+      id: configuration?.id || "unknown",
+      hasDefaultFlow: !!configuration?.defaultFlow,
+      nodeCount: configuration?.defaultFlow?.nodes?.length || 0,
+      configType: typeof configuration,
+      firstNodeId: configuration?.defaultFlow?.nodes?.[0]?.id || "none",
+    });
+
+    // Log the actual node IDs being loaded
+    if (configuration?.defaultFlow?.nodes) {
+      console.log(
+        "🔍 Node IDs from configuration:",
+        configuration.defaultFlow.nodes.map((n: any) => n.id),
+      );
+    }
+
+    const layoutEngine = createLayoutEngine(DEFAULT_LAYOUT_CONFIG);
+
+    // Generate layout from configuration synchronously
+    const { nodes: layoutNodes, links: layoutLinks } =
+      layoutEngine.generateLayout(configuration);
+
+    // Convert layout nodes to QOM nodes
+    layoutNodes.forEach((layoutNode) => {
+      const node: QOMNode = {
+        id: layoutNode.id,
+        name: layoutNode.name,
+        type: layoutNode.type as QOMNode["type"],
+        category: layoutNode.category,
+        layer: layoutNode.layer,
+        parent: layoutNode.parentNodes[0], // Take first parent as primary
+        children: layoutNode.childNodes,
+        state: "pending",
+        provider: "openai",
+        model: "gpt-4",
+        x: layoutNode.x,
+        y: layoutNode.y,
+      };
+      nodes.set(node.id, node);
+    });
+
+    // Convert layout links to QOM links
+    layoutLinks.forEach((layoutLink) => {
+      const link: QOMLink = {
+        id: layoutLink.id,
+        source: layoutLink.source,
+        target: layoutLink.target,
+        type: layoutLink.type as QOMLink["type"],
+        direction: "forward",
+        strength: 0.6,
+        active: true, // Default flow links should be active to show proper arrows
+      };
+      links.set(link.id, link);
+    });
+
+    console.log(
+      `✅ QOM Store initialized with ${nodes.size} nodes and ${links.size} links`,
+    );
+
+    qomStore.set({
+      nodes,
+      links,
+      nodeStates: new Map(),
+      configuration,
+      layoutEngine,
+      executionState: {
+        sessionId,
+        qomModelId: configuration.id,
+        status: "initializing",
+        currentLayer: 0,
+        activeNodes: [],
+        completedNodes: [],
+        failedNodes: [],
+        totalNodes: nodes.size,
+        totalCost: 0,
+        totalDuration: 0,
+        successRate: 0,
+      },
+      lastUpdate: Date.now(),
     });
   },
 
-  // Reset QOM to initial state
+  // Reset QOM to null state
   reset() {
-    qomStore.set(createInitialState());
+    qomStore.set(null);
   },
 
   // Update node state
@@ -393,6 +367,8 @@ export const qomActions = {
     data?: Partial<QOMNode>,
   ) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       const node = state.nodes.get(nodeId);
       if (node) {
         node.state = newState;
@@ -448,6 +424,8 @@ export const qomActions = {
   // Add a new node dynamically using generic layout engine
   addNode(node: QOMNode, options?: NodeAdditionOptions) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       if (!state.layoutEngine) {
         console.error("Layout engine not available");
         return state;
@@ -482,6 +460,8 @@ export const qomActions = {
   // Add multiple nodes dynamically
   addNodes(nodes: QOMNode[], options?: NodeAdditionOptions) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       if (!state.layoutEngine) {
         console.error("Layout engine not available");
         return state;
@@ -520,6 +500,8 @@ export const qomActions = {
   // Add a new link
   addLink(link: QOMLink) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       state.links.set(link.id, link);
 
       // Update child/parent relationships if needed
@@ -558,6 +540,8 @@ export const qomActions = {
   // Activate a link (when relationship becomes active)
   activateLink(linkId: string) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       const link = state.links.get(linkId);
       if (link) {
         link.active = true;
@@ -570,6 +554,8 @@ export const qomActions = {
   // Update link properties
   updateLink(linkId: string, updates: Partial<QOMLink>) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       const link = state.links.get(linkId);
       if (link) {
         Object.assign(link, updates);
@@ -584,6 +570,8 @@ export const qomActions = {
     switch (event.type) {
       case "qom_initialized":
         qomStore.update((state) => {
+          if (!state) return state; // Guard against null
+
           // Only clear and rebuild if event contains actual data
           // Otherwise, just update the status to running
           if (event.nodes && event.nodes.length > 0) {
@@ -626,6 +614,8 @@ export const qomActions = {
 
         // Update total metrics
         qomStore.update((state) => {
+          if (!state) return state; // Guard against null
+
           state.executionState.totalCost += completeEvent.cost || 0;
           state.executionState.totalDuration += completeEvent.duration || 0;
           state.lastUpdate = Date.now();
@@ -663,6 +653,8 @@ export const qomActions = {
 
       case "qom_completed":
         qomStore.update((state) => {
+          if (!state) return state; // Guard against null
+
           state.executionState.status = "completed";
           state.executionState.totalCost = event.totalCost;
           state.executionState.totalDuration = event.totalDuration;
@@ -678,6 +670,8 @@ export const qomActions = {
     positions: Map<string, { x: number; y: number; fx?: number; fy?: number }>,
   ) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       positions.forEach((pos, nodeId) => {
         const node = state.nodes.get(nodeId);
         if (node) {
@@ -694,6 +688,8 @@ export const qomActions = {
   // Fix node position (pin it)
   fixNodePosition(nodeId: string, x: number, y: number) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       const node = state.nodes.get(nodeId);
       if (node) {
         node.fx = x;
@@ -707,6 +703,8 @@ export const qomActions = {
   // Release node position (unpin it)
   releaseNodePosition(nodeId: string) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       const node = state.nodes.get(nodeId);
       if (node) {
         node.fx = undefined;
@@ -720,6 +718,8 @@ export const qomActions = {
   // Update layout with container dimensions
   updateLayoutDimensions(containerWidth: number, containerHeight: number) {
     qomStore.update((state) => {
+      if (!state) return state; // Guard against null
+
       recalculateLayoutInternal(state, containerWidth, containerHeight);
       state.lastUpdate = Date.now();
       return state;

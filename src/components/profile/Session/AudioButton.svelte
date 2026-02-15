@@ -1,6 +1,6 @@
 <script lang="ts">
     import { AudioState } from '$lib/audio/microphone';
-    import { audioManager } from '$lib/audio/AudioManager';
+    import { getAudioManager } from '$lib/audio/AudioManager';
     // @ts-ignore - throttle-debounce has type issues but works fine
     import { throttle } from 'throttle-debounce';
     import { onDestroy, onMount } from 'svelte';
@@ -52,7 +52,7 @@
             useRealtime,
             sessionId,
             isRealtimeReady,
-            audioManagerInitialized: audioManager.getIsInitialized()
+            audioManagerInitialized: getAudioManager().getIsInitialized()
         });
     });
 
@@ -104,10 +104,10 @@
         log.audio.debug('AudioButton mounted - subscribing to AudioManager events');
         
         // Subscribe to AudioManager events for visual feedback
-        audioManager.on('features', handleAudioFeatures);
-        audioManager.on('speech-start', handleSpeechStart);  
-        audioManager.on('speech-end', handleSpeechEnd);
-        audioManager.on('state-change', handleStateChange);
+        getAudioManager().on('features', handleAudioFeatures);
+        getAudioManager().on('speech-start', handleSpeechStart);  
+        getAudioManager().on('speech-end', handleSpeechEnd);
+        getAudioManager().on('state-change', handleStateChange);
         
         // TODO: Remove shortcuts - now handled by parent components
         // return shortcuts.listen('Space', () => {
@@ -116,10 +116,10 @@
         
         return () => {
             // Cleanup event listeners
-            audioManager.off('features', handleAudioFeatures);
-            audioManager.off('speech-start', handleSpeechStart);
-            audioManager.off('speech-end', handleSpeechEnd);
-            audioManager.off('state-change', handleStateChange);
+            getAudioManager().off('features', handleAudioFeatures);
+            getAudioManager().off('speech-start', handleSpeechStart);
+            getAudioManager().off('speech-end', handleSpeechEnd);
+            getAudioManager().off('state-change', handleStateChange);
         };
     });
 

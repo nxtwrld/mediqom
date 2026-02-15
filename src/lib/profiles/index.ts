@@ -10,9 +10,7 @@ import user from "$lib/user";
 import { prepareKeys } from "$lib/encryption/rsa";
 import { createHash } from "$lib/encryption/hash";
 import { generatePassphrase } from "$lib/encryption/passphrase";
-
-// API base URL - empty for web (same origin), set for mobile builds
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+import { apiFetch } from "$lib/api/client";
 
 export { profiles, profile };
 
@@ -25,39 +23,28 @@ const loadProfilesMeta: { lastLoadedUserId: string | null } = {
  *  Removes links between a parent and a profile
  */
 export async function removeLinkedParent(profile_id: string) {
-  const response = await fetch(
-    `${API_BASE}/v1/med/profiles/${profile_id}?link_type=parent`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
-  await loadProfiles(undefined, true);
-  return;
+  await apiFetch(`/v1/med/profiles/${profile_id}?link_type=parent`, {
+    method: "DELETE",
+  });
+  await loadProfiles(true);
 }
 
 /**
  *  Removes links between a profile and a parent
  */
 export async function removeLinkedProfile(profile_id: string) {
-  const response = await fetch(`${API_BASE}/v1/med/profiles/${profile_id}`, {
+  await apiFetch(`/v1/med/profiles/${profile_id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
   });
-  await loadProfiles(undefined, true);
-  return;
+  await loadProfiles(true);
 }
 
 /**
  *  Load
  */
 export async function loadProfiles(
-  fetch: typeof window.fetch | undefined = undefined,
   force: boolean = false,
+  fetchFn?: typeof globalThis.fetch,
 ) {
   // Guard: avoid unnecessary reloads for the same authenticated user
   // Reload only if forced, or if no profiles are in store, or if user changed
@@ -69,9 +56,9 @@ export async function loadProfiles(
       return;
     }
   }
-  if (!fetch) fetch = window.fetch;
   // fetch basic profile data
-  const profilesLoaded = await fetch(`${API_BASE}/v1/med/profiles`)
+  const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
+  const profilesLoaded = await apiFetch('/v1/med/profiles', fetchOpts)
     .then((r) => r.json())
     .catch((e) => {
       console.error("Error loading profiles", e);
@@ -85,8 +72,9 @@ export async function loadProfiles(
       .map(async (d: ProfileCore): Promise<ProfileLoadResult> => {
         // fetch encrypted profile and health documents
         try {
-          const rootsEncrypted = await fetch(
-            `${API_BASE}/v1/med/profiles/${d.profiles.id}/documents?types=profile,health&full=true`,
+          const rootsEncrypted = await apiFetch(
+            `/v1/med/profiles/${d.profiles.id}/documents?types=profile,health&full=true`,
+            fetchOpts,
           )
             .then((r) => r.json())
             .catch((e) => {
@@ -216,7 +204,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
   });
 
   // 4. submit to server
-  const response = await fetch(`${API_BASE}/v1/med/profiles`, {
+  const response = await apiFetch('/v1/med/profiles', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -239,7 +227,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
 
   //console.log('Add profile documnets', profileData.id);
   // 7. update profiles
-  await loadProfiles(undefined, true);
+  await loadProfiles(true);
 
   // 5. create profile document if vcard is provided
   await addDocument({
@@ -273,7 +261,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
   });
 
   // 7. update profiles
-  await loadProfiles(undefined, true);
+  await loadProfiles(true);
 
   return profileData;
 }

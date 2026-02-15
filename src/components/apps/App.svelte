@@ -15,14 +15,14 @@
 
     function close() {
         sharedItems.set([]);
-        history.back(-1);
+        history.back();
     }
     let id: null | string = $state(null);
 
     onMount(()=> {
         const items = sharedItems.get();
         logger.api.debug('Items to be stored....', items);
-        fetch(app.connect.uri + '/api/connect', {
+        fetch(app.connect?.uri + '/api/connect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

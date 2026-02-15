@@ -30,7 +30,7 @@ import { logger } from "$lib/logging/logger";
 import { profileContextManager } from "$lib/context/integration/profile-context";
 // Removed embedding migration import - now using medical terms classification
 
-const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
+export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
 
 export function byUser(id: string): Readable<(DocumentPreload | Document)[]> {
   return profileStores[id];
@@ -431,7 +431,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
   }
 
   // save the report itself
-  const data = await fetch(
+  const response = await fetch(
     "/v1/med/profiles/" + (profile_id || user_id) + "/documents",
     {
       method: "POST",
@@ -446,15 +446,28 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
         keys,
       }),
     },
-  )
-    .then((r) => r.json())
-    .catch(async (e) => {
-      logger.documents.error("Failed to add document", { error: e });
+  ).catch(async (e) => {
+    logger.documents.error("Failed to add document - network error", { error: e });
+    await removeAttachments(attachmentsUrls);
+    throw new Error(Errors.NetworkError);
+  });
 
-      await removeAttachments(attachmentsUrls);
-
-      throw new Error(Errors.NetworkError);
+  if (!response.ok) {
+    const errorBody = await response.text();
+    logger.documents.error("Failed to add document - server error", {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      requestType: document.type,
+      hasMetadata: !!enc[1],
+      hasContent: !!enc[0],
+      keysCount: keys.length,
     });
+    await removeAttachments(attachmentsUrls);
+    throw new Error(`Server error: ${response.status} - ${errorBody}`);
+  }
+
+  const data = await response.json();
 
   // update local documents
   const newDocument = await loadDocument(data.id, profile_id || user_id);

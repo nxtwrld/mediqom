@@ -143,7 +143,7 @@ export class SignalMigrationTester {
           throw new Error(`Missing migrated signal: ${signalName}`);
         }
 
-        const originalValues = originalData.values || [];
+        const originalValues = (originalData as any).values || [];
         const migratedValues = migratedData.values || [];
 
         if (originalValues.length !== migratedValues.length) {
@@ -433,7 +433,7 @@ export class SignalMigrationTester {
       metadata: {
         type: "laboratory",
       },
-    } as Document;
+    } as unknown as Document;
   }
 
   /**
@@ -446,7 +446,7 @@ export class SignalMigrationTester {
         signals: {},
       },
       metadata: {},
-    } as Document;
+    } as unknown as Document;
   }
 
   /**
@@ -468,7 +468,7 @@ export class SignalMigrationTester {
         },
       },
       metadata: {},
-    } as Document;
+    } as unknown as Document;
   }
 
   /**
@@ -487,7 +487,7 @@ export class SignalMigrationTester {
         },
       },
       metadata: {},
-    } as Document;
+    } as unknown as Document;
   }
 
   /**
@@ -518,7 +518,7 @@ export class SignalMigrationTester {
       id: "test-doc-large",
       content: { signals },
       metadata: { type: "laboratory" },
-    } as Document;
+    } as unknown as Document;
   }
 
   /**

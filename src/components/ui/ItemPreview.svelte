@@ -38,7 +38,7 @@
 </script>
 
 {#if component}
-    {@const SvelteComponent = component}
+    {@const SvelteComponent = component as any}
     <SvelteComponent {item} passive={passive} />
 {:else}
     <LinkedItem title="Item deleted" type="focus" passive={passive} />

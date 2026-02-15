@@ -60,14 +60,19 @@ export const POST: RequestHandler = async ({
       },
       content:
         isDicomExtracted && dicomMetadata
-          ? `
+          ? [
+              {
+                type: "text" as const,
+                text: `
 DICOM Context:
 - Modality: ${dicomMetadata.modality || "Unknown"}
 - Body Part: ${dicomMetadata.bodyPartExamined || "Unknown"}
 - Study: ${dicomMetadata.studyDescription || "Not specified"}
 - View Position: ${dicomMetadata.viewPosition || "Unknown"}
-`
-          : "Medical imaging analysis",
+`,
+              },
+            ]
+          : [{ type: "text" as const, text: "Medical imaging analysis" }],
       // Initialize medical imaging specific fields
       imagingMetadata: dicomMetadata
         ? {
@@ -83,6 +88,7 @@ DICOM Context:
       detectedAnomalies: [],
       measurements: [],
       urgentFindings: false,
+      tokenUsage: { total: 0 },
     };
 
     // Execute the medical imaging workflow

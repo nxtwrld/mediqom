@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import Input from '$components/forms/Input.svelte';
 	import type { Signal } from '$lib/types.d';
 
 	interface Props {
@@ -14,6 +13,8 @@
 	let { signal, unit = '', entry, onsave, oncancel }: Props = $props();
 
 	// Form state
+	let dateId: string = Math.random().toString(36).substring(7);
+	let valueId: string = Math.random().toString(36).substring(7);
 	let date = $state(entry?.date || new Date().toISOString().split('T')[0]);
 	let value = $state<string | number>(entry?.value ?? '');
 
@@ -43,83 +44,71 @@
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<div class="entry-form" onkeydown={handleKeydown} role="form">
+<form class="form entry-form" onkeydown={handleKeydown} onsubmit={(e) => { e.preventDefault(); handleSave(); }}>
 	<div class="form-row">
-		<div class="field date-field">
-			<Input type="date" bind:value={date} label={$t('profile.health.history.date')} />
+		<div class="input">
+			<label for={dateId}>{$t('profile.health.history.date')}</label>
+			<input type="date" id={dateId} bind:value={date} />
 		</div>
-		<div class="field value-field">
-			<Input
-				type="number"
-				bind:value
-				label={$t('profile.health.props.' + signal)}
-				placeholder={unit}
-				step="any"
-			/>
-			{#if unit}
-				<span class="unit">{unit}</span>
-			{/if}
+		<div class="input">
+			<label for={valueId}>{$t('profile.health.props.' + signal)}</label>
+			<div class="field">
+				<input type="number" id={valueId} bind:value step="any" />
+				{#if unit}
+					<span class="unit">{unit}</span>
+				{/if}
+			</div>
 		</div>
 	</div>
 	<div class="form-actions">
 		<button type="button" class="button --secondary" onclick={oncancel}>
 			{$t('profile.health.history.cancel')}
 		</button>
-		<button type="button" class="button --primary" onclick={handleSave}>
+		<button type="submit" class="button --primary">
 			{$t('profile.health.history.save')}
 		</button>
 	</div>
-</div>
+</form>
 
 <style>
 	.entry-form {
-		padding: var(--gap-small);
+		padding: var(--gap);
 		background: var(--color-gray-100);
 		border-radius: var(--radius);
 		margin-bottom: var(--gap-small);
 	}
 
 	.form-row {
-		display: flex;
+		display: grid;
+		grid-template-columns: auto 1fr;
 		gap: var(--gap);
-		margin-bottom: var(--gap-small);
 	}
 
 	.field {
 		position: relative;
+		width: 100%;
 	}
 
-	.date-field {
-		flex: 0 0 auto;
-		min-width: 10rem;
+	.field input {
+		width: 100%;
 	}
 
-	.value-field {
-		flex: 1;
-		display: flex;
-		align-items: flex-end;
-		gap: 0.5rem;
+	.field:has(.unit) input {
+		padding-right: 4rem;
 	}
 
-	.unit {
+	.field .unit {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		padding: 1rem;
 		color: var(--color-text-muted);
-		font-size: var(--font-size-small);
-		padding-bottom: 0.5rem;
-	}
-
-	.form-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--gap-small);
 	}
 
 	@media screen and (max-width: 480px) {
 		.form-row {
-			flex-direction: column;
-		}
-
-		.date-field {
-			min-width: 100%;
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

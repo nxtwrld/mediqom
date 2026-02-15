@@ -18,9 +18,7 @@ import "$lib/i18n"; // Import to initialize. Important :)
 import { locale, waitLocale } from "svelte-i18n";
 import "$lib/config/logging-config"; // Initialize logging from environment variables
 import { isNativePlatform, isCapacitorBuild } from "$lib/config/platform";
-
-// API base URL - empty for web (same origin), set for mobile builds
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+import { apiFetch } from "$lib/api/client";
 
 // Initialize mixpanel only if token is available (may not be in mobile builds)
 try {
@@ -125,7 +123,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
         url.pathname.startsWith("/med") || url.pathname.startsWith("/account");
 
       if (needsUserData) {
-        const userData = await fetch(`${API_BASE}/v1/med/user`)
+        const userData = await apiFetch('/v1/med/user', { fetch })
           .then((r) => r.json())
           .catch(() => null);
 

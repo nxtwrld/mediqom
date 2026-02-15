@@ -116,7 +116,7 @@ export const POST: RequestHandler = async ({
     
     // Process overlaps if enabled and multiple segments available
     let processedTranscription = transcriptionSegment;
-    const overlapConfig = audioTranscriptionConfig.transcriptionSettings?.overlapProcessing;
+    const overlapConfig = (audioTranscriptionConfig as any).transcriptionSettings?.overlapProcessing;
     
     if (overlapConfig?.enabled && audioMetadata?.sequenceNumber && audioMetadata.sequenceNumber > 1) {
       // In a real implementation, you would maintain a session-based segment buffer

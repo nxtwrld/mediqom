@@ -5,6 +5,8 @@
 	import ui from '$lib/ui';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { throttle } from 'throttle-debounce';
+	import { t } from '$lib/i18n';
+	import { translateAnatomy } from '$lib/i18n/anatomy';
 
 
 
@@ -51,9 +53,9 @@
 	{#each tags as tag}
         {#if isObject(tag.replace(/ /g, '_'))}
 			{#if active}
-            	<button class="tag -object" class:-highlight={tag == $focused.object} onclick={(event) => focus(event, tag)}>{tag}</button>
+            	<button class="tag -object" class:-highlight={tag == $focused.object} onclick={(event) => focus(event, tag)}>{translateAnatomy(tag.replace(/ /g, '_'), $t)}</button>
 			{:else}
-				<button class="tag -object" class:-highlight={tag == $focused.object} onclick={() => dispatch('click', tag)}>{tag}</button>
+				<button class="tag -object" class:-highlight={tag == $focused.object} onclick={() => dispatch('click', tag)}>{translateAnatomy(tag.replace(/ /g, '_'), $t)}</button>
 			{/if}
         {:else}
     		<button class="tag" onclick={() => dispatch('click', tag)}>{tag}</button>

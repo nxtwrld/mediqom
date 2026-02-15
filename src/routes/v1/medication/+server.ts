@@ -51,7 +51,7 @@ export const GET: RequestHandler = async ({ url }) => {
   const data = await response.json();
 
   return json(
-    data.data.map((item) => {
+    data.data.map((item: any) => {
       if ((routes as any)[item.cestaPodani.kod]) {
         console.log("route not found", item.cestaPodani);
       }

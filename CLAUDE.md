@@ -191,6 +191,44 @@ index.
 - **Error handling**: Standardized error responses with proper HTTP status codes
 - **SSE integration**: Real-time features use Server-Sent Events for streaming updates
 
+### apiFetch & SvelteKit `fetch` (CRITICAL)
+
+All API calls go through `apiFetch()` from `$lib/api/client.ts`. It handles both web (cookies) and Capacitor/mobile (Bearer token) automatically.
+
+**Rule: Always pass `{ fetch }` in load functions.**
+
+SvelteKit load functions receive a special `fetch` that supports relative URLs during SSR, deduplicates requests, and avoids `window.fetch` warnings. Even when `ssr = false`, SvelteKit still expects its own `fetch` to be used inside load functions.
+
+```typescript
+// In any +layout.ts or +page.ts load function:
+export const load: LayoutLoad = async ({ fetch }) => {
+  const data = await apiFetch('/v1/med/user', { fetch });
+};
+```
+
+**Rule: Functions called from load functions must accept and forward `fetch`.**
+
+If a utility function (like `loadProfiles`) uses `apiFetch` internally and is called from a load function, it must accept an optional `fetchFn` parameter and pass it through:
+
+```typescript
+// In utility module:
+export async function loadProfiles(
+  force = false,
+  fetchFn?: typeof globalThis.fetch,
+) {
+  const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
+  const data = await apiFetch('/v1/med/profiles', fetchOpts);
+}
+
+// In load function:
+await loadProfiles(false, fetch);
+```
+
+**SSR configuration:**
+- `med/` routes: `ssr = false` — all load functions run client-side, but still pass `{ fetch }`
+- Root `+layout.ts`: SSR enabled — `{ fetch }` is required for `/account` route SSR
+- Capacitor builds: SSR always disabled, `apiFetch` uses Bearer tokens via `getAccessToken()`
+
 ## Configuration System
 
 ### Feature Flags
@@ -416,6 +454,128 @@ export const POST: RequestHandler = async ({
 
 For session development context, use the `@session` command. Key references: `AI_SESSION_WORKFLOW.md`, `AI_SESSION_QOM.md`, `AI_SESSION_ANALYSIS.md`
 
+## CSS Architecture & Styling Guidelines
+
+### Core Principles
+
+1. **Use existing CSS files** - Never create inline styles or custom classes when standard ones exist
+2. **Follow established patterns** - Look at existing components (e.g., HealthForm.svelte) before creating new ones
+3. **Use CSS variables** - All spacing, colors, and sizing should use variables from core.css
+
+### Key CSS Files
+
+- **`src/css/core.css`** - CSS variables (colors, spacing, sizing)
+- **`src/css/forms.css`** - Form inputs, labels, buttons
+- **`src/css/tabs.css`** - Tab navigation styling
+- **`src/css/buttons.css`** - Button styles and modifiers
+- **`src/css/typography.css`** - Headings, text styles
+
+### Standard Patterns
+
+#### Tabs Pattern
+
+**Use the Tabs component system:**
+
+```svelte
+<Tabs fixedHeight={true}>
+  {#snippet tabHeads()}
+    <TabHeads>
+      <TabHead>{$t('tab1')}</TabHead>
+      <TabHead>{$t('tab2')}</TabHead>
+    </TabHeads>
+  {/snippet}
+
+  <TabPanel><!-- Content 1 --></TabPanel>
+  <TabPanel><!-- Content 2 --></TabPanel>
+</Tabs>
+```
+
+**Or for route-based tabs:**
+
+```svelte
+<nav class="tab-heads">
+  <a href="/path1" class:"-active"={isActive('/path1')}>Tab 1</a>
+  <a href="/path2" class:"-active"={isActive('/path2')}>Tab 2</a>
+</nav>
+```
+
+**Don't:** Create custom `.tab-navigation` or `.tab-link` classes
+
+#### Form Pattern
+
+**Use the `.input` class pattern:**
+
+```svelte
+<form class="form">
+  <Select
+    bind:value={myValue}
+    options={myOptions}
+    label={$t('label')}
+  />
+  <!-- Select component handles .input class internally -->
+
+  <div class="form-actions">
+    <button class="button -primary" type="submit">Save</button>
+  </div>
+</form>
+```
+
+**Don't:** Create custom `.form-group` or `.form-container` wrappers
+
+#### CSS Variables
+
+**Always use these variables instead of hard-coded values:**
+
+```css
+/* Spacing */
+--ui-pad-small: 0.5rem
+--ui-pad-medium: 1rem
+--ui-pad-large: 1.5rem
+--ui-pad-xlarge: 2rem
+
+/* Radius */
+--ui-radius-small: 0.25rem
+--ui-radius-medium: 0.5rem
+--ui-radius-large: 1rem
+
+/* Colors */
+--color-surface: /* Light background */
+--color-border: /* Border color */
+--color-text-primary: /* Main text */
+--color-text-secondary: /* Muted text */
+--color-positive: /* Success */
+--color-negative: /* Error */
+--color-warning: /* Warning */
+```
+
+**Don't:** Use hard-coded values like `padding: 1rem` or `color: #333`
+
+### Component Library
+
+Reference these components for standard UI patterns:
+
+- **Forms:** `src/components/forms/` - Input, Select, InputDateTime, etc.
+- **UI:** `src/components/ui/` - Tabs, Modal, Button patterns
+- **Profile:** `src/components/profile/HealthForm.svelte` - Example of proper tab usage
+
+### Before Creating Custom Styles
+
+1. **Search existing CSS** - Use `qmd search "css pattern"` to find existing styles
+2. **Check components** - Look at `src/components/` for similar patterns
+3. **Read CLAUDE.md** - Review this section and other guidelines
+4. **Ask for guidance** - If unsure, ask the user or check documentation
+
+### Code Review Checklist
+
+When reviewing or creating styled components:
+
+- [ ] Uses CSS variables from core.css (not hard-coded values)
+- [ ] Follows established component patterns (Tabs, forms, buttons)
+- [ ] Uses standard class names (`.tab-heads`, `.input`, `.form`, etc.)
+- [ ] Uses BEM-style modifiers (`.-active`, `-primary`, `-error`, etc.)
+- [ ] No inline styles unless absolutely necessary
+- [ ] Mobile-responsive (uses CSS variables and media queries)
+
 ## Documentation Index
 
 | File | Purpose |
@@ -441,6 +601,7 @@ For session development context, use the `@session` command. Key references: `AI
 | `docs/README.md` | Documentation index |
 | `src/routes/med/FEATURES.md` | Medical features documentation |
 | `src/components/apps/README.md` | Apps component documentation |
+| `3D_TEXTURES.md` | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
 
 ## Important Notes
 
