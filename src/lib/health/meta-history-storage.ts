@@ -8,8 +8,9 @@
  * - All data encrypted with AES and shareable via existing document system
  */
 
-import { addDocument, updateDocument, getDocument } from "$lib/documents";
+import { addDocument, updateDocument, getDocument, documents } from "$lib/documents";
 import { profiles } from "$lib/profiles";
+import { get } from "svelte/store";
 import {
   DocumentType,
   type DocumentNew,
@@ -25,11 +26,12 @@ import {
   MEASUREMENT_THRESHOLDS,
 } from "./meta-history-types";
 
-// Custom document types for META_HISTORIES
-const META_HISTORY_TYPES = {
-  ENTRIES: "meta_history_entries" as DocumentType,
-  CURRENT: "meta_history_current" as DocumentType,
-  ARCHIVE: "meta_history_archive" as DocumentType,
+// Use standard health document type for META_HISTORIES
+// Differentiate via metadata.category instead of type
+const META_HISTORY_CATEGORY = {
+  ENTRIES: "meta_history_entries",
+  CURRENT: "meta_history_current",
+  ARCHIVE: "meta_history_archive",
 } as const;
 
 /**
@@ -89,10 +91,10 @@ async function storeRegularEntries(
 
     const newDoc: DocumentNew = {
       user_id: patientId,
-      type: META_HISTORY_TYPES.ENTRIES,
+      type: DocumentType.document, // Use 'document' type, not 'health' (health is unique per user)
       metadata: {
         title: "META_HISTORIES Entries",
-        category: "meta_history",
+        category: META_HISTORY_CATEGORY.ENTRIES,
         tags: ["meta_history", "entries"],
         date: new Date().toISOString(),
       },
@@ -104,7 +106,8 @@ async function storeRegularEntries(
       attachments: [],
     };
 
-    await addDocument(newDoc);
+    const createdDoc = await addDocument(newDoc);
+    console.log(`Created META_HISTORIES entries document: ${createdDoc.id}`);
   }
 }
 
@@ -235,10 +238,10 @@ async function createCurrentDataDocument(
 
   const newDoc: DocumentNew = {
     user_id: patientId,
-    type: META_HISTORY_TYPES.CURRENT,
+    type: DocumentType.health,
     metadata: {
       title: `${measurementType} Current Data`,
-      category: "meta_history_timeseries",
+      category: META_HISTORY_CATEGORY.CURRENT,
       tags: ["meta_history", "timeseries", measurementType],
       date: new Date().toISOString(),
       measurementType,
@@ -251,7 +254,8 @@ async function createCurrentDataDocument(
     attachments: [],
   };
 
-  await addDocument(newDoc);
+  const createdDoc = await addDocument(newDoc);
+  console.log(`Created META_HISTORIES current data document: ${createdDoc.id}`);
 }
 
 /**
@@ -287,10 +291,10 @@ async function createArchiveDocument(
 
   const archiveDoc: DocumentNew = {
     user_id: patientId,
-    type: META_HISTORY_TYPES.ARCHIVE,
+    type: DocumentType.health,
     metadata: {
       title: `${measurementType} Archive ${timeRange.start}`,
-      category: "meta_history_archive",
+      category: META_HISTORY_CATEGORY.ARCHIVE,
       tags: ["meta_history", "archive", measurementType],
       date: timeRange.end,
       measurementType,
@@ -306,6 +310,7 @@ async function createArchiveDocument(
   };
 
   const savedDoc = await addDocument(archiveDoc);
+  console.log(`Created META_HISTORIES archive document: ${savedDoc.id}`);
 
   // Update parent document's historical references
   const parentDoc = await getDocument(parentDocumentId);
@@ -383,9 +388,20 @@ function determineMeasurementType(entry: MetaHistoryEntry): string {
 async function findExistingEntriesDocument(
   patientId: string,
 ): Promise<Document | null> {
-  // TODO: Implement document querying by metadata
-  // This would use your existing document search/query functionality
-  // For now, return null to always create new documents
+  const allDocs = get(documents);
+
+  // Find document with matching user_id and meta_history_entries category
+  const existing = allDocs?.find(
+    (doc) =>
+      doc.user_id === patientId &&
+      doc.metadata?.category === META_HISTORY_CATEGORY.ENTRIES
+  );
+
+  if (existing) {
+    // Load full document with content
+    return await getDocument(existing.id, patientId);
+  }
+
   return null;
 }
 
@@ -393,8 +409,20 @@ async function findCurrentDataDocument(
   patientId: string,
   measurementType: string,
 ): Promise<Document | null> {
-  // TODO: Implement document querying by metadata
-  // Search for documents with type='meta_history_current' and metadata.measurementType=measurementType
+  const allDocs = get(documents);
+
+  // Find document with matching user_id, category, and measurementType
+  const existing = allDocs?.find(
+    (doc) =>
+      doc.user_id === patientId &&
+      doc.metadata?.category === META_HISTORY_CATEGORY.CURRENT &&
+      doc.metadata?.measurementType === measurementType
+  );
+
+  if (existing) {
+    return await getDocument(existing.id, patientId);
+  }
+
   return null;
 }
 

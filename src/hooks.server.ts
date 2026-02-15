@@ -17,6 +17,18 @@ const supabase: Handle = async ({ event, resolve }) => {
     console.log(`[REQ] ${event.request.method} ${event.url.pathname}`);
   }
 
+  // Handle CORS preflight for mobile API calls
+  if (event.request.method === 'OPTIONS' && event.url.pathname.startsWith('/v1/')) {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
+
   /**
    * Creates a Supabase client specific to this server request.
    * The Supabase client gets the Auth token from the request cookies.
@@ -113,6 +125,12 @@ const supabase: Handle = async ({ event, resolve }) => {
       return name === "content-range" || name === "x-supabase-api-version";
     },
   });
+
+  // Add CORS headers for API routes (mobile Capacitor)
+  if (event.url.pathname.startsWith('/v1/')) {
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
 
   // Only log errors and important requests
   if (response.status >= 400 || shouldLog) {

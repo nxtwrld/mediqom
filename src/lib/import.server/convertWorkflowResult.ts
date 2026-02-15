@@ -1,6 +1,32 @@
 import type { ReportAnalysis } from "$lib/import/types";
 
 /**
+ * Strip processing metadata properties that leak from node result wrappers.
+ * These are debugging artifacts that should not be persisted in saved reports.
+ * Also handles double-nested objects (e.g., { patient: { patient: {...} } }).
+ */
+function stripProcessingMetadata(data: any, sectionKey?: string): any {
+  if (!data || typeof data !== "object") return data;
+
+  // For arrays, strip metadata from each item
+  if (Array.isArray(data)) {
+    return data.map((item) => stripProcessingMetadata(item));
+  }
+
+  // Strip wrapper properties
+  const { documentContext, processingNotes, processingConfidence, ...clean } = data;
+
+  // Backward compatibility: unwrap double-nested objects
+  // e.g., { patient: { fullName: ... } } when sectionKey is "patient" - already correct
+  // e.g., { diagnosis: [...] } when sectionKey is "diagnosis" - unwrap to array
+  if (sectionKey && clean[sectionKey] !== undefined && Object.keys(clean).length === 1) {
+    return clean[sectionKey];
+  }
+
+  return clean;
+}
+
+/**
  * Converts a LangGraph workflow result into the ReportAnalysis format.
  * Extracted from report/stream/+server.ts for reuse in job-based processing.
  */
@@ -33,11 +59,50 @@ export function convertWorkflowResult(
     actualContent = analysisContent;
   }
 
+  // Build comprehensive report object by merging all specialized medical sections
+  const reportBase = useStructuredData ? workflowResult.report : (actualContent.report || {});
+  const reportObject = Array.isArray(reportBase)
+    ? { content: reportBase }  // Legacy array format
+    : { ...reportBase };       // Object format
+
+  // List of all specialized medical sections from multi-node processing
+  const specializedSections = [
+    'diagnosis', 'performer', 'patient', 'bodyParts', 'signals',
+    'ecg', 'echo', 'allergies', 'anesthesia',
+    'microscopic', 'triage', 'immunizations',
+    'specimens', 'admission', 'dental',
+    'tumorCharacteristics', 'treatmentPlan', 'treatmentResponse',
+    'imagingFindings', 'grossFindings', 'specialStains',
+    'socialHistory', 'treatments', 'assessment', 'molecular',
+    'medications', 'procedures', 'imaging',
+  ];
+
+  // Merge all specialized sections from workflow result into report object
+  // Strip any processing metadata that leaked from node result wrappers
+  // Pass section key for backward-compat double-nesting unwrap
+  for (const section of specializedSections) {
+    if (workflowResult[section] !== undefined) {
+      reportObject[section] = stripProcessingMetadata(workflowResult[section], section);
+    }
+  }
+
+  // Extract signals - prefer the cleaned version from reportObject (already stripped/unwrapped)
+  // Fall back to actualContent.signals for legacy format
+  let signalsArray = actualContent.signals;
+  if (reportObject.signals !== undefined) {
+    if (Array.isArray(reportObject.signals)) {
+      signalsArray = reportObject.signals;
+    } else if (reportObject.signals?.signals && Array.isArray(reportObject.signals.signals)) {
+      // Handle any remaining double-wrapped case
+      signalsArray = reportObject.signals.signals;
+    }
+  }
+
   // Merge bodyParts identifications into tags (matching analyzeReport.ts behavior)
-  const report = useStructuredData ? workflowResult.report : actualContent.report;
   let tags: string[] = actualContent.tags || [];
-  if (report && !Array.isArray(report) && report.bodyParts && Array.isArray(report.bodyParts)) {
-    const bodyPartTags = report.bodyParts
+
+  if (reportObject.bodyParts && Array.isArray(reportObject.bodyParts)) {
+    const bodyPartTags = reportObject.bodyParts
       .map((bp: any) => bp.identification)
       .filter((id: any) => typeof id === 'string' && id.length > 0);
     if (bodyPartTags.length > 0) {
@@ -55,13 +120,17 @@ export function convertWorkflowResult(
     tags,
     hasPrescription: actualContent.hasPrescription || false,
     hasImmunization: actualContent.hasImmunization || false,
-    hasLabOrVitals: actualContent.hasLabOrVitals || false,
+    // Derive hasLabOrVitals from workflow feature detection or signals presence
+    hasLabOrVitals:
+      actualContent.hasLabOrVitals ||
+      workflowResult.featureDetectionResults?.hasSignals ||
+      (signalsArray && (
+        Array.isArray(signalsArray) ? signalsArray.length > 0 : false
+      )) ||
+      false,
     content: actualContent.content || fallbackText,
-    report: useStructuredData
-      ? workflowResult.report
-      : actualContent.report || [
-          { type: "text", text: actualContent.text || fallbackText },
-        ],
+    // Pass through complete report with all specialized sections merged
+    report: reportObject,
     text: actualContent.text || fallbackText || "",
     tokenUsage: workflowResult.tokenUsage ||
       actualContent.tokenUsage || { total: 0 },
@@ -69,7 +138,8 @@ export function convertWorkflowResult(
     recommendations: actualContent.recommendations,
     title: actualContent.title,
     summary: actualContent.summary,
-    signals: actualContent.signals,
+    // Keep signals at top level for backward compatibility
+    signals: signalsArray,
     // Enhanced fields from workflow
     documentType: actualContent.documentType,
     schemaUsed: actualContent.schemaUsed,

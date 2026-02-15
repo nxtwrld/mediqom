@@ -6,29 +6,27 @@
 	import EntryForm from './EntryForm.svelte';
 	import { profile } from '$lib/profiles';
 	import { addSignalEntry, updateSignalEntry, deleteSignalEntry } from '$lib/health/signal-crud';
+	import { date as formatDate } from '$lib/datetime';
 
 	interface Props {
 		values: Signal[];
 		signal: string;
 		category: PropertyCategory;
 		unit?: string;
+		hideAddButton?: boolean;
 	}
 
-	let { values, signal, category, unit = '' }: Props = $props();
+	let { values, signal, category, unit = '', hideAddButton = false }: Props = $props();
 
 	// Local state for editing
 	let editingIndex = $state<number | null>(null);
 	let isAdding = $state(false);
 	let isProcessing = $state(false);
 
-	function formatDate(dateStr: string): string {
+	function formatDateDisplay(dateStr: string): string {
 		if (!dateStr) return '';
-		const date = new Date(dateStr);
-		return date.toLocaleDateString(undefined, {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
+		// Use the project's localized date formatting (DD.MM.YYYY)
+		return formatDate(dateStr) || '';
 	}
 
 	function formatValue(val: any): string {
@@ -113,7 +111,7 @@
 						/>
 					{:else}
 						<div class="entry-content">
-							<span class="date">{formatDate(entry.date)}</span>
+							<span class="date">{formatDateDisplay(entry.date)}</span>
 							<span class="value">
 								{formatValue(entry.value)}
 								{#if entry.unit || unit}
@@ -153,7 +151,7 @@
 		</ul>
 	{/if}
 
-	{#if canAddEntries(category) && !isAdding}
+	{#if !hideAddButton && canAddEntries(category) && !isAdding}
 		<button type="button" class="button --secondary add-btn" onclick={startAdd} disabled={isProcessing}>
 			{$t('profile.health.history.add-entry')}
 		</button>

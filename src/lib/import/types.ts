@@ -94,23 +94,26 @@ export interface FileManifestEntry {
 }
 
 export interface ImportJob {
-  id: string;
-  user_id: string;
-  status: ImportJobStatus;
-  stage: string | null;
-  progress: number;
-  message: string | null;
-  error: string | null;
-  scan_deducted: boolean;
-  processing_started_at: string | null;
-  file_count: number;
-  file_manifest: FileManifestEntry[];
-  language: string;
-  extraction_result: Assessment[] | null;
-  analysis_results: ReportAnalysis[];
-  created_at: string;
-  updated_at: string;
-  expires_at: string;
+	id: string
+	user_id: string
+	status: ImportJobStatus
+	stage: string | null
+	progress: number
+	message: string | null
+	error: string | null
+	scan_deducted: boolean
+	processing_started_at: string | null
+	file_count: number
+	file_manifest: FileManifestEntry[]
+	language: string
+	extraction_result: Assessment[] | null // Deprecated: use encrypted_extraction_result
+	analysis_results: ReportAnalysis[] // Deprecated: use encrypted_analysis_results
+	encrypted_extraction_result?: string // AES-256-GCM encrypted with IV
+	encrypted_analysis_results?: string // AES-256-GCM encrypted with IV
+	result_encryption_key?: string // Job encryption key wrapped with user RSA public key
+	created_at: string
+	updated_at: string
+	expires_at: string
 }
 
 export interface ImportJobCreateInput {

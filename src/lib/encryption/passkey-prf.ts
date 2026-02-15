@@ -65,21 +65,14 @@ export async function checkPasskeyPRFSupport(): Promise<PasskeyPRFSupport> {
     result.platformAuthenticatorAvailable = false;
   }
 
-  // Check PRF support by attempting to get client capabilities
-  // This is a heuristic - actual PRF support depends on the authenticator
-  try {
-    // Chrome 120+ supports getClientCapabilities
-    if ('getClientCapabilities' in PublicKeyCredential) {
-      const capabilities = await (PublicKeyCredential as any).getClientCapabilities();
-      result.prfSupported = capabilities?.prf === true;
-    } else {
-      // For older browsers, assume PRF might be supported if platform authenticator is available
-      // Actual support will be verified during credential creation
-      result.prfSupported = result.platformAuthenticatorAvailable;
-    }
-  } catch {
-    // Assume PRF might be supported - will be verified during creation
-    result.prfSupported = result.platformAuthenticatorAvailable;
+  // Check PRF support
+  // Note: PRF is an authenticator-level extension, not a browser capability.
+  // getClientCapabilities() doesn't report PRF support - it's verified during credential creation.
+  // Modern platform authenticators (macOS, Windows Hello, iOS, Android) support PRF.
+  // We assume PRF is supported if a platform authenticator is available.
+  // Actual PRF support will be verified when creating/using the credential.
+  if (result.platformAuthenticatorAvailable) {
+    result.prfSupported = true;
   }
 
   return result;

@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { enhance } from '$app/forms';
-	import type { SubmitFunction } from '@sveltejs/kit';
 	import steps from '$components/onboarding/steps';
-    import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { VCard } from '$lib/contact/types.d';
-    import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { prepareKey, encrypt as encryptAES, exportKey } from '$lib/encryption/aes.js';
 	import { encrypt as encryptRSA, pemToKey } from '$lib/encryption/rsa.js';
 	import { log } from '$lib/logging/logger';
 	import { t } from '$lib/i18n';
+	import { apiFetch } from '$lib/api/client';
+	import { isNativePlatform } from '$lib/config/platform';
+	import { getClient } from '$lib/supabase';
 
 	let STEP = $state(0);
 
@@ -39,7 +40,7 @@
 	}
 
 
-	let { data, form } = $props();
+	let { data } = $props();
 
 
 	let readyNext: boolean = $state(false);
@@ -64,18 +65,18 @@
 		});
 	})
 
-	        let profileForm: HTMLFormElement | undefined = $state()
+	let profileForm: HTMLFormElement | undefined = $state()
 	let loading = $state(false);
 	let error: string | null = $state(null);
 
 	let editData: EditData = $state({
-		                bio: {
-                        email: userEmail || '',
-                        fullName: (form as any)?.fullName ?? profile?.fullName ?? '',
-                        avatarUrl: profile?.avatarUrl ?? '',
-                        birthDate: profile?.birthDate ?? '',
-                        language: (form as any)?.language ?? profile?.language ?? 'en'
-                },
+		bio: {
+			email: userEmail || '',
+			fullName: profile?.fullName ?? '',
+			avatarUrl: profile?.avatarUrl ?? '',
+			birthDate: profile?.birthDate ?? '',
+			language: profile?.language ?? 'en'
+		},
 		subscription: profile?.subscription ?? 'individual',
 		vcard: JSON.parse(profile?.vcard ?? '{}'),
 		insurance: JSON.parse(profile?.insurance ?? '{}'),
@@ -89,24 +90,9 @@
 		}
 	})
 
-	const handleSubmit: SubmitFunction = async ({formElement, formData, action, cancel}) => {
-		//console.log('editData', editData);
-		//console.log('handleSubmit', {formElement, formData, action, cancel})
-		formData.append('fullName', editData.bio.fullName);
-		formData.append('avatarUrl', editData.bio.avatarUrl);
-		formData.append('language', editData.bio.language);
-		formData.append('vcard', JSON.stringify(editData.vcard));
-		formData.append('subscription', editData.subscription);
-		formData.append('insurance', JSON.stringify(editData.insurance));
-		formData.append('health', JSON.stringify(editData.health));
-		if (!editData.privacy.enabled && editData.privacy.passphrase) {
-			formData.append('passphrase', editData.privacy.passphrase);
-		}
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
 
-		formData.append('publicKey', editData.privacy.publicKey as string);
-		formData.append('privateKey', editData.privacy.privateKey as string);
-		formData.append('key_hash', editData.privacy.key_hash as string);
-		
 		// Sync birthDate from bio to health document
 		editData.health.birthDate = editData.bio.birthDate;
 
@@ -133,7 +119,7 @@
 			content: {
 				title: 'Profile',
 				tags: ['profile'],
-				
+
 			}
 		}];
 
@@ -154,40 +140,71 @@
 			};
 		}));
 
+		loading = true;
+		error = null;
 
-		formData.append('documents', JSON.stringify(documentsEncrypted));
+		try {
+			const payload = {
+				fullName: editData.bio.fullName,
+				avatarUrl: editData.bio.avatarUrl,
+				language: editData.bio.language,
+				subscription: editData.subscription,
+				passphrase: (!editData.privacy.enabled && editData.privacy.passphrase)
+					? editData.privacy.passphrase
+					: null,
+				publicKey: editData.privacy.publicKey,
+				privateKey: editData.privacy.privateKey,
+				key_hash: editData.privacy.key_hash,
+				documents: documentsEncrypted,
+			};
 
-		loading = true
-		return async ({ update, result }) => {
-			log.ui.debug('result', result);
-			if (result.type === 'success') {
-				loading = false;
+			const response = await apiFetch('/v1/account/onboarding', {
+				method: 'POST',
+				body: JSON.stringify(payload),
+			});
+
+			const result = await response.json();
+
+			if (response.ok && result.success) {
 				log.ui.info('should go to /med');
 				goto('/med');
 				return;
 			}
-			                        if (result.type === 'failure') {
-                                error = result.data?.error;
-				log.ui.error('error', error);
-				setStep(0);
-				loading = false
-			}
-			loading = false
+
+			error = result.error || 'An error occurred';
+			log.ui.error('error', error);
+			setStep(0);
+		} catch (err: any) {
+			error = err.message || 'An error occurred';
+			log.ui.error('submit error', err);
+			setStep(0);
+		} finally {
+			loading = false;
 		}
 	}
 
-	const handleSignOut: SubmitFunction = () => {
-		loading = true
-		return async ({ update }) => {
-			loading = false
-			update()
+	async function handleSignOut() {
+		loading = true;
+		try {
+			if (isNativePlatform()) {
+				const { signOut } = await import('$lib/capacitor/auth');
+				await signOut();
+			} else {
+				const supabase = getClient();
+				await supabase.auth.signOut();
+			}
+			goto('/auth');
+		} catch (err) {
+			log.ui.error('sign out error', err);
+		} finally {
+			loading = false;
 		}
 	}
 
 	function setStep(step: number) {
 		location.hash = step.toString();
 	}
-	
+
 	//let { session, profile } = $derived(data);
 	run(() => {
 		if (hash == '') {
@@ -204,19 +221,16 @@
 
 	<div class="form modal">
 		{#if error}
-			                        <div class="form-instructions -error">{typeof error === 'string' ? error : (error as any)?.message}</div>
+			<div class="form-instructions -error">{typeof error === 'string' ? error : (error as any)?.message}</div>
 		{/if}
 		<div class="form-contents">
 		<SvelteComponent bind:data={editData} {profileForm}  bind:ready={readyNext} />
 		</div>
 
 		<form
-
-		method="post"
-		action="?/update"
-		use:enhance={handleSubmit}
+		onsubmit={handleSubmit}
 		bind:this={profileForm}
-	>  
+	>
 
 		<div class="form-actions">
 
@@ -251,12 +265,10 @@
 		</div>
 	</form>
 	</div>
-	<form class="signout" method="post" action="?/signout" use:enhance={handleSignOut}>
-		<div>
-			<button class="button block" disabled={loading}>{$t('app.account.sign-out')}</button>
-		</div>
-	</form>
-	
+	<div class="signout">
+		<button class="button block" disabled={loading} onclick={handleSignOut}>{$t('app.account.sign-out')}</button>
+	</div>
+
 </div>
 
 

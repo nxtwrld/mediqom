@@ -11,8 +11,11 @@
 	import { t } from '$lib/i18n';
 	import {
 		getPropertyCategory,
-		type PropertyCategory
+		type PropertyCategory,
+		canAddEntries
 	} from '$lib/health/property-categories';
+	import { addSignalEntry } from '$lib/health/signal-crud';
+	import EntryForm from './EntryForm.svelte';
 
 	interface PropertyWithCategory extends Signal {
 		category?: PropertyCategory;
@@ -50,40 +53,85 @@
 			};
 		});
 	}
+
+	// Local state for adding entries
+	let isAdding = $state(false);
+	let isProcessing = $state(false);
+
+	async function handleAdd(entry: Omit<Signal, 'signal'>) {
+		if (!$profile?.id) return;
+		isProcessing = true;
+
+		const result = await addSignalEntry($profile.id, property.signal, entry);
+
+		if (result.success) {
+			isAdding = false;
+		}
+		isProcessing = false;
+	}
+
+	function startAdd() {
+		isAdding = true;
+	}
+
+	function cancelAdd() {
+		isAdding = false;
+	}
+
+	// Show chart tab only if we have enough data (2+ values)
+	let showChartTab = $derived(history.length > 1);
 </script>
 
 <div class="property-overview">
 	<h2 class="h2">{$t('profile.health.props.' + property.signal)}</h2>
 
-	<Tabs fixedHeight={false}>
-		{#snippet tabHeads()}
-			<TabHeads>
-				<TabHead>{$t('profile.health.tabs.chart')}</TabHead>
-				<TabHead>{$t('profile.health.tabs.history')}</TabHead>
-			</TabHeads>
-		{/snippet}
+	{#if showChartTab}
+		<Tabs fixedHeight={false}>
+			{#snippet tabHeads()}
+				<TabHeads>
+					<TabHead>{$t('profile.health.tabs.chart')}</TabHead>
+					<TabHead>{$t('profile.health.tabs.history')}</TabHead>
+				</TabHeads>
+			{/snippet}
 
-		<TabPanel>
-			<div class="chart-panel">
-				{#if property.reference}
-					<ReferenceRange value={property.value} reference={property.reference} />
-				{/if}
+			<TabPanel>
+				<div class="chart-panel">
+					{#if property.reference}
+						<ReferenceRange value={property.value} reference={property.reference} />
+					{/if}
 
-				{#if history.length > 1}
 					<ReferenceRangeLineChart
 						series={toLineChartData(history)}
 						reference={property.reference}
 					/>
-				{:else}
-					<p class="no-history">{$t('profile.health.history.no-chart-data')}</p>
-				{/if}
-			</div>
-		</TabPanel>
+				</div>
+			</TabPanel>
 
-		<TabPanel>
-			<HistoryList values={history} signal={property.signal} {category} {unit} />
-		</TabPanel>
-	</Tabs>
+			<TabPanel>
+				<HistoryList values={history} signal={property.signal} {category} {unit} hideAddButton={true} />
+			</TabPanel>
+		</Tabs>
+	{:else}
+		<!-- No tabs when insufficient data - show history only -->
+		<div class="history-only">
+			<HistoryList values={history} signal={property.signal} {category} {unit} hideAddButton={true} />
+		</div>
+	{/if}
+
+	<!-- Add button outside tabs - visible on both views -->
+	{#if isAdding}
+		<div class="add-form-container">
+			<EntryForm signal={property.signal} {unit} onsave={handleAdd} oncancel={cancelAdd} />
+		</div>
+	{/if}
+
+	{#if canAddEntries(category) && !isAdding}
+		<div class="add-button-container">
+			<button type="button" class="button --primary add-btn" onclick={startAdd} disabled={isProcessing}>
+				{$t('profile.health.history.add-entry')}
+			</button>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -103,6 +151,24 @@
 		color: var(--color-text-muted);
 		text-align: center;
 		padding: var(--gap);
+	}
+
+	.history-only {
+		padding: var(--gap-small) 0;
+	}
+
+	.add-form-container {
+		margin-top: var(--gap);
+		padding: 0 var(--gap-small);
+	}
+
+	.add-button-container {
+		margin-top: var(--gap);
+		padding: 0 var(--gap-small);
+	}
+
+	.add-btn {
+		width: 100%;
 	}
 
 	@media screen and (max-width: 600px) {

@@ -6,6 +6,7 @@
  */
 
 import type { DocumentProcessingState } from "../state";
+import { saveNodeResult } from "$lib/import.server/debug-output";
 
 export interface NodeDefinition {
   nodeName: string;
@@ -133,6 +134,7 @@ export class NodeRegistry {
     plan: NodeExecutionPlan,
     initialState: DocumentProcessingState,
     progressCallback?: (progress: number, message: string) => void,
+    debugContext?: { jobId?: string; runTimestamp?: string },
   ): Promise<DocumentProcessingState> {
     let currentState = { ...initialState };
     let completedNodes = 0;
@@ -158,6 +160,17 @@ export class NodeRegistry {
           console.log(`⚡ Starting ${node.nodeName}...`);
           const nodeResult = await node.nodeFunction(currentState);
           console.log(`✅ Completed ${node.nodeName}`);
+
+          // Save per-node debug output
+          if (debugContext?.jobId) {
+            saveNodeResult(
+              debugContext.jobId,
+              node.nodeName,
+              nodeResult,
+              debugContext.runTimestamp,
+            );
+          }
+
           return { nodeName: node.nodeName, result: nodeResult, success: true };
         } catch (error) {
           console.error(`❌ Failed ${node.nodeName}:`, error);

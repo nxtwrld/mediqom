@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import user from '$lib/user';
+	import type { User } from '$lib/user';
+	import Modal from '$components/ui/Modal.svelte';
+	import EncryptionMethodSwitch from '$components/settings/EncryptionMethodSwitch.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	// Read user data from store (using $user auto-subscription)
-	const encryptionEnabled = !!($user?.privateKey && $user?.publicKey);
-	const encryptionMethod = $user?.key_derivation_method || 'passphrase';
-	const userEmail = $user?.email || '';
-	const createdAt = ($user as any)?.created_at || new Date().toISOString();
+	const currentUser = $user as User | null;
+	const encryptionEnabled = !!(currentUser?.privateKey && currentUser?.publicKey);
+	const encryptionMethod = currentUser?.key_derivation_method || 'passphrase';
+	const hasRecoveryKey = !!currentUser?.recovery_encrypted_key;
+	const userEmail = currentUser?.email || '';
+	const createdAt = (currentUser as any)?.created_at || new Date().toISOString();
+
+	// Modal state
+	let showEncryptionModal = $state(false);
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString('en-US', {
@@ -15,6 +24,20 @@
 			day: 'numeric'
 		});
 	};
+
+	function openEncryptionModal() {
+		showEncryptionModal = true;
+	}
+
+	function closeEncryptionModal() {
+		showEncryptionModal = false;
+	}
+
+	async function handleEncryptionSuccess() {
+		// Reload user data to reflect changes
+		await invalidateAll();
+		showEncryptionModal = false;
+	}
 </script>
 
 <div class="settings-panel">
@@ -38,6 +61,12 @@
 						? $t('app.settings.privacy.encryption.passkey')
 						: $t('app.settings.privacy.encryption.passphrase')}
 				</div>
+				{#if hasRecoveryKey}
+					<div class="info-item">
+						<span class="status-icon -small">✓</span>
+						<span>Recovery key configured</span>
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<div class="info-box -warning">
@@ -46,9 +75,14 @@
 		{/if}
 
 		<div class="actions">
-			<a href="/account" class="button">
+			<button class="button" onclick={openEncryptionModal}>
 				{$t('app.settings.privacy.encryption.change')}
-			</a>
+			</button>
+			{#if encryptionEnabled && !hasRecoveryKey}
+				<button class="button -secondary" onclick={openEncryptionModal}>
+					{$t('app.settings.privacy.encryption.setup-recovery')}
+				</button>
+			{/if}
 		</div>
 	</section>
 
@@ -83,6 +117,15 @@
 		<p class="note">{$t('app.settings.privacy.data.coming-soon')}</p>
 	</section>
 </div>
+
+{#if showEncryptionModal}
+	<Modal onclose={closeEncryptionModal}>
+		<EncryptionMethodSwitch
+			onClose={closeEncryptionModal}
+			onSuccess={handleEncryptionSuccess}
+		/>
+	</Modal>
+{/if}
 
 <style>
 	.settings-panel {
@@ -132,6 +175,10 @@
 		color: var(--color-positive);
 		font-size: 1.25rem;
 		font-weight: bold;
+	}
+
+	.status-icon.-small {
+		font-size: 1rem;
 	}
 
 	.status-text {

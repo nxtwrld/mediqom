@@ -435,6 +435,25 @@ export async function decrypt(data: string): Promise<string> {
     */
 }
 
+/**
+ * Get the current private key as PEM string (if unlocked)
+ * Used for re-encrypting when switching encryption methods
+ */
+export async function getPrivateKeyPEM(): Promise<string | null> {
+  if (!keyPair.isReady() || !keyPair.privateKey) {
+    return null;
+  }
+
+  try {
+    // Import keyToPEM dynamically to avoid circular imports
+    const { keyToPEM } = await import("../encryption/rsa");
+    return await keyToPEM(keyPair.privateKey, true);
+  } catch (error) {
+    console.error("[User] Error exporting private key:", error);
+    return null;
+  }
+}
+
 export default {
   keyPair,
   getId,
@@ -450,4 +469,5 @@ export default {
   getKeyDerivationMethod,
   hasRecoveryKey,
   hasPasskey,
+  getPrivateKeyPEM,
 };

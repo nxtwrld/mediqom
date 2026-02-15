@@ -25,9 +25,6 @@ import { externalValidationNode } from "../nodes/external-validation";
 import { qualityGateNode } from "../nodes/quality-gate";
 import { documentTypeRouterNode } from "../nodes/document-type-router";
 
-// Import unified multi-node processing
-import { executeMultiNodeProcessing } from "./multi-node-orchestrator";
-
 // Conditional edge functions
 const shouldProcessMedical = (state: DocumentProcessingState): string => {
   if (state.errors && state.errors.length > 0) {
@@ -160,10 +157,8 @@ export const createDocumentProcessingWorkflow = (
     "feature_detection",
     createNodeWrapper(featureDetectionNode),
   );
-  workflow.addNode(
-    "multi_node_processing",
-    createNodeWrapper(executeMultiNodeProcessing),
-  );
+  // Note: multi_node_processing node removed - now handled by unified workflow
+  // This legacy workflow is kept for backward compatibility but forwards to unified-workflow.ts
 
   // Enhanced nodes (new capabilities)
   workflow.addNode(
