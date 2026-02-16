@@ -377,7 +377,9 @@
       "doc-status-error": "Chyba",
       "no-cached-files-warning": "Původní soubory nejsou na tomto zařízení k dispozici. Můžete uložit bez příloh, nebo dokončit na zařízení, kde jste import zahájili.",
       "extracting-text-and-data": "Extrahování textu a dat...",
-      "analyzing-medical-content": "Analýza lékařského obsahu..."
+      "analyzing-medical-content": "Analýza lékařského obsahu...",
+      "loading-job": "",
+      "preparing-documents": ""
     },
     "buttons": {
       "retry": "Opakovat",

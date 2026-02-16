@@ -535,7 +535,7 @@ export class EnhancedAIProvider {
    * Create system message for all providers
    */
   private createSystemMessage(language: string): string {
-    return `You are a medical AI assistant. You MUST respond in ${language} language ONLY. All text in your response must be in ${language}. Do not use any other language. If the language is "English", respond only in English. If the language is "Czech", respond only in Czech. This is critical - strictly follow the language requirement.`;
+    return `You are a medical AI assistant. You MUST respond in ${language} language ONLY. All free-text fields in your response must be in ${language}. Do not use any other language for free-text content. This is critical - strictly follow the language requirement. IMPORTANT EXCEPTION: When the JSON schema defines an "enum" array for a field, you MUST use the exact enum values as provided - never translate enum values.`;
   }
 
   /**

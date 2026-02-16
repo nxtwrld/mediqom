@@ -9,6 +9,7 @@ import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import anatomyTags from "$lib/configurations/tags";
+import propertiesDefinition from "$data/lab.properties.defaults.json";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import {
@@ -278,6 +279,12 @@ export abstract class BaseProcessingNode {
       const schemaItems = (this.schema as any)?.items?.properties?.identification;
       if (schemaItems?.enum && schemaItems.enum.length === 0) {
         schemaItems.enum = [...anatomyTags];
+      }
+
+      // Populate empty signal enum with lab property keys
+      const signalSchema = (this.schema as any)?.parameters?.properties?.signals?.items?.properties?.signal;
+      if (signalSchema?.enum && Array.isArray(signalSchema.enum) && signalSchema.enum.length === 0) {
+        signalSchema.enum.push(...Object.keys(propertiesDefinition));
       }
 
       console.log(`✅ Successfully loaded schema for ${this.config.nodeName}`);

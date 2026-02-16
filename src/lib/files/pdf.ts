@@ -60,15 +60,23 @@ export async function selectPagesFromPdf(
     ignoreEncryption: true,
   });
 
+  // Validate page count — pdf-lib may not load all pages from certain PDF structures
+  const pageCount = sourcePdf.getPageCount();
+  const validIndices = pagesForFirstPdf
+    .map((n) => n - 1)
+    .filter((i) => i >= 0 && i < pageCount);
+
+  if (validIndices.length === 0) {
+    throw new Error(
+      `No valid pages (requested: [${pagesForFirstPdf}], pdf-lib found: ${pageCount})`,
+    );
+  }
+
   // Create new PDF documents for the split PDFs
   const firstPdf = await PDFDocument.create();
-  //const secondPdf = await PDFDocument.create();
 
   // Copy selected pages to the first PDF
-  const firstPdfPages = await firstPdf.copyPages(
-    sourcePdf,
-    pagesForFirstPdf.map((pageNumber) => pageNumber - 1), // Convert to zero-based index
-  );
+  const firstPdfPages = await firstPdf.copyPages(sourcePdf, validIndices);
   firstPdfPages.forEach((page) => firstPdf.addPage(page));
 
   // Copy selected pages to the second PDF

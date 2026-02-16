@@ -296,39 +296,50 @@ export async function updateDocument(documentData: Document) {
   );
 
   // encrypt attachments and map them to content with thumbnails
-  const attachmentsToEncrypt = (documentData.attachments || [])
-    .filter((a) => !a.url)
-    .map((a) => {
-      return JSON.stringify({
-        file: a.file,
-        type: a.type,
-      });
+  // Separate new attachments (with file data) from existing ones (with URLs)
+  const newAttachments = (documentData.attachments || []).filter((a) => !a.url && a.file);
+  const existingAttachments = (documentData.attachments || []).filter((a) => a.url);
+
+  logger.documents.debug("Update attachments to process", {
+    attachmentsCount: documentData.attachments?.length || 0,
+    newWithFileData: newAttachments.length,
+    existingWithUrls: existingAttachments.length,
+    withThumbnails: documentData.attachments?.filter(a => a.thumbnail).length || 0
+  });
+
+  const attachmentsToEncrypt = newAttachments.map((a) => {
+    return JSON.stringify({
+      file: a.file,
+      type: a.type,
     });
+  });
   const { data: attachmentsEncrypted } = await encrypt(
     attachmentsToEncrypt,
     key,
   );
 
-  logger.documents.debug("Update attachments", { attachmentsEncrypted });
+  logger.documents.debug("Update attachments encrypted", { attachmentsEncrypted });
   const attachmentsUrls = await saveAttachements(
     attachmentsEncrypted,
     document.user_id,
   );
 
-  // remap attachments to
-  let i = 0;
-  logger.documents.debug("Update attachments", { document });
-  document.content.attachments = (document.attachments || []).map((a) => {
-    const url = a.url || attachmentsUrls[i];
-    const path = a.path || attachmentsUrls[i].path;
-    i++;
-    return {
-      url,
-      path,
+  // Map attachments: new ones get fresh URLs, existing ones keep their URLs, all preserve thumbnails
+  logger.documents.debug("Update attachments remapping", { document });
+  document.content.attachments = [
+    ...newAttachments.map((a, i) => ({
+      url: attachmentsUrls[i].url,
+      path: attachmentsUrls[i].path,
       type: a.type,
-      thumbnail: a.thumbnail,
-    };
-  });
+      thumbnail: a.thumbnail, // Preserve thumbnail from original attachment
+    })),
+    ...existingAttachments.map((a) => ({
+      url: a.url,
+      path: a.path,
+      type: a.type,
+      thumbnail: a.thumbnail, // Preserve thumbnail from existing attachment
+    })),
+  ];
 
   const { data: enc } = await encrypt(
     [JSON.stringify(documentData.content), JSON.stringify(metadata)],
@@ -376,31 +387,55 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
   let metadata = deriveMetadata(document, document.metadata);
 
   // encrypt attachments and map them to content with thumbnails
-  const attachmentsToEncrypt: string[] = (document.attachments || []).map(
-    (a) => {
-      return JSON.stringify({
-        file: a.file,
-        type: a.type,
-      });
-    },
-  );
+  // Only process attachments that have file data
+  const attachmentsWithFiles = (document.attachments || []).filter((a) => a.file);
+  const attachmentsWithoutFiles = (document.attachments || []).filter((a) => !a.file && a.url);
+
+  logger.documents.debug("Attachments to process", {
+    attachmentsCount: document.attachments?.length || 0,
+    withFileData: attachmentsWithFiles.length,
+    withoutFileData: attachmentsWithoutFiles.length,
+    withThumbnails: document.attachments?.filter(a => a.thumbnail).length || 0
+  });
+
+  const attachmentsToEncrypt: string[] = attachmentsWithFiles.map((a) => {
+    return JSON.stringify({
+      file: a.file,
+      type: a.type,
+    });
+  });
   const { data: attachmentsEncrypted, key } =
     await encrypt(attachmentsToEncrypt);
+
+  logger.documents.debug("Attachments encrypted", {
+    attachmentsEncrypted: attachmentsEncrypted.length
+  });
+
   // save encrypted attachments
   const attachmentsUrls = await saveAttachements(
     attachmentsEncrypted,
     profile_id,
   );
 
-  // map attachments to content
-  document.content.attachments = (document.attachments || []).map((a: Attachment, i: number) => {
-    return {
+  logger.documents.debug("Attachments saved to storage", {
+    attachmentsUrls: attachmentsUrls.length
+  });
+
+  // map attachments to content, preserving thumbnails from original attachments
+  document.content.attachments = [
+    ...attachmentsWithFiles.map((a: Attachment, i: number) => ({
       url: attachmentsUrls[i].url,
       path: attachmentsUrls[i].path,
       type: a.type,
-      thumbnail: a.thumbnail,
-    };
-  });
+      thumbnail: a.thumbnail, // Preserve thumbnail from original attachment
+    })),
+    ...attachmentsWithoutFiles.map((a: Attachment) => ({
+      url: a.url,
+      path: a.path,
+      type: a.type,
+      thumbnail: a.thumbnail, // Preserve thumbnail from existing attachment
+    })),
+  ];
   logger.documents.info("Add document", { document });
   // encrypt document, metadata using the same key as attachments
   const { data: enc } = await encrypt(
