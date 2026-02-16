@@ -77,6 +77,18 @@
 
     const originalMaterials = new Map<string, THREE.Material>();
 
+    // Material cache: stores original and highlight-variant materials per mesh
+    // This avoids cloning materials on every focus change (472 meshes × ~0.18ms = ~85ms)
+    const materialCache = new Map<string, {
+        original: THREE.Material | THREE.Material[];
+        unfocused: THREE.Material | THREE.Material[];  // opacity 0.5
+        highlighted: THREE.Material | THREE.Material[]; // highlight color + opacity 1
+    }>();
+
+    // Pre-built list of meshes to update on focus (excludes shade_skin)
+    // Avoids expensive scene.traverse() on every highlight call
+    let focusableMeshes: THREE.Mesh[] = [];
+
     const objectToFileMapping = Object.entries(objects3d).reduce((acc, [k,v]) => {
         v.objects.forEach(f => {
             acc[f] = k;
@@ -386,6 +398,8 @@
 
             loadedFiles = [];
             loadedLayers = [];
+            materialCache.clear();
+            focusableMeshes = [];
             console.log('🧍', 'Destroyed');
         }
 
@@ -430,6 +444,9 @@
         })
         objects = [...objects, ...newObjects];
 
+        // Pre-cache materials and build focusable mesh list for fast highlight()
+        precacheMaterials();
+
         requestRender();
         loadLabels();
 
@@ -466,7 +483,6 @@
                 if (objectsToShow) checkObject(child, objectsToShow, labelIds);
 
                 if (object.name === 'integumentary_system' && child.name === 'body') {
-                    console.log('child...', child.name, child)
                     child.visible = false;
                 }
             } );
@@ -558,9 +574,53 @@
             return newMaterial;
         }
 
-        
+
     }
 
+    /**
+     * Gets cached material variants for a mesh.
+     * Creates and caches the variants on first access.
+     * Returns original, unfocused (dimmed), and highlighted material variants.
+     */
+    function getCachedMaterials(child: THREE.Mesh): {
+        original: THREE.Material | THREE.Material[];
+        unfocused: THREE.Material | THREE.Material[];
+        highlighted: THREE.Material | THREE.Material[];
+    } {
+        const key = child.uuid;
+        if (!materialCache.has(key)) {
+            const original = child.material;
+            materialCache.set(key, {
+                original,
+                unfocused: updateMaterial(original as THREE.Material, {
+                    opacity: UNFOCUSED_OPACITY,
+                    transparent: true
+                }),
+                highlighted: updateMaterial(original as THREE.Material, {
+                    color: HIGHLIGHT_COLOR,
+                    opacity: 1
+                })
+            });
+        }
+        return materialCache.get(key)!;
+    }
+
+    /**
+     * Pre-caches materials for all meshes and builds the focusableMeshes list.
+     * Called after model loading to ensure highlight() is fast.
+     */
+    function precacheMaterials() {
+        focusableMeshes = [];
+        scene.traverse((child: any) => {
+            if (child.isMesh && child.material) {
+                if (child.parent?.name !== 'shade_skin') {
+                    focusableMeshes.push(child);
+                    // Pre-populate the cache
+                    getCachedMaterials(child);
+                }
+            }
+        });
+    }
 
     function loadObj(setup: {
             id: string,
@@ -595,7 +655,6 @@
 
                 const objLoader = new OBJLoader( );
                 if (setup.material) {
-                    console.log('setup.material', setup.material)
                     const material = setup.material;
                     Object.keys(materialsCreator.materials).forEach(key => {
                         materialsCreator.materials[key] = material;
@@ -983,10 +1042,8 @@
 
 
     function clickLabel(event: MouseEvent) {
-        //console.log('clickLabel');
         event.stopPropagation();
         event.preventDefault();
-        console.log('click label')
         sounds.focus.play();
         ($state as any).focusView = false;
     }
@@ -1130,9 +1187,6 @@
                 const object = intersects[ 0 ].object;
                 if (object.name) {
                     sounds.focus.play();
-                    //addExperience('curiosity');
-                    //highlight(object);
-                    console.log('click', object.name, object);
                     focused.set({ object: object.name });
                     selected = object;
                 }
@@ -1144,47 +1198,45 @@
     }
 
     function highlight (object: THREE.Object3D | null) {
-        if (selected) {
-            selected.traverse( function ( child: any ) {
-                if ( child.isMesh ) {
-                    child.material = child.oldMaterial;
+        // Restore previously selected object to unfocused state
+        if (selected && selected !== object) {
+            selected.traverse((child: any) => {
+                if (child.isMesh) {
+                    const cached = getCachedMaterials(child);
+                    child.material = object ? cached.unfocused : cached.original;
                 }
             });
         }
 
-        // traverse all object and set material opacity to .5
-        scene.traverse( function ( child: any ) {
-            if ( child.isMesh && child.material) {
-                // material needs to cloned to distinguish from original
-                if(!child.parent || child.parent?.name !== 'shade_skin') {
-                    // material needs to cloned to distinguish from original
-                    child.oldMaterial = child.material;
-                    child.material = updateMaterial(child.material, { opacity: (object == null) ? DEFAULT_OPACITY : UNFOCUSED_OPACITY , transparent: true }) as any;
+        // Update all visible meshes to unfocused/original state using pre-built list
+        // This avoids expensive scene.traverse() calls
+        if (object && !selected) {
+            // Entering focus mode: dim all meshes
+            for (const mesh of focusableMeshes) {
+                if (mesh.visible) {
+                    const cached = materialCache.get(mesh.uuid);
+                    if (cached) mesh.material = cached.unfocused;
                 }
-
-
             }
-        });
+        } else if (!object && selected) {
+            // Exiting focus mode: restore all meshes
+            for (const mesh of focusableMeshes) {
+                if (mesh.visible) {
+                    const cached = materialCache.get(mesh.uuid);
+                    if (cached) mesh.material = cached.original;
+                }
+            }
+        }
 
-
-
+        // Highlight the target object
         if (object) {
-            //ui.emit('highlight-object', object.name);
-            object.traverse( function ( child: any ) {
-                if ( child.isMesh && child.material) {
-                    // material needs to cloned to distinguish from original
-                    child.oldMaterial = child.material;
-                    child.material = updateMaterial(child.material, { color: HIGHLIGHT_COLOR, opacity: 1 }) as any;
-
-                    //console.log('highlight', child.name, child.material);
-                    /*
-                    const material = child.material.clone();
-                    child.oldMaterial = child.material;
-                    material.color.set( HIGHLIGHT_COLOR );
-                    child.material = material;*/
+            object.traverse((child: any) => {
+                if (child.isMesh && child.material) {
+                    const cached = materialCache.get(child.uuid);
+                    if (cached) child.material = cached.highlighted;
                 }
             });
-        } 
+        }
     }
 
     function resetFocus() {

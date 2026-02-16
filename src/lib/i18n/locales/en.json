@@ -377,7 +377,9 @@
       "doc-status-error": "Error",
       "no-cached-files-warning": "Original files are not available on this device. You can save without attachments, or finalize on the device where you started the import.",
       "extracting-text-and-data": "Extracting text and data...",
-      "analyzing-medical-content": "Analyzing medical content..."
+      "analyzing-medical-content": "Analyzing medical content...",
+      "loading-job": "Loading import job...",
+      "preparing-documents": "Preparing documents for review..."
     },
     "buttons": {
       "retry": "Retry",

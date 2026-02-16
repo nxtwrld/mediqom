@@ -74,14 +74,22 @@ export async function decryptJobResults(
 /**
  * Assemble import Documents from extraction/analysis results.
  * If originalFiles are provided, creates PDF attachments from them.
+ * @param onProgress - Optional callback to report progress (0-1)
  */
 export async function assembleDocuments(
   extractionResults: Assessment[],
   analysisResults: ReportAnalysis[],
   originalFiles?: File[] | null,
+  onProgress?: (progress: number) => void,
 ): Promise<ImportDocument[]> {
   const documents: ImportDocument[] = [];
   let analysisIndex = 0;
+
+  // Count total documents for progress tracking
+  const totalDocs = extractionResults.reduce(
+    (sum, a) => sum + a.documents.length, 0
+  );
+  let processedDocs = 0;
 
   for (let ai = 0; ai < extractionResults.length; ai++) {
     const assessment = extractionResults[ai];
@@ -98,35 +106,68 @@ export async function assembleDocuments(
       let attachment: { thumbnail: string; type: string; file: string; path: string; url: string } | null = null;
 
       if (originalFile) {
-        const docPages = assessment.pages.filter((p) => doc.pages.includes(p.page));
-
         try {
           if (originalFile.type === "application/pdf") {
             const pdfBuffer = await originalFile.arrayBuffer();
 
+            // Use server-provided thumbnail, fall back to processing
+            const docPages = assessment.pages.filter((p) => doc.pages.includes(p.page));
             let thumbnail = docPages[0]?.thumbnail || "";
             if (!thumbnail) {
               try {
                 const { processPDF } = await import("$lib/files/pdf");
-                const processedPdf = await processPDF(pdfBuffer, originalFile.name);
+                const processedPdf = await processPDF(pdfBuffer);
                 thumbnail = processedPdf.pages[0]?.thumbnail || "";
-              } catch {
-                // Skip thumbnail generation
+              } catch { /* skip thumbnail generation */ }
+            }
+
+            // Try pdf-lib splitting (primary path)
+            let extractedPdfBuffer: ArrayBuffer | null = null;
+            try {
+              // doc.pages contains 1-based page numbers from extraction
+              extractedPdfBuffer = await selectPagesFromPdf(
+                pdfBuffer,
+                doc.pages,
+              );
+            } catch (splitError) {
+              console.warn("pdf-lib split failed, falling back to image-based PDF:", splitError);
+              // Fallback: use pdfjs-dist to render pages → create image-based PDF
+              try {
+                const { loadPdfDocument, renderPDFToBase64Images } = await import("$lib/files/pdf");
+                const pdfDoc = await loadPdfDocument({ data: pdfBuffer.slice(0) });
+                const allPageImages = await renderPDFToBase64Images(pdfDoc);
+                // Convert 1-based page numbers to 0-based array indices
+                const selectedImages = doc.pages.map((p: number) => allPageImages[p - 1]).filter(Boolean);
+                if (selectedImages.length > 0) {
+                  const imageBuffers = selectedImages.map((dataUrl: string) =>
+                    base64ToArrayBuffer(dataUrl.split(",")[1])
+                  );
+                  extractedPdfBuffer = await createPdfFromImageBuffers(imageBuffers);
+                  if (!thumbnail && selectedImages[0]) {
+                    thumbnail = await resizeImage(selectedImages[0], THUMBNAIL_SIZE);
+                  }
+                }
+              } catch (fallbackError) {
+                console.error("Image-based PDF fallback also failed:", fallbackError);
               }
             }
 
-            const extractedPdf = await selectPagesFromPdf(
-              pdfBuffer,
-              doc.pages.map((p) => p + 1),
-            );
-
-            attachment = {
-              thumbnail,
-              type: "application/pdf",
-              file: await toBase64(extractedPdf),
-              path: "",
-              url: "",
-            };
+            if (extractedPdfBuffer) {
+              attachment = {
+                thumbnail,
+                type: "application/pdf",
+                file: await toBase64(extractedPdfBuffer),
+                path: "",
+                url: "",
+              };
+              console.log('📎 [Finalizer] Created PDF attachment:', {
+                hasThumbnail: !!thumbnail,
+                thumbnailLength: thumbnail?.length || 0,
+                hasFile: !!attachment.file,
+                fileSize: attachment.file.length,
+                type: attachment.type
+              });
+            }
           } else if (originalFile.type.startsWith("image/")) {
             const reader = new FileReader();
             const originalImageBase64 = await new Promise<string>((resolve, reject) => {
@@ -147,6 +188,13 @@ export async function assembleDocuments(
               path: "",
               url: "",
             };
+            console.log('📎 [Finalizer] Created image-to-PDF attachment:', {
+              hasThumbnail: !!thumbnail,
+              thumbnailLength: thumbnail?.length || 0,
+              hasFile: !!attachment.file,
+              fileSize: attachment.file.length,
+              type: attachment.type
+            });
           }
         } catch (error) {
           console.error("Failed to create attachment:", error);
@@ -166,7 +214,7 @@ export async function assembleDocuments(
         ...reportData,
       };
 
-      documents.push({
+      const importDoc = {
         title: reportData.title || doc.title || `Document ${ai + 1}-${di + 1}`,
         date: reportData.date || doc.date || new Date().toISOString(),
         isMedical: analysis?.isMedical !== undefined ? analysis.isMedical : doc.isMedical,
@@ -177,7 +225,21 @@ export async function assembleDocuments(
         type: (originalFile?.type || "application/pdf") as any,
         files: originalFile ? [originalFile] : [] as any,
         task: undefined as any,
-      } as unknown as ImportDocument);
+      } as unknown as ImportDocument;
+
+      console.log('📋 [Finalizer] Assembled import document:', {
+        title: importDoc.title,
+        attachmentsCount: importDoc.attachments?.length || 0,
+        hasAttachment: !!attachment,
+        attachmentHasThumbnail: attachment ? !!attachment.thumbnail : false,
+        attachmentHasFile: attachment ? !!attachment.file : false,
+      });
+
+      documents.push(importDoc);
+
+      // Report progress
+      processedDocs++;
+      onProgress?.(processedDocs / totalDocs);
     }
   }
 

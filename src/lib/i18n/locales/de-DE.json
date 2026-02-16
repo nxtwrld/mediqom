@@ -377,7 +377,9 @@
       "doc-status-error": "Fehler",
       "no-cached-files-warning": "Originaldateien sind auf diesem Gerät nicht verfügbar. Sie können ohne Anhänge speichern oder auf dem Gerät abschließen, auf dem Sie den Import gestartet haben.",
       "extracting-text-and-data": "Text und Daten extrahieren...",
-      "analyzing-medical-content": "Medizinischen Inhalt analysieren..."
+      "analyzing-medical-content": "Medizinischen Inhalt analysieren...",
+      "loading-job": "",
+      "preparing-documents": ""
     },
     "buttons": {
       "retry": "Wiederholen",

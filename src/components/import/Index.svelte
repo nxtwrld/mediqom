@@ -52,6 +52,7 @@
     // Current job tracking
     let currentJobId: string | null = $state(jobId || null);
     let noCachedFiles = $state(false);
+    let isResuming = $state(false);
 
     enum AssessingState {
         IDLE = 'IDLE',
@@ -103,6 +104,8 @@
     /** Resume a completed/in-progress job */
     async function resumeJob(id: string) {
         try {
+            isResuming = true;
+
             const job = await fetchJob(id);
             if (!job) return;
 
@@ -115,11 +118,6 @@
 
                 // Use decryptJobResults to handle both encrypted and plaintext jobs
                 const { extraction, analysis } = await decryptJobResults(job);
-
-                console.log('Resume flow - extraction:', extraction);
-                console.log('Resume flow - analysis:', analysis);
-                console.log('Resume flow - extraction type:', Array.isArray(extraction));
-                console.log('Resume flow - analysis type:', Array.isArray(analysis));
 
                 const documents = await assembleDocuments(
                     extraction,
@@ -138,6 +136,7 @@
                 byProfileDetected = mergeNamesOnReports(results as any) as any;
             } else if (['created', 'extracting', 'analyzing'].includes(job.status)) {
                 // Still processing - start listening
+                isResuming = false;
                 assessingState = AssessingState.ASSESSING;
                 processingState = ProcessingState.PROCESSING;
 
@@ -157,6 +156,7 @@
             console.error('Failed to resume job:', error);
             play('error');
         } finally {
+            isResuming = false;
             assessingState = AssessingState.IDLE;
             processingState = ProcessingState.IDLE;
             currentStage = null;
@@ -201,8 +201,9 @@
 
             const language = ($user as User)?.language || 'English';
 
-            // Create persistent job
-            const id = await createJob(newTasks, filesToProcess, language);
+            // Create persistent job — use task files (possibly decrypted clones) for caching
+            const filesToCache = newTasks.flatMap(t => t.files as File[]);
+            const id = await createJob(newTasks, filesToCache, language);
             currentJobId = id;
 
             // Process with SSE + polling fallback
@@ -324,7 +325,12 @@
 </script>
 
 <div class="page -empty">
-{#if ($user as User)?.subscriptionStats?.scans <= 0}
+{#if isResuming}
+    <div class="resume-loading">
+        <LoaderThinking />
+        <p>{$t('app.import.preparing-documents')}</p>
+    </div>
+{:else if ($user as User)?.subscriptionStats?.scans <= 0}
     <div class="alert -warning">
         { $t('app.import.maxium-scans-reached', { values: {
             limit: ($user as User)?.subscriptionStats?.scans
@@ -468,6 +474,15 @@
         --color: var(--color-white);
         width: 100%;
         height: 1.2em;
+    }
+
+    .resume-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - var(--heading-height) - var(--toolbar-height));
+        padding: 2rem;
     }
 
     .imports {

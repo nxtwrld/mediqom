@@ -15,7 +15,7 @@ import { type Task, TaskState } from "../import/index";
 
 // Re-export Task and TaskState for use in other modules
 export { type Task, TaskState };
-import { toBase64 } from "$lib/arrays";
+import { toBase64, base64ToArrayBuffer } from "$lib/arrays";
 import { checkPassword } from "./pdf";
 // IMPORTANT: Do not import dicomHandler at module level - causes server-side issues on Vercel
 // import { dicomHandler } from "./dicom-handler";
@@ -237,16 +237,33 @@ export async function createTasks(files: File[]): Promise<Task[]> {
 
             console.log(`✅ PDF pre-processing completed: ${file.name} - Extracted ${base64Images.length} pages as base64 images`);
 
+            // For password-protected PDFs, create an unencrypted image-based clone
+            // so the finalizer can split pages without dealing with encryption
+            let finalFile = file;
+            let finalData = data;
+            if (password) {
+              try {
+                const imageBuffers = base64Images.map((dataUrl) =>
+                  base64ToArrayBuffer(dataUrl.split(",")[1])
+                );
+                const cleanPdfBuffer = await createPdfFromImageBuffers(imageBuffers);
+                finalFile = new File([cleanPdfBuffer], file.name, { type: "application/pdf" });
+                finalData = cleanPdfBuffer;
+              } catch (decryptCloneError) {
+                console.warn("Failed to create decrypted PDF clone, using original:", decryptCloneError);
+              }
+            }
+
             tasks.push({
               title: file.name,
               type: "application/pdf",
               icon: "pdf",
               data: base64Images, // Store base64 images for SSE processing
               password,
-              originalPdf: data, // Store original PDF for attachment creation
+              originalPdf: finalData, // Store (possibly decrypted) PDF for attachment creation
               thumbnail,
               state: TaskState.NEW,
-              files: [file],
+              files: [finalFile],
             });
           } catch (error) {
             console.error(`❌ PDF pre-processing failed for ${file.name}:`, error);
