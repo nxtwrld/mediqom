@@ -114,7 +114,7 @@ export function convertWorkflowResult(
     type: actualContent.type || "report",
     fhirType: actualContent.fhirType || "DiagnosticReport",
     fhir: actualContent.fhir || {},
-    cagegory: actualContent.category || "report",
+    category: actualContent.category || "report",
     isMedical:
       actualContent.isMedical !== undefined ? actualContent.isMedical : true,
     tags,

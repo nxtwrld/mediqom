@@ -6,16 +6,16 @@
     import { scale, fade } from 'svelte/transition';
     import { t } from '$lib/i18n';
 
-    export function closeModal() {
+    export async function closeModal() {
         console.log('Modal closeModal function called, calling onclose callback');
-        onclose?.();
-        console.log('Modal onclose callback called');
+        await onclose?.();
+        console.log('Modal onclose callback called and completed');
     }
 
     interface Props {
         style?: string | undefined;
         children?: import('svelte').Snippet;
-        onclose?: () => void;
+        onclose?: () => void | Promise<void>;
     }
 
     let { style = undefined, children, onclose }: Props = $props();

@@ -3,6 +3,8 @@
 	import { profiles, profile } from '$lib/profiles';
 	import ProfileEdit from '$components/profile/ProfileEdit.svelte';
 	import { saveHealthProfile } from '$lib/health/save';
+	import { saveProfileDocument } from '$lib/profiles/save';
+	import { apiFetch } from '$lib/api/client';
 	import user from '$lib/user';
 	import type { Profile } from '$lib/types.d';
 
@@ -56,22 +58,52 @@
 		message = null;
 
 		try {
-			if (editingProfile?.id && editingProfile?.health) {
+			if (!editingProfile?.id) {
+				throw new Error('Profile ID missing');
+			}
+
+			// 1. Save profile document (vcard + insurance)
+			const profileResult = await saveProfileDocument({
+				profileId: editingProfile.id,
+				vcard: editingProfile.vcard,
+				insurance: editingProfile.insurance
+			});
+
+			if (!profileResult.success) {
+				throw new Error(profileResult.error || 'Failed to save profile document');
+			}
+
+			// 2. Update database fullName (sync derived field)
+			if (profileResult.fullName) {
+				try {
+					await apiFetch(`/v1/med/profiles/${editingProfile.id}`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ fullName: profileResult.fullName })
+					});
+				} catch (e) {
+					// Non-critical: fullName will sync on next load
+					console.warn('[ProfileSettings] Failed to sync fullName to database:', e);
+				}
+			}
+
+			// 3. Save health document (existing functionality)
+			if (editingProfile.health) {
 				await saveHealthProfile({
 					profileId: editingProfile.id,
 					formData: editingProfile.health
 				});
-
-				// Update the store with edited data
-				profile.set(editingProfile);
-
-				// Update original to reflect saved state
-				originalProfile = JSON.parse(JSON.stringify(editingProfile));
-
-				message = { type: 'success', text: $t('app.settings.profile.saved') };
 			}
+
+			// Update the store with all edited data
+			profile.set(editingProfile);
+
+			// Update original to reflect saved state
+			originalProfile = JSON.parse(JSON.stringify(editingProfile));
+
+			message = { type: 'success', text: $t('app.settings.profile.saved') };
 		} catch (error) {
-			console.error('[Settings] Profile save error:', error);
+			console.error('[ProfileSettings] Save error:', error);
 			message = { type: 'error', text: $t('app.settings.profile.save-error') };
 		} finally {
 			saving = false;

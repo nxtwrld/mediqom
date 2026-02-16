@@ -7,6 +7,8 @@
     import { PROFILE_NEW_ID } from '$lib/profiles/tools';
     import { t } from '$lib/i18n';
     import { saveHealthProfile } from '$lib/health/save';
+    import { saveProfileDocument } from '$lib/profiles/save';
+    import { apiFetch } from '$lib/api/client';
     
 
     interface Props {
@@ -48,12 +50,40 @@
         showProfile = false;
     }
     async function done() {
-        // Save health data before closing (only for existing profiles)
-        if (profile.id && profile.id !== PROFILE_NEW_ID && profile.health) {
-            await saveHealthProfile({
-                profileId: profile.id,
-                formData: profile.health
-            });
+        // Save all data before closing (only for existing profiles)
+        if (profile.id && profile.id !== PROFILE_NEW_ID) {
+            try {
+                // 1. Save profile document (vcard + insurance)
+                const profileResult = await saveProfileDocument({
+                    profileId: profile.id,
+                    vcard: profile.vcard,
+                    insurance: profile.insurance
+                });
+
+                // 2. Update database fullName (sync derived field)
+                if (profileResult.success && profileResult.fullName) {
+                    try {
+                        await apiFetch(`/v1/med/profiles/${profile.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ fullName: profileResult.fullName })
+                        });
+                    } catch (e) {
+                        console.warn('[ImportProfile] Failed to sync fullName:', e);
+                    }
+                }
+
+                // 3. Save health document
+                if (profile.health) {
+                    await saveHealthProfile({
+                        profileId: profile.id,
+                        formData: profile.health
+                    });
+                }
+            } catch (error) {
+                console.error('[ImportProfile] Save error:', error);
+                // TODO: Show error message to user
+            }
         }
         showProfile = false;
     }

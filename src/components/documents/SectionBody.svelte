@@ -41,10 +41,10 @@
         </thead>
         <tbody>
 
-        {#each data as { identification, status, diagnosis, treatment, urgency}}
+        {#each data as { identification, part, status, diagnosis, treatment, urgency}}
         <tr class:selected={normalize(identification) == $focused.object} class="urgency-{urgency}">
             <td class="body-part" data-label="{ $t('report.anatomy.body-part') }">
-                {translateAnatomy(normalize(identification), $t)}
+                {translateAnatomy(normalize(identification), $t)}{#if part}<span class="part"> ({part})</span>{/if}
             </td>
             <td class="-empty -actions" >
                 <div class="actions">
@@ -81,15 +81,20 @@
 
 <style>
     /* SectionBody specific styles */
+    .part {
+        color: var(--color-text-secondary);
+        font-size: 0.9em;
+    }
+
     @media (min-width: 769px) {
         .table-list tr td {
             width: 50%;
         }
-        
+
         .table-list td.body-part {
             width: auto;
-        } 
-        
+        }
+
         .table-list td.-actions {
             width: auto;
         }

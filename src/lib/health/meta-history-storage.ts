@@ -91,7 +91,7 @@ async function storeRegularEntries(
 
     const newDoc: DocumentNew = {
       user_id: patientId,
-      type: DocumentType.document, // Use 'document' type, not 'health' (health is unique per user)
+      type: DocumentType.internal,
       metadata: {
         title: "META_HISTORIES Entries",
         category: META_HISTORY_CATEGORY.ENTRIES,
@@ -238,7 +238,7 @@ async function createCurrentDataDocument(
 
   const newDoc: DocumentNew = {
     user_id: patientId,
-    type: DocumentType.health,
+    type: DocumentType.internal,
     metadata: {
       title: `${measurementType} Current Data`,
       category: META_HISTORY_CATEGORY.CURRENT,
@@ -291,7 +291,7 @@ async function createArchiveDocument(
 
   const archiveDoc: DocumentNew = {
     user_id: patientId,
-    type: DocumentType.health,
+    type: DocumentType.internal,
     metadata: {
       title: `${measurementType} Archive ${timeRange.start}`,
       category: META_HISTORY_CATEGORY.ARCHIVE,

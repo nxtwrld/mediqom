@@ -53,7 +53,7 @@ export interface ReportAnalysis {
   type: Types;
   fhirType: string;
   fhir: any;
-  cagegory: string;
+  category: string;
   isMedical: boolean;
   tags: string[];
   hasPrescription: boolean;

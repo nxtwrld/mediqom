@@ -60,7 +60,9 @@ function updateIndex() {
       (() => {
         profileStores[user_id] = derived(documents, ($documents, set) => {
           const userDocuments = $documents.filter(
-            (doc) => doc.user_id === user_id && doc.type === DocumentType.document,
+            (doc) =>
+              doc.user_id === user_id &&
+              doc.type === DocumentType.document,
           );
           logger.documents.debug("Update profile store", {
             user_id,

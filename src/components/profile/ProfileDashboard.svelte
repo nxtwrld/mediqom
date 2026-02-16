@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { profile} from '$lib/profiles';
+    import { profile, updateProfile } from '$lib/profiles';
     import { getAge } from '$lib/datetime';
     import PropertyTile from './PropertyTile.svelte';
     import { properties } from '$lib/health/dataTypes';
@@ -13,6 +13,8 @@
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
     import { saveHealthProfile } from '$lib/health/save';
+    import { saveProfileDocument } from '$lib/profiles/save';
+    import { apiFetch } from '$lib/api/client';
     import { getPropertyCategory } from '$lib/health/property-categories';
     
     // Local state for ProfileEdit modal
@@ -21,9 +23,58 @@
     let originalProfile: any = $state(null);
 
     function openProfileEdit() {
-        // Create a deep copy to avoid direct store mutations
-        editingProfile = JSON.parse(JSON.stringify($profile));
-        originalProfile = JSON.parse(JSON.stringify($profile)); // Store original for comparison
+        console.log('[ProfileDashboard] Opening ProfileEdit');
+
+        // Create a deep copy using $state.snapshot to handle Svelte 5 proxies
+        const profileSnapshot = $state.snapshot($profile);
+        const profileCopy = JSON.parse(JSON.stringify(profileSnapshot));
+
+        // Initialize all required data structures upfront
+        if (!profileCopy.health) profileCopy.health = {};
+        if (!profileCopy.vcard) profileCopy.vcard = {};
+        if (!profileCopy.insurance) profileCopy.insurance = { provider: '', number: '' };
+
+        // Migrate fullName to vcard.fn if needed (only once, here)
+        if (profileCopy.fullName && (!profileCopy.vcard.fn || profileCopy.vcard.fn === '')) {
+            profileCopy.vcard.fn = profileCopy.fullName;
+
+            // Try to parse fullName into structured name components
+            const nameParts = profileCopy.fullName.trim().split(/\s+/);
+
+            if (!profileCopy.vcard.n) {
+                profileCopy.vcard.n = {
+                    honorificPrefix: '',
+                    givenName: '',
+                    additionalName: '',
+                    familyName: '',
+                    honorificSufix: ''
+                };
+            }
+
+            // Simple heuristic: titles usually end with "."
+            let currentIndex = 0;
+            if (nameParts[0] && nameParts[0].endsWith('.')) {
+                profileCopy.vcard.n.honorificPrefix = nameParts[0];
+                currentIndex = 1;
+            }
+
+            // Assign remaining parts: first name, middle names, last name
+            if (nameParts.length - currentIndex === 1) {
+                profileCopy.vcard.n.familyName = nameParts[currentIndex] || '';
+            } else if (nameParts.length - currentIndex === 2) {
+                profileCopy.vcard.n.givenName = nameParts[currentIndex] || '';
+                profileCopy.vcard.n.familyName = nameParts[currentIndex + 1] || '';
+            } else if (nameParts.length - currentIndex >= 3) {
+                profileCopy.vcard.n.givenName = nameParts[currentIndex] || '';
+                profileCopy.vcard.n.familyName = nameParts[nameParts.length - 1] || '';
+                profileCopy.vcard.n.additionalName = nameParts.slice(currentIndex + 1, nameParts.length - 1).join(' ');
+            }
+        }
+
+        editingProfile = profileCopy;
+        originalProfile = JSON.parse(JSON.stringify(profileCopy)); // Store original for comparison
+
+        console.log('[ProfileDashboard] Initialized editingProfile');
         showProfileEdit = true;
     }
     
@@ -298,21 +349,94 @@
 <!-- ProfileEdit Modal -->
 {#if showProfileEdit && editingProfile}
     <Modal onclose={async () => {
-        // Only save if data actually changed
-        const hasChanges = JSON.stringify(editingProfile) !== JSON.stringify(originalProfile);
+        console.log('[ProfileDashboard] Modal onclose handler started');
 
-        if (hasChanges && editingProfile?.id && editingProfile?.health) {
-            await saveHealthProfile({
-                profileId: editingProfile.id,
-                formData: editingProfile.health
-            });
-            // Update the store with edited data
-            profile.set(editingProfile);
+        // Use $state.snapshot() to properly extract values from Svelte 5 proxies
+        const editingSnapshot = $state.snapshot(editingProfile);
+        const originalSnapshot = $state.snapshot(originalProfile);
+
+        // Detect which sections changed
+        const vcardChanged = JSON.stringify(editingSnapshot.vcard) !== JSON.stringify(originalSnapshot.vcard);
+        const healthChanged = JSON.stringify(editingSnapshot.health) !== JSON.stringify(originalSnapshot.health);
+        const insuranceChanged = JSON.stringify(editingSnapshot.insurance) !== JSON.stringify(originalSnapshot.insurance);
+        const avatarChanged = editingSnapshot.avatarUrl !== originalSnapshot.avatarUrl;
+
+        const hasChanges = vcardChanged || healthChanged || insuranceChanged || avatarChanged;
+
+        console.log('[ProfileDashboard] Change detection:', {
+            vcard: vcardChanged,
+            health: healthChanged,
+            insurance: insuranceChanged,
+            avatar: avatarChanged,
+            hasChanges
+        });
+
+        if (hasChanges && editingProfile?.id) {
+            console.log('[ProfileDashboard] Starting save operations...');
+            try {
+                // 1. Save profile document (vcard + insurance) - only if changed
+                if (vcardChanged || insuranceChanged) {
+                    console.log('[ProfileDashboard] Saving profile document (vcard/insurance changed)...');
+                    const profileResult = await saveProfileDocument({
+                        profileId: editingProfile.id,
+                        vcard: editingProfile.vcard,
+                        insurance: editingProfile.insurance
+                    });
+                    console.log('[ProfileDashboard] Profile document saved:', profileResult);
+
+                    // 2. Update database fullName (sync derived field)
+                    if (profileResult.success && profileResult.fullName) {
+                        console.log('[ProfileDashboard] Syncing fullName to database:', profileResult.fullName);
+                        try {
+                            const response = await apiFetch(`/v1/med/profiles/${editingProfile.id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ fullName: profileResult.fullName })
+                            });
+
+                            const updatedProfileData = await response.json();
+
+                            // Create fresh merged object (don't mutate $state variable)
+                            editingProfile = {
+                                ...editingProfile,
+                                ...updatedProfileData
+                            };
+                            console.log('[ProfileDashboard] Profile updated with server data:', updatedProfileData);
+                        } catch (e) {
+                            console.warn('[ProfileDashboard] Failed to sync fullName:', e);
+                        }
+                    }
+                } else {
+                    console.log('[ProfileDashboard] Skipping profile document save (no vcard/insurance changes)');
+                }
+
+                // 3. Save health document - only if changed
+                if (healthChanged && editingProfile.health) {
+                    console.log('[ProfileDashboard] Saving health document (health changed)...');
+                    await saveHealthProfile({
+                        profileId: editingProfile.id,
+                        formData: editingProfile.health
+                    });
+                    console.log('[ProfileDashboard] Health document saved');
+                } else if (!healthChanged) {
+                    console.log('[ProfileDashboard] Skipping health document save (no health changes)');
+                }
+
+                // Update the store with all edited data (updates both profile and profiles stores)
+                updateProfile(editingProfile);
+                console.log('[ProfileDashboard] Store updated with edited data');
+            } catch (error) {
+                console.error('[ProfileDashboard] Save error:', error);
+                // TODO: Show error message to user
+            }
+        } else {
+            console.log('[ProfileDashboard] No changes detected, skipping save');
         }
 
         editingProfile = null;
         originalProfile = null;
         showProfileEdit = false;
+        console.log('[ProfileDashboard] Modal onclose handler completed');
     }}>
         <ProfileEdit bind:profile={editingProfile} />
     </Modal>
