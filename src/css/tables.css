@@ -4,6 +4,7 @@
   height: fit-content;
   border-collapse: separate;
   border-spacing: 0 var(--gap);
+  overflow: hidden;
 }
 
 .table-list th {

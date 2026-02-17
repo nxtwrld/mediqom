@@ -25,17 +25,30 @@
 </script>
 
 <div class="toolbar">
-    <button onclick={bookmark} aria-label={$t('app.documents.bookmark')}>
+    <button  onclick={bookmark} aria-label={$t('app.documents.bookmark')}>
         <svg><use href="/icons.svg#star" /></svg>
     </button>
-    <button onclick={remove} aria-label={$t('app.documents.remove')}>
+    <button class="-danger" onclick={remove} aria-label={$t('app.documents.remove')}>
         <svg><use href="/icons.svg#close" /></svg>
     </button>
 </div>
 
 <style>
     .toolbar {
-        height: var(--heading-height);
-        margin-bottom: var(--gap);
+        /*height: var(--heading-height);
+        margin-bottom: var(--gap);*/
+    }
+
+    .toolbar button {
+        color: var(--color-text-secondary);
+    }
+
+    .toolbar button:hover {
+        background: var(--color-interactivity);
+        color: var(--color-interactivity-text);
+    }
+    .toolbar button.-danger:hover {
+        background: var(--color-negative);
+        color: var(--color-negative-text);
     }
 </style>

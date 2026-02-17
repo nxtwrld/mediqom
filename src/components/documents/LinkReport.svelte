@@ -52,7 +52,7 @@
 
 
 {#if showModal}
-    <Modal onclose={() => showModal = false}>
+    <Modal onclose={() => { showModal = false; }}>
         <h3 class="h3">Link Report</h3>
         <div class="list">
             {#each $store.links as item}

@@ -205,7 +205,7 @@ export async function assembleDocuments(
         tags: analysis?.tags || [],
         title: reportData.title || doc.title,
         date: reportData.date || doc.date,
-        category: reportData.category || analysis?.cagegory || "report",
+        category: reportData.category || analysis?.category || "report",
         summary: reportData.summary,
         diagnosis: reportData.diagnosis,
         bodyParts: reportData.bodyParts,

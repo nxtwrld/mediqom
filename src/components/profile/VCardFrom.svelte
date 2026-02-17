@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import { reconstructFullName, hasNameComponents } from '$lib/contact/name-utils';
 
     interface Props {
         data: any;
@@ -35,6 +36,17 @@
     }
 
     console.log('[VCardFrom] Initialized with data:', data);
+
+    // Handle name component changes - reconstruct full name when user leaves a field
+    function handleComponentBlur() {
+        // Always reconstruct fn from components when they change
+        if (hasNameComponents(data.n)) {
+            data.fn = reconstructFullName(data.n);
+        }
+    }
+
+    // Preview of reconstructed name (for UX feedback)
+    let reconstructedName = $derived(reconstructFullName(data.n));
 </script>
 
 
@@ -47,28 +59,34 @@
         <input type="text" id="vcard-name" bind:value={data.fn} />
     </div>
 
+    {#if reconstructedName && data.fn !== reconstructedName}
+        <div class="hint" style="margin-top: -0.5rem; margin-bottom: 1rem; color: var(--color-text-secondary); font-size: 0.875rem;">
+            {$t('profile.vcard.willUpdateTo')}: <strong>{reconstructedName}</strong>
+        </div>
+    {/if}
+
     <!-- n object of VCard with prefixes and suffixes-->
 
     <div class="inputs-row">
         <div class="input">
             <label for="vcard-prefix">{ $t('profile.vcard.prefix') }</label>
-            <input type="text" id="vcard-prefix" bind:value={data.n.honorificPrefix} />
+            <input type="text" id="vcard-prefix" bind:value={data.n.honorificPrefix} onblur={handleComponentBlur} />
         </div>
         <div class="input -grow">
             <label for="vcard-given">{ $t('profile.vcard.given') }</label>
-            <input type="text" id="vcard-given" bind:value={data.n.givenName} />
+            <input type="text" id="vcard-given" bind:value={data.n.givenName} onblur={handleComponentBlur} />
         </div>
         <div class="input -grow">
             <label for="vcard-middle">{ $t('profile.vcard.middle') }</label>
-            <input type="text" id="vcard-middle" bind:value={data.n.additionalName} />
+            <input type="text" id="vcard-middle" bind:value={data.n.additionalName} onblur={handleComponentBlur} />
         </div>
         <div class="input -grow">
             <label for="vcard-family">{ $t('profile.vcard.family') }</label>
-            <input type="text" id="vcard-family" bind:value={data.n.familyName} />
+            <input type="text" id="vcard-family" bind:value={data.n.familyName} onblur={handleComponentBlur} />
         </div>
         <div class="input">
             <label for="vcard-sufix">{ $t('profile.vcard.sufix') }</label>
-            <input type="text" id="vcard-sufix" bind:value={data.n.honorificSufix} />
+            <input type="text" id="vcard-sufix" bind:value={data.n.honorificSufix} onblur={handleComponentBlur} />
         </div>
     </div>
 

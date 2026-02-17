@@ -399,7 +399,7 @@ async function findExistingEntriesDocument(
 
   if (existing) {
     // Load full document with content
-    return await getDocument(existing.id, patientId);
+    return (await getDocument(existing.id)) ?? null;
   }
 
   return null;
@@ -420,7 +420,7 @@ async function findCurrentDataDocument(
   );
 
   if (existing) {
-    return await getDocument(existing.id, patientId);
+    return (await getDocument(existing.id)) ?? null;
   }
 
   return null;

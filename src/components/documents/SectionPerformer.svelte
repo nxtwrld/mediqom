@@ -283,9 +283,6 @@
         overflow: hidden;
     }
 
-    .card.primary .card-header {
-        border: 2px solid var(--color-primary, #007bff);
-    }
 
     .card-header {
         display: flex;

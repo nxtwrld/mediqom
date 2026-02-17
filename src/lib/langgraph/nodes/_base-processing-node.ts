@@ -16,6 +16,7 @@ import {
   recordWorkflowStep,
   workflowRecorder,
 } from "$lib/debug/workflow-recorder";
+import { STATIC_PROPERTIES } from "$lib/health/property-categories";
 
 export interface BaseProcessingNodeConfig {
   nodeName: string;
@@ -286,10 +287,12 @@ export abstract class BaseProcessingNode {
         schemaItems.enum = [...new Set(validAnatomyObjects)];
       }
 
-      // Populate empty signal enum with lab property keys
+      // Populate empty signal enum with lab property keys (excluding static profile fields)
       const signalSchema = (this.schema as any)?.parameters?.properties?.signals?.items?.properties?.signal;
       if (signalSchema?.enum && Array.isArray(signalSchema.enum) && signalSchema.enum.length === 0) {
-        signalSchema.enum.push(...Object.keys(propertiesDefinition));
+        const signalKeys = Object.keys(propertiesDefinition)
+          .filter(key => !STATIC_PROPERTIES.includes(key));
+        signalSchema.enum.push(...signalKeys);
       }
 
       console.log(`✅ Successfully loaded schema for ${this.config.nodeName}`);

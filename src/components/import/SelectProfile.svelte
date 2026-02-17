@@ -51,7 +51,7 @@ class="button selected-profile link-{linkFrom}"
 </button>
 
 {#if showSelectProfileModal}
-<Modal onclose={() => showSelectProfileModal = false}>
+<Modal onclose={() => { showSelectProfileModal = false; }}>
     <ul class="list">
         {#if profilesFound.length == 0}
         

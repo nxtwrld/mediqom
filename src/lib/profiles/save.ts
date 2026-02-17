@@ -3,6 +3,7 @@ import { profiles, updateProfile } from '$lib/profiles';
 import type { Profile } from '$lib/types.d';
 import type { Document } from '$lib/documents/types.d';
 import { log } from '$lib/logging/logger';
+import { reconstructFullName, hasNameComponents } from '$lib/contact/name-utils';
 
 const profileLogger = log.namespace('Profile', '👤');
 
@@ -52,6 +53,19 @@ export async function saveProfileDocument(
 
 		// Update document content
 		if (vcard !== undefined) {
+			// SAFETY NET: Always reconstruct fn from components if components exist
+			// This handles cases where blur handlers didn't fire (imports, programmatic updates)
+			if (hasNameComponents(vcard.n)) {
+				const reconstructed = reconstructFullName(vcard.n);
+				if (reconstructed) {
+					vcard.fn = reconstructed;
+					profileLogger.info('Reconstructed vcard.fn from components', {
+						profileId,
+						fn: vcard.fn
+					});
+				}
+			}
+
 			document.content.vcard = vcard;
 		}
 		if (insurance !== undefined) {
