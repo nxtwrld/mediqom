@@ -55,7 +55,8 @@
       "Bash(npx svelte-kit:*)",
       "Bash(test:*)",
       "WebFetch(domain:langchain-ai.github.io)",
-      "WebFetch(domain:docs.langchain.com)"
+      "WebFetch(domain:docs.langchain.com)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": []
   }

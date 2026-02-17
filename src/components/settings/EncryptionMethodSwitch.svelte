@@ -692,6 +692,9 @@
         margin: 0;
     }
 
+    .modal-content :global(.heading) {
+        background-color: inherit;
+    }
     .close-button {
         background: none;
         border: none;

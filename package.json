@@ -101,6 +101,7 @@
     "dayjs": "^1.11.13",
     "dicom-parser": "^1.8.21",
     "eventemitter3": "^5.0.1",
+    "fflate": "^0.8.2",
     "file-selector": "^2.1.0",
     "gray-matter": "^4.0.3",
     "howler": "^2.2.4",

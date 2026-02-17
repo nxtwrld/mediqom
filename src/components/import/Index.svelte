@@ -27,11 +27,13 @@
     interface Props {
         /** If set, resume a previously created job instead of starting fresh */
         jobId?: string;
+        /** If true, auto-open the file picker dialog on mount */
+        autoOpen?: boolean;
         /** Callback when import is fully complete (all docs saved) */
         oncomplete?: () => void;
     }
 
-    let { jobId, oncomplete }: Props = $props();
+    let { jobId, autoOpen, oncomplete }: Props = $props();
 
     let results: Document[] = $state([]);
     let byProfileDetected: {
@@ -75,6 +77,11 @@
         if (jobId) {
             resumeJob(jobId);
             return () => {};
+        }
+
+        // Auto-open file picker if requested
+        if (autoOpen) {
+            document.getElementById('upload-file')?.click();
         }
 
         // Normal mode: listen for file drops

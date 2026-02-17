@@ -4,7 +4,9 @@
 	import type { User } from '$lib/user';
 	import Modal from '$components/ui/Modal.svelte';
 	import EncryptionMethodSwitch from '$components/settings/EncryptionMethodSwitch.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { apiFetch } from '$lib/api/client';
+	import { exportUserData } from '$lib/export';
 
 	// Read user data from store (using $user auto-subscription)
 	const currentUser = $user as User | null;
@@ -16,6 +18,10 @@
 
 	// Modal state
 	let showEncryptionModal = $state(false);
+
+	// Export state
+	let exportLoading = $state(false);
+	let exportProgress = $state('');
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString('en-US', {
@@ -33,10 +39,49 @@
 		showEncryptionModal = false;
 	}
 
+	async function handleDeleteAccount() {
+		const confirmed = confirm($t('app.settings.privacy.data.delete-confirm'));
+		if (!confirmed) return;
+
+		try {
+			const res = await apiFetch('/v1/user/delete', { method: 'DELETE' });
+			if (res.ok) {
+				await goto('/auth');
+			} else {
+				const data = await res.json();
+				alert(data.error || $t('app.settings.privacy.data.delete-error'));
+			}
+		} catch {
+			alert($t('app.settings.privacy.data.delete-error'));
+		}
+	}
+
 	async function handleEncryptionSuccess() {
 		// Reload user data to reflect changes
 		await invalidateAll();
 		showEncryptionModal = false;
+	}
+
+	async function handleExport() {
+		exportLoading = true;
+		exportProgress = $t('app.settings.privacy.data.export-progress');
+		try {
+			await exportUserData(
+				{
+					email: userEmail,
+					fullName: (currentUser as any)?.fullName ?? '',
+					userId: currentUser?.id ?? '',
+				},
+				(msg) => {
+					exportProgress = msg;
+				},
+			);
+		} catch {
+			alert($t('app.settings.privacy.data.export-error'));
+		} finally {
+			exportLoading = false;
+			exportProgress = '';
+		}
 	}
 </script>
 
@@ -107,14 +152,16 @@
 		<h3 class="h3">{$t('app.settings.privacy.data.title')}</h3>
 
 		<div class="actions">
-			<button class="button" disabled>
+			<button class="button" onclick={handleExport} disabled={exportLoading}>
 				{$t('app.settings.privacy.data.export')}
 			</button>
-			<button class="button -negative" disabled>
+			<button class="button -negative" onclick={handleDeleteAccount}>
 				{$t('app.settings.privacy.data.delete')}
 			</button>
 		</div>
-		<p class="note">{$t('app.settings.privacy.data.coming-soon')}</p>
+		{#if exportProgress}
+			<p class="note">{exportProgress}</p>
+		{/if}
 	</section>
 </div>
 

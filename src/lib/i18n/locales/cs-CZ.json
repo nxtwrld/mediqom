@@ -566,7 +566,11 @@
         "data": {
           "title": "",
           "export": "",
+          "export-progress": "",
+          "export-error": "",
           "delete": "",
+          "delete-confirm": "",
+          "delete-error": "",
           "coming-soon": ""
         }
       },

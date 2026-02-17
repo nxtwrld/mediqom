@@ -619,7 +619,11 @@
         "data": {
           "title": "Data Management",
           "export": "Export All Data",
+          "export-progress": "Exporting data...",
+          "export-error": "Failed to export data. Please try again.",
           "delete": "Delete Account",
+          "delete-confirm": "Are you sure you want to permanently delete your account? This action cannot be undone.",
+          "delete-error": "Failed to delete account. Please try again.",
           "coming-soon": "These features are coming soon"
         }
       },

@@ -29,6 +29,13 @@
         }
     }
 
+    function handleOverlayMousedown(e: MouseEvent) {
+        // Only close if clicking directly on the overlay, not on child elements
+        if (e.target === e.currentTarget) {
+            closeModal();
+        }
+    }
+
     onMount(() => {
         if (!modalContainer) return;
         
@@ -50,12 +57,7 @@
     });
 </script>
 
-<div class="overlay flex -center" role="dialog" aria-modal="true" tabindex="0" onmousedown={(e) => {
-    // Only close if clicking directly on the overlay, not on child elements
-    if (e.target === e.currentTarget) {
-        closeModal();
-    }
-}} class:-shade={showShade}  bind:this={modalContainer} onkeydown={handleKeydown} transition:fade>
+<div class="overlay flex -center" role="dialog" aria-modal="true" tabindex="0" onmousedown={handleOverlayMousedown} class:-shade={showShade} bind:this={modalContainer} onkeydown={handleKeydown} transition:fade>
     <div class="modal-content" role="document" onclick={(e) => e.stopPropagation()} transition:scale>
         <button class="close" aria-label={$t('aria.ui.close-modal')} onclick={closeModal}>
             <svg>
@@ -79,6 +81,12 @@
         max-height: 100vh;
         overflow: hidden;
         box-shadow: 0 3rem 3rem -2rem rgba(0,0,0,.4);   
+    }
+
+
+    .modal-content :global(.heading) {
+        top: 0;
+        background-color: var(--color-background);
     }
 
     @media screen and (max-width: 768px) {

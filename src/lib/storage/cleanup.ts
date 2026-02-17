@@ -1,8 +1,8 @@
 /**
  * Storage Cleanup Helper
  *
- * Centralized utilities for cleaning up user storage from Vercel Blob
- * Used by both admin deletion and user self-delete endpoints
+ * Centralized utilities for cleaning up user storage from Vercel Blob.
+ * Used by the user self-delete endpoint.
  */
 
 import { del, list } from '@vercel/blob';
@@ -16,7 +16,7 @@ interface StorageCleanupResult {
 }
 
 /**
- * Delete all storage files associated with a user
+ * Delete all storage files associated with a user.
  *
  * @param userId - The user's UUID (from auth.users or profiles)
  * @param supabase - Supabase client (with appropriate permissions)
@@ -24,13 +24,13 @@ interface StorageCleanupResult {
  */
 export async function deleteUserStorage(
 	userId: string,
-	supabase: SupabaseClient,
+	supabase: SupabaseClient
 ): Promise<StorageCleanupResult> {
 	const result: StorageCleanupResult = {
 		deletedFiles: [],
 		errors: [],
 		totalDeleted: 0,
-		totalErrors: 0,
+		totalErrors: 0
 	};
 
 	try {
@@ -50,7 +50,7 @@ export async function deleteUserStorage(
 			} catch (error) {
 				result.errors.push({
 					file: profile.avatarUrl,
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: error instanceof Error ? error.message : 'Unknown error'
 				});
 				result.totalErrors++;
 			}
@@ -74,7 +74,7 @@ export async function deleteUserStorage(
 						} catch (error) {
 							result.errors.push({
 								file: attachment,
-								error: error instanceof Error ? error.message : 'Unknown error',
+								error: error instanceof Error ? error.message : 'Unknown error'
 							});
 							result.totalErrors++;
 						}
@@ -94,53 +94,21 @@ export async function deleteUserStorage(
 				} catch (error) {
 					result.errors.push({
 						file: blob.url,
-						error: error instanceof Error ? error.message : 'Unknown error',
+						error: error instanceof Error ? error.message : 'Unknown error'
 					});
 					result.totalErrors++;
 				}
 			}
 		} catch (listError) {
-			// List operation failed, log but continue
 			console.error('Failed to list blobs for user:', userId, listError);
 		}
 	} catch (error) {
 		console.error('Storage cleanup failed:', error);
 		result.errors.push({
 			file: 'storage_cleanup',
-			error: error instanceof Error ? error.message : 'Unknown error',
+			error: error instanceof Error ? error.message : 'Unknown error'
 		});
 		result.totalErrors++;
-	}
-
-	return result;
-}
-
-/**
- * Delete specific storage files by URLs
- *
- * @param urls - Array of storage URLs to delete
- * @returns Summary of deleted files and any errors
- */
-export async function deleteStorageFiles(urls: string[]): Promise<StorageCleanupResult> {
-	const result: StorageCleanupResult = {
-		deletedFiles: [],
-		errors: [],
-		totalDeleted: 0,
-		totalErrors: 0,
-	};
-
-	for (const url of urls) {
-		try {
-			await del(url);
-			result.deletedFiles.push(url);
-			result.totalDeleted++;
-		} catch (error) {
-			result.errors.push({
-				file: url,
-				error: error instanceof Error ? error.message : 'Unknown error',
-			});
-			result.totalErrors++;
-		}
 	}
 
 	return result;
