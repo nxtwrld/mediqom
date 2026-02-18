@@ -5,10 +5,7 @@ import { PUBLIC_SUPABASE_URL } from '$env/static/public'
 import assess from '$lib/import.server/assessInputs'
 import { runDocumentProcessingWorkflow } from '$lib/langgraph/workflows/document-processing'
 import { convertWorkflowResult } from '$lib/import.server/convertWorkflowResult'
-import {
-	loadSubscription,
-	updateSubscription
-} from '$lib/user/subscriptions.server.js'
+import { consumeScan } from '$lib/billing/subscription.server'
 import type { ImportJob, FileManifestEntry, ReportAnalysis } from '$lib/import/types'
 import { prepareKey, exportKey, encrypt as encryptAES } from '$lib/encryption/aes'
 import { encrypt as encryptRSA, pemToKey } from '$lib/encryption/rsa'
@@ -238,16 +235,16 @@ export const POST: RequestHandler = async ({
 				// Save extraction results for debugging
 				saveExtractionResults(job.id, extractionResults);
 
-				// Deduct scan (once per job)
+				// Deduct scan (once per job, atomic operation)
 				if (!job.scan_deducted) {
-					const subscription = await loadSubscription(user.id);
-					if (subscription && subscription.scans > 0) {
-						subscription.scans -= 1;
-						await updateSubscription(subscription, user.id);
+					const consumeResult = await consumeScan(user.id);
+					if (consumeResult.success) {
 						await updateJob(supabase, job.id, {
 							scan_deducted: true,
 						} as any);
 					}
+					// Note: If consumption fails, we continue processing but don't mark as deducted
+					// This allows retry on next job processing attempt
 				}
 
         // ---- STAGE 2: Analysis ----

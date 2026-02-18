@@ -2,9 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
-import {
-  loadSubscription,
-} from "$lib/user/subscriptions.server.js";
+import { checkScansAvailable } from "$lib/billing/subscription.server";
 import type { ImportJobCreateInput } from "$lib/import/types";
 
 function getServiceClient() {
@@ -21,11 +19,8 @@ export const POST: RequestHandler = async ({
     error(401, { message: "Unauthorized" });
   }
 
-  const subscription = await loadSubscription(user.id);
-  if (!subscription) {
-    error(404, { message: "Subscription not found" });
-  }
-  if (subscription.scans <= 0) {
+  const scansCheck = await checkScansAvailable(user.id);
+  if (scansCheck.available <= 0) {
     error(403, { message: "Subscription limit reached" });
   }
 

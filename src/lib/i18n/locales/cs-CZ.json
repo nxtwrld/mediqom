@@ -520,10 +520,11 @@
     "settings": {
       "title": "",
       "tabs": {
-        "general": "",
-        "profile": "",
-        "privacy": "",
-        "about": ""
+        "general": "Obecné",
+        "profile": "Profil",
+        "privacy": "Soukromí",
+        "subscription": "Předplatné",
+        "about": "O aplikaci"
       },
       "general": {
         "title": "",
@@ -1821,6 +1822,70 @@
       "days": "dny",
       "days-short": "d",
       "percent": "%"
+    }
+  },
+  "billing": {
+    "subscription": "Předplatné",
+    "monthly": "Měsíčně",
+    "yearly": "Ročně",
+    "month": "měs",
+    "year": "rok",
+    "free": "Zdarma",
+    "recommended": "Doporučeno",
+    "current-plan": "Aktuální plán",
+    "free-tier": "Zdarma",
+    "upgrade-to": "Upgradovat na",
+    "profile": "profil",
+    "profiles": "profily",
+    "unlimited-profiles": "Neomezený počet profilů",
+    "scans-per-year": "skenů/rok",
+    "scan": "sken",
+    "scans": "skeny",
+    "choose-your-plan": "Vyberte si plán",
+    "upgrade-subtitle": "Odemkněte více funkcí a kapacity pro skenování vašich lékařských dokumentů",
+    "subscription-plans": "Plány",
+    "scan-credits": "Kredity",
+    "scan-credits-title": "Balíčky kreditů",
+    "scan-credits-description": "Zakupte si další skeny, které nikdy nevyprší. Kredity se používají po vyčerpání základních skenů.",
+    "current-credits": "Aktuální kredity",
+    "one-time": "jednorázově",
+    "buy-now": "Koupit",
+    "redirecting": "Přesměrování na platbu...",
+    "scan-usage": "Využití skenů",
+    "base-scans": "Základní skeny",
+    "credits-available": "dostupných kreditů",
+    "scans-available": "dostupných skenů",
+    "resets-on": "Obnoví se",
+    "profile-usage": "Využití profilů",
+    "unlimited": "neomezeno",
+    "upgrade": "Upgradovat",
+    "change-plan": "Změnit plán",
+    "buy-credits": "Koupit kredity",
+    "manage-billing": "Spravovat platby",
+    "ends-on": "Končí",
+    "renews-on": "Obnoví se",
+    "status": {
+      "active": "Aktivní",
+      "past_due": "Po splatnosti",
+      "canceled": "Zrušeno",
+      "expired": "Vypršelo",
+      "trialing": "Zkušební"
+    },
+    "payment-success": "Platba byla úspěšná! Vaše předplatné bylo aktualizováno.",
+    "payment-canceled": "Platba byla zrušena. Nebyly provedeny žádné změny.",
+    "loading": "Načítání předplatného...",
+    "no-subscription": "Nebylo nalezeno žádné předplatné. Začněte s plánem.",
+    "get-started": "Začít",
+    "faq": {
+      "title": "Často kladené otázky",
+      "what-are-scans": "Co jsou skeny?",
+      "what-are-scans-answer": "Sken se spotřebuje při každém importu lékařského dokumentu pro AI analýzu a extrakci dat.",
+      "credits-expire": "Vyprší kredity?",
+      "credits-expire-answer": "Ne, zakoupené kredity nikdy nevyprší a hromadí se s každým nákupem.",
+      "base-scans-reset": "Kdy se obnoví základní skeny?",
+      "base-scans-reset-answer": "Váš základní počet skenů se obnoví v den výročí předplatného. Nevyužité základní skeny se nepřenášejí.",
+      "cancel-subscription": "Jak zruším předplatné?",
+      "cancel-subscription-answer": "Klikněte na 'Spravovat platby' pro přístup k portálu zákazníka Stripe, kde můžete zrušit předplatné, změnit platební metodu nebo zobrazit faktury."
     }
   }
 }

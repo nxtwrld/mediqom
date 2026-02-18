@@ -38,6 +38,12 @@
 			{$t('app.settings.tabs.privacy')}
 		</a>
 		<a
+			href="/med/settings/subscription"
+			class={isActive('/subscription') ? '-active' : ''}
+		>
+			{$t('app.settings.tabs.subscription')}
+		</a>
+		<a
 			href="/med/settings/about"
 			class={isActive('/about') ? '-active' : ''}
 		>

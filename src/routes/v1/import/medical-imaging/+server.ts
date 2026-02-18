@@ -1,9 +1,9 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { processMedicalImaging } from "$lib/langgraph/workflows/medical-imaging-workflow";
 import {
-  loadSubscription,
-  updateSubscription,
-} from "$lib/user/subscriptions.server.js";
+  checkScansAvailable,
+  consumeScan,
+} from "$lib/billing/subscription.server";
 import type { MedicalImagingState } from "$lib/langgraph/state-medical-imaging";
 
 /**
@@ -23,12 +23,8 @@ export const POST: RequestHandler = async ({
     error(401, { message: "Unauthorized" });
   }
 
-  const subscription = await loadSubscription(user.id);
-  if (!subscription) {
-    error(404, { message: "Subscription not found" });
-  }
-
-  if (subscription.scans == 0) {
+  const scansCheck = await checkScansAvailable(user.id);
+  if (scansCheck.available <= 0) {
     error(403, { message: "Subscription limit reached" });
   }
 
@@ -94,9 +90,11 @@ DICOM Context:
     // Execute the medical imaging workflow
     const workflowResult = await processMedicalImaging(imagingState);
 
-    // Update subscription
-    subscription.scans -= 1;
-    await updateSubscription(subscription, user.id);
+    // Consume scan (atomic operation)
+    const consumeResult = await consumeScan(user.id);
+    if (!consumeResult.success) {
+      error(403, { message: consumeResult.reason || "Failed to consume scan" });
+    }
 
     console.log(`✅ Medical imaging analysis completed`);
 

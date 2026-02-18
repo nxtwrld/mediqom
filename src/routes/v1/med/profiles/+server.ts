@@ -1,8 +1,5 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import {
-  loadSubscription,
-  updateSubscription,
-} from "$lib/user/subscriptions.server.js";
+import { checkProfileLimit } from "$lib/billing/subscription.server";
 
 export const GET: RequestHandler = async ({
   request,
@@ -46,14 +43,9 @@ export const POST: RequestHandler = async ({
       return error(401, { message: "Unauthorized" });
     }
 
-    const subscription = await loadSubscription(user.id);
-    //console.log('user', subscription);
-    if (!subscription) {
-      error(404, { message: "Subscription not found" });
-    }
-
-    if (subscription.profiles == 0) {
-      error(403, { message: "Subscription limit reached" });
+    const profileLimit = await checkProfileLimit(user.id);
+    if (!profileLimit.can_create) {
+      error(403, { message: `Profile limit reached (${profileLimit.current_count}/${profileLimit.limit})` });
     }
 
     console.log("Saving virtual profile");
@@ -111,9 +103,8 @@ export const POST: RequestHandler = async ({
       return error(500, { message: "Error saving profile link" });
     }
 
-    // 4. update subscription
-    subscription.profiles -= 1;
-    const u = await updateSubscription(subscription, user.id);
+    // Profile count is tracked via database query on profiles table
+    // No need to manually decrement - checkProfileLimit counts actual profiles
 
     return json(profileData);
   } catch (authError) {
