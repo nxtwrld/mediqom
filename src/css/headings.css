@@ -48,12 +48,12 @@
 }
 .heading .-date {
   font-size: 1rem;
-  position: absolute;
+  /*position: absolute;
   right: 1rem;
-  bottom: 0.5rem;
+  bottom: 0.5rem;*/
   /*margin-top: -1.3rem;
     */
-  z-index: 12;
+  margin: -1rem 0 .5rem 0;
 }
 .heading:has(.h1),
 .h1.heading {
@@ -121,19 +121,19 @@
   .heading .-date {
     font-size: 0.8rem !important;
   }
-
+/*
   .heading .-date {
     font-size: 1rem;
     position: static;
-    margin-bottom: .5rem;
-    /*
+    margin: 0 0 .5rem 0;
+    
     position: absolute;
     right: 50%;
     bottom: 0;
     transform: translate(50%, 50%);
     margin-top: -1.3rem;
-        */
-  }
+  
+  }      */
 
   /* Mobile: Toolbar grid layout
      ICON    | Title

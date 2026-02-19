@@ -7,8 +7,7 @@
 
     let { profile = $bindable() } = $props();
 
-    // Don't pre-initialize profile data - let forms handle undefined gracefully
-    // Forms should only populate the profile when user actually enters data
+    // No reactive initialization needed - parent (ProfileDashboard) handles all setup
 
     function handleAvatarUpload() {
         // Update the profile store immediately so other parts of UI reflect the change
@@ -29,7 +28,7 @@
 
     <InsuranceForm bind:data={profile.insurance} />
     <VCardFrom bind:data={profile.vcard} />
-    <HealthForm bind:data={profile.health} />
+    <HealthForm config={{ data: profile.health }} bind:data={profile.health} />
 
 </div>
 

@@ -400,6 +400,7 @@
       "sending": "Sending...",
       "email-sent": "Email sent!",
       "send-again": "Send again",
+      "email-sent-to": "Email sent to",
       "magic-link-sent": "Magic link sent! Check your email and tap the link to sign in.",
       "magic-link-failed": "Failed to send magic link",
       "invalid-email": "Please enter a valid email address",
@@ -551,6 +552,7 @@
         "general": "General",
         "profile": "Profile",
         "privacy": "Privacy",
+        "subscription": "Subscription",
         "about": "About"
       },
       "general": {
@@ -619,7 +621,11 @@
         "data": {
           "title": "Data Management",
           "export": "Export All Data",
+          "export-progress": "Exporting data...",
+          "export-error": "Failed to export data. Please try again.",
           "delete": "Delete Account",
+          "delete-confirm": "Are you sure you want to permanently delete your account? This action cannot be undone.",
+          "delete-error": "Failed to delete account. Please try again.",
           "coming-soon": "These features are coming soon"
         }
       },
@@ -1466,7 +1472,8 @@
       "street": "Street",
       "suffix": "Suffix",
       "tel": "Phone",
-      "title": "Title"
+      "title": "Title",
+      "willUpdateTo": "Will update to"
     }
   },
   "session": {
@@ -1921,5 +1928,80 @@
     "diagnoses-list": "Diagnoses",
     "diagnosis-date": "Diagnosis Date",
     "no-diagnosis-data": "No diagnosis data available"
+  },
+  "billing": {
+    "subscription": "Subscription",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "month": "mo",
+    "year": "yr",
+    "free": "Free",
+    "recommended": "Recommended",
+    "current-plan": "Current Plan",
+    "free-tier": "Free Tier",
+    "upgrade-to": "Upgrade to",
+    "profile": "profile",
+    "profiles": "profiles",
+    "unlimited-profiles": "Unlimited profiles",
+    "scans-per-year": "scans/year",
+    "scan": "scan",
+    "scans": "scans",
+    "choose-your-plan": "Choose Your Plan",
+    "upgrade-subtitle": "Unlock more features and scan capacity for your medical documents",
+    "subscription-plans": "Plans",
+    "scan-credits": "Credits",
+    "scan-credits-title": "Scan Credit Packs",
+    "scan-credits-description": "Purchase additional scans that never expire. Credits are used after your base scans are depleted.",
+    "current-credits": "Current credits",
+    "one-time": "one-time",
+    "buy-now": "Buy Now",
+    "redirecting": "Redirecting to payment...",
+    "preparing-checkout": "Preparing checkout...",
+    "loading-checkout": "Loading payment form...",
+    "back-to-plans": "Back to plans",
+    "complete-purchase": "Complete Your Purchase",
+    "payment-successful": "Payment Successful!",
+    "subscription-updated": "Your subscription has been updated. Thank you for your purchase!",
+    "payment-failed": "Payment Failed",
+    "generic-error": "Something went wrong. Please try again.",
+    "try-again": "Try Again",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "scan-usage": "Scan Usage",
+    "base-scans": "Base Scans",
+    "credits-available": "credits available",
+    "scans-available": "scans available",
+    "resets-on": "Resets on",
+    "profile-usage": "Profile Usage",
+    "unlimited": "unlimited",
+    "upgrade": "Upgrade",
+    "change-plan": "Change Plan",
+    "buy-credits": "Buy Credits",
+    "manage-billing": "Manage Billing",
+    "ends-on": "Ends on",
+    "renews-on": "Renews on",
+    "status": {
+      "active": "Active",
+      "past_due": "Past Due",
+      "canceled": "Canceled",
+      "expired": "Expired",
+      "trialing": "Trial"
+    },
+    "payment-success": "Payment successful! Your subscription has been updated.",
+    "payment-canceled": "Payment was canceled. No changes were made.",
+    "loading": "Loading subscription...",
+    "no-subscription": "No subscription found. Get started with a plan.",
+    "get-started": "Get Started",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "what-are-scans": "What are scans?",
+      "what-are-scans-answer": "A scan is used each time you import a medical document for AI-powered analysis and data extraction.",
+      "credits-expire": "Do scan credits expire?",
+      "credits-expire-answer": "No, purchased scan credits never expire and accumulate across purchases.",
+      "base-scans-reset": "When do base scans reset?",
+      "base-scans-reset-answer": "Your base scan allowance resets on your subscription anniversary date. Unused base scans do not carry over.",
+      "cancel-subscription": "How do I cancel my subscription?",
+      "cancel-subscription-answer": "Click 'Manage Billing' to access the Stripe customer portal where you can cancel, change payment method, or view invoices."
+    }
   }
 }

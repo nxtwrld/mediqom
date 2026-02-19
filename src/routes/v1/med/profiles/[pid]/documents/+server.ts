@@ -1,5 +1,5 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-const DOCUMENT_TYPES = ["document", "profile", "health"];
+const DOCUMENT_TYPES = ["document", "profile", "health", "internal"];
 const UNIQUE_TYPES = ["profile", "health"];
 
 export const GET: RequestHandler = async ({

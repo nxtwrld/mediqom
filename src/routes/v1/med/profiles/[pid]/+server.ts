@@ -30,6 +30,53 @@ export const GET: RequestHandler = async ({
   return json(data);
 };
 
+export const PATCH: RequestHandler = async ({
+  params,
+  request,
+  locals: { supabase, safeGetSession, user },
+}) => {
+  const { session } = await safeGetSession();
+  if (!session || !user) {
+    return error(401, { message: "Unauthorized" });
+  }
+
+  const { pid } = params;
+  const { fullName } = await request.json();
+
+  if (!fullName || typeof fullName !== "string") {
+    return error(400, { message: "Invalid fullName" });
+  }
+
+  // Verify user owns this profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("owner_id")
+    .eq("id", pid)
+    .single();
+
+  if (profileError || !profile) {
+    return error(404, { message: "Profile not found" });
+  }
+
+  if (profile.owner_id !== user.id) {
+    return error(403, { message: "Forbidden" });
+  }
+
+  // Update fullName and return updated profile
+  const { data: updatedProfile, error: updateError } = await supabase
+    .from("profiles")
+    .update({ fullName })
+    .eq("id", pid)
+    .select()
+    .single();
+
+  if (updateError || !updatedProfile) {
+    return error(500, { message: "Failed to update profile" });
+  }
+
+  return json(updatedProfile);
+};
+
 export const DELETE: RequestHandler = async ({
   request,
   params,

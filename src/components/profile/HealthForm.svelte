@@ -10,9 +10,10 @@
 
     interface Props {
         config?: {
-            keys: string[];
-            values: any[];
-            property: any;
+            keys?: string[];
+            values?: any[];
+            property?: any;
+            data?: any;
         } | true;
         data?: any;
     }
@@ -65,7 +66,7 @@
         if (config && typeof config === 'object' && config.keys) {
             const filteredTab = {
                 ...tab,
-                properties: tab.properties.filter(prop => config.keys.includes(prop))
+                properties: tab.properties.filter(prop => config.keys!.includes(prop))
             };
             if (filteredTab.properties.length > 0) {
                 acc.push(filteredTab);
@@ -83,7 +84,7 @@
 
             // Check if config has specific values (for filtered forms)
             const configObj = (config && typeof config === 'object') ? config : null;
-            if (configObj?.keys) {
+            if (configObj?.keys && configObj?.values) {
                 const index = configObj.keys.indexOf(prop.key);
                 if (index >= 0) {
                     value = configObj.values[index];
@@ -137,7 +138,7 @@
         // passed inputs from dialog config
         const configObj = (config && typeof config === 'object') ? config : null;
         const index = configObj?.keys ? configObj.keys.indexOf(prop.key) : -1;
-        let values = (configObj && index >= 0) ? configObj.values[index] : currentValues;
+        let values = (configObj && configObj.values && index >= 0) ? configObj.values[index] : currentValues;
 
         // NOTE: We intentionally do NOT read from `data` prop here to avoid circular dependency.
 
@@ -209,44 +210,18 @@
         ])];
     }
 
-    // Initialize inputs state
-    let inputs = $state({} as { [key: string]: any });
-    
-    // Initialize inputs only once when component mounts or config changes
-    let lastConfigSnapshot = $state(null as any);
-    let hasInitialized = $state(false);
-    
-    $effect(() => {
-        const currentConfigSnapshot = $state.snapshot(config);
+    // Initialize inputs state - do this ONCE on mount, not reactively
+    let inputs = $state(mapFromToInputs());
 
-        // Only reinitialize if config changed or this is the first initialization
-        if (!hasInitialized || JSON.stringify(currentConfigSnapshot) !== JSON.stringify(lastConfigSnapshot)) {
-            // Use untrack to read data without creating a reactive dependency
-            // This prevents the circular loop: inputs -> data -> inputs
-            inputs = untrack(() => mapFromToInputs());
-            lastConfigSnapshot = currentConfigSnapshot;
-            hasInitialized = true;
-        }
-    });
+    console.log('[HealthForm] Initialized inputs:', inputs);
 
-    // Update data when inputs change
-    // Track the last mapped data to avoid unnecessary updates
-    let lastMappedData = $state(null as any);
-
+    // Simple one-way sync: inputs -> data (no reactive loop)
+    // This syncs changes back to the parent data object
     $effect(() => {
         if (Object.keys(inputs).length > 0) {
             const newData = mapInputsToData(inputs);
-            const newDataStr = JSON.stringify(newData);
-            const lastDataStr = lastMappedData ? JSON.stringify(lastMappedData) : '';
-
-            // Only update if data actually changed to prevent unnecessary re-renders
-            if (newDataStr !== lastDataStr) {
-                lastMappedData = newData;
-                // Use untrack to prevent this write from triggering other effects
-                untrack(() => {
-                    Object.assign(data, newData);
-                });
-            }
+            // Directly update data object properties (shallow merge)
+            Object.assign(data, newData);
         }
     });
 

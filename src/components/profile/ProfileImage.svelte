@@ -27,7 +27,7 @@
     .avatar {
         border-radius: 25%;
         width: 100%;
-        height: 100%;
+       /* height: 100%;*/
         background-color: var(--color-gray-500);
         display: flex;
         justify-content: center;

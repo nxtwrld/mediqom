@@ -79,11 +79,11 @@
 }
 
 .category-exam {
-  --color: #00a3ac;
+  --color: #00a1ac;
   --color-text: #fff;
 }
 .category-therapy {
-  --color: #65ad38;
+  --color: #5d9d19;
   --color-text: #fff;
 }
 .category-laboratory {
@@ -99,7 +99,8 @@
   --color-text: #fff;
 }
 .category-report {
-  --color: #00a566;
+  --color: #006196;
+  --color-text: #fff;
 }
 .category-survey {
   --color: #c300ff;

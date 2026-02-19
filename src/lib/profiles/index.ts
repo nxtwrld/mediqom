@@ -179,6 +179,14 @@ export function mapProfileData(
   if (health) {
     profileData.health = health;
   }
+
+  // In-memory sync to ensure consistency
+  // If vcard.fn exists, ensure fullName matches (vcard is source of truth)
+  if (profileData.vcard?.fn) {
+    profileData.fullName = profileData.vcard.fn;
+  }
+  // Else if fullName exists but vcard.fn doesn't, migration will happen in ProfileEdit
+
   return profileData as Profile;
 }
 
@@ -230,12 +238,18 @@ export async function createVirtualProfile(profile: ProfileNew) {
   await loadProfiles(true);
 
   // 5. create profile document if vcard is provided
+  // Ensure vcard.fn is populated from fullName if not provided
+  const vcardData = profile.vcard || {};
+  if (!vcardData.fn && profile.fullName) {
+    vcardData.fn = profile.fullName;
+  }
+
   await addDocument({
     type: DocumentType.profile,
     content: {
       title: "Profile",
       tags: ["profile"],
-      vcard: profile.vcard || {},
+      vcard: vcardData,  // Use synced vcard
       insurance: profile.insurance || {},
     },
     user_id: profileData.id,

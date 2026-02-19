@@ -1,9 +1,9 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import assess from "$lib/import.server/assessInputs";
 import {
-  loadSubscription,
-  updateSubscription,
-} from "$lib/user/subscriptions.server.js";
+  checkScansAvailable,
+  consumeScan,
+} from "$lib/billing/subscription.server";
 
 export const POST: RequestHandler = async ({
   request,
@@ -16,13 +16,8 @@ export const POST: RequestHandler = async ({
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
   }
-  const subscription = await loadSubscription(user.id);
-  //console.log('user', subscription);
-  if (!subscription) {
-    error(404, { message: "Subscription not found" });
-  }
-
-  if (subscription.scans == 0) {
+  const scansCheck = await checkScansAvailable(user.id);
+  if (scansCheck.available <= 0) {
     error(403, { message: "Subscription limit reached" });
   }
 
@@ -34,8 +29,11 @@ export const POST: RequestHandler = async ({
 
   const result = await assess(data);
 
-  subscription.scans -= 1;
-  const u = await updateSubscription(subscription, user.id);
+  // Consume scan (atomic operation)
+  const consumeResult = await consumeScan(user.id);
+  if (!consumeResult.success) {
+    error(403, { message: consumeResult.reason || "Failed to consume scan" });
+  }
 
   return json(result);
 };

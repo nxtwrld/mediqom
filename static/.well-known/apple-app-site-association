@@ -1,10 +1,11 @@
 {
   "applinks": {
-    "apps": [],
     "details": [
       {
-        "appID": "551275822.com.mediqom.app",
-        "paths": ["/auth/callback", "/auth/callback/*"]
+        "appIDs": ["551275822.com.mediqom.app"],
+        "components": [
+          { "/": "/auth/callback" }
+        ]
       }
     ]
   }

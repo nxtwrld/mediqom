@@ -8,7 +8,7 @@
 import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
-import anatomyTags from "$lib/configurations/tags";
+import anatomyObjects from "$data/objects.json";
 import propertiesDefinition from "$data/lab.properties.defaults.json";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
@@ -16,6 +16,7 @@ import {
   recordWorkflowStep,
   workflowRecorder,
 } from "$lib/debug/workflow-recorder";
+import { STATIC_PROPERTIES } from "$lib/health/property-categories";
 
 export interface BaseProcessingNodeConfig {
   nodeName: string;
@@ -275,16 +276,23 @@ export abstract class BaseProcessingNode {
         );
       }
 
-      // Populate empty bodyParts identification enum with anatomy tags
+      // Populate empty bodyParts identification enum with valid 3D model objects
       const schemaItems = (this.schema as any)?.items?.properties?.identification;
       if (schemaItems?.enum && schemaItems.enum.length === 0) {
-        schemaItems.enum = [...anatomyTags];
+        // Extract all objects from anatomy object categories (these are valid 3D model objects)
+        const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
+          (category: any) => category.objects || []
+        );
+        // Remove duplicates and set as enum
+        schemaItems.enum = [...new Set(validAnatomyObjects)];
       }
 
-      // Populate empty signal enum with lab property keys
+      // Populate empty signal enum with lab property keys (excluding static profile fields)
       const signalSchema = (this.schema as any)?.parameters?.properties?.signals?.items?.properties?.signal;
       if (signalSchema?.enum && Array.isArray(signalSchema.enum) && signalSchema.enum.length === 0) {
-        signalSchema.enum.push(...Object.keys(propertiesDefinition));
+        const signalKeys = Object.keys(propertiesDefinition)
+          .filter(key => !STATIC_PROPERTIES.includes(key));
+        signalSchema.enum.push(...signalKeys);
       }
 
       console.log(`✅ Successfully loaded schema for ${this.config.nodeName}`);

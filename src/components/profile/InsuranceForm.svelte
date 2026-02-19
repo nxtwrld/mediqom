@@ -11,29 +11,15 @@
 
     let { data = $bindable() }: Props = $props();
 
-    // Create local state for form inputs
-    let provider = $state(data?.provider || '');
-    let number = $state(data?.number || '');
-
-    // Update data only when user enters meaningful values
-    $effect(() => {
-        if (provider || number) {
-            // Only create the data object when user enters something
-            if (!data) data = { provider: '', number: '' };
-            data.provider = provider;
-            data.number = number;
-        }
-    });
-
+    console.log('[InsuranceForm] Initialized with data:', data);
 </script>
 
 <h3 class="h3 heading -sticky">{ $t('profile.insurance.health-insurance') }</h3>
 <div class="page">
 
-
     <div class="input">
         <label for="insurance-provider">{ $t('profile.insurance.provider') }</label>
-        <select id="insurance-provider" bind:value={provider}>
+        <select id="insurance-provider" bind:value={data.provider}>
             <option value="">{ $t('profile.insurance.selectProvider') }</option>
             {#each insuranceProviders as { code, name }}
                 <option value={code}>{code} - {name}</option>
@@ -43,6 +29,6 @@
 
     <div class="input">
         <label for="insurance-number">{ $t('profile.insurance.identification') }</label>
-        <input type="text" id="insurance-number" bind:value={number} />
+        <input type="text" id="insurance-number" bind:value={data.number} autocomplete="off" />
     </div>
 </div>

@@ -161,6 +161,7 @@ export const actions: Actions = {
 
       return {
         success: true,
+        email: email,
         message:
           "Magic link sent! Please check your email and click the link to continue.",
       };

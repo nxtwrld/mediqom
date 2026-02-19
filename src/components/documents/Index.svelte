@@ -13,13 +13,14 @@
     import type { ImportJob } from '$lib/import/types';
     import JobCard from '$components/import/JobCard.svelte';
     import ui from '$lib/ui';
+    import { t } from '$lib/i18n';
 
   interface Props {
     user?: string;
   }
 
   let { user = $profile?.id || $userStore?.id as string }: Props = $props();
-    let documents = byUser(user);
+    let documents = $derived(byUser(user));
 
     // Cache availability per job
     let cacheStatus: Record<string, boolean> = $state({});
@@ -43,6 +44,10 @@
         if (!a.metadata.date) return 1;
         if (!b.metadata.date) return -1;
         return new Date(b.metadata.date).getTime() - new Date(a.metadata.date).getTime();
+    }
+
+    function handleImport() {
+        ui.emit('overlay.import', { autoOpen: true });
     }
 
     function handleReview(job: ImportJob) {
@@ -88,6 +93,14 @@
 
 {#if documents}
 <div class="tiles">
+<button class="tile -vertical -import" onclick={handleImport}>
+    <div class="tile-body">
+        <svg class="import-icon"><use href="/icons.svg#add-file" /></svg>
+    </div>
+    <div class="tile-footer">
+        <span>{ $t('app.nav.import') }</span>
+    </div>
+</button>
 {#each $documents.sort(sortByDate) as document}
   <DocumentTile document={document as Document} />
 {/each}
@@ -100,6 +113,29 @@
         flex-direction: column;
         gap: .5rem;
         margin-bottom: 1rem;
+    }
+
+    .tile.-import {
+        border: 2px dashed var(--color-border);
+        background: transparent;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+        text-align: left;
+    }
+    .tile.-import:hover {
+        background-color: var(--color-surface);
+        color: var(--color-text-primary);
+    }
+    .tile.-import .import-icon {
+        width: 2rem;
+        height: 2rem;
+        fill: currentColor;
+        margin: .5rem;
+    }
+    .tile.-import .tile-footer {
+        background-color: var(--color-gray-600);
+        padding: .5rem;
+        font-size: 0.9rem;
     }
 </style>
 

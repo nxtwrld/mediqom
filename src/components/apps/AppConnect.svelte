@@ -29,21 +29,11 @@
 
     let selectedApp: AppRecord | undefined = $state(undefined);
 
-    let items: any[] = cleanItems(shared);
+    let items = $derived(cleanItems(shared));
 
-    if (shared) {
-        logger.api.debug('Shared items', shared);
-        /*
-        getAllLinkedItems(shared).then((itemsShared: any[]) => {
-            items = itemsShared.map(item => {
-                return {
-                    type: item.type,
-                    title: item.data?.title || item.data?.question || item.data?.fn,
-                    uid: item.data.uid
-                }
-            }) as any[];
-        });*/
-    }
+    $effect(() => {
+        if (shared) logger.api.debug('Shared items', shared);
+    });
 
     function cleanItems(items: any[]): any[] {
         return items.map(item => {

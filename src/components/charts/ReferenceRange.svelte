@@ -39,16 +39,13 @@
     const referenceRangeLowPercent: number = 35;
     const referenceRangeOkPercent: number = 30;
     const referenceRangeHighPercent: number = 35;
-    let onPercentOnScale: number = (referenceRange.high.value - referenceRange.low.value) / referenceRangeOkPercent;
-    let scaleStartsAt: number = referenceRange.low.value - (referenceRangeLowPercent * onPercentOnScale);
+    let onPercentOnScale = $derived((referenceRange.high.value - referenceRange.low.value) / referenceRangeOkPercent);
+    let scaleStartsAt = $derived(referenceRange.low.value - (referenceRangeLowPercent * onPercentOnScale));
 
-    let referenceRangeValuePercent = (value - scaleStartsAt) / onPercentOnScale;
-    let status: 'ok' | 'low' | 'high' = $state('ok');
-    if (value < referenceRange.low.value) {
-        status = 'low';
-    } else if (value > referenceRange.high.value) {
-        status = 'high';
-    }
+    let referenceRangeValuePercent = $derived((value - scaleStartsAt) / onPercentOnScale);
+    let status = $derived<'ok' | 'low' | 'high'>(
+        value < referenceRange.low.value ? 'low' : value > referenceRange.high.value ? 'high' : 'ok'
+    );
 </script>
 
 <div class="range" class:-value={showValue}>

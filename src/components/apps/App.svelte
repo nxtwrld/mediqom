@@ -11,7 +11,7 @@
     }
 
     let { data, app = data.app }: Props = $props();
-    logger.api.debug('App record', data.app);
+    $effect(() => { logger.api.debug('App record', data.app); });
 
     function close() {
         sharedItems.set([]);
@@ -38,12 +38,12 @@
 
 {#if app && app.connect}
 <div class="app">
-        <button onclick={close} class='close'><svg>
+        <button onclick={close} class='close' aria-label="Close"><svg>
             <use href="/sprite.svg#close" />
         </svg>
         </button>
         {#if id}
-        <iframe src="{app.connect.uri}?id={id}" frameborder="0" class="app-iframe"></iframe>
+        <iframe src="{app.connect.uri}?id={id}" frameborder="0" class="app-iframe" title={app.name}></iframe>
         {:else}
         {$t('app.apps.loading-data')}
         {/if}

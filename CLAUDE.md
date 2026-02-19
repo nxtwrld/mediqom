@@ -169,6 +169,9 @@ index.
 - **Data management**: Use Svelte stores for shared state, avoid overusing `$effect()` and `$derived()` - prefer store subscriptions
 - **Snippet-based composition**: Components use `children?: import('svelte').Snippet` for content projection
 - **Event dispatcher pattern**: Components emit custom events for parent communication using `createBubbler()`
+- **No multiline inline handlers**: Never write logic directly in HTML event attributes.
+  Extract to a named function in `<script>` and reference it: `onclick={handleSave}`.
+  One-liners that just call a function are fine: `onclick={() => open(item)}`.
 
 ### TypeScript Patterns
 

@@ -23,6 +23,24 @@
     import { device } from '$lib/device';
     import { saveHealthProfile } from '$lib/health/save';
 
+    async function handleHealthFormClose() {
+        logger.ui.debug('Health form modal close event fired');
+        // Save data before clearing
+        if (dialogs.healthFormData && $profile?.id) {
+            await saveHealthProfile({
+                profileId: $profile.id,
+                formData: dialogs.healthFormData
+            });
+        }
+        dialogs.healthForm = false;
+        dialogs.healthFormData = null;
+    }
+
+    function handleHealthPropertyClose() {
+        logger.ui.debug('Health property modal close event fired');
+        dialogs.healthProperty = false;
+    }
+
     interface Props {
         children?: import('svelte').Snippet;
     }
@@ -38,6 +56,7 @@
 
     // Import overlay state
     let importJobId: string | undefined = $state(undefined);
+    let importAutoOpen = $state(false);
 
     // Chat state
     let currentProfile: Profile | null = $state(null);
@@ -181,12 +200,15 @@
                 logger.ui.debug('import');
                 if (state && typeof state === 'object' && state.jobId) {
                     importJobId = state.jobId;
+                    importAutoOpen = false;
                 } else {
                     importJobId = undefined;
+                    importAutoOpen = !!(state && typeof state === 'object' && state.autoOpen);
                 }
                 if (state) location.hash = '#overlay-import';
                 else  {
                     importJobId = undefined;
+                    importAutoOpen = false;
                     if (location.hash.indexOf('#overlay-') == 0) {
                     history.back();
                 }
@@ -244,10 +266,11 @@
                 {/if}
                 <!-- Mobile Pull Handle -->
                 {#if isMobile}
-                    <div 
+                    <div
                         class="mobile-pull-handle"
                         ontouchstart={handleMobileResizeStart}
                         role="button"
+                        tabindex="0"
                         aria-label="Drag to resize viewer height"
                     >
                         <div class="pull-handle-bar"></div>
@@ -261,23 +284,12 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            <Import jobId={importJobId} oncomplete={() => { importJobId = undefined; }} />
+            <Import jobId={importJobId} autoOpen={importAutoOpen} oncomplete={() => { importJobId = undefined; }} />
             </div>
     {/if}
 
     {#if dialogs.healthForm}
-        <Modal onclose={async () => {
-            logger.ui.debug('Health form modal close event fired');
-            // Save data before clearing
-            if (dialogs.healthFormData && $profile?.id) {
-                await saveHealthProfile({
-                    profileId: $profile.id,
-                    formData: dialogs.healthFormData
-                });
-            }
-            dialogs.healthForm = false;
-            dialogs.healthFormData = null;
-        }}>
+        <Modal onclose={handleHealthFormClose}>
             <HealthForm
                 config={dialogs.healthForm}
                 bind:data={dialogs.healthFormData}
@@ -285,10 +297,7 @@
         </Modal>
     {/if}
     {#if dialogs.healthProperty}
-        <Modal onclose={() => {
-            logger.ui.debug('Health property modal close event fired');
-            dialogs.healthProperty = false;
-        }}>
+        <Modal onclose={handleHealthPropertyClose}>
             <HealthProperty property={dialogs.healthProperty as any} />
         </Modal>
     {/if}

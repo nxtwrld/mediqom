@@ -111,7 +111,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
                     <!--div class="spacer"></div-->
                     <a href="/med/p/{$profile.id}/documents" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/documents/', $page.url.pathname)}>{ $t('app.nav.documents') }</a>
                     <!--a href="/med/p/{$profile.id}/history" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/history/', $page.url.pathname)}>{ $t('app.nav.history') }</a-->
-                    {#if $user && 'isMedical' in $user && $user.isMedical}
+                    {#if false && $user && 'isMedical' in $user && $user.isMedical}
                         <SessionHeaderButton 
                             profileId={$profile.id}
                             patientId={$profile.id}

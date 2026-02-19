@@ -8,8 +8,13 @@ export default {
       identification: {
         type: "string",
         description:
-          "Identification of the body part. Only select ones from provided enum items. Do not create new identification outside the provided list - look for more generic terms from the list.",
+          "Main body part from 3D model. MUST use lateralized names for paired structures (L_humerus, R_femur, L_patella, etc.). Only select from provided enum items - these are valid 3D model objects. For bilateral findings, create separate entries with L_ and R_ prefixes. Do not create new identification outside the provided list.",
         enum: [],
+      },
+      part: {
+        type: "string",
+        description:
+          "Specific sub-region or anatomical part of the body part (e.g., cardia, pylorus, fundus for stomach; left lobe, right lobe for liver). Leave empty if the entire organ/body part is referenced without specifying a particular region.",
       },
       status: {
         type: "string",
@@ -27,6 +32,6 @@ export default {
           "Urgency of the report regarding the body part on a scale of 1-5. 1 - not severe, 5 - very severe. where 1 is non issue - just a general statement, 2 and up are issues detected, that need to be reflected upon.",
       },
     },
-    required: ["identification", "status", "diagnosis", "treatment", "urgency"],
+    required: ["identification", "status", "urgency"],
   },
 };

@@ -2,6 +2,7 @@ export enum DocumentType {
   "profile" = "profile",
   "document" = "document",
   "health" = "health",
+  "internal" = "internal",
 }
 
 export enum DocumentState {

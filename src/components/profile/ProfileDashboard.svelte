@@ -1,18 +1,15 @@
 <script lang="ts">
-    import { profile} from '$lib/profiles';
+    import { profile } from '$lib/profiles';
     import { getAge } from '$lib/datetime';
     import PropertyTile from './PropertyTile.svelte';
-    import { properties } from '$lib/health/dataTypes';
     import user from '$lib/user';
     import ui from '$lib/ui';
     import Avatar from '$components/onboarding/Avatar.svelte';
     import Documents from '$components/documents/Index.svelte';
     import { t } from '$lib/i18n';
-    import { ConstitutionalPrinciple } from 'langchain/chains';
-    import { onMount } from 'svelte';
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
-    import { saveHealthProfile } from '$lib/health/save';
+    import { saveProfileChanges, prepareProfileForEditing } from '$lib/profiles/save';
     import { getPropertyCategory } from '$lib/health/property-categories';
     
     // Local state for ProfileEdit modal
@@ -21,10 +18,19 @@
     let originalProfile: any = $state(null);
 
     function openProfileEdit() {
-        // Create a deep copy to avoid direct store mutations
-        editingProfile = JSON.parse(JSON.stringify($profile));
-        originalProfile = JSON.parse(JSON.stringify($profile)); // Store original for comparison
+        const prepared = prepareProfileForEditing($state.snapshot($profile));
+        editingProfile = prepared;
+        originalProfile = JSON.parse(JSON.stringify(prepared));
         showProfileEdit = true;
+    }
+
+    async function saveProfile() {
+        if (editingProfile?.id) {
+            await saveProfileChanges($state.snapshot(editingProfile), $state.snapshot(originalProfile));
+        }
+        editingProfile = null;
+        originalProfile = null;
+        showProfileEdit = false;
     }
     
     interface Property {
@@ -297,23 +303,8 @@
 
 <!-- ProfileEdit Modal -->
 {#if showProfileEdit && editingProfile}
-    <Modal onclose={async () => {
-        // Only save if data actually changed
-        const hasChanges = JSON.stringify(editingProfile) !== JSON.stringify(originalProfile);
-
-        if (hasChanges && editingProfile?.id && editingProfile?.health) {
-            await saveHealthProfile({
-                profileId: editingProfile.id,
-                formData: editingProfile.health
-            });
-            // Update the store with edited data
-            profile.set(editingProfile);
-        }
-
-        editingProfile = null;
-        originalProfile = null;
-        showProfileEdit = false;
-    }}>
+    <Modal onclose={saveProfile}>
+    <div class="modal-header">Profile Edit</div>
         <ProfileEdit bind:profile={editingProfile} />
     </Modal>
 {/if}

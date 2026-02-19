@@ -471,7 +471,7 @@ const TEST_DATA: ReportAnalysis[] = [
     type: Types.report,
     fhirType: "DiagnosticReport",
     fhir: {},
-    cagegory: "report",
+    category: "report",
     tags: ["esophagus", "throat", "larynx", "hyoid_bone_skeletal", "nerves"],
     hasLabOrVitals: false,
     hasPrescription: true,

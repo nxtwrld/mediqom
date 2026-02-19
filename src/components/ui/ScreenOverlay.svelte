@@ -60,7 +60,7 @@
 </div>
 
 {#if showPreviewDisabled}
-<Modal onclose={() => showPreviewDisabled = false}>
+<Modal onclose={() => { showPreviewDisabled = false; }}>
     <p class="p preview-disabled-message">{ $t('app.import.preview-disabled') }</p>
 </Modal>
 {/if}

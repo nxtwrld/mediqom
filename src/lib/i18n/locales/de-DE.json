@@ -400,6 +400,7 @@
       "sending": "Wird gesendet...",
       "email-sent": "E-Mail gesendet!",
       "send-again": "Erneut senden",
+      "email-sent-to": "",
       "magic-link-sent": "Magic Link gesendet! Prüfen Sie Ihre E-Mail und tippen Sie auf den Link zum Anmelden.",
       "magic-link-failed": "Magic Link konnte nicht gesendet werden",
       "invalid-email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
@@ -518,12 +519,13 @@
       }
     },
     "settings": {
-      "title": "",
+      "title": "Einstellungen",
       "tabs": {
-        "general": "",
-        "profile": "",
-        "privacy": "",
-        "about": ""
+        "general": "Allgemein",
+        "profile": "Profil",
+        "privacy": "Datenschutz",
+        "subscription": "Abonnement",
+        "about": "Über"
       },
       "general": {
         "title": "",
@@ -566,7 +568,11 @@
         "data": {
           "title": "",
           "export": "",
+          "export-progress": "",
+          "export-error": "",
           "delete": "",
+          "delete-confirm": "",
+          "delete-error": "",
           "coming-soon": ""
         }
       },
@@ -1413,7 +1419,8 @@
       "street": "Straße",
       "suffix": "Suffix",
       "tel": "Telefon",
-      "title": "Titel"
+      "title": "Titel",
+      "willUpdateTo": ""
     }
   },
   "share": {
@@ -1816,6 +1823,70 @@
       "days": "Tage",
       "days-short": "T",
       "percent": "%"
+    }
+  },
+  "billing": {
+    "subscription": "Abonnement",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "month": "Mo",
+    "year": "Jahr",
+    "free": "Kostenlos",
+    "recommended": "Empfohlen",
+    "current-plan": "Aktueller Plan",
+    "free-tier": "Kostenlos",
+    "upgrade-to": "Upgrade auf",
+    "profile": "Profil",
+    "profiles": "Profile",
+    "unlimited-profiles": "Unbegrenzte Profile",
+    "scans-per-year": "Scans/Jahr",
+    "scan": "Scan",
+    "scans": "Scans",
+    "choose-your-plan": "Wählen Sie Ihren Plan",
+    "upgrade-subtitle": "Schalten Sie mehr Funktionen und Scan-Kapazität für Ihre medizinischen Dokumente frei",
+    "subscription-plans": "Pläne",
+    "scan-credits": "Guthaben",
+    "scan-credits-title": "Scan-Guthaben-Pakete",
+    "scan-credits-description": "Kaufen Sie zusätzliche Scans, die nie verfallen. Guthaben wird verwendet, nachdem Ihre Basis-Scans aufgebraucht sind.",
+    "current-credits": "Aktuelles Guthaben",
+    "one-time": "einmalig",
+    "buy-now": "Jetzt kaufen",
+    "redirecting": "Weiterleitung zur Zahlung...",
+    "scan-usage": "Scan-Nutzung",
+    "base-scans": "Basis-Scans",
+    "credits-available": "Guthaben verfügbar",
+    "scans-available": "Scans verfügbar",
+    "resets-on": "Wird zurückgesetzt am",
+    "profile-usage": "Profil-Nutzung",
+    "unlimited": "unbegrenzt",
+    "upgrade": "Upgrade",
+    "change-plan": "Plan ändern",
+    "buy-credits": "Guthaben kaufen",
+    "manage-billing": "Abrechnung verwalten",
+    "ends-on": "Endet am",
+    "renews-on": "Erneuert sich am",
+    "status": {
+      "active": "Aktiv",
+      "past_due": "Überfällig",
+      "canceled": "Gekündigt",
+      "expired": "Abgelaufen",
+      "trialing": "Testversion"
+    },
+    "payment-success": "Zahlung erfolgreich! Ihr Abonnement wurde aktualisiert.",
+    "payment-canceled": "Zahlung wurde abgebrochen. Es wurden keine Änderungen vorgenommen.",
+    "loading": "Abonnement wird geladen...",
+    "no-subscription": "Kein Abonnement gefunden. Starten Sie mit einem Plan.",
+    "get-started": "Loslegen",
+    "faq": {
+      "title": "Häufig gestellte Fragen",
+      "what-are-scans": "Was sind Scans?",
+      "what-are-scans-answer": "Ein Scan wird jedes Mal verwendet, wenn Sie ein medizinisches Dokument für die KI-gestützte Analyse und Datenextraktion importieren.",
+      "credits-expire": "Verfallen Scan-Guthaben?",
+      "credits-expire-answer": "Nein, gekaufte Scan-Guthaben verfallen nie und sammeln sich über Käufe hinweg an.",
+      "base-scans-reset": "Wann werden Basis-Scans zurückgesetzt?",
+      "base-scans-reset-answer": "Ihr Basis-Scan-Kontingent wird am Jahrestag Ihres Abonnements zurückgesetzt. Ungenutzte Basis-Scans werden nicht übertragen.",
+      "cancel-subscription": "Wie kündige ich mein Abonnement?",
+      "cancel-subscription-answer": "Klicken Sie auf 'Abrechnung verwalten', um das Stripe-Kundenportal zu öffnen, wo Sie kündigen, die Zahlungsmethode ändern oder Rechnungen einsehen können."
     }
   }
 }

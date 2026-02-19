@@ -23,7 +23,7 @@ export const GET: RequestHandler = async ({
 
     const { data: subscription, error: subscriptionError } = await supabase
       .from("subscriptions")
-      .select("profiles, scans")
+      .select("scans_base, scans_used, scans_credits")
       .eq("id", user.id)
       .single();
 
@@ -34,12 +34,17 @@ export const GET: RequestHandler = async ({
         throw profileError;
       }
     }
-    if (subscriptionError) {
+    if (subscriptionError && subscriptionError.code !== "PGRST116") {
       throw subscriptionError;
     }
 
+    const scansAvailable = subscription
+      ? (subscription.scans_base ?? 0) + (subscription.scans_credits ?? 0) - (subscription.scans_used ?? 0)
+      : 10;
+
     (profile as any).subscriptionStats = {
-      ...subscription,
+      profiles: 5,
+      scans: scansAvailable,
       default_scans: 10,
       default_profiles: 5,
     };
