@@ -17,6 +17,8 @@
 
 			const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
 			const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
+			const tokenHash = searchParams.get('token_hash');
+			const otpType = searchParams.get('type') as 'email' | 'magiclink' | 'email_change' | null;
 			const code = searchParams.get('code');
 
 			const supabase = getClient();
@@ -30,6 +32,23 @@
 
 				if (sessionError) {
 					error = sessionError.message;
+					return;
+				}
+
+				if (data.session) {
+					CurrentSession.set(data.session);
+					goto('/med');
+					return;
+				}
+			} else if (tokenHash) {
+				status = $t('app.auth.setting-up-session');
+				const { data, error: otpError } = await supabase.auth.verifyOtp({
+					token_hash: tokenHash,
+					type: otpType ?? 'email',
+				});
+
+				if (otpError) {
+					error = otpError.message;
 					return;
 				}
 
