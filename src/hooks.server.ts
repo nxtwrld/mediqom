@@ -1,6 +1,38 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+
+/**
+ * Normalize malformed Supabase auth redirect URLs.
+ *
+ * GoTrue can generate URLs like:
+ *   /auth/callback&token_hash=...&type=email
+ * instead of the correct:
+ *   /auth/callback?token_hash=...&type=email
+ *
+ * This happens when the emailRedirectTo already contained a `?`
+ * (e.g. from PKCE code_challenge), GoTrue strips the PKCE params but
+ * forgets to change `&` back to `?` for the next appended params.
+ */
+const authUrlNormalizer: Handle = async ({ event, resolve }) => {
+  const path = event.url.pathname;
+
+  if (
+    path.startsWith('/auth/callback') &&
+    (path.includes('&token_hash=') || path.includes('&code=') || path.includes('&access_token=') || path.includes('&type='))
+  ) {
+    const ampIndex = path.indexOf('&');
+    if (ampIndex > 0) {
+      const base = path.slice(0, ampIndex);
+      const fromPath = path.slice(ampIndex + 1);
+      const existingQuery = event.url.search ? event.url.search.slice(1) : '';
+      const fullQuery = existingQuery ? `${fromPath}&${existingQuery}` : fromPath;
+      return redirect(302, `${base}?${fullQuery}`);
+    }
+  }
+
+  return resolve(event);
+};
 import {
   PUBLIC_SUPABASE_URL,
   PUBLIC_SUPABASE_ANON_KEY,
@@ -186,4 +218,4 @@ const errorHandler: Handle = async ({ event, resolve }) => {
   }
 };
 
-export const handle: Handle = sequence(supabase, authGuard, errorHandler);
+export const handle: Handle = sequence(authUrlNormalizer, supabase, authGuard, errorHandler);
