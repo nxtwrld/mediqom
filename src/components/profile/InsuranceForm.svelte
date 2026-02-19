@@ -29,6 +29,6 @@
 
     <div class="input">
         <label for="insurance-number">{ $t('profile.insurance.identification') }</label>
-        <input type="text" id="insurance-number" bind:value={data.number} />
+        <input type="text" id="insurance-number" bind:value={data.number} autocomplete="off" />
     </div>
 </div>

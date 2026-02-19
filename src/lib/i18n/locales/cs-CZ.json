@@ -400,6 +400,7 @@
       "sending": "Odesílání...",
       "email-sent": "E-mail odeslán!",
       "send-again": "Odeslat znovu",
+      "email-sent-to": "",
       "magic-link-sent": "Magický odkaz odeslán! Zkontrolujte svůj e-mail a klikněte na odkaz pro přihlášení.",
       "magic-link-failed": "Nepodařilo se odeslat magický odkaz",
       "invalid-email": "Zadejte prosím platnou e-mailovou adresu",

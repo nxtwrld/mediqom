@@ -16,7 +16,7 @@
     }
 
     let { data }: Props = $props();
-    log.ui.debug('data', data);
+    $effect(() => { log.ui.debug('data', data); });
 </script>
 
 <div class="page -empty">

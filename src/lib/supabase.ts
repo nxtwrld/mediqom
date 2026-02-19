@@ -6,6 +6,7 @@ import {
   PUBLIC_SUPABASE_URL,
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
+import { isCapacitorBuild } from '$lib/config/platform';
 
 const clients = new Map<string, SupabaseClient>();
 
@@ -45,10 +46,16 @@ export function getClient(clientName: string = "default"): SupabaseClient {
       url: PUBLIC_SUPABASE_URL,
     });
     if (clientName == "default") {
-      const newClient = createClient(
-        PUBLIC_SUPABASE_URL,
-        PUBLIC_SUPABASE_ANON_KEY,
-      );
+      const newClient = isCapacitorBuild()
+        ? createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+            auth: {
+              flowType: 'implicit',
+              detectSessionInUrl: false,
+              persistSession: true,
+              autoRefreshToken: true,
+            },
+          })
+        : createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
       clients.set("default", newClient);
       return newClient;
     } else {

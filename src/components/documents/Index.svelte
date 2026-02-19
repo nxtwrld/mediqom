@@ -20,7 +20,7 @@
   }
 
   let { user = $profile?.id || $userStore?.id as string }: Props = $props();
-    let documents = byUser(user);
+    let documents = $derived(byUser(user));
 
     // Cache availability per job
     let cacheStatus: Record<string, boolean> = $state({});

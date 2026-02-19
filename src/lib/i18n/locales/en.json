@@ -400,6 +400,7 @@
       "sending": "Sending...",
       "email-sent": "Email sent!",
       "send-again": "Send again",
+      "email-sent-to": "Email sent to",
       "magic-link-sent": "Magic link sent! Check your email and tap the link to sign in.",
       "magic-link-failed": "Failed to send magic link",
       "invalid-email": "Please enter a valid email address",

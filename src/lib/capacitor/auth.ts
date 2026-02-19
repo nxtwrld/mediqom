@@ -135,6 +135,29 @@ async function handleAuthCallback(url: string): Promise<void> {
         console.log('[Mobile Auth] Session established, redirecting to /med');
         goto('/med');
       }
+    } else if (searchParams.get('token_hash')) {
+      // token_hash flow (newer Supabase magic links): ?token_hash=...&type=email
+      const tokenHash = searchParams.get('token_hash')!;
+      const otpType = searchParams.get('type') as 'email' | 'magiclink' | 'email_change' | null;
+
+      console.log('[Mobile Auth] Verifying OTP token_hash...');
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: otpType ?? 'email',
+      });
+
+      if (error) {
+        console.error('[Mobile Auth] verifyOtp failed:', error);
+        goto('/auth?error=otp_failed');
+        return;
+      }
+
+      if (data.session) {
+        CurrentSession.set(data.session);
+        console.log('[Mobile Auth] OTP session established, redirecting to /med');
+        goto('/med');
+        return;
+      }
     } else if (code) {
       // PKCE fallback: exchange authorization code for session
       console.log('[Mobile Auth] Exchanging PKCE code for session...');

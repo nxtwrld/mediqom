@@ -266,10 +266,11 @@
                 {/if}
                 <!-- Mobile Pull Handle -->
                 {#if isMobile}
-                    <div 
+                    <div
                         class="mobile-pull-handle"
                         ontouchstart={handleMobileResizeStart}
                         role="button"
+                        tabindex="0"
                         aria-label="Drag to resize viewer height"
                     >
                         <div class="pull-handle-bar"></div>

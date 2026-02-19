@@ -400,6 +400,7 @@
       "sending": "Wird gesendet...",
       "email-sent": "E-Mail gesendet!",
       "send-again": "Erneut senden",
+      "email-sent-to": "",
       "magic-link-sent": "Magic Link gesendet! Prüfen Sie Ihre E-Mail und tippen Sie auf den Link zum Anmelden.",
       "magic-link-failed": "Magic Link konnte nicht gesendet werden",
       "invalid-email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",

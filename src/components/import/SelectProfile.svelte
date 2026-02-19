@@ -6,7 +6,6 @@
     import Modal from '$components/ui/Modal.svelte';
     import type { Profile } from '$lib/types.d';
     import ProfileImage from '$components/profile/ProfileImage.svelte';
-    import { onMount } from 'svelte';
     import { normalizeName } from '$lib/profiles/tools';
     import type { DetectedProfileData } from '$lib/import'
     import { scale } from 'svelte/transition';
@@ -21,24 +20,21 @@
     }
 
     let { contact, linkFrom = 'top', selected = $bindable() }: Props = $props();
-    
-    // Type assertion to ensure selected is never undefined after initialization
-    let selectedProfile: Profile;
-    
-    let profilesFound = contact ? findInProfiles(contact) : []; 
-    
-    // Initialize selected if not provided
-    selected = selected || (profilesFound.length > 0 ? profilesFound[0] : normalizePatientData(contact));
+
+    let profilesFound = $derived(contact ? findInProfiles(contact) : []);
+
+    $effect.pre(() => {
+        if (!selected) {
+            selected = profilesFound.length > 0 ? profilesFound[0] : normalizePatientData(contact);
+        }
+    });
 
     let showSelectProfileModal: boolean = $state(false);
 
     function selectProfile(profile: Profile) {
         selected = profile;
         showSelectProfileModal = false;
-    }   
-    onMount(() => {
-        selected = profilesFound.length > 0 ? profilesFound[0] : normalizePatientData(contact);
-    });
+    }
 </script>
 
 <button

@@ -16,6 +16,7 @@
 	let loading: boolean = $state(false);
 	let submitted: boolean = $state(false);
 	let email: string = $state('');
+	let submittedEmail: string = $state('');
 	let errorMessage: string = $state('');
 	let successMessage: string = $state('');
 
@@ -52,6 +53,7 @@
 			}
 
 			submitted = true;
+			submittedEmail = email;
 			successMessage = $t('app.auth.magic-link-sent');
 			loading = false;
 		} catch (err) {
@@ -74,6 +76,7 @@
 			return;
 		}
 
+		submittedEmail = formData.get('email') as string;
 		loading = true;
 		submitted = true;
 
@@ -118,6 +121,7 @@
 		{#if submitted && successMessage}
 		<div class="success">
 			<p class="form-instructions -success">{successMessage}</p>
+			<p class="form-instructions">{$t('app.auth.email-sent-to')} <strong>{email}</strong></p>
 			<div class="form-actions">
 				<button class="button -block" type="button" onclick={resetForm}>{$t('app.auth.send-again')}</button>
 			</div>
@@ -138,6 +142,7 @@
 					name="email"
 					class="inputField"
 					type="email"
+					autocomplete="email"
 					placeholder={$t('app.auth.email-placeholder')}
 					bind:value={email}
 					disabled={loading}
@@ -165,6 +170,7 @@
 		{#if form?.success}
 		<div class="success">
 			<p class="form-instructions -success">{form?.message}</p>
+			<p class="form-instructions">{$t('app.auth.email-sent-to')} <strong>{form?.email}</strong></p>
 			<div class="form-actions">
 				<button class="button -block" type="button" onclick={resetForm}>{$t('app.auth.send-again')}</button>
 			</div>
@@ -211,7 +217,7 @@
 					class="inputField"
 					type="email"
 					placeholder={$t('app.auth.email-placeholder')}
-					value={form?.email ?? ''}
+					value={form?.email ?? submittedEmail}
 					disabled={loading}
 				/>
 			</div>
