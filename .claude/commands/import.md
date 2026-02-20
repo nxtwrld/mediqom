@@ -34,6 +34,7 @@ $ARGUMENTS
 ## LangGraph Workflow (`src/lib/langgraph/`)
 
 ### Nodes (`nodes/`)
+
 - `_base-processing-node.ts` - Base class for all processing nodes
 - `document-type-router.ts` - Routes documents to appropriate pipeline
 - `feature-detection.ts` - Detects document features and types
@@ -52,12 +53,14 @@ $ARGUMENTS
 - `visual-analysis.ts` - Visual content analysis
 
 ### Workflows (`workflows/`)
+
 - `unified-workflow.ts` - Main unified processing workflow
 - `document-processing.ts` - Standard document processing
 - `medical-imaging-workflow.ts` - Medical imaging pipeline
 - `multi-node-orchestrator.ts` - Multi-node parallel orchestration
 
 ### Infrastructure
+
 - `state.ts` - Workflow state definitions
 - `state-medical-imaging.ts` - Imaging workflow state
 - `streaming-wrapper.ts` - SSE streaming integration

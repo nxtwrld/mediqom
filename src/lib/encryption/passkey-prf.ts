@@ -15,13 +15,13 @@
 import type {
   PublicKeyCredentialCreationOptionsWithPRF,
   PublicKeyCredentialRequestOptionsWithPRF,
-  PublicKeyCredentialWithPRF
-} from '../../types/webauthn-prf';
+  PublicKeyCredentialWithPRF,
+} from "../../types/webauthn-prf";
 
 const crypto = globalThis.crypto;
 
 // Salt used for PRF input - unique per application
-const PRF_SALT_PREFIX = 'mediqom-passkey-prf-v1';
+const PRF_SALT_PREFIX = "mediqom-passkey-prf-v1";
 
 export interface PasskeyPRFSupport {
   webauthnSupported: boolean;
@@ -47,7 +47,7 @@ export async function checkPasskeyPRFSupport(): Promise<PasskeyPRFSupport> {
   const result: PasskeyPRFSupport = {
     webauthnSupported: false,
     prfSupported: false,
-    platformAuthenticatorAvailable: false
+    platformAuthenticatorAvailable: false,
   };
 
   // Check basic WebAuthn support
@@ -105,29 +105,29 @@ function createPRFInput(salt: Uint8Array): Uint8Array {
 async function deriveKeyFromPRF(prfOutput: ArrayBuffer): Promise<CryptoKey> {
   // Import PRF output as key material
   const keyMaterial = await crypto.subtle.importKey(
-    'raw',
+    "raw",
     prfOutput,
-    { name: 'HKDF' },
+    { name: "HKDF" },
     false,
-    ['deriveKey']
+    ["deriveKey"],
   );
 
   const encoder = new TextEncoder();
-  const salt = encoder.encode('mediqom-prf-derived-key-v1');
-  const info = encoder.encode('private-key-encryption');
+  const salt = encoder.encode("mediqom-prf-derived-key-v1");
+  const info = encoder.encode("private-key-encryption");
 
   // Derive AES-256-GCM key
   return await crypto.subtle.deriveKey(
     {
-      name: 'HKDF',
-      hash: 'SHA-256',
+      name: "HKDF",
+      hash: "SHA-256",
       salt: salt,
-      info: info
+      info: info,
     },
     keyMaterial,
-    { name: 'AES-GCM', length: 256 },
+    { name: "AES-GCM", length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ["encrypt", "decrypt"],
   );
 }
 
@@ -135,7 +135,8 @@ async function deriveKeyFromPRF(prfOutput: ArrayBuffer): Promise<CryptoKey> {
  * Convert ArrayBuffer or Uint8Array to Base64 string
  */
 function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
-  const uint8Array = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const uint8Array =
+    buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   return btoa(String.fromCharCode(...uint8Array));
 }
 
@@ -143,7 +144,11 @@ function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
  * Convert Base64 string to Uint8Array
  */
 function base64ToUint8Array(base64: string): Uint8Array {
-  return new Uint8Array(atob(base64).split('').map(c => c.charCodeAt(0)));
+  return new Uint8Array(
+    atob(base64)
+      .split("")
+      .map((c) => c.charCodeAt(0)),
+  );
 }
 
 /**
@@ -152,11 +157,11 @@ function base64ToUint8Array(base64: string): Uint8Array {
 export async function createPasskeyWithPRF(
   userId: string,
   userEmail: string,
-  userName: string
+  userName: string,
 ): Promise<PasskeyAuthResult> {
   const support = await checkPasskeyPRFSupport();
   if (!support.webauthnSupported) {
-    throw new Error('WebAuthn is not supported in this browser');
+    throw new Error("WebAuthn is not supported in this browser");
   }
 
   // Generate challenge and PRF salt
@@ -170,53 +175,53 @@ export async function createPasskeyWithPRF(
   const createOptions: PublicKeyCredentialCreationOptionsWithPRF = {
     challenge: challenge,
     rp: {
-      name: 'Mediqom',
-      id: window.location.hostname
+      name: "Mediqom",
+      id: window.location.hostname,
     },
     user: {
       id: userHandle,
       name: userEmail,
-      displayName: userName
+      displayName: userName,
     },
     pubKeyCredParams: [
-      { type: 'public-key', alg: -7 },  // ES256
-      { type: 'public-key', alg: -257 } // RS256
+      { type: "public-key", alg: -7 }, // ES256
+      { type: "public-key", alg: -257 }, // RS256
     ],
     authenticatorSelection: {
-      authenticatorAttachment: 'platform',
-      userVerification: 'required',
-      residentKey: 'required'
+      authenticatorAttachment: "platform",
+      userVerification: "required",
+      residentKey: "required",
     },
     timeout: 60000,
-    attestation: 'none',
+    attestation: "none",
     extensions: {
       prf: {
         eval: {
-          first: prfInput
-        }
-      }
-    }
+          first: prfInput,
+        },
+      },
+    },
   };
 
   // Create the credential
-  const credential = await navigator.credentials.create({
-    publicKey: createOptions
-  }) as PublicKeyCredentialWithPRF | null;
+  const credential = (await navigator.credentials.create({
+    publicKey: createOptions,
+  })) as PublicKeyCredentialWithPRF | null;
 
   if (!credential) {
-    throw new Error('Failed to create passkey');
+    throw new Error("Failed to create passkey");
   }
 
   // Check if PRF was enabled
   const extensionResults = credential.getClientExtensionResults();
   if (!extensionResults.prf?.enabled) {
-    throw new Error('PRF extension not supported by this authenticator');
+    throw new Error("PRF extension not supported by this authenticator");
   }
 
   // Get PRF output
   const prfOutput = extensionResults.prf.results?.first;
   if (!prfOutput) {
-    throw new Error('PRF output not available');
+    throw new Error("PRF output not available");
   }
 
   // Derive encryption key from PRF output
@@ -226,9 +231,9 @@ export async function createPasskeyWithPRF(
     credential: {
       credentialId: arrayBufferToBase64(credential.rawId),
       prfSalt: arrayBufferToBase64(prfSalt),
-      userHandle: arrayBufferToBase64(userHandle)
+      userHandle: arrayBufferToBase64(userHandle),
     },
-    derivedKey
+    derivedKey,
   };
 }
 
@@ -237,11 +242,11 @@ export async function createPasskeyWithPRF(
  */
 export async function authenticateWithPasskeyPRF(
   credentialId: string,
-  prfSalt: string
+  prfSalt: string,
 ): Promise<CryptoKey> {
   const support = await checkPasskeyPRFSupport();
   if (!support.webauthnSupported) {
-    throw new Error('WebAuthn is not supported in this browser');
+    throw new Error("WebAuthn is not supported in this browser");
   }
 
   // Generate challenge
@@ -254,28 +259,30 @@ export async function authenticateWithPasskeyPRF(
   const requestOptions: PublicKeyCredentialRequestOptionsWithPRF = {
     challenge: challenge,
     rpId: window.location.hostname,
-    allowCredentials: [{
-      type: 'public-key',
-      id: base64ToUint8Array(credentialId)
-    }],
-    userVerification: 'required',
+    allowCredentials: [
+      {
+        type: "public-key",
+        id: base64ToUint8Array(credentialId),
+      },
+    ],
+    userVerification: "required",
     timeout: 60000,
     extensions: {
       prf: {
         eval: {
-          first: prfInput
-        }
-      }
-    }
+          first: prfInput,
+        },
+      },
+    },
   };
 
   // Authenticate with the credential
-  const credential = await navigator.credentials.get({
-    publicKey: requestOptions
-  }) as PublicKeyCredentialWithPRF | null;
+  const credential = (await navigator.credentials.get({
+    publicKey: requestOptions,
+  })) as PublicKeyCredentialWithPRF | null;
 
   if (!credential) {
-    throw new Error('Failed to authenticate with passkey');
+    throw new Error("Failed to authenticate with passkey");
   }
 
   // Get PRF output
@@ -283,7 +290,9 @@ export async function authenticateWithPasskeyPRF(
   const prfOutput = extensionResults.prf?.results?.first;
 
   if (!prfOutput) {
-    throw new Error('PRF output not available - authenticator may not support PRF');
+    throw new Error(
+      "PRF output not available - authenticator may not support PRF",
+    );
   }
 
   // Derive encryption key from PRF output
@@ -295,11 +304,11 @@ export async function authenticateWithPasskeyPRF(
  * This is used when the credential ID is not known
  */
 export async function authenticateWithDiscoverablePasskey(
-  storedCredentials: Array<{ credentialId: string; prfSalt: string }>
+  storedCredentials: Array<{ credentialId: string; prfSalt: string }>,
 ): Promise<{ derivedKey: CryptoKey; credentialId: string }> {
   const support = await checkPasskeyPRFSupport();
   if (!support.webauthnSupported) {
-    throw new Error('WebAuthn is not supported in this browser');
+    throw new Error("WebAuthn is not supported in this browser");
   }
 
   // Generate challenge
@@ -319,26 +328,26 @@ export async function authenticateWithDiscoverablePasskey(
   const requestOptions: PublicKeyCredentialRequestOptionsWithPRF = {
     challenge: challenge,
     rpId: window.location.hostname,
-    allowCredentials: storedCredentials.map(cred => ({
-      type: 'public-key' as const,
-      id: base64ToUint8Array(cred.credentialId)
+    allowCredentials: storedCredentials.map((cred) => ({
+      type: "public-key" as const,
+      id: base64ToUint8Array(cred.credentialId),
     })),
-    userVerification: 'required',
+    userVerification: "required",
     timeout: 60000,
     extensions: {
       prf: {
-        evalByCredential
-      }
-    }
+        evalByCredential,
+      },
+    },
   };
 
   // Authenticate
-  const credential = await navigator.credentials.get({
-    publicKey: requestOptions
-  }) as PublicKeyCredentialWithPRF | null;
+  const credential = (await navigator.credentials.get({
+    publicKey: requestOptions,
+  })) as PublicKeyCredentialWithPRF | null;
 
   if (!credential) {
-    throw new Error('Failed to authenticate with passkey');
+    throw new Error("Failed to authenticate with passkey");
   }
 
   const usedCredentialId = arrayBufferToBase64(credential.rawId);
@@ -348,7 +357,7 @@ export async function authenticateWithDiscoverablePasskey(
   const prfOutput = extensionResults.prf?.results?.first;
 
   if (!prfOutput) {
-    throw new Error('PRF output not available');
+    throw new Error("PRF output not available");
   }
 
   // Derive encryption key from PRF output
@@ -362,7 +371,7 @@ export async function authenticateWithDiscoverablePasskey(
  */
 export async function encryptWithPRFKey(
   privateKeyPEM: string,
-  prfDerivedKey: CryptoKey
+  prfDerivedKey: CryptoKey,
 ): Promise<string> {
   const encoder = new TextEncoder();
   const plaintext = encoder.encode(privateKeyPEM);
@@ -372,9 +381,9 @@ export async function encryptWithPRFKey(
 
   // Encrypt
   const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv },
+    { name: "AES-GCM", iv: iv },
     prfDerivedKey,
-    plaintext
+    plaintext,
   );
 
   // Combine IV + ciphertext
@@ -391,13 +400,13 @@ export async function encryptWithPRFKey(
  */
 export async function decryptWithPRFKey(
   encryptedData: string,
-  prfDerivedKey: CryptoKey
+  prfDerivedKey: CryptoKey,
 ): Promise<string> {
   // Decode base64
   const combined = new Uint8Array(
     atob(encryptedData)
-      .split('')
-      .map(char => char.charCodeAt(0))
+      .split("")
+      .map((char) => char.charCodeAt(0)),
   );
 
   // Extract IV and ciphertext
@@ -406,12 +415,12 @@ export async function decryptWithPRFKey(
 
   // Decrypt
   const plaintext = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: iv },
+    { name: "AES-GCM", iv: iv },
     prfDerivedKey,
-    ciphertext
+    ciphertext,
   );
 
   return new TextDecoder().decode(plaintext);
 }
 
-export type KeyDerivationMethod = 'passphrase' | 'passkey_prf';
+export type KeyDerivationMethod = "passphrase" | "passkey_prf";

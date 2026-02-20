@@ -218,7 +218,6 @@ export const sessionDataActions = {
   },
 };
 
-
 // Exported stores and derived stores
 export const sessionData: Readable<SessionAnalysis | null> = derived(
   sessionDataStore,
@@ -357,7 +356,6 @@ export function alertsForLink(link: any): Readable<ActionNode[]> {
     );
   });
 }
-
 
 /**
  * Derived store for questions sorted by composite score

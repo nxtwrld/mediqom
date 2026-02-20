@@ -44,9 +44,7 @@ export abstract class BaseChatContextService {
       const startTime = performance.now();
 
       // Check if context is available
-      const isReady = profileContextManager.isContextReady(
-        options.profileId,
-      );
+      const isReady = profileContextManager.isContextReady(options.profileId);
       if (!isReady) {
         logger.namespace("ChatContext").warn("No context available for chat", {
           profileId: options.profileId,

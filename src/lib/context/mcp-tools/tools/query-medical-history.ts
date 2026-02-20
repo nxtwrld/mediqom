@@ -49,8 +49,7 @@ export class QueryMedicalHistoryTool extends BaseMedicalTool {
 
   async execute(params: any, profileId: string): Promise<MCPToolResult> {
     try {
-      const contextStats =
-        profileContextManager.getContextStats(profileId);
+      const contextStats = profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [

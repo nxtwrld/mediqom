@@ -26,10 +26,13 @@ export interface AuthenticationExtensionsPRFInputs {
     /**
      * Multiple PRF evaluations by credential ID
      */
-    evalByCredential?: Record<string, {
-      first: BufferSource;
-      second?: BufferSource;
-    }>;
+    evalByCredential?: Record<
+      string,
+      {
+        first: BufferSource;
+        second?: BufferSource;
+      }
+    >;
   };
 }
 
@@ -63,7 +66,8 @@ export interface AuthenticationExtensionsPRFOutputs {
  */
 export interface PublicKeyCredentialCreationOptionsWithPRF
   extends PublicKeyCredentialCreationOptions {
-  extensions?: AuthenticationExtensionsClientInputs & AuthenticationExtensionsPRFInputs;
+  extensions?: AuthenticationExtensionsClientInputs &
+    AuthenticationExtensionsPRFInputs;
 }
 
 /**
@@ -71,7 +75,8 @@ export interface PublicKeyCredentialCreationOptionsWithPRF
  */
 export interface PublicKeyCredentialRequestOptionsWithPRF
   extends PublicKeyCredentialRequestOptions {
-  extensions?: AuthenticationExtensionsClientInputs & AuthenticationExtensionsPRFInputs;
+  extensions?: AuthenticationExtensionsClientInputs &
+    AuthenticationExtensionsPRFInputs;
 }
 
 /**
@@ -79,7 +84,8 @@ export interface PublicKeyCredentialRequestOptionsWithPRF
  */
 export interface AuthenticatorAttestationResponseWithPRF
   extends AuthenticatorAttestationResponse {
-  getClientExtensionResults(): AuthenticationExtensionsClientOutputs & AuthenticationExtensionsPRFOutputs;
+  getClientExtensionResults(): AuthenticationExtensionsClientOutputs &
+    AuthenticationExtensionsPRFOutputs;
 }
 
 /**
@@ -87,15 +93,19 @@ export interface AuthenticatorAttestationResponseWithPRF
  */
 export interface AuthenticatorAssertionResponseWithPRF
   extends AuthenticatorAssertionResponse {
-  getClientExtensionResults(): AuthenticationExtensionsClientOutputs & AuthenticationExtensionsPRFOutputs;
+  getClientExtensionResults(): AuthenticationExtensionsClientOutputs &
+    AuthenticationExtensionsPRFOutputs;
 }
 
 /**
  * Extended PublicKeyCredential with PRF support
  */
 export interface PublicKeyCredentialWithPRF extends PublicKeyCredential {
-  response: AuthenticatorAttestationResponseWithPRF | AuthenticatorAssertionResponseWithPRF;
-  getClientExtensionResults(): AuthenticationExtensionsClientOutputs & AuthenticationExtensionsPRFOutputs;
+  response:
+    | AuthenticatorAttestationResponseWithPRF
+    | AuthenticatorAssertionResponseWithPRF;
+  getClientExtensionResults(): AuthenticationExtensionsClientOutputs &
+    AuthenticationExtensionsPRFOutputs;
 }
 
 // Augment the global CredentialCreationOptions
@@ -106,10 +116,13 @@ declare global {
         first: BufferSource;
         second?: BufferSource;
       };
-      evalByCredential?: Record<string, {
-        first: BufferSource;
-        second?: BufferSource;
-      }>;
+      evalByCredential?: Record<
+        string,
+        {
+          first: BufferSource;
+          second?: BufferSource;
+        }
+      >;
     };
   }
 

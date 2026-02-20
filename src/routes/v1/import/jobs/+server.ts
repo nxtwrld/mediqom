@@ -72,7 +72,9 @@ export const GET: RequestHandler = async ({
   // Fetch active jobs (exclude expired status)
   const { data: jobs, error: dbError } = await supabase
     .from("import_jobs")
-    .select("id, status, stage, progress, message, error, file_count, file_manifest, language, created_at, updated_at, expires_at")
+    .select(
+      "id, status, stage, progress, message, error, file_count, file_manifest, language, created_at, updated_at, expires_at",
+    )
     .eq("user_id", user.id)
     .in("status", ["created", "extracting", "analyzing", "completed", "error"])
     .order("created_at", { ascending: false });

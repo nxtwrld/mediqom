@@ -57,8 +57,7 @@ export class GetAssembledContextTool extends BaseMedicalTool {
       );
 
       // Get context stats
-      const contextStats =
-        profileContextManager.getContextStats(profileId);
+      const contextStats = profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -93,15 +92,17 @@ export class GetAssembledContextTool extends BaseMedicalTool {
       const contextData: AssembledContext = {
         summary: assembledContext.summary,
         keyFindings: assembledContext.keyPoints.map((kp: any) => kp.text),
-        relevantDocuments: assembledContext.relevantDocuments.map((doc: any) => ({
-          document: {
-            id: doc.documentId,
-            metadata: { type: doc.type, date: doc.date },
-          },
-          relevance: doc.relevance,
-          matchedTerms: [],
-          excerpt: doc.excerpt,
-        })),
+        relevantDocuments: assembledContext.relevantDocuments.map(
+          (doc: any) => ({
+            document: {
+              id: doc.documentId,
+              metadata: { type: doc.type, date: doc.date },
+            },
+            relevance: doc.relevance,
+            matchedTerms: [],
+            excerpt: doc.excerpt,
+          }),
+        ),
         temporalContext: {
           recent: assembledContext.keyPoints
             .filter((kp: any) => this.isRecent(kp.date))

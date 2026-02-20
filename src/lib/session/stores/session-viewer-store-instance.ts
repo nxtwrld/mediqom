@@ -58,7 +58,7 @@ interface ViewerState {
   // Interaction state
   isDragging: boolean;
   isZooming: boolean;
-  
+
   // Interactivity mode (false for passive/read-only mode in documents)
   isInteractive: boolean;
 
@@ -114,10 +114,12 @@ const initialViewerState: ViewerState = {
  */
 export function createSessionViewerStoreInstance(
   dataStoreInstance: SessionDataStoreInstance,
-  instanceId?: string
+  instanceId?: string,
 ) {
-  const storeId = instanceId || `session_viewer_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-  
+  const storeId =
+    instanceId ||
+    `session_viewer_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
   logger.session.debug("Creating session viewer store instance", { storeId });
 
   // Create isolated viewer store instance
@@ -158,7 +160,11 @@ export function createSessionViewerStoreInstance(
       logger.session.debug("Selection cleared (isolated)", { storeId });
     },
 
-    setHoveredItem(type: "node" | "link" | null, id?: string, item?: any): void {
+    setHoveredItem(
+      type: "node" | "link" | null,
+      id?: string,
+      item?: any,
+    ): void {
       sessionViewerStore.update((state) => ({
         ...state,
         hoveredItem: type ? { type, id: id!, item } : null,
@@ -217,10 +223,13 @@ export function createSessionViewerStoreInstance(
         );
       } else {
         this.clearActivePath();
-        logger.session.debug("No path calculated, cleared active path (isolated)", {
-          nodeId,
-          storeId,
-        });
+        logger.session.debug(
+          "No path calculated, cleared active path (isolated)",
+          {
+            nodeId,
+            storeId,
+          },
+        );
       }
     },
 
@@ -309,7 +318,10 @@ export function createSessionViewerStoreInstance(
         activeTabId: "details",
       }));
 
-      logger.session.debug("Details tab selected and sidebar opened (isolated)", { storeId });
+      logger.session.debug(
+        "Details tab selected and sidebar opened (isolated)",
+        { storeId },
+      );
     },
 
     updateTabContext(context: SessionTabContext): void {
@@ -318,7 +330,10 @@ export function createSessionViewerStoreInstance(
         tabContext: context,
       }));
 
-      logger.session.debug("Tab context updated (isolated)", { context, storeId });
+      logger.session.debug("Tab context updated (isolated)", {
+        context,
+        storeId,
+      });
     },
 
     toggleLegend(): void {
@@ -367,7 +382,10 @@ export function createSessionViewerStoreInstance(
         isInteractive,
       }));
 
-      logger.session.debug("Interactivity mode updated (isolated)", { isInteractive, storeId });
+      logger.session.debug("Interactivity mode updated (isolated)", {
+        isInteractive,
+        storeId,
+      });
     },
 
     /**
@@ -383,7 +401,10 @@ export function createSessionViewerStoreInstance(
         };
       });
 
-      logger.session.debug("Alert acknowledged (isolated)", { alertId, storeId });
+      logger.session.debug("Alert acknowledged (isolated)", {
+        alertId,
+        storeId,
+      });
     },
 
     answerQuestion(questionId: string, answer: any, confidence: number): void {
@@ -396,7 +417,11 @@ export function createSessionViewerStoreInstance(
         };
       });
 
-      logger.session.debug("Question answered (isolated)", { questionId, confidence, storeId });
+      logger.session.debug("Question answered (isolated)", {
+        questionId,
+        confidence,
+        storeId,
+      });
     },
 
     /**
@@ -411,7 +436,10 @@ export function createSessionViewerStoreInstance(
         },
       }));
 
-      logger.session.debug("Symptom threshold updated (isolated)", { threshold, storeId });
+      logger.session.debug("Symptom threshold updated (isolated)", {
+        threshold,
+        storeId,
+      });
     },
 
     setDiagnosisThreshold(threshold: number): void {
@@ -423,7 +451,10 @@ export function createSessionViewerStoreInstance(
         },
       }));
 
-      logger.session.debug("Diagnosis threshold updated (isolated)", { threshold, storeId });
+      logger.session.debug("Diagnosis threshold updated (isolated)", {
+        threshold,
+        storeId,
+      });
     },
 
     setTreatmentThreshold(threshold: number): void {
@@ -435,7 +466,10 @@ export function createSessionViewerStoreInstance(
         },
       }));
 
-      logger.session.debug("Treatment threshold updated (isolated)", { threshold, storeId });
+      logger.session.debug("Treatment threshold updated (isolated)", {
+        threshold,
+        storeId,
+      });
     },
 
     toggleShowAllSymptoms(): void {
@@ -471,7 +505,9 @@ export function createSessionViewerStoreInstance(
         },
       }));
 
-      logger.session.debug("Toggle show all treatments (isolated)", { storeId });
+      logger.session.debug("Toggle show all treatments (isolated)", {
+        storeId,
+      });
     },
 
     setHiddenCounts(counts: HiddenCounts): void {
@@ -480,7 +516,10 @@ export function createSessionViewerStoreInstance(
         hiddenCounts: counts,
       }));
 
-      logger.session.debug("Hidden counts updated (isolated)", { counts, storeId });
+      logger.session.debug("Hidden counts updated (isolated)", {
+        counts,
+        storeId,
+      });
     },
 
     /**
@@ -506,10 +545,8 @@ export function createSessionViewerStoreInstance(
     ($store) => $store.hoveredItem,
   );
 
-  const activePath: Readable<{ nodes: string[]; links: string[] } | null> = derived(
-    sessionViewerStore,
-    ($store) => $store.activePath,
-  );
+  const activePath: Readable<{ nodes: string[]; links: string[] } | null> =
+    derived(sessionViewerStore, ($store) => $store.activePath);
 
   const highlightedNodes: Readable<Set<string>> = derived(
     sessionViewerStore,
@@ -551,19 +588,20 @@ export function createSessionViewerStoreInstance(
     ($store) => $store.acknowledgedAlerts,
   );
 
-  const answeredQuestions: Readable<Map<string, { answer: any; confidence: number }>> = derived(
-    sessionViewerStore,
-    ($store) => $store.answeredQuestions,
-  );
+  const answeredQuestions: Readable<
+    Map<string, { answer: any; confidence: number }>
+  > = derived(sessionViewerStore, ($store) => $store.answeredQuestions);
 
   const isInteractive: Readable<boolean> = derived(
     sessionViewerStore,
-    ($store) => $store.isInteractive
+    ($store) => $store.isInteractive,
   );
 
   // Cleanup function
   const cleanup = () => {
-    logger.session.debug("Cleaning up session viewer store instance", { storeId });
+    logger.session.debug("Cleaning up session viewer store instance", {
+      storeId,
+    });
     sessionViewerStore.set({
       ...initialViewerState,
       isInteractive: false,
@@ -574,13 +612,13 @@ export function createSessionViewerStoreInstance(
     // Instance metadata
     id: storeId,
     cleanup,
-    
+
     // Actions
     actions,
-    
+
     // Core store
     sessionViewerStore,
-    
+
     // Derived stores
     selectedItem,
     hoveredItem,
@@ -598,4 +636,6 @@ export function createSessionViewerStoreInstance(
   };
 }
 
-export type SessionViewerStoreInstance = ReturnType<typeof createSessionViewerStoreInstance>;
+export type SessionViewerStoreInstance = ReturnType<
+  typeof createSessionViewerStoreInstance
+>;

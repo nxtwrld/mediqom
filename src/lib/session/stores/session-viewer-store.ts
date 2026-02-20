@@ -83,7 +83,7 @@ interface ViewerState {
   // Interaction state
   isDragging: boolean;
   isZooming: boolean;
-  
+
   // Interactivity mode (false for passive/read-only mode in documents)
   isInteractive: boolean;
 
@@ -685,7 +685,7 @@ export const answeredQuestions: Readable<
 
 export const isInteractive: Readable<boolean> = derived(
   sessionViewerStore,
-  ($store) => $store.isInteractive
+  ($store) => $store.isInteractive,
 );
 
 // thresholds export moved to session-data-store to avoid circular dependency

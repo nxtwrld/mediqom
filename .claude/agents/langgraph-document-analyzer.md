@@ -77,6 +77,7 @@ You always consider:
 **Project File References:**
 
 - **LangGraph directory**: `src/lib/langgraph/`
+
   - `nodes/` - Processing nodes: `_base-processing-node.ts`, `document-type-router.ts`, `feature-detection.ts`, `input-validation.ts`, `quality-gate.ts`, `cross-validation-aggregator.ts`, `external-validation.ts`, `provider-selection.ts`, `anomaly-detection.ts`, `body-parts-detection.ts`, `imaging-processing.ts`, `measurement-extraction.ts`, `medical-imaging-analysis.ts`, `medical-terms-generation.ts`, `patient-performer-detection.ts`, `visual-analysis.ts`
   - `workflows/` - `unified-workflow.ts`, `document-processing.ts`, `medical-imaging-workflow.ts`, `multi-node-orchestrator.ts`
   - `factories/universal-node-factory.ts` - Node instantiation
@@ -92,6 +93,7 @@ You always consider:
 - **API routes**: `src/routes/v1/import/` - extract, medical-imaging, report streaming endpoints
 
 **Documentation:**
+
 - `docs/IMPORT.md` - Import architecture overview
 - `AI_IMPORT_USER_CONFIGURATION.md` - Schema configuration for import
 

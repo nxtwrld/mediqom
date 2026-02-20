@@ -21,7 +21,7 @@ function decodePcm(message: ClientAudioMessage): Float32Array {
     const view = new Int16Array(
       buffer.buffer,
       buffer.byteOffset,
-      buffer.byteLength / Int16Array.BYTES_PER_ELEMENT
+      buffer.byteLength / Int16Array.BYTES_PER_ELEMENT,
     );
     const float = new Float32Array(view.length);
     for (let i = 0; i < view.length; i++) {
@@ -33,7 +33,7 @@ function decodePcm(message: ClientAudioMessage): Float32Array {
   return new Float32Array(
     buffer.buffer,
     buffer.byteOffset,
-    buffer.byteLength / Float32Array.BYTES_PER_ELEMENT
+    buffer.byteLength / Float32Array.BYTES_PER_ELEMENT,
   );
 }
 
@@ -47,7 +47,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const session = sessions.get(data.sessionId);
     if (!session) {
-      error(404, { message: "Session not found. Ensure SSE stream is connected first." });
+      error(404, {
+        message: "Session not found. Ensure SSE stream is connected first.",
+      });
     }
 
     // Update session instructions

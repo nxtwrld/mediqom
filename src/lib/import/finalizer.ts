@@ -3,27 +3,27 @@
  * Extracted from components/import/Index.svelte for reuse in job-based flow.
  */
 
-import { DocumentState, type Document as ImportDocument } from './index'
+import { DocumentState, type Document as ImportDocument } from "./index";
 import {
-	DocumentType,
-	type DocumentNew,
-	type Document as SavedDocument
-} from '$lib/documents/types.d'
-import { addDocument } from '$lib/documents'
-import { processHealthData } from '$lib/health/signals'
-import { createVirtualProfile } from '$lib/profiles'
-import { PROFILE_NEW_ID } from '$lib/profiles/tools'
-import type { Profile } from '$lib/types.d'
-import type { Assessment, ReportAnalysis, ImportJob } from './types'
-import { importKey, decrypt as decryptAES } from '$lib/encryption/aes'
-import { decrypt as decryptRSA } from '$lib/encryption/rsa'
-import type { User } from '@supabase/supabase-js'
+  DocumentType,
+  type DocumentNew,
+  type Document as SavedDocument,
+} from "$lib/documents/types.d";
+import { addDocument } from "$lib/documents";
+import { processHealthData } from "$lib/health/signals";
+import { createVirtualProfile } from "$lib/profiles";
+import { PROFILE_NEW_ID } from "$lib/profiles/tools";
+import type { Profile } from "$lib/types.d";
+import type { Assessment, ReportAnalysis, ImportJob } from "./types";
+import { importKey, decrypt as decryptAES } from "$lib/encryption/aes";
+import { decrypt as decryptRSA } from "$lib/encryption/rsa";
+import type { User } from "@supabase/supabase-js";
 
 // Attachment processing
-import { selectPagesFromPdf, createPdfFromImageBuffers } from '$lib/files/pdf'
-import { toBase64, base64ToArrayBuffer } from '$lib/arrays'
-import { resizeImage } from '$lib/images'
-import { THUMBNAIL_SIZE } from '$lib/files/CONFIG'
+import { selectPagesFromPdf, createPdfFromImageBuffers } from "$lib/files/pdf";
+import { toBase64, base64ToArrayBuffer } from "$lib/arrays";
+import { resizeImage } from "$lib/images";
+import { THUMBNAIL_SIZE } from "$lib/files/CONFIG";
 
 /**
  * Decrypt extraction and analysis results from an encrypted import job.
@@ -31,44 +31,63 @@ import { THUMBNAIL_SIZE } from '$lib/files/CONFIG'
  * Falls back to plaintext results if encryption is not used.
  */
 export async function decryptJobResults(
-	job: ImportJob,
-	userPrivateKey?: CryptoKey
+  job: ImportJob,
+  userPrivateKey?: CryptoKey,
 ): Promise<{
-	extraction: Assessment[]
-	analysis: ReportAnalysis[]
+  extraction: Assessment[];
+  analysis: ReportAnalysis[];
 }> {
-	// Check if job has encrypted results
-	const hasEncryptedResults =
-		job.result_encryption_key && job.encrypted_extraction_result && job.encrypted_analysis_results
+  // Check if job has encrypted results
+  const hasEncryptedResults =
+    job.result_encryption_key &&
+    job.encrypted_extraction_result &&
+    job.encrypted_analysis_results;
 
-	if (hasEncryptedResults) {
-		// Decrypt encrypted results
-		if (!userPrivateKey) {
-			throw new Error('User private key required to decrypt job results')
-		}
+  if (hasEncryptedResults) {
+    // Decrypt encrypted results
+    if (!userPrivateKey) {
+      throw new Error("User private key required to decrypt job results");
+    }
 
-		const jobKeyExported = await decryptRSA(userPrivateKey, job.result_encryption_key!)
-		const jobKey = await importKey(jobKeyExported)
+    const jobKeyExported = await decryptRSA(
+      userPrivateKey,
+      job.result_encryption_key!,
+    );
+    const jobKey = await importKey(jobKeyExported);
 
-		const extractionJson = await decryptAES(jobKey, job.encrypted_extraction_result!)
-		const extraction = JSON.parse(extractionJson)
+    const extractionJson = await decryptAES(
+      jobKey,
+      job.encrypted_extraction_result!,
+    );
+    const extraction = JSON.parse(extractionJson);
 
-		const analysisJson = await decryptAES(jobKey, job.encrypted_analysis_results!)
-		const analysis = JSON.parse(analysisJson)
+    const analysisJson = await decryptAES(
+      jobKey,
+      job.encrypted_analysis_results!,
+    );
+    const analysis = JSON.parse(analysisJson);
 
-		return { extraction, analysis }
-	} else {
-		// Fallback to plaintext results (backwards compatible)
-		console.warn('Job has no encrypted results - using plaintext fallback')
-		console.log('job.extraction_result:', job.extraction_result)
-		console.log('job.analysis_results:', job.analysis_results)
-		console.log('job.extraction_result type:', typeof job.extraction_result, Array.isArray(job.extraction_result))
-		console.log('job.analysis_results type:', typeof job.analysis_results, Array.isArray(job.analysis_results))
-		return {
-			extraction: job.extraction_result || [],
-			analysis: job.analysis_results || []
-		}
-	}
+    return { extraction, analysis };
+  } else {
+    // Fallback to plaintext results (backwards compatible)
+    console.warn("Job has no encrypted results - using plaintext fallback");
+    console.log("job.extraction_result:", job.extraction_result);
+    console.log("job.analysis_results:", job.analysis_results);
+    console.log(
+      "job.extraction_result type:",
+      typeof job.extraction_result,
+      Array.isArray(job.extraction_result),
+    );
+    console.log(
+      "job.analysis_results type:",
+      typeof job.analysis_results,
+      Array.isArray(job.analysis_results),
+    );
+    return {
+      extraction: job.extraction_result || [],
+      analysis: job.analysis_results || [],
+    };
+  }
 }
 
 /**
@@ -87,7 +106,8 @@ export async function assembleDocuments(
 
   // Count total documents for progress tracking
   const totalDocs = extractionResults.reduce(
-    (sum, a) => sum + a.documents.length, 0
+    (sum, a) => sum + a.documents.length,
+    0,
   );
   let processedDocs = 0;
 
@@ -103,7 +123,13 @@ export async function assembleDocuments(
       const reportData = analysis?.report || {};
 
       // Create attachment from original file
-      let attachment: { thumbnail: string; type: string; file: string; path: string; url: string } | null = null;
+      let attachment: {
+        thumbnail: string;
+        type: string;
+        file: string;
+        path: string;
+        url: string;
+      } | null = null;
 
       if (originalFile) {
         try {
@@ -111,14 +137,18 @@ export async function assembleDocuments(
             const pdfBuffer = await originalFile.arrayBuffer();
 
             // Use server-provided thumbnail, fall back to processing
-            const docPages = assessment.pages.filter((p) => doc.pages.includes(p.page));
+            const docPages = assessment.pages.filter((p) =>
+              doc.pages.includes(p.page),
+            );
             let thumbnail = docPages[0]?.thumbnail || "";
             if (!thumbnail) {
               try {
                 const { processPDF } = await import("$lib/files/pdf");
                 const processedPdf = await processPDF(pdfBuffer);
                 thumbnail = processedPdf.pages[0]?.thumbnail || "";
-              } catch { /* skip thumbnail generation */ }
+              } catch {
+                /* skip thumbnail generation */
+              }
             }
 
             // Try pdf-lib splitting (primary path)
@@ -130,25 +160,40 @@ export async function assembleDocuments(
                 doc.pages,
               );
             } catch (splitError) {
-              console.warn("pdf-lib split failed, falling back to image-based PDF:", splitError);
+              console.warn(
+                "pdf-lib split failed, falling back to image-based PDF:",
+                splitError,
+              );
               // Fallback: use pdfjs-dist to render pages → create image-based PDF
               try {
-                const { loadPdfDocument, renderPDFToBase64Images } = await import("$lib/files/pdf");
-                const pdfDoc = await loadPdfDocument({ data: pdfBuffer.slice(0) });
+                const { loadPdfDocument, renderPDFToBase64Images } =
+                  await import("$lib/files/pdf");
+                const pdfDoc = await loadPdfDocument({
+                  data: pdfBuffer.slice(0),
+                });
                 const allPageImages = await renderPDFToBase64Images(pdfDoc);
                 // Convert 1-based page numbers to 0-based array indices
-                const selectedImages = doc.pages.map((p: number) => allPageImages[p - 1]).filter(Boolean);
+                const selectedImages = doc.pages
+                  .map((p: number) => allPageImages[p - 1])
+                  .filter(Boolean);
                 if (selectedImages.length > 0) {
                   const imageBuffers = selectedImages.map((dataUrl: string) =>
-                    base64ToArrayBuffer(dataUrl.split(",")[1])
+                    base64ToArrayBuffer(dataUrl.split(",")[1]),
                   );
-                  extractedPdfBuffer = await createPdfFromImageBuffers(imageBuffers);
+                  extractedPdfBuffer =
+                    await createPdfFromImageBuffers(imageBuffers);
                   if (!thumbnail && selectedImages[0]) {
-                    thumbnail = await resizeImage(selectedImages[0], THUMBNAIL_SIZE);
+                    thumbnail = await resizeImage(
+                      selectedImages[0],
+                      THUMBNAIL_SIZE,
+                    );
                   }
                 }
               } catch (fallbackError) {
-                console.error("Image-based PDF fallback also failed:", fallbackError);
+                console.error(
+                  "Image-based PDF fallback also failed:",
+                  fallbackError,
+                );
               }
             }
 
@@ -160,25 +205,30 @@ export async function assembleDocuments(
                 path: "",
                 url: "",
               };
-              console.log('📎 [Finalizer] Created PDF attachment:', {
+              console.log("📎 [Finalizer] Created PDF attachment:", {
                 hasThumbnail: !!thumbnail,
                 thumbnailLength: thumbnail?.length || 0,
                 hasFile: !!attachment.file,
                 fileSize: attachment.file.length,
-                type: attachment.type
+                type: attachment.type,
               });
             }
           } else if (originalFile.type.startsWith("image/")) {
             const reader = new FileReader();
-            const originalImageBase64 = await new Promise<string>((resolve, reject) => {
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(originalFile);
-            });
+            const originalImageBase64 = await new Promise<string>(
+              (resolve, reject) => {
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(originalFile);
+              },
+            );
 
             const base64Data = originalImageBase64.split(",")[1];
             const imageBuffer = base64ToArrayBuffer(base64Data);
-            const thumbnail = await resizeImage(originalImageBase64, THUMBNAIL_SIZE);
+            const thumbnail = await resizeImage(
+              originalImageBase64,
+              THUMBNAIL_SIZE,
+            );
             const pdfBuffer = await createPdfFromImageBuffers([imageBuffer]);
 
             attachment = {
@@ -188,12 +238,12 @@ export async function assembleDocuments(
               path: "",
               url: "",
             };
-            console.log('📎 [Finalizer] Created image-to-PDF attachment:', {
+            console.log("📎 [Finalizer] Created image-to-PDF attachment:", {
               hasThumbnail: !!thumbnail,
               thumbnailLength: thumbnail?.length || 0,
               hasFile: !!attachment.file,
               fileSize: attachment.file.length,
-              type: attachment.type
+              type: attachment.type,
             });
           }
         } catch (error) {
@@ -217,17 +267,20 @@ export async function assembleDocuments(
       const importDoc = {
         title: reportData.title || doc.title || `Document ${ai + 1}-${di + 1}`,
         date: reportData.date || doc.date || new Date().toISOString(),
-        isMedical: analysis?.isMedical !== undefined ? analysis.isMedical : doc.isMedical,
+        isMedical:
+          analysis?.isMedical !== undefined
+            ? analysis.isMedical
+            : doc.isMedical,
         state: DocumentState.PROCESSED,
         pages: assessment.pages.filter((p) => doc.pages.includes(p.page)),
         content,
         attachments: attachment ? [attachment] : [],
         type: (originalFile?.type || "application/pdf") as any,
-        files: originalFile ? [originalFile] : [] as any,
+        files: originalFile ? [originalFile] : ([] as any),
         task: undefined as any,
       } as unknown as ImportDocument;
 
-      console.log('📋 [Finalizer] Assembled import document:', {
+      console.log("📋 [Finalizer] Assembled import document:", {
         title: importDoc.title,
         attachmentsCount: importDoc.attachments?.length || 0,
         hasAttachment: !!attachment,
@@ -263,7 +316,9 @@ export async function saveDocuments(
   for (const profileDetected of byProfileDetected) {
     // Create profile if it's a new one
     if (profileDetected.profile.id === PROFILE_NEW_ID) {
-      profileDetected.profile = await createVirtualProfile(profileDetected.profile);
+      profileDetected.profile = await createVirtualProfile(
+        profileDetected.profile,
+      );
     }
 
     const signals: any[] = [];
@@ -272,7 +327,7 @@ export async function saveDocuments(
       const content = document.content as any;
 
       // Debug: Log content structure
-      console.log('📄 [Finalizer] Processing document:', {
+      console.log("📄 [Finalizer] Processing document:", {
         hasContent: !!content,
         contentKeys: content ? Object.keys(content) : [],
         title: content?.title,
@@ -292,11 +347,12 @@ export async function saveDocuments(
           language: (document as any).language || "English",
         },
         content: content,
-        attachments: document.attachments?.map((a) => ({
-          ...a,
-          path: (a as any).path || "",
-          url: (a as any).url || "",
-        })) || [],
+        attachments:
+          document.attachments?.map((a) => ({
+            ...a,
+            path: (a as any).path || "",
+            url: (a as any).url || "",
+          })) || [],
       };
 
       if (content.summary) {
@@ -312,10 +368,16 @@ export async function saveDocuments(
 
         if (Array.isArray(content.signals)) {
           signalsArray = content.signals;
-        } else if (content.signals.signals && Array.isArray(content.signals.signals)) {
+        } else if (
+          content.signals.signals &&
+          Array.isArray(content.signals.signals)
+        ) {
           signalsArray = content.signals.signals;
         } else {
-          console.warn('Signals data is not in expected format:', content.signals);
+          console.warn(
+            "Signals data is not in expected format:",
+            content.signals,
+          );
         }
 
         if (signalsArray.length > 0) {
@@ -327,12 +389,14 @@ export async function saveDocuments(
       }
 
       // Debug: Log document structure before saving
-      console.log('📋 [Finalizer] Document to save:', {
+      console.log("📋 [Finalizer] Document to save:", {
         type: documentNew.type,
         hasMetadata: !!documentNew.metadata,
         metadata: documentNew.metadata,
         hasContent: !!documentNew.content,
-        contentKeys: documentNew.content ? Object.keys(documentNew.content) : [],
+        contentKeys: documentNew.content
+          ? Object.keys(documentNew.content)
+          : [],
         attachmentsCount: documentNew.attachments?.length || 0,
       });
 

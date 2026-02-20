@@ -152,7 +152,8 @@ export class SessionContextService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to initialize session context", {
@@ -234,7 +235,8 @@ export class SessionContextService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to update session context", {
@@ -291,7 +293,8 @@ export class SessionContextService {
         contextSummary: `Context for ${analysisType} analysis: ${relevantHistory.length} relevant medical history items found`,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger
         .namespace("SessionContext")
         .error("Failed to get context for analysis", {

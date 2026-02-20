@@ -1,98 +1,92 @@
 {
-    "title": "Perceived Stress Scale (PSS-4)",
-    "description": "A quick survey to assess your perceived stress levels over the past month.",
-    "category": "Mental Health Assessments",
-    "subCategory": "Stress",
-    "loincCode": "aouros-mental-health-pss-4",
-    "fhirCategory": "survey",
-    "resultFormat": "observation",
-    "badges": ["mental_health_assessment"],
-    "tags": [
-      "stress",
-      "mental health",
-      "anxiety"
-    ],
-    "overallScore": {
-        "unit": "points",
-        "system": "http://unitsofmeasure.org",
-        "code": "points"
+  "title": "Perceived Stress Scale (PSS-4)",
+  "description": "A quick survey to assess your perceived stress levels over the past month.",
+  "category": "Mental Health Assessments",
+  "subCategory": "Stress",
+  "loincCode": "aouros-mental-health-pss-4",
+  "fhirCategory": "survey",
+  "resultFormat": "observation",
+  "badges": ["mental_health_assessment"],
+  "tags": ["stress", "mental health", "anxiety"],
+  "overallScore": {
+    "unit": "points",
+    "system": "http://unitsofmeasure.org",
+    "code": "points"
+  },
+  "questions": [
+    {
+      "id": "pss4_q1",
+      "text": "In the last month, I have often felt that I was unable to control the important things in my life.",
+      "responseType": "likert",
+      "options": [
+        "Never",
+        "Almost Never",
+        "Sometimes",
+        "Fairly Often",
+        "Very Often"
+      ],
+      "scores": [0, 1, 2, 3, 4]
     },
-    "questions": [
-      {
-        "id": "pss4_q1",
-        "text": "In the last month, I have often felt that I was unable to control the important things in my life.",
-        "responseType": "likert",
-        "options": [
-          "Never",
-          "Almost Never",
-          "Sometimes",
-          "Fairly Often",
-          "Very Often"
-        ],
-        "scores": [0, 1, 2, 3, 4]
-      },
-      {
-        "id": "pss4_q2",
-        "text": "In the last month, I have often felt confident about my ability to handle my personal problems.",
-        "responseType": "likert",
-        "options": [
-          "Never",
-          "Almost Never",
-          "Sometimes",
-          "Fairly Often",
-          "Very Often"
-        ],
-        "scores": [4, 3, 2, 1, 0] 
-      },
-      {
-        "id": "pss4_q3",
-        "text": "In the last month, I have often felt nervous and stressed.",
-        "responseType": "likert",
-        "options": [
-          "Never",
-          "Almost Never",
-          "Sometimes",
-          "Fairly Often",
-          "Very Often"
-        ],
-        "scores": [0, 1, 2, 3, 4]
-      },
-      {
-        "id": "pss4_q4",
-        "text": "In the last month, I have often felt that things were going my way.",
-        "responseType": "likert",
-        "options": [
-          "Never",
-          "Almost Never",
-          "Sometimes",
-          "Fairly Often",
-          "Very Often"
-        ],
-        "scores": [4, 3, 2, 1, 0] 
-      }
-    ],
-    "scoringInterpretation": {
-        "ranges": [
-          {
-            "minScore": 0,
-            "maxScore": 4,
-            "interpretation": "Good",
-            "guidance": "Your current status suggests good well-being."
-          },
-          {
-            "minScore": 5,
-            "maxScore": 7,
-            "interpretation": "Moderate",
-            "guidance": "You are in a moderate state. Consider self-care strategies."
-          },
-          {
-            "minScore": 8,
-            "maxScore": 12,
-            "interpretation": "Poor",
-            "guidance": "Your score indicates a need to seek professional assistance."
-          }
-        ]
+    {
+      "id": "pss4_q2",
+      "text": "In the last month, I have often felt confident about my ability to handle my personal problems.",
+      "responseType": "likert",
+      "options": [
+        "Never",
+        "Almost Never",
+        "Sometimes",
+        "Fairly Often",
+        "Very Often"
+      ],
+      "scores": [4, 3, 2, 1, 0]
+    },
+    {
+      "id": "pss4_q3",
+      "text": "In the last month, I have often felt nervous and stressed.",
+      "responseType": "likert",
+      "options": [
+        "Never",
+        "Almost Never",
+        "Sometimes",
+        "Fairly Often",
+        "Very Often"
+      ],
+      "scores": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": "pss4_q4",
+      "text": "In the last month, I have often felt that things were going my way.",
+      "responseType": "likert",
+      "options": [
+        "Never",
+        "Almost Never",
+        "Sometimes",
+        "Fairly Often",
+        "Very Often"
+      ],
+      "scores": [4, 3, 2, 1, 0]
     }
-      
+  ],
+  "scoringInterpretation": {
+    "ranges": [
+      {
+        "minScore": 0,
+        "maxScore": 4,
+        "interpretation": "Good",
+        "guidance": "Your current status suggests good well-being."
+      },
+      {
+        "minScore": 5,
+        "maxScore": 7,
+        "interpretation": "Moderate",
+        "guidance": "You are in a moderate state. Consider self-care strategies."
+      },
+      {
+        "minScore": 8,
+        "maxScore": 12,
+        "interpretation": "Poor",
+        "guidance": "Your score indicates a need to seek professional assistance."
+      }
+    ]
   }
-  
+}

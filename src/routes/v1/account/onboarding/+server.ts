@@ -103,10 +103,7 @@ export const POST: RequestHandler = async ({
           supabase,
           user,
         );
-        return json(
-          { error: "Error inserting document" },
-          { status: 500 },
-        );
+        return json({ error: "Error inserting document" }, { status: 500 });
       }
 
       const document_id = documentInsert[0].id;
@@ -130,10 +127,7 @@ export const POST: RequestHandler = async ({
           supabase,
           user,
         );
-        return json(
-          { error: "Error inserting keys" },
-          { status: 500 },
-        );
+        return json({ error: "Error inserting keys" }, { status: 500 });
       }
     }
   }

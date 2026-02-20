@@ -37,7 +37,10 @@ export const POST: RequestHandler = async ({
   }
 
   const sessionId = params.sessionId!;
-  console.log("⚠️ DEPRECATED: Audio endpoint used, use /transcribe instead for session:", sessionId);
+  console.log(
+    "⚠️ DEPRECATED: Audio endpoint used, use /transcribe instead for session:",
+    sessionId,
+  );
 
   try {
     const sessionData = getSession(sessionId);
@@ -98,7 +101,9 @@ export const POST: RequestHandler = async ({
 
       console.log("✅ SERVER: Transcript generated:", {
         chunkId: chunkId || "no-id",
-        text: partialTranscript.text.substring(0, 50) + (partialTranscript.text.length > 50 ? "..." : ""),
+        text:
+          partialTranscript.text.substring(0, 50) +
+          (partialTranscript.text.length > 50 ? "..." : ""),
         confidence: partialTranscript.confidence,
       });
 
@@ -106,7 +111,10 @@ export const POST: RequestHandler = async ({
       // This endpoint only handles transcription for backward compatibility
       response.analysisTriggered = false;
     } else {
-      console.log("⚠️ SERVER: No transcript generated from audio chunk:", chunkId || "no-id");
+      console.log(
+        "⚠️ SERVER: No transcript generated from audio chunk:",
+        chunkId || "no-id",
+      );
     }
 
     return json(response);
@@ -117,7 +125,7 @@ export const POST: RequestHandler = async ({
 };
 
 // DEPRECATED: This endpoint is being phased out in favor of separate transcription and analysis endpoints
-// New architecture: 
+// New architecture:
 // - POST /v1/session/{sessionId}/transcribe - For audio transcription only
 // - GET /v1/session/{sessionId}/analyze - For medical analysis (SSE)
 

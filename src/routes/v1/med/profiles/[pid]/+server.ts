@@ -96,7 +96,7 @@ export const DELETE: RequestHandler = async ({
   // we are deleting a profile link from a parent
   if (url.searchParams.get("link_type") == "parent") {
     profile_id = user.id;
-    parent_id = params.pid || '';
+    parent_id = params.pid || "";
   }
 
   if (profile_id != user.id) {

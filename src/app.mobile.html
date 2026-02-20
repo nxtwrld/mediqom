@@ -5,7 +5,7 @@
     <!-- Capacitor build initialization - must be first -->
     <script>
       // Global polyfill for Node.js compatibility
-      if (typeof global === 'undefined') {
+      if (typeof global === "undefined") {
         window.global = window;
       }
 
@@ -15,23 +15,31 @@
       // SvelteKit data fetch polyfill for static builds
       // In static builds, there's no server to handle /__data.json requests
       // This intercepts those requests and returns empty data to prevent 500 errors
-      (function() {
+      (function () {
         var originalFetch = window.fetch;
-        window.fetch = function(input, init) {
-          var url = typeof input === 'string' ? input : (input instanceof Request ? input.url : String(input));
+        window.fetch = function (input, init) {
+          var url =
+            typeof input === "string"
+              ? input
+              : input instanceof Request
+                ? input.url
+                : String(input);
 
           // Intercept SvelteKit data requests that would fail in static builds
-          if (url.indexOf('__data.json') !== -1) {
-            console.log('[Capacitor] Intercepting data request:', url);
+          if (url.indexOf("__data.json") !== -1) {
+            console.log("[Capacitor] Intercepting data request:", url);
             // Return empty data response that SvelteKit can handle
-            var emptyResponse = JSON.stringify({
-              type: 'data',
-              nodes: [null, null, null, null, null, null, null, null]
-            }) + '\n';
-            return Promise.resolve(new Response(emptyResponse, {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            }));
+            var emptyResponse =
+              JSON.stringify({
+                type: "data",
+                nodes: [null, null, null, null, null, null, null, null],
+              }) + "\n";
+            return Promise.resolve(
+              new Response(emptyResponse, {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              }),
+            );
           }
 
           return originalFetch.apply(this, arguments);
@@ -81,7 +89,10 @@
       sizes="180x180"
       href="/apple-touch-icon-180x180.png"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
     <!-- Preload critical fonts for improved LCP -->
     <link

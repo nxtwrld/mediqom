@@ -3,18 +3,18 @@
 // =====================================================
 
 // Subscription tiers
-export type SubscriptionTierId = 'free' | 'caretaker' | 'family';
+export type SubscriptionTierId = "free" | "caretaker" | "family";
 
 export type SubscriptionStatus =
-  | 'active'
-  | 'past_due'
-  | 'canceled'
-  | 'expired'
-  | 'trialing';
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "expired"
+  | "trialing";
 
-export type PaymentSource = 'stripe' | 'apple' | 'google' | 'manual';
+export type PaymentSource = "stripe" | "apple" | "google" | "manual";
 
-export type BillingCycle = 'monthly' | 'yearly';
+export type BillingCycle = "monthly" | "yearly";
 
 // Subscription tier definition
 export interface SubscriptionTier {
@@ -94,17 +94,17 @@ export interface PurchaseHistoryEvent {
 }
 
 export type PurchaseEventType =
-  | 'subscription_created'
-  | 'subscription_renewed'
-  | 'subscription_upgraded'
-  | 'subscription_downgraded'
-  | 'subscription_canceled'
-  | 'subscription_expired'
-  | 'pack_purchased'
-  | 'trial_started'
-  | 'trial_ended'
-  | 'payment_failed'
-  | 'refund';
+  | "subscription_created"
+  | "subscription_renewed"
+  | "subscription_upgraded"
+  | "subscription_downgraded"
+  | "subscription_canceled"
+  | "subscription_expired"
+  | "pack_purchased"
+  | "trial_started"
+  | "trial_ended"
+  | "payment_failed"
+  | "refund";
 
 // API request/response types
 export interface CheckoutRequest {
@@ -124,8 +124,8 @@ export interface EmbeddedCheckoutResponse {
 }
 
 export interface SessionStatusResponse {
-  status: 'complete' | 'open' | 'expired' | null;
-  paymentStatus: 'paid' | 'unpaid' | 'no_payment_required';
+  status: "complete" | "open" | "expired" | null;
+  paymentStatus: "paid" | "unpaid" | "no_payment_required";
   customerEmail: string | null;
 }
 
@@ -138,7 +138,7 @@ export interface PortalResponse {
 }
 
 export interface IAPVerifyRequest {
-  platform: 'ios' | 'android';
+  platform: "ios" | "android";
   receipt: string;
   product_id: string;
 }
@@ -153,8 +153,8 @@ export interface IAPVerifyResponse {
 // Scan consumption result
 export interface ScanConsumptionResult {
   success: boolean;
-  reason: 'consumed' | 'no_scans' | 'no_subscription' | 'subscription_inactive';
-  source?: 'base' | 'credits';
+  reason: "consumed" | "no_scans" | "no_subscription" | "subscription_inactive";
+  source?: "base" | "credits";
   remaining_base?: number;
   remaining_credits?: number;
   available?: number;
@@ -172,10 +172,10 @@ export interface ProfileLimitResult {
 
 // Stripe webhook event types we handle
 export type StripeWebhookEventType =
-  | 'checkout.session.completed'
-  | 'customer.subscription.created'
-  | 'customer.subscription.updated'
-  | 'customer.subscription.deleted'
-  | 'invoice.paid'
-  | 'invoice.payment_failed'
-  | 'customer.created';
+  | "checkout.session.completed"
+  | "customer.subscription.created"
+  | "customer.subscription.updated"
+  | "customer.subscription.deleted"
+  | "invoice.paid"
+  | "invoice.payment_failed"
+  | "customer.created";

@@ -8,7 +8,12 @@
  * - All data encrypted with AES and shareable via existing document system
  */
 
-import { addDocument, updateDocument, getDocument, documents } from "$lib/documents";
+import {
+  addDocument,
+  updateDocument,
+  getDocument,
+  documents,
+} from "$lib/documents";
 import { profiles } from "$lib/profiles";
 import { get } from "svelte/store";
 import {
@@ -394,7 +399,7 @@ async function findExistingEntriesDocument(
   const existing = allDocs?.find(
     (doc) =>
       doc.user_id === patientId &&
-      doc.metadata?.category === META_HISTORY_CATEGORY.ENTRIES
+      doc.metadata?.category === META_HISTORY_CATEGORY.ENTRIES,
   );
 
   if (existing) {
@@ -416,7 +421,7 @@ async function findCurrentDataDocument(
     (doc) =>
       doc.user_id === patientId &&
       doc.metadata?.category === META_HISTORY_CATEGORY.CURRENT &&
-      doc.metadata?.measurementType === measurementType
+      doc.metadata?.measurementType === measurementType,
   );
 
   if (existing) {

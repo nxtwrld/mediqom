@@ -1,106 +1,105 @@
 {
-    "title": "Body Measurements",
-    "description": "Your regular vitals measurements - weight, height, BMI.",
-    "category": "General Health Metrics",
-    "subCategory": "Body Measurements",
-    "loincCode": "aouros-vitals-simplified",
-    "fhirCategory": "vital-signs",
-    "resultFormat": "observationBundle",
-    "tags": ["vitals", "body measurements", "weight", "height", "bmi"],
-    "entryMode" : "all",
-    "questions": [
-      {
-        "id": "bodyWeight",
-        "text": "Weight",
-        "responseType": "numeric",
-        "unit": "kg",
-        "loincCode": "3142-7",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0,
-        "step": ".01"
-      },
-      {
-        "id": "bodyHeight",
-        "text": "Height",
-        "responseType": "numeric",
-        "unit": "cm",
-        "loincCode": "8302-2",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0,
-        "step": ".1"
-      },
-      {
-        "id": "bmi",
-        "text": "BMI (Body Mass Index)",
-        "responseType": "numeric",
-        "unit": "kg/m2",
-        "loincCode": "39156-5",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      },
-      {
-       "id" : "bodyFat",
-        "text" : "Body Fat",
-        "responseType" : "numeric",
-        "unit" : "%",
-        "loincCode" : "41982-4",
-        "system" : "http://unitsofmeasure.org",
-        "ignoreValue" : 0,
-        "minValue" : 0
-      },
-      {
-        "id": "muscleMass",
-        "text": "Muscle Mass",
-        "responseType": "numeric",
-        "unit": "kg",
-        "loincCode": "41981-6",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      },
-      {
-        "id": "bloodPressure",
-        "text": "Blood Pressure",
-        "responseType": "numeric",
-        "unit": "mmHg",
-        "loincCode": "85354-9",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      },
-      {
-        "id": "heartRate",
-        "text": "Heart Rate",
-        "responseType": "numeric",
-        "unit": "bpm",
-        "loincCode": "8867-4",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      },
-      {
-        "id": "bodyTemperature",
-        "text": "Temperature",
-        "responseType": "numeric",
-        "unit": "C",
-        "loincCode": "8310-5",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      }, 
-      {
-        "id": "oxygenSaturation",
-        "text": "Oxygen Saturation",
-        "responseType": "numeric",
-        "unit": "%",
-        "loincCode": "59408-5",
-        "system": "http://unitsofmeasure.org",
-        "ignoreValue": 0,
-        "minValue": 0
-      }
-    ]
-  }
-  
+  "title": "Body Measurements",
+  "description": "Your regular vitals measurements - weight, height, BMI.",
+  "category": "General Health Metrics",
+  "subCategory": "Body Measurements",
+  "loincCode": "aouros-vitals-simplified",
+  "fhirCategory": "vital-signs",
+  "resultFormat": "observationBundle",
+  "tags": ["vitals", "body measurements", "weight", "height", "bmi"],
+  "entryMode": "all",
+  "questions": [
+    {
+      "id": "bodyWeight",
+      "text": "Weight",
+      "responseType": "numeric",
+      "unit": "kg",
+      "loincCode": "3142-7",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0,
+      "step": ".01"
+    },
+    {
+      "id": "bodyHeight",
+      "text": "Height",
+      "responseType": "numeric",
+      "unit": "cm",
+      "loincCode": "8302-2",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0,
+      "step": ".1"
+    },
+    {
+      "id": "bmi",
+      "text": "BMI (Body Mass Index)",
+      "responseType": "numeric",
+      "unit": "kg/m2",
+      "loincCode": "39156-5",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "bodyFat",
+      "text": "Body Fat",
+      "responseType": "numeric",
+      "unit": "%",
+      "loincCode": "41982-4",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "muscleMass",
+      "text": "Muscle Mass",
+      "responseType": "numeric",
+      "unit": "kg",
+      "loincCode": "41981-6",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "bloodPressure",
+      "text": "Blood Pressure",
+      "responseType": "numeric",
+      "unit": "mmHg",
+      "loincCode": "85354-9",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "heartRate",
+      "text": "Heart Rate",
+      "responseType": "numeric",
+      "unit": "bpm",
+      "loincCode": "8867-4",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "bodyTemperature",
+      "text": "Temperature",
+      "responseType": "numeric",
+      "unit": "C",
+      "loincCode": "8310-5",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    },
+    {
+      "id": "oxygenSaturation",
+      "text": "Oxygen Saturation",
+      "responseType": "numeric",
+      "unit": "%",
+      "loincCode": "59408-5",
+      "system": "http://unitsofmeasure.org",
+      "ignoreValue": 0,
+      "minValue": 0
+    }
+  ]
+}

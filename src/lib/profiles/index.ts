@@ -1,7 +1,11 @@
 import profiles from "./profiles";
 import profile from "./profile";
 
-import { decryptDocumentsNoStore, setDocuments, addDocument } from "$lib/documents";
+import {
+  decryptDocumentsNoStore,
+  setDocuments,
+  addDocument,
+} from "$lib/documents";
 import { DocumentType } from "$lib/documents/types.d";
 import type { Document } from "$lib/documents/types.d";
 import type { ProfileNew, Profile } from "$lib/types.d";
@@ -52,13 +56,16 @@ export async function loadProfiles(
   const existingProfiles = profiles.get() as any[];
   if (!force && existingProfiles && existingProfiles.length > 0) {
     // Track the last user id we loaded profiles for
-    if (loadProfilesMeta.lastLoadedUserId && loadProfilesMeta.lastLoadedUserId === currentUserId) {
+    if (
+      loadProfilesMeta.lastLoadedUserId &&
+      loadProfilesMeta.lastLoadedUserId === currentUserId
+    ) {
       return;
     }
   }
   // fetch basic profile data
   const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
-  const profilesLoaded = await apiFetch('/v1/med/profiles', fetchOpts)
+  const profilesLoaded = await apiFetch("/v1/med/profiles", fetchOpts)
     .then((r) => r.json())
     .catch((e) => {
       console.error("Error loading profiles", e);
@@ -83,7 +90,9 @@ export async function loadProfiles(
             });
 
           // decrypt documents without mutating global documents store
-          const roots = await decryptDocumentsNoStore(rootsEncrypted) as Document[];
+          const roots = (await decryptDocumentsNoStore(
+            rootsEncrypted,
+          )) as Document[];
 
           // map profile data
           const profileData = mapProfileData(d, roots);
@@ -132,10 +141,7 @@ export function updateProfile(p: Profile) {
   }
 }
 
-export function mapProfileData(
-  core: ProfileCore,
-  roots: Document[]
-): Profile {
+export function mapProfileData(core: ProfileCore, roots: Document[]): Profile {
   let profile: any = null,
     health: any = null,
     profileDocumentId: string | null = null,
@@ -152,7 +158,7 @@ export function mapProfileData(
       healthDocumentId = r.id;
     }
     // Remove title and tags from content object if they exist
-    if (r.content && typeof r.content === 'object') {
+    if (r.content && typeof r.content === "object") {
       const content = r.content as any;
       delete content.title;
       delete content.tags;
@@ -212,7 +218,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
   });
 
   // 4. submit to server
-  const response = await apiFetch('/v1/med/profiles', {
+  const response = await apiFetch("/v1/med/profiles", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -249,7 +255,7 @@ export async function createVirtualProfile(profile: ProfileNew) {
     content: {
       title: "Profile",
       tags: ["profile"],
-      vcard: vcardData,  // Use synced vcard
+      vcard: vcardData, // Use synced vcard
       insurance: profile.insurance || {},
     },
     user_id: profileData.id,

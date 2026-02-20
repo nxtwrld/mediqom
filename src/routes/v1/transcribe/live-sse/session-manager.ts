@@ -63,7 +63,10 @@ function float32ToWav(intended: Float32Array, sampleRate: number): Uint8Array {
   return new Uint8Array(dataBuffer);
 }
 
-function flattenChunks(chunks: Float32Array[], takeSamples: number): Float32Array {
+function flattenChunks(
+  chunks: Float32Array[],
+  takeSamples: number,
+): Float32Array {
   const out = new Float32Array(takeSamples);
   let written = 0;
   while (chunks.length > 0 && written < takeSamples) {
@@ -84,7 +87,7 @@ function flattenChunks(chunks: Float32Array[], takeSamples: number): Float32Arra
 
 async function transcribeChunk(
   audio: Float32Array,
-  instructions: { lang?: string; translate?: boolean; prompt?: string }
+  instructions: { lang?: string; translate?: boolean; prompt?: string },
 ) {
   const wav = float32ToWav(audio, SAMPLE_RATE);
   const file = new File([wav], "chunk.wav", { type: "audio/wav" }) as any;
@@ -102,7 +105,10 @@ export async function processSession(sessionId: string, force = false) {
   const session = sessions.get(sessionId);
   if (!session || session.processing) return;
 
-  const totalSamples = session.audioChunks.reduce((acc, c) => acc + c.length, 0);
+  const totalSamples = session.audioChunks.reduce(
+    (acc, c) => acc + c.length,
+    0,
+  );
   if (!force && totalSamples < WINDOW_SAMPLES) return;
 
   session.processing = true;

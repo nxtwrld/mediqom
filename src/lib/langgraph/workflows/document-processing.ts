@@ -181,10 +181,14 @@ export const createDocumentProcessingWorkflow = (
   workflow.addEdge("provider_selection" as any, "feature_detection" as any);
 
   // Conditional routing after feature detection - now goes to unified multi-node processing
-  workflow.addConditionalEdges("feature_detection" as any, shouldProcessMedical, {
-    medical: "multi_node_processing" as any,
-    error: END,
-  });
+  workflow.addConditionalEdges(
+    "feature_detection" as any,
+    shouldProcessMedical,
+    {
+      medical: "multi_node_processing" as any,
+      error: END,
+    },
+  );
 
   // Conditional external validation after multi-node processing
   workflow.addConditionalEdges(

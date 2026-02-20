@@ -84,10 +84,16 @@ export async function processHealthData(
 
       if (Array.isArray(extractedData.signals)) {
         legacySignals = extractedData.signals;
-      } else if (extractedData.signals.signals && Array.isArray(extractedData.signals.signals)) {
+      } else if (
+        extractedData.signals.signals &&
+        Array.isArray(extractedData.signals.signals)
+      ) {
         legacySignals = extractedData.signals.signals;
       } else {
-        console.warn('Signals data is not in expected array format:', extractedData.signals);
+        console.warn(
+          "Signals data is not in expected array format:",
+          extractedData.signals,
+        );
       }
 
       legacySignals.forEach((signal) => {
@@ -146,7 +152,10 @@ function convertExtractedDataToMetaEntries(
     const medications = extractedData.medications;
 
     // Process newPrescriptions (new Rx from this document)
-    if (medications.newPrescriptions && Array.isArray(medications.newPrescriptions)) {
+    if (
+      medications.newPrescriptions &&
+      Array.isArray(medications.newPrescriptions)
+    ) {
       for (const med of medications.newPrescriptions) {
         entries.push({
           entryId: crypto.randomUUID(),
@@ -160,7 +169,8 @@ function convertExtractedDataToMetaEntries(
           clinicalSignificance: determineClinicalSignificance(med),
           confidence: med.confidence || 0.8,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${med.medicationName || med.genericName || ""} ${med.dosage || ""} ${med.instructions?.frequency || ""}`.trim(),
+          searchableText:
+            `${med.medicationName || med.genericName || ""} ${med.dosage || ""} ${med.instructions?.frequency || ""}`.trim(),
         });
 
         // Handle adverse reactions
@@ -178,18 +188,23 @@ function convertExtractedDataToMetaEntries(
             tags: ["adverse_reaction", "medication", "safety"],
             category: "safety",
             subcategory: "adverse_reaction",
-            clinicalSignificance: med.reactionSeverity === "severe" ? "critical" : "medium",
+            clinicalSignificance:
+              med.reactionSeverity === "severe" ? "critical" : "medium",
             confidence: med.confidence || 0.7,
             relatedEntries: [entries[entries.length - 1].entryId],
             sourceDocumentIds: [sourceDocumentId],
-            searchableText: `${med.medicationName} adverse reaction ${med.adverseReactions || med.sideEffects}`.trim(),
+            searchableText:
+              `${med.medicationName} adverse reaction ${med.adverseReactions || med.sideEffects}`.trim(),
           });
         }
       }
     }
 
     // Process currentMedications (patient's ongoing meds mentioned in document)
-    if (medications.currentMedications && Array.isArray(medications.currentMedications)) {
+    if (
+      medications.currentMedications &&
+      Array.isArray(medications.currentMedications)
+    ) {
       for (const med of medications.currentMedications) {
         entries.push({
           entryId: crypto.randomUUID(),
@@ -203,13 +218,17 @@ function convertExtractedDataToMetaEntries(
           clinicalSignificance: determineClinicalSignificance(med),
           confidence: med.confidence || 0.8,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${med.medicationName || med.genericName || ""} ${med.dosage || ""} ${med.frequency?.schedule || ""}`.trim(),
+          searchableText:
+            `${med.medicationName || med.genericName || ""} ${med.dosage || ""} ${med.frequency?.schedule || ""}`.trim(),
         });
       }
     }
 
     // Process discontinuedMedications
-    if (medications.discontinuedMedications && Array.isArray(medications.discontinuedMedications)) {
+    if (
+      medications.discontinuedMedications &&
+      Array.isArray(medications.discontinuedMedications)
+    ) {
       for (const med of medications.discontinuedMedications) {
         entries.push({
           entryId: crypto.randomUUID(),
@@ -223,13 +242,17 @@ function convertExtractedDataToMetaEntries(
           clinicalSignificance: "low",
           confidence: med.confidence || 0.7,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${med.medicationName || med.genericName || ""} discontinued ${med.discontinuedReason || ""}`.trim(),
+          searchableText:
+            `${med.medicationName || med.genericName || ""} discontinued ${med.discontinuedReason || ""}`.trim(),
         });
       }
     }
 
     // Process medicationChanges
-    if (medications.medicationChanges && Array.isArray(medications.medicationChanges)) {
+    if (
+      medications.medicationChanges &&
+      Array.isArray(medications.medicationChanges)
+    ) {
       for (const change of medications.medicationChanges) {
         entries.push({
           entryId: crypto.randomUUID(),
@@ -243,7 +266,8 @@ function convertExtractedDataToMetaEntries(
           clinicalSignificance: "medium",
           confidence: change.confidence || 0.7,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${change.medicationName} change ${change.changeType} ${change.changeReason || ""}`.trim(),
+          searchableText:
+            `${change.medicationName} change ${change.changeType} ${change.changeReason || ""}`.trim(),
         });
       }
     }
@@ -295,7 +319,9 @@ function convertExtractedDataToMetaEntries(
   const diagnosisData = extractedData.diagnosis || extractedData.diagnoses;
   if (diagnosisData) {
     // Ensure it's an array
-    const diagnosisArray = Array.isArray(diagnosisData) ? diagnosisData : [diagnosisData];
+    const diagnosisArray = Array.isArray(diagnosisData)
+      ? diagnosisData
+      : [diagnosisData];
 
     for (const diagnosis of diagnosisArray) {
       entries.push({
@@ -322,11 +348,15 @@ function convertExtractedDataToMetaEntries(
     const allergiesData = extractedData.allergies;
     const allergiesArray = Array.isArray(allergiesData)
       ? allergiesData
-      : (allergiesData.allergies || []);
+      : allergiesData.allergies || [];
 
     for (const allergy of allergiesArray) {
       // Use onsetDate or lastReactionDate as timestamp
-      const allergyTimestamp = allergy.onsetDate || allergy.lastReactionDate || allergy.date || timestamp;
+      const allergyTimestamp =
+        allergy.onsetDate ||
+        allergy.lastReactionDate ||
+        allergy.date ||
+        timestamp;
 
       entries.push({
         entryId: crypto.randomUUID(),
@@ -338,7 +368,10 @@ function convertExtractedDataToMetaEntries(
         category: "safety",
         subcategory: "allergy",
         clinicalSignificance:
-          allergy.severity === "severe" || allergy.severity === "life_threatening" ? "critical" : "high",
+          allergy.severity === "severe" ||
+          allergy.severity === "life_threatening"
+            ? "critical"
+            : "high",
         confidence: allergy.confidence || 0.9,
         sourceDocumentIds: [sourceDocumentId],
         searchableText:
@@ -347,41 +380,52 @@ function convertExtractedDataToMetaEntries(
     }
 
     // Also process drug intolerances if present in structured format
-    if (!Array.isArray(allergiesData) && allergiesData.drugIntolerances && Array.isArray(allergiesData.drugIntolerances)) {
+    if (
+      !Array.isArray(allergiesData) &&
+      allergiesData.drugIntolerances &&
+      Array.isArray(allergiesData.drugIntolerances)
+    ) {
       for (const intolerance of allergiesData.drugIntolerances) {
         entries.push({
           entryId: crypto.randomUUID(),
           patientId,
           entryType: MetaHistoryEntryType.ALLERGY,
           timestamp: timestamp,
-          data: { ...intolerance, type: 'intolerance' },
+          data: { ...intolerance, type: "intolerance" },
           tags: ["drug_intolerance", "medication", "safety"],
           category: "safety",
           subcategory: "intolerance",
           clinicalSignificance: "medium",
           confidence: 0.8,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${intolerance.medication} intolerance ${intolerance.reaction}`.trim(),
+          searchableText:
+            `${intolerance.medication} intolerance ${intolerance.reaction}`.trim(),
         });
       }
     }
 
     // Process environmental sensitivities if present
-    if (!Array.isArray(allergiesData) && allergiesData.environmentalSensitivities && Array.isArray(allergiesData.environmentalSensitivities)) {
+    if (
+      !Array.isArray(allergiesData) &&
+      allergiesData.environmentalSensitivities &&
+      Array.isArray(allergiesData.environmentalSensitivities)
+    ) {
       for (const sensitivity of allergiesData.environmentalSensitivities) {
         entries.push({
           entryId: crypto.randomUUID(),
           patientId,
           entryType: MetaHistoryEntryType.ALLERGY,
           timestamp: timestamp,
-          data: { ...sensitivity, type: 'environmental' },
+          data: { ...sensitivity, type: "environmental" },
           tags: ["environmental_sensitivity", "allergy", "safety"],
           category: "safety",
           subcategory: "environmental_allergy",
-          clinicalSignificance: sensitivity.severity === "severe" ? "high" : "medium",
+          clinicalSignificance:
+            sensitivity.severity === "severe" ? "high" : "medium",
           confidence: 0.7,
           sourceDocumentIds: [sourceDocumentId],
-          searchableText: `${sensitivity.trigger} ${sensitivity.reaction} ${sensitivity.seasonal ? 'seasonal' : ''}`.trim(),
+          searchableText:
+            `${sensitivity.trigger} ${sensitivity.reaction} ${sensitivity.seasonal ? "seasonal" : ""}`.trim(),
         });
       }
     }
@@ -393,7 +437,7 @@ function convertExtractedDataToMetaEntries(
     const proceduresData = extractedData.procedures;
     const proceduresArray = Array.isArray(proceduresData)
       ? proceduresData
-      : (proceduresData.procedures || []);
+      : proceduresData.procedures || [];
 
     for (const procedure of proceduresArray) {
       entries.push({
@@ -414,7 +458,11 @@ function convertExtractedDataToMetaEntries(
     }
 
     // Also process surgical team if present in structured format
-    if (!Array.isArray(proceduresData) && proceduresData.surgicalTeam && Array.isArray(proceduresData.surgicalTeam)) {
+    if (
+      !Array.isArray(proceduresData) &&
+      proceduresData.surgicalTeam &&
+      Array.isArray(proceduresData.surgicalTeam)
+    ) {
       // Store surgical team information with the procedures
       // This could be used for provider tracking
     }
@@ -493,26 +541,36 @@ async function syncCurrentMedicationsAndAllergies(
     const currentMedications: any[] = [];
 
     // Combine newPrescriptions and currentMedications
-    if (medications.newPrescriptions && Array.isArray(medications.newPrescriptions)) {
-      currentMedications.push(...medications.newPrescriptions.map((med: any) => ({
-        name: med.medicationName || med.genericName,
-        dosage: med.dosage || med.strength,
-        frequency: med.instructions?.frequency || med.frequency?.schedule,
-        prescriber: med.prescriber?.name,
-        startDate: med.prescriptionDate || med.date,
-        indication: med.indication,
-      })));
+    if (
+      medications.newPrescriptions &&
+      Array.isArray(medications.newPrescriptions)
+    ) {
+      currentMedications.push(
+        ...medications.newPrescriptions.map((med: any) => ({
+          name: med.medicationName || med.genericName,
+          dosage: med.dosage || med.strength,
+          frequency: med.instructions?.frequency || med.frequency?.schedule,
+          prescriber: med.prescriber?.name,
+          startDate: med.prescriptionDate || med.date,
+          indication: med.indication,
+        })),
+      );
     }
 
-    if (medications.currentMedications && Array.isArray(medications.currentMedications)) {
-      currentMedications.push(...medications.currentMedications.map((med: any) => ({
-        name: med.medicationName || med.genericName,
-        dosage: med.dosage || med.strength,
-        frequency: med.frequency?.schedule,
-        prescriber: med.prescriber?.name,
-        startDate: med.startDate || med.date,
-        indication: med.indication,
-      })));
+    if (
+      medications.currentMedications &&
+      Array.isArray(medications.currentMedications)
+    ) {
+      currentMedications.push(
+        ...medications.currentMedications.map((med: any) => ({
+          name: med.medicationName || med.genericName,
+          dosage: med.dosage || med.strength,
+          frequency: med.frequency?.schedule,
+          prescriber: med.prescriber?.name,
+          startDate: med.startDate || med.date,
+          indication: med.indication,
+        })),
+      );
     }
 
     // Merge with existing medications, avoiding duplicates
@@ -541,20 +599,29 @@ async function syncCurrentMedicationsAndAllergies(
     // Handle both legacy array format and new structured object format
     const allergiesArray = Array.isArray(allergiesData)
       ? allergiesData
-      : (allergiesData.allergies || []);
+      : allergiesData.allergies || [];
 
     // Map allergies to profile format
     allergiesArray.forEach((allergy: any) => {
       // Only include active allergies in profile
-      if (!allergy.status || allergy.status === 'active' || allergy.clinicalStatus === 'active') {
+      if (
+        !allergy.status ||
+        allergy.status === "active" ||
+        allergy.clinicalStatus === "active"
+      ) {
         currentAllergies.push({
           allergen: allergy.allergen,
-          reaction: allergy.reactionType || allergy.reaction ||
-                   (allergy.reactions && Array.isArray(allergy.reactions) && allergy.reactions.length > 0
-                     ? allergy.reactions.map((r: any) => r.symptom).join(', ')
-                     : ''),
+          reaction:
+            allergy.reactionType ||
+            allergy.reaction ||
+            (allergy.reactions &&
+            Array.isArray(allergy.reactions) &&
+            allergy.reactions.length > 0
+              ? allergy.reactions.map((r: any) => r.symptom).join(", ")
+              : ""),
           severity: allergy.severity,
-          confirmedDate: allergy.onsetDate || allergy.lastReactionDate || allergy.date,
+          confirmedDate:
+            allergy.onsetDate || allergy.lastReactionDate || allergy.date,
         });
       }
     });
@@ -639,7 +706,10 @@ async function getClinicalTrends(profileId: string): Promise<any[]> {
 
   const trends = await queryMetaHistory({
     patientId: profileId,
-    entryTypes: [MetaHistoryEntryType.MEASUREMENT_VITAL, MetaHistoryEntryType.MEASUREMENT_LAB],
+    entryTypes: [
+      MetaHistoryEntryType.MEASUREMENT_VITAL,
+      MetaHistoryEntryType.MEASUREMENT_LAB,
+    ],
     timeRange: {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
       end: new Date().toISOString(),

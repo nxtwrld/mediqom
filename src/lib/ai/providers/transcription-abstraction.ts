@@ -312,7 +312,8 @@ export class TranscriptionProviderAbstraction {
     if (!prompt && this.config!.transcriptionSettings.medicalContext.enabled) {
       if (options.translate) {
         // Use translation prompt from config
-        prompt = this.config!.transcriptionSettings.medicalContext.translatePrompt;
+        prompt =
+          this.config!.transcriptionSettings.medicalContext.translatePrompt;
       } else {
         // Use standard preservation prompt from config
         prompt = this.config!.transcriptionSettings.medicalContext.prompt;
@@ -349,8 +350,8 @@ export class TranscriptionProviderAbstraction {
     // Log key transcription parameters (keep minimal for troubleshooting)
     console.log("🎯 TRANSCRIBE: Using", {
       language: transcriptionParams.language,
-      translate: options.translate ? 'enabled' : 'disabled',
-      fileSize: `${Math.round((transcriptionParams.file?.size || 0) / 1024)}KB`
+      translate: options.translate ? "enabled" : "disabled",
+      fileSize: `${Math.round((transcriptionParams.file?.size || 0) / 1024)}KB`,
     });
 
     const transcription =
@@ -363,7 +364,9 @@ export class TranscriptionProviderAbstraction {
       if (!prompt || !text) return text;
       const promptText = prompt.trim();
       if (text.startsWith(promptText)) {
-        console.warn('⚠️ Stripped hallucinated prompt from transcription output');
+        console.warn(
+          "⚠️ Stripped hallucinated prompt from transcription output",
+        );
         return text.slice(promptText.length).trim();
       }
       return text;
@@ -593,7 +596,9 @@ export class TranscriptionProviderAbstraction {
     if (instructions.prompt && text) {
       const promptText = instructions.prompt.trim();
       if (text.startsWith(promptText)) {
-        console.warn('⚠️ Stripped hallucinated prompt from transcription (backup check)');
+        console.warn(
+          "⚠️ Stripped hallucinated prompt from transcription (backup check)",
+        );
         text = text.slice(promptText.length).trim();
       }
     }

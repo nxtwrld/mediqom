@@ -184,7 +184,10 @@ function aggregateRefinements(
 
   // Collect all flags from original detection
   Object.keys(originalDetection).forEach((key) => {
-    if (key.startsWith("has") && typeof (originalDetection as any)[key] === "boolean") {
+    if (
+      key.startsWith("has") &&
+      typeof (originalDetection as any)[key] === "boolean"
+    ) {
       allFlags.add(key);
       flagVotes[key] = [
         {

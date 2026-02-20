@@ -35,12 +35,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run mobile:android` - Open Android project in Android Studio
 - `npm run mobile:dev` - Start mobile development server
 
-
 ## Rule: always use qmd before reading files
 
 Before reading files or exploring directories, always use qmd to search for information in local projects.
 
 Available tools:
+
 - `qmd search “query”` - fast keyword search (BM25)
 - `qmd query “query”` - hybrid search with reranking (best quality)
 - `qmd vsearch “query”` - semantic vector search
@@ -205,7 +205,7 @@ SvelteKit load functions receive a special `fetch` that supports relative URLs d
 ```typescript
 // In any +layout.ts or +page.ts load function:
 export const load: LayoutLoad = async ({ fetch }) => {
-  const data = await apiFetch('/v1/med/user', { fetch });
+  const data = await apiFetch("/v1/med/user", { fetch });
 };
 ```
 
@@ -220,7 +220,7 @@ export async function loadProfiles(
   fetchFn?: typeof globalThis.fetch,
 ) {
   const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
-  const data = await apiFetch('/v1/med/profiles', fetchOpts);
+  const data = await apiFetch("/v1/med/profiles", fetchOpts);
 }
 
 // In load function:
@@ -228,6 +228,7 @@ await loadProfiles(false, fetch);
 ```
 
 **SSR configuration:**
+
 - `med/` routes: `ssr = false` — all load functions run client-side, but still pass `{ fetch }`
 - Root `+layout.ts`: SSR enabled — `{ fetch }` is required for `/account` route SSR
 - Capacitor builds: SSR always disabled, `apiFetch` uses Bearer tokens via `getAccessToken()`
@@ -531,24 +532,13 @@ For session development context, use the `@session` command. Key references: `AI
 
 ```css
 /* Spacing */
---ui-pad-small: 0.5rem
---ui-pad-medium: 1rem
---ui-pad-large: 1.5rem
---ui-pad-xlarge: 2rem
-
-/* Radius */
---ui-radius-small: 0.25rem
---ui-radius-medium: 0.5rem
---ui-radius-large: 1rem
-
-/* Colors */
---color-surface: /* Light background */
---color-border: /* Border color */
---color-text-primary: /* Main text */
---color-text-secondary: /* Muted text */
---color-positive: /* Success */
---color-negative: /* Error */
---color-warning: /* Warning */
+--ui-pad-small: 0.5rem --ui-pad-medium: 1rem --ui-pad-large: 1.5rem
+  --ui-pad-xlarge: 2rem /* Radius */ --ui-radius-small: 0.25rem
+  --ui-radius-medium: 0.5rem --ui-radius-large: 1rem /* Colors */
+  --color-surface: /* Light background */ --color-border: /* Border color */
+  --color-text-primary: /* Main text */ --color-text-secondary: /* Muted text */
+  --color-positive: /* Success */ --color-negative: /* Error */
+  --color-warning: /* Warning */;
 ```
 
 **Don't:** Use hard-coded values like `padding: 1rem` or `color: #333`
@@ -581,30 +571,30 @@ When reviewing or creating styled components:
 
 ## Documentation Index
 
-| File | Purpose |
-|------|---------|
-| `AI_CHAT.md` | Chat system architecture and design |
-| `AI_IMPORT_USER_CONFIGURATION.md` | Import schema user configuration |
-| `AI_RESEARCH.md` | AI research notes |
-| `AI_SESSION_ANALYSIS.md` | Session analysis pipeline |
-| `AI_SESSION_QOM.md` | QOM expert pipeline architecture |
-| `AI_SESSION_WORKFLOW.md` | Full session AI workflow phases |
-| `AI_TODO.md` | AI development TODO items |
-| `CONTEXT_DEVELOPMENT_STRATEGY.md` | Context assembly roadmap |
-| `DATA_AND_PRIVACY.md` | Data handling and privacy policies |
-| `LOGGER_MIGRATION_GUIDE.md` | Logger migration instructions |
-| `LOGGER_EXAMPLE_MIGRATION.md` | Logger migration examples |
-| `MARKETING.md` | Marketing content |
-| `RESPONSIVE.md` | Mobile responsive patterns and breakpoints |
-| `TRANSCRIPTION.md` | Audio transcription providers and setup |
-| `docs/BETA_ACCESS_SYSTEM.md` | Beta access management |
-| `docs/CLINICAL_DATA_PLATFORM.md` | Clinical data platform design |
-| `docs/CONTEXT_MANAGEMENT_SYSTEM.md` | Context assembly system documentation |
-| `docs/IMPORT.md` | Import architecture documentation |
-| `docs/README.md` | Documentation index |
-| `src/routes/med/FEATURES.md` | Medical features documentation |
-| `src/components/apps/README.md` | Apps component documentation |
-| `3D_TEXTURES.md` | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
+| File                                | Purpose                                                              |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `AI_CHAT.md`                        | Chat system architecture and design                                  |
+| `AI_IMPORT_USER_CONFIGURATION.md`   | Import schema user configuration                                     |
+| `AI_RESEARCH.md`                    | AI research notes                                                    |
+| `AI_SESSION_ANALYSIS.md`            | Session analysis pipeline                                            |
+| `AI_SESSION_QOM.md`                 | QOM expert pipeline architecture                                     |
+| `AI_SESSION_WORKFLOW.md`            | Full session AI workflow phases                                      |
+| `AI_TODO.md`                        | AI development TODO items                                            |
+| `CONTEXT_DEVELOPMENT_STRATEGY.md`   | Context assembly roadmap                                             |
+| `DATA_AND_PRIVACY.md`               | Data handling and privacy policies                                   |
+| `LOGGER_MIGRATION_GUIDE.md`         | Logger migration instructions                                        |
+| `LOGGER_EXAMPLE_MIGRATION.md`       | Logger migration examples                                            |
+| `MARKETING.md`                      | Marketing content                                                    |
+| `RESPONSIVE.md`                     | Mobile responsive patterns and breakpoints                           |
+| `TRANSCRIPTION.md`                  | Audio transcription providers and setup                              |
+| `docs/BETA_ACCESS_SYSTEM.md`        | Beta access management                                               |
+| `docs/CLINICAL_DATA_PLATFORM.md`    | Clinical data platform design                                        |
+| `docs/CONTEXT_MANAGEMENT_SYSTEM.md` | Context assembly system documentation                                |
+| `docs/IMPORT.md`                    | Import architecture documentation                                    |
+| `docs/README.md`                    | Documentation index                                                  |
+| `src/routes/med/FEATURES.md`        | Medical features documentation                                       |
+| `src/components/apps/README.md`     | Apps component documentation                                         |
+| `3D_TEXTURES.md`                    | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
 
 ## Important Notes
 

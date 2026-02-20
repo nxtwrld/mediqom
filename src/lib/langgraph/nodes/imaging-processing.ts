@@ -133,9 +133,10 @@ export class ImagingProcessingNode extends BaseProcessingNode {
     // Enhance modality detection if not provided
     if (!enhanced.modality || enhanced.modality === "unknown") {
       // Extract text from content array
-      const contentText = state.content
-        ?.map((c) => (c.type === "text" ? c.text : ""))
-        .join(" ") || "";
+      const contentText =
+        state.content
+          ?.map((c) => (c.type === "text" ? c.text : ""))
+          .join(" ") || "";
       enhanced.modality = this.detectModalityFromContent(contentText);
     }
 

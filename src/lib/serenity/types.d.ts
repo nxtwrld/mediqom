@@ -2,7 +2,7 @@ export interface SerenityFormSchema {
   title: string;
   description: string;
   loincCode: string;
-  sessionTiming: 'pre' | 'post';
+  sessionTiming: "pre" | "post";
   questions: SerenityQuestion[];
   scoringInterpretation: {
     ranges: SerenityScoreRange[];
@@ -12,7 +12,7 @@ export interface SerenityFormSchema {
 export interface SerenityQuestion {
   id: string;
   text: string;
-  responseType: 'likert';
+  responseType: "likert";
   options: string[];
   scores: number[];
 }
@@ -35,7 +35,7 @@ export interface SerenityFormResponse {
   };
   totalScore: number;
   interpretation: {
-    range: string;      // "Good", "Moderate", "Poor"
+    range: string; // "Good", "Moderate", "Poor"
     guidance: string;
   };
   confidence: number;

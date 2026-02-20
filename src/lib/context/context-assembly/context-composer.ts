@@ -67,7 +67,9 @@ export class ContextAssembler {
         tokenCount: optimizedContext.tokenCount,
       };
     } catch (error) {
-      logger.namespace("Context").error("Failed to assemble context", { error });
+      logger
+        .namespace("Context")
+        .error("Failed to assemble context", { error });
 
       // Return minimal context on error
       return {

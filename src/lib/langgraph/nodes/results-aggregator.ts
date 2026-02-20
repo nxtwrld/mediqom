@@ -19,7 +19,9 @@ import type { DocumentProcessingState } from "../state";
 export const resultsAggregatorNode = async (
   state: DocumentProcessingState,
 ): Promise<Partial<DocumentProcessingState>> => {
-  console.log("📊 Results Aggregator: collecting results from specialized nodes");
+  console.log(
+    "📊 Results Aggregator: collecting results from specialized nodes",
+  );
 
   state.emitProgress?.(
     "results_aggregator",
@@ -33,17 +35,29 @@ export const resultsAggregatorNode = async (
   const sectionCounts: Record<string, number> = {};
 
   // Core medical sections
-  if (state.signals && Array.isArray(state.signals) && state.signals.length > 0) {
+  if (
+    state.signals &&
+    Array.isArray(state.signals) &&
+    state.signals.length > 0
+  ) {
     processedSections.push("signals");
     sectionCounts.signals = state.signals.length;
   }
 
-  if (state.medications && Array.isArray(state.medications) && state.medications.length > 0) {
+  if (
+    state.medications &&
+    Array.isArray(state.medications) &&
+    state.medications.length > 0
+  ) {
     processedSections.push("medications");
     sectionCounts.medications = state.medications.length;
   }
 
-  if (state.procedures && Array.isArray(state.procedures) && state.procedures.length > 0) {
+  if (
+    state.procedures &&
+    Array.isArray(state.procedures) &&
+    state.procedures.length > 0
+  ) {
     processedSections.push("procedures");
     sectionCounts.procedures = state.procedures.length;
   }
@@ -58,7 +72,8 @@ export const resultsAggregatorNode = async (
       const value = state.report![key];
       // Include section if it has data (non-null, non-empty array/object)
       if (Array.isArray(value)) return value.length > 0;
-      if (value && typeof value === "object") return Object.keys(value).length > 0;
+      if (value && typeof value === "object")
+        return Object.keys(value).length > 0;
       return value !== null && value !== undefined;
     });
 

@@ -14,12 +14,17 @@ function stripProcessingMetadata(data: any, sectionKey?: string): any {
   }
 
   // Strip wrapper properties
-  const { documentContext, processingNotes, processingConfidence, ...clean } = data;
+  const { documentContext, processingNotes, processingConfidence, ...clean } =
+    data;
 
   // Backward compatibility: unwrap double-nested objects
   // e.g., { patient: { fullName: ... } } when sectionKey is "patient" - already correct
   // e.g., { diagnosis: [...] } when sectionKey is "diagnosis" - unwrap to array
-  if (sectionKey && clean[sectionKey] !== undefined && Object.keys(clean).length === 1) {
+  if (
+    sectionKey &&
+    clean[sectionKey] !== undefined &&
+    Object.keys(clean).length === 1
+  ) {
     return clean[sectionKey];
   }
 
@@ -60,21 +65,43 @@ export function convertWorkflowResult(
   }
 
   // Build comprehensive report object by merging all specialized medical sections
-  const reportBase = useStructuredData ? workflowResult.report : (actualContent.report || {});
+  const reportBase = useStructuredData
+    ? workflowResult.report
+    : actualContent.report || {};
   const reportObject = Array.isArray(reportBase)
-    ? { content: reportBase }  // Legacy array format
-    : { ...reportBase };       // Object format
+    ? { content: reportBase } // Legacy array format
+    : { ...reportBase }; // Object format
 
   // List of all specialized medical sections from multi-node processing
   const specializedSections = [
-    'diagnosis', 'performer', 'patient', 'bodyParts', 'signals',
-    'ecg', 'echo', 'allergies', 'anesthesia',
-    'microscopic', 'triage', 'immunizations',
-    'specimens', 'admission', 'dental',
-    'tumorCharacteristics', 'treatmentPlan', 'treatmentResponse',
-    'imagingFindings', 'grossFindings', 'specialStains',
-    'socialHistory', 'treatments', 'assessment', 'molecular',
-    'medications', 'procedures', 'imaging',
+    "diagnosis",
+    "performer",
+    "patient",
+    "bodyParts",
+    "signals",
+    "ecg",
+    "echo",
+    "allergies",
+    "anesthesia",
+    "microscopic",
+    "triage",
+    "immunizations",
+    "specimens",
+    "admission",
+    "dental",
+    "tumorCharacteristics",
+    "treatmentPlan",
+    "treatmentResponse",
+    "imagingFindings",
+    "grossFindings",
+    "specialStains",
+    "socialHistory",
+    "treatments",
+    "assessment",
+    "molecular",
+    "medications",
+    "procedures",
+    "imaging",
   ];
 
   // Merge all specialized sections from workflow result into report object
@@ -82,7 +109,10 @@ export function convertWorkflowResult(
   // Pass section key for backward-compat double-nesting unwrap
   for (const section of specializedSections) {
     if (workflowResult[section] !== undefined) {
-      reportObject[section] = stripProcessingMetadata(workflowResult[section], section);
+      reportObject[section] = stripProcessingMetadata(
+        workflowResult[section],
+        section,
+      );
     }
   }
 
@@ -92,7 +122,10 @@ export function convertWorkflowResult(
   if (reportObject.signals !== undefined) {
     if (Array.isArray(reportObject.signals)) {
       signalsArray = reportObject.signals;
-    } else if (reportObject.signals?.signals && Array.isArray(reportObject.signals.signals)) {
+    } else if (
+      reportObject.signals?.signals &&
+      Array.isArray(reportObject.signals.signals)
+    ) {
       // Handle any remaining double-wrapped case
       signalsArray = reportObject.signals.signals;
     }
@@ -104,7 +137,7 @@ export function convertWorkflowResult(
   if (reportObject.bodyParts && Array.isArray(reportObject.bodyParts)) {
     const bodyPartTags = reportObject.bodyParts
       .map((bp: any) => bp.identification)
-      .filter((id: any) => typeof id === 'string' && id.length > 0);
+      .filter((id: any) => typeof id === "string" && id.length > 0);
     if (bodyPartTags.length > 0) {
       tags = [...new Set([...tags, ...bodyPartTags])];
     }
@@ -124,9 +157,8 @@ export function convertWorkflowResult(
     hasLabOrVitals:
       actualContent.hasLabOrVitals ||
       workflowResult.featureDetectionResults?.hasSignals ||
-      (signalsArray && (
-        Array.isArray(signalsArray) ? signalsArray.length > 0 : false
-      )) ||
+      (signalsArray &&
+        (Array.isArray(signalsArray) ? signalsArray.length > 0 : false)) ||
       false,
     content: actualContent.content || fallbackText,
     // Pass through complete report with all specialized sections merged

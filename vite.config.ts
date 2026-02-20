@@ -1,10 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from 'vitest/config';
-import {
-  type ViteDevServer,
-  normalizePath,
-  type Plugin,
-} from "vite";
+import { defineConfig } from "vitest/config";
+import { type ViteDevServer, normalizePath, type Plugin } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 // Removed topLevelAwait plugin - was causing 'Server is not a constructor' error on Vercel
 // import topLevelAwait from "vite-plugin-top-level-await";

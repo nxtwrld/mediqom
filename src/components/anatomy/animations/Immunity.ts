@@ -199,7 +199,10 @@ export default class Vaccination implements IAnimation {
       object.position.copy(position);
 
       if (retries-- <= 0) break; // Avoid infinite loop, give up after certain retries
-    } while (this.objectBounced && this.isOverlapping(object, this.objectBounced));
+    } while (
+      this.objectBounced &&
+      this.isOverlapping(object, this.objectBounced)
+    );
     return position;
   }
 

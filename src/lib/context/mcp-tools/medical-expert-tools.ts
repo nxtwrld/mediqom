@@ -810,7 +810,8 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to search documents", {
         error: errorMessage,
         profileId,
@@ -847,8 +848,7 @@ export class MedicalExpertTools {
       );
 
       // Get context stats
-      const contextStats =
-        profileContextManager.getContextStats(profileId);
+      const contextStats = profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -916,7 +916,8 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to assemble context", {
         error: errorMessage,
         profileId,
@@ -1009,7 +1010,8 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to get profile data", {
         error: errorMessage,
         profileId,
@@ -1042,8 +1044,7 @@ export class MedicalExpertTools {
     profileId: string,
   ): Promise<MCPToolResult> {
     try {
-      const contextStats =
-        profileContextManager.getContextStats(profileId);
+      const contextStats = profileContextManager.getContextStats(profileId);
       if (!contextStats) {
         return {
           content: [
@@ -1090,12 +1091,8 @@ export class MedicalExpertTools {
         const timeframe = params.timeframe;
         filteredResults = searchResults.filter((result: any) => {
           const docDate = new Date(result.metadata.date);
-          const start = timeframe.start
-            ? new Date(timeframe.start)
-            : null;
-          const end = timeframe.end
-            ? new Date(timeframe.end)
-            : null;
+          const start = timeframe.start ? new Date(timeframe.start) : null;
+          const end = timeframe.end ? new Date(timeframe.end) : null;
 
           return (!start || docDate >= start) && (!end || docDate <= end);
         });
@@ -1156,7 +1153,8 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to query medical history", {
         error: errorMessage,
         profileId,
@@ -1223,7 +1221,8 @@ export class MedicalExpertTools {
         ],
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.namespace("Context")?.error("Failed to get document", {
         error: errorMessage,
         documentId: params.documentId,
@@ -1516,7 +1515,11 @@ export class MedicalExpertTools {
         if (!doc.content) continue;
 
         // Extract date from document
-        let eventDate = doc.metadata?.date || (typeof doc.content === 'object' && doc.content !== null ? (doc.content as any).date : undefined);
+        let eventDate =
+          doc.metadata?.date ||
+          (typeof doc.content === "object" && doc.content !== null
+            ? (doc.content as any).date
+            : undefined);
         if (!eventDate) continue;
 
         // Filter by date range if specified
@@ -1941,7 +1944,10 @@ export class MedicalExpertTools {
       });
 
       // Analyze patterns across documents
-      const patternAnalysis = this.analyzePatterns(searchResults, params.patternType);
+      const patternAnalysis = this.analyzePatterns(
+        searchResults,
+        params.patternType,
+      );
 
       // Generate AI hypotheses if requested
       let hypotheses: string[] = [];
@@ -2032,7 +2038,10 @@ export class MedicalExpertTools {
       // Get assembled context for summary generation
       const contextResult = await this.getAssembledContext(
         {
-          conversationContext: this.buildSummaryQuery(params.summaryType, params.timeframe),
+          conversationContext: this.buildSummaryQuery(
+            params.summaryType,
+            params.timeframe,
+          ),
           maxTokens: 4000,
           includeMedicalContext: true,
         },
@@ -2141,7 +2150,10 @@ export class MedicalExpertTools {
       );
 
       // Format symptom search results
-      const resultsText = this.formatSymptomResults(symptomAnalysis, params.symptoms);
+      const resultsText = this.formatSymptomResults(
+        symptomAnalysis,
+        params.symptoms,
+      );
 
       return {
         content: [
@@ -2203,7 +2215,7 @@ export class MedicalExpertTools {
       // Build specialty-specific query
       const specialtyQuery = this.buildSpecialtyQuery(
         params.clinicalQuestion || params.specialty,
-        []
+        [],
       );
 
       // Get relevant medical context
@@ -2296,7 +2308,7 @@ export class MedicalExpertTools {
     searchResults: any[],
     trendType: string,
     parameter?: string,
-    timeframe?: { start: string; end: string }
+    timeframe?: { start: string; end: string },
   ): any[] {
     let filtered = searchResults.filter((result) => {
       const content = (result.excerpt || "").toLowerCase();
@@ -2342,7 +2354,9 @@ export class MedicalExpertTools {
       const startDate = new Date(timeframe.start);
       const endDate = new Date(timeframe.end);
       filtered = filtered.filter((result) => {
-        const date = result.metadata?.date ? new Date(result.metadata.date) : null;
+        const date = result.metadata?.date
+          ? new Date(result.metadata.date)
+          : null;
         return date && date >= startDate && date <= endDate;
       });
     }
@@ -2405,7 +2419,11 @@ export class MedicalExpertTools {
   /**
    * Format trend analysis for display
    */
-  private formatTrendAnalysis(analysis: any, trendType: string, parameter?: string): string {
+  private formatTrendAnalysis(
+    analysis: any,
+    trendType: string,
+    parameter?: string,
+  ): string {
     const paramInfo = parameter ? ` (${parameter})` : "";
     return `${trendType.charAt(0).toUpperCase() + trendType.slice(1)} Trend Analysis${paramInfo}:
 Pattern: ${analysis.pattern}
@@ -2423,7 +2441,7 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       includeHistoricalMedications?: boolean;
       medicationClass?: string;
       timeframe?: { start: string; end: string };
-    }
+    },
   ): { currentMedications: any[]; historicalMedications: any[] } {
     const allMedications = searchResults
       .filter((result) => {
@@ -2457,8 +2475,7 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
         excerpt.includes("current") ||
         excerpt.includes("active") ||
         excerpt.includes("taking") ||
-        !excerpt.includes("discontinued") &&
-        !excerpt.includes("stopped");
+        (!excerpt.includes("discontinued") && !excerpt.includes("stopped"));
 
       return isCurrent && isActive;
     });
@@ -2482,10 +2499,10 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
     if (params?.medicationClass) {
       const classLower = params.medicationClass.toLowerCase();
       filteredCurrent = filteredCurrent.filter((med) =>
-        (med.excerpt || "").toLowerCase().includes(classLower)
+        (med.excerpt || "").toLowerCase().includes(classLower),
       );
       filteredHistorical = filteredHistorical.filter((med) =>
-        (med.excerpt || "").toLowerCase().includes(classLower)
+        (med.excerpt || "").toLowerCase().includes(classLower),
       );
     }
 
@@ -2503,8 +2520,12 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
     }
 
     return {
-      currentMedications: params?.includeCurrentMedications !== false ? filteredCurrent : [],
-      historicalMedications: params?.includeHistoricalMedications !== false ? filteredHistorical : [],
+      currentMedications:
+        params?.includeCurrentMedications !== false ? filteredCurrent : [],
+      historicalMedications:
+        params?.includeHistoricalMedications !== false
+          ? filteredHistorical
+          : [],
     };
   }
 
@@ -2542,7 +2563,10 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
    * Format medication history for display
    */
   private formatMedicationHistory(
-    medicationHistory: { currentMedications: any[]; historicalMedications: any[] },
+    medicationHistory: {
+      currentMedications: any[];
+      historicalMedications: any[];
+    },
     interactions: string[],
   ): string {
     let result = "Medication History:\n";
@@ -2592,7 +2616,7 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       testType?: string;
       includeAbnormalOnly?: boolean;
       timeframe?: { start: string; end: string };
-    }
+    },
   ): any[] {
     let filtered = searchResults.filter((result) => {
       const content = (result.excerpt || "").toLowerCase();
@@ -2618,7 +2642,9 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       const startDate = new Date(params.timeframe.start);
       const endDate = new Date(params.timeframe.end);
       filtered = filtered.filter((result) => {
-        const date = result.metadata?.date ? new Date(result.metadata.date) : null;
+        const date = result.metadata?.date
+          ? new Date(result.metadata.date)
+          : null;
         return date && date >= startDate && date <= endDate;
       });
     }
@@ -2634,7 +2660,9 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
 
     // Filter for abnormal only if requested
     if (params?.includeAbnormalOnly) {
-      return testResults.filter((test) => test.status === "abnormal" || test.status === "critical");
+      return testResults.filter(
+        (test) => test.status === "abnormal" || test.status === "critical",
+      );
     }
 
     return testResults;
@@ -2659,7 +2687,8 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       const sortedResults = results
         .filter((r: any) => r.date && r.value)
         .sort(
-          (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          (a: any, b: any) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
 
       return {
@@ -2686,7 +2715,7 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
     params?: {
       includeTrends?: boolean;
       includeAbnormalOnly?: boolean;
-    }
+    },
   ): string {
     let result = "Test Results Summary:\n";
 
@@ -2698,7 +2727,9 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
     // Filter for abnormal only if requested
     let resultsToShow = testResults;
     if (params?.includeAbnormalOnly) {
-      resultsToShow = testResults.filter((test) => test.status === "abnormal" || test.status === "critical");
+      resultsToShow = testResults.filter(
+        (test) => test.status === "abnormal" || test.status === "critical",
+      );
     }
 
     // Recent results
@@ -2708,12 +2739,18 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
 
     result += "\nRecent Results:\n";
     recentResults.forEach((test) => {
-      const statusMarker = test.status === "abnormal" || test.status === "critical" ? " ⚠️" : "";
+      const statusMarker =
+        test.status === "abnormal" || test.status === "critical" ? " ⚠️" : "";
       result += `- ${test.testName}: ${test.value} ${test.range ? `(Ref: ${test.range})` : ""}${statusMarker} [${test.date}]\n`;
     });
 
     // Trends (only if requested and available)
-    if (params?.includeTrends !== false && trends && Array.isArray(trends) && trends.length > 0) {
+    if (
+      params?.includeTrends !== false &&
+      trends &&
+      Array.isArray(trends) &&
+      trends.length > 0
+    ) {
       result += "\nTrends:\n";
       trends.forEach((trend) => {
         if (trend.trend !== "insufficient-data") {
@@ -2737,7 +2774,8 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       "diagnostic-patterns": "diagnosis differential patterns signs",
     };
 
-    const baseQuery = patternQueries[patternType] || `medical patterns ${patternType}`;
+    const baseQuery =
+      patternQueries[patternType] || `medical patterns ${patternType}`;
 
     // Append focus area if provided
     if (focusArea) {
@@ -2997,14 +3035,17 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
     });
 
     // Remove duplicates and prioritize
-    const uniqueRecommendations = recommendations.reduce((acc: any[], rec: any) => {
-      const existing = acc.find((r: any) => r.specialty === rec.specialty);
-      if (!existing || rec.priority === "high") {
-        acc = acc.filter((r: any) => r.specialty !== rec.specialty);
-        acc.push(rec);
-      }
-      return acc;
-    }, [] as any[]);
+    const uniqueRecommendations = recommendations.reduce(
+      (acc: any[], rec: any) => {
+        const existing = acc.find((r: any) => r.specialty === rec.specialty);
+        if (!existing || rec.priority === "high") {
+          acc = acc.filter((r: any) => r.specialty !== rec.specialty);
+          acc.push(rec);
+        }
+        return acc;
+      },
+      [] as any[],
+    );
 
     return uniqueRecommendations.slice(0, 5); // Top 5 recommendations
   }
@@ -3216,7 +3257,9 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
 
     searchResults.forEach((result) => {
       const content = (result.excerpt || "").toLowerCase();
-      const words = content.split(/\s+/).filter((word: string) => word.length > 3);
+      const words = content
+        .split(/\s+/)
+        .filter((word: string) => word.length > 3);
 
       words.forEach((word: string) => {
         frequencies[word] = (frequencies[word] || 0) + 1;
@@ -3358,7 +3401,11 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
       mild: ["mild", "slight", "minor", "light"],
     };
 
-    const severityCounts: Record<string, number> = { severe: 0, moderate: 0, mild: 0 };
+    const severityCounts: Record<string, number> = {
+      severe: 0,
+      moderate: 0,
+      mild: 0,
+    };
 
     searchResults.forEach((result) => {
       const content = (result.excerpt || "").toLowerCase();
@@ -4156,9 +4203,7 @@ Data Points: ${analysis.dataPoints || "N/A"}`;
         const docCategory = doc.metadata?.category || "unknown";
         const docTypes: string[] = options.documentTypes!; // Non-null assertion since we check above
         console.log(`🔍 Category Filter Check:`);
-        console.log(
-          `   Requested categories: [${docTypes.join(", ")}]`,
-        );
+        console.log(`   Requested categories: [${docTypes.join(", ")}]`);
         console.log(`   Document category: "${docCategory}"`);
         console.log(`   Match: ${docTypes.includes(docCategory)}`);
 

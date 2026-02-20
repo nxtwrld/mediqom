@@ -1,14 +1,9 @@
 main.layout {
-  padding: 
-  var(--safe-area-top)
-  var(--safe-area-right) 
-  calc(var(--toolbar-height) + var(--gap)) 
-  var(--safe-area-left);
+  padding: var(--safe-area-top) var(--safe-area-right)
+    calc(var(--toolbar-height) + var(--gap)) var(--safe-area-left);
   height: 100vh;
   position: relative;
 }
-
-
 
 section.layout-content {
   margin-left: 0;
@@ -33,15 +28,11 @@ section.layout-viewer {
     margin-left: var(--viewer-width, 33vw);
   }
   main.layout {
-    padding: 
-    calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top)) 
-    var(--safe-area-right) 
-    0
-    var(--safe-area-left);
+    padding: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top))
+      var(--safe-area-right) 0 var(--safe-area-left);
     height: 100vh;
     position: relative;
   }
-  
 }
 
 main.layout.-viewer section.layout-viewer {

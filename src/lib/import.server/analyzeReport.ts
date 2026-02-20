@@ -126,8 +126,8 @@ let localizedSchemas = updateLanguage(JSON.parse(JSON.stringify(schemas)));
 (dental as ExtendedFunctionDefinition).parameters.properties.diagnosis =
   diagnosis;
 
-((bodyParts as any as ExtendedFunctionDefinition).items!.properties.identification
-  .enum as string[]) = [...tags];
+((bodyParts as any as ExtendedFunctionDefinition).items!.properties
+  .identification.enum as string[]) = [...tags];
 
 (report as ExtendedFunctionDefinition).parameters.properties.bodyParts =
   bodyParts;

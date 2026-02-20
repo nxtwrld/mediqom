@@ -25,11 +25,12 @@ try {
     mixpanel.init(PUBLIC_MIXPANEL_TOKEN, { debug: false });
   }
 } catch (e) {
-  console.warn('[Layout] Mixpanel initialization failed:', e);
+  console.warn("[Layout] Mixpanel initialization failed:", e);
 }
 
 // @ts-ignore - __CAPACITOR_BUILD__ is defined at build time by vite.config.mobile.ts
-const IS_CAPACITOR = typeof __CAPACITOR_BUILD__ !== 'undefined' && __CAPACITOR_BUILD__ === true;
+const IS_CAPACITOR =
+  typeof __CAPACITOR_BUILD__ !== "undefined" && __CAPACITOR_BUILD__ === true;
 
 // Use "ignore" for all builds: prevents Vercel from generating 308 redirect rules
 // that would intercept CORS OPTIONS preflights before hooks.server.ts can handle them.
@@ -52,8 +53,8 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
   // Web browser: use createBrowserClient (PKCE via @supabase/ssr)
   // SSR: use createServerClient with cookie handling
   const supabase = isMobileBuild
-    ? getClient()  // Use registry singleton — same instance as capacitor/auth.ts and getAccessToken()
-    : (isBrowser()
+    ? getClient() // Use registry singleton — same instance as capacitor/auth.ts and getAccessToken()
+    : isBrowser()
       ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
           global: {
             fetch,
@@ -65,7 +66,8 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
           },
           cookies: {
             get(key: string) {
-              return data?.cookies?.find((cookie) => cookie.name === key)?.value;
+              return data?.cookies?.find((cookie) => cookie.name === key)
+                ?.value;
             },
             set(key: string, value: string, options?: any) {
               // Server-side cookie setting not implemented in client context
@@ -74,7 +76,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
               // Server-side cookie removal not implemented in client context
             },
           },
-        }));
+        });
 
   /**
    * Use session and user data from server (via safeGetSession)
@@ -85,22 +87,26 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
 
   // For mobile/Capacitor builds, server data won't be available at all
   // Get session directly from Supabase client
-  if (isMobileBuild || (isBrowser() && !session && (isNativePlatform() || isCapacitorBuild()))) {
+  if (
+    isMobileBuild ||
+    (isBrowser() && !session && (isNativePlatform() || isCapacitorBuild()))
+  ) {
     try {
-      console.log('[Layout] Mobile: Getting session from Supabase...');
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log("[Layout] Mobile: Getting session from Supabase...");
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
       if (sessionError) {
-        console.error('[Layout] Mobile: Session error:', sessionError);
+        console.error("[Layout] Mobile: Session error:", sessionError);
       }
       if (sessionData?.session) {
         session = sessionData.session;
         user = sessionData.session.user;
-        console.log('[Layout] Mobile: Session found for user:', user?.email);
+        console.log("[Layout] Mobile: Session found for user:", user?.email);
       } else {
-        console.log('[Layout] Mobile: No session found');
+        console.log("[Layout] Mobile: No session found");
       }
     } catch (e) {
-      console.error('[Layout] Mobile: Failed to get session:', e);
+      console.error("[Layout] Mobile: Failed to get session:", e);
     }
   }
 
@@ -115,7 +121,7 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
         url.pathname.startsWith("/med") || url.pathname.startsWith("/account");
 
       if (needsUserData) {
-        const userData = await apiFetch('/v1/med/user', { fetch })
+        const userData = await apiFetch("/v1/med/user", { fetch })
           .then((r) => r.json())
           .catch(() => null);
 

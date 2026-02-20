@@ -6,7 +6,11 @@
   "loincCode": "aouros-serenity-therapeutic-comparison",
   "resultFormat": "observation",
   "fhirCategory": "survey",
-  "badges": ["therapeutic_observation", "session_comparison", "outcome_tracking"],
+  "badges": [
+    "therapeutic_observation",
+    "session_comparison",
+    "outcome_tracking"
+  ],
   "tags": [
     "mental health",
     "therapeutic",

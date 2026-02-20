@@ -1,4 +1,4 @@
-import { logger } from '$lib/logging/logger';
+import { logger } from "$lib/logging/logger";
 
 /**
  * Audio chunk metadata for overlap processing
@@ -76,7 +76,7 @@ export class TextSimilarity {
         matrix[i][j] = Math.min(
           matrix[i - 1][j] + 1, // deletion
           matrix[i][j - 1] + 1, // insertion
-          matrix[i - 1][j - 1] + cost // substitution
+          matrix[i - 1][j - 1] + cost, // substitution
         );
       }
     }
@@ -98,7 +98,10 @@ export class TextSimilarity {
   /**
    * Find longest common substring
    */
-  static longestCommonSubstring(a: string, b: string): {
+  static longestCommonSubstring(
+    a: string,
+    b: string,
+  ): {
     substring: string;
     startA: number;
     startB: number;
@@ -139,16 +142,20 @@ export class TextSimilarity {
    * Calculate word-based similarity for better semantic understanding
    */
   static wordSimilarity(a: string, b: string): number {
-    const wordsA = this.normalizeText(a).split(/\s+/).filter(w => w.length > 0);
-    const wordsB = this.normalizeText(b).split(/\s+/).filter(w => w.length > 0);
+    const wordsA = this.normalizeText(a)
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
+    const wordsB = this.normalizeText(b)
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
 
     if (wordsA.length === 0 && wordsB.length === 0) return 1;
     if (wordsA.length === 0 || wordsB.length === 0) return 0;
 
     const setA = new Set(wordsA);
     const setB = new Set(wordsB);
-    
-    const intersection = new Set([...setA].filter(word => setB.has(word)));
+
+    const intersection = new Set([...setA].filter((word) => setB.has(word)));
     const union = new Set([...setA, ...setB]);
 
     return intersection.size / union.size; // Jaccard similarity
@@ -160,8 +167,8 @@ export class TextSimilarity {
   static normalizeText(text: string): string {
     return text
       .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Remove punctuation
-      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/[^\w\s]/g, "") // Remove punctuation
+      .replace(/\s+/g, " ") // Normalize whitespace
       .trim();
   }
 
@@ -171,9 +178,9 @@ export class TextSimilarity {
   static combinedSimilarity(a: string, b: string): number {
     const levenshtein = this.similarityScore(a, b);
     const wordSim = this.wordSimilarity(a, b);
-    
+
     // Weight word similarity higher for medical conversations
-    return (levenshtein * 0.4) + (wordSim * 0.6);
+    return levenshtein * 0.4 + wordSim * 0.6;
   }
 }
 
@@ -188,10 +195,29 @@ export class OverlapProcessor {
   constructor() {
     // Common medical terms that should be preserved during merging
     this.medicalTerms = new Set([
-      'symptom', 'diagnosis', 'treatment', 'medication', 'prescription',
-      'blood', 'pressure', 'temperature', 'heart', 'rate', 'pain',
-      'infection', 'allergy', 'chronic', 'acute', 'patient', 'doctor',
-      'nurse', 'hospital', 'clinic', 'emergency', 'surgery', 'therapy'
+      "symptom",
+      "diagnosis",
+      "treatment",
+      "medication",
+      "prescription",
+      "blood",
+      "pressure",
+      "temperature",
+      "heart",
+      "rate",
+      "pain",
+      "infection",
+      "allergy",
+      "chronic",
+      "acute",
+      "patient",
+      "doctor",
+      "nurse",
+      "hospital",
+      "clinic",
+      "emergency",
+      "surgery",
+      "therapy",
     ]);
   }
 
@@ -211,12 +237,13 @@ export class OverlapProcessor {
       }
     }
 
-    logger.audio.debug('Overlap detection completed', {
+    logger.audio.debug("Overlap detection completed", {
       totalSegments: segments.length,
       overlapsFound: overlaps.length,
-      avgSimilarity: overlaps.length > 0 
-        ? overlaps.reduce((sum, o) => sum + o.similarity, 0) / overlaps.length 
-        : 0,
+      avgSimilarity:
+        overlaps.length > 0
+          ? overlaps.reduce((sum, o) => sum + o.similarity, 0) / overlaps.length
+          : 0,
     });
 
     return overlaps;
@@ -227,7 +254,7 @@ export class OverlapProcessor {
    */
   private findOverlapBetweenSegments(
     segment1: TranscriptionSegment,
-    segment2: TranscriptionSegment
+    segment2: TranscriptionSegment,
   ): OverlapDetection | null {
     const text1 = segment1.text.trim();
     const text2 = segment2.text.trim();
@@ -237,15 +264,21 @@ export class OverlapProcessor {
     // Calculate various similarity metrics
     const similarity = TextSimilarity.combinedSimilarity(text1, text2);
     const lcs = TextSimilarity.longestCommonSubstring(text1, text2);
-    
+
     // Check if similarity meets threshold
     if (similarity < this.overlapThreshold) return null;
 
     // Calculate confidence based on multiple factors
-    const confidence = this.calculateOverlapConfidence(segment1, segment2, similarity, lcs);
+    const confidence = this.calculateOverlapConfidence(
+      segment1,
+      segment2,
+      similarity,
+      lcs,
+    );
 
     // Determine merge recommendation
-    const mergeRecommended = similarity >= this.mergeThreshold && confidence > 0.7;
+    const mergeRecommended =
+      similarity >= this.mergeThreshold && confidence > 0.7;
 
     return {
       segments: [segment1, segment2],
@@ -264,30 +297,39 @@ export class OverlapProcessor {
     segment1: TranscriptionSegment,
     segment2: TranscriptionSegment,
     similarity: number,
-    lcs: ReturnType<typeof TextSimilarity.longestCommonSubstring>
+    lcs: ReturnType<typeof TextSimilarity.longestCommonSubstring>,
   ): number {
     let confidence = similarity;
 
     // Boost confidence for longer common substrings
-    const lcsRatio = lcs.length / Math.min(segment1.text.length, segment2.text.length);
+    const lcsRatio =
+      lcs.length / Math.min(segment1.text.length, segment2.text.length);
     confidence += lcsRatio * 0.2;
 
     // Boost confidence if segments are close in time
     const timeDiff = Math.abs(segment1.timestamp - segment2.timestamp);
-    if (timeDiff < 5000) { // Within 5 seconds
+    if (timeDiff < 5000) {
+      // Within 5 seconds
       confidence += 0.1;
     }
 
     // Boost confidence if both segments have high transcription confidence
-    const avgTranscriptionConfidence = (segment1.confidence + segment2.confidence) / 2;
+    const avgTranscriptionConfidence =
+      (segment1.confidence + segment2.confidence) / 2;
     confidence += (avgTranscriptionConfidence - 0.5) * 0.2;
 
     // Boost confidence for medical terms
-    const medicalTermBoost = this.calculateMedicalTermBoost(segment1.text, segment2.text);
+    const medicalTermBoost = this.calculateMedicalTermBoost(
+      segment1.text,
+      segment2.text,
+    );
     confidence += medicalTermBoost;
 
     // Penalize if one segment was timeout-forced (may be unreliable)
-    if (segment1.chunkMetadata.isTimeoutForced || segment2.chunkMetadata.isTimeoutForced) {
+    if (
+      segment1.chunkMetadata.isTimeoutForced ||
+      segment2.chunkMetadata.isTimeoutForced
+    ) {
       confidence -= 0.1;
     }
 
@@ -301,10 +343,12 @@ export class OverlapProcessor {
     const words1 = TextSimilarity.normalizeText(text1).split(/\s+/);
     const words2 = TextSimilarity.normalizeText(text2).split(/\s+/);
 
-    const medicalWords1 = words1.filter(word => this.medicalTerms.has(word));
-    const medicalWords2 = words2.filter(word => this.medicalTerms.has(word));
+    const medicalWords1 = words1.filter((word) => this.medicalTerms.has(word));
+    const medicalWords2 = words2.filter((word) => this.medicalTerms.has(word));
 
-    const commonMedicalWords = medicalWords1.filter(word => medicalWords2.includes(word));
+    const commonMedicalWords = medicalWords1.filter((word) =>
+      medicalWords2.includes(word),
+    );
 
     if (commonMedicalWords.length === 0) return 0;
 
@@ -326,9 +370,11 @@ export class OverlapProcessor {
       if (processedIndices.has(i)) continue;
 
       const currentSegment = segments[i];
-      const applicableOverlaps = overlaps.filter(overlap => 
-        (overlap.segments[0] === currentSegment || overlap.segments[1] === currentSegment) &&
-        overlap.mergeRecommended
+      const applicableOverlaps = overlaps.filter(
+        (overlap) =>
+          (overlap.segments[0] === currentSegment ||
+            overlap.segments[1] === currentSegment) &&
+          overlap.mergeRecommended,
       );
 
       if (applicableOverlaps.length === 0) {
@@ -355,15 +401,20 @@ export class OverlapProcessor {
         mergedSegments.push(merged);
 
         // Mark all involved segments as processed
-        indicesToProcess.forEach(idx => processedIndices.add(idx));
+        indicesToProcess.forEach((idx) => processedIndices.add(idx));
         mergedCount++;
         duplicatesRemoved += segmentsToMerge.size - 1;
       }
     }
 
     // Calculate final text and statistics
-    const finalText = mergedSegments.map(segment => segment.text).join(' ').trim();
-    const avgConfidence = mergedSegments.reduce((sum, s) => sum + s.confidence, 0) / mergedSegments.length;
+    const finalText = mergedSegments
+      .map((segment) => segment.text)
+      .join(" ")
+      .trim();
+    const avgConfidence =
+      mergedSegments.reduce((sum, s) => sum + s.confidence, 0) /
+      mergedSegments.length;
 
     const result: MergedTranscription = {
       text: finalText,
@@ -378,7 +429,7 @@ export class OverlapProcessor {
       },
     };
 
-    logger.audio.info('Transcription merge completed', {
+    logger.audio.info("Transcription merge completed", {
       originalSegments: segments.length,
       finalSegments: mergedSegments.length,
       overlapsDetected: overlaps.length,
@@ -401,23 +452,27 @@ export class OverlapProcessor {
     segments.sort((a, b) => a.timestamp - b.timestamp);
 
     // Use the segment with highest confidence as base
-    const baseSegment = segments.reduce((max, segment) => 
-      segment.confidence > max.confidence ? segment : max
+    const baseSegment = segments.reduce((max, segment) =>
+      segment.confidence > max.confidence ? segment : max,
     );
 
     // Intelligently merge text content
-    const mergedText = this.mergeTextContent(segments.map(s => s.text));
-    
+    const mergedText = this.mergeTextContent(segments.map((s) => s.text));
+
     // Calculate weighted confidence
     const totalLength = segments.reduce((sum, s) => sum + s.text.length, 0);
-    const weightedConfidence = segments.reduce((sum, s) => 
-      sum + (s.confidence * s.text.length / totalLength), 0
+    const weightedConfidence = segments.reduce(
+      (sum, s) => sum + (s.confidence * s.text.length) / totalLength,
+      0,
     );
 
     return {
       text: mergedText,
-      confidence: Math.min(weightedConfidence, Math.max(...segments.map(s => s.confidence))),
-      timestamp: Math.min(...segments.map(s => s.timestamp)),
+      confidence: Math.min(
+        weightedConfidence,
+        Math.max(...segments.map((s) => s.confidence)),
+      ),
+      timestamp: Math.min(...segments.map((s) => s.timestamp)),
       chunkMetadata: baseSegment.chunkMetadata,
       processed: true,
     };
@@ -430,8 +485,8 @@ export class OverlapProcessor {
     if (texts.length === 1) return texts[0];
 
     // Find the longest text as base
-    let baseText = texts.reduce((longest, current) => 
-      current.length > longest.length ? current : longest
+    let baseText = texts.reduce((longest, current) =>
+      current.length > longest.length ? current : longest,
     );
 
     // For each other text, see if it adds meaningful content
@@ -439,38 +494,38 @@ export class OverlapProcessor {
       if (text === baseText) continue;
 
       const similarity = TextSimilarity.combinedSimilarity(baseText, text);
-      
+
       if (similarity < 0.8) {
         // Texts are different enough to potentially combine
         const lcs = TextSimilarity.longestCommonSubstring(baseText, text);
-        
+
         if (lcs.length > Math.min(baseText.length, text.length) * 0.3) {
           // Significant overlap - merge intelligently
           baseText = this.mergeOverlappingTexts(baseText, text, lcs);
         } else {
           // No significant overlap - concatenate with space
-          baseText += ' ' + text;
+          baseText += " " + text;
         }
       }
     }
 
-    return baseText.trim().replace(/\s+/g, ' ');
+    return baseText.trim().replace(/\s+/g, " ");
   }
 
   /**
    * Merge two overlapping texts based on longest common substring
    */
   private mergeOverlappingTexts(
-    text1: string, 
-    text2: string, 
-    lcs: ReturnType<typeof TextSimilarity.longestCommonSubstring>
+    text1: string,
+    text2: string,
+    lcs: ReturnType<typeof TextSimilarity.longestCommonSubstring>,
   ): string {
     // Take the beginning of the first text
     const prefix = text1.substring(0, lcs.startA);
-    
+
     // Take the common part
     const commonPart = lcs.substring;
-    
+
     // Take the end of the longer text after the common part
     const suffix1 = text1.substring(lcs.startA + lcs.length);
     const suffix2 = text2.substring(lcs.startB + lcs.length);
@@ -483,8 +538,8 @@ export class OverlapProcessor {
    * Update medical terms dictionary (for medical consultation optimization)
    */
   updateMedicalTerms(terms: string[]): void {
-    terms.forEach(term => this.medicalTerms.add(term.toLowerCase()));
-    logger.audio.debug('Medical terms updated', {
+    terms.forEach((term) => this.medicalTerms.add(term.toLowerCase()));
+    logger.audio.debug("Medical terms updated", {
       newTerms: terms.length,
       totalTerms: this.medicalTerms.size,
     });

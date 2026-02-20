@@ -1,40 +1,35 @@
 {
-    "title": "Pain Level Assessment",
-    "description": "Please indicate your current level of pain.",
-    "category": "Mental Health Assessments",
-    "subCategory": "Pain Management",
-    "loincCode": "aouros-mental-health-vas",
-    "fhirCategory": "survey",
-    "resultFormat": "observation",
-    "tags": [
-      "pain",
-      "mental health",
-      "vas"
-    ],
-    "overallScore": {
-        "unit": "points",
-        "system": "http://unitsofmeasure.org",
-        "code": "points"
-    },
-    "questions": [
-      {
-        "id": "vasPainLevel",
-        "text": "Rate your level of pain on a scale from 0 to 10",
-        "responseType": "VAS",
-        "options": {
-          "min": 0,
-          "max": 10,
-          "step": 1,
-          "labels": {
-            "min": "No Pain",
-            "max": "Worst Imaginable Pain"
-          },
-          "imageConfig": {
-            "type": "single",
-            "singleImage": "path/to/pain/gradient/image.png"
-          }
+  "title": "Pain Level Assessment",
+  "description": "Please indicate your current level of pain.",
+  "category": "Mental Health Assessments",
+  "subCategory": "Pain Management",
+  "loincCode": "aouros-mental-health-vas",
+  "fhirCategory": "survey",
+  "resultFormat": "observation",
+  "tags": ["pain", "mental health", "vas"],
+  "overallScore": {
+    "unit": "points",
+    "system": "http://unitsofmeasure.org",
+    "code": "points"
+  },
+  "questions": [
+    {
+      "id": "vasPainLevel",
+      "text": "Rate your level of pain on a scale from 0 to 10",
+      "responseType": "VAS",
+      "options": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "labels": {
+          "min": "No Pain",
+          "max": "Worst Imaginable Pain"
+        },
+        "imageConfig": {
+          "type": "single",
+          "singleImage": "path/to/pain/gradient/image.png"
         }
       }
-    ]
-  }
-  
+    }
+  ]
+}

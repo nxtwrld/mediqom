@@ -39,7 +39,9 @@ export const GET: RequestHandler = async ({
     }
 
     const scansAvailable = subscription
-      ? (subscription.scans_base ?? 0) + (subscription.scans_credits ?? 0) - (subscription.scans_used ?? 0)
+      ? (subscription.scans_base ?? 0) +
+        (subscription.scans_credits ?? 0) -
+        (subscription.scans_used ?? 0)
       : 10;
 
     (profile as any).subscriptionStats = {

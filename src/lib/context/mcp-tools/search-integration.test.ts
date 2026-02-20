@@ -239,9 +239,12 @@ describe("Search Documents Integration Tests", () => {
 
   describe("MCP Tools Integration", () => {
     it("should integrate with medicalExpertTools.searchDocuments", async () => {
-      const result = await medicalExpertTools.searchDocuments({
-        terms: ["blood", "glucose"],
-      }, "test-profile");
+      const result = await medicalExpertTools.searchDocuments(
+        {
+          terms: ["blood", "glucose"],
+        },
+        "test-profile",
+      );
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
@@ -254,9 +257,12 @@ describe("Search Documents Integration Tests", () => {
         new Error("Database error"),
       );
 
-      const result = await medicalExpertTools.searchDocuments({
-        terms: ["blood"],
-      }, "test-profile");
+      const result = await medicalExpertTools.searchDocuments(
+        {
+          terms: ["blood"],
+        },
+        "test-profile",
+      );
 
       // Should handle error gracefully
       expect(result).toBeDefined();
@@ -533,7 +539,8 @@ describe("Search Documents Integration Tests", () => {
         // Should not reach here
         expect(true).toBe(false);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         expect(errorMessage).toContain("Profile not found");
       }
     });

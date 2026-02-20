@@ -205,9 +205,7 @@ async function processAIRequest(
     if (finalTools && finalTools.length > 0) {
       // Get document IDs already in context to avoid duplicate tool requests
       const documentsInContext: string[] = pageContext?.documentsContent
-        ? pageContext.documentsContent.map(
-            ([docId]: [string, any]) => docId,
-          )
+        ? pageContext.documentsContent.map(([docId]: [string, any]) => docId)
         : [];
 
       content.push({
@@ -215,7 +213,10 @@ async function processAIRequest(
         text: formatAvailableTools(finalTools, documentsInContext),
       });
       console.log("[MCP Debug] Tool instructions added to content");
-      console.log("[MCP Debug] Documents already in context:", documentsInContext);
+      console.log(
+        "[MCP Debug] Documents already in context:",
+        documentsInContext,
+      );
     }
 
     // Add conversation history

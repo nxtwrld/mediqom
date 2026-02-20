@@ -166,7 +166,7 @@ export class SSEClient extends EventEmitter {
     const chunkId = `chunk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const sequenceNumber = ++this.sequenceCounter;
     const timestamp = Date.now();
-    
+
     console.log("📡 TRANSCRIBE SUBMIT:", {
       chunkId,
       sequenceNumber,
@@ -203,7 +203,7 @@ export class SSEClient extends EventEmitter {
           text: result.transcription?.text?.substring(0, 50) || "no text",
           confidence: result.transcription?.confidence,
         });
-        
+
         // Emit transcript event for the unified store to handle
         this.emit("partial_transcript", {
           id: chunkId,
@@ -214,7 +214,7 @@ export class SSEClient extends EventEmitter {
           sequenceNumber: result.sequenceNumber,
           sessionId: result.sessionId,
         });
-        
+
         return true;
       } else {
         console.error("❌ TRANSCRIBE FAILED:", chunkId, response.status);

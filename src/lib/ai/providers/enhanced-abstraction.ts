@@ -183,7 +183,8 @@ export class EnhancedAIProvider {
       }
 
       const executionTime = Date.now() - startTime;
-      const tokensUsed = (schema.description && tokenUsage[schema.description]) || 0;
+      const tokensUsed =
+        (schema.description && tokenUsage[schema.description]) || 0;
       const cost = modelConfig.calculateCost(
         provider,
         modelInfo.model_id.replace("gpt-4o-2024-08-06", "gpt4"),

@@ -35,31 +35,52 @@ export interface ValidationIssue {
 }
 
 // Validation helper functions (stub implementations)
-function validateRecommendationDiagnosisAlign(recommendationsData: any, diagnosisData: any): ValidationResult {
+function validateRecommendationDiagnosisAlign(
+  recommendationsData: any,
+  diagnosisData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateRecommendationBodyParts(recommendationsData: any, bodyPartsData: any): ValidationResult {
+function validateRecommendationBodyParts(
+  recommendationsData: any,
+  bodyPartsData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateSpecimenBodyPartConsistency(specimensData: any, bodyPartsData: any): ValidationResult {
+function validateSpecimenBodyPartConsistency(
+  specimensData: any,
+  bodyPartsData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateProvisionalDiagnosis(provisionalData: any, finalData: any): ValidationResult {
+function validateProvisionalDiagnosis(
+  provisionalData: any,
+  finalData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateMicroscopicDiagnosisAlign(microscopicData: any, diagnosisData: any): ValidationResult {
+function validateMicroscopicDiagnosisAlign(
+  microscopicData: any,
+  diagnosisData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateECGVitalCorrelation(ecgData: any, vitalData: any): ValidationResult {
+function validateECGVitalCorrelation(
+  ecgData: any,
+  vitalData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
-function validateECGDiagnosisAlign(ecgData: any, diagnosisData: any): ValidationResult {
+function validateECGDiagnosisAlign(
+  ecgData: any,
+  diagnosisData: any,
+): ValidationResult {
   return { isValid: true, confidence: 1, issues: [], suggestions: [] };
 }
 
@@ -69,7 +90,7 @@ function validateECGDiagnosisAlign(ecgData: any, diagnosisData: any): Validation
  */
 function validateAnesthesiaMonitoringCompleteness(
   anesthesiaData: any,
-  signalsData: any
+  signalsData: any,
 ): ValidationResult {
   // Placeholder implementation
   return {
@@ -317,7 +338,8 @@ export class SchemaDependencyAnalyzer {
           const result = rule.validate(sourceData, targetData);
           schemaResults.push(result);
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           schemaResults.push({
             isValid: false,
             confidence: 0,

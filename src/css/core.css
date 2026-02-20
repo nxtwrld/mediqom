@@ -36,7 +36,7 @@
   --color-gray-500-alpha: #d0d1d77c;
   --color-gray-400-alpha: #e0e0e37c;
   --color-gray-300-alpha: #e6e7ea7c;
-  --color-white: #F9FAFB;
+  --color-white: #f9fafb;
 
   --color-background: var(--color-gray-300);
   --color-border: var(--color-white);
@@ -103,15 +103,15 @@
   --safe-area-left: env(safe-area-inset-left, 0px);
 
   /* Spacing - UI Padding (consistent scale) */
-  --ui-pad-small: 0.5rem;      /* 8px */
-  --ui-pad-medium: 1rem;       /* 16px */
-  --ui-pad-large: 1.5rem;      /* 24px */
-  --ui-pad-xlarge: 2rem;       /* 32px */
+  --ui-pad-small: 0.5rem; /* 8px */
+  --ui-pad-medium: 1rem; /* 16px */
+  --ui-pad-large: 1.5rem; /* 24px */
+  --ui-pad-xlarge: 2rem; /* 32px */
 
   /* Border Radius - UI */
-  --ui-radius-small: 0.25rem;  /* 4px */
-  --ui-radius-medium: 0.5rem;  /* 8px */
-  --ui-radius-large: 1rem;     /* 16px */
+  --ui-radius-small: 0.25rem; /* 4px */
+  --ui-radius-medium: 0.5rem; /* 8px */
+  --ui-radius-large: 1rem; /* 16px */
 
   /* Surface Colors */
   --color-surface: var(--color-white);

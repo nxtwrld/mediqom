@@ -1,5 +1,11 @@
 import { readAsArrayBuffer, readAsText, readAsBase64 } from "./reader";
-import { processPDF, CODES as PDF_CODES, loadPdfDocument, renderPDFToBase64Images, makeThumb } from "./pdf";
+import {
+  processPDF,
+  CODES as PDF_CODES,
+  loadPdfDocument,
+  renderPDFToBase64Images,
+  makeThumb,
+} from "./pdf";
 import { processImages } from "./image";
 import type {
   Assessment,
@@ -213,11 +219,17 @@ export async function createTasks(files: File[]): Promise<Task[]> {
         // checkPassword already prompts user if PDF is encrypted
         let password = await checkPassword(data, file.name);
         if (!(password instanceof Error)) {
-          console.log("Password obtained for PDF:", file.name, password ? "(protected)" : "(unprotected)");
+          console.log(
+            "Password obtained for PDF:",
+            file.name,
+            password ? "(protected)" : "(unprotected)",
+          );
 
           try {
             // Pre-process PDF to base64 images for SSE compatibility
-            console.log(`📄 Pre-processing PDF: ${file.name} - Converting to base64 images`);
+            console.log(
+              `📄 Pre-processing PDF: ${file.name} - Converting to base64 images`,
+            );
 
             const options: { data: ArrayBuffer; password?: string } = {
               data: data.slice(0),
@@ -235,7 +247,9 @@ export async function createTasks(files: File[]): Promise<Task[]> {
             // Generate thumbnail from first page
             const thumbnail = await makeThumb(await pdfDoc.getPage(1));
 
-            console.log(`✅ PDF pre-processing completed: ${file.name} - Extracted ${base64Images.length} pages as base64 images`);
+            console.log(
+              `✅ PDF pre-processing completed: ${file.name} - Extracted ${base64Images.length} pages as base64 images`,
+            );
 
             // For password-protected PDFs, create an unencrypted image-based clone
             // so the finalizer can split pages without dealing with encryption
@@ -244,13 +258,19 @@ export async function createTasks(files: File[]): Promise<Task[]> {
             if (password) {
               try {
                 const imageBuffers = base64Images.map((dataUrl) =>
-                  base64ToArrayBuffer(dataUrl.split(",")[1])
+                  base64ToArrayBuffer(dataUrl.split(",")[1]),
                 );
-                const cleanPdfBuffer = await createPdfFromImageBuffers(imageBuffers);
-                finalFile = new File([cleanPdfBuffer], file.name, { type: "application/pdf" });
+                const cleanPdfBuffer =
+                  await createPdfFromImageBuffers(imageBuffers);
+                finalFile = new File([cleanPdfBuffer], file.name, {
+                  type: "application/pdf",
+                });
                 finalData = cleanPdfBuffer;
               } catch (decryptCloneError) {
-                console.warn("Failed to create decrypted PDF clone, using original:", decryptCloneError);
+                console.warn(
+                  "Failed to create decrypted PDF clone, using original:",
+                  decryptCloneError,
+                );
               }
             }
 
@@ -266,7 +286,10 @@ export async function createTasks(files: File[]): Promise<Task[]> {
               files: [finalFile],
             });
           } catch (error) {
-            console.error(`❌ PDF pre-processing failed for ${file.name}:`, error);
+            console.error(
+              `❌ PDF pre-processing failed for ${file.name}:`,
+              error,
+            );
             throw new Error(
               `PDF pre-processing failed for ${file.name}: ${(error as Error).message}`,
             );
@@ -414,13 +437,17 @@ async function processMultipageAssessmentToDocumnets(
           break;
         case "images":
           // merge images into a single pdf
-          const imageBuffers = pages.map((p) => p.image).filter((img): img is string => img !== undefined);
+          const imageBuffers = pages
+            .map((p) => p.image)
+            .filter((img): img is string => img !== undefined);
           attachment = {
             path: "", // Will be set by addDocument
             url: "", // Will be set by addDocument
             thumbnail: pages[0].thumbnail,
             type: "application/pdf",
-            file: await toBase64(await createPdfFromImageBuffers(imageBuffers as any)),
+            file: await toBase64(
+              await createPdfFromImageBuffers(imageBuffers as any),
+            ),
           };
           break;
         case "application/dicom":

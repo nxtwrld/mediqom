@@ -27,11 +27,13 @@ Current transcription challenges:
 ### Existing Architecture
 
 **AudioManager** (`src/lib/audio/AudioManager.ts`):
+
 - Creates 10-second optimized chunks with 5-second overlap
 - `createOverlappingChunk()` method (lines 275-328) already implemented
 - Overlap currently NOT used for transcription context
 
 **TranscriptionProviderAbstraction** (`src/lib/ai/providers/transcription-abstraction.ts`):
+
 - Centralized API for all transcription operations
 - Supports multiple providers (OpenAI, Azure, Google)
 - Model configuration via `config/audio-transcription.json`
@@ -43,21 +45,25 @@ Current transcription challenges:
 ### Whisper API Capabilities
 
 **Prompt Parameter** (224 tokens ~800 chars):
+
 - Accepts previous transcription text to maintain continuity
 - Improves accuracy across chunk boundaries
 - Helps model understand conversational context
 
 **Diarization Models**:
+
 - `gpt-4o-mini-transcribe` - High quality, supports prompts, NO diarization
 - `gpt-4o-transcribe-diarize` - Speaker identification, NO prompt support
 
 **Response Formats**:
+
 - `text` - Plain text transcription
 - `json` - Basic JSON with text + metadata
 - `verbose_json` - Segments + timestamps
 - `diarized_json` - Speaker-labeled segments (diarization model only)
 
 **Trade-offs**:
+
 - Context prompts OR diarization, not both simultaneously
 - Diarization requires model switch and different response format
 
@@ -79,18 +85,24 @@ export class TranscriptionProviderAbstraction {
   // Existing properties...
 
   // NEW: Context management per session
-  private contextBuffers: Map<string, {
-    transcriptions: string[];
-    maxContextChars: number;
-    enableDiarization: boolean;
-    lastProcessedTimestamp: number;
-  }> = new Map();
+  private contextBuffers: Map<
+    string,
+    {
+      transcriptions: string[];
+      maxContextChars: number;
+      enableDiarization: boolean;
+      lastProcessedTimestamp: number;
+    }
+  > = new Map();
 
   // NEW: Overlap detection cache
-  private overlapCache: Map<string, {
-    lastChunkText: string;
-    overlapStartIndex: number;
-  }> = new Map();
+  private overlapCache: Map<
+    string,
+    {
+      lastChunkText: string;
+      overlapStartIndex: number;
+    }
+  > = new Map();
 }
 ```
 
@@ -104,15 +116,35 @@ export class TranscriptionProviderAbstraction {
     "openai": {
       "models": {
         "whisper": {
-          "name": "gpt-4o-mini-transcribe",
+          "name": "gpt-4o-mini-transcribe"
           // ... existing config
         },
         "whisper-diarize": {
           "name": "gpt-4o-transcribe-diarize",
           "description": "OpenAI GPT-4o Transcribe with speaker diarization",
-          "supportedFormats": ["mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"],
+          "supportedFormats": [
+            "mp3",
+            "mp4",
+            "mpeg",
+            "mpga",
+            "m4a",
+            "wav",
+            "webm"
+          ],
           "maxFileSize": "25MB",
-          "languages": ["en", "cs", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zh"],
+          "languages": [
+            "en",
+            "cs",
+            "de",
+            "es",
+            "fr",
+            "it",
+            "ja",
+            "ko",
+            "pt",
+            "ru",
+            "zh"
+          ],
           "responseFormats": ["diarized_json"],
           "temperature": 0,
           "supportsDiarization": true
@@ -143,7 +175,7 @@ export interface TranscriptionContextOptions {
 }
 
 export interface DiarizedSegment {
-  speaker: string;  // "A", "B", "C", etc.
+  speaker: string; // "A", "B", "C", etc.
   text: string;
   start: number;
   end: number;
@@ -220,6 +252,7 @@ private findLongestOverlap(str1: string, str2: string): {
 **Goal**: Validate context and diarization features in isolation
 
 **Features**:
+
 1. Toggle between context-enabled and diarization modes
 2. Visual display of context prompts being used
 3. De-duplication metrics (chars removed)
@@ -227,19 +260,21 @@ private findLongestOverlap(str1: string, str2: string): {
 5. Side-by-side comparison mode
 
 **Success Criteria**:
+
 - Context prompts reduce hallucinations and improve continuity
 - Overlap detection removes duplicate text accurately
 - Diarization correctly identifies speakers in multi-person audio
 - No regression in single-speaker transcription quality
 
 **Code Changes**:
+
 ```typescript
-let transcriptionMode = $state<'context' | 'diarization'>('context');
+let transcriptionMode = $state<"context" | "diarization">("context");
 let contextMetrics = $state<{
   contextChars: number;
   deduplicatedChars: number;
   usedPrompt: string;
-}>({ contextChars: 0, deduplicatedChars: 0, usedPrompt: '' });
+}>({ contextChars: 0, deduplicatedChars: 0, usedPrompt: "" });
 
 // Initialize context when recording starts
 async function startRecording() {
@@ -247,9 +282,9 @@ async function startRecording() {
 
   transcriptionProvider.initializeContext({
     sessionId,
-    enableContext: transcriptionMode === 'context',
-    enableDiarization: transcriptionMode === 'diarization',
-    maxContextChars: 800
+    enableContext: transcriptionMode === "context",
+    enableDiarization: transcriptionMode === "diarization",
+    maxContextChars: 800,
   });
 
   // ... existing recording logic
@@ -258,7 +293,7 @@ async function startRecording() {
 // Use new transcribeWithContext method
 async function transcribeChunk(audioData: Float32Array, sessionId: string) {
   const mp3Blob = await convertFloat32ToMp3(audioData, 16000);
-  const audioFile = new File([mp3Blob], 'chunk.mp3', { type: 'audio/mp3' });
+  const audioFile = new File([mp3Blob], "chunk.mp3", { type: "audio/mp3" });
 
   const result = await transcriptionProvider.transcribeWithContext(
     sessionId,
@@ -266,8 +301,8 @@ async function transcribeChunk(audioData: Float32Array, sessionId: string) {
     {
       language,
       translate: enableTranslation,
-      prompt: customPrompt.trim() || undefined
-    }
+      prompt: customPrompt.trim() || undefined,
+    },
   );
 
   // Display context metrics
@@ -275,7 +310,7 @@ async function transcribeChunk(audioData: Float32Array, sessionId: string) {
     contextMetrics = {
       contextChars: result.context.contextChars,
       deduplicatedChars: result.context.deduplicatedChars,
-      usedPrompt: result.context.usedPrompt
+      usedPrompt: result.context.usedPrompt,
     };
   }
 
@@ -287,6 +322,7 @@ async function transcribeChunk(audioData: Float32Array, sessionId: string) {
 ```
 
 **Testing Checklist**:
+
 - [ ] Context mode reduces split sentences across chunks
 - [ ] Overlap de-duplication removes duplicate phrases
 - [ ] Diarization mode correctly labels speakers A/B/C
@@ -301,6 +337,7 @@ async function transcribeChunk(audioData: Float32Array, sessionId: string) {
 **Implementation**: `/src/lib/session/stores/unified-session-store.ts`
 
 **Features**:
+
 1. Enable diarization for doctor-patient conversations
 2. Speaker labels ("Doctor", "Patient") based on diarization
 3. Context continuity across entire consultation
@@ -309,6 +346,7 @@ async function transcribeChunk(audioData: Float32Array, sessionId: string) {
 **Integration Points**:
 
 **`startRecordingSession()` method** (lines 327-453):
+
 ```typescript
 async startRecordingSession(options = {}): Promise<boolean> {
   const { language, models, useRealtime, translate } = options;
@@ -330,6 +368,7 @@ async startRecordingSession(options = {}): Promise<boolean> {
 ```
 
 **`sendAudioChunk()` method** (lines 914-989):
+
 ```typescript
 async sendAudioChunk(audioData: Float32Array): Promise<boolean> {
   const currentState = get(unifiedSessionStore);
@@ -382,6 +421,7 @@ async sendAudioChunk(audioData: Float32Array): Promise<boolean> {
 ```
 
 **`resetSession()` method** (lines 999-1005):
+
 ```typescript
 async resetSession(): Promise<void> {
   const sessionId = get(unifiedSessionStore).audio.sessionId;
@@ -399,12 +439,14 @@ async resetSession(): Promise<void> {
 ```
 
 **Success Criteria**:
+
 - Medical consultations show "Doctor" and "Patient" labels
 - Context maintains continuity across entire session
 - No performance degradation with diarization enabled
 - Transcript UI displays speaker attribution clearly
 
 **Testing Checklist**:
+
 - [ ] Diarization works in real-world medical consultations
 - [ ] Speaker labels are accurate and consistent
 - [ ] Context reduces hallucinations in long sessions
@@ -418,6 +460,7 @@ async resetSession(): Promise<void> {
 **Implementation**: `/src/components/serenity/SerenityAudioInput.svelte`
 
 **Features**:
+
 1. Context enabled, diarization DISABLED (single speaker assumed)
 2. Optimized for user dictation and form responses
 3. Lower latency without diarization overhead
@@ -425,6 +468,7 @@ async resetSession(): Promise<void> {
 **Integration Points**:
 
 **`handleAudioChunk()` method** (lines 91-99):
+
 ```typescript
 function handleAudioChunk(chunk: Float32Array, metadata: any) {
   audioChunks.push(chunk);
@@ -435,27 +479,28 @@ function handleAudioChunk(chunk: Float32Array, metadata: any) {
     transcriptionProvider.initializeContext({
       sessionId,
       enableContext: true,
-      enableDiarization: false,  // OFF for single-speaker form filling
-      maxContextChars: 800
+      enableDiarization: false, // OFF for single-speaker form filling
+      maxContextChars: 800,
     });
   }
 
-  console.log('📦 Received audio chunk:', {
+  console.log("📦 Received audio chunk:", {
     samples: chunk.length,
     sequenceNumber: metadata?.sequenceNumber,
-    totalChunks: audioChunks.length
+    totalChunks: audioChunks.length,
   });
 }
 ```
 
 **`stopRecording()` method** (lines 101-140):
+
 ```typescript
 async function stopRecording() {
   await audioManager.stop();
-  audioManager.off('audio-chunk', handleAudioChunk);
+  audioManager.off("audio-chunk", handleAudioChunk);
 
   if (audioChunks.length === 0) {
-    alert('No audio recorded. Please try again.');
+    alert("No audio recorded. Please try again.");
     isRecording = false;
     return;
   }
@@ -463,16 +508,18 @@ async function stopRecording() {
   try {
     const combined = float32Flatten(audioChunks);
     const mp3Blob = await convertFloat32ToMp3(combined, 16000);
-    const audioFile = new File([mp3Blob], 'recording.mp3', { type: 'audio/mp3' });
+    const audioFile = new File([mp3Blob], "recording.mp3", {
+      type: "audio/mp3",
+    });
 
     // NEW: Use transcribeWithContext for final transcription
     const result = await transcriptionProvider.transcribeWithContext(
       sessionId,
       audioFile,
       {
-        language: 'cs',  // Or user-selected language
-        translate: false
-      }
+        language: "cs", // Or user-selected language
+        translate: false,
+      },
     );
 
     // NEW: Clear context after transcription
@@ -484,8 +531,8 @@ async function stopRecording() {
 
     onAudioReady(audioFile);
   } catch (error) {
-    console.error('Failed to process recording:', error);
-    alert('Failed to process recording');
+    console.error("Failed to process recording:", error);
+    alert("Failed to process recording");
     isRecording = false;
     audioChunks = [];
   }
@@ -493,12 +540,14 @@ async function stopRecording() {
 ```
 
 **Success Criteria**:
+
 - Form-filling transcription maintains high accuracy
 - Context improves continuity without diarization overhead
 - Lower latency than diarization mode
 - Backward compatible with existing form workflows
 
 **Testing Checklist**:
+
 - [ ] Context mode works without diarization
 - [ ] Form responses transcribed accurately
 - [ ] No regression in existing form functionality
@@ -509,6 +558,7 @@ async function stopRecording() {
 ### Why Extend Instead of New Library?
 
 **Pros**:
+
 1. **Single Source of Truth**: All transcription logic in one place
 2. **Centralized Configuration**: Models and settings managed consistently
 3. **Provider Abstraction**: Context/diarization work with any provider (future Azure/Google support)
@@ -516,6 +566,7 @@ async function stopRecording() {
 5. **Easier Testing**: One library to test, not two
 
 **Cons**:
+
 1. Larger file size (acceptable - still under 1000 lines with additions)
 2. More complex class (mitigated by clear method separation)
 
@@ -524,6 +575,7 @@ async function stopRecording() {
 **Decision**: Support both modes, not simultaneously
 
 **Rationale**:
+
 - Whisper API limitation: prompts OR diarization, not both
 - Different use cases have different priorities:
   - **Medical consultations**: Need speaker labels (diarization ON)
@@ -537,12 +589,14 @@ async function stopRecording() {
 **Approach**: Longest Common Substring (LCS) with threshold
 
 **Rationale**:
+
 - 5-second audio overlap typically produces 15-50 word overlap in text
-- LCS finds exact duplicate phrases efficiently (O(n*m) time)
+- LCS finds exact duplicate phrases efficiently (O(n\*m) time)
 - Threshold prevents false positives from common words
 - Configurable threshold (default 0.7 = 70% match required)
 
 **Alternatives Considered**:
+
 - Levenshtein distance (too slow for real-time)
 - Simple string search (too brittle)
 - No de-duplication (wastes tokens and context space)
@@ -552,12 +606,14 @@ async function stopRecording() {
 **Approach**: Rolling window of last N characters
 
 **Rationale**:
+
 - 224 token limit = ~800 characters maximum
 - Keep most recent transcriptions for relevance
 - FIFO buffer: oldest dropped when limit exceeded
 - Per-session isolation prevents context bleed
 
 **Edge Cases**:
+
 - Empty context: Send no prompt (graceful degradation)
 - Context too short: Wait for minimum chars (default 100)
 - Session timeout: Auto-clear context after inactivity
@@ -571,6 +627,7 @@ async function stopRecording() {
 **Expected**: ~2-5 KB per active session
 
 **Mitigation**:
+
 - Auto-clear on session reset
 - Timeout-based garbage collection (future)
 - Max sessions limit (future)
@@ -581,6 +638,7 @@ async function stopRecording() {
 **Diarization Mode**: +200-500ms (model switch + speaker detection)
 
 **Mitigation**:
+
 - Async processing (no blocking)
 - Chunk-by-chunk streaming (user sees results incrementally)
 - Configurable timeouts
@@ -591,6 +649,7 @@ async function stopRecording() {
 **Diarization Model**: +30% cost (gpt-4o-transcribe-diarize vs gpt-4o-mini-transcribe)
 
 **Mitigation**:
+
 - Context only when beneficial (configurable)
 - Diarization only for multi-speaker scenarios
 - Model selection per use case
@@ -620,16 +679,19 @@ async function stopRecording() {
 ### Key Metrics to Track
 
 **Context Effectiveness**:
+
 - Average context chars used per chunk
 - De-duplication rate (chars removed / total chars)
 - Hallucination reduction (manual validation)
 
 **Diarization Accuracy**:
+
 - Speaker label consistency across chunks
 - Speaker switch detection rate
 - False positive speaker switches
 
 **Performance**:
+
 - Latency per transcription (with/without context/diarization)
 - Memory usage per session
 - API cost per session
@@ -642,25 +704,26 @@ async function stopRecording() {
 **Error Level**: API failures, context corruption
 
 **Example Logs**:
+
 ```typescript
 console.log("🎯 CONTEXT: Using prompt", {
   sessionId,
   contextChars: 750,
   deduplicatedChars: 45,
-  mode: 'diarization'
+  mode: "diarization",
 });
 
 console.log("🔄 OVERLAP: Removed duplicate", {
   sessionId,
   overlapLength: 45,
   threshold: 0.7,
-  confidence: 0.85
+  confidence: 0.85,
 });
 
 console.log("🎤 DIARIZATION: Detected speakers", {
   sessionId,
   speakerCount: 2,
-  segments: 5
+  segments: 5,
 });
 ```
 
@@ -669,16 +732,19 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 ### Unit Tests
 
 **Context Buffer Management**:
+
 - Test buffer overflow handling
 - Test FIFO behavior
 - Test per-session isolation
 
 **Overlap Detection**:
+
 - Test LCS algorithm with known inputs
 - Test threshold edge cases
 - Test empty/null string handling
 
 **Diarization Response Parsing**:
+
 - Test various speaker count scenarios
 - Test malformed response handling
 - Test speaker label mapping
@@ -686,17 +752,20 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 ### Integration Tests
 
 **Audio Test Page**:
+
 - Test context mode with fabricated audio
 - Test diarization mode with multi-speaker audio
 - Test mode switching mid-session
 - Test de-duplication metrics accuracy
 
 **Unified Session Store**:
+
 - Test medical consultation workflow
 - Test speaker attribution consistency
 - Test session reset clears context
 
 **Serenity Audio Input**:
+
 - Test form-filling scenario
 - Test single-speaker optimization
 - Test backward compatibility
@@ -704,12 +773,14 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 ### Manual Testing
 
 **Real-world Scenarios**:
+
 - Doctor-patient consultations (Czech language)
 - Multi-party medical discussions (3+ speakers)
 - Form dictation (single speaker)
 - Mixed language conversations (CS/EN)
 
 **Edge Cases**:
+
 - Very long sessions (30+ minutes)
 - Rapid speaker switching
 - Background noise and crosstalk
@@ -720,11 +791,13 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 ### Backward Compatibility
 
 **Existing Code**: No changes required
+
 - `transcribeAudio()` method unchanged
 - `transcribeAudioCompatible()` method unchanged
 - Existing configurations continue to work
 
 **Opt-in Enhancement**: New features require explicit initialization
+
 - Call `initializeContext()` to enable context/diarization
 - Use `transcribeWithContext()` for enhanced features
 - Use `clearContext()` for cleanup
@@ -794,11 +867,13 @@ console.log("🎤 DIARIZATION: Detected speakers", {
 This strategy provides a comprehensive, phased approach to enhancing transcription with context management and speaker diarization. By extending the existing `transcription-abstraction.ts` library, we maintain architectural consistency while adding powerful new capabilities.
 
 The three-phase rollout allows incremental validation:
+
 1. **Phase 1**: Context and diarization validation
 2. **Phase 2**: Production medical sessions with diarization
 3. **Phase 3**: Form-filling optimization without diarization
 
 Key benefits:
+
 - **Context Continuity**: 224-token prompts prevent split sentences
 - **Speaker Attribution**: Diarization for multi-party conversations
 - **De-duplication**: Remove overlap waste from 5-second audio overlap
@@ -806,6 +881,7 @@ Key benefits:
 - **Backward Compatible**: Existing code works unchanged
 
 Expected outcomes:
+
 - 60-80% reduction in hallucinations (Phase 1)
 - 95%+ speaker attribution accuracy (Phase 2)
 - Improved user experience across all transcription scenarios (Phase 3)
@@ -818,15 +894,19 @@ Expected outcomes:
 
 **Initial Implementation Issue**:
 The original `/v1/transcribe/live` endpoint was built using WebSocket with `WebSocketPair` API, which is:
+
 - **Cloudflare Workers specific** - not available in Node.js or Vercel
 - **Platform-dependent** - fails silently on incompatible platforms
 - **No error logging** - connections opened but transcripts never returned
 
 **Root Cause**:
+
 ```typescript
 // WebSocketPair is Cloudflare Workers API only
 if (!(globalThis as any).WebSocketPair) {
-  return new Response("WebSocket not supported on this platform", { status: 501 });
+  return new Response("WebSocket not supported on this platform", {
+    status: 501,
+  });
 }
 ```
 
@@ -835,6 +915,7 @@ This check would fail on Vercel (our deployment platform) and localhost Node.js 
 ### Solution: SSE + HTTP Hybrid Architecture
 
 **Design Rationale**:
+
 - ✅ **Platform-agnostic**: Works on Vercel, localhost, and any HTTP server
 - ✅ **Already in use**: Existing codebase uses SSE extensively (session management, document import)
 - ✅ **Simpler**: No complex WebSocket handshake or connection management
@@ -842,6 +923,7 @@ This check would fail on Vercel (our deployment platform) and localhost Node.js 
 - ✅ **Unidirectional streaming**: Perfect for server → client transcription results
 
 **Architecture**:
+
 1. **SSE Stream** (`/v1/transcribe/live-sse` GET): Server → Client transcription results
 2. **HTTP POST** (`/v1/transcribe/live-sse/audio` POST): Client → Server audio chunks
 3. **Session Correlation**: Unique session ID links SSE stream with audio submissions
@@ -851,6 +933,7 @@ This check would fail on Vercel (our deployment platform) and localhost Node.js 
 #### SSE Stream Endpoint (`/v1/transcribe/live-sse/+server.ts`)
 
 **Features**:
+
 - Session-based correlation with unique UUIDs
 - In-memory session management with `Map<sessionId, sessionState>`
 - Audio chunk accumulation (1-second windows at 16kHz)
@@ -858,20 +941,25 @@ This check would fail on Vercel (our deployment platform) and localhost Node.js 
 - Automatic session cleanup (10-minute timeout)
 
 **Session State**:
+
 ```typescript
-const sessions = new Map<string, {
-  controller: ReadableStreamDefaultController;  // SSE stream controller
-  audioChunks: Float32Array[];                  // Accumulating audio
-  processing: boolean;                          // Prevent concurrent processing
-  lang?: string;                                // Language preference
-  translate?: boolean;                          // Translation flag
-  prompt?: string;                              // Custom prompt
-  lastSeq: number;                              // Sequence number
-  createdAt: number;                            // Timestamp for cleanup
-}>();
+const sessions = new Map<
+  string,
+  {
+    controller: ReadableStreamDefaultController; // SSE stream controller
+    audioChunks: Float32Array[]; // Accumulating audio
+    processing: boolean; // Prevent concurrent processing
+    lang?: string; // Language preference
+    translate?: boolean; // Translation flag
+    prompt?: string; // Custom prompt
+    lastSeq: number; // Sequence number
+    createdAt: number; // Timestamp for cleanup
+  }
+>();
 ```
 
 **SSE Message Format**:
+
 ```typescript
 // Initial connection
 { type: "connected", sessionId: "uuid-here" }
@@ -887,6 +975,7 @@ const sessions = new Map<string, {
 ```
 
 **Processing Strategy**:
+
 - Accumulates Float32Array chunks until 16,000 samples (1 second at 16kHz)
 - Converts to WAV format (16-bit PCM with proper headers)
 - Uses existing `transcriptionProvider.transcribeAudioCompatible()` for consistency
@@ -895,12 +984,14 @@ const sessions = new Map<string, {
 #### Audio Ingestion Endpoint (`/v1/transcribe/live-sse/audio/+server.ts`)
 
 **Features**:
+
 - Validates `sessionId` exists in active sessions
 - Decodes base64 PCM audio (supports `f32` and `i16` formats)
 - Updates session language/translation preferences dynamically
 - Triggers processing when audio window is ready
 
 **Request Format**:
+
 ```typescript
 POST /v1/transcribe/live-sse/audio
 Content-Type: application/json
@@ -917,6 +1008,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -927,15 +1019,16 @@ Content-Type: application/json
 ### Client Implementation
 
 **Connection Flow**:
+
 ```typescript
 // 1. Connect to SSE stream
-liveEventSource = new EventSource('/v1/transcribe/live-sse');
+liveEventSource = new EventSource("/v1/transcribe/live-sse");
 
 // 2. Wait for connected message with sessionId
-liveEventSource.addEventListener('message', (event) => {
+liveEventSource.addEventListener("message", (event) => {
   const payload = JSON.parse(event.data);
-  if (payload.type === 'connected') {
-    liveSessionId = payload.sessionId;  // Save for audio POST
+  if (payload.type === "connected") {
+    liveSessionId = payload.sessionId; // Save for audio POST
   }
 });
 
@@ -943,20 +1036,20 @@ liveEventSource.addEventListener('message', (event) => {
 const payload = {
   sessionId: liveSessionId,
   pcm: encodeFloat32ToInt16Base64(audioData),
-  lang: 'cs',
-  translate: false
+  lang: "cs",
+  translate: false,
 };
 
-await fetch('/v1/transcribe/live-sse/audio', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(payload)
+await fetch("/v1/transcribe/live-sse/audio", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
 });
 
 // 4. Receive transcription results via SSE
-liveEventSource.addEventListener('message', (event) => {
+liveEventSource.addEventListener("message", (event) => {
   const result = JSON.parse(event.data);
-  if (result.type === 'partial' || result.type === 'final') {
+  if (result.type === "partial" || result.type === "final") {
     addTranscript(result.text, result.type);
   }
 });
@@ -966,11 +1059,12 @@ liveEventSource.close();
 ```
 
 **Graceful Fallback**:
+
 ```typescript
 try {
   await connectLiveSSE();
   if (!liveSessionId) {
-    throw new Error('Session not established');
+    throw new Error("Session not established");
   }
   // Send via SSE
 } catch (err) {
@@ -980,25 +1074,27 @@ try {
 ```
 
 **UI Updates**:
+
 - Transport dropdown: "Live (SSE + HTTP)"
 - Status indicator: "SSE connected" / "SSE will connect on start"
 - Log categories: "Live SSE"
 
 ### Advantages Over WebSocket
 
-| Feature | WebSocket | SSE + HTTP |
-|---------|-----------|------------|
-| **Platform Support** | Platform-specific (Cloudflare) | Universal (HTTP) |
-| **Localhost Dev** | ❌ Requires special setup | ✅ Works immediately |
-| **Vercel Deployment** | ❌ Not supported | ✅ Fully supported |
-| **Browser API** | `WebSocket` (manual reconnect) | `EventSource` (auto-reconnect) |
-| **Connection Setup** | Complex handshake | Simple GET request |
-| **Bidirectional** | ✅ Yes | ❌ Server→Client only |
-| **Message Order** | ✅ Guaranteed | ✅ Guaranteed |
-| **Existing Codebase** | ❌ New pattern | ✅ Already used |
+| Feature               | WebSocket                      | SSE + HTTP                     |
+| --------------------- | ------------------------------ | ------------------------------ |
+| **Platform Support**  | Platform-specific (Cloudflare) | Universal (HTTP)               |
+| **Localhost Dev**     | ❌ Requires special setup      | ✅ Works immediately           |
+| **Vercel Deployment** | ❌ Not supported               | ✅ Fully supported             |
+| **Browser API**       | `WebSocket` (manual reconnect) | `EventSource` (auto-reconnect) |
+| **Connection Setup**  | Complex handshake              | Simple GET request             |
+| **Bidirectional**     | ✅ Yes                         | ❌ Server→Client only          |
+| **Message Order**     | ✅ Guaranteed                  | ✅ Guaranteed                  |
+| **Existing Codebase** | ❌ New pattern                 | ✅ Already used                |
 
 **Why SSE is Sufficient**:
 Our use case is **server → client streaming** (transcription results), with **client → server** handled via simple HTTP POST.
+
 - Audio chunks sent via POST (no need for bidirectional)
 - Transcription results streamed via SSE (server → client)
 - Session correlation via UUID (no complex state management)
@@ -1006,6 +1102,7 @@ Our use case is **server → client streaming** (transcription results), with **
 ### Testing Checklist
 
 **SSE Stream Endpoint**:
+
 - [x] Session creation with unique UUID
 - [x] Audio chunk accumulation (1-second windows)
 - [x] Transcription processing triggers correctly
@@ -1014,6 +1111,7 @@ Our use case is **server → client streaming** (transcription results), with **
 - [x] Error handling and error messages
 
 **Audio Ingestion**:
+
 - [x] SessionId validation
 - [x] Base64 PCM decoding (f32 and i16)
 - [x] Dynamic language/prompt updates
@@ -1021,6 +1119,7 @@ Our use case is **server → client streaming** (transcription results), with **
 - [x] Error responses for invalid sessions
 
 **Client Integration**:
+
 - [x] EventSource connection
 - [x] Session ID capture from connected message
 - [x] Audio POST with session ID
@@ -1031,18 +1130,21 @@ Our use case is **server → client streaming** (transcription results), with **
 ### Performance Characteristics
 
 **Latency**:
+
 - **SSE Connection**: ~50-100ms initial setup
 - **Audio POST**: ~20-50ms per chunk
 - **Transcription**: 200-500ms (model-dependent)
 - **SSE Message**: ~10-20ms delivery
 
 **Scalability**:
+
 - Sessions stored in-memory (Map)
 - Automatic cleanup prevents memory leaks
 - No persistent connections (EventSource reconnects automatically)
 - Stateless audio POST (horizontal scaling friendly)
 
 **Resource Usage**:
+
 - ~2-5 KB per active session (audio buffers + metadata)
 - Cleanup runs every 60 seconds
 - Sessions auto-deleted after 10 minutes idle
@@ -1050,11 +1152,13 @@ Our use case is **server → client streaming** (transcription results), with **
 ### Production Deployment Notes
 
 **Vercel Configuration**:
+
 - No special configuration needed
 - SSE works out-of-the-box on Vercel serverless functions
 - HTTP POST compatible with all Vercel runtimes
 
 **Monitoring**:
+
 - Log SSE connection events
 - Track session creation/cleanup
 - Monitor transcription latency

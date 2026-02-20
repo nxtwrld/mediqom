@@ -11,6 +11,7 @@ $ARGUMENTS
 ## Schema Files by Category
 
 ### Core Schemas (shared properties spread into specialized schemas)
+
 - `core.patient.ts` - Patient identification and demographics
 - `core.performer.ts` - Healthcare provider information
 - `core.diagnosis.ts` - Diagnosis coding (ICD-10, SNOMED)
@@ -20,6 +21,7 @@ $ARGUMENTS
 - `core.recommendations.ts` - Clinical recommendations
 
 ### Specialized Medical Schemas
+
 - `admission.ts` - Hospital admission records
 - `allergies.ts` - Allergy documentation
 - `anesthesia.ts` - Anesthesia records
@@ -48,6 +50,7 @@ $ARGUMENTS
 - `tumor-characteristics.ts` - Oncology tumor data
 
 ### Detection & Extraction Schemas
+
 - `feature-detection.ts` - Document feature detection
 - `anomaly-detection.ts` - Medical anomaly detection
 - `bodyparts.extraction.ts` - Body part extraction
@@ -61,12 +64,14 @@ $ARGUMENTS
 - `import.assesments.ts` - Import assessment checks
 
 ### Session-Specific Schemas
+
 - `session.diagnosis.ts` - Session diagnosis extraction
 - `session.diagnosis.enhanced.ts` - Enhanced session diagnosis
 - `session.diagnosis.streamlined.ts` - Streamlined session diagnosis
 - `session.report.ts` - Session report generation
 
 ### Utility Schemas
+
 - `fhir.ts` - FHIR type definitions
 - `jcard.ts` / `jcard.reduced.ts` - Patient card format
 - `tags.ts` - Document tag definitions
@@ -74,6 +79,7 @@ $ARGUMENTS
 ## UI Component Mapping (`src/components/documents/Section*.svelte`)
 
 Each specialized schema maps to a display component (33 Section components):
+
 - `SectionAdmission.svelte` <-> `admission.ts`
 - `SectionAllergies.svelte` <-> `allergies.ts`
 - `SectionAssessment.svelte` <-> `assessment.ts`

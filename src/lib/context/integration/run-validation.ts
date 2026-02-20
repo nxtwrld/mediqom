@@ -59,9 +59,7 @@ export async function runFullValidation(profileId: string) {
       },
     };
 
-    const validation = await validateContextAssemblyIntegration(
-      profileId
-    );
+    const validation = await validateContextAssemblyIntegration(profileId);
 
     // Report results
     validationLogger.info("Validation Summary", {

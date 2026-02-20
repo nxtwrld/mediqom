@@ -58,7 +58,8 @@
       "WebFetch(domain:docs.langchain.com)",
       "Bash(npm uninstall:*)",
       "Bash(npm view:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": []
   }

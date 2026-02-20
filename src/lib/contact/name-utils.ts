@@ -1,4 +1,4 @@
-import type { VCard } from './types.d';
+import type { VCard } from "./types.d";
 
 /**
  * Reconstructs vcard.fn from structured name components
@@ -19,19 +19,19 @@ import type { VCard } from './types.d';
  * })
  * // Returns: "Dr. Jane Q Doe Jr."
  */
-export function reconstructFullName(n?: VCard['n']): string {
-	if (!n) return '';
+export function reconstructFullName(n?: VCard["n"]): string {
+  if (!n) return "";
 
-	const parts: string[] = [];
+  const parts: string[] = [];
 
-	// Add components in standard order, filtering empty strings
-	if (n.honorificPrefix?.trim()) parts.push(n.honorificPrefix.trim());
-	if (n.givenName?.trim()) parts.push(n.givenName.trim());
-	if (n.additionalName?.trim()) parts.push(n.additionalName.trim());
-	if (n.familyName?.trim()) parts.push(n.familyName.trim());
-	if (n.honorificSufix?.trim()) parts.push(n.honorificSufix.trim()); // Note: typo exists in schema
+  // Add components in standard order, filtering empty strings
+  if (n.honorificPrefix?.trim()) parts.push(n.honorificPrefix.trim());
+  if (n.givenName?.trim()) parts.push(n.givenName.trim());
+  if (n.additionalName?.trim()) parts.push(n.additionalName.trim());
+  if (n.familyName?.trim()) parts.push(n.familyName.trim());
+  if (n.honorificSufix?.trim()) parts.push(n.honorificSufix.trim()); // Note: typo exists in schema
 
-	return parts.join(' ');
+  return parts.join(" ");
 }
 
 /**
@@ -40,14 +40,14 @@ export function reconstructFullName(n?: VCard['n']): string {
  * @param n - VCard.n structured name object
  * @returns True if any name component has a non-empty value
  */
-export function hasNameComponents(n?: VCard['n']): boolean {
-	if (!n) return false;
+export function hasNameComponents(n?: VCard["n"]): boolean {
+  if (!n) return false;
 
-	return !!(
-		n.givenName?.trim() ||
-		n.familyName?.trim() ||
-		n.additionalName?.trim() ||
-		n.honorificPrefix?.trim() ||
-		n.honorificSufix?.trim()
-	);
+  return !!(
+    n.givenName?.trim() ||
+    n.familyName?.trim() ||
+    n.additionalName?.trim() ||
+    n.honorificPrefix?.trim() ||
+    n.honorificSufix?.trim()
+  );
 }

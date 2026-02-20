@@ -56,7 +56,7 @@ describe("Enhanced Health Signals Processing", () => {
     vi.mocked(getDocument).mockResolvedValue({
       id: mockDocumentId,
       content: {
-        title: 'Test Document',
+        title: "Test Document",
         tags: [],
         signals: {},
       },

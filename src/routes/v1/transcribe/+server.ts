@@ -32,18 +32,23 @@ export const POST: RequestHandler = async ({ request }) => {
 
   // Validate MIME type matches OpenAI Whisper supported formats
   const supportedMimeTypes = [
-    'audio/flac',
-    'audio/m4a', 'audio/x-m4a',
-    'audio/mp3', 'audio/mpeg',
-    'audio/mp4', 'video/mp4',
-    'audio/oga', 'audio/ogg',
-    'audio/wav', 'audio/x-wav',
-    'audio/webm'
+    "audio/flac",
+    "audio/m4a",
+    "audio/x-m4a",
+    "audio/mp3",
+    "audio/mpeg",
+    "audio/mp4",
+    "video/mp4",
+    "audio/oga",
+    "audio/ogg",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/webm",
   ];
 
   if (!supportedMimeTypes.includes(uploadedFile.type)) {
     error(400, {
-      message: `Invalid file type: ${uploadedFile.type}. Supported: ${supportedMimeTypes.join(', ')}`
+      message: `Invalid file type: ${uploadedFile.type}. Supported: ${supportedMimeTypes.join(", ")}`,
     });
   }
 

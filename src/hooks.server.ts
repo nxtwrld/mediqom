@@ -18,15 +18,20 @@ const authUrlNormalizer: Handle = async ({ event, resolve }) => {
   const path = event.url.pathname;
 
   if (
-    path.startsWith('/auth/callback') &&
-    (path.includes('&token_hash=') || path.includes('&code=') || path.includes('&access_token=') || path.includes('&type='))
+    path.startsWith("/auth/callback") &&
+    (path.includes("&token_hash=") ||
+      path.includes("&code=") ||
+      path.includes("&access_token=") ||
+      path.includes("&type="))
   ) {
-    const ampIndex = path.indexOf('&');
+    const ampIndex = path.indexOf("&");
     if (ampIndex > 0) {
       const base = path.slice(0, ampIndex);
       const fromPath = path.slice(ampIndex + 1);
-      const existingQuery = event.url.search ? event.url.search.slice(1) : '';
-      const fullQuery = existingQuery ? `${fromPath}&${existingQuery}` : fromPath;
+      const existingQuery = event.url.search ? event.url.search.slice(1) : "";
+      const fullQuery = existingQuery
+        ? `${fromPath}&${existingQuery}`
+        : fromPath;
       return redirect(302, `${base}?${fullQuery}`);
     }
   }
@@ -43,25 +48,27 @@ const supabase: Handle = async ({ event, resolve }) => {
   const { pathname } = event.url;
 
   // Always log OPTIONS and v1 requests so we can debug CORS preflight flow
-  if (method === 'OPTIONS' || pathname.startsWith('/v1/')) {
-    console.log(`[REQ] ${method} ${pathname} | origin: ${reqHeaders.get('origin') ?? '-'} | auth: ${reqHeaders.has('authorization') ? 'yes' : 'no'}`);
-  } else {
-    const shouldLog =
-      pathname.startsWith("/auth") ||
-      pathname === "/med" ||
-      pathname === "/account";
-    if (shouldLog) console.log(`[REQ] ${method} ${pathname}`);
+  const shouldLog =
+    pathname.startsWith("/auth") ||
+    pathname === "/med" ||
+    pathname === "/account";
+  if (method === "OPTIONS" || pathname.startsWith("/v1/")) {
+    console.log(
+      `[REQ] ${method} ${pathname} | origin: ${reqHeaders.get("origin") ?? "-"} | auth: ${reqHeaders.has("authorization") ? "yes" : "no"}`,
+    );
+  } else if (shouldLog) {
+    console.log(`[REQ] ${method} ${pathname}`);
   }
 
   // Handle CORS preflight for mobile API calls
-  if (method === 'OPTIONS' && pathname.startsWith('/v1/')) {
+  if (method === "OPTIONS" && pathname.startsWith("/v1/")) {
     console.log(`[CORS] Responding 204 to OPTIONS ${pathname}`);
     return new Response(null, {
       status: 204,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
     });
   }
@@ -98,8 +105,8 @@ const supabase: Handle = async ({ event, resolve }) => {
 
     if (!session) {
       // Fallback: Bearer token auth (mobile Capacitor)
-      const authHeader = event.request.headers.get('Authorization');
-      if (authHeader?.startsWith('Bearer ')) {
+      const authHeader = event.request.headers.get("Authorization");
+      if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.slice(7);
         const tokenClient = createServerClient(
           PUBLIC_SUPABASE_URL,
@@ -124,9 +131,9 @@ const supabase: Handle = async ({ event, resolve }) => {
           return {
             session: {
               access_token: token,
-              refresh_token: '',
+              refresh_token: "",
               expires_in: 0,
-              token_type: 'bearer',
+              token_type: "bearer",
               user,
             },
             user,
@@ -164,9 +171,12 @@ const supabase: Handle = async ({ event, resolve }) => {
   });
 
   // Add CORS headers for API routes (mobile Capacitor)
-  if (event.url.pathname.startsWith('/v1/')) {
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (event.url.pathname.startsWith("/v1/")) {
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization",
+    );
   }
 
   // Only log errors and important requests
@@ -223,4 +233,9 @@ const errorHandler: Handle = async ({ event, resolve }) => {
   }
 };
 
-export const handle: Handle = sequence(authUrlNormalizer, supabase, authGuard, errorHandler);
+export const handle: Handle = sequence(
+  authUrlNormalizer,
+  supabase,
+  authGuard,
+  errorHandler,
+);

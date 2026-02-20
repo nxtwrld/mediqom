@@ -35,18 +35,18 @@ This skill scans Svelte component files, extracts hardcoded English text strings
 
 Derive namespace from file path:
 
-| Component Path | Namespace |
-|---------------|-----------|
-| `src/components/import/` | `app.import` |
-| `src/components/session/` | `session` |
-| `src/components/profile/` | `profile` |
-| `src/components/documents/` | `documents` |
-| `src/components/forms/` | `app.forms` |
-| `src/components/ui/` | `app.ui` |
-| `src/components/layout/` | `app.layout` |
-| `src/components/chat/` | `app.chat` |
-| `src/routes/auth/` | `app.auth` |
-| `src/routes/med/` | `app.med` |
+| Component Path              | Namespace    |
+| --------------------------- | ------------ |
+| `src/components/import/`    | `app.import` |
+| `src/components/session/`   | `session`    |
+| `src/components/profile/`   | `profile`    |
+| `src/components/documents/` | `documents`  |
+| `src/components/forms/`     | `app.forms`  |
+| `src/components/ui/`        | `app.ui`     |
+| `src/components/layout/`    | `app.layout` |
+| `src/components/chat/`      | `app.chat`   |
+| `src/routes/auth/`          | `app.auth`   |
+| `src/routes/med/`           | `app.med`    |
 
 Generate key: `namespace.category.kebab-case-description`
 
@@ -55,6 +55,7 @@ Example: "Processing files" in `src/components/import/JobCard.svelte` → `app.i
 ### Step 3: Update Files
 
 1. **Locale files**: Add entries to all three with actual translations:
+
    - `en.json`: Full English text value
    - `cs-CZ.json`: Czech translation (provide actual translation, never empty strings)
    - `de-DE.json`: German translation (provide actual translation, never empty strings)
@@ -70,6 +71,7 @@ Run `npm run check` to verify TypeScript/Svelte compilation succeeds.
 ## Translation Patterns
 
 ### Simple text content:
+
 ```svelte
 <!-- Before -->
 <button>Save</button>
@@ -79,6 +81,7 @@ Run `npm run check` to verify TypeScript/Svelte compilation succeeds.
 ```
 
 ### Attributes:
+
 ```svelte
 <!-- Before -->
 <input placeholder="Search..." aria-label="Search documents" />
@@ -88,6 +91,7 @@ Run `npm run check` to verify TypeScript/Svelte compilation succeeds.
 ```
 
 ### With interpolation (ICU MessageFormat):
+
 ```svelte
 <!-- Before -->
 <p>Hello {user.name}!</p>
@@ -97,6 +101,7 @@ Run `npm run check` to verify TypeScript/Svelte compilation succeeds.
 ```
 
 ### Pluralization:
+
 ```json
 {
   "app.items-count": "{count, plural, =0 {No items} one {1 item} other {# items}}"
@@ -104,6 +109,7 @@ Run `npm run check` to verify TypeScript/Svelte compilation succeeds.
 ```
 
 ### Conditional text:
+
 ```svelte
 <!-- Before -->
 {#if loading}Loading...{:else}Done{/if}
@@ -133,6 +139,7 @@ Keys are organized hierarchically and alphabetically:
 ## Priority Files (High Impact)
 
 These files likely contain many untranslated strings:
+
 - `src/routes/auth/+page.svelte` - Auth error messages
 - `src/components/import/JobCard.svelte` - Status labels
 - `src/components/import/FileProgressCard.svelte` - Progress text

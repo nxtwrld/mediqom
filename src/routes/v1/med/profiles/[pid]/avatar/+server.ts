@@ -43,7 +43,14 @@ export const POST: RequestHandler = async ({
     const body = await request.json();
     console.log("[Avatar] Request body keys:", Object.keys(body));
     const { file: base64, filename, type } = body;
-    console.log("[Avatar] Filename:", filename, "Type:", type, "Base64 length:", base64?.length);
+    console.log(
+      "[Avatar] Filename:",
+      filename,
+      "Type:",
+      type,
+      "Base64 length:",
+      base64?.length,
+    );
     // convert base64 to blob
     const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
     const binaryString = atob(base64Data);
@@ -59,11 +66,13 @@ export const POST: RequestHandler = async ({
       .from("avatars")
       .upload(params.pid + "_" + filename, blob, {
         upsert: true,
-        contentType: type
+        contentType: type,
       });
     if (errorUploading) {
       console.error("Error uploading avatar:", errorUploading);
-      throw error(500, { message: errorUploading.message || "Failed to upload avatar" });
+      throw error(500, {
+        message: errorUploading.message || "Failed to upload avatar",
+      });
     }
     console.log("uploaded", filename);
 
@@ -77,7 +86,9 @@ export const POST: RequestHandler = async ({
       await supabase.storage
         .from("avatars")
         .remove([params.pid + "_" + filename]);
-      throw error(500, { message: errorUpdate.message || "Failed to update profile" });
+      throw error(500, {
+        message: errorUpdate.message || "Failed to update profile",
+      });
     }
 
     return json({
@@ -85,10 +96,12 @@ export const POST: RequestHandler = async ({
     });
   } catch (err) {
     // Re-throw SvelteKit errors
-    if (err && typeof err === 'object' && 'status' in err) {
+    if (err && typeof err === "object" && "status" in err) {
       throw err;
     }
     console.error("Unexpected error in avatar upload:", err);
-    throw error(500, { message: err instanceof Error ? err.message : "Unexpected error" });
+    throw error(500, {
+      message: err instanceof Error ? err.message : "Unexpected error",
+    });
   }
 };

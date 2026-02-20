@@ -15,7 +15,7 @@ export const load: LayoutLoad = async ({ parent, fetch }) => {
   }
 
   // fetch basic user data - now safe because we have a session
-  const userData = await apiFetch('/v1/med/user', { fetch })
+  const userData = await apiFetch("/v1/med/user", { fetch })
     .then((r) => r.json())
     .catch((e) => {
       log.api.error("Error loading user", e);
@@ -43,7 +43,8 @@ export const load: LayoutLoad = async ({ parent, fetch }) => {
 };
 
 // @ts-ignore - __CAPACITOR_BUILD__ is defined at build time by vite.config.mobile.ts
-const IS_CAPACITOR = typeof __CAPACITOR_BUILD__ !== 'undefined' && __CAPACITOR_BUILD__ === true;
+const IS_CAPACITOR =
+  typeof __CAPACITOR_BUILD__ !== "undefined" && __CAPACITOR_BUILD__ === true;
 
 // Disable trailing slash redirects for Capacitor to prevent redirect loops
 export const trailingSlash = IS_CAPACITOR ? "ignore" : "always";

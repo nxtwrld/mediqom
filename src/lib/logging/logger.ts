@@ -60,14 +60,14 @@ class CentralizedLogger {
     try {
       this.loadConfig();
     } catch (e) {
-      console.warn('[Logger] Failed to load config:', e);
+      console.warn("[Logger] Failed to load config:", e);
     }
 
     // Make config accessible via window for runtime control
     try {
       this.exposeGlobalConfig();
     } catch (e) {
-      console.warn('[Logger] Failed to expose global config:', e);
+      console.warn("[Logger] Failed to expose global config:", e);
     }
   }
 

@@ -27,16 +27,27 @@ export const audioActions = {
       useRealtime?: boolean;
     } = {},
   ): Promise<boolean> {
-    const { language = getLocale() || "en", models = ["GP"], useRealtime = true } = options;
+    const {
+      language = getLocale() || "en",
+      models = ["GP"],
+      useRealtime = true,
+    } = options;
 
-    logger.audio.info("Starting recording with AudioManager (legacy wrapper)...", {
+    logger.audio.info(
+      "Starting recording with AudioManager (legacy wrapper)...",
+      {
+        language,
+        models,
+        useRealtime,
+      },
+    );
+
+    // Delegate to the unified session store's method which uses AudioManager
+    return await audioActions.initializeAudio({
       language,
       models,
       useRealtime,
     });
-
-    // Delegate to the unified session store's method which uses AudioManager
-    return await audioActions.initializeAudio({ language, models, useRealtime });
   },
   /**
    * Initialize audio recording using AudioManager
@@ -67,7 +78,8 @@ export const audioActions = {
       // Create session if needed and realtime is enabled
       let finalSessionId = sessionId;
       if (useRealtime && !finalSessionId) {
-        finalSessionId = (await audioActions.createSession(language, models)) || undefined;
+        finalSessionId =
+          (await audioActions.createSession(language, models)) || undefined;
         if (!finalSessionId) {
           logger.audio.warn(
             "Failed to create session, continuing with local recording",
@@ -89,7 +101,7 @@ export const audioActions = {
       if (!getAudioManager().getIsInitialized()) {
         logger.audio.debug("Initializing AudioManager...");
         const initialized = await getAudioManager().initialize();
-        
+
         if (!initialized) {
           throw new Error("Failed to initialize AudioManager");
         }
@@ -115,8 +127,8 @@ export const audioActions = {
       };
 
       // Subscribe to AudioManager events
-      getAudioManager().on('audio-chunk', handleAudioChunk);
-      getAudioManager().on('state-change', handleStateChange);
+      getAudioManager().on("audio-chunk", handleAudioChunk);
+      getAudioManager().on("state-change", handleStateChange);
 
       // Update store with successful initialization
       unifiedSessionStore.update((state) => ({

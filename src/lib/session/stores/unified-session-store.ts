@@ -58,7 +58,7 @@ export interface TranscriptItem {
   is_final: boolean;
   speaker?: string;
   sequenceNumber?: number;
-  status?: 'pending' | 'processing' | 'completed';
+  status?: "pending" | "processing" | "completed";
 }
 
 // Main unified session state interface
@@ -287,20 +287,19 @@ export const unifiedSessionActions = {
       },
       lastUpdated: Date.now(),
     }));
-    
+
     // Allow UI time to react to state change
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   },
   async stopSessionAndReset(): Promise<void> {
     logger.session.info("Stopping session and resetting to Ready state");
-    
+
     // Stop AudioManager first to ensure proper cleanup
     await getAudioManager().stop();
-    
+
     // Reset to clean Ready state
     await this.resetSession();
   },
-
 
   // Load existing session data (for mock data or resuming)
   loadSessionWithData(sessionData: any): void {
@@ -329,44 +328,61 @@ export const unifiedSessionActions = {
       models?: string[];
       useRealtime?: boolean;
       translate?: boolean;
-    } = {}
+    } = {},
   ): Promise<boolean> {
     const currentLocale = getLocale();
-    const { language = currentLocale || "en", models = ["GP"], useRealtime = true, translate = false } = options;
-    
-    logger.session.info("Starting recording session", { language, models, useRealtime, translate });
+    const {
+      language = currentLocale || "en",
+      models = ["GP"],
+      useRealtime = true,
+      translate = false,
+    } = options;
+
+    logger.session.info("Starting recording session", {
+      language,
+      models,
+      useRealtime,
+      translate,
+    });
 
     const currentState = get(unifiedSessionStore);
     const { sessionState } = currentState.ui;
 
     // Only allow starting from Ready or Paused states
-    if (sessionState !== SessionState.Ready && sessionState !== SessionState.Paused) {
-      logger.session.warn("Cannot start recording session from current state", { sessionState });
+    if (
+      sessionState !== SessionState.Ready &&
+      sessionState !== SessionState.Paused
+    ) {
+      logger.session.warn("Cannot start recording session from current state", {
+        sessionState,
+      });
       return false;
     }
 
     try {
       // Initialize AudioManager if needed (this must be done in user interaction context)
       if (!getAudioManager().getIsInitialized()) {
-        logger.audio.debug('Initializing AudioManager for recording session...');
+        logger.audio.debug(
+          "Initializing AudioManager for recording session...",
+        );
         const initialized = await getAudioManager().initialize();
-        
+
         if (!initialized) {
-          throw new Error('Failed to initialize AudioManager');
+          throw new Error("Failed to initialize AudioManager");
         }
       }
-      
-      logger.audio.info('AudioManager ready for session', {
+
+      logger.audio.info("AudioManager ready for session", {
         hasStream: !!getAudioManager().getAudioStream(),
         streamId: getAudioManager().getAudioStream()?.id,
-        trackCount: getAudioManager().getAudioStream()?.getTracks().length || 0
+        trackCount: getAudioManager().getAudioStream()?.getTracks().length || 0,
       });
-      
+
       // Set up AudioManager event handlers for this session
       const handleAudioChunk = (audioData: Float32Array) => {
         unifiedSessionActions.sendAudioChunk(audioData);
       };
-      
+
       const handleStateChange = (state: AudioState) => {
         unifiedSessionStore.update((storeState) => ({
           ...storeState,
@@ -377,76 +393,80 @@ export const unifiedSessionActions = {
           lastUpdated: Date.now(),
         }));
       };
-      
+
       // Subscribe to AudioManager events
-      getAudioManager().on('audio-chunk', handleAudioChunk);
-      getAudioManager().on('state-change', handleStateChange);
-      
+      getAudioManager().on("audio-chunk", handleAudioChunk);
+      getAudioManager().on("state-change", handleStateChange);
+
       // Create session on server (server will generate the session ID)
-      const createSessionResponse = await fetch('/v1/session/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const createSessionResponse = await fetch("/v1/session/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           language,
           models,
           translate,
-          userId: 'current-user' // TODO: Get from auth
-        })
+          userId: "current-user", // TODO: Get from auth
+        }),
       });
-      
+
       if (!createSessionResponse.ok) {
-        throw new Error('Failed to create session on server');
+        throw new Error("Failed to create session on server");
       }
-      
+
       // Get the actual session ID from server response
       const sessionData = await createSessionResponse.json();
       const sessionId = sessionData.sessionId;
-      
+
       console.log("🔗 SESSION: Created server session:", sessionId);
-      
+
       // NOTE: We don't connect SSE here anymore - only for transcription
       // SSE will be connected later when we need to stream analysis results
-      console.log("📡 SESSION: Ready for transcription (SSE will connect when needed):", sessionId);
-      
+      console.log(
+        "📡 SESSION: Ready for transcription (SSE will connect when needed):",
+        sessionId,
+      );
+
       // Transition to Running state first
       unifiedSessionActions.transitionToRunning();
-      
+
       // Update session ID in state
-      unifiedSessionStore.update(state => ({
+      unifiedSessionStore.update((state) => ({
         ...state,
         audio: {
           ...state.audio,
           sessionId: sessionId,
-        }
+        },
       }));
-      
+
       // Start recording with AudioManager (this is also async)
       const success = await getAudioManager().start();
-      
+
       if (!success) {
         // Clean up event listeners and rollback on failure
-        getAudioManager().off('audio-chunk', handleAudioChunk);
-        getAudioManager().off('state-change', handleStateChange);
+        getAudioManager().off("audio-chunk", handleAudioChunk);
+        getAudioManager().off("state-change", handleStateChange);
         await unifiedSessionActions.resetSession();
-        logger.session.error('Failed to start AudioManager recording');
+        logger.session.error("Failed to start AudioManager recording");
         return false;
       }
-      
-      logger.session.info('Recording session started successfully with AudioManager');
+
+      logger.session.info(
+        "Recording session started successfully with AudioManager",
+      );
       return true;
-      
     } catch (error) {
-      logger.session.error('Error starting recording session:', error);
-      
+      logger.session.error("Error starting recording session:", error);
+
       // Reset to Ready state on error
       await unifiedSessionActions.resetSession();
-      
-      unifiedSessionStore.update(state => ({
+
+      unifiedSessionStore.update((state) => ({
         ...state,
         error: `Failed to start recording: ${error instanceof Error ? error.message : String(error)}`,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       }));
-      
+
       return false;
     }
   },
@@ -458,7 +478,7 @@ export const unifiedSessionActions = {
       language?: string;
       models?: string[];
       useRealtime?: boolean;
-    } = {}
+    } = {},
   ): Promise<boolean> {
     // Delegate to new method
     return await unifiedSessionActions.startRecordingSession(options);
@@ -466,13 +486,15 @@ export const unifiedSessionActions = {
 
   async stopSessionComplete(): Promise<void> {
     logger.session.info("Stopping complete session");
-    
+
     const currentState = get(unifiedSessionStore);
     const { sessionState } = currentState.ui;
 
     // Only allow stopping from Running state
     if (sessionState !== SessionState.Running) {
-      logger.session.warn("Cannot stop session - not in Running state", { sessionState });
+      logger.session.warn("Cannot stop session - not in Running state", {
+        sessionState,
+      });
       return;
     }
 
@@ -487,7 +509,7 @@ export const unifiedSessionActions = {
       unifiedSessionActions.transitionToPaused();
     } else {
       // No data collected, go back to Ready
-      unifiedSessionStore.update(state => ({
+      unifiedSessionStore.update((state) => ({
         ...state,
         ui: {
           ...state.ui,
@@ -503,7 +525,7 @@ export const unifiedSessionActions = {
     }
 
     logger.session.info("Complete session stopped successfully", {
-      nextState: hasData ? "Paused" : "Ready"
+      nextState: hasData ? "Paused" : "Ready",
     });
   },
 
@@ -528,7 +550,7 @@ export const unifiedSessionActions = {
     try {
       // Use the new session recording method for consistency
       return await unifiedSessionActions.startRecordingSession({
-        useRealtime
+        useRealtime,
       });
     } catch (error) {
       logger.session.error("Failed to start recording", { error });
@@ -623,7 +645,7 @@ export const unifiedSessionActions = {
   },
 
   // Transcript Management
-  
+
   // Create placeholder for audio chunk being processed
   addTranscriptPlaceholder(chunkId: string, sequenceNumber: number): void {
     const placeholderItem: TranscriptItem = {
@@ -633,28 +655,33 @@ export const unifiedSessionActions = {
       timestamp: Date.now(),
       is_final: false,
       sequenceNumber,
-      status: 'processing',
+      status: "processing",
     };
 
     unifiedSessionStore.update((state) => ({
       ...state,
       transcripts: {
         ...state.transcripts,
-        items: [...state.transcripts.items, placeholderItem].sort((a, b) => 
-          (a.sequenceNumber || 0) - (b.sequenceNumber || 0)
+        items: [...state.transcripts.items, placeholderItem].sort(
+          (a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0),
         ),
       },
       lastUpdated: Date.now(),
     }));
 
-    console.log("📝 PLACEHOLDER: Created for chunk", { chunkId, sequenceNumber });
+    console.log("📝 PLACEHOLDER: Created for chunk", {
+      chunkId,
+      sequenceNumber,
+    });
   },
 
   // Update transcript with actual transcription result (fill placeholder)
   addTranscript(transcript: PartialTranscript): void {
     unifiedSessionStore.update((state) => {
-      const existingIndex = state.transcripts.items.findIndex(item => item.id === transcript.id);
-      
+      const existingIndex = state.transcripts.items.findIndex(
+        (item) => item.id === transcript.id,
+      );
+
       const transcriptItem: TranscriptItem = {
         id: transcript.id,
         text: transcript.text,
@@ -663,7 +690,7 @@ export const unifiedSessionActions = {
         is_final: transcript.is_final,
         speaker: transcript.speaker,
         sequenceNumber: transcript.sequenceNumber,
-        status: 'completed',
+        status: "completed",
       };
 
       let updatedItems;
@@ -671,19 +698,29 @@ export const unifiedSessionActions = {
         // Replace placeholder with actual transcript
         updatedItems = [...state.transcripts.items];
         updatedItems[existingIndex] = transcriptItem;
-        console.log("📝 FILLED: Placeholder replaced", { id: transcript.id, sequenceNumber: transcript.sequenceNumber });
+        console.log("📝 FILLED: Placeholder replaced", {
+          id: transcript.id,
+          sequenceNumber: transcript.sequenceNumber,
+        });
       } else {
         // Add new transcript and sort by sequence
         updatedItems = [...state.transcripts.items, transcriptItem];
-        console.log("📝 ADDED: New transcript", { id: transcript.id, sequenceNumber: transcript.sequenceNumber });
+        console.log("📝 ADDED: New transcript", {
+          id: transcript.id,
+          sequenceNumber: transcript.sequenceNumber,
+        });
       }
 
       // Sort items by sequence number to maintain order
-      updatedItems.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+      updatedItems.sort(
+        (a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0),
+      );
 
       // Update buffer with final transcripts only
-      const finalTranscripts = updatedItems.filter(item => item.is_final && item.status === 'completed');
-      const newBuffer = finalTranscripts.map(item => item.text).join(" ");
+      const finalTranscripts = updatedItems.filter(
+        (item) => item.is_final && item.status === "completed",
+      );
+      const newBuffer = finalTranscripts.map((item) => item.text).join(" ");
 
       return {
         ...state,
@@ -931,23 +968,26 @@ export const unifiedSessionActions = {
       // Direct transcription - no SSE needed for audio chunks
       const chunkId = `chunk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const sequenceNumber = Date.now(); // Use timestamp as sequence for simplicity
-      
+
       // Create placeholder
       unifiedSessionActions.addTranscriptPlaceholder(chunkId, sequenceNumber);
-      
+
       // Convert and send to transcription endpoint
       const mp3Blob = await convertFloat32ToMp3(audioData, 16000);
-      
+
       const formData = new FormData();
       formData.append("audio", mp3Blob, "chunk.mp3");
       formData.append("chunkId", chunkId);
       formData.append("sequenceNumber", sequenceNumber.toString());
       formData.append("timestamp", Date.now().toString());
 
-      const response = await fetch(`/v1/session/${currentState.audio.sessionId}/transcribe`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `/v1/session/${currentState.audio.sessionId}/transcribe`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (response.ok) {
         const result = await response.json();
@@ -955,7 +995,7 @@ export const unifiedSessionActions = {
           chunkId,
           text: result.transcription?.text?.substring(0, 50) || "no text",
         });
-        
+
         // Update transcript with result
         unifiedSessionActions.addTranscript({
           id: chunkId,
@@ -966,7 +1006,7 @@ export const unifiedSessionActions = {
           sequenceNumber,
           sessionId: currentState.audio.sessionId,
         });
-        
+
         // Update speech chunks for tracking
         unifiedSessionStore.update((state) => ({
           ...state,
@@ -975,7 +1015,7 @@ export const unifiedSessionActions = {
             speechChunks: [...state.audio.speechChunks, audioData],
           },
         }));
-        
+
         return true;
       } else {
         console.error("❌ TRANSCRIBE FAILED:", response.status);
@@ -998,9 +1038,9 @@ export const unifiedSessionActions = {
   async resetSession(): Promise<void> {
     logger.session.info("Resetting unified session store");
     unifiedSessionStore.set(initialState);
-    
+
     // Allow store reset to propagate
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
   },
 
   // Get current state snapshot
@@ -1016,13 +1056,13 @@ export const unifiedSessionActions = {
 
   getCurrentTranscriptData(): any[] {
     const state = get(unifiedSessionStore);
-    return state.transcripts.items.map(item => ({
+    return state.transcripts.items.map((item) => ({
       id: item.id,
       text: item.text,
       confidence: item.confidence,
       timestamp: item.timestamp,
       is_final: item.is_final,
-      speaker: item.speaker || 'unknown'
+      speaker: item.speaker || "unknown",
     }));
   },
 
@@ -1033,17 +1073,18 @@ export const unifiedSessionActions = {
     hasData: boolean;
   } {
     const state = get(unifiedSessionStore);
-    const duration = state.audio.recordingStartTime 
-      ? Date.now() - state.audio.recordingStartTime 
+    const duration = state.audio.recordingStartTime
+      ? Date.now() - state.audio.recordingStartTime
       : 0;
-    const hasData = state.transcripts.items.length > 0 || 
-                    state.analysis.currentSession !== null;
-    
+    const hasData =
+      state.transcripts.items.length > 0 ||
+      state.analysis.currentSession !== null;
+
     return {
       sessionId: state.audio.sessionId,
       duration,
       recordingStartTime: state.audio.recordingStartTime,
-      hasData
+      hasData,
     };
   },
 };

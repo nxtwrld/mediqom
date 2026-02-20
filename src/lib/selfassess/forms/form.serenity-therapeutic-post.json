@@ -7,12 +7,7 @@
   "resultFormat": "observation",
   "fhirCategory": "survey",
   "badges": ["therapeutic_observation", "post_session_assessment"],
-  "tags": [
-    "mental health",
-    "therapeutic",
-    "observation",
-    "post-session"
-  ],
+  "tags": ["mental health", "therapeutic", "observation", "post-session"],
   "performerRole": "therapist",
   "administrationType": "observer",
   "sessionTiming": "post",

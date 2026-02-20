@@ -145,7 +145,8 @@ export class SignalDataMigration {
           document,
         );
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         console.error(`Failed to migrate signal ${signalName}:`, error);
         warnings.push(
           `Failed to migrate signal ${signalName}: ${errorMessage}`,
@@ -411,7 +412,9 @@ export class SignalDataMigration {
         "$data/lab.properties.defaults.json"
       );
 
-      const definition = (propertiesDefinition.default as any)[signalName.toLowerCase()];
+      const definition = (propertiesDefinition.default as any)[
+        signalName.toLowerCase()
+      ];
       if (definition) {
         return {
           name: signalName,

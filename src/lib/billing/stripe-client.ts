@@ -2,8 +2,8 @@
 // Stripe Client - Client-side Stripe.js loader
 // =====================================================
 
-import { loadStripe, type Stripe } from '@stripe/stripe-js';
-import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public';
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from "$env/static/public";
 
 let stripePromise: Promise<Stripe | null> | null = null;
 
@@ -14,7 +14,7 @@ let stripePromise: Promise<Stripe | null> | null = null;
 export function getStripe(): Promise<Stripe | null> {
   if (!stripePromise) {
     if (!PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-      console.warn('Stripe publishable key not configured');
+      console.warn("Stripe publishable key not configured");
       return Promise.resolve(null);
     }
     stripePromise = loadStripe(PUBLIC_STRIPE_PUBLISHABLE_KEY);

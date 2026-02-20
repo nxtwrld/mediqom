@@ -15,7 +15,7 @@ const CHUNK_SIZE = 1024;
 export enum AudioState {
   Ready = "ready",
   Listening = "listening",
-  Speaking = "speaking", 
+  Speaking = "speaking",
   Stopping = "stopping",
   Stopped = "stopped",
   Error = "error",
@@ -120,7 +120,9 @@ export async function getAudioVAD(
       } else {
         // Manual cleanup for VAD's internal MediaStream (critical for Chrome tab indicator)
         if (mvad.stream) {
-          mvad.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+          mvad.stream
+            .getTracks()
+            .forEach((track: MediaStreamTrack) => track.stop());
           console.log("[VAD] VAD MediaStream tracks stopped");
         }
 
@@ -218,7 +220,8 @@ export async function getAudio(
       };
 
       mediaRecorder.addEventListener("dataavailable", (event) => {
-        if (controls.onData) controls.onData(event.data as unknown as AudioData);
+        if (controls.onData)
+          controls.onData(event.data as unknown as AudioData);
       });
 
       // create analyzer instance

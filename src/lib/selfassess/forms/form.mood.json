@@ -1,53 +1,50 @@
 {
-    "title": "Daily Mood Tracker",
-    "description": "Record and monitor your daily mood patterns.",
-    "category": "Mental Health Assessments",
-    "subCategory": "Mood Tracking",
-    "loincCode": "aouros-mental-health-mood-tracker",
-    "fhirCategory": "survey",
-    "resultFormat": "observation",
-    "tags": [
-      "mental health", "mood"
-    ],
-    "overallScore": {
-      "unit": "points",
-      "system": "http://unitsofmeasure.org",
-      "code": "points"
+  "title": "Daily Mood Tracker",
+  "description": "Record and monitor your daily mood patterns.",
+  "category": "Mental Health Assessments",
+  "subCategory": "Mood Tracking",
+  "loincCode": "aouros-mental-health-mood-tracker",
+  "fhirCategory": "survey",
+  "resultFormat": "observation",
+  "tags": ["mental health", "mood"],
+  "overallScore": {
+    "unit": "points",
+    "system": "http://unitsofmeasure.org",
+    "code": "points"
   },
-    "questions": [
-      {
-        "id": "moodRating",
-        "text": "Rate your overall mood today:",
-        "responseType": "likert",
-        "options": [
-          {"label": "Very Sad"},
-          {"label": "Sad"},
-          {"label": "Neutral"},
-          {"label": "Happy"},
-          {"label": "Very Happy"}
-        ],
-        "scores": [1, 2, 3, 4, 5],
-        "imageConfig": {
-          "type": "individual",
-          "individualImages": [
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4n8UAAAPVAWrpB1skAAAAAElFTkSuQmCC",
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4/58BAAT/Af9dfQKHAAAAAElFTkSuQmCC",
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgaGAAAAEEAIFw9selAAAAAElFTkSuQmCC",
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYPgPAAEDAQAIicLsAAAAAElFTkSuQmCC"
-          ]
-        }
-      },
-      {
-        "id": "moodFactors",
-        "text": "Factors that influenced your mood today (optional):",
-        "responseType": "openEnded"
-      },
-      {
-        "id": "additionalNotes",
-        "text": "Additional notes or observations (optional):",
-        "responseType": "openEnded"
+  "questions": [
+    {
+      "id": "moodRating",
+      "text": "Rate your overall mood today:",
+      "responseType": "likert",
+      "options": [
+        { "label": "Very Sad" },
+        { "label": "Sad" },
+        { "label": "Neutral" },
+        { "label": "Happy" },
+        { "label": "Very Happy" }
+      ],
+      "scores": [1, 2, 3, 4, 5],
+      "imageConfig": {
+        "type": "individual",
+        "individualImages": [
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4n8UAAAPVAWrpB1skAAAAAElFTkSuQmCC",
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4/58BAAT/Af9dfQKHAAAAAElFTkSuQmCC",
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgaGAAAAEEAIFw9selAAAAAElFTkSuQmCC",
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYPgPAAEDAQAIicLsAAAAAElFTkSuQmCC"
+        ]
       }
-    ]
-  }
-  
+    },
+    {
+      "id": "moodFactors",
+      "text": "Factors that influenced your mood today (optional):",
+      "responseType": "openEnded"
+    },
+    {
+      "id": "additionalNotes",
+      "text": "Additional notes or observations (optional):",
+      "responseType": "openEnded"
+    }
+  ]
+}

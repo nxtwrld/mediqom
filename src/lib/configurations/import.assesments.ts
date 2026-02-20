@@ -184,7 +184,8 @@ CRITICAL RULES:
           properties: {
             page: {
               type: "integer",
-              description: "Page number (1-indexed, matching input image order).",
+              description:
+                "Page number (1-indexed, matching input image order).",
             },
             text: {
               type: "string",

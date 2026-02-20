@@ -144,7 +144,10 @@ export const createMedicalImagingWorkflow = (
   // Define 2-node sequential workflow
   workflow
     .addEdge("__start__", "patient_performer_detection" as any)
-    .addEdge("patient_performer_detection" as any, "medical_imaging_analysis" as any)
+    .addEdge(
+      "patient_performer_detection" as any,
+      "medical_imaging_analysis" as any,
+    )
     .addEdge("medical_imaging_analysis" as any, END);
 
   return workflow.compile();

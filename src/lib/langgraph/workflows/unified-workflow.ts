@@ -141,7 +141,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       signals: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ signals reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ signals reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -159,7 +162,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       medications: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ medications reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ medications reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -170,7 +176,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       procedures: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ procedures reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ procedures reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -203,7 +212,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       diagnosis: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ diagnosis reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ diagnosis reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -219,7 +231,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       bodyParts: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ bodyParts reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ bodyParts reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -229,7 +244,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       ecg: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ ecg reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ ecg reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -242,7 +260,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       allergies: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ allergies reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ allergies reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -252,7 +273,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       anesthesia: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ anesthesia reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ anesthesia reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -265,7 +289,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       triage: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ triage reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ triage reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -275,7 +302,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       immunizations: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ immunizations reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ immunizations reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -285,7 +315,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       specimens: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ specimens reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ specimens reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -295,7 +328,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       admission: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ admission reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ admission reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -323,7 +359,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       specialStains: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ specialStains reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ specialStains reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -336,7 +375,10 @@ export const createUnifiedDocumentProcessingWorkflow = (
       treatments: {
         reducer: (current: any[] | undefined, update: any[] | undefined) => {
           if (update && !Array.isArray(update)) {
-            console.warn('⚠️ treatments reducer received non-array update, ignoring:', typeof update);
+            console.warn(
+              "⚠️ treatments reducer received non-array update, ignoring:",
+              typeof update,
+            );
             return current || [];
           }
           if (!update || update.length === 0) return current || [];
@@ -448,17 +490,24 @@ export const createUnifiedDocumentProcessingWorkflow = (
   workflow.addEdge("provider_selection" as any, "feature_detection" as any);
 
   // Route to LangGraph-native multi-node dispatcher or end
-  workflow.addConditionalEdges("feature_detection" as any, shouldProcessMedical, {
-    medical: "multi_node_dispatcher" as any,
-    error: END,
-  });
+  workflow.addConditionalEdges(
+    "feature_detection" as any,
+    shouldProcessMedical,
+    {
+      medical: "multi_node_dispatcher" as any,
+      error: END,
+    },
+  );
 
   // Dispatcher uses Send API to route to specialized nodes in parallel
   // After all Send nodes complete, continue to results aggregator
   workflow.addEdge("multi_node_dispatcher" as any, "results_aggregator" as any);
 
   // After aggregation, continue to medical terms generation
-  workflow.addEdge("results_aggregator" as any, "medical_terms_generation" as any);
+  workflow.addEdge(
+    "results_aggregator" as any,
+    "medical_terms_generation" as any,
+  );
 
   // External validation (optional)
   workflow.addConditionalEdges(
@@ -549,10 +598,10 @@ export async function runUnifiedDocumentProcessingWorkflow(
     // Execute workflow with streaming to capture node results
     let currentState = initialState;
     const nodeResults: Record<string, any> = {};
-    const debugImportEnabled = DEBUG_IMPORT === 'true';
+    const debugImportEnabled = DEBUG_IMPORT === "true";
 
     // Generate timestamp once for all nodes in this run
-    const runTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const runTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
     // Stream the workflow to capture each node's output
     for await (const chunk of await workflow.stream(initialState)) {

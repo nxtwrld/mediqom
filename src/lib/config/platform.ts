@@ -1,5 +1,5 @@
-import { browser } from '$app/environment';
-import { Capacitor } from '@capacitor/core';
+import { browser } from "$app/environment";
+import { Capacitor } from "@capacitor/core";
 
 /**
  * Platform detection utilities for Capacitor mobile builds
@@ -50,7 +50,7 @@ export function isCapacitorBuild(): boolean {
 
   // Method 1: Check build-time constant (replaced by Vite define)
   try {
-    if (typeof __CAPACITOR_BUILD__ !== 'undefined' && __CAPACITOR_BUILD__) {
+    if (typeof __CAPACITOR_BUILD__ !== "undefined" && __CAPACITOR_BUILD__) {
       _isCapacitorBuild = true;
       return true;
     }
@@ -73,7 +73,7 @@ export function isCapacitorBuild(): boolean {
   // Method 4: Check Capacitor platform (native iOS/Android means mobile build)
   try {
     const platform = Capacitor.getPlatform();
-    if (platform === 'ios' || platform === 'android') {
+    if (platform === "ios" || platform === "android") {
       _isCapacitorBuild = true;
       return true;
     }
@@ -88,12 +88,12 @@ export function isCapacitorBuild(): boolean {
 /**
  * Get the current platform
  */
-export function getPlatform(): 'ios' | 'android' | 'web' {
-  if (!browser) return 'web';
+export function getPlatform(): "ios" | "android" | "web" {
+  if (!browser) return "web";
   try {
-    return Capacitor.getPlatform() as 'ios' | 'android' | 'web';
+    return Capacitor.getPlatform() as "ios" | "android" | "web";
   } catch {
-    return 'web';
+    return "web";
   }
 }
 
@@ -101,14 +101,14 @@ export function getPlatform(): 'ios' | 'android' | 'web' {
  * Check if running on iOS
  */
 export function isIOS(): boolean {
-  return getPlatform() === 'ios';
+  return getPlatform() === "ios";
 }
 
 /**
  * Check if running on Android
  */
 export function isAndroid(): boolean {
-  return getPlatform() === 'android';
+  return getPlatform() === "android";
 }
 
 /**
@@ -117,16 +117,16 @@ export function isAndroid(): boolean {
  * - Web: empty string (same origin, relative URLs)
  */
 export function getApiBaseUrl(): string {
-  if (!browser) return '';
+  if (!browser) return "";
 
   // For native platform or Capacitor build, use absolute URL
   if (isNativePlatform() || isCapacitorBuild()) {
     // Use environment variable or default to production URL
-    return import.meta.env.VITE_API_BASE_URL || 'https://mediqom.com';
+    return import.meta.env.VITE_API_BASE_URL || "https://mediqom.com";
   }
 
   // Web uses relative URLs (same origin)
-  return '';
+  return "";
 }
 
 /**
@@ -135,10 +135,10 @@ export function getApiBaseUrl(): string {
  * - Web: web URL (/auth/confirm)
  */
 export function getAuthRedirectUrl(): string {
-  if (!browser) return '/auth/confirm';
+  if (!browser) return "/auth/confirm";
 
   if (isNativePlatform()) {
-    return 'https://mediqom.com/auth/callback';
+    return "https://mediqom.com/auth/callback";
   }
 
   return `${window.location.origin}/auth/confirm`;
@@ -159,9 +159,9 @@ export const platformConfig = {
   },
 
   // Deep link scheme for the app
-  deepLinkScheme: 'mediqom',
+  deepLinkScheme: "mediqom",
 
   // App store URLs (update with actual app store listings)
-  appStoreUrl: 'https://apps.apple.com/app/mediqom/id000000000',
-  playStoreUrl: 'https://play.google.com/store/apps/details?id=com.mediqom.app',
+  appStoreUrl: "https://apps.apple.com/app/mediqom/id000000000",
+  playStoreUrl: "https://play.google.com/store/apps/details?id=com.mediqom.app",
 };
