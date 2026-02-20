@@ -191,7 +191,7 @@ export async function signInWithMagicLink(email: string): Promise<{ error: Error
   const supabase = getClient();
 
   const redirectUrl = isNativePlatform()
-    ? `https://${UNIVERSAL_LINK_HOST}${AUTH_CALLBACK_PATH}`
+    ? `https://${UNIVERSAL_LINK_HOST}${AUTH_CALLBACK_PATH}?m=1`
     : `${window.location.origin}/auth/confirm`;
 
   console.log('[Mobile Auth] Signing in with magic link:', { email, redirectUrl });
