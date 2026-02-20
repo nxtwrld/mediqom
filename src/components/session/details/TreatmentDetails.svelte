@@ -74,7 +74,7 @@
         <!-- Description -->
         {#if treatment.description}
             <section class="session-info-section">
-                <label>{$t('session.labels.description')}:</label>
+                <span class="session-info-label">{$t('session.labels.description')}:</span>
                 <p class="session-reasoning-text">{treatment.description}</p>
             </section>
         {/if}
@@ -92,7 +92,7 @@
         <!-- Instructions -->
         {#if treatment.instructions}
             <section class="session-info-section">
-                <label>{$t('session.labels.instructions')}:</label>
+                <span class="session-info-label">{$t('session.labels.instructions')}:</span>
                 <p class="session-reasoning-text">{treatment.instructions}</p>
             </section>
         {/if}
@@ -124,7 +124,7 @@
         <!-- Monitoring -->
         {#if treatment.monitoring}
             <section class="session-info-section">
-                <label>{$t('session.labels.monitoring')}:</label>
+                <span class="session-info-label">{$t('session.labels.monitoring')}:</span>
                 <p class="session-reasoning-text">{treatment.monitoring}</p>
             </section>
         {/if}
@@ -132,7 +132,7 @@
         <!-- Notes -->
         {#if treatment.notes}
             <section class="session-info-section">
-                <label>{$t('session.labels.notes')}:</label>
+                <span class="session-info-label">{$t('session.labels.notes')}:</span>
                 <p class="session-reasoning-text">{treatment.notes}</p>
             </section>
         {/if}

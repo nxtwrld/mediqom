@@ -34,11 +34,6 @@
 </div>
 
 <style>
-    .toolbar {
-        /*height: var(--heading-height);
-        margin-bottom: var(--gap);*/
-    }
-
     .toolbar button {
         color: var(--color-text-secondary);
     }

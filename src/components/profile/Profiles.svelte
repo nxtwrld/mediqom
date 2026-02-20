@@ -139,9 +139,6 @@
         transform: none;
         border: none;
     }
-    .list-items-grid .list-item .actions .button:hover {
-        /*background-color: var(--color-gray-400);*/
-    }
     
 
 

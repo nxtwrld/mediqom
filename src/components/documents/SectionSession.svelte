@@ -152,41 +152,6 @@
         background: var(--color-surface, #fff);
     }
     
-    .session-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--color-border, #e2e8f0);
-        background: var(--color-surface-alt, #f8fafc);
-    }
-    
-    .session-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0 0 1rem;
-        color: var(--color-text-primary, #1f2937);
-    }
-    
-    .session-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .meta-item {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-    
-    .meta-label {
-        color: var(--color-text-secondary, #6b7280);
-        font-weight: 500;
-    }
-    
-    .meta-value {
-        color: var(--color-text-primary, #1f2937);
-    }
-    
     .session-visualization {
         flex: 1;
         position: relative;
@@ -237,19 +202,6 @@
     
     /* Mobile responsive */
     @media (max-width: 640px) {
-        .session-header {
-            padding: 1rem;
-        }
-        
-        .session-title {
-            font-size: 1.25rem;
-        }
-        
-        .session-meta {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
         .session-visualization {
             min-height: 400px;
         }

@@ -54,7 +54,7 @@
             <div class="linked-item">
                 {@render view?.({ item, })}
                 {#if removable}
-                <button class="-unlink" type="button" onclick={() => unlink(item)}>
+                <button class="-unlink" type="button" aria-label="Remove link" onclick={() => unlink(item)}>
                     <svg class="icon">
                         <use href="/sprite.svg#close"></use>
                     </svg>

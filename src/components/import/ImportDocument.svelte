@@ -125,9 +125,6 @@
         padding: .5rem;
     }
 
-    .report.ERROR .status {
-
-    }
 
     .report .preview {
         position: relative;

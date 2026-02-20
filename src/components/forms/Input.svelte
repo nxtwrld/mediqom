@@ -62,7 +62,7 @@
     }: Props = $props();
 
     // Cast autocomplete to proper type for HTML input
-    const autocompleteAttr = autocomplete as any;
+    const autocompleteAttr = $derived(autocomplete as any);
 
     // Helper to combine bubble and callback
     function handleKeypress(event: KeyboardEvent) {
@@ -168,7 +168,7 @@
     </div>
 {/if}
 {#if copyable}
-    <button type="button" class="input-tool input-copy" onclick={() => navigator.clipboard.writeText(String(value))} disabled={value == ''}>
+    <button type="button" class="input-tool input-copy" aria-label="Copy to clipboard" onclick={() => navigator.clipboard.writeText(String(value))} disabled={value == ''}>
         <svg>
             <use xlink:href="/sprite.svg#copy"></use>
         </svg>

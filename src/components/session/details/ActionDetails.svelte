@@ -56,7 +56,7 @@
         <!-- Description -->
         {#if action.description}
             <section class="info-section">
-                <label>{$t('session.labels.description')}:</label>
+                <span class="info-section-label">{$t('session.labels.description')}:</span>
                 <p class="description-text">{action.description}</p>
             </section>
         {/if}
@@ -66,7 +66,7 @@
             <!-- Expected Answer Type -->
             {#if action.expectedAnswerType}
                 <section class="info-section">
-                    <label>{$t('session.labels.expected-answer-type')}:</label>
+                    <span class="info-section-label">{$t('session.labels.expected-answer-type')}:</span>
                     <span class="answer-type-badge">{action.expectedAnswerType}</span>
                 </section>
             {/if}
@@ -74,7 +74,7 @@
             <!-- Answer -->
             {#if action.answer}
                 <section class="info-section">
-                    <label>{$t('session.labels.answer')}:</label>
+                    <span class="info-section-label">{$t('session.labels.answer')}:</span>
                     <p class="answer-text">{action.answer}</p>
                 </section>
             {/if}
@@ -82,7 +82,7 @@
             <!-- Answer Context -->
             {#if action.answerContext}
                 <section class="info-section">
-                    <label>{$t('session.labels.answer-context')}:</label>
+                    <span class="info-section-label">{$t('session.labels.answer-context')}:</span>
                     <p class="context-text">{action.answerContext}</p>
                 </section>
             {/if}
@@ -93,7 +93,7 @@
             <!-- Severity -->
             {#if action.severity}
                 <section class="info-section">
-                    <label>{$t('session.labels.severity')}:</label>
+                    <span class="info-section-label">{$t('session.labels.severity')}:</span>
                     <span class="severity-badge severity-{action.severity}">{$t(`session.severity.${action.severity}`)}</span>
                 </section>
             {/if}
@@ -101,7 +101,7 @@
             <!-- Alert Message -->
             {#if action.alertMessage}
                 <section class="info-section">
-                    <label>{$t('session.labels.alert-message')}:</label>
+                    <span class="info-section-label">{$t('session.labels.alert-message')}:</span>
                     <p class="alert-message">{action.alertMessage}</p>
                 </section>
             {/if}
@@ -110,7 +110,7 @@
         <!-- Reasoning -->
         {#if action.reasoning}
             <section class="info-section">
-                <label>{$t('session.labels.reasoning')}:</label>
+                <span class="info-section-label">{$t('session.labels.reasoning')}:</span>
                 <p class="reasoning-text">{action.reasoning}</p>
             </section>
         {/if}
@@ -118,7 +118,7 @@
         <!-- Clinical Context -->
         {#if action.clinicalContext}
             <section class="info-section">
-                <label>{$t('session.labels.clinical-context')}:</label>
+                <span class="info-section-label">{$t('session.labels.clinical-context')}:</span>
                 <p class="clinical-context-text">{action.clinicalContext}</p>
             </section>
         {/if}
@@ -207,7 +207,7 @@
         color: var(--color-text-primary, #1f2937);
     }
 
-    .info-section label {
+    .info-section-label {
         display: block;
         font-size: 0.875rem;
         font-weight: 500;

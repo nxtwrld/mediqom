@@ -78,7 +78,7 @@
         <!-- Quote Section -->
         {#if symptom.quote}
             <section class="session-info-section">
-                <label>{$t('session.labels.quote')}:</label>
+                <span class="session-info-label">{$t('session.labels.quote')}:</span>
                 <p class="session-quote-text">"{symptom.quote}"</p>
             </section>
         {/if}

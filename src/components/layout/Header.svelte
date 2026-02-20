@@ -111,12 +111,13 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
                     <!--div class="spacer"></div-->
                     <a href="/med/p/{$profile.id}/documents" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/documents/', $page.url.pathname)}>{ $t('app.nav.documents') }</a>
                     <!--a href="/med/p/{$profile.id}/history" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/history/', $page.url.pathname)}>{ $t('app.nav.history') }</a-->
-                    {#if false && $user && 'isMedical' in $user && $user.isMedical}
-                        <SessionHeaderButton 
+                    {#if false}
+                        {@const u = $user as import('$lib/user').User}
+                        <SessionHeaderButton
                             profileId={$profile.id}
                             patientId={$profile.id}
-                            performerId={$user.id}
-                            performerName={$user.fullName || $user.email}
+                            performerId={u.id}
+                            performerName={u.fullName || u.email}
                             isActive={isActive('/med/p/' + $profile.id + '/session-moe', $page.url.pathname)}
                         />
                     {/if}
@@ -161,9 +162,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         z-index: 1000;
         --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
     }
-    @media (min-width: 768px) { 
-        header,
-        .search-panel {
+    @media (min-width: 768px) {
+        header {
             top: 0;
             bottom: auto;
         }

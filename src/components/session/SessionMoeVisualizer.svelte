@@ -290,9 +290,9 @@
     const questionCount = $derived(sessionData.nodes.actions?.filter(a => a.actionType === 'question')?.length || 0);
     const pendingQuestions = $derived(sessionData.nodes.actions?.filter(a => a.actionType === 'question' && a.status === 'pending')?.length || 0);
     // Use the correct store instance (isolated or global)
-    const selectedItemStore = storeInstance ? storeInstance.viewerStore.selectedItem : selectedItem;
-    const sidebarOpenStore = storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen;
-    const activeTabStore = storeInstance ? storeInstance.viewerStore.activeTab : activeTab;
+    const selectedItemStore = $derived(storeInstance ? storeInstance.viewerStore.selectedItem : selectedItem);
+    const sidebarOpenStore = $derived(storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen);
+    const activeTabStore = $derived(storeInstance ? storeInstance.viewerStore.activeTab : activeTab);
     
     const currentSidebarOpen = $derived($sidebarOpenStore);
     const currentSelectedItem = $derived($selectedItemStore);
@@ -418,7 +418,7 @@
 
     <!-- Mobile sidebar overlay -->
     {#if isMobile && currentSidebarOpen}
-        <div class="mobile-overlay" onclick={toggleSidebar}></div>
+        <div class="mobile-overlay" onclick={toggleSidebar} role="button" tabindex="0" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleSidebar(); }}></div>
     {/if}
 </div>
 

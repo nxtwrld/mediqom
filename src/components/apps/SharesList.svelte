@@ -33,7 +33,7 @@
                 {$t('app.apps.items-linked-count', { values: { count: share.links.length } })}
             </a>
             <div class="tools">
-                <button class="tool -negative" onclick={() => removeShare(share)}>
+                <button class="tool -negative" aria-label="Remove share" onclick={() => removeShare(share)}>
                     <svg>
                         <use href="/sprite.svg#remove" />
                     </svg>

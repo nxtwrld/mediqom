@@ -33,7 +33,7 @@
     }
 
     let { data }: Props = $props();
-    logger.api.debug('Performer data:', $state.snapshot(data))
+    $effect(() => { logger.api.debug('Performer data:', $state.snapshot(data)); });
 
     // Generic function to check if a value is valid (not undefined, null, empty string, or "undefined" string)
     function isValidValue(value: any): boolean {

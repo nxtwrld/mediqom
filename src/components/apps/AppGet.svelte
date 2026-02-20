@@ -22,8 +22,10 @@
 
     let { app, items = [] }: Props = $props();
     
-    logger.api.debug('App', app);
-    logger.api.debug('Items', items);
+    $effect(() => {
+        logger.api.debug('App', app);
+        logger.api.debug('Items', items);
+    });
     
     const dispatch = createEventDispatcher();
     let reviewData: boolean = $state(false);

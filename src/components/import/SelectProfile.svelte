@@ -98,8 +98,6 @@ class="button selected-profile link-{linkFrom}"
         z-index: -1;
     }
 
-    .selected-profile:hover:before {
-    }
 
     .link-top {
         margin-top: 1rem;

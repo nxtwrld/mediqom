@@ -233,12 +233,17 @@
     style="width: {sidebarWidth}px"
   >
     <!-- Resize Handle -->
-    <div 
+    <div
       class="resize-handle"
       onmousedown={startResize}
-      role="separator"
+      onkeydown={(e) => { if (e.key === 'ArrowLeft') sidebarWidth = Math.min(800, sidebarWidth + 10); if (e.key === 'ArrowRight') sidebarWidth = Math.max(300, sidebarWidth - 10); }}
+      role="slider"
       aria-orientation="vertical"
       aria-label={$t('app.chat.sidebar.resize')}
+      aria-valuenow={sidebarWidth}
+      aria-valuemin={300}
+      aria-valuemax={800}
+      tabindex="0"
     ></div>
 
     <!-- Header -->

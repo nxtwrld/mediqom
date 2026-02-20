@@ -42,7 +42,7 @@
     }: Props = $props();
 
     // Use isolated stores when provided, otherwise fall back to global stores
-    const sidebarOpenStore = storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen;
+    const sidebarOpenStore = $derived(storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen);
     
     const currentSidebarOpen = $derived($sidebarOpenStore);
 </script>
@@ -52,12 +52,17 @@
         <!-- Desktop Sidebar -->
         <aside class="sidebar desktop" style="width: {sidebarWidth}px">
             <!-- Resize Handle -->
-            <div 
+            <div
                 class="resize-handle"
                 onmousedown={onStartResize}
-                role="separator"
+                onkeydown={(e) => { if (e.key === 'ArrowLeft') onStartResize(e as any); if (e.key === 'ArrowRight') onStartResize(e as any); }}
+                role="slider"
                 aria-orientation="vertical"
                 aria-label="Resize sidebar"
+                aria-valuenow={sidebarWidth}
+                aria-valuemin={200}
+                aria-valuemax={600}
+                tabindex="0"
             ></div>
             
             <!-- Sidebar Header -->
@@ -87,7 +92,7 @@
         <!-- Mobile Sidebar -->
         <aside class="sidebar mobile">
             <div class="mobile-sidebar-header">
-                <button class="close-btn" onclick={onToggleSidebar}>
+                <button class="close-btn" aria-label="Close sidebar" onclick={onToggleSidebar}>
                     <svg><use href="/icons.svg#close" /></svg>
                 </button>
             </div>

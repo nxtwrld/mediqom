@@ -786,7 +786,8 @@
   color: var(--color-text-primary, #1f2937);
 }
 
-.session-info-section label {
+.session-info-section label,
+.session-info-section .session-info-label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -832,7 +833,8 @@
   gap: 0.25rem;
 }
 
-.session-info-item label {
+.session-info-item label,
+.session-info-item .session-info-label {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-text-secondary, #6b7280);

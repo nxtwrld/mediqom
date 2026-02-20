@@ -22,7 +22,7 @@
 
   let { data, key = undefined }: Props = $props();
 
-    logger.api.debug('Attachments data:', data);
+    $effect(() => { logger.api.debug('Attachments data:', data); });
 
     const loadedAttachments = new Map<string, ArrayBuffer>();
 

@@ -133,7 +133,7 @@
       <!-- Clinical Reasoning -->
       {#if link.reasoning}
       <section class="session-info-section">
-          <label>{$t('session.labels.clinical-reasoning')}:</label>
+          <span class="session-info-label">{$t('session.labels.clinical-reasoning')}:</span>
           <p class="session-reasoning-text">{link.reasoning}</p>
       </section>
   {/if}

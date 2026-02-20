@@ -21,7 +21,6 @@
     }: Props = $props();
 
     let showPreviewDisabled = $state(false);
-    console.log(preventer)
 </script>
 
 

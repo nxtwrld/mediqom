@@ -29,12 +29,12 @@
         document: document
     });
 
-    const code: string = item.signal || item.test;
-    const key = code.toLowerCase().replace(/ /g, '_');
-    const title: string = item.signal || item.test;
-    const value: string | number = parseValue(item.value);
-    const unit: string = item.unit || '';
-    const urgency: number = item.urgency || -1;
+    const code = $derived<string>(item.signal || item.test);
+    const key = $derived(code.toLowerCase().replace(/ /g, '_'));
+    const title = $derived<string>(item.signal || item.test);
+    const value = $derived<string | number>(parseValue(item.value));
+    const unit = $derived<string>(item.unit || '');
+    const urgency = $derived<number>(item.urgency || -1);
 
     let referenceRange: {
         low: {

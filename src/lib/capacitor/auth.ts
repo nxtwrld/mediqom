@@ -20,6 +20,10 @@ import type { Session } from '@supabase/supabase-js';
 const AUTH_CALLBACK_PATH = '/auth/callback';
 const UNIVERSAL_LINK_HOST = 'mediqom.com';
 
+// Deduplication: track the last processed auth URL to prevent double-handling
+// when both getLaunchUrl() (cold start) and appUrlOpen (warm start) fire for the same link
+let lastProcessedAuthUrl: string | null = null;
+
 /**
  * Initialize mobile authentication listeners
  * Call this once when the app starts (from +layout.svelte onMount)
@@ -88,6 +92,12 @@ async function handleDeepLink(url: string): Promise<void> {
       urlObj.pathname.startsWith(AUTH_CALLBACK_PATH);
 
     if (isCustomScheme || isUniversalLink) {
+      // Deduplicate: getLaunchUrl() and appUrlOpen can both fire for the same URL
+      if (lastProcessedAuthUrl === url) {
+        console.log('[Mobile Auth] Skipping duplicate auth callback URL');
+        return;
+      }
+      lastProcessedAuthUrl = url;
       await handleAuthCallback(url);
     }
   } catch (error) {

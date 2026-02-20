@@ -67,7 +67,7 @@
         return textContent;
     }
 
-    let language = getSyntaxLanguage(mimeType);
+    const language = $derived(getSyntaxLanguage(mimeType));
     let displayContent = $derived(getDisplayContent());
 </script>
 

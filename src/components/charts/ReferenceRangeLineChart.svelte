@@ -59,8 +59,8 @@ let id = Math.random().toString(36).substring(7);
     }: Props = $props();
 
     // Initialize these after props are available
-    let referenceRange: [number, number] = [ Number(reference.split('-')[0]), Number(reference.split('-')[1]) ];
-    let normalExtent = referenceRange[1] - referenceRange[0];
+    const referenceRange = $derived<[number, number]>([ Number(reference.split('-')[0]), Number(reference.split('-')[1]) ]);
+    const normalExtent = $derived(referenceRange[1] - referenceRange[0]);
 
     // Set default ranges after referenceRange is calculated
     let ranges = $derived([
@@ -69,7 +69,6 @@ let id = Math.random().toString(36).substring(7);
         { name: 'high', min: referenceRange[1], max: referenceRange[1] + normalExtent }
     ]);
 
-    console.log(series, referenceRange, normalExtent);
 
 let svgElement: SVGSVGElement | undefined = $state();
 

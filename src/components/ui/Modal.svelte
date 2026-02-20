@@ -58,7 +58,7 @@
 </script>
 
 <div class="overlay flex -center" role="dialog" aria-modal="true" tabindex="0" onmousedown={handleOverlayMousedown} class:-shade={showShade} bind:this={modalContainer} onkeydown={handleKeydown} transition:fade>
-    <div class="modal-content" role="document" onclick={(e) => e.stopPropagation()} transition:scale>
+    <div class="modal-content" role="document" transition:scale>
         <button class="close" aria-label={$t('aria.ui.close-modal')} onclick={closeModal}>
             <svg>
                 <use href="/icons.svg#close"></use>

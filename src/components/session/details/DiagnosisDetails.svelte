@@ -108,7 +108,7 @@
       <!-- Clinical Reasoning -->
       {#if diagnosis.reasoning}
         <section class="session-info-section">
-            <label>{$t('session.labels.clinical-reasoning')}:</label>
+            <span class="session-info-label">{$t('session.labels.clinical-reasoning')}:</span>
             <p class="session-reasoning-text">{diagnosis.reasoning}</p>
         </section>
         {/if}
