@@ -7,12 +7,12 @@ import type { SessionViewerStoreInstance } from "./session-viewer-store-instance
 
 /**
  * Session Store Manager
- * 
+ *
  * Manages isolated store instances using the new factory pattern.
  * No code duplication - reuses shared utility functions.
  */
 
-export type StoreInstanceType = 'document' | 'global';
+export type StoreInstanceType = "document" | "global";
 
 export interface StoreInstance {
   type: StoreInstanceType;
@@ -21,7 +21,7 @@ export interface StoreInstance {
 }
 
 export interface DocumentStoreInstance extends StoreInstance {
-  type: 'document';
+  type: "document";
   dataStore: SessionDataStoreInstance;
   viewerStore: SessionViewerStoreInstance;
 }
@@ -40,9 +40,11 @@ function generateInstanceId(type: StoreInstanceType): string {
  * Create a document store instance for viewing existing session data
  * Uses factory pattern - NO CODE DUPLICATION
  */
-export function createDocumentStoreInstance(sessionData?: SessionAnalysis): DocumentStoreInstance {
-  const instanceId = generateInstanceId('document');
-  
+export function createDocumentStoreInstance(
+  sessionData?: SessionAnalysis,
+): DocumentStoreInstance {
+  const instanceId = generateInstanceId("document");
+
   logger.session.info("Creating document store instance", { instanceId });
 
   // Create isolated data store using factory function (no duplication!)
@@ -59,18 +61,18 @@ export function createDocumentStoreInstance(sessionData?: SessionAnalysis): Docu
   // Combined cleanup function
   const cleanup = () => {
     logger.session.info("Cleaning up document store instance", { instanceId });
-    
+
     // Cleanup both stores
     viewerStore.cleanup();
     dataStore.cleanup();
-    
+
     // Remove from registry
     activeInstances.delete(instanceId);
   };
 
   // Create combined instance
   const instance: DocumentStoreInstance = {
-    type: 'document',
+    type: "document",
     id: instanceId,
     cleanup,
     dataStore,
@@ -89,20 +91,28 @@ export function createDocumentStoreInstance(sessionData?: SessionAnalysis): Docu
  */
 export function getGlobalStoreInstance() {
   // Import the existing global stores
-  const { sessionData, sessionDataActions } = require('./session-data-store'); 
-  const { sessionViewerStore, sessionViewerActions } = require('./session-viewer-store');
-  const { unifiedSessionStore, unifiedSessionActions } = require('./unified-session-store');
+  const { sessionData, sessionDataActions } = require("./session-data-store");
+  const {
+    sessionViewerStore,
+    sessionViewerActions,
+  } = require("./session-viewer-store");
+  const {
+    unifiedSessionStore,
+    unifiedSessionActions,
+  } = require("./unified-session-store");
 
   logger.session.debug("Returning global store instance for live session");
 
   return {
-    type: 'global' as const,
-    id: 'global',
+    type: "global" as const,
+    id: "global",
     cleanup: () => {
-      logger.session.info("Global store cleanup requested - resetting to initial state");
+      logger.session.info(
+        "Global store cleanup requested - resetting to initial state",
+      );
       unifiedSessionActions.resetSession();
     },
-    
+
     // Existing global stores
     unifiedStore: unifiedSessionStore,
     unifiedActions: unifiedSessionActions,
@@ -116,15 +126,20 @@ export function getGlobalStoreInstance() {
  */
 export function cleanupInstance(instanceId: string): boolean {
   const instance = activeInstances.get(instanceId);
-  
+
   if (!instance) {
-    logger.session.warn("Attempted to cleanup non-existent store instance", { instanceId });
+    logger.session.warn("Attempted to cleanup non-existent store instance", {
+      instanceId,
+    });
     return false;
   }
 
-  logger.session.info("Cleaning up store instance", { instanceId, type: instance.type });
+  logger.session.info("Cleaning up store instance", {
+    instanceId,
+    type: instance.type,
+  });
   instance.cleanup();
-  
+
   return true;
 }
 
@@ -133,25 +148,28 @@ export function cleanupInstance(instanceId: string): boolean {
  */
 export function cleanupAllInstances(): number {
   const count = activeInstances.size;
-  
+
   logger.session.info("Cleaning up all store instances", { count });
-  
+
   for (const [instanceId, instance] of activeInstances) {
     instance.cleanup();
   }
-  
+
   activeInstances.clear();
-  
+
   return count;
 }
 
 /**
  * Get information about active store instances (for debugging)
  */
-export function getActiveInstances(): Array<{ id: string; type: StoreInstanceType }> {
-  return Array.from(activeInstances.values()).map(instance => ({
+export function getActiveInstances(): Array<{
+  id: string;
+  type: StoreInstanceType;
+}> {
+  return Array.from(activeInstances.values()).map((instance) => ({
     id: instance.id,
-    type: instance.type
+    type: instance.type,
   }));
 }
 

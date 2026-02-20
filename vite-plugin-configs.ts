@@ -21,13 +21,19 @@ export function configsPlugin(): Plugin {
       if (id === RESOLVED_ID) {
         try {
           // Model config (YAML)
-          const modelsYamlPath = resolve(process.cwd(), "src/lib/config/models.yaml");
+          const modelsYamlPath = resolve(
+            process.cwd(),
+            "src/lib/config/models.yaml",
+          );
           const modelsYaml = existsSync(modelsYamlPath)
             ? yamlLoad(readFileSync(modelsYamlPath, "utf-8"))
             : null;
 
           // Transcription config (JSON)
-          const transcriptionPath = resolve(process.cwd(), "config/audio-transcription.json");
+          const transcriptionPath = resolve(
+            process.cwd(),
+            "config/audio-transcription.json",
+          );
           const transcription = existsSync(transcriptionPath)
             ? JSON.parse(readFileSync(transcriptionPath, "utf-8"))
             : null;
@@ -35,11 +41,11 @@ export function configsPlugin(): Plugin {
           // Serenity form schemas (JSON)
           const serenityPrePath = resolve(
             process.cwd(),
-            "src/lib/selfassess/forms/form.serenity-therapeutic-pre.json"
+            "src/lib/selfassess/forms/form.serenity-therapeutic-pre.json",
           );
           const serenityPostPath = resolve(
             process.cwd(),
-            "src/lib/selfassess/forms/form.serenity-therapeutic-post.json"
+            "src/lib/selfassess/forms/form.serenity-therapeutic-post.json",
           );
 
           const serenityPre = existsSync(serenityPrePath)

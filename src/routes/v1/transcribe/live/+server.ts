@@ -95,7 +95,10 @@ function float32ToWav(intended: Float32Array, sampleRate: number): Uint8Array {
   return new Uint8Array(dataBuffer);
 }
 
-function flattenChunks(chunks: Float32Array[], takeSamples: number): Float32Array {
+function flattenChunks(
+  chunks: Float32Array[],
+  takeSamples: number,
+): Float32Array {
   const out = new Float32Array(takeSamples);
   let written = 0;
   while (chunks.length > 0 && written < takeSamples) {
@@ -151,8 +154,10 @@ export const GET: RequestHandler = async ({ request }) => {
   let processing = false;
   let sequence = 0;
   let lastClientSeq: number | undefined = undefined;
-  let lastInstructions: Pick<ClientAudioMessage, "lang" | "translate" | "prompt"> =
-    {};
+  let lastInstructions: Pick<
+    ClientAudioMessage,
+    "lang" | "translate" | "prompt"
+  > = {};
 
   async function maybeProcess(force = false) {
     if (processing) return;

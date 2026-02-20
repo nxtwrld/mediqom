@@ -74,15 +74,38 @@
           "name": "nova-2",
           "description": "Deepgram Nova-2 General Model",
           "streamingSupport": true,
-          "languages": ["en", "cs", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zh"],
-          "features": ["punctuate", "diarize", "smart_format", "interim_results"]
+          "languages": [
+            "en",
+            "cs",
+            "de",
+            "es",
+            "fr",
+            "it",
+            "ja",
+            "ko",
+            "pt",
+            "ru",
+            "zh"
+          ],
+          "features": [
+            "punctuate",
+            "diarize",
+            "smart_format",
+            "interim_results"
+          ]
         },
         "nova-2-medical": {
           "name": "nova-2-medical",
           "description": "Deepgram Nova-2 Medical (optimized for healthcare)",
           "streamingSupport": true,
           "languages": ["en", "cs", "de", "es", "fr"],
-          "features": ["punctuate", "diarize", "smart_format", "interim_results", "medical_vocabulary"]
+          "features": [
+            "punctuate",
+            "diarize",
+            "smart_format",
+            "interim_results",
+            "medical_vocabulary"
+          ]
         }
       },
       "streamingSettings": {

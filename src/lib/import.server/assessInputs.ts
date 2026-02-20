@@ -89,11 +89,7 @@ export default async function assess(
   )) as OcrResult;
 
   // === PASS 2: Document assessment (text-only call — cheaper/faster) ===
-  progressCallback?.(
-    "ai_processing",
-    70,
-    `Pass 2: Classifying documents...`,
-  );
+  progressCallback?.("ai_processing", 70, `Pass 2: Classifying documents...`);
 
   // Build text content for Pass 2
   const textContent: Content[] = [

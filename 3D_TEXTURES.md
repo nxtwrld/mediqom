@@ -4,13 +4,13 @@ Complete reference for converting the raw anatomy source textures into web-ready
 
 ## Current State Summary
 
-| Fact | Detail |
-|------|--------|
-| **OBJ UV coordinates** | All systems have UVs. Muscular system: 65K `vt` entries, 312 groups, all sharing `usemtl wire_088088225` (single material, one UV space) |
-| **Texture naming** | `<part>_<type>.<ext>` — CM (color), NM (normal), DM (displacement), BM (bump), OM (opacity) |
-| **Source textures** | ~110 male, ~110 female files. Formats: TIF (48MB), BMP (48MB), PNG, JPG. Resolution: 4096x4096+ |
-| **Blender file** | `aouros/assets-src/AnatomyModel/full_male_anatomy_blender/full_male_anatomy.blend` with all textures alongside |
-| **Texture-to-mesh mapping** | Locked in `.max`/`.blend` files. MTL exports only contain flat colors — no texture references |
+| Fact                         | Detail                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **OBJ UV coordinates**       | All systems have UVs. Muscular system: 65K `vt` entries, 312 groups, all sharing `usemtl wire_088088225` (single material, one UV space)               |
+| **Texture naming**           | `<part>_<type>.<ext>` — CM (color), NM (normal), DM (displacement), BM (bump), OM (opacity)                                                            |
+| **Source textures**          | ~110 male, ~110 female files. Formats: TIF (48MB), BMP (48MB), PNG, JPG. Resolution: 4096x4096+                                                        |
+| **Blender file**             | `aouros/assets-src/AnatomyModel/full_male_anatomy_blender/full_male_anatomy.blend` with all textures alongside                                         |
+| **Texture-to-mesh mapping**  | Locked in `.max`/`.blend` files. MTL exports only contain flat colors — no texture references                                                          |
 | **Muscular system textures** | Body-region based (toroso_CM, arm_CM, upleg_CM, lowerleg_CM, face_CM) — NOT per-muscle. The 312 muscles share UV space mapped to these region textures |
 
 ---
@@ -55,13 +55,13 @@ Shader Editor layout per material:
 
 **Key settings on Principled BSDF:**
 
-| Parameter | Value | Reason |
-|-----------|-------|--------|
-| Roughness | 0.65 | Muscles are moist but not mirror-like |
-| Metallic | 0.0 | Organic tissue |
-| Subsurface Weight | 0.05–0.1 | Subtle SSS for fleshy look |
-| Subsurface Color | Slightly warmer/redder than base | Realistic skin/muscle scattering |
-| Specular IOR Level | 0.5 | Default |
+| Parameter          | Value                            | Reason                                |
+| ------------------ | -------------------------------- | ------------------------------------- |
+| Roughness          | 0.65                             | Muscles are moist but not mirror-like |
+| Metallic           | 0.0                              | Organic tissue                        |
+| Subsurface Weight  | 0.05–0.1                         | Subtle SSS for fleshy look            |
+| Subsurface Color   | Slightly warmer/redder than base | Realistic skin/muscle scattering      |
+| Specular IOR Level | 0.5                              | Default                               |
 
 ### Step 4: Handle Normal Maps — Tangent Space Conversion
 
@@ -120,13 +120,14 @@ material.bumpScale = 0.5;
 
 The source textures are **48MB TIF/BMP** (4096x4096+). Target sizes for web:
 
-| Target | Resolution | Format | Est. Size |
-|--------|-----------|--------|-----------|
-| Desktop | 2048x2048 | JPG (quality 85) or WebP | 200-500 KB each |
-| Mobile | 1024x1024 | JPG (quality 80) or WebP | 50-150 KB each |
-| KTX2/Basis (advanced) | 2048x2048 | GPU-compressed | 100-300 KB each |
+| Target                | Resolution | Format                   | Est. Size       |
+| --------------------- | ---------- | ------------------------ | --------------- |
+| Desktop               | 2048x2048  | JPG (quality 85) or WebP | 200-500 KB each |
+| Mobile                | 1024x1024  | JPG (quality 80) or WebP | 50-150 KB each  |
+| KTX2/Basis (advanced) | 2048x2048  | GPU-compressed           | 100-300 KB each |
 
 **In Blender:**
+
 1. Image Editor → Image → Scale: resize to 2048x2048
 2. Image → Save As: choose JPG or PNG
 3. Repeat for all CM, NM, baked-NM textures
@@ -153,17 +154,17 @@ This is the **most critical step** — glTF is Three.js's preferred format and p
 
 **In Blender:** File → Export → glTF 2.0 (.glb/.gltf)
 
-| Setting | Value | Why |
-|---------|-------|-----|
-| Format | glTF Separate (.gltf + .bin + textures) | Allows texture swapping, caching |
-| Include | Selected Objects (export per system) | Separate files per anatomy system |
-| Transform → Y Up | Yes | Three.js uses Y-up |
-| Mesh → Apply Modifiers | Yes | Flatten subdivision etc. |
-| Mesh → UVs | Yes | Preserve UV mapping |
-| Mesh → Normals | Yes | Preserve vertex normals |
-| Mesh → Tangents | Yes | Required for normal maps |
-| Material → Images | JPEG/WebP or None (if separate) | Web-optimized |
-| Compression → Draco | Yes | 75-85% geometry size reduction |
+| Setting                | Value                                   | Why                               |
+| ---------------------- | --------------------------------------- | --------------------------------- |
+| Format                 | glTF Separate (.gltf + .bin + textures) | Allows texture swapping, caching  |
+| Include                | Selected Objects (export per system)    | Separate files per anatomy system |
+| Transform → Y Up       | Yes                                     | Three.js uses Y-up                |
+| Mesh → Apply Modifiers | Yes                                     | Flatten subdivision etc.          |
+| Mesh → UVs             | Yes                                     | Preserve UV mapping               |
+| Mesh → Normals         | Yes                                     | Preserve vertex normals           |
+| Mesh → Tangents        | Yes                                     | Required for normal maps          |
+| Material → Images      | JPEG/WebP or None (if separate)         | Web-optimized                     |
+| Compression → Draco    | Yes                                     | 75-85% geometry size reduction    |
 
 **Export per system** — one glTF per anatomy layer:
 
@@ -180,16 +181,16 @@ vascular_system.glb
 After export, load with `GLTFLoader` instead of `OBJLoader` + `MTLLoader`:
 
 ```typescript
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/'); // host Draco WASM decoder
+dracoLoader.setDecoderPath("/draco/"); // host Draco WASM decoder
 
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-gltfLoader.load('/anatomy_models/muscular_system.glb', (gltf) => {
+gltfLoader.load("/anatomy_models/muscular_system.glb", (gltf) => {
   const model = gltf.scene;
   // Materials, textures, normals all loaded automatically
   scene.add(model);
@@ -197,6 +198,7 @@ gltfLoader.load('/anatomy_models/muscular_system.glb', (gltf) => {
 ```
 
 **glTF automatically handles:**
+
 - Material/texture slot assignments (base color, normal, etc.)
 - Correct tangent space for normal maps
 - PBR metallic-roughness workflow
@@ -207,13 +209,13 @@ gltfLoader.load('/anatomy_models/muscular_system.glb', (gltf) => {
 ## Adaptive Texture Loading (Mobile vs Desktop)
 
 ```typescript
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { TextureLoader } from 'three';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { TextureLoader } from "three";
 
-const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent)
-  || window.innerWidth < 768;
+const isMobile =
+  /Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
 
-const textureRes = isMobile ? '1024' : '2048';
+const textureRes = isMobile ? "1024" : "2048";
 const texturePath = `/anatomy_textures/${textureRes}/`;
 
 // If using glTF Separate format, swap texture paths after load:
@@ -234,18 +236,18 @@ gltfLoader.load(`/anatomy_models/muscular_system.gltf`, (gltf) => {
 
 ## Gotchas Checklist
 
-| Issue | Fix |
-|-------|-----|
-| **Normal map Y-flip** | Check in Blender viewport first. If lighting looks wrong, flip green channel. glTF export handles OpenGL convention automatically |
-| **Color space** | CM textures = sRGB. NM/BM/DM textures = Non-Color (linear). Set in Image Texture node |
-| **Displacement at runtime** | Don't use `displacementMap` — bake into normals instead (Step 5 Option A) |
-| **Texture resolution** | Max 2048x2048 for web. Normal maps: PNG/KTX2 only (no JPG) |
-| **glTF uses metallic-roughness** | Not specular-glossiness. Principled BSDF maps correctly |
-| **Mesh names preserved** | glTF export keeps Blender object names → Three.js `scene.getObjectByName()` still works |
-| **312 draw calls** | Each muscle = separate mesh = separate draw call. Future optimization: merge muscles by body region into texture atlases |
-| **Draco decoder** | Must host WASM files at `/draco/` path. Copy from `node_modules/three/examples/jsm/libs/draco/` |
-| **Mobile texture memory** | 8 textures x 2048² x 4 bytes = ~128MB GPU RAM. Use 1024² on mobile (~32MB) |
-| **glTF flipY** | glTF uses `flipY = false` convention. If loading textures manually, set `texture.flipY = false` |
+| Issue                            | Fix                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Normal map Y-flip**            | Check in Blender viewport first. If lighting looks wrong, flip green channel. glTF export handles OpenGL convention automatically |
+| **Color space**                  | CM textures = sRGB. NM/BM/DM textures = Non-Color (linear). Set in Image Texture node                                             |
+| **Displacement at runtime**      | Don't use `displacementMap` — bake into normals instead (Step 5 Option A)                                                         |
+| **Texture resolution**           | Max 2048x2048 for web. Normal maps: PNG/KTX2 only (no JPG)                                                                        |
+| **glTF uses metallic-roughness** | Not specular-glossiness. Principled BSDF maps correctly                                                                           |
+| **Mesh names preserved**         | glTF export keeps Blender object names → Three.js `scene.getObjectByName()` still works                                           |
+| **312 draw calls**               | Each muscle = separate mesh = separate draw call. Future optimization: merge muscles by body region into texture atlases          |
+| **Draco decoder**                | Must host WASM files at `/draco/` path. Copy from `node_modules/three/examples/jsm/libs/draco/`                                   |
+| **Mobile texture memory**        | 8 textures x 2048² x 4 bytes = ~128MB GPU RAM. Use 1024² on mobile (~32MB)                                                        |
+| **glTF flipY**                   | glTF uses `flipY = false` convention. If loading textures manually, set `texture.flipY = false`                                   |
 
 ---
 
@@ -270,42 +272,42 @@ Since the **Blender file already exists** with textures:
 
 All 312 muscles share one UV space mapped to these region textures.
 
-| Body Region | CM (Color) | NM (Normal) | DM (Displacement) | BM (Bump) |
-|-------------|:---:|:---:|:---:|:---:|
-| toroso (torso) | TIF | - | - | TIF |
-| arm | TIF | - | - | TIF |
-| upleg | TIF | - | - | TIF |
-| lowerleg | TIF | - | - | TIF |
-| face | TIF | - | TIF | - |
+| Body Region    | CM (Color) | NM (Normal) | DM (Displacement) | BM (Bump) |
+| -------------- | :--------: | :---------: | :---------------: | :-------: |
+| toroso (torso) |    TIF     |      -      |         -         |    TIF    |
+| arm            |    TIF     |      -      |         -         |    TIF    |
+| upleg          |    TIF     |      -      |         -         |    TIF    |
+| lowerleg       |    TIF     |      -      |         -         |    TIF    |
+| face           |    TIF     |      -      |        TIF        |     -     |
 
 ### Skeletal System
 
-| Region | CM | NM | DM | BM |
-|--------|:---:|:---:|:---:|:---:|
-| skull | JPG | - | JPG | - |
-| spine | JPG | - | JPG | - |
+| Region | CM  | NM  | DM  | BM  |
+| ------ | :-: | :-: | :-: | :-: |
+| skull  | JPG |  -  | JPG |  -  |
+| spine  | JPG |  -  | JPG |  -  |
 
 ### Organs
 
-| Organ | CM | NM | DM | BM |
-|-------|:---:|:---:|:---:|:---:|
-| closed_heart | JPG | JPG | JPG | - |
-| liver_right | TIF | TIF | - | - |
-| liver_left | TIF | TIF | - | - |
-| stomach | TIF | TIF | - | - |
-| kidneys | TIF | - | TIF | - |
-| brain | TIF | - | - | - |
-| lungs | TIF | - | TIF | - |
+| Organ        | CM  | NM  | DM  | BM  |
+| ------------ | :-: | :-: | :-: | :-: |
+| closed_heart | JPG | JPG | JPG |  -  |
+| liver_right  | TIF | TIF |  -  |  -  |
+| liver_left   | TIF | TIF |  -  |  -  |
+| stomach      | TIF | TIF |  -  |  -  |
+| kidneys      | TIF |  -  | TIF |  -  |
+| brain        | TIF |  -  |  -  |  -  |
+| lungs        | TIF |  -  | TIF |  -  |
 
 ### Texture Type Key
 
-| Code | Full Name | Color Space | Web Format |
-|------|-----------|-------------|------------|
-| CM | Color Map | sRGB | JPG / WebP |
-| NM | Normal Map | Non-Color (Linear) | PNG / KTX2 (lossless only) |
-| DM | Displacement Map | Non-Color (Linear) | Bake into NM (see Step 5) |
-| BM | Bump Map | Non-Color (Linear) | PNG / KTX2 |
-| OM | Opacity Map | Non-Color (Linear) | PNG (alpha channel) |
+| Code | Full Name        | Color Space        | Web Format                 |
+| ---- | ---------------- | ------------------ | -------------------------- |
+| CM   | Color Map        | sRGB               | JPG / WebP                 |
+| NM   | Normal Map       | Non-Color (Linear) | PNG / KTX2 (lossless only) |
+| DM   | Displacement Map | Non-Color (Linear) | Bake into NM (see Step 5)  |
+| BM   | Bump Map         | Non-Color (Linear) | PNG / KTX2                 |
+| OM   | Opacity Map      | Non-Color (Linear) | PNG (alpha channel)        |
 
 ---
 
@@ -334,6 +336,7 @@ cp -r node_modules/three/examples/jsm/libs/draco/ static/draco/
 ```
 
 Files needed in `static/draco/`:
+
 - `draco_decoder.wasm`
 - `draco_wasm_wrapper.js`
 - `draco_decoder.js` (fallback for non-WASM browsers)

@@ -1,14 +1,14 @@
-import { enhancedAIProvider } from '$lib/ai/providers/enhanced-abstraction';
-import { serenityFormExtractionSchema } from './serenity-schema';
-import type { TokenUsage } from '$lib/ai/types.d';
-import type { SerenityFormResponse } from './types';
-import { prompts } from 'virtual:prompts';
-import { configs } from 'virtual:configs';
+import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
+import { serenityFormExtractionSchema } from "./serenity-schema";
+import type { TokenUsage } from "$lib/ai/types.d";
+import type { SerenityFormResponse } from "./types";
+import { prompts } from "virtual:prompts";
+import { configs } from "virtual:configs";
 
 export async function analyzeSerenityForm(
   transcript: string,
-  formType: 'pre' | 'post',
-  language: string = 'en'
+  formType: "pre" | "post",
+  language: string = "en",
 ): Promise<SerenityFormResponse> {
   // Load prompt from build-time virtual module
   const promptTemplate = prompts.serenityFormAnalysis;
@@ -16,9 +16,9 @@ export async function analyzeSerenityForm(
   // Construct content with prompt + transcript
   const content = [
     {
-      type: 'text' as const,
-      text: `${promptTemplate}\n\n## Transcript to Analyze\n\n${transcript}\n\nForm Type: ${formType === 'pre' ? 'Pre-Session' : 'Post-Session'}`
-    }
+      type: "text" as const,
+      text: `${promptTemplate}\n\n## Transcript to Analyze\n\n${transcript}\n\nForm Type: ${formType === "pre" ? "Pre-Session" : "Post-Session"}`,
+    },
   ];
 
   // Token tracking
@@ -31,9 +31,9 @@ export async function analyzeSerenityForm(
     tokenUsage,
     {
       language,
-      flowType: 'serenity_form_analysis' as any,
+      flowType: "serenity_form_analysis" as any,
       temperature: 0, // Deterministic extraction
-    }
+    },
   );
 
   // Calculate total score
@@ -42,8 +42,8 @@ export async function analyzeSerenityForm(
     result.eyeMovement,
     result.bodyMovement,
     result.vocalizationBreathing,
-    result.environmentalEngagement
-  ].filter(s => s !== undefined);
+    result.environmentalEngagement,
+  ].filter((s) => s !== undefined);
 
   const totalScore = scores.reduce((sum, s) => sum + s, 0);
 
@@ -52,7 +52,8 @@ export async function analyzeSerenityForm(
 
   // Find interpretation range
   const interpretation = formSchema.scoringInterpretation.ranges.find(
-    (range: any) => totalScore >= range.minScore && totalScore <= range.maxScore
+    (range: any) =>
+      totalScore >= range.minScore && totalScore <= range.maxScore,
   );
 
   return {
@@ -62,15 +63,15 @@ export async function analyzeSerenityForm(
       eyeMovement: result.eyeMovement,
       bodyMovement: result.bodyMovement,
       vocalizationBreathing: result.vocalizationBreathing,
-      environmentalEngagement: result.environmentalEngagement
+      environmentalEngagement: result.environmentalEngagement,
     },
     totalScore,
     interpretation: {
-      range: interpretation?.interpretation || 'Unknown',
-      guidance: interpretation?.guidance || ''
+      range: interpretation?.interpretation || "Unknown",
+      guidance: interpretation?.guidance || "",
     },
     confidence: result.confidence || 0.8,
     unansweredQuestions: result.unansweredQuestions || [],
-    reasoning: result.reasoning
+    reasoning: result.reasoning,
   };
 }

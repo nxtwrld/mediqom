@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({
   const { type, metadata, content, attachments, keys } = await request.json();
 
   // Debug logging
-  console.log('📝 [Documents API] POST request:', {
+  console.log("📝 [Documents API] POST request:", {
     hasType: !!type,
     type: type,
     hasMetadata: !!metadata,
@@ -61,7 +61,9 @@ export const POST: RequestHandler = async ({
   });
 
   if (!type || !metadata) {
-    console.error('❌ [Documents API] Invalid request - missing type or metadata');
+    console.error(
+      "❌ [Documents API] Invalid request - missing type or metadata",
+    );
     return error(400, { message: "Invalid request" });
   }
 
@@ -112,9 +114,14 @@ export const POST: RequestHandler = async ({
   const document_id = documentInsert[0].id;
 
   if (!keys || !Array.isArray(keys) || keys.length === 0) {
-    console.error('❌ [Documents API] Invalid keys array', { keys, type: typeof keys });
+    console.error("❌ [Documents API] Invalid keys array", {
+      keys,
+      type: typeof keys,
+    });
     await supabase.from("documents").delete().eq("id", document_id);
-    return error(400, { message: "Invalid keys - keys must be a non-empty array" });
+    return error(400, {
+      message: "Invalid keys - keys must be a non-empty array",
+    });
   }
 
   keys.forEach((key: any) => {

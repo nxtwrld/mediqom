@@ -35,7 +35,9 @@ export async function createJob(
   });
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({ message: response.statusText }));
+    const err = await response
+      .json()
+      .catch(() => ({ message: response.statusText }));
     throw new Error(err.message || "Failed to create import job");
   }
 
@@ -116,7 +118,9 @@ export async function processJob(
           if (response.status === 409) {
             return finishWithPoll();
           }
-          const err = await response.json().catch(() => ({ message: response.statusText }));
+          const err = await response
+            .json()
+            .catch(() => ({ message: response.statusText }));
           throw new Error(err.message || "Failed to start processing");
         }
 
@@ -147,11 +151,12 @@ export async function processJob(
                     stage: eventData.stage,
                     progress: eventData.progress,
                     message: eventData.message,
-                    status: eventData.type === "complete"
-                      ? "completed"
-                      : eventData.type === "error"
-                        ? "error"
-                        : undefined,
+                    status:
+                      eventData.type === "complete"
+                        ? "completed"
+                        : eventData.type === "error"
+                          ? "error"
+                          : undefined,
                   } as any);
 
                   onProgress?.(eventData);
@@ -223,7 +228,12 @@ async function pollUntilDone(
         addJob(job);
 
         onProgress?.({
-          type: job.status === "completed" ? "complete" : job.status === "error" ? "error" : "progress",
+          type:
+            job.status === "completed"
+              ? "complete"
+              : job.status === "error"
+                ? "error"
+                : "progress",
           stage: job.stage || "",
           progress: job.progress,
           message: job.message || "",

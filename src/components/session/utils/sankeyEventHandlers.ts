@@ -223,11 +223,7 @@ export function handleNodeClick(
   // Use provided viewer actions to select node only
   // Store the original medical data, not the D3 Sankey wrapper
   // Path calculation will be handled by the reactive effect in SessionMoeVisualizer
-  viewerActions.selectItem(
-    "node",
-    node.id,
-    node.data || node,
-  );
+  viewerActions.selectItem("node", node.id, node.data || node);
 
   // Also emit the event for backwards compatibility
   onnodeSelect?.(
@@ -253,11 +249,7 @@ export function handleLinkClick(
   event.stopPropagation();
 
   // Use provided viewer actions to select link
-  viewerActions.selectItem(
-    "link",
-    `${link.source}-${link.target}`,
-    link,
-  );
+  viewerActions.selectItem("link", `${link.source}-${link.target}`, link);
 
   // Also emit the event for backwards compatibility
   onlinkSelect?.(
@@ -326,11 +318,7 @@ export function handleNodeHover(
   // Find the complete node object from allNodeArrays
   const nodeObject = allNodeArrays.find((n) => n.id === nodeId);
   if (nodeObject) {
-    viewerActions.setHoveredItem(
-      "node",
-      nodeId,
-      nodeObject.data || nodeObject,
-    );
+    viewerActions.setHoveredItem("node", nodeId, nodeObject.data || nodeObject);
   }
 }
 

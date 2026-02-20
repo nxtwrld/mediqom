@@ -1,20 +1,20 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import { type Plugin, defineConfig, normalizePath } from 'vite';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import path from 'path';
-import { qomConfigPlugin } from './vite-plugin-qom-config';
-import { promptsPlugin } from './vite-plugin-prompts';
-import { configsPlugin } from './vite-plugin-configs';
+import { sveltekit } from "@sveltejs/kit/vite";
+import { type Plugin, defineConfig, normalizePath } from "vite";
+import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "path";
+import { qomConfigPlugin } from "./vite-plugin-qom-config";
+import { promptsPlugin } from "./vite-plugin-prompts";
+import { configsPlugin } from "./vite-plugin-configs";
 
 // Combined plugin for mobile build initialization
 // Injects all required polyfills and setup in a single script to avoid ordering issues
 function mobileInitPlugin(): Plugin {
   return {
-    name: 'mobile-init',
+    name: "mobile-init",
     transformIndexHtml() {
       return [
         {
-          tag: 'script',
+          tag: "script",
           children: `
 // Global polyfill for Node.js compatibility
 if (typeof global === 'undefined') {
@@ -50,7 +50,7 @@ window.__CAPACITOR_BUILD__ = true;
   };
 })();
           `.trim(),
-          injectTo: 'head-prepend',
+          injectTo: "head-prepend",
         },
       ];
     },
@@ -70,29 +70,32 @@ export default defineConfig({
           src: normalizePath(
             path.join(
               __dirname,
-              'node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js'
-            )
+              "node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js",
+            ),
           ),
-          dest: '',
+          dest: "",
         },
         {
           src: normalizePath(
-            path.join(__dirname, 'node_modules/@ricky0123/vad-web/dist/silero_vad.onnx')
+            path.join(
+              __dirname,
+              "node_modules/@ricky0123/vad-web/dist/silero_vad.onnx",
+            ),
           ),
-          dest: '',
+          dest: "",
         },
         {
           src: normalizePath(
-            path.join(__dirname, 'node_modules/onnxruntime-web/dist/*.wasm')
+            path.join(__dirname, "node_modules/onnxruntime-web/dist/*.wasm"),
           ),
-          dest: '',
+          dest: "",
         },
         // PDF.js files
         {
           src: normalizePath(
-            path.join(__dirname, 'node_modules/pdfjs-dist/build/*.*')
+            path.join(__dirname, "node_modules/pdfjs-dist/build/*.*"),
           ),
-          dest: 'pdfjs',
+          dest: "pdfjs",
         },
       ],
     }),
@@ -100,18 +103,21 @@ export default defineConfig({
   ],
 
   build: {
-    outDir: 'mobile/dist',
+    outDir: "mobile/dist",
     // Don't inline WASM files
     assetsInlineLimit: 0,
     rollupOptions: {
       output: {
         // Code splitting for heavy dependencies
         manualChunks: (id) => {
-          if (id.includes('pdfjs-dist')) return 'pdfjs';
-          if (id.includes('@ricky0123/vad-web') || id.includes('onnxruntime-web'))
-            return 'vad';
-          if (id.includes('three')) return 'three';
-          if (id.includes('d3')) return 'd3';
+          if (id.includes("pdfjs-dist")) return "pdfjs";
+          if (
+            id.includes("@ricky0123/vad-web") ||
+            id.includes("onnxruntime-web")
+          )
+            return "vad";
+          if (id.includes("three")) return "three";
+          if (id.includes("d3")) return "d3";
         },
       },
     },
@@ -124,44 +130,53 @@ export default defineConfig({
 
   optimizeDeps: {
     esbuildOptions: {
-      target: 'esnext',
+      target: "esnext",
       define: {
-        global: 'globalThis',
+        global: "globalThis",
       },
     },
     exclude: [
-      'onnx-runtime-web',
-      'cornerstone-core',
-      'cornerstone-wado-image-loader',
-      'dicom-parser',
+      "onnx-runtime-web",
+      "cornerstone-core",
+      "cornerstone-wado-image-loader",
+      "dicom-parser",
     ],
-    include: ['buffer', 'util', 'process', 'events', 'stream-browserify', 'crypto-browserify'],
+    include: [
+      "buffer",
+      "util",
+      "process",
+      "events",
+      "stream-browserify",
+      "crypto-browserify",
+    ],
   },
 
   resolve: {
     alias: {
-      crypto: 'crypto-browserify',
-      buffer: 'buffer',
-      stream: 'stream-browserify',
-      events: 'events',
-      util: 'util/util.js',
-      process: 'process/browser',
+      crypto: "crypto-browserify",
+      buffer: "buffer",
+      stream: "stream-browserify",
+      events: "events",
+      util: "util/util.js",
+      process: "process/browser",
     },
   },
 
   define: {
-    global: 'globalThis',
-    Buffer: ['buffer', 'Buffer'],
-    'process.env': {},
+    global: "globalThis",
+    Buffer: ["buffer", "Buffer"],
+    "process.env": {},
     // Mobile build flag - use JSON.stringify to ensure proper boolean replacement
-    __CAPACITOR_BUILD__: 'true',
+    __CAPACITOR_BUILD__: "true",
     // Also set on window for runtime access
-    'window.__CAPACITOR_BUILD__': 'true',
+    "window.__CAPACITOR_BUILD__": "true",
     // API base URL for mobile - points to production backend
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'https://mediqom.com'),
+    "import.meta.env.VITE_API_BASE_URL": JSON.stringify(
+      process.env.VITE_API_BASE_URL || "https://mediqom.com",
+    ),
   },
 
   test: {
-    include: ['src/**/*.{test,spec}.{js,ts}'],
+    include: ["src/**/*.{test,spec}.{js,ts}"],
   },
 });

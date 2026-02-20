@@ -22,8 +22,11 @@ export function promptsPlugin(): Plugin {
           // Load all prompts at build time
           const prompts = {
             serenityFormAnalysis: readFileSync(
-              resolve(process.cwd(), "src/lib/prompts/serenity-form-analysis.md"),
-              "utf-8"
+              resolve(
+                process.cwd(),
+                "src/lib/prompts/serenity-form-analysis.md",
+              ),
+              "utf-8",
             ),
             // Add other prompts here as needed
           };

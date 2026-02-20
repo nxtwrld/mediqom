@@ -12,6 +12,7 @@ You are an expert developer specializing in Mediqom's medical configuration sche
 1. **Medical Configuration Schemas** (`src/lib/configurations/` - 54 files)
 
    Schema categories:
+
    - **Core schemas** (shared properties): `core.patient.ts`, `core.performer.ts`, `core.diagnosis.ts`, `core.signals.ts`, `core.summary.ts`, `core.bodyParts.ts`, `core.recommendations.ts`
    - **Specialized schemas**: `admission.ts`, `allergies.ts`, `anesthesia.ts`, `assessment.ts`, `dental.ts`, `ecg.ts`, `echo.ts`, `gross-findings.ts`, `imaging.ts`, `imaging-findings.ts`, `immunization.ts`, `laboratory.ts`, `medications.ts`, `microscopic.ts`, `molecular.ts`, `prescription.ts`, `procedures.ts`, `report.ts`, `social-history.ts`, `special-stains.ts`, `specimens.ts`, `treatment-plan.ts`, `treatment-response.ts`, `treatments.ts`, `triage.ts`, `tumor-characteristics.ts`
    - **Detection schemas**: `feature-detection.ts`, `anomaly-detection.ts`, `bodyparts.extraction.ts`, `diagnosis.extraction.ts`, `patient.extraction.ts`, `performer.extraction.ts`, `patient-performer-detection.ts`, `measurement-extraction.ts`, `medical-imaging-analysis.ts`, `visual-analysis.ts`
@@ -20,6 +21,7 @@ You are an expert developer specializing in Mediqom's medical configuration sche
 
 2. **Schema Pattern**
    All schemas follow the `FunctionDefinition` pattern with JSON Schema parameters:
+
    ```typescript
    export const schemaName: FunctionDefinition = {
      name: 'extract_...',
@@ -35,10 +37,12 @@ You are an expert developer specializing in Mediqom's medical configuration sche
      }
    };
    ```
+
    Core schemas (`core.*.ts`) define reusable property sets that spread into specialized schemas.
 
 3. **Document Section Components** (`src/components/documents/Section*.svelte` - 33 files)
    Each specialized schema maps 1:1 to a display component:
+
    - `SectionAdmission.svelte` <-> `admission.ts`
    - `SectionAllergies.svelte` <-> `allergies.ts`
    - `SectionDiagnosis.svelte` <-> `core.diagnosis.ts`
@@ -56,6 +60,7 @@ You are an expert developer specializing in Mediqom's medical configuration sche
    - Multi-language support (Czech, German, English)
 
 **Key Patterns:**
+
 - When adding a new medical type: create schema in `configurations/`, create `Section*.svelte` component, add to LangGraph node if needed
 - Core schemas are spread into specialized schemas - changes cascade
 - Schema `required` arrays control which fields are mandatory for AI extraction
@@ -63,5 +68,6 @@ You are an expert developer specializing in Mediqom's medical configuration sche
 - Document tags defined in `tags.ts` categorize document types
 
 **Documentation:**
+
 - `AI_IMPORT_USER_CONFIGURATION.md` - Schema configuration for import pipeline
 - `docs/IMPORT.md` - Import architecture overview

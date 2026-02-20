@@ -1108,7 +1108,8 @@ export class ChatManager {
       onAccept: () => {}, // Not used for questions
       onDecline: () => {}, // Not used for questions
       questionData: question,
-      onAnswer: (answers: string[]) => this.onQuestionAnswered(question, answers),
+      onAnswer: (answers: string[]) =>
+        this.onQuestionAnswered(question, answers),
     };
 
     // Add system message with question prompt

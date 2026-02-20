@@ -78,6 +78,7 @@ The project's primary MoE implementation is the QOM (Quality-Outcome-Model) expe
 - **Analysis manager**: `src/lib/session/analysis-manager.ts`
 
 **10-Expert QOM Pipeline Sequence:**
+
 1. `transcript_parser` - Parse raw transcript into structured segments
 2. `symptom_extractor` - Extract symptoms from parsed transcript
 3. `diagnosis_mapper` - Map symptoms to potential diagnoses

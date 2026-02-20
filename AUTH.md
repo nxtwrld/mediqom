@@ -48,10 +48,12 @@ npm install @capacitor/core @capacitor/app @capacitor/preferences
 2. **Site URL**: Set to your production web URL (e.g. `https://yourapp.com`).
 
 3. **Redirect URLs**: Add both web and mobile callback URLs:
+
    ```
    https://yourapp.com/auth/callback
    https://yourapp.com/auth/callback/**
    ```
+
    The mobile Universal Link uses the same `https://` domain — Supabase doesn't need to know about custom URL schemes.
 
 4. **Auth Providers → Email**: Ensure "Enable Email OTP" is on and "Confirm email" is enabled.
@@ -69,7 +71,7 @@ Create a module that detects whether the app is running as a Capacitor native bu
 **`src/lib/config/platform.ts`**
 
 ```typescript
-import { browser } from '$app/environment';
+import { browser } from "$app/environment";
 
 declare global {
   interface Window {
@@ -81,7 +83,9 @@ declare global {
 /** Build-time flag — set via Vite `define` in the mobile config */
 export function isCapacitorBuild(): boolean {
   try {
-    return typeof __CAPACITOR_BUILD__ !== 'undefined' && __CAPACITOR_BUILD__ === true;
+    return (
+      typeof __CAPACITOR_BUILD__ !== "undefined" && __CAPACITOR_BUILD__ === true
+    );
   } catch {
     return false;
   }
@@ -94,7 +98,9 @@ export function isNativePlatform(): boolean {
   if (window.__CAPACITOR_BUILD__) return true;
   try {
     const w = window as Record<string, unknown>;
-    const cap = w['Capacitor'] as { isNativePlatform?: () => boolean } | undefined;
+    const cap = w["Capacitor"] as
+      | { isNativePlatform?: () => boolean }
+      | undefined;
     return cap?.isNativePlatform?.() ?? false;
   } catch {
     return false;
@@ -102,26 +108,28 @@ export function isNativePlatform(): boolean {
 }
 
 /** Returns 'ios', 'android', or 'web' */
-export function getPlatform(): 'ios' | 'android' | 'web' {
-  if (!browser) return 'web';
+export function getPlatform(): "ios" | "android" | "web" {
+  if (!browser) return "web";
   try {
     const w = window as Record<string, unknown>;
-    const cap = w['Capacitor'] as { getPlatform?: () => string } | undefined;
+    const cap = w["Capacitor"] as { getPlatform?: () => string } | undefined;
     const platform = cap?.getPlatform?.();
-    if (platform === 'ios' || platform === 'android') return platform;
-  } catch { /* Capacitor not available */ }
-  return 'web';
+    if (platform === "ios" || platform === "android") return platform;
+  } catch {
+    /* Capacitor not available */
+  }
+  return "web";
 }
 
 /** Auth redirect URL — Universal Link on mobile, origin-relative on web */
 export function getAuthRedirectUrl(): string {
   if (isNativePlatform()) {
-    return 'https://yourapp.com/auth/callback';  // <-- Your domain
+    return "https://yourapp.com/auth/callback"; // <-- Your domain
   }
   if (browser) {
     return `${window.location.origin}/auth/callback`;
   }
-  return '/auth/callback';
+  return "/auth/callback";
 }
 ```
 
@@ -136,10 +144,10 @@ The fix: on mobile, use `createClient` from `@supabase/supabase-js` directly.
 **`src/lib/services/auth/supabase.ts`**
 
 ```typescript
-import { createBrowserClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY } from '$env/static/public';
-import { isCapacitorBuild } from '$lib/config/platform';
+import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY } from "$env/static/public";
+import { isCapacitorBuild } from "$lib/config/platform";
 
 function buildClient() {
   if (isCapacitorBuild()) {
@@ -148,11 +156,11 @@ function buildClient() {
     // breaks deep link auth (code_verifier is lost on app restart).
     return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY, {
       auth: {
-        flowType: 'implicit',
+        flowType: "implicit",
         detectSessionInUrl: false, // we handle deep links manually
         persistSession: true,
         autoRefreshToken: true,
-      }
+      },
     });
   }
   // Web: use SSR-aware client for cookie-based auth
@@ -165,13 +173,13 @@ export const auth = supabase.auth;
 
 ### Why This Works
 
-| | Web | Mobile |
-|---|---|---|
-| **Client** | `createBrowserClient` (SSR) | `createClient` (standard) |
-| **Flow** | PKCE (default) | Implicit |
-| **Session storage** | Cookies (server-readable) | localStorage (persisted in WebView) |
-| **Redirect format** | `?code=abc123` | `#access_token=...&refresh_token=...` |
-| **Token exchange** | `exchangeCodeForSession(code)` | `setSession({ access_token, refresh_token })` |
+|                     | Web                            | Mobile                                        |
+| ------------------- | ------------------------------ | --------------------------------------------- |
+| **Client**          | `createBrowserClient` (SSR)    | `createClient` (standard)                     |
+| **Flow**            | PKCE (default)                 | Implicit                                      |
+| **Session storage** | Cookies (server-readable)      | localStorage (persisted in WebView)           |
+| **Redirect format** | `?code=abc123`                 | `#access_token=...&refresh_token=...`         |
+| **Token exchange**  | `exchangeCodeForSession(code)` | `setSession({ access_token, refresh_token })` |
 
 ---
 
@@ -180,8 +188,8 @@ export const auth = supabase.auth;
 **`src/lib/services/auth/magicLink.ts`**
 
 ```typescript
-import { supabase } from './supabase';
-import { getAuthRedirectUrl } from '$lib/config/platform';
+import { supabase } from "./supabase";
+import { getAuthRedirectUrl } from "$lib/config/platform";
 
 export class MagicLinkAuth {
   static async sendEmailLink(email: string) {
@@ -190,10 +198,10 @@ export class MagicLinkAuth {
       options: {
         emailRedirectTo: getAuthRedirectUrl(),
         shouldCreateUser: true,
-      }
+      },
     });
     if (error) throw error;
-    return { success: true, message: 'Check your email for the magic link!' };
+    return { success: true, message: "Check your email for the magic link!" };
   }
 
   static async signOut() {
@@ -289,55 +297,59 @@ This module is called by the Capacitor `appUrlOpen` listener when the app receiv
 **`src/lib/services/auth/deepLinkHandler.ts`**
 
 ```typescript
-import { supabase } from './supabase';
-import { goto } from '$app/navigation';
+import { supabase } from "./supabase";
+import { goto } from "$app/navigation";
 
 export async function handleDeepLinkAuth(url: string): Promise<void> {
   try {
     const parsed = new URL(url);
 
     // 1. PKCE flow fallback — exchange authorization code
-    const code = parsed.searchParams.get('code');
+    const code = parsed.searchParams.get("code");
     if (code) {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error && data.session) {
         // Update your auth store here
-        await goto('/app', { replaceState: true });
+        await goto("/app", { replaceState: true });
         return;
       }
     }
 
     // 2. Implicit flow — extract tokens from URL fragment
-    const fragment = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
+    const fragment = parsed.hash.startsWith("#")
+      ? parsed.hash.substring(1)
+      : "";
     if (fragment) {
       const params = new URLSearchParams(fragment);
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
 
       if (accessToken && refreshToken) {
         const { data, error } = await supabase.auth.setSession({
           access_token: accessToken,
-          refresh_token: refreshToken
+          refresh_token: refreshToken,
         });
         if (!error && data.session) {
           // Update your auth store here
-          await goto('/app', { replaceState: true });
+          await goto("/app", { replaceState: true });
           return;
         }
       }
     }
 
     // 3. Fallback — check if Supabase auto-detected the session
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session) {
-      await goto('/app', { replaceState: true });
+      await goto("/app", { replaceState: true });
       return;
     }
 
-    await goto('/login?error=auth_failed', { replaceState: true });
+    await goto("/login?error=auth_failed", { replaceState: true });
   } catch (err) {
-    console.error('Deep link auth handler error:', err);
-    await goto('/login?error=auth_failed', { replaceState: true });
+    console.error("Deep link auth handler error:", err);
+    await goto("/login?error=auth_failed", { replaceState: true });
   }
 }
 ```
@@ -412,8 +424,8 @@ A reactive store (Svelte 5 runes) that holds the current session state. On mobil
 **`src/lib/stores/auth.svelte.ts`** (simplified)
 
 ```typescript
-import { supabase } from '$lib/services/auth/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { supabase } from "$lib/services/auth/supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
 class AuthStore {
   user = $state<User | null>(null);
@@ -425,7 +437,9 @@ class AuthStore {
 
   /** Initialize from client session — used on mobile where there's no SSR */
   async initializeFromClient() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     this.updateFromServer(session);
   }
 
@@ -450,6 +464,7 @@ export const authStore = new AuthStore();
 ## 10. Vite Mobile Build Config
 
 The mobile build uses a separate Vite config that:
+
 - Sets `__CAPACITOR_BUILD__` to `true` at build time (for platform detection)
 - Injects a `window.__CAPACITOR_BUILD__` flag into the HTML (for runtime detection)
 - Defines the API base URL (mobile needs absolute URLs since there's no same-origin server)
@@ -457,14 +472,14 @@ The mobile build uses a separate Vite config that:
 **`vite.config.mobile.ts`**
 
 ```typescript
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
-import type { Plugin } from 'vite';
+import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 
 /** Injects mobile-specific scripts into the HTML */
 function mobileInitPlugin(): Plugin {
   return {
-    name: 'mobile-init',
+    name: "mobile-init",
     transformIndexHtml(html) {
       const script = `
 <script>
@@ -484,23 +499,23 @@ function mobileInitPlugin(): Plugin {
     return originalFetch.apply(this, args);
   };
 </script>`;
-      return html.replace('</head>', `${script}\n</head>`);
-    }
+      return html.replace("</head>", `${script}\n</head>`);
+    },
   };
 }
 
 export default defineConfig({
   plugins: [sveltekit(), mobileInitPlugin()],
   define: {
-    __CAPACITOR_BUILD__: 'true',
-    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
-      process.env.VITE_API_BASE_URL || 'https://yourapp.com'
-    )
+    __CAPACITOR_BUILD__: "true",
+    "import.meta.env.VITE_API_BASE_URL": JSON.stringify(
+      process.env.VITE_API_BASE_URL || "https://yourapp.com",
+    ),
   },
   build: {
-    outDir: 'mobile/dist',
-    target: 'esnext',
-  }
+    outDir: "mobile/dist",
+    target: "esnext",
+  },
 });
 ```
 
@@ -509,22 +524,22 @@ You also need a mobile SvelteKit config that uses `adapter-static`:
 **`svelte.config.mobile.js`**
 
 ```javascript
-import adapter from '@sveltejs/adapter-static';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 const config = {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter({
-      pages: 'mobile/dist',
-      assets: 'mobile/dist',
-      fallback: 'index.html',  // SPA fallback
-      strict: false
+      pages: "mobile/dist",
+      assets: "mobile/dist",
+      fallback: "index.html", // SPA fallback
+      strict: false,
     }),
     prerender: {
-      entries: []  // No prerendering for mobile SPA
-    }
-  }
+      entries: [], // No prerendering for mobile SPA
+    },
+  },
 };
 
 export default config;
@@ -537,17 +552,17 @@ export default config;
 **`capacitor.config.ts`**
 
 ```typescript
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'com.yourcompany.yourapp',
-  appName: 'YourApp',
-  webDir: 'mobile/dist',
+  appId: "com.yourcompany.yourapp",
+  appName: "YourApp",
+  webDir: "mobile/dist",
   server: {
     // IMPORTANT: use https scheme so Universal Links work
-    androidScheme: 'https',
-    iosScheme: 'https'
-  }
+    androidScheme: "https",
+    iosScheme: "https",
+  },
 };
 
 export default config;
@@ -604,17 +619,20 @@ Universal Links are preferred over custom schemes for magic links because email 
 Host at `https://yourapp.com/.well-known/assetlinks.json`:
 
 ```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.yourcompany.yourapp",
-    "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yourcompany.yourapp",
+      "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT"]
+    }
   }
-}]
+]
 ```
 
 Get your SHA-256 fingerprint:
+
 ```bash
 keytool -list -v -keystore your-keystore.jks -alias your-alias
 ```
@@ -641,21 +659,21 @@ Automate the config-swap + build + restore cycle:
 **`scripts/mobile-build.js`**
 
 ```javascript
-import { execSync } from 'child_process';
-import { copyFileSync, existsSync, unlinkSync, renameSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import { copyFileSync, existsSync, unlinkSync, renameSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
-const SVELTE_CONFIG = resolve(root, 'svelte.config.js');
-const SVELTE_BACKUP = resolve(root, 'svelte.config.js.bak');
-const SVELTE_MOBILE = resolve(root, 'svelte.config.mobile.js');
+const SVELTE_CONFIG = resolve(root, "svelte.config.js");
+const SVELTE_BACKUP = resolve(root, "svelte.config.js.bak");
+const SVELTE_MOBILE = resolve(root, "svelte.config.mobile.js");
 
 // Server route files to remove during mobile builds
 const SERVER_FILES = [
-  resolve(root, 'src/routes/+layout.server.ts'),
+  resolve(root, "src/routes/+layout.server.ts"),
   // Add any other server-only files here
 ];
 
@@ -668,15 +686,16 @@ try {
 
   // Remove server route files (they cause __data.json 500s in static SPA)
   for (const f of SERVER_FILES) {
-    if (existsSync(f)) renameSync(f, f + '.bak');
+    if (existsSync(f)) renameSync(f, f + ".bak");
   }
 
   // Build
-  execSync('npx vite build --config vite.config.mobile.ts', {
-    cwd: root, stdio: 'inherit'
+  execSync("npx vite build --config vite.config.mobile.ts", {
+    cwd: root,
+    stdio: "inherit",
   });
 
-  console.log('Mobile build complete! Output in mobile/dist/');
+  console.log("Mobile build complete! Output in mobile/dist/");
 } finally {
   // Restore
   if (existsSync(SVELTE_BACKUP)) {
@@ -684,12 +703,13 @@ try {
     unlinkSync(SVELTE_BACKUP);
   }
   for (const f of SERVER_FILES) {
-    if (existsSync(f + '.bak')) renameSync(f + '.bak', f);
+    if (existsSync(f + ".bak")) renameSync(f + ".bak", f);
   }
 }
 ```
 
 Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -706,6 +726,7 @@ Add to `package.json`:
 ## 15. Testing Checklist
 
 ### Build & Deploy
+
 ```bash
 npm run build:mobile
 npx cap sync
@@ -735,28 +756,35 @@ Build and run from Xcode / Android Studio on a real device (simulators don't sup
 ## 16. Troubleshooting
 
 ### `validation_failed` or `code_verifier` errors
+
 **Cause**: The Supabase client is using PKCE flow. The `code_verifier` is stored in cookies/sessionStorage, which is lost when the app restarts via Universal Link.
 **Fix**: Ensure mobile builds use `createClient` (not `createBrowserClient`) with `flowType: 'implicit'`. See step 4.
 
 ### Magic link opens in browser instead of app
+
 **Cause**: Universal Links / App Links not configured correctly.
 **Check**:
+
 - AASA file at `https://yourapp.com/.well-known/apple-app-site-association`
 - Associated Domains capability in Xcode: `applinks:yourapp.com`
 - `androidScheme: 'https'` in Capacitor config
 - App is installed from a build (not via Xcode debug sometimes)
 
 ### Session not persisting after app restart
+
 **Cause**: `persistSession: false` or storage not available.
 **Fix**: Ensure `persistSession: true` in the mobile client options. Supabase uses `localStorage` by default in the WebView, which persists.
 
 ### `detectSessionInUrl` auto-processing
+
 When set to `true` (default), Supabase auto-parses tokens from the URL on page load. On mobile, the deep link handler processes tokens before the page renders, so set `detectSessionInUrl: false` and handle it manually to avoid race conditions.
 
 ### Deep link not firing on cold start
+
 The `appUrlOpen` Capacitor listener only fires when the app is already running. For cold starts (app was killed), use `App.getLaunchUrl()` after Capacitor initializes. See step 8.
 
 ### `goto()` navigation silently fails on mobile (stuck on redirect screen)
+
 **Cause**: Calling `invalidate('supabase:auth')` on native platforms marks the root layout's server data as stale. When `goto('/app')` runs, SvelteKit's client router tries to re-fetch `__data.json` for the invalidated `+layout.server.ts` data. With adapter-static and `prerender: { entries: [] }`, those files don't exist. Capacitor's server returns the HTML fallback instead of JSON, causing a parse error that silently aborts the navigation.
 
 **Fix**: In the `onAuthStateChange` handler in `+layout.svelte`, skip `invalidate()` on native platforms. The client-side `authStore.updateFromServer(session)` is sufficient:
@@ -783,6 +811,7 @@ supabase.auth.onAuthStateChange((event, _session) => {
 **Why it happens**: `+layout.server.ts` declares `depends('supabase:auth')`. When `invalidate('supabase:auth')` is called, SvelteKit marks that data as stale. On the next navigation, the client router must re-fetch it. On web (Vercel), the server responds with fresh JSON. On mobile (adapter-static), there's no server — the fetch returns the HTML fallback page, which can't be parsed as JSON.
 
 ### Authenticated user stuck on home page / redirected to onboarding on cold start
+
 **Cause**: Race condition between auth initialization and page routing. On mobile, `data.session` from the server layout is `null` (no SSR). Svelte mounts children before parents, so the home page's `onMount` fires before the root layout's `onMount` (which initializes auth from the persisted Supabase session). At this point `authStore.isAuthenticated` is `false`, so the page navigates to `/onboarding` before the session is recovered.
 
 **Fix**: Add a `waitForInitialization()` promise to the auth store and await it before routing:

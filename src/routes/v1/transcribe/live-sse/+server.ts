@@ -17,7 +17,9 @@ export const GET: RequestHandler = async ({ url }) => {
       });
 
       // Send initial connection message
-      controller.enqueue(`data: ${JSON.stringify({ type: "connected", sessionId })}\n\n`);
+      controller.enqueue(
+        `data: ${JSON.stringify({ type: "connected", sessionId })}\n\n`,
+      );
     },
     cancel() {
       // Cleanup on disconnect

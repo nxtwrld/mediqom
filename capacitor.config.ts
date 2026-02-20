@@ -1,9 +1,9 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'com.mediqom.app',
-  appName: 'Mediqom',
-  webDir: 'mobile/dist',
+  appId: "com.mediqom.app",
+  appName: "Mediqom",
+  webDir: "mobile/dist",
   bundledWebRuntime: false,
 
   server: {
@@ -12,32 +12,32 @@ const config: CapacitorConfig = {
     // cleartext: true,
 
     // Production settings
-    androidScheme: 'https',
-    iosScheme: 'https',
+    androidScheme: "https",
+    iosScheme: "https",
   },
 
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
       showSpinner: false,
-      androidSpinnerStyle: 'small',
-      spinnerColor: '#3880ff',
+      androidSpinnerStyle: "small",
+      spinnerColor: "#3880ff",
     },
     Keyboard: {
-      resize: 'body',
-      style: 'dark',
+      resize: "body",
+      style: "dark",
       resizeOnFullScreen: true,
     },
     StatusBar: {
-      style: 'dark',
-      backgroundColor: '#ffffff',
+      style: "dark",
+      backgroundColor: "#ffffff",
     },
   },
 
   ios: {
-    contentInset: 'never',
-    preferredContentMode: 'mobile',
+    contentInset: "never",
+    preferredContentMode: "mobile",
     // Deep link scheme configured in Info.plist
   },
 

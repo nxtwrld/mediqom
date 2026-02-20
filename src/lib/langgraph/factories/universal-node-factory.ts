@@ -466,7 +466,9 @@ export class UniversalProcessingNode extends BaseProcessingNode {
 
     // Handle null/undefined AI results
     if (!aiResult) {
-      console.warn(`${this.nodeConfig.nodeName}: AI returned null/undefined result`);
+      console.warn(
+        `${this.nodeConfig.nodeName}: AI returned null/undefined result`,
+      );
       return null;
     }
 
@@ -492,7 +494,7 @@ export class UniversalProcessingNode extends BaseProcessingNode {
       const unwrapped = aiResult[unwrapField];
       console.log(
         `🔧 ${this.nodeConfig.nodeName}: unwrapped field "${unwrapField}"`,
-        { type: Array.isArray(unwrapped) ? 'array' : typeof unwrapped },
+        { type: Array.isArray(unwrapped) ? "array" : typeof unwrapped },
       );
       return unwrapped;
     }
@@ -507,12 +509,21 @@ export class UniversalProcessingNode extends BaseProcessingNode {
    * These are schema-level metadata added for AI extraction but should not be stored.
    */
   private stripWrapperProperties(data: any): any {
-    if (!data || typeof data !== 'object' || Array.isArray(data)) return data;
-    const { processingConfidence, processingNotes, documentContext, ...clean } = data;
-    if (processingConfidence !== undefined || processingNotes !== undefined || documentContext !== undefined) {
+    if (!data || typeof data !== "object" || Array.isArray(data)) return data;
+    const { processingConfidence, processingNotes, documentContext, ...clean } =
+      data;
+    if (
+      processingConfidence !== undefined ||
+      processingNotes !== undefined ||
+      documentContext !== undefined
+    ) {
       console.log(
         `🧹 ${this.nodeConfig.nodeName}: stripped wrapper properties`,
-        { processingConfidence, processingNotes: !!processingNotes, documentContext: !!documentContext },
+        {
+          processingConfidence,
+          processingNotes: !!processingNotes,
+          documentContext: !!documentContext,
+        },
       );
     }
     return clean;
@@ -545,9 +556,7 @@ export class UniversalProcessingNode extends BaseProcessingNode {
 
     // Check for structured data presence
     const structuredFields = Object.keys(data).filter(
-      (key) =>
-        typeof data[key] === "object" &&
-        data[key] !== null,
+      (key) => typeof data[key] === "object" && data[key] !== null,
     );
     confidence += Math.min(structuredFields.length * 0.1, 0.2);
 

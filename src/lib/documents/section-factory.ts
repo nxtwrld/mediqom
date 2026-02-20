@@ -53,10 +53,10 @@ const STANDARD_SECTIONS = {
     component: SectionSession,
     priority: 95,
     condition: (doc: Document) => !!doc.content.sessionAnalysis,
-    propsMapper: (doc: Document) => ({ 
-      data: doc.content.sessionAnalysis, 
+    propsMapper: (doc: Document) => ({
+      data: doc.content.sessionAnalysis,
       document: doc,
-      key: doc.key
+      key: doc.key,
     }),
   },
   summary: {
@@ -208,25 +208,44 @@ export function createDocumentSectionPlan(
   const sections: SectionConfiguration[] = [];
 
   // Process each available section
-  for (const [sectionId, sectionDef] of Object.entries(STANDARD_SECTIONS) as [keyof typeof STANDARD_SECTIONS, typeof STANDARD_SECTIONS[keyof typeof STANDARD_SECTIONS]][]) {
+  for (const [sectionId, sectionDef] of Object.entries(STANDARD_SECTIONS) as [
+    keyof typeof STANDARD_SECTIONS,
+    (typeof STANDARD_SECTIONS)[keyof typeof STANDARD_SECTIONS],
+  ][]) {
     // Skip excluded sections for this document type
-    if ((typeConfig.excludeSections as unknown as any[]).includes(sectionId as any)) {
+    if (
+      (typeConfig.excludeSections as unknown as any[]).includes(
+        sectionId as any,
+      )
+    ) {
       continue;
     }
 
     // Check if section should be included based on content availability
     if (!sectionDef.condition(document)) {
       // Required sections show even if empty (with placeholder)
-      if (!(typeConfig.requiredSections as unknown as any[]).includes(sectionId as any)) {
+      if (
+        !(typeConfig.requiredSections as unknown as any[]).includes(
+          sectionId as any,
+        )
+      ) {
         continue;
       }
     }
 
     // Calculate section priority based on document type
     let priority = sectionDef.priority;
-    if ((typeConfig.requiredSections as unknown as any[]).includes(sectionId as any)) {
+    if (
+      (typeConfig.requiredSections as unknown as any[]).includes(
+        sectionId as any,
+      )
+    ) {
       priority += 50; // Boost required sections
-    } else if ((typeConfig.prioritySections as unknown as any[]).includes(sectionId as any)) {
+    } else if (
+      (typeConfig.prioritySections as unknown as any[]).includes(
+        sectionId as any,
+      )
+    ) {
       priority += 25; // Boost priority sections
     }
 

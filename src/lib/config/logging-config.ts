@@ -71,12 +71,8 @@ export function getLoggingConfig(): LoggingConfig {
     debugStateTransitions: parseBoolean(
       safeEnv.PUBLIC_DEBUG_STATE_TRANSITIONS || "false",
     ),
-    debugLangGraph: parseBoolean(
-      safeEnv.PUBLIC_DEBUG_LANGGRAPH || "false",
-    ),
-    logAIResponses: parseBoolean(
-      safeEnv.PUBLIC_LOG_AI_RESPONSES || "false",
-    ),
+    debugLangGraph: parseBoolean(safeEnv.PUBLIC_DEBUG_LANGGRAPH || "false"),
+    logAIResponses: parseBoolean(safeEnv.PUBLIC_LOG_AI_RESPONSES || "false"),
     enableWorkflowTracing: parseBoolean(
       safeEnv.PUBLIC_ENABLE_WORKFLOW_TRACING || "false",
     ),
@@ -169,5 +165,5 @@ export function isWorkflowTracingEnabled(): boolean {
 try {
   initializeLogging();
 } catch (e) {
-  console.warn('[LoggingConfig] Failed to initialize logging:', e);
+  console.warn("[LoggingConfig] Failed to initialize logging:", e);
 }

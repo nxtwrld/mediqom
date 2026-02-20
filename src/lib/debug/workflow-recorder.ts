@@ -84,7 +84,8 @@ export class WorkflowRecorder {
 
   private constructor() {
     // Skip all initialization in production/Vercel
-    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+    const isProduction =
+      process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 
     if (isProduction) {
       // Explicitly disable recording in production
@@ -114,7 +115,8 @@ export class WorkflowRecorder {
 
   private initializeFromEnvironment() {
     // Never enable recording in production
-    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+    const isProduction =
+      process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
     if (isProduction) {
       this.recordingEnabled = false;
       this.replayMode = false;

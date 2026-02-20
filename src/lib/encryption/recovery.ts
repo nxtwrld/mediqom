@@ -8,7 +8,7 @@
 const crypto = globalThis.crypto;
 
 // Base32 alphabet (Crockford's Base32 - excludes I, L, O, U to avoid confusion)
-const BASE32_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const BASE32_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
 /**
  * Generate a cryptographically secure recovery key
@@ -19,7 +19,7 @@ export function generateRecoveryKey(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(25));
 
   // Convert to base32
-  let base32 = '';
+  let base32 = "";
   let buffer = 0;
   let bitsInBuffer = 0;
 
@@ -29,16 +29,16 @@ export function generateRecoveryKey(): string {
 
     while (bitsInBuffer >= 5) {
       bitsInBuffer -= 5;
-      const index = (buffer >> bitsInBuffer) & 0x1F;
+      const index = (buffer >> bitsInBuffer) & 0x1f;
       base32 += BASE32_ALPHABET[index];
     }
   }
 
   // Pad to 40 characters
-  base32 = base32.padEnd(40, '0');
+  base32 = base32.padEnd(40, "0");
 
   // Format as XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX
-  return base32.match(/.{1,4}/g)?.join('-') || base32;
+  return base32.match(/.{1,4}/g)?.join("-") || base32;
 }
 
 /**
@@ -46,7 +46,7 @@ export function generateRecoveryKey(): string {
  */
 export function validateRecoveryKeyFormat(key: string): boolean {
   // Remove dashes and spaces
-  const cleanKey = key.replace(/[-\s]/g, '').toUpperCase();
+  const cleanKey = key.replace(/[-\s]/g, "").toUpperCase();
 
   // Should be exactly 40 characters
   if (cleanKey.length !== 40) {
@@ -67,43 +67,45 @@ export function validateRecoveryKeyFormat(key: string): boolean {
  * Normalize recovery key (remove formatting, uppercase)
  */
 export function normalizeRecoveryKey(key: string): string {
-  return key.replace(/[-\s]/g, '').toUpperCase();
+  return key.replace(/[-\s]/g, "").toUpperCase();
 }
 
 /**
  * Derive an AES-256 key from the recovery key using HKDF
  */
-async function deriveKeyFromRecoveryKey(recoveryKey: string): Promise<CryptoKey> {
+async function deriveKeyFromRecoveryKey(
+  recoveryKey: string,
+): Promise<CryptoKey> {
   const normalizedKey = normalizeRecoveryKey(recoveryKey);
   const encoder = new TextEncoder();
   const keyMaterial = encoder.encode(normalizedKey);
 
   // Import the recovery key as key material for HKDF
   const baseKey = await crypto.subtle.importKey(
-    'raw',
+    "raw",
     keyMaterial,
-    { name: 'HKDF' },
+    { name: "HKDF" },
     false,
-    ['deriveKey']
+    ["deriveKey"],
   );
 
   // Use a fixed salt for recovery key derivation
   // This is acceptable since the recovery key itself has sufficient entropy
-  const salt = encoder.encode('mediqom-recovery-key-v1');
-  const info = encoder.encode('private-key-encryption');
+  const salt = encoder.encode("mediqom-recovery-key-v1");
+  const info = encoder.encode("private-key-encryption");
 
   // Derive the AES-256-GCM key
   return await crypto.subtle.deriveKey(
     {
-      name: 'HKDF',
-      hash: 'SHA-256',
+      name: "HKDF",
+      hash: "SHA-256",
       salt: salt,
-      info: info
+      info: info,
     },
     baseKey,
-    { name: 'AES-GCM', length: 256 },
+    { name: "AES-GCM", length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ["encrypt", "decrypt"],
   );
 }
 
@@ -113,10 +115,10 @@ async function deriveKeyFromRecoveryKey(recoveryKey: string): Promise<CryptoKey>
  */
 export async function encryptWithRecoveryKey(
   privateKeyPEM: string,
-  recoveryKey: string
+  recoveryKey: string,
 ): Promise<string> {
   if (!validateRecoveryKeyFormat(recoveryKey)) {
-    throw new Error('Invalid recovery key format');
+    throw new Error("Invalid recovery key format");
   }
 
   const encoder = new TextEncoder();
@@ -130,9 +132,9 @@ export async function encryptWithRecoveryKey(
 
   // Encrypt
   const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv },
+    { name: "AES-GCM", iv: iv },
     aesKey,
-    plaintext
+    plaintext,
   );
 
   // Combine IV + ciphertext
@@ -150,17 +152,17 @@ export async function encryptWithRecoveryKey(
  */
 export async function recoverPrivateKey(
   encryptedData: string,
-  recoveryKey: string
+  recoveryKey: string,
 ): Promise<string> {
   if (!validateRecoveryKeyFormat(recoveryKey)) {
-    throw new Error('Invalid recovery key format');
+    throw new Error("Invalid recovery key format");
   }
 
   // Decode base64
   const combined = new Uint8Array(
     atob(encryptedData)
-      .split('')
-      .map(char => char.charCodeAt(0))
+      .split("")
+      .map((char) => char.charCodeAt(0)),
   );
 
   // Extract IV and ciphertext
@@ -172,9 +174,9 @@ export async function recoverPrivateKey(
 
   // Decrypt
   const plaintext = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: iv },
+    { name: "AES-GCM", iv: iv },
     aesKey,
-    ciphertext
+    ciphertext,
   );
 
   return new TextDecoder().decode(plaintext);
@@ -187,9 +189,9 @@ export async function recoverPrivateKey(
 export async function hashRecoveryKey(recoveryKey: string): Promise<string> {
   const normalizedKey = normalizeRecoveryKey(recoveryKey);
   const encoder = new TextEncoder();
-  const data = encoder.encode(normalizedKey + 'mediqom-recovery-hash-v1');
+  const data = encoder.encode(normalizedKey + "mediqom-recovery-hash-v1");
 
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = new Uint8Array(hashBuffer);
 
   return btoa(String.fromCharCode(...hashArray));
@@ -200,7 +202,7 @@ export async function hashRecoveryKey(recoveryKey: string): Promise<string> {
  */
 export async function verifyRecoveryKeyHash(
   recoveryKey: string,
-  storedHash: string
+  storedHash: string,
 ): Promise<boolean> {
   const computedHash = await hashRecoveryKey(recoveryKey);
   return computedHash === storedHash;
@@ -217,15 +219,18 @@ export type RecoveryKeyData = {
  * Returns the recovery key (to show user), encrypted private key, and hash
  */
 export async function generateRecoveryData(
-  privateKeyPEM: string
+  privateKeyPEM: string,
 ): Promise<RecoveryKeyData> {
   const recoveryKey = generateRecoveryKey();
-  const recoveryEncryptedKey = await encryptWithRecoveryKey(privateKeyPEM, recoveryKey);
+  const recoveryEncryptedKey = await encryptWithRecoveryKey(
+    privateKeyPEM,
+    recoveryKey,
+  );
   const recoveryKeyHash = await hashRecoveryKey(recoveryKey);
 
   return {
     recoveryKey,
     recoveryEncryptedKey,
-    recoveryKeyHash
+    recoveryKeyHash,
   };
 }

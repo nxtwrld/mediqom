@@ -61,8 +61,7 @@ function updateIndex() {
         profileStores[user_id] = derived(documents, ($documents, set) => {
           const userDocuments = $documents.filter(
             (doc) =>
-              doc.user_id === user_id &&
-              doc.type === DocumentType.document,
+              doc.user_id === user_id && doc.type === DocumentType.document,
           );
           logger.documents.debug("Update profile store", {
             user_id,
@@ -125,7 +124,9 @@ export async function decryptDocumentsNoStore(
 ): Promise<(Document | DocumentPreload)[]> {
   // If keys are not available (unlock disabled), skip quietly
   if (!(user as any)?.keyPair?.isReady?.()) {
-    logger.documents.warn("Skipping decryptDocumentsNoStore: user keys not available");
+    logger.documents.warn(
+      "Skipping decryptDocumentsNoStore: user keys not available",
+    );
     return [];
   }
   const documentsDecrypted: (DocumentPreload | Document)[] = await Promise.all(
@@ -142,11 +143,10 @@ export async function decryptDocumentsNoStore(
       const embeddings = parsedMetadata.embeddings || {};
 
       // Normalize attachments to Attachment[]
-      const normalizedAttachments: Attachment[] = (document.attachments || []).map(
-        (att: any) =>
-          typeof att === "string"
-            ? { url: att, path: att }
-            : (att as Attachment),
+      const normalizedAttachments: Attachment[] = (
+        document.attachments || []
+      ).map((att: any) =>
+        typeof att === "string" ? { url: att, path: att } : (att as Attachment),
       );
 
       const base: Document | DocumentPreload = {
@@ -299,14 +299,19 @@ export async function updateDocument(documentData: Document) {
 
   // encrypt attachments and map them to content with thumbnails
   // Separate new attachments (with file data) from existing ones (with URLs)
-  const newAttachments = (documentData.attachments || []).filter((a) => !a.url && a.file);
-  const existingAttachments = (documentData.attachments || []).filter((a) => a.url);
+  const newAttachments = (documentData.attachments || []).filter(
+    (a) => !a.url && a.file,
+  );
+  const existingAttachments = (documentData.attachments || []).filter(
+    (a) => a.url,
+  );
 
   logger.documents.debug("Update attachments to process", {
     attachmentsCount: documentData.attachments?.length || 0,
     newWithFileData: newAttachments.length,
     existingWithUrls: existingAttachments.length,
-    withThumbnails: documentData.attachments?.filter(a => a.thumbnail).length || 0
+    withThumbnails:
+      documentData.attachments?.filter((a) => a.thumbnail).length || 0,
   });
 
   const attachmentsToEncrypt = newAttachments.map((a) => {
@@ -320,7 +325,9 @@ export async function updateDocument(documentData: Document) {
     key,
   );
 
-  logger.documents.debug("Update attachments encrypted", { attachmentsEncrypted });
+  logger.documents.debug("Update attachments encrypted", {
+    attachmentsEncrypted,
+  });
   const attachmentsUrls = await saveAttachements(
     attachmentsEncrypted,
     document.user_id,
@@ -390,14 +397,19 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
 
   // encrypt attachments and map them to content with thumbnails
   // Only process attachments that have file data
-  const attachmentsWithFiles = (document.attachments || []).filter((a) => a.file);
-  const attachmentsWithoutFiles = (document.attachments || []).filter((a) => !a.file && a.url);
+  const attachmentsWithFiles = (document.attachments || []).filter(
+    (a) => a.file,
+  );
+  const attachmentsWithoutFiles = (document.attachments || []).filter(
+    (a) => !a.file && a.url,
+  );
 
   logger.documents.debug("Attachments to process", {
     attachmentsCount: document.attachments?.length || 0,
     withFileData: attachmentsWithFiles.length,
     withoutFileData: attachmentsWithoutFiles.length,
-    withThumbnails: document.attachments?.filter(a => a.thumbnail).length || 0
+    withThumbnails:
+      document.attachments?.filter((a) => a.thumbnail).length || 0,
   });
 
   const attachmentsToEncrypt: string[] = attachmentsWithFiles.map((a) => {
@@ -410,7 +422,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
     await encrypt(attachmentsToEncrypt);
 
   logger.documents.debug("Attachments encrypted", {
-    attachmentsEncrypted: attachmentsEncrypted.length
+    attachmentsEncrypted: attachmentsEncrypted.length,
   });
 
   // save encrypted attachments
@@ -420,7 +432,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
   );
 
   logger.documents.debug("Attachments saved to storage", {
-    attachmentsUrls: attachmentsUrls.length
+    attachmentsUrls: attachmentsUrls.length,
   });
 
   // map attachments to content, preserving thumbnails from original attachments
@@ -484,7 +496,9 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
       }),
     },
   ).catch(async (e) => {
-    logger.documents.error("Failed to add document - network error", { error: e });
+    logger.documents.error("Failed to add document - network error", {
+      error: e,
+    });
     await removeAttachments(attachmentsUrls);
     throw new Error(Errors.NetworkError);
   });

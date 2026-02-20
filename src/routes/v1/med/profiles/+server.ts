@@ -45,7 +45,9 @@ export const POST: RequestHandler = async ({
 
     const profileLimit = await checkProfileLimit(user.id);
     if (!profileLimit.can_create) {
-      error(403, { message: `Profile limit reached (${profileLimit.current_count}/${profileLimit.limit})` });
+      error(403, {
+        message: `Profile limit reached (${profileLimit.current_count}/${profileLimit.limit})`,
+      });
     }
 
     console.log("Saving virtual profile");

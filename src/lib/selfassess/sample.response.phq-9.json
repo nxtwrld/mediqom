@@ -1,65 +1,64 @@
 {
-    "resourceType": "Observation",
-    "id": "phq9-unique-id",
-    "status": "final",
+  "resourceType": "Observation",
+  "id": "phq9-unique-id",
+  "status": "final",
 
-    "code": {
-      "coding": [
-        {
-          "system": "http://loinc.org",
-          "code": "PHQ9-code",
-          "display": "PHQ-9"
-        }
-      ]
-    },
-    "subject": {
-      "reference": "Patient/patient-id"
-    },
-    "effectiveDateTime": "2023-04-01T00:00:00Z",
-    "valueQuantity": {
-      "value": 15,
-      "unit": "points",
-      "system": "http://unitsofmeasure.org",
-      "code": "points"
-    },
-    "component": [
+  "code": {
+    "coding": [
       {
-        "code": {
-          "coding": [
-            {
-              "system": "http://loinc.org/phq9-question1",
-              "code": "phq9-q1",
-              "display": "Little interest or pleasure in doing things"
-            }
-          ]
-        },
-        "valueString": "More than half the days",
-        "extension": [
+        "system": "http://loinc.org",
+        "code": "PHQ9-code",
+        "display": "PHQ-9"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/patient-id"
+  },
+  "effectiveDateTime": "2023-04-01T00:00:00Z",
+  "valueQuantity": {
+    "value": 15,
+    "unit": "points",
+    "system": "http://unitsofmeasure.org",
+    "code": "points"
+  },
+  "component": [
+    {
+      "code": {
+        "coding": [
           {
-            "url": "http://example.org/fhir/StructureDefinition/response-score",
-            "valueInteger": 2
+            "system": "http://loinc.org/phq9-question1",
+            "code": "phq9-q1",
+            "display": "Little interest or pleasure in doing things"
           }
         ]
       },
-      
-      {
-        "code": {
-          "coding": [
-            {
-              "system": "http://loinc.org/phq9-question9",
-              "code": "phq9-q9",
-              "display": "Thoughts of being better off dead, or of hurting yourself"
-            }
-          ]
-        },
-        "valueString": "Not at all",
-        "extension": [
+      "valueString": "More than half the days",
+      "extension": [
+        {
+          "url": "http://example.org/fhir/StructureDefinition/response-score",
+          "valueInteger": 2
+        }
+      ]
+    },
+
+    {
+      "code": {
+        "coding": [
           {
-            "url": "http://example.org/fhir/StructureDefinition/response-score",
-            "valueInteger": 0
+            "system": "http://loinc.org/phq9-question9",
+            "code": "phq9-q9",
+            "display": "Thoughts of being better off dead, or of hurting yourself"
           }
         ]
-      }
-    ]
-  }
-  
+      },
+      "valueString": "Not at all",
+      "extension": [
+        {
+          "url": "http://example.org/fhir/StructureDefinition/response-score",
+          "valueInteger": 0
+        }
+      ]
+    }
+  ]
+}

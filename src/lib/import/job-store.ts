@@ -6,7 +6,9 @@ export const importJobs = writable<ImportJob[]>([]);
 
 /** Jobs that are still processing */
 export const activeJobs = derived(importJobs, ($jobs) =>
-  $jobs.filter((j) => ["created", "extracting", "analyzing"].includes(j.status)),
+  $jobs.filter((j) =>
+    ["created", "extracting", "analyzing"].includes(j.status),
+  ),
 );
 
 /** Jobs ready for review */

@@ -43,25 +43,30 @@ export interface HiddenCounts {
  * Reuses utility functions from shared module - NO CODE DUPLICATION
  */
 export function createSessionDataStoreInstance(instanceId?: string) {
-  const storeId = instanceId || `session_data_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-  
+  const storeId =
+    instanceId ||
+    `session_data_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
   logger.session.debug("Creating session data store instance", { storeId });
 
   // Create isolated store instance
   const sessionDataStore: Writable<SessionComputedData | null> = writable(null);
-  
+
   // Create isolated thresholds store
   const thresholds: Writable<ThresholdConfig> = writable({
     symptoms: { severityThreshold: 7, showAll: false },
-    diagnoses: { probabilityThreshold: 0.35, showAll: false }, 
+    diagnoses: { probabilityThreshold: 0.35, showAll: false },
     treatments: { priorityThreshold: 10, showAll: true },
   });
 
   // Actions that operate on the local store instance (reusing imported utility functions)
   const actions = {
     loadSession(sessionData: SessionAnalysis): void {
-      logger.session.debug("Loading session data", { storeId, analysisVersion: sessionData.analysisVersion });
-      
+      logger.session.debug("Loading session data", {
+        storeId,
+        analysisVersion: sessionData.analysisVersion,
+      });
+
       // Reuse utility functions - no duplication!
       const relationshipIndex = buildRelationshipIndex(sessionData);
       const { nodeMap, linkMap } = buildNodeAndLinkMaps(sessionData);
@@ -219,22 +224,19 @@ export function createSessionDataStoreInstance(instanceId?: string) {
     ($store) => $store?.sessionData || null,
   );
 
-  const sankeyData: Readable<any | null> = readable<any | null>(
-    null,
-    (set) => {
-      let lastSessionRef: SessionAnalysis | null = null;
+  const sankeyData: Readable<any | null> = readable<any | null>(null, (set) => {
+    let lastSessionRef: SessionAnalysis | null = null;
 
-      const unsubscribe = sessionDataStore.subscribe(($store) => {
-        const nextSession = $store?.sessionData || null;
-        if (nextSession !== lastSessionRef) {
-          lastSessionRef = nextSession;
-          set(nextSession ? transformToSankeyData(nextSession) : null);
-        }
-      });
+    const unsubscribe = sessionDataStore.subscribe(($store) => {
+      const nextSession = $store?.sessionData || null;
+      if (nextSession !== lastSessionRef) {
+        lastSessionRef = nextSession;
+        set(nextSession ? transformToSankeyData(nextSession) : null);
+      }
+    });
 
-      return unsubscribe;
-    },
-  );
+    return unsubscribe;
+  });
 
   const relationshipIndex: Readable<RelationshipIndex | null> = derived(
     sessionDataStore,
@@ -308,9 +310,8 @@ export function createSessionDataStoreInstance(instanceId?: string) {
     ($questions) => $questions.filter((q) => q.status === "pending"),
   );
 
-  const pendingAlerts: Readable<ActionNode[]> = derived(
-    alerts,
-    ($alerts) => $alerts.filter((a) => a.status === "pending"),
+  const pendingAlerts: Readable<ActionNode[]> = derived(alerts, ($alerts) =>
+    $alerts.filter((a) => a.status === "pending"),
   );
 
   const questionsForLink = (link: any): Readable<ActionNode[]> => {
@@ -367,7 +368,8 @@ export function createSessionDataStoreInstance(instanceId?: string) {
 
   const sortedPendingQuestions: Readable<ActionNode[]> = derived(
     sortedQuestions,
-    ($sortedQuestions) => $sortedQuestions.filter((q) => q.status === "pending"),
+    ($sortedQuestions) =>
+      $sortedQuestions.filter((q) => q.status === "pending"),
   );
 
   // Filtered Sankey data with thresholds
@@ -398,7 +400,9 @@ export function createSessionDataStoreInstance(instanceId?: string) {
 
   // Cleanup function
   const cleanup = () => {
-    logger.session.debug("Cleaning up session data store instance", { storeId });
+    logger.session.debug("Cleaning up session data store instance", {
+      storeId,
+    });
     sessionDataStore.set(null);
     thresholds.set({
       symptoms: { severityThreshold: 7, showAll: false },
@@ -411,10 +415,10 @@ export function createSessionDataStoreInstance(instanceId?: string) {
     // Instance metadata
     id: storeId,
     cleanup,
-    
+
     // Actions
     actions,
-    
+
     // Core stores
     sessionData,
     sankeyData,
@@ -426,7 +430,7 @@ export function createSessionDataStoreInstance(instanceId?: string) {
     error,
     thresholds,
     hiddenCounts,
-    
+
     // Derived stores
     questions,
     alerts,
@@ -434,7 +438,7 @@ export function createSessionDataStoreInstance(instanceId?: string) {
     pendingAlerts,
     sortedQuestions,
     sortedPendingQuestions,
-    
+
     // Factory functions
     questionsForNode,
     alertsForNode,
@@ -443,4 +447,6 @@ export function createSessionDataStoreInstance(instanceId?: string) {
   };
 }
 
-export type SessionDataStoreInstance = ReturnType<typeof createSessionDataStoreInstance>;
+export type SessionDataStoreInstance = ReturnType<
+  typeof createSessionDataStoreInstance
+>;

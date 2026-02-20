@@ -79,7 +79,10 @@ export const POST: RequestHandler = async ({ request }) => {
       {
         handleLLMEnd(output, runId, parentRunId, tags) {
           const llmOutput = output.llmOutput ?? {};
-          console.log("Token Usage", (llmOutput as any).tokenUsage?.totalTokens);
+          console.log(
+            "Token Usage",
+            (llmOutput as any).tokenUsage?.totalTokens,
+          );
         },
       },
     ],

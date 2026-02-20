@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({
 
   const data = await request.json();
   const { language, models = ["GP"], translate = false } = data;
-  
+
   // Use provided language, or fallback to 'en' if not provided
   // The client should now pass the correct locale from getLocale()
   const sessionLanguage = language || "en";

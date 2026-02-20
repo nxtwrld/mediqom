@@ -6,7 +6,7 @@ import {
   PUBLIC_SUPABASE_URL,
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
-import { isCapacitorBuild } from '$lib/config/platform';
+import { isCapacitorBuild } from "$lib/config/platform";
 
 const clients = new Map<string, SupabaseClient>();
 
@@ -49,7 +49,7 @@ export function getClient(clientName: string = "default"): SupabaseClient {
       const newClient = isCapacitorBuild()
         ? createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
             auth: {
-              flowType: 'implicit',
+              flowType: "implicit",
               detectSessionInUrl: false,
               persistSession: true,
               autoRefreshToken: true,

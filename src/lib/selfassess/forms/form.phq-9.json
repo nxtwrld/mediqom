@@ -1,107 +1,148 @@
 {
-    "title": "PHQ-9 Depression Assessment",
-    "description": "This questionnaire is a tool that helps assess depression levels. Please indicate how often you have been bothered by the following over the past two weeks.",
-    "category": "Mental Health Assessments",
-    "subCategory": "Depression",
-    "loincCode": "44261-6",
-    "resultFormat": "observation",
-    "fhirCategory": "survey",
-    "badges": ["depression_screening", "mental_health_assessment"],
-    "tags": [
-      "mental health",
-      "depression"
-    ],
-    "overallScore": {
-      "unit": "points",
-      "system": "http://unitsofmeasure.org",
-      "code": "points"
+  "title": "PHQ-9 Depression Assessment",
+  "description": "This questionnaire is a tool that helps assess depression levels. Please indicate how often you have been bothered by the following over the past two weeks.",
+  "category": "Mental Health Assessments",
+  "subCategory": "Depression",
+  "loincCode": "44261-6",
+  "resultFormat": "observation",
+  "fhirCategory": "survey",
+  "badges": ["depression_screening", "mental_health_assessment"],
+  "tags": ["mental health", "depression"],
+  "overallScore": {
+    "unit": "points",
+    "system": "http://unitsofmeasure.org",
+    "code": "points"
   },
-    "questions": [
-        {
-          "id": "q1",
-          "text": "I have little interest or pleasure in doing things",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q2",
-          "text": "I am feeling down, depressed, or hopeless",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q3",
-          "text": "I have trouble falling or staying asleep, or sleeping too much",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q4",
-          "text": "I am feeling tired or having little energy",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q5",
-          "text": "I have poor appetite or I am overeating",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q6",
-          "text": "I am feeling bad about myself — or I feel I am a failure or I have let myself or my family down",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q7",
-          "text": "I have trouble concentrating on things, such as reading the newspaper or watching television",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q8",
-          "text": "I am moving or speaking so slowly that other people could have noticed? Or the opposite — I am being so fidgety or restless that I have been moving around more than usual",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        },
-        {
-          "id": "q9",
-          "text": "I have thoughts that I would be better off dead, or of hurting yourself",
-          "responseType": "likert",
-          "options": ["Not at all", "Several days", "More than half the days", "Nearly every day"],
-          "scores": [0, 1, 2, 3]
-        }
-    ],
-    "scoringInterpretation": {
-      "ranges": [
-        {
-          "minScore": 0,
-          "maxScore": 4,
-          "interpretation": "Good",
-          "guidance": "Your current score suggests minimal or no depression. May not require treatment for depression, but this doesn't rule out other mental health issues."
-        },
-        {
-          "minScore": 5,
-          "maxScore": 14,
-          "interpretation": "Moderate",
-          "guidance": "Your current score indicates mild to moderate depression. Patients should be further evaluated to determine the most appropriate intervention."
-        },
-        {
-          "minScore": 15,
-          "maxScore": 27,
-          "interpretation": "Poor",
-          "guidance": "Your current score suggests moderately severe to severe depression. Active treatment with psychotherapy, medications, or a combination is typically necessary."
-        }
-      ]
+  "questions": [
+    {
+      "id": "q1",
+      "text": "I have little interest or pleasure in doing things",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q2",
+      "text": "I am feeling down, depressed, or hopeless",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q3",
+      "text": "I have trouble falling or staying asleep, or sleeping too much",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q4",
+      "text": "I am feeling tired or having little energy",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q5",
+      "text": "I have poor appetite or I am overeating",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q6",
+      "text": "I am feeling bad about myself — or I feel I am a failure or I have let myself or my family down",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q7",
+      "text": "I have trouble concentrating on things, such as reading the newspaper or watching television",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q8",
+      "text": "I am moving or speaking so slowly that other people could have noticed? Or the opposite — I am being so fidgety or restless that I have been moving around more than usual",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
+    },
+    {
+      "id": "q9",
+      "text": "I have thoughts that I would be better off dead, or of hurting yourself",
+      "responseType": "likert",
+      "options": [
+        "Not at all",
+        "Several days",
+        "More than half the days",
+        "Nearly every day"
+      ],
+      "scores": [0, 1, 2, 3]
     }
+  ],
+  "scoringInterpretation": {
+    "ranges": [
+      {
+        "minScore": 0,
+        "maxScore": 4,
+        "interpretation": "Good",
+        "guidance": "Your current score suggests minimal or no depression. May not require treatment for depression, but this doesn't rule out other mental health issues."
+      },
+      {
+        "minScore": 5,
+        "maxScore": 14,
+        "interpretation": "Moderate",
+        "guidance": "Your current score indicates mild to moderate depression. Patients should be further evaluated to determine the most appropriate intervention."
+      },
+      {
+        "minScore": 15,
+        "maxScore": 27,
+        "interpretation": "Poor",
+        "guidance": "Your current score suggests moderately severe to severe depression. Active treatment with psychotherapy, medications, or a combination is typically necessary."
+      }
+    ]
   }
-  
+}

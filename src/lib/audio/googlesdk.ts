@@ -1,7 +1,8 @@
 import { SpeechClient, protos } from "@google-cloud/speech";
 import * as fs from "fs";
 
-const AudioEncoding = protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
+const AudioEncoding =
+  protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
 
 let client: SpeechClient;
 

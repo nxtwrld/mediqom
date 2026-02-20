@@ -277,21 +277,28 @@ export abstract class BaseProcessingNode {
       }
 
       // Populate empty bodyParts identification enum with valid 3D model objects
-      const schemaItems = (this.schema as any)?.items?.properties?.identification;
+      const schemaItems = (this.schema as any)?.items?.properties
+        ?.identification;
       if (schemaItems?.enum && schemaItems.enum.length === 0) {
         // Extract all objects from anatomy object categories (these are valid 3D model objects)
         const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
-          (category: any) => category.objects || []
+          (category: any) => category.objects || [],
         );
         // Remove duplicates and set as enum
         schemaItems.enum = [...new Set(validAnatomyObjects)];
       }
 
       // Populate empty signal enum with lab property keys (excluding static profile fields)
-      const signalSchema = (this.schema as any)?.parameters?.properties?.signals?.items?.properties?.signal;
-      if (signalSchema?.enum && Array.isArray(signalSchema.enum) && signalSchema.enum.length === 0) {
-        const signalKeys = Object.keys(propertiesDefinition)
-          .filter(key => !STATIC_PROPERTIES.includes(key));
+      const signalSchema = (this.schema as any)?.parameters?.properties?.signals
+        ?.items?.properties?.signal;
+      if (
+        signalSchema?.enum &&
+        Array.isArray(signalSchema.enum) &&
+        signalSchema.enum.length === 0
+      ) {
+        const signalKeys = Object.keys(propertiesDefinition).filter(
+          (key) => !STATIC_PROPERTIES.includes(key),
+        );
         signalSchema.enum.push(...signalKeys);
       }
 

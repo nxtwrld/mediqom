@@ -8,7 +8,7 @@ import { KeyPair, pemToKey } from "../encryption/rsa";
 import {
   authenticateWithPasskeyPRF,
   decryptWithPRFKey,
-  type KeyDerivationMethod
+  type KeyDerivationMethod,
 } from "../encryption/passkey-prf";
 import { recoverPrivateKey } from "../encryption/recovery";
 //import { loadSubscription } from "./subscriptions";
@@ -99,10 +99,13 @@ export async function setUser(
     const key_pass = userProfile.private_keys?.key_pass;
 
     // Extract new encryption fields
-    userProfile.key_derivation_method = userProfile.private_keys?.key_derivation_method;
-    userProfile.passkey_credential_id = userProfile.private_keys?.passkey_credential_id;
+    userProfile.key_derivation_method =
+      userProfile.private_keys?.key_derivation_method;
+    userProfile.passkey_credential_id =
+      userProfile.private_keys?.passkey_credential_id;
     userProfile.passkey_prf_salt = userProfile.private_keys?.passkey_prf_salt;
-    userProfile.recovery_encrypted_key = userProfile.private_keys?.recovery_encrypted_key;
+    userProfile.recovery_encrypted_key =
+      userProfile.private_keys?.recovery_encrypted_key;
 
     delete userProfile.private_keys;
 
@@ -117,10 +120,21 @@ export async function setUser(
     });
 
     // Set up encryption keys directly (no store update to avoid cascading re-renders)
-    if (key_pass && userProfile.key_hash && userProfile.privateKey && userProfile.publicKey) {
+    if (
+      key_pass &&
+      userProfile.key_hash &&
+      userProfile.privateKey &&
+      userProfile.publicKey
+    ) {
       try {
-        const privateKeyString = await decryptString(userProfile.privateKey, key_pass);
-        if (privateKeyString && privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") === 0) {
+        const privateKeyString = await decryptString(
+          userProfile.privateKey,
+          key_pass,
+        );
+        if (
+          privateKeyString &&
+          privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") === 0
+        ) {
           const privateKey = await pemToKey(privateKeyString, true);
           const publicKey = await pemToKey(userProfile.publicKey, false);
           keyPair.set(publicKey, privateKey);
@@ -242,7 +256,7 @@ async function unlockWithPasskey(): Promise<boolean> {
 
   // Check if user has passkey credentials
   if (
-    fullUser.key_derivation_method !== 'passkey_prf' ||
+    fullUser.key_derivation_method !== "passkey_prf" ||
     !fullUser.passkey_credential_id ||
     !fullUser.passkey_prf_salt ||
     !fullUser.privateKey ||
@@ -256,20 +270,22 @@ async function unlockWithPasskey(): Promise<boolean> {
     // Authenticate with passkey and get PRF-derived key
     const prfDerivedKey = await authenticateWithPasskeyPRF(
       fullUser.passkey_credential_id,
-      fullUser.passkey_prf_salt
+      fullUser.passkey_prf_salt,
     );
 
     // Decrypt private key with PRF-derived key
     const privateKeyString = await decryptWithPRFKey(
       fullUser.privateKey,
-      prfDerivedKey
+      prfDerivedKey,
     );
 
     if (
       !privateKeyString ||
       privateKeyString.indexOf("-----BEGIN PRIVATE KEY-----") !== 0
     ) {
-      console.error("[User] Invalid private key format after passkey decryption");
+      console.error(
+        "[User] Invalid private key format after passkey decryption",
+      );
       return false;
     }
 
@@ -324,7 +340,7 @@ async function unlockWithRecoveryKey(recoveryKey: string): Promise<boolean> {
     // Decrypt private key with recovery key
     const privateKeyString = await recoverPrivateKey(
       fullUser.recovery_encrypted_key,
-      recoveryKey
+      recoveryKey,
     );
 
     if (
@@ -369,7 +385,10 @@ async function unlockWithRecoveryKey(recoveryKey: string): Promise<boolean> {
 function getKeyDerivationMethod(): KeyDerivationMethod | null {
   const $user = get(user);
   if (!$user) return null;
-  return (($user as User).key_derivation_method as KeyDerivationMethod) || 'passphrase';
+  return (
+    (($user as User).key_derivation_method as KeyDerivationMethod) ||
+    "passphrase"
+  );
 }
 
 /**
@@ -389,7 +408,7 @@ function hasPasskey(): boolean {
   if (!$user) return false;
   const fullUser = $user as User;
   return !!(
-    fullUser.key_derivation_method === 'passkey_prf' &&
+    fullUser.key_derivation_method === "passkey_prf" &&
     fullUser.passkey_credential_id &&
     fullUser.passkey_prf_salt
   );

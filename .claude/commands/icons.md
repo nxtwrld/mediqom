@@ -8,11 +8,11 @@ $ARGUMENTS
 
 This project uses SVG sprite sheets for icons. There are **three sprite files**:
 
-| Sprite File | Source Directory | Purpose |
-|-------------|------------------|---------|
-| `/icons.svg` | `assets-src/icons/` | Solid/filled UI icons |
+| Sprite File    | Source Directory            | Purpose                             |
+| -------------- | --------------------------- | ----------------------------------- |
+| `/icons.svg`   | `assets-src/icons/`         | Solid/filled UI icons               |
 | `/icons-o.svg` | `assets-src/icons-outline/` | Outline icons (medical, properties) |
-| `/files.svg` | `assets-src/files/` | File type icons |
+| `/files.svg`   | `assets-src/files/`         | File type icons                     |
 
 ## Usage in Svelte Components
 
@@ -34,6 +34,7 @@ This project uses SVG sprite sheets for icons. There are **three sprite files**:
 ## Available Icons
 
 ### icons.svg (Solid UI Icons)
+
 ```
 add-file, anatomy, anatomy-reset, arrow-nav-down, arrow-nav-left,
 arrow-nav-right, arrow-nav-up, arrow-round-down, arrow-round-up,
@@ -43,6 +44,7 @@ plus, report, search, selection, share, star, user
 ```
 
 ### icons-o.svg (Outline Icons)
+
 ```
 calendar, checked, diagnosis, encrypt, model-gp, model-pt, model-voice,
 prop-age, prop-biologicalSex-female, prop-biologicalSex-male,
@@ -53,6 +55,7 @@ report-procedure, report-survey, report-vital-signs, transcript, warning
 ```
 
 ### files.svg (File Type Icons)
+
 ```
 doc, jpeg, jpg, pdf, png, txt, xls, zip
 ```
@@ -72,11 +75,13 @@ The filename (without `.svg`) becomes the icon ID.
 ### Step 2: Prepare the SVG
 
 Ensure your SVG:
+
 - Has no `width`/`height` attributes (use `viewBox` instead)
 - Uses `currentColor` for fills/strokes (to inherit color from CSS)
 - Has clean, minimal markup
 
 Example:
+
 ```svg
 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
   <path fill="currentColor" d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -105,26 +110,27 @@ This updates the sprite files in `static/`.
 ```css
 /* Standard icon button */
 .icon-btn svg {
-    width: 1rem;
-    height: 1rem;
-    fill: currentColor;
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
 }
 
 /* Larger icon */
 .icon-lg svg {
-    width: 1.5rem;
-    height: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* Icon with hover color */
 .icon-btn:hover svg {
-    fill: var(--color-primary);
+  fill: var(--color-primary);
 }
 ```
 
 ## Common Patterns
 
 ### Action Buttons
+
 ```svelte
 <button class="action-btn" aria-label="Edit">
     <svg><use href="/icons.svg#edit"></use></svg>
@@ -135,6 +141,7 @@ This updates the sprite files in `static/`.
 ```
 
 ### Status Indicators
+
 ```svelte
 <span class="status-icon warning">
     <svg><use href="/icons-o.svg#warning"></use></svg>
@@ -145,6 +152,7 @@ This updates the sprite files in `static/`.
 ```
 
 ### File Type Badges
+
 ```svelte
 <span class="file-badge">
     <svg><use href="/files.svg#pdf"></use></svg>
@@ -154,15 +162,18 @@ This updates the sprite files in `static/`.
 ## Troubleshooting
 
 ### Icon Not Showing (404 Error)
+
 - Check the sprite file exists in `static/`
 - Verify the icon ID matches a source file in `assets-src/`
 - Run the sprite generator if you added new icons
 - Use browser DevTools Network tab to confirm the path
 
 ### Icon Not Inheriting Color
+
 - Ensure the source SVG uses `fill="currentColor"` or `stroke="currentColor"`
 - Check CSS `fill` or `color` is set on the parent element
 
 ### Wrong Icon Displayed
+
 - Icon IDs must be unique across the sprite
 - Check for typos in the `href` attribute

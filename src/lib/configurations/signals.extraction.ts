@@ -19,8 +19,7 @@ export default {
       // Processing metadata
       processingConfidence: {
         type: "number",
-        description:
-          "Overall confidence in signal extraction (0.0 to 1.0)",
+        description: "Overall confidence in signal extraction (0.0 to 1.0)",
       },
 
       processingNotes: {

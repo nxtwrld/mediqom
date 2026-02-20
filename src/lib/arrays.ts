@@ -13,7 +13,10 @@ export function typedArrayToBuffer(array: Uint8Array): ArrayBuffer {
     return arrayBuffer;
   }
   // At this point, buffer is guaranteed to be ArrayBuffer
-  return (buffer as ArrayBuffer).slice(array.byteOffset, array.byteLength + array.byteOffset);
+  return (buffer as ArrayBuffer).slice(
+    array.byteOffset,
+    array.byteLength + array.byteOffset,
+  );
 }
 
 export async function toBase64(array: ArrayBuffer): Promise<string> {

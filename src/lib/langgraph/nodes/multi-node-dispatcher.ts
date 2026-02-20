@@ -114,7 +114,7 @@ export const multiNodeDispatcherNode = async (
   );
 
   const startTime = Date.now();
-  const runTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const runTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
   // Execute nodes with progress tracking
   const processedState = await nodeRegistry.executeNodes(
@@ -123,7 +123,11 @@ export const multiNodeDispatcherNode = async (
     (progress, message) => {
       // Map execution progress to 10-90% of dispatcher progress
       const dispatcherProgress = 10 + progress * 0.8;
-      state.emitProgress?.("multi_node_dispatcher", dispatcherProgress, message);
+      state.emitProgress?.(
+        "multi_node_dispatcher",
+        dispatcherProgress,
+        message,
+      );
     },
     { jobId: state.jobId, runTimestamp },
   );

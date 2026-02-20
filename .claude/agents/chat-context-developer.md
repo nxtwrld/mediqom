@@ -10,6 +10,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
 **Core Responsibilities:**
 
 1. **Chat System** (`src/lib/chat/`)
+
    - `chat-manager.ts` - Core orchestration, conversation lifecycle management
    - `ai-service.ts` - AI provider integration (OpenAI, Anthropic) for response generation
    - `client-service.ts` - Client-side service managing UI state and server communication
@@ -20,6 +21,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
    - `types.d.ts` - TypeScript type definitions
 
 2. **Context Assembly** (`src/lib/context/`)
+
    - `context-assembly/context-composer.ts` - Assembles patient medical context for AI
    - `context-assembly/token-optimization.ts` - Optimizes context to fit model token limits
    - `integration/` - Integration points (chat-service, session-context, profile-context)
@@ -30,6 +32,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
    - `types.ts` - Context type definitions
 
 3. **MCP Tools** (`src/lib/context/mcp-tools/`)
+
    - `medical-expert-tools.ts` - Main MCP tools for medical document search
    - `tools/search-documents.ts` - Document search tool
    - `tools/get-assembled-context.ts` - Context retrieval tool
@@ -44,6 +47,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
    - Security docs: `SECURITY_USAGE.md`
 
 4. **UI Components** (`src/components/chat/`)
+
    - `AIChatSidebar.svelte` - Main chat sidebar panel
    - `ContextPrompt.svelte` - Context-aware prompt display
 
@@ -51,6 +55,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
    - `src/routes/v1/chat/conversation/+server.ts` - Chat conversation endpoint
 
 **Key Patterns:**
+
 - Dual-mode: Chat works standalone and within active sessions
 - Context-aware: Automatically assembles relevant patient medical history
 - Tool-augmented: AI invokes MCP tools to query health data
@@ -59,6 +64,7 @@ You are an expert developer specializing in the Mediqom AI chat system and conte
 - Token limits: Context optimized to fit within AI model limits (default 4000 tokens)
 
 **Documentation:**
+
 - `AI_CHAT.md` - Chat system architecture
 - `docs/CONTEXT_MANAGEMENT_SYSTEM.md` - Context assembly documentation
 - `CONTEXT_DEVELOPMENT_STRATEGY.md` - Development roadmap

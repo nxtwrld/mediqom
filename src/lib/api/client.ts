@@ -6,10 +6,10 @@
  * - Mobile: Uses absolute URLs with Bearer token authentication
  */
 
-import { browser } from '$app/environment';
-import { getApiBaseUrl, isNativePlatform } from '$lib/config/platform';
-import { getClient } from '$lib/supabase';
-import { session as CurrentSession } from '$lib/user';
+import { browser } from "$app/environment";
+import { getApiBaseUrl, isNativePlatform } from "$lib/config/platform";
+import { getClient } from "$lib/supabase";
+import { session as CurrentSession } from "$lib/user";
 
 export interface ApiRequestOptions extends RequestInit {
   /** Skip adding authorization header */
@@ -42,10 +42,12 @@ async function getAccessToken(): Promise<string | null> {
 
   try {
     const supabase = getClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token ?? null;
   } catch (error) {
-    console.error('[API Client] Failed to get access token:', error);
+    console.error("[API Client] Failed to get access token:", error);
     return null;
   }
 }
@@ -55,24 +57,23 @@ async function getAccessToken(): Promise<string | null> {
  */
 function buildUrl(endpoint: string): string {
   // If already absolute URL, return as-is
-  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+  if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
     return endpoint;
   }
 
   const baseUrl = getApiBaseUrl();
 
   // Ensure endpoint starts with /
-  let normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  let normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
   // On mobile builds, add trailing slash to avoid 308 redirect from the SvelteKit
   // server (trailingSlash = "always"). iOS WKWebView strips Authorization on redirect.
-  if (baseUrl && !normalizedEndpoint.endsWith('/')) {
-    const queryIdx = normalizedEndpoint.indexOf('?');
+  if (baseUrl && !normalizedEndpoint.endsWith("/")) {
+    const queryIdx = normalizedEndpoint.indexOf("?");
     if (queryIdx === -1) {
       normalizedEndpoint = `${normalizedEndpoint}/`;
     } else {
-      normalizedEndpoint =
-        `${normalizedEndpoint.slice(0, queryIdx)}/${normalizedEndpoint.slice(queryIdx)}`;
+      normalizedEndpoint = `${normalizedEndpoint.slice(0, queryIdx)}/${normalizedEndpoint.slice(queryIdx)}`;
     }
   }
 
@@ -88,9 +89,14 @@ function buildUrl(endpoint: string): string {
  */
 export async function apiFetch(
   endpoint: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<Response> {
-  const { skipAuth = false, timeout = 30000, fetch: fetchFn = globalThis.fetch, ...fetchOptions } = options;
+  const {
+    skipAuth = false,
+    timeout = 30000,
+    fetch: fetchFn = globalThis.fetch,
+    ...fetchOptions
+  } = options;
 
   const url = buildUrl(endpoint);
 
@@ -101,31 +107,44 @@ export async function apiFetch(
   if (isNativePlatform() && !skipAuth) {
     const token = await getAccessToken();
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
   }
 
   // Ensure JSON content type for POST/PUT/PATCH if not set
   if (
     fetchOptions.body &&
-    typeof fetchOptions.body === 'string' &&
-    !headers.has('Content-Type')
+    typeof fetchOptions.body === "string" &&
+    !headers.has("Content-Type")
   ) {
-    headers.set('Content-Type', 'application/json');
+    headers.set("Content-Type", "application/json");
   }
 
   // Create abort controller for timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  const method = fetchOptions.method ?? "GET";
+  if (isNativePlatform()) {
+    console.log(
+      `[API] → ${method} ${url} | auth: ${headers.has("Authorization") ? "yes" : "no"}`,
+    );
+  }
+
   try {
     const response = await fetchFn(url, {
       ...fetchOptions,
       headers,
       // On web, include credentials (cookies); on mobile, omit them
-      credentials: isNativePlatform() ? 'omit' : 'include',
+      credentials: isNativePlatform() ? "omit" : "include",
       signal: controller.signal,
     });
+
+    if (isNativePlatform()) {
+      console.log(
+        `[API] ← ${response.status} ${response.url}${response.redirected ? " (redirected)" : ""}`,
+      );
+    }
 
     return response;
   } finally {
@@ -138,12 +157,16 @@ export async function apiFetch(
  */
 export async function apiGet<T = unknown>(
   endpoint: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> {
-  const response = await apiFetch(endpoint, { ...options, method: 'GET' });
+  const response = await apiFetch(endpoint, { ...options, method: "GET" });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `GET ${endpoint} failed`, await response.text());
+    throw new ApiError(
+      response.status,
+      `GET ${endpoint} failed`,
+      await response.text(),
+    );
   }
 
   return response.json();
@@ -155,16 +178,20 @@ export async function apiGet<T = unknown>(
 export async function apiPost<T = unknown>(
   endpoint: string,
   data?: unknown,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> {
   const response = await apiFetch(endpoint, {
     ...options,
-    method: 'POST',
+    method: "POST",
     body: data ? JSON.stringify(data) : undefined,
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `POST ${endpoint} failed`, await response.text());
+    throw new ApiError(
+      response.status,
+      `POST ${endpoint} failed`,
+      await response.text(),
+    );
   }
 
   return response.json();
@@ -176,16 +203,20 @@ export async function apiPost<T = unknown>(
 export async function apiPut<T = unknown>(
   endpoint: string,
   data?: unknown,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> {
   const response = await apiFetch(endpoint, {
     ...options,
-    method: 'PUT',
+    method: "PUT",
     body: data ? JSON.stringify(data) : undefined,
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `PUT ${endpoint} failed`, await response.text());
+    throw new ApiError(
+      response.status,
+      `PUT ${endpoint} failed`,
+      await response.text(),
+    );
   }
 
   return response.json();
@@ -196,12 +227,16 @@ export async function apiPut<T = unknown>(
  */
 export async function apiDelete<T = unknown>(
   endpoint: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> {
-  const response = await apiFetch(endpoint, { ...options, method: 'DELETE' });
+  const response = await apiFetch(endpoint, { ...options, method: "DELETE" });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `DELETE ${endpoint} failed`, await response.text());
+    throw new ApiError(
+      response.status,
+      `DELETE ${endpoint} failed`,
+      await response.text(),
+    );
   }
 
   return response.json();
@@ -214,10 +249,10 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
-    public body?: string
+    public body?: string,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 
   get isUnauthorized(): boolean {
@@ -248,22 +283,30 @@ export function createMobileFetch(originalFetch: typeof fetch): typeof fetch {
   }
 
   // On mobile, wrap with auth token injection
-  return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+  return async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ): Promise<Response> => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
 
     // Only modify API calls (not external resources)
-    if (url.startsWith('/v1/') || url.includes('/v1/')) {
+    if (url.startsWith("/v1/") || url.includes("/v1/")) {
       const token = await getAccessToken();
       const headers = new Headers(init?.headers);
 
       if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
 
       return originalFetch(buildUrl(url), {
         ...init,
         headers,
-        credentials: 'omit',
+        credentials: "omit",
       });
     }
 

@@ -5,18 +5,21 @@
 // We need the raw body to verify the webhook signature.
 // =====================================================
 
-import { json, type RequestHandler } from '@sveltejs/kit';
-import { verifyWebhookSignature, handleWebhookEvent } from '$lib/billing/stripe.server';
+import { json, type RequestHandler } from "@sveltejs/kit";
+import {
+  verifyWebhookSignature,
+  handleWebhookEvent,
+} from "$lib/billing/stripe.server";
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
     // Get raw body for signature verification
     const body = await request.text();
-    const signature = request.headers.get('stripe-signature');
+    const signature = request.headers.get("stripe-signature");
 
     if (!signature) {
-      console.error('[Webhook] Missing stripe-signature header');
-      return json({ error: 'Missing signature' }, { status: 401 });
+      console.error("[Webhook] Missing stripe-signature header");
+      return json({ error: "Missing signature" }, { status: 401 });
     }
 
     // Verify signature and parse event
@@ -24,8 +27,8 @@ export const POST: RequestHandler = async ({ request }) => {
     try {
       event = verifyWebhookSignature(body, signature);
     } catch (err) {
-      console.error('[Webhook] Signature verification failed:', err);
-      return json({ error: 'Invalid signature' }, { status: 401 });
+      console.error("[Webhook] Signature verification failed:", err);
+      return json({ error: "Invalid signature" }, { status: 401 });
     }
 
     console.log(`[Webhook] Processing event: ${event.type} (${event.id})`);
@@ -41,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
         received: true,
         event_id: event.id,
         event_type: event.type,
-        status: 'error',
+        status: "error",
       });
     }
 
@@ -49,10 +52,10 @@ export const POST: RequestHandler = async ({ request }) => {
       received: true,
       event_id: event.id,
       event_type: event.type,
-      status: 'processed',
+      status: "processed",
     });
   } catch (err) {
-    console.error('[Webhook] Unexpected error:', err);
-    return json({ error: 'Internal error' }, { status: 500 });
+    console.error("[Webhook] Unexpected error:", err);
+    return json({ error: "Internal error" }, { status: 500 });
   }
 };

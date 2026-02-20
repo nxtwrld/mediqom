@@ -87,7 +87,12 @@ export const GET: RequestHandler = async ({
               timestamp: update.timestamp,
             });
           } catch (err) {
-            if (err && typeof err === 'object' && 'code' in err && err.code === "ERR_INVALID_STATE") {
+            if (
+              err &&
+              typeof err === "object" &&
+              "code" in err &&
+              err.code === "ERR_INVALID_STATE"
+            ) {
               console.log("⚠️ SSE controller closed, marking as closed");
               isClosed = true;
             } else {
@@ -114,7 +119,12 @@ export const GET: RequestHandler = async ({
             };
             controller.enqueue(`data: ${JSON.stringify(heartbeat)}\n\n`);
           } catch (err) {
-            if (err && typeof err === 'object' && 'code' in err && err.code === "ERR_INVALID_STATE") {
+            if (
+              err &&
+              typeof err === "object" &&
+              "code" in err &&
+              err.code === "ERR_INVALID_STATE"
+            ) {
               console.log(
                 "⚠️ SSE controller closed during heartbeat, stopping interval",
               );

@@ -280,7 +280,7 @@ ${JSON.stringify(dicomData, null, 2)}`;
               text.substring(text.length - 500),
           );
         } else {
-          console.log(`📝 Content[${index}]:`, text || '');
+          console.log(`📝 Content[${index}]:`, text || "");
         }
       } else {
         console.log(`📝 Content[${index}]:`, content);

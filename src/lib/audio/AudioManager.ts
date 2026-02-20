@@ -1,8 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import { AudioState, getAudioVAD, type AudioControlsVad } from './microphone';
-import { logger } from '$lib/logging/logger';
-import { float32Flatten } from '$lib/array';
-import ui from '$lib/ui';
+import { EventEmitter } from "eventemitter3";
+import { AudioState, getAudioVAD, type AudioControlsVad } from "./microphone";
+import { logger } from "$lib/logging/logger";
+import { float32Flatten } from "$lib/array";
+import ui from "$lib/ui";
 
 /**
  * Singleton AudioManager for centralized audio processing
@@ -15,13 +15,13 @@ export class AudioManager extends EventEmitter {
   private isInitialized = false;
   private isRecording = false;
   private currentState: AudioState = AudioState.Ready;
-  
+
   // Audio chunk buffering for optimization
   private chunkBuffer: Float32Array[] = [];
   private bufferTimer: number | null = null;
   private batchDurationMs = 30000; // 30 seconds real-time, loaded from config
   private batchStartTime: number | null = null;
-  
+
   // VAD timeout system for stuck speech events
   private vadTimeoutTimer: number | null = null;
   private lastSpeechStartTime: number | null = null;
@@ -29,7 +29,7 @@ export class AudioManager extends EventEmitter {
   private overlappingBuffer: Float32Array[] = [];
   private overlapDurationMs = 5000; // 5 seconds overlap
   private chunkSequenceNumber = 0;
-  
+
   // Energy-based pause detection
   private energyHistory: number[] = [];
   private readonly ENERGY_HISTORY_SIZE = 50; // frames to keep for analysis
@@ -37,12 +37,12 @@ export class AudioManager extends EventEmitter {
 
   private constructor() {
     super();
-    logger.audio.debug('AudioManager singleton created');
-    
+    logger.audio.debug("AudioManager singleton created");
+
     // Load configuration from audio-transcription.json if available
     this.loadConfiguration();
   }
-  
+
   /**
    * Load configuration from audio-transcription.json
    */
@@ -54,7 +54,7 @@ export class AudioManager extends EventEmitter {
 
     // In a browser environment, configuration would be loaded via API
     // For now, we use reasonable defaults that can be overridden later
-    logger.audio.debug('AudioManager configuration loaded with defaults', {
+    logger.audio.debug("AudioManager configuration loaded with defaults", {
       maxSpeechDuration: `${this.maxSpeechDurationMs}ms`,
       overlapDuration: `${this.overlapDurationMs}ms`,
       batchDuration: `${this.batchDurationMs}ms`,
@@ -77,7 +77,9 @@ export class AudioManager extends EventEmitter {
    */
   public static createInstance(): AudioManager {
     if (AudioManager.instance !== null) {
-      throw new Error('AudioManager instance already exists. Only one instance allowed per application.');
+      throw new Error(
+        "AudioManager instance already exists. Only one instance allowed per application.",
+      );
     }
     return AudioManager.getInstance();
   }
@@ -98,20 +100,23 @@ export class AudioManager extends EventEmitter {
   private setVadTimeout() {
     // Clear any existing timeout
     this.clearVadTimeout();
-    
+
     this.vadTimeoutTimer = window.setTimeout(() => {
-      logger.audio.warn('⚠️ VAD timeout triggered - forcing speech end after 30s', {
-        maxDurationMs: this.maxSpeechDurationMs,
-        lastSpeechStart: this.lastSpeechStartTime,
-        shouldTriggerSmartTimeout: this.shouldTriggerSmartTimeout(),
-        energyHistorySize: this.energyHistory.length,
-      });
-      
+      logger.audio.warn(
+        "⚠️ VAD timeout triggered - forcing speech end after 30s",
+        {
+          maxDurationMs: this.maxSpeechDurationMs,
+          lastSpeechStart: this.lastSpeechStartTime,
+          shouldTriggerSmartTimeout: this.shouldTriggerSmartTimeout(),
+          energyHistorySize: this.energyHistory.length,
+        },
+      );
+
       // Force speech end with current audio context
       this.handleVadTimeout();
     }, this.maxSpeechDurationMs);
   }
-  
+
   /**
    * Clear VAD timeout
    */
@@ -121,84 +126,98 @@ export class AudioManager extends EventEmitter {
       this.vadTimeoutTimer = null;
     }
   }
-  
+
   /**
    * Handle VAD timeout by forcing speech end
    */
   private handleVadTimeout() {
     if (!this.audio || this.currentState !== AudioState.Speaking) {
-      logger.audio.debug('VAD timeout called but not in speaking state');
+      logger.audio.debug("VAD timeout called but not in speaking state");
       return;
     }
-    
+
     // Create synthetic audio chunk from recent energy data if available
     const syntheticAudioData = new Float32Array(1600); // 100ms of silence at 16kHz
     syntheticAudioData.fill(0.001); // Very low amplitude
-    
-    logger.audio.info('🔧 VAD timeout recovery - creating synthetic speech end', {
-      currentState: this.currentState,
-      speechDuration: this.lastSpeechStartTime ? Date.now() - this.lastSpeechStartTime : 0,
-      syntheticDataLength: syntheticAudioData.length,
-      energyPattern: this.shouldTriggerSmartTimeout() ? 'anomalous' : 'normal',
-    });
-    
+
+    logger.audio.info(
+      "🔧 VAD timeout recovery - creating synthetic speech end",
+      {
+        currentState: this.currentState,
+        speechDuration: this.lastSpeechStartTime
+          ? Date.now() - this.lastSpeechStartTime
+          : 0,
+        syntheticDataLength: syntheticAudioData.length,
+        energyPattern: this.shouldTriggerSmartTimeout()
+          ? "anomalous"
+          : "normal",
+      },
+    );
+
     // Force state transition to Listening
     this.currentState = AudioState.Listening;
     this.lastSpeechStartTime = null;
-    
+
     // Process the synthetic chunk through normal pipeline with timeout flag
     this.processTimeoutChunk(syntheticAudioData);
-    
+
     // Emit events to notify listeners of forced speech end
-    this.emit('speech-end-timeout', syntheticAudioData);
-    this.emit('state-change', this.currentState);
-    ui.emit('audio:speech-end-timeout', syntheticAudioData);
+    this.emit("speech-end-timeout", syntheticAudioData);
+    this.emit("state-change", this.currentState);
+    ui.emit("audio:speech-end-timeout", syntheticAudioData);
   }
-  
+
   /**
    * Process timeout-forced audio chunk with special handling
    */
   private processTimeoutChunk(audioData: Float32Array) {
     // Create overlapping chunk with timeout metadata
     const overlappingChunk = this.createOverlappingChunk(audioData, true);
-    
-    logger.audio.info('⏰ Processing timeout-forced chunk with overlap', {
+
+    logger.audio.info("⏰ Processing timeout-forced chunk with overlap", {
       sequenceNumber: overlappingChunk.metadata.sequenceNumber,
       overlapDuration: `${overlappingChunk.metadata.overlapDurationMs}ms`,
       finalLength: overlappingChunk.audio.length,
       energyLevel: overlappingChunk.metadata.energyLevel.toFixed(6),
     });
-    
+
     // Add to buffer with special timeout handling
     this.chunkBuffer.push(overlappingChunk.audio);
-    
+
     // Force immediate sending for timeout chunks to prevent data loss
     this.mergeAndSendBuffer(true);
   }
-  
+
   /**
    * Merge buffered chunks and send for transcription processing
    * This combines multiple small audio chunks into larger, more efficient chunks
    */
   private mergeAndSendBuffer(forceFlush = false) {
     if (this.chunkBuffer.length === 0) {
-      logger.audio.debug('No chunks in buffer to send');
+      logger.audio.debug("No chunks in buffer to send");
       return;
     }
 
-    const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
+    const totalSamples = this.chunkBuffer.reduce(
+      (acc, chunk) => acc + chunk.length,
+      0,
+    );
     const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
-    const realTimeDurationMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
+    const realTimeDurationMs = this.batchStartTime
+      ? Date.now() - this.batchStartTime
+      : 0;
     const chunkCount = this.chunkBuffer.length;
 
-    logger.audio.info('🔄 Sending buffered audio for transcription', {
+    logger.audio.info("🔄 Sending buffered audio for transcription", {
       chunkCount,
       totalSamples,
       audioDurationMs: `${audioDurationMs}ms`,
       realTimeDurationMs: `${realTimeDurationMs}ms`,
       targetBatchDurationMs: `${this.batchDurationMs}ms`,
       forceFlush,
-      reason: forceFlush ? 'Batch duration reached or manual flush' : 'Batch timer triggered',
+      reason: forceFlush
+        ? "Batch duration reached or manual flush"
+        : "Batch timer triggered",
       hasOverlap: this.overlappingBuffer.length > 0,
     });
 
@@ -206,7 +225,10 @@ export class AudioManager extends EventEmitter {
     const mergedChunk = float32Flatten(this.chunkBuffer);
 
     // Create overlapping chunk with metadata for transcription
-    const overlappingChunk = this.createOverlappingChunk(mergedChunk, forceFlush);
+    const overlappingChunk = this.createOverlappingChunk(
+      mergedChunk,
+      forceFlush,
+    );
 
     // Clear buffer, timer, and reset batch start time for next batch
     this.chunkBuffer = [];
@@ -217,9 +239,9 @@ export class AudioManager extends EventEmitter {
     }
 
     // Send the overlapping chunk with metadata for transcription processing
-    this.emit('audio-chunk', overlappingChunk.audio, overlappingChunk.metadata);
+    this.emit("audio-chunk", overlappingChunk.audio, overlappingChunk.metadata);
 
-    logger.audio.debug('✅ Merged overlapping chunk sent for processing', {
+    logger.audio.debug("✅ Merged overlapping chunk sent for processing", {
       finalSamples: overlappingChunk.audio.length,
       compressionRatio: `${chunkCount}:1`,
       sequenceNumber: overlappingChunk.metadata.sequenceNumber,
@@ -237,50 +259,56 @@ export class AudioManager extends EventEmitter {
     }
     return energy / audioData.length;
   }
-  
+
   /**
    * Update energy history for smart timeout detection
    */
   private updateEnergyHistory(audioData: Float32Array) {
     const energy = this.calculateEnergy(audioData);
     this.energyHistory.push(energy);
-    
+
     // Keep history limited
     if (this.energyHistory.length > this.ENERGY_HISTORY_SIZE) {
       this.energyHistory.shift();
     }
-    
+
     this.lastEnergyCalculation = Date.now();
   }
-  
+
   /**
    * Detect if we should trigger timeout based on energy patterns
    */
   private shouldTriggerSmartTimeout(): boolean {
     if (this.energyHistory.length < 10) return false;
-    
+
     // Calculate average energy over recent history
     const recentFrames = this.energyHistory.slice(-10);
-    const avgRecentEnergy = recentFrames.reduce((a, b) => a + b, 0) / recentFrames.length;
-    
+    const avgRecentEnergy =
+      recentFrames.reduce((a, b) => a + b, 0) / recentFrames.length;
+
     // Check for sustained low energy (possible stuck VAD)
     const energyThreshold = 0.001; // Very low threshold for background noise
     const isLowEnergy = avgRecentEnergy < energyThreshold;
-    
+
     // Check for consistent energy patterns (possible continuous noise)
-    const energyVariance = recentFrames.reduce((acc, energy) => {
-      return acc + Math.pow(energy - avgRecentEnergy, 2);
-    }, 0) / recentFrames.length;
-    
-    const isConsistentNoise = energyVariance < 0.0001 && avgRecentEnergy > 0.0005;
-    
+    const energyVariance =
+      recentFrames.reduce((acc, energy) => {
+        return acc + Math.pow(energy - avgRecentEnergy, 2);
+      }, 0) / recentFrames.length;
+
+    const isConsistentNoise =
+      energyVariance < 0.0001 && avgRecentEnergy > 0.0005;
+
     return isLowEnergy || isConsistentNoise;
   }
-  
+
   /**
    * Create overlapping audio chunk with metadata
    */
-  private createOverlappingChunk(audioData: Float32Array, isTimeoutForced = false): {
+  private createOverlappingChunk(
+    audioData: Float32Array,
+    isTimeoutForced = false,
+  ): {
     audio: Float32Array;
     metadata: {
       sequenceNumber: number;
@@ -292,11 +320,12 @@ export class AudioManager extends EventEmitter {
   } {
     // Calculate overlap samples
     const overlapSamples = Math.floor((this.overlapDurationMs / 1000) * 16000);
-    
+
     // Combine with previous overlap if available
     let finalAudio: Float32Array;
     if (this.overlappingBuffer.length > 0) {
-      const previousOverlap = this.overlappingBuffer[this.overlappingBuffer.length - 1];
+      const previousOverlap =
+        this.overlappingBuffer[this.overlappingBuffer.length - 1];
       const combinedLength = previousOverlap.length + audioData.length;
       const combined = new Float32Array(combinedLength);
       combined.set(previousOverlap, 0);
@@ -305,21 +334,21 @@ export class AudioManager extends EventEmitter {
     } else {
       finalAudio = audioData;
     }
-    
+
     // Store overlap for next chunk
     if (audioData.length > overlapSamples) {
       const overlapStart = audioData.length - overlapSamples;
       this.overlappingBuffer = [audioData.slice(overlapStart)];
-      
+
       // Keep only recent overlaps to prevent memory issues
       if (this.overlappingBuffer.length > 3) {
         this.overlappingBuffer.shift();
       }
     }
-    
+
     const energy = this.calculateEnergy(audioData);
     this.chunkSequenceNumber++;
-    
+
     return {
       audio: finalAudio,
       metadata: {
@@ -331,7 +360,7 @@ export class AudioManager extends EventEmitter {
       },
     };
   }
-  
+
   /**
    * Add chunk to buffer and check if ready to send
    */
@@ -339,7 +368,7 @@ export class AudioManager extends EventEmitter {
     // Start batch timer on first chunk
     if (this.chunkBuffer.length === 0) {
       this.batchStartTime = Date.now();
-      logger.audio.debug('🎬 New batch started', {
+      logger.audio.debug("🎬 New batch started", {
         batchDurationMs: this.batchDurationMs,
       });
     }
@@ -349,11 +378,16 @@ export class AudioManager extends EventEmitter {
 
     this.chunkBuffer.push(audioData);
 
-    const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
+    const totalSamples = this.chunkBuffer.reduce(
+      (acc, chunk) => acc + chunk.length,
+      0,
+    );
     const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
-    const elapsedRealTimeMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
+    const elapsedRealTimeMs = this.batchStartTime
+      ? Date.now() - this.batchStartTime
+      : 0;
 
-    logger.audio.debug('📦 Added chunk to buffer', {
+    logger.audio.debug("📦 Added chunk to buffer", {
       chunkSamples: audioData.length,
       totalSamples,
       audioDurationMs: `${audioDurationMs}ms`,
@@ -380,9 +414,12 @@ export class AudioManager extends EventEmitter {
       const remaining = Math.max(100, this.batchDurationMs - elapsed); // Min 100ms to prevent immediate firing
 
       this.bufferTimer = window.setTimeout(() => {
-        logger.audio.info('⏰ Batch duration reached - sending accumulated audio', {
-          targetDurationMs: this.batchDurationMs,
-        });
+        logger.audio.info(
+          "⏰ Batch duration reached - sending accumulated audio",
+          {
+            targetDurationMs: this.batchDurationMs,
+          },
+        );
         this.mergeAndSendBuffer(true);
       }, remaining);
     }
@@ -397,30 +434,35 @@ export class AudioManager extends EventEmitter {
     if (this.bufferTimer) {
       clearTimeout(this.bufferTimer);
       this.bufferTimer = null;
-      logger.audio.debug('🕰️ Cleared pending buffer timeout');
+      logger.audio.debug("🕰️ Cleared pending buffer timeout");
     }
 
     this.clearVadTimeout();
 
     // Send any remaining chunks for processing before clearing
     if (this.chunkBuffer.length > 0) {
-      const totalSamples = this.chunkBuffer.reduce((acc, chunk) => acc + chunk.length, 0);
+      const totalSamples = this.chunkBuffer.reduce(
+        (acc, chunk) => acc + chunk.length,
+        0,
+      );
       const audioDurationMs = Math.round((totalSamples / 16000) * 1000);
-      const realTimeDurationMs = this.batchStartTime ? Date.now() - this.batchStartTime : 0;
+      const realTimeDurationMs = this.batchStartTime
+        ? Date.now() - this.batchStartTime
+        : 0;
 
-      logger.audio.info('🧹 Flushing remaining buffer chunks for processing', {
+      logger.audio.info("🧹 Flushing remaining buffer chunks for processing", {
         chunkCount: this.chunkBuffer.length,
         totalSamples,
         audioDurationMs: `${audioDurationMs}ms`,
         realTimeDurationMs: `${realTimeDurationMs}ms`,
-        reason: 'Recording stopped - ensuring no audio data is lost',
+        reason: "Recording stopped - ensuring no audio data is lost",
         hasOverlap: this.overlappingBuffer.length > 0,
       });
 
       // Force send remaining buffered chunks for processing
       this.mergeAndSendBuffer(true);
     } else {
-      logger.audio.debug('✅ Buffer already empty - no chunks to flush');
+      logger.audio.debug("✅ Buffer already empty - no chunks to flush");
     }
 
     // Clear overlapping buffer and reset batch state
@@ -435,20 +477,20 @@ export class AudioManager extends EventEmitter {
    */
   async initialize(): Promise<boolean> {
     if (this.isInitialized) {
-      logger.audio.warn('AudioManager already initialized');
+      logger.audio.warn("AudioManager already initialized");
       return true;
     }
 
     try {
-      logger.audio.info('Initializing AudioManager with VAD...');
-      
+      logger.audio.info("Initializing AudioManager with VAD...");
+
       // Request microphone access with VAD
       const audioResult = await getAudioVAD({
         analyzer: true,
       });
 
       if (audioResult instanceof Error) {
-        logger.audio.error('Failed to initialize audio - returned Error:', {
+        logger.audio.error("Failed to initialize audio - returned Error:", {
           message: audioResult.message,
           stack: audioResult.stack,
         });
@@ -459,7 +501,7 @@ export class AudioManager extends EventEmitter {
       this.isInitialized = true;
       this.currentState = AudioState.Ready;
 
-      logger.audio.info('AudioManager initialized successfully', {
+      logger.audio.info("AudioManager initialized successfully", {
         hasStream: !!this.audio.stream,
         hasAudioContext: !!this.audio.audioContext,
       });
@@ -467,12 +509,15 @@ export class AudioManager extends EventEmitter {
       // Set up audio event handlers
       this.setupAudioHandlers();
 
-      this.emit('initialized');
+      this.emit("initialized");
       return true;
     } catch (error) {
-      logger.audio.error('AudioManager initialization failed:', error);
+      logger.audio.error("AudioManager initialization failed:", error);
       this.currentState = AudioState.Error;
-      this.emit('error', `Audio initialization failed: ${(error as Error).message}`);
+      this.emit(
+        "error",
+        `Audio initialization failed: ${(error as Error).message}`,
+      );
       return false;
     }
   }
@@ -487,34 +532,34 @@ export class AudioManager extends EventEmitter {
     this.audio.onFeatures = (features) => {
       if (features.energy && features.energy > 0.001) {
         // Emit to both internal event system and UI system for backward compatibility
-        this.emit('features', features);
-        ui.emit('audio:features', features);
+        this.emit("features", features);
+        ui.emit("audio:features", features);
       }
     };
 
     // Handle speech start detection
     this.audio.onSpeechStart = () => {
-      logger.audio.info('Speech started - AudioManager');
+      logger.audio.info("Speech started - AudioManager");
       this.currentState = AudioState.Speaking;
       this.lastSpeechStartTime = Date.now();
-      
+
       // Set VAD timeout to prevent infinite speech detection
       this.setVadTimeout();
-      
-      this.emit('speech-start');
-      this.emit('state-change', this.currentState);
-      ui.emit('audio:speech-start');
+
+      this.emit("speech-start");
+      this.emit("state-change", this.currentState);
+      ui.emit("audio:speech-start");
     };
 
     // Handle speech end and process audio chunks
     this.audio.onSpeechEnd = (audioData: Float32Array) => {
       // Clear VAD timeout since speech ended naturally
       this.clearVadTimeout();
-      
+
       // Calculate peak amplitude without spreading large array
       let peakAmplitude = 0;
       let sumSquares = 0;
-      
+
       for (let i = 0; i < audioData.length; i++) {
         const absValue = Math.abs(audioData[i]);
         if (absValue > peakAmplitude) {
@@ -522,7 +567,7 @@ export class AudioManager extends EventEmitter {
         }
         sumSquares += audioData[i] * audioData[i];
       }
-      
+
       const chunkMetrics = {
         sampleCount: audioData.length,
         durationMs: Math.round((audioData.length / 16000) * 1000), // Assuming 16kHz sample rate
@@ -531,30 +576,32 @@ export class AudioManager extends EventEmitter {
         timestamp: Date.now(),
       };
 
-      logger.audio.info('🎤 Speech ended - AudioManager', {
+      logger.audio.info("🎤 Speech ended - AudioManager", {
         chunkSize: audioData.length,
         duration: `${chunkMetrics.durationMs}ms`,
         peakAmplitude: chunkMetrics.peakAmplitude.toFixed(4),
         rmsLevel: chunkMetrics.rmsLevel.toFixed(4),
         dataRange: `[${audioData[0].toFixed(4)}...${audioData[audioData.length - 1].toFixed(4)}]`,
-        speechDuration: this.lastSpeechStartTime ? Date.now() - this.lastSpeechStartTime : 0,
+        speechDuration: this.lastSpeechStartTime
+          ? Date.now() - this.lastSpeechStartTime
+          : 0,
       });
 
       this.currentState = AudioState.Listening;
       this.lastSpeechStartTime = null;
-      
+
       // Add chunk to buffer for optimization (instead of immediate sending)
       this.addToBuffer(audioData);
-      
+
       // Emit other events but not audio-chunk (that's handled by buffer)
-      this.emit('speech-end', audioData);
-      this.emit('state-change', this.currentState);
-      ui.emit('audio:speech-end', audioData);
+      this.emit("speech-end", audioData);
+      this.emit("state-change", this.currentState);
+      ui.emit("audio:speech-end", audioData);
 
       // Log chunk emission timing
-      logger.audio.debug('📤 Audio chunk events emitted', {
+      logger.audio.debug("📤 Audio chunk events emitted", {
         chunkId: `chunk_${chunkMetrics.timestamp}`,
-        eventTypes: ['speech-end', 'audio-chunk', 'state-change'],
+        eventTypes: ["speech-end", "audio-chunk", "state-change"],
         totalSamples: audioData.length,
       });
     };
@@ -565,31 +612,36 @@ export class AudioManager extends EventEmitter {
    */
   async start(): Promise<boolean> {
     if (!this.isInitialized || !this.audio) {
-      logger.audio.error('AudioManager not initialized - cannot start recording');
+      logger.audio.error(
+        "AudioManager not initialized - cannot start recording",
+      );
       return false;
     }
 
     if (this.isRecording) {
-      logger.audio.warn('AudioManager already recording');
+      logger.audio.warn("AudioManager already recording");
       return true;
     }
 
     try {
-      logger.audio.info('Starting AudioManager recording...');
-      
+      logger.audio.info("Starting AudioManager recording...");
+
       this.audio.start();
       this.isRecording = true;
       this.currentState = this.audio.state;
 
-      this.emit('recording-started');
-      this.emit('state-change', this.currentState);
-      ui.emit('audio:recording-started');
+      this.emit("recording-started");
+      this.emit("state-change", this.currentState);
+      ui.emit("audio:recording-started");
 
-      logger.audio.info('AudioManager recording started successfully');
+      logger.audio.info("AudioManager recording started successfully");
       return true;
     } catch (error) {
-      logger.audio.error('Failed to start AudioManager recording:', error);
-      this.emit('error', `Failed to start recording: ${(error as Error).message}`);
+      logger.audio.error("Failed to start AudioManager recording:", error);
+      this.emit(
+        "error",
+        `Failed to start recording: ${(error as Error).message}`,
+      );
       return false;
     }
   }
@@ -598,15 +650,15 @@ export class AudioManager extends EventEmitter {
    * Stop audio recording and cleanup resources
    */
   async stop(): Promise<void> {
-    logger.audio.info('Stopping AudioManager...');
+    logger.audio.info("Stopping AudioManager...");
 
     if (this.audio) {
       try {
         // Set stopping state
         this.currentState = AudioState.Stopping;
-        this.emit('state-change', this.currentState);
+        this.emit("state-change", this.currentState);
 
-        logger.audio.info('Stopping audio processor...', {
+        logger.audio.info("Stopping audio processor...", {
           hasStream: !!this.audio.stream,
           streamId: this.audio.stream?.id,
           trackCount: this.audio.stream?.getTracks().length || 0,
@@ -617,9 +669,9 @@ export class AudioManager extends EventEmitter {
 
         // Stop the audio processor (handles VAD and MediaStream cleanup)
         this.audio.stop();
-        logger.audio.info('Audio processor stopped successfully');
+        logger.audio.info("Audio processor stopped successfully");
       } catch (error) {
-        logger.audio.error('Error stopping audio processor:', error);
+        logger.audio.error("Error stopping audio processor:", error);
       }
     }
 
@@ -630,11 +682,11 @@ export class AudioManager extends EventEmitter {
     this.currentState = AudioState.Ready;
     this.lastSpeechStartTime = null;
 
-    this.emit('recording-stopped');
-    this.emit('state-change', this.currentState);
-    ui.emit('audio:recording-stopped');
+    this.emit("recording-stopped");
+    this.emit("state-change", this.currentState);
+    ui.emit("audio:recording-stopped");
 
-    logger.audio.info('AudioManager stopped and cleaned up');
+    logger.audio.info("AudioManager stopped and cleaned up");
   }
 
   /**
@@ -674,7 +726,7 @@ export class AudioManager extends EventEmitter {
       AudioManager.instance.stop();
       AudioManager.instance.removeAllListeners();
       AudioManager.instance = null;
-      logger.audio.debug('AudioManager singleton destroyed');
+      logger.audio.debug("AudioManager singleton destroyed");
     }
   }
 }
