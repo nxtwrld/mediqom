@@ -118,6 +118,11 @@ export async function apiFetch(
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+  const method = fetchOptions.method ?? 'GET';
+  if (isNativePlatform()) {
+    console.log(`[API] → ${method} ${url} | auth: ${headers.has('Authorization') ? 'yes' : 'no'}`);
+  }
+
   try {
     const response = await fetchFn(url, {
       ...fetchOptions,
@@ -126,6 +131,10 @@ export async function apiFetch(
       credentials: isNativePlatform() ? 'omit' : 'include',
       signal: controller.signal,
     });
+
+    if (isNativePlatform()) {
+      console.log(`[API] ← ${response.status} ${response.url}${response.redirected ? ' (redirected)' : ''}`);
+    }
 
     return response;
   } finally {

@@ -57,7 +57,8 @@
       "WebFetch(domain:langchain-ai.github.io)",
       "WebFetch(domain:docs.langchain.com)",
       "Bash(npm uninstall:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": []
   }

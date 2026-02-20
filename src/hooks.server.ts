@@ -39,18 +39,23 @@ import {
 } from "$env/static/public";
 
 const supabase: Handle = async ({ event, resolve }) => {
-  // Reduced logging to only errors and auth-related requests
-  const shouldLog =
-    !event.url.pathname.startsWith("/v1/") &&
-    (event.url.pathname.startsWith("/auth") ||
-      event.url.pathname === "/med" ||
-      event.url.pathname === "/account");
-  if (shouldLog) {
-    console.log(`[REQ] ${event.request.method} ${event.url.pathname}`);
+  const { method, headers: reqHeaders } = event.request;
+  const { pathname } = event.url;
+
+  // Always log OPTIONS and v1 requests so we can debug CORS preflight flow
+  if (method === 'OPTIONS' || pathname.startsWith('/v1/')) {
+    console.log(`[REQ] ${method} ${pathname} | origin: ${reqHeaders.get('origin') ?? '-'} | auth: ${reqHeaders.has('authorization') ? 'yes' : 'no'}`);
+  } else {
+    const shouldLog =
+      pathname.startsWith("/auth") ||
+      pathname === "/med" ||
+      pathname === "/account";
+    if (shouldLog) console.log(`[REQ] ${method} ${pathname}`);
   }
 
   // Handle CORS preflight for mobile API calls
-  if (event.request.method === 'OPTIONS' && event.url.pathname.startsWith('/v1/')) {
+  if (method === 'OPTIONS' && pathname.startsWith('/v1/')) {
+    console.log(`[CORS] Responding 204 to OPTIONS ${pathname}`);
     return new Response(null, {
       status: 204,
       headers: {

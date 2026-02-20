@@ -31,8 +31,9 @@ try {
 // @ts-ignore - __CAPACITOR_BUILD__ is defined at build time by vite.config.mobile.ts
 const IS_CAPACITOR = typeof __CAPACITOR_BUILD__ !== 'undefined' && __CAPACITOR_BUILD__ === true;
 
-// Disable trailing slash redirects for Capacitor to prevent redirect loops
-export const trailingSlash = IS_CAPACITOR ? "ignore" : "always";
+// Use "ignore" for all builds: prevents Vercel from generating 308 redirect rules
+// that would intercept CORS OPTIONS preflights before hooks.server.ts can handle them.
+export const trailingSlash = "ignore";
 
 // Disable SSR for Capacitor builds - server load functions won't be available
 export const ssr = !IS_CAPACITOR;
