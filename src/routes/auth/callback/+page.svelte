@@ -15,6 +15,17 @@
 			const hashParams = new URLSearchParams(hash);
 			const searchParams = new URLSearchParams(search);
 
+			// Mobile magic link: redirect to custom scheme to reopen the app
+			const isMobileLink = searchParams.get('m') === '1';
+			if (isMobileLink) {
+				const appUrl = new URL('mediqom://auth/callback');
+				for (const [key, value] of searchParams) {
+					if (key !== 'm') appUrl.searchParams.set(key, value);
+				}
+				window.location.href = appUrl.toString();
+				return;
+			}
+
 			const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
 			const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
 			const tokenHash = searchParams.get('token_hash');
