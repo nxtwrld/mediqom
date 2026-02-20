@@ -27,7 +27,7 @@
         <div class="session-info-grid">
             {#each items as item}
                 <div class="session-info-item">
-                    <label>{item.label}:</label>
+                    <span class="session-info-label">{item.label}:</span>
                     {#if item.type === 'priority' && item.priority}
                         <div class="priority-value">
                             <PriorityIndicator priority={item.priority} size="small" variant="dots" />
@@ -60,7 +60,7 @@
         min-height: 1.75rem !important;
     }
     
-    :global(.session-info-grid) .session-info-item label {
+    :global(.session-info-grid) .session-info-item .session-info-label {
         font-weight: 500 !important;
         color: var(--color-text-secondary, #6b7280) !important;
         font-size: 0.875rem !important;

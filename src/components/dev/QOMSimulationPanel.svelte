@@ -61,11 +61,14 @@
   }
   
   // Auto-start if requested
-  if (autoStart && typeof window !== 'undefined') {
-    setTimeout(() => {
-      startSimulation();
-    }, 1000);
-  }
+  $effect(() => {
+    if (autoStart && typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        startSimulation();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  });
 </script>
 
 <!-- Only show in development -->

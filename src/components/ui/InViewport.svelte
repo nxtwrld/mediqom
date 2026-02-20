@@ -8,6 +8,7 @@
         componentProps?: any;
         onenter?: () => void;
         onexit?: () => void;
+        children?: import('svelte').Snippet;
     }
 
     let {
@@ -16,7 +17,8 @@
         component = undefined,
         componentProps = {},
         onenter = undefined,
-        onexit = undefined
+        onexit = undefined,
+        children
     }: Props = $props();
 
     let intersectionObserver : IntersectionObserver | null = null;
@@ -70,9 +72,10 @@
 <div use:viewport>
     {#if isIntersecting}
         {#if component}
-            <svelte:component this={component} {...componentProps} />
+            {@const DynComp = component}
+            <DynComp {...componentProps} />
         {:else}
-            <slot />
+            {@render children?.()}
         {/if}
     {/if}
 </div>

@@ -6,7 +6,6 @@ import {
   isBrowser,
   parse,
 } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
 import {
   PUBLIC_SUPABASE_ANON_KEY,
   PUBLIC_SUPABASE_URL,
@@ -48,19 +47,11 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
   // For Capacitor builds, always use browser client - no server data available
   const isMobileBuild = IS_CAPACITOR || isCapacitorBuild();
 
-  // Create supabase client with proper error handling
-  // Mobile: use createClient with implicit flow to avoid PKCE code_verifier loss on cold start
+  // Mobile: use the registry singleton (implicit flow, configured in src/lib/supabase.ts)
   // Web browser: use createBrowserClient (PKCE via @supabase/ssr)
   // SSR: use createServerClient with cookie handling
   const supabase = isMobileBuild
-    ? createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-        auth: {
-          flowType: 'implicit',
-          detectSessionInUrl: false,
-          persistSession: true,
-          autoRefreshToken: true,
-        },
-      })
+    ? getClient()  // Use registry singleton — same instance as capacitor/auth.ts and getAccessToken()
     : (isBrowser()
       ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
           global: {

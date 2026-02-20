@@ -147,12 +147,6 @@
 		padding: var(--gap) 0;
 	}
 
-	.no-history {
-		color: var(--color-text-muted);
-		text-align: center;
-		padding: var(--gap);
-	}
-
 	.history-only {
 		padding: var(--gap-small) 0;
 	}

@@ -83,7 +83,7 @@
     }: Props = $props();
 
     // Use isolated stores when provided, otherwise fall back to global stores
-    const activeTabStore = storeInstance ? storeInstance.viewerStore.activeTab : activeTab;
+    const activeTabStore = $derived(storeInstance ? storeInstance.viewerStore.activeTab : activeTab);
     const currentActiveTab = $derived($activeTabStore);
     
     

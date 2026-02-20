@@ -72,9 +72,9 @@
         dispatch('download');
     }
 
-    let fileSize = formatFileSize(data.byteLength);
-    let fileIcon = getFileIcon();
-    let fileExt = getFileExtension();
+    const fileSize = $derived(formatFileSize(data.byteLength));
+    const fileIcon = $derived(getFileIcon());
+    const fileExt = $derived(getFileExtension());
 </script>
 
 <style>
@@ -201,7 +201,7 @@
     </div>
 
     <div class="actions">
-        <button class="btn primary" on:click={handleDownload}>
+        <button class="btn primary" onclick={handleDownload}>
             ⬇️ Download File
         </button>
     </div>

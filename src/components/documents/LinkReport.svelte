@@ -58,7 +58,7 @@
             {#each $store.links as item}
             <button onclick={() => link(item)} class="item panel">
                 <div class="icon">
-                    <Label type="{item.metadata.category}" />
+                    <Label type={item.metadata.category} />
                 </div>
                 <div>
                     {item.title} <br/>

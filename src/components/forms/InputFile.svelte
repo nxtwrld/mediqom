@@ -60,10 +60,6 @@
 </label>
 
 <style>
-
-.styled-file {
-
-}
 .styled-file input[type="file"] {
     display: none;
 }

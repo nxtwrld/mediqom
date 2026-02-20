@@ -1,8 +1,7 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-//import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 import {
   type ViteDevServer,
-  defineConfig,
   normalizePath,
   type Plugin,
 } from "vite";

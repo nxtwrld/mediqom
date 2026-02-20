@@ -32,9 +32,9 @@
     const getViewerActions = () => storeInstance?.viewerStore.actions || sessionViewerActions;
     
     // Use isolated stores when provided, otherwise fall back to global stores
-    const sidebarOpenStore = storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen;
-    const activeTabStore = storeInstance ? storeInstance.viewerStore.activeTab : activeTab;
-    const viewerStore = storeInstance ? storeInstance.viewerStore.sessionViewerStore : sessionViewerStore;
+    const sidebarOpenStore = $derived(storeInstance ? storeInstance.viewerStore.sidebarOpen : sidebarOpen);
+    const activeTabStore = $derived(storeInstance ? storeInstance.viewerStore.activeTab : activeTab);
+    const viewerStore = $derived(storeInstance ? storeInstance.viewerStore.sessionViewerStore : sessionViewerStore);
     
     const currentSidebarOpen = $derived($sidebarOpenStore);
     const currentActiveTab = $derived($activeTabStore);

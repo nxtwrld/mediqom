@@ -112,6 +112,7 @@
 	<title>{$t('app.auth.title')}</title>
 </svelte:head>
 
+<div class="auth-page">
 {#if isMobile}
 	<!-- Mobile: Client-side form submission -->
 	<form class="flex -column form modal" onsubmit={handleMobileSubmit}>
@@ -234,19 +235,26 @@
 		{/if}
 	</form>
 {/if}
+</div>
 
 
 <style>
+
+	.auth-page {
+		padding-top: var(--safe-area-top);
+		padding-bottom: var(--safe-area-bottom);
+		padding-left: var(--safe-area-left);
+		padding-right: var(--safe-area-right);
+		min-height: 100%;
+		display: flex;
+		align-items: center;
+	}
 
 	.logo {
 		width: 8rem;
 		margin: 0 auto;
 		display: block;
 	}
-	.form {
-		
-	}
-
 	.beta-notice {
 		background-color: #f8f9fa;
 		border: 1px solid #dee2e6;

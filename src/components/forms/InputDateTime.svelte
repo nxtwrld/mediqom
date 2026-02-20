@@ -102,6 +102,7 @@
 <style>
     input {
         -webkit-appearance: none;
+        appearance: none;
         -webkit-min-logical-width: calc(100% - 16px);
         min-height: 1.5rem;
     }

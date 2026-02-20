@@ -128,7 +128,7 @@
 
 		selectedTab,
 		selectedPanel,
-		fixedHeight,
+		get fixedHeight() { return fixedHeight; },
 		maxHeight,
 		panels,
 		tabIds

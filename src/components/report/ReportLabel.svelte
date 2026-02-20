@@ -21,18 +21,4 @@
         text-transform: capitalize;
     }
     
-    .report-label.laboratory {
-        background-color: var(--color-blue-100);
-        color: var(--color-blue-800);
-    }
-    
-    .report-label.imaging {
-        background-color: var(--color-green-100);
-        color: var(--color-green-800);
-    }
-    
-    .report-label.exam {
-        background-color: var(--color-purple-100);
-        color: var(--color-purple-800);
-    }
 </style> 

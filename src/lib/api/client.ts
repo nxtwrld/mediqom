@@ -9,6 +9,7 @@
 import { browser } from '$app/environment';
 import { getApiBaseUrl, isNativePlatform } from '$lib/config/platform';
 import { getClient } from '$lib/supabase';
+import { session as CurrentSession } from '$lib/user';
 
 export interface ApiRequestOptions extends RequestInit {
   /** Skip adding authorization header */
@@ -24,10 +25,20 @@ export interface ApiResponse<T = unknown> extends Response {
 }
 
 /**
- * Get the current session access token from Supabase
+ * Get the current session access token.
+ *
+ * Fast path: read from the synchronously-updated session store.
+ * On mobile, capacitor/auth.ts calls CurrentSession.set() before goto(), so
+ * the store is guaranteed to hold the token when load functions run.
+ * Falls back to the Supabase client for cold starts and token refresh cases.
  */
 async function getAccessToken(): Promise<string | null> {
   if (!browser) return null;
+
+  const storedSession = CurrentSession.get();
+  if (storedSession?.access_token) {
+    return storedSession.access_token;
+  }
 
   try {
     const supabase = getClient();
@@ -51,7 +62,19 @@ function buildUrl(endpoint: string): string {
   const baseUrl = getApiBaseUrl();
 
   // Ensure endpoint starts with /
-  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  let normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+
+  // On mobile builds, add trailing slash to avoid 308 redirect from the SvelteKit
+  // server (trailingSlash = "always"). iOS WKWebView strips Authorization on redirect.
+  if (baseUrl && !normalizedEndpoint.endsWith('/')) {
+    const queryIdx = normalizedEndpoint.indexOf('?');
+    if (queryIdx === -1) {
+      normalizedEndpoint = `${normalizedEndpoint}/`;
+    } else {
+      normalizedEndpoint =
+        `${normalizedEndpoint.slice(0, queryIdx)}/${normalizedEndpoint.slice(queryIdx)}`;
+    }
+  }
 
   return `${baseUrl}${normalizedEndpoint}`;
 }

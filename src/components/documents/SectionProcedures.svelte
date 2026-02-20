@@ -8,7 +8,6 @@
     }
 
     let { data, document, key }: Props = $props();
-    console.log('Procedures input',$state.snapshot(data) )
     // Check if we have procedure data
     let hasProcedures = $derived(data && (
         data.hasProcedures || 

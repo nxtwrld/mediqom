@@ -406,14 +406,14 @@
             <defs>
                 {#each colors as color}
                 <pattern id="color-{color}" viewBox="0,0,4,4" width="3" height="3" patternUnits="userSpaceOnUse">
-                  <circle r="3" fill={color} dx="1" dy="1" >
+                  <circle r="3" fill={color} dx="1" dy="1" />
                 </pattern>
                 {/each}
         </defs>        
         </svg>
     </div>
 </div>
-<div class="tooltip" bind:this={tooltip} onclick={stopPropagation(viewDetails)} role="button" tabindex="0">
+<div class="tooltip" bind:this={tooltip} onclick={stopPropagation(viewDetails)} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') viewDetails(); }} role="button" tabindex="0">
     {#if tooltipData}
         <div class="date">{date(tooltipData.date)}</div>
         <div class="property">{tooltipData.label}</div>

@@ -94,12 +94,12 @@
     const getViewerActions = () => storeInstance ? storeInstance.viewerStore.actions : sessionViewerActions;
 
     // Use isolated stores when provided, otherwise fall back to global stores
-    const sankeyDataStore = storeInstance ? storeInstance.dataStore.sankeyDataFiltered : sankeyData;
-    const hiddenCountsStore = storeInstance ? storeInstance.dataStore.hiddenCounts : hiddenCounts;
-    const thresholdsStore = storeInstance ? storeInstance.dataStore.thresholds : thresholds;
-    const activePathStore = storeInstance ? storeInstance.viewerStore.activePath : activePath;
-    const hoveredItemStore = storeInstance ? storeInstance.viewerStore.hoveredItem : hoveredItem;
-    const selectedItemStore = storeInstance ? storeInstance.viewerStore.selectedItem : selectedItem;
+    const sankeyDataStore = $derived(storeInstance ? storeInstance.dataStore.sankeyDataFiltered : sankeyData);
+    const hiddenCountsStore = $derived(storeInstance ? storeInstance.dataStore.hiddenCounts : hiddenCounts);
+    const thresholdsStore = $derived(storeInstance ? storeInstance.dataStore.thresholds : thresholds);
+    const activePathStore = $derived(storeInstance ? storeInstance.viewerStore.activePath : activePath);
+    const hoveredItemStore = $derived(storeInstance ? storeInstance.viewerStore.hoveredItem : hoveredItem);
+    const selectedItemStore = $derived(storeInstance ? storeInstance.viewerStore.selectedItem : selectedItem);
     
     const currentSankeyData = $derived($sankeyDataStore);
     const currentHiddenCounts = $derived($hiddenCountsStore);
@@ -207,12 +207,12 @@
     const ZOOM_CONFIG = DEFAULT_ZOOM_CONFIG;
     
     // Responsive margins based on screen size
-    const margins = {
+    const margins = $derived({
         top: isMobile ? 10 : 20,
         right: isMobile ? 5 : 15,
         bottom: isMobile ? 10 : 20,
         left: isMobile ? 5 : 15
-    };
+    });
 
     // Derive focused node ID efficiently  
     const focusedNodeId = $derived(
@@ -1371,7 +1371,8 @@
 
 </script>
 
-<div class="sankey-container" 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div class="sankey-container"
      bind:this={container}
      tabindex="0"
      role="application"

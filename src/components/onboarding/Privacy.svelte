@@ -650,7 +650,6 @@
         background-color: var(--color-primary-light, rgba(0, 122, 255, 0.05));
     }
 
-    .mode-option.-disabled,
     .method-option.-disabled {
         opacity: 0.5;
         cursor: not-allowed;
