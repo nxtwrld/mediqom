@@ -66,17 +66,6 @@ function buildUrl(endpoint: string): string {
   // Ensure endpoint starts with /
   let normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
-  // On mobile builds, add trailing slash to avoid 308 redirect from the SvelteKit
-  // server (trailingSlash = "always"). iOS WKWebView strips Authorization on redirect.
-  if (baseUrl && !normalizedEndpoint.endsWith("/")) {
-    const queryIdx = normalizedEndpoint.indexOf("?");
-    if (queryIdx === -1) {
-      normalizedEndpoint = `${normalizedEndpoint}/`;
-    } else {
-      normalizedEndpoint = `${normalizedEndpoint.slice(0, queryIdx)}/${normalizedEndpoint.slice(queryIdx)}`;
-    }
-  }
-
   return `${baseUrl}${normalizedEndpoint}`;
 }
 
@@ -141,8 +130,9 @@ export async function apiFetch(
     });
 
     if (isNativePlatform()) {
+      const location = response.headers.get('location') ?? '';
       console.log(
-        `[API] ← ${response.status} ${response.url}${response.redirected ? " (redirected)" : ""}`,
+        `[API] ← ${response.status} ${response.url}${response.redirected ? ' (redirected)' : ''}${location ? ` → ${location}` : ''}`,
       );
     }
 

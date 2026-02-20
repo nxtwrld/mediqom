@@ -17,6 +17,12 @@ const config: CapacitorConfig = {
   },
 
   plugins: {
+    CapacitorHttp: {
+      // Use native HTTP (NSURLSession on iOS) instead of WKWebView networking.
+      // This bypasses CORS preflight entirely — no OPTIONS requests are sent,
+      // so the Vercel 308 redirect on OPTIONS never triggers.
+      enabled: true,
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#ffffff",
