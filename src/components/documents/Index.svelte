@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { profile } from '$lib/profiles';
+    import { profile, profileDocumentsLoading } from '$lib/profiles';
     import userStore from '$lib/user';
     import { byUser } from '$lib/documents';
     import { type Document } from '$lib/documents/types.d';
     import DocumentTile from './DocumentTile.svelte';
+    import Loading from '$components/ui/Loading.svelte';
     import { onMount } from 'svelte';
 
     // Import job support
@@ -91,7 +92,9 @@
 </div>
 {/if}
 
-{#if documents}
+{#if $profileDocumentsLoading}
+<Loading type="line" />
+{:else if documents}
 <div class="tiles">
 <button class="tile -vertical -import" onclick={handleImport}>
     <div class="tile-body">

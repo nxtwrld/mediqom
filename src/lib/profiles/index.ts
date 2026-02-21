@@ -3,8 +3,8 @@ import profile from "./profile";
 
 import {
   decryptDocumentsNoStore,
-  setDocuments,
   addDocument,
+  importDocuments,
 } from "$lib/documents";
 import { DocumentType } from "$lib/documents/types.d";
 import type { Document } from "$lib/documents/types.d";
@@ -15,8 +15,19 @@ import { prepareKeys } from "$lib/encryption/rsa";
 import { createHash } from "$lib/encryption/hash";
 import { generatePassphrase } from "$lib/encryption/passphrase";
 import { apiFetch } from "$lib/api/client";
+import { writable } from "svelte/store";
+import {
+  getCachedProfiles,
+  setCachedProfiles,
+  type BasicProfile,
+} from "./cache";
+import { profileContextManager } from "$lib/context/integration/profile-context";
+import { isCapacitorBuild } from "$lib/config/platform";
 
 export { profiles, profile };
+
+/** Store: true while background document loading for a profile is in progress */
+export const profileDocumentsLoading = writable(false);
 
 // Simple in-memory metadata for loadProfiles
 const loadProfilesMeta: { lastLoadedUserId: string | null } = {
@@ -44,18 +55,17 @@ export async function removeLinkedProfile(profile_id: string) {
 }
 
 /**
- *  Load
+ * Phase 1 (blocking, fast): fetch basic profile list and set in store.
+ * Phase 2 (background, slow): enrich each profile with decrypted documents.
  */
 export async function loadProfiles(
   force: boolean = false,
   fetchFn?: typeof globalThis.fetch,
 ) {
   // Guard: avoid unnecessary reloads for the same authenticated user
-  // Reload only if forced, or if no profiles are in store, or if user changed
   const currentUserId = user.getId();
   const existingProfiles = profiles.get() as any[];
   if (!force && existingProfiles && existingProfiles.length > 0) {
-    // Track the last user id we loaded profiles for
     if (
       loadProfilesMeta.lastLoadedUserId &&
       loadProfilesMeta.lastLoadedUserId === currentUserId
@@ -63,8 +73,22 @@ export async function loadProfiles(
       return;
     }
   }
-  // fetch basic profile data
+
   const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
+
+  // --- Phase 0: Stale cache (mobile only) ---
+  if (currentUserId && isCapacitorBuild()) {
+    const cached = await getCachedProfiles(currentUserId);
+    if (cached) {
+      // Only set if store is currently empty (avoids flickering on forced reloads)
+      const current = profiles.get() as any[];
+      if (!current || current.length === 0) {
+        profiles.set(cached as any);
+      }
+    }
+  }
+
+  // --- Phase 1: Fetch basic profile list (fast) ---
   const profilesLoaded = await apiFetch("/v1/med/profiles", fetchOpts)
     .then((r) => r.json())
     .catch((e) => {
@@ -72,12 +96,50 @@ export async function loadProfiles(
       return [];
     });
 
-  // extend profile data with decrypted roots and batch set documents once
+  // Build basic profiles with empty health/vcard/insurance
+  const basicProfiles: Profile[] = profilesLoaded
+    .filter((d: any) => d.profiles != null)
+    .map((d: ProfileCore) => ({
+      ...d.profiles,
+      status: d.status,
+      insurance: {},
+      health: {},
+      vcard: {},
+    }));
+
+  // Set store immediately so profile list renders now
+  profiles.set(basicProfiles);
+  loadProfilesMeta.lastLoadedUserId = currentUserId || null;
+
+  // Cache non-sensitive metadata for mobile stale-while-revalidate (never on web)
+  if (currentUserId && isCapacitorBuild()) {
+    const toCache: BasicProfile[] = basicProfiles.map((p: any) => ({
+      id: p.id,
+      fullName: p.fullName,
+      avatarUrl: p.avatarUrl,
+      status: p.status,
+      owner_id: p.owner_id,
+      language: p.language,
+    }));
+    setCachedProfiles(currentUserId, toCache);
+  }
+
+  // --- Phase 2: Background enrichment with documents ---
+  enrichProfilesWithDocuments(profilesLoaded, fetchOpts);
+}
+
+/**
+ * Background: fetch & decrypt profile+health documents for each profile,
+ * then update the profiles store with enriched data and populate documents store.
+ */
+async function enrichProfilesWithDocuments(
+  profilesLoaded: ProfileCore[],
+  fetchOpts: { fetch?: typeof globalThis.fetch },
+) {
   const results: ProfileLoadResult[] = await Promise.all(
     profilesLoaded
       .filter((d: any) => d.profiles != null)
       .map(async (d: ProfileCore): Promise<ProfileLoadResult> => {
-        // fetch encrypted profile and health documents
         try {
           const rootsEncrypted = await apiFetch(
             `/v1/med/profiles/${d.profiles.id}/documents?types=profile,health&full=true`,
@@ -89,15 +151,12 @@ export async function loadProfiles(
               return [];
             });
 
-          // decrypt documents without mutating global documents store
           const roots = (await decryptDocumentsNoStore(
             rootsEncrypted,
           )) as Document[];
 
-          // map profile data
           const profileData = mapProfileData(d, roots);
-
-          return { profileData, roots };
+          return { profileData };
         } catch (e) {
           return {
             profileData: {
@@ -107,25 +166,90 @@ export async function loadProfiles(
               health: {},
               vcard: {},
             },
-            roots: [],
           };
         }
       }),
   );
 
   const profilesExtended = results.map((r) => r.profileData);
-  const allRoots = results.flatMap((r) => r.roots);
 
-  // set profiles
   profiles.set(profilesExtended || []);
+}
 
-  // Batch update documents store once with all roots for all profiles
-  if (allRoots.length > 0) {
-    setDocuments(allRoots);
+/** Tracks in-flight document loads per profile to prevent concurrent duplicate fetches */
+const profileDocumentLoads = new Map<string, Promise<void>>();
+
+/** Tracks profiles whose documents have already been successfully loaded this session */
+const profileDocumentsLoaded = new Set<string>();
+
+/**
+ * Clears the loaded-flag for a profile so the next call re-fetches.
+ * Call after document mutations (e.g. add/delete) if a full reload is needed.
+ */
+export function invalidateProfileDocuments(profileId: string): void {
+  profileDocumentsLoaded.delete(profileId);
+  profileDocumentLoads.delete(profileId);
+}
+
+/**
+ * Load all documents for a single profile in the background.
+ * Sets profileDocumentsLoading store during the operation.
+ * Deduplicates concurrent calls and skips re-fetch if already loaded this session.
+ */
+export async function loadProfileDocuments(
+  profileId: string,
+  fetchFn?: typeof globalThis.fetch,
+): Promise<void> {
+  // Skip entirely if already successfully loaded this session
+  if (profileDocumentsLoaded.has(profileId)) {
+    return;
   }
 
-  // Update metadata after successful load
-  loadProfilesMeta.lastLoadedUserId = currentUserId || null;
+  // Return existing promise if already loading for this profile
+  const existing = profileDocumentLoads.get(profileId);
+  if (existing) {
+    return existing;
+  }
+
+  const promise = (async () => {
+    profileDocumentsLoading.set(true);
+    try {
+      const fetchOpts = fetchFn ? { fetch: fetchFn } : {};
+      const response = await apiFetch(
+        `/v1/med/profiles/${profileId}/documents`,
+        fetchOpts,
+      );
+
+      if (response.status !== 200) {
+        console.warn(`Failed to load documents for profile ${profileId}: ${response.status}`);
+        return;
+      }
+
+      const documents = await importDocuments(await response.json());
+
+      // Mark as loaded only on success so failed loads can retry
+      profileDocumentsLoaded.add(profileId);
+
+      if (documents.length > 0) {
+        try {
+          await profileContextManager.initializeProfileContext(profileId);
+        } catch (error) {
+          console.warn(
+            `Failed to initialize context for profile ${profileId}:`,
+            error,
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Error loading profile documents:", e);
+    } finally {
+      profileDocumentsLoading.set(false);
+      profileDocumentLoads.delete(profileId);
+    }
+  })();
+
+  profileDocumentLoads.set(profileId, promise);
+  return promise;
 }
 
 export function updateProfile(p: Profile) {
@@ -153,11 +277,9 @@ export function mapProfileData(core: ProfileCore, roots: Document[]): Profile {
       profileDocumentId = r.id;
     }
     if (r.type === "health") {
-      //console.log('health', r);
       health = r.content;
       healthDocumentId = r.id;
     }
-    // Remove title and tags from content object if they exist
     if (r.content && typeof r.content === "object") {
       const content = r.content as any;
       delete content.title;
@@ -186,26 +308,19 @@ export function mapProfileData(core: ProfileCore, roots: Document[]): Profile {
     profileData.health = health;
   }
 
-  // In-memory sync to ensure consistency
-  // If vcard.fn exists, ensure fullName matches (vcard is source of truth)
   if (profileData.vcard?.fn) {
     profileData.fullName = profileData.vcard.fn;
   }
-  // Else if fullName exists but vcard.fn doesn't, migration will happen in ProfileEdit
 
   return profileData as Profile;
 }
 
 /**
- * Creat a new virtual profile
+ * Create a new virtual profile
  */
-
 export async function createVirtualProfile(profile: ProfileNew) {
-  // 2. generate random passphrase
   const key_pass = generatePassphrase();
   const key_hash = await createHash(key_pass);
-
-  // 3. encrypt private key with passphrase
   const keys = await prepareKeys(key_pass);
 
   console.log("Saving profile", {
@@ -217,7 +332,6 @@ export async function createVirtualProfile(profile: ProfileNew) {
     key_pass: key_pass,
   });
 
-  // 4. submit to server
   const response = await apiFetch("/v1/med/profiles", {
     method: "POST",
     headers: {
@@ -237,14 +351,8 @@ export async function createVirtualProfile(profile: ProfileNew) {
   });
   const [profileData] = await response.json();
 
-  //console.log('Profile saved', profileData);
-
-  //console.log('Add profile documnets', profileData.id);
-  // 7. update profiles
   await loadProfiles(true);
 
-  // 5. create profile document if vcard is provided
-  // Ensure vcard.fn is populated from fullName if not provided
   const vcardData = profile.vcard || {};
   if (!vcardData.fn && profile.fullName) {
     vcardData.fn = profile.fullName;
@@ -255,13 +363,12 @@ export async function createVirtualProfile(profile: ProfileNew) {
     content: {
       title: "Profile",
       tags: ["profile"],
-      vcard: vcardData, // Use synced vcard
+      vcard: vcardData,
       insurance: profile.insurance || {},
     },
     user_id: profileData.id,
   });
 
-  // 6. create a health document
   const healthDocument = {
     ...(profile.health || {}),
   };
@@ -269,7 +376,6 @@ export async function createVirtualProfile(profile: ProfileNew) {
     healthDocument.birthDate = profile.birthDate;
   }
 
-  //console.log('Add health documnets', profileData.id);
   await addDocument({
     type: DocumentType.health,
     content: {
@@ -280,7 +386,6 @@ export async function createVirtualProfile(profile: ProfileNew) {
     user_id: profileData.id,
   });
 
-  // 7. update profiles
   await loadProfiles(true);
 
   return profileData;

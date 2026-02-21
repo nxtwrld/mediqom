@@ -2,8 +2,6 @@
  * Profile loading type definitions
  */
 
-import type { Document } from "$lib/documents/types.d";
-
 /** Core profile data from database */
 export interface ProfileCore {
   profiles: {
@@ -17,5 +15,4 @@ export interface ProfileCore {
 /** Result of profile loading operation */
 export interface ProfileLoadResult {
   profileData: any;
-  roots: Document[];
 }

@@ -14,14 +14,16 @@ export const load: LayoutLoad = async ({ parent, fetch }) => {
     redirect(303, "/auth");
   }
 
-  // fetch basic user data - now safe because we have a session
-  const userData = await apiFetch("/v1/med/user", { fetch })
-    .then((r) => r.json())
-    .catch((e) => {
-      log.api.error("Error loading user", e);
-      redirect(303, "/account");
-    });
-  await loadProfiles(false, fetch);
+  // fetch user data and profiles in parallel
+  const [userData] = await Promise.all([
+    apiFetch("/v1/med/user", { fetch })
+      .then((r) => r.json())
+      .catch((e) => {
+        log.api.error("Error loading user", e);
+        redirect(303, "/account");
+      }),
+    loadProfiles(false, fetch),
+  ]);
 
   if (
     userData &&

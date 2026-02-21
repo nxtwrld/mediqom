@@ -1,10 +1,7 @@
-import { fail, redirect } from "@sveltejs/kit";
+import { redirect } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 import type { Profile } from "$lib/types.d";
-import { profiles, profile } from "$lib/profiles";
-import { importDocuments } from "$lib/documents";
-import { profileContextManager } from "$lib/context/integration/profile-context";
-import { apiFetch } from "$lib/api/client";
+import { profiles, profile, loadProfileDocuments } from "$lib/profiles";
 
 export const load: LayoutLoad = async ({ parent, params, fetch }) => {
   await parent();
@@ -13,39 +10,14 @@ export const load: LayoutLoad = async ({ parent, params, fetch }) => {
   const p = profiles.get(params.profile) as Profile;
 
   if (!p) {
-    // profile not found
     redirect(303, "/med/p");
   }
 
-  // set the profile
+  // Set profile immediately so the page renders now
   profile.set(p);
 
-  const documentsResponse = await apiFetch(
-    `/v1/med/profiles/${params.profile}/documents`,
-    { fetch },
-  );
-
-  if (documentsResponse.status === 401) {
-    fail(401, { message: "Unauthorized" });
-  }
-
-  if (documentsResponse.status !== 200) {
-    fail(documentsResponse.status, { message: "Error loading documents" });
-  }
-
-  const documents = await importDocuments(await documentsResponse.json());
-
-  // Initialize profile context with simplified medical terms approach
-  if (documents.length > 0) {
-    try {
-      await profileContextManager.initializeProfileContext(params.profile);
-    } catch (error) {
-      console.warn(
-        `Failed to initialize context for profile ${params.profile}:`,
-        error,
-      );
-    }
-  }
+  // Load documents in the background — no await
+  loadProfileDocuments(params.profile, fetch);
 
   return {};
 };
