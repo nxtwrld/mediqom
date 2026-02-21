@@ -28,6 +28,7 @@ import {
 import { base64ToArrayBuffer } from "$lib/arrays";
 import { logger } from "$lib/logging/logger";
 import { profileContextManager } from "$lib/context/integration/profile-context";
+import { apiFetch } from "$lib/api/client";
 // Removed embedding migration import - now using medical terms classification
 
 export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
@@ -93,7 +94,7 @@ let loadingDocuments: Promise<boolean> = new Promise(
 export async function loadDocuments(
   profile_id: string,
 ): Promise<(DocumentPreload | Document)[]> {
-  const documentsResponse = await fetch(
+  const documentsResponse = await apiFetch(
     `/v1/med/profiles/${profile_id}/documents`,
   );
   const result = await documentsResponse.json();
@@ -210,7 +211,7 @@ export async function loadDocument(
     throw new Error(Errors.Unauthenticated);
   }
 
-  const documentEncrypted = await fetch(
+  const documentEncrypted = await apiFetch(
     "/v1/med/profiles/" + profile_id + "/documents/" + id,
   )
     .then((r) => r.json())
@@ -355,7 +356,7 @@ export async function updateDocument(documentData: Document) {
     key,
   );
 
-  return await fetch(
+  return await apiFetch(
     "/v1/med/profiles/" + document.user_id + "/documents/" + document.id,
     {
       method: "PUT",
@@ -480,7 +481,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
   }
 
   // save the report itself
-  const response = await fetch(
+  const response = await apiFetch(
     "/v1/med/profiles/" + (profile_id || user_id) + "/documents",
     {
       method: "POST",
@@ -552,7 +553,7 @@ export async function removeDocument(id: string): Promise<void> {
   if (document?.content?.attachments)
     await removeAttachments(document?.content?.attachments);
   // remove document
-  await fetch("/v1/med/profiles/" + document.user_id + "/documents/" + id, {
+  await apiFetch("/v1/med/profiles/" + document.user_id + "/documents/" + id, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -596,7 +597,7 @@ async function saveAttachements(
   // store attachments
   const urls = await Promise.all(
     attachments.map(async (attachment, i) => {
-      const response = await fetch(
+      const response = await apiFetch(
         "/v1/med/profiles/" + user_id + "/attachments",
         {
           method: "POST",
@@ -620,7 +621,7 @@ async function removeAttachments(attachments: Attachment[]): Promise<void> {
   logger.documents.debug("Delete attachments from storage", { attachments });
   await Promise.all(
     attachments.map(async (attachment) => {
-      const response = await fetch(
+      const response = await apiFetch(
         "/v1/med/profiles/" +
           user.getId() +
           "/attachments?path=" +

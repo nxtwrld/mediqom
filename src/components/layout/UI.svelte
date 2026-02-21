@@ -316,11 +316,17 @@
 <style>
     .virtual-page {
         position: fixed;
-        top: calc(var(--toolbar-height) + var(--gap));
+        top: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top));
         left: 0;
         right: 0;
         bottom: 0;
         z-index: 100000;
         background: var(--background);
+    }
+    @media (max-width: 768px) {
+        .virtual-page {
+            top: var(--safe-area-top);
+            bottom: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-bottom));
+        }
     }
 </style>

@@ -47,22 +47,8 @@ const supabase: Handle = async ({ event, resolve }) => {
   const { method, headers: reqHeaders } = event.request;
   const { pathname } = event.url;
 
-  // Always log OPTIONS and v1 requests so we can debug CORS preflight flow
-  const shouldLog =
-    pathname.startsWith("/auth") ||
-    pathname === "/med" ||
-    pathname === "/account";
-  if (method === "OPTIONS" || pathname.startsWith("/v1/")) {
-    console.log(
-      `[REQ] ${method} ${pathname} | origin: ${reqHeaders.get("origin") ?? "-"} | auth: ${reqHeaders.has("authorization") ? "yes" : "no"}`,
-    );
-  } else if (shouldLog) {
-    console.log(`[REQ] ${method} ${pathname}`);
-  }
-
   // Handle CORS preflight for mobile API calls
   if (method === "OPTIONS" && pathname.startsWith("/v1/")) {
-    console.log(`[CORS] Responding 204 to OPTIONS ${pathname}`);
     return new Response(null, {
       status: 204,
       headers: {
@@ -97,66 +83,76 @@ const supabase: Handle = async ({ event, resolve }) => {
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
    * validating the JWT, this function also calls `getUser()` to validate the
    * JWT before returning the session.
+   *
+   * Memoized per-request: the Promise is cached in a closure so multiple
+   * callers within the same request share a single network round-trip.
    */
-  event.locals.safeGetSession = async () => {
-    const {
-      data: { session },
-    } = await event.locals.supabase.auth.getSession();
+  let sessionCache: Promise<{ session: any | null; user: any | null }> | null = null;
 
-    if (!session) {
-      // Fallback: Bearer token auth (mobile Capacitor)
-      const authHeader = event.request.headers.get("Authorization");
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.slice(7);
-        const tokenClient = createServerClient(
-          PUBLIC_SUPABASE_URL,
-          PUBLIC_SUPABASE_ANON_KEY,
-          {
-            global: { headers: { Authorization: `Bearer ${token}` } },
-            cookies: {
-              get: () => undefined as unknown as string,
-              set: () => {},
-              remove: () => {},
-            },
-          },
-        );
+  event.locals.safeGetSession = () => {
+    if (!sessionCache) {
+      sessionCache = (async () => {
         const {
-          data: { user },
-          error,
-        } = await tokenClient.auth.getUser();
-        if (user && !error) {
-          // Replace locals.supabase with the token-authenticated client
-          // so downstream endpoints use the mobile user's RLS context
-          event.locals.supabase = tokenClient;
-          return {
-            session: {
-              access_token: token,
-              refresh_token: "",
-              expires_in: 0,
-              token_type: "bearer",
-              user,
-            },
-            user,
-          };
+          data: { session },
+        } = await event.locals.supabase.auth.getSession();
+
+        if (!session) {
+          // Fallback: Bearer token auth (mobile Capacitor)
+          const authHeader = event.request.headers.get("Authorization");
+          if (authHeader?.startsWith("Bearer ")) {
+            const token = authHeader.slice(7);
+            const tokenClient = createServerClient(
+              PUBLIC_SUPABASE_URL,
+              PUBLIC_SUPABASE_ANON_KEY,
+              {
+                global: { headers: { Authorization: `Bearer ${token}` } },
+                cookies: {
+                  get: () => undefined as unknown as string,
+                  set: () => {},
+                  remove: () => {},
+                },
+              },
+            );
+            const {
+              data: { user },
+              error,
+            } = await tokenClient.auth.getUser();
+            if (user && !error) {
+              // Replace locals.supabase with the token-authenticated client
+              // so downstream endpoints use the mobile user's RLS context
+              event.locals.supabase = tokenClient;
+              return {
+                session: {
+                  access_token: token,
+                  refresh_token: "",
+                  expires_in: 0,
+                  token_type: "bearer",
+                  user,
+                },
+                user,
+              };
+            }
+          }
+          return { session: null, user: null };
         }
-      }
-      return { session: null, user: null };
+
+        try {
+          const {
+            data: { user },
+            error,
+          } = await event.locals.supabase.auth.getUser();
+
+          if (error) {
+            return { session: null, user: null };
+          }
+
+          return { session, user };
+        } catch {
+          return { session: null, user: null };
+        }
+      })();
     }
-
-    try {
-      const {
-        data: { user },
-        error,
-      } = await event.locals.supabase.auth.getUser();
-
-      if (error) {
-        return { session: null, user: null };
-      }
-
-      return { session, user };
-    } catch (authError: any) {
-      return { session: null, user: null };
-    }
+    return sessionCache;
   };
 
   // CRITICAL: Await the response to ensure cookies are properly set
@@ -179,10 +175,6 @@ const supabase: Handle = async ({ event, resolve }) => {
     );
   }
 
-  // Only log errors and important requests
-  if (response.status >= 400 || shouldLog) {
-    console.log(`[RES] ${response.status} ${event.url.pathname}`);
-  }
   return response;
 };
 

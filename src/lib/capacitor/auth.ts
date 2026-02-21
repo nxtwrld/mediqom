@@ -31,14 +31,11 @@ let lastProcessedAuthUrl: string | null = null;
 export async function initMobileAuth(): Promise<void> {
   if (!browser || !isNativePlatform()) return;
 
-  console.log("[Mobile Auth] Initializing...");
-
   try {
     const { App } = await import("@capacitor/app");
 
     // Listen for deep links while the app is running (warm start)
     App.addListener("appUrlOpen", async ({ url }) => {
-      console.log("[Mobile Auth] Deep link received:", url);
       await handleDeepLink(url);
     });
 
@@ -46,7 +43,6 @@ export async function initMobileAuth(): Promise<void> {
     try {
       const launchUrl = await App.getLaunchUrl();
       if (launchUrl?.url) {
-        console.log("[Mobile Auth] Cold start launch URL:", launchUrl.url);
         await handleDeepLink(launchUrl.url);
       }
     } catch (e) {
@@ -98,7 +94,6 @@ async function handleDeepLink(url: string): Promise<void> {
     if (isCustomScheme || isUniversalLink) {
       // Deduplicate: getLaunchUrl() and appUrlOpen can both fire for the same URL
       if (lastProcessedAuthUrl === url) {
-        console.log("[Mobile Auth] Skipping duplicate auth callback URL");
         return;
       }
       lastProcessedAuthUrl = url;
@@ -116,8 +111,6 @@ async function handleDeepLink(url: string): Promise<void> {
  * Fallback: PKCE code exchange (if Supabase sends a code param)
  */
 async function handleAuthCallback(url: string): Promise<void> {
-  console.log("[Mobile Auth] Processing auth callback...");
-
   try {
     const urlObj = new URL(url);
     const searchParams = new URLSearchParams(urlObj.search);
@@ -134,7 +127,6 @@ async function handleAuthCallback(url: string): Promise<void> {
 
     if (accessToken && refreshToken) {
       // Implicit flow: tokens directly in URL fragment
-      console.log("[Mobile Auth] Setting session from implicit flow tokens...");
       const { data, error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -160,7 +152,6 @@ async function handleAuthCallback(url: string): Promise<void> {
         | "email_change"
         | null;
 
-      console.log("[Mobile Auth] Verifying OTP token_hash...");
       const { data, error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
         type: otpType ?? "email",
@@ -174,15 +165,12 @@ async function handleAuthCallback(url: string): Promise<void> {
 
       if (data.session) {
         CurrentSession.set(data.session);
-        console.log(
-          "[Mobile Auth] OTP session established, redirecting to /med",
-        );
+        console.log("[Mobile Auth] Session established, redirecting to /med");
         goto("/med");
         return;
       }
     } else if (code) {
       // PKCE fallback: exchange authorization code for session
-      console.log("[Mobile Auth] Exchanging PKCE code for session...");
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
@@ -193,9 +181,7 @@ async function handleAuthCallback(url: string): Promise<void> {
 
       if (data.session) {
         CurrentSession.set(data.session);
-        console.log(
-          "[Mobile Auth] PKCE session established, redirecting to /med",
-        );
+        console.log("[Mobile Auth] Session established, redirecting to /med");
         goto("/med");
       }
     } else {
@@ -220,11 +206,6 @@ export async function signInWithMagicLink(
     ? `https://${UNIVERSAL_LINK_HOST}${AUTH_CALLBACK_PATH}?m=1`
     : `${window.location.origin}/auth/confirm`;
 
-  console.log("[Mobile Auth] Signing in with magic link:", {
-    email,
-    redirectUrl,
-  });
-
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
@@ -248,15 +229,6 @@ export async function signOut(): Promise<void> {
   const supabase = getClient();
   await supabase.auth.signOut();
   CurrentSession.set(null);
-
-  if (isNativePlatform()) {
-    try {
-      const { Preferences } = await import("@capacitor/preferences");
-      await Preferences.remove({ key: "supabase_session" });
-    } catch (error) {
-      console.error("[Mobile Auth] Failed to clear preferences:", error);
-    }
-  }
 
   goto("/auth");
 }
@@ -324,49 +296,3 @@ export function onAuthStateChange(
   };
 }
 
-/**
- * Store session in Capacitor Preferences for persistence
- */
-export async function persistSession(session: Session): Promise<void> {
-  if (!isNativePlatform()) return;
-
-  try {
-    const { Preferences } = await import("@capacitor/preferences");
-    await Preferences.set({
-      key: "supabase_session",
-      value: JSON.stringify(session),
-    });
-  } catch (error) {
-    console.error("[Mobile Auth] Failed to persist session:", error);
-  }
-}
-
-/**
- * Restore session from Capacitor Preferences
- */
-export async function restoreSession(): Promise<Session | null> {
-  if (!isNativePlatform()) return null;
-
-  try {
-    const { Preferences } = await import("@capacitor/preferences");
-    const { value } = await Preferences.get({ key: "supabase_session" });
-
-    if (value) {
-      const session = JSON.parse(value) as Session;
-      const supabase = getClient();
-      const { data, error } = await supabase.auth.setSession({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-      });
-
-      if (!error && data.session) {
-        CurrentSession.set(data.session);
-        return data.session;
-      }
-    }
-  } catch (error) {
-    console.error("[Mobile Auth] Failed to restore session:", error);
-  }
-
-  return null;
-}

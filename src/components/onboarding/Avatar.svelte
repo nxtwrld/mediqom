@@ -6,6 +6,7 @@
 	import { t } from '$lib/i18n';
 	import { logger } from '$lib/logging/logger';
 	import ImageCropModal from '$components/ui/ImageCropModal.svelte';
+	import { apiFetch } from '$lib/api/client';
 
 	interface Props {
 		size?: number;
@@ -35,7 +36,7 @@
 	const downloadImage = async (path: string) => {
 		try {
 
-			const data = await fetch(`/v1/med/profiles/${id}/avatar?path=${path}`).then((res) => res.blob())
+			const data = await apiFetch(`/v1/med/profiles/${id}/avatar?path=${path}`).then((res) => res.blob())
 
 			// blob data to base64
 			const reader = new FileReader();
@@ -68,7 +69,7 @@
 			uploading = true;
 			const filenameNew = `${Math.random()}.png`;
 
-			const { filename } = await fetch(`/v1/med/profiles/${id}/avatar`, {
+			const { filename } = await apiFetch(`/v1/med/profiles/${id}/avatar`, {
 				method: 'POST',
 				body: JSON.stringify({ file: croppedImage, filename: filenameNew, type: 'image/png' }),
 			})

@@ -59,8 +59,10 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 <header>
     <nav class="toolbar">
         <a href="/med" class="icon logo">
-            <svg>
-                <use href="/logo.svg#icon"></use>
+            <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#ff0086" shape-rendering="optimizedQuality" d="M453.4,234.5c0-22.8-15.8-39.9-36.8-39.9s-14.4,2.4-20.5,7.1c-5.8,4.5-9.7,10.2-12,14.4-2.3-4.2-6.2-9.9-12-14.4-6.1-4.7-13-7.1-20.5-7.1-21,0-36.8,17.2-36.8,39.9s49.6,44.9,42.9,61.1c-4.3,10.2-10.1,18.5-18.5,30.4-3.8,5.3-8.9,9.6-13.9,13.8-30.5,27-70.7,43.5-114.6,43.5s-73-12.2-101.6-33c31.4,44,82.8,72.7,140.9,72.7,82.3,0,151.1-57.4,168.6-134.4,4.8-20.8,34.8-33.9,34.8-54.1Z"/>
+                <path shape-rendering="optimizedQuality" d="M368.4,124.1q.1,0,0,0c-.1,0-.2-.2-.2-.3-1.2-1.3-2.6-2.6-4-3.7-30.5-26.8-70.4-43.1-114.2-43.1-95.5,0-173,77.4-173,173s6.4,53.2,17.7,76.2c21.5,16.4,47.2,28.1,75.7,33,14.3,2.5,28.5,3.1,42.3,2-46.5-15.6-80-59.5-80-111.2s52.5-117.3,117.3-117.3,55.9,10.7,76.4,28.3c5.1,5.9,12.7,9.6,21.1,9.6,15.5,0,28-12.5,28-28s-2.7-13.6-7.1-18.5Z"/>
+                <circle shape-rendering="optimizedQuality" cx="249.2" cy="250.5" r="30.6" transform="translate(-38 456.4) rotate(-80.8)"/>
             </svg>
             <h1>{$t('app.name')}</h1>
         </a>
@@ -157,8 +159,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         bottom: 0;
         left: 0;
         right: 0;
-        /*padding-top: var(--safe-area-top);*/
-        height: var(--toolbar-height);
+        height: calc(var(--toolbar-height) + var(--safe-area-bottom));
+        padding-bottom: var(--safe-area-bottom);
         z-index: 1000;
         --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
     }
@@ -166,6 +168,9 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         header {
             top: 0;
             bottom: auto;
+            height: calc(var(--toolbar-height) + var(--safe-area-top));
+            padding-top: var(--safe-area-top);
+            padding-bottom: 0;
         }
     }
     header .toolbar {
@@ -311,8 +316,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
             align-items: stretch;
             position: fixed;
             width: 100%;
-            height: calc(100vh - var(--toolbar-height));
-            /*top: var(--toolbar-height);*/
+            bottom: calc(var(--toolbar-height) + var(--safe-area-bottom));
+            top: var(--safe-area-top);
             background-color: var(--color-gray-500);
             padding-top: var(--gap);
             max-height: 0;
@@ -320,9 +325,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
             transition: max-height .5s;
         }
         .toolbar > .navigation.-open {
-            max-height: calc(100vh - var(--toolbar-height));
+            max-height: calc(100vh - var(--toolbar-height) - var(--safe-area-bottom) - var(--safe-area-top));
             box-shadow: var(--menu-shadow);
-
         }
         .toolbar > .navigation .spacer {
             display: none;
@@ -343,11 +347,11 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 
         .menu > ul.menu {
             position: fixed;
-            top: var(--toolbar-height);
+            bottom: calc(var(--toolbar-height) + var(--safe-area-bottom));
+            top: var(--safe-area-top);
             left: 0;
             width: 100%;
-            height: calc(100vh - var(--toolbar-height));
-
+            height: auto;
         }
 
     }

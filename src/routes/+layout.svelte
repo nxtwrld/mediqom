@@ -12,17 +12,17 @@
 	let session = $derived(data?.session || null);
 	let supabase = $derived(data?.supabase);
 
-	onMount(() => {
+	onMount(async () => {
 		const currentSupabase = data?.supabase;
 		if (!currentSupabase) return;
 
 		const isMobile = isNativePlatform() || isCapacitorBuild();
 
 		// Initialize mobile auth (deep link listeners, cold start handling)
+		// AWAITED: ensures session is in CurrentSession before UI continues
 		if (isMobile) {
-			import('$lib/capacitor/auth').then(({ initMobileAuth }) => {
-				initMobileAuth();
-			});
+			const { initMobileAuth } = await import('$lib/capacitor/auth');
+			await initMobileAuth();
 		}
 
 		let lastUserId: string | null = data?.session?.user?.id || null;
@@ -34,7 +34,7 @@
 			if (isMobile) {
 				// Mobile: update session store directly, never call invalidate
 				// (invalidate triggers __data.json fetch which fails in static SPA)
-				if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+				if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
 					if (sessionData) {
 						CurrentSession.set(sessionData);
 					}

@@ -92,7 +92,6 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
     (isBrowser() && !session && (isNativePlatform() || isCapacitorBuild()))
   ) {
     try {
-      console.log("[Layout] Mobile: Getting session from Supabase...");
       const { data: sessionData, error: sessionError } =
         await supabase.auth.getSession();
       if (sessionError) {
@@ -101,9 +100,6 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
       if (sessionData?.session) {
         session = sessionData.session;
         user = sessionData.session.user;
-        console.log("[Layout] Mobile: Session found for user:", user?.email);
-      } else {
-        console.log("[Layout] Mobile: No session found");
       }
     } catch (e) {
       console.error("[Layout] Mobile: Failed to get session:", e);

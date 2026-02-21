@@ -9,7 +9,6 @@
 import { browser } from "$app/environment";
 import { getApiBaseUrl, isNativePlatform } from "$lib/config/platform";
 import { getClient } from "$lib/supabase";
-import { session as CurrentSession } from "$lib/user";
 
 export interface ApiRequestOptions extends RequestInit {
   /** Skip adding authorization header */
@@ -27,18 +26,12 @@ export interface ApiResponse<T = unknown> extends Response {
 /**
  * Get the current session access token.
  *
- * Fast path: read from the synchronously-updated session store.
- * On mobile, capacitor/auth.ts calls CurrentSession.set() before goto(), so
- * the store is guaranteed to hold the token when load functions run.
- * Falls back to the Supabase client for cold starts and token refresh cases.
+ * Always calls supabase.auth.getSession() to avoid stale expired tokens from
+ * the in-memory store. Supabase caches the session in memory and auto-refreshes,
+ * so this is fast when the token is still valid.
  */
 async function getAccessToken(): Promise<string | null> {
   if (!browser) return null;
-
-  const storedSession = CurrentSession.get();
-  if (storedSession?.access_token) {
-    return storedSession.access_token;
-  }
 
   try {
     const supabase = getClient();
@@ -262,45 +255,3 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Create a fetch function that can be passed to SvelteKit load functions
- * This wraps the provided fetch with mobile-specific auth handling
- */
-export function createMobileFetch(originalFetch: typeof fetch): typeof fetch {
-  if (!isNativePlatform()) {
-    // On web, just return the original fetch
-    return originalFetch;
-  }
-
-  // On mobile, wrap with auth token injection
-  return async (
-    input: RequestInfo | URL,
-    init?: RequestInit,
-  ): Promise<Response> => {
-    const url =
-      typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url;
-
-    // Only modify API calls (not external resources)
-    if (url.startsWith("/v1/") || url.includes("/v1/")) {
-      const token = await getAccessToken();
-      const headers = new Headers(init?.headers);
-
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-
-      return originalFetch(buildUrl(url), {
-        ...init,
-        headers,
-        credentials: "omit",
-      });
-    }
-
-    // For non-API calls, use original fetch
-    return originalFetch(input, init);
-  };
-}

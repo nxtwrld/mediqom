@@ -10,11 +10,31 @@ import { isCapacitorBuild } from "$lib/config/platform";
 
 const clients = new Map<string, SupabaseClient>();
 
-/*
-
-// curently set in layout - maybe do it here....
-clients.set('default', createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY));
-*/
+// Storage adapter that uses @capacitor/preferences (native key-value store)
+// so the Supabase session survives full app restarts on iOS/Android.
+const capacitorStorage = {
+  async getItem(key: string): Promise<string | null> {
+    try {
+      const { Preferences } = await import("@capacitor/preferences");
+      const { value } = await Preferences.get({ key });
+      return value;
+    } catch {
+      return null;
+    }
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    try {
+      const { Preferences } = await import("@capacitor/preferences");
+      await Preferences.set({ key, value });
+    } catch {}
+  },
+  async removeItem(key: string): Promise<void> {
+    try {
+      const { Preferences } = await import("@capacitor/preferences");
+      await Preferences.remove({ key });
+    } catch {}
+  },
+};
 
 export function setClient(
   client: SupabaseClient,
@@ -31,7 +51,6 @@ export function setClient(
     // Don't warn for same client instance (common during hydration)
     return;
   }
-  console.log("Supabase - setting client:", clientName);
   clients.set(clientName, client);
 }
 
@@ -42,9 +61,6 @@ export function getClient(clientName: string = "default"): SupabaseClient {
 
   const client = clients.get(clientName);
   if (client == undefined) {
-    console.log("Supabase - creating client:", clientName, {
-      url: PUBLIC_SUPABASE_URL,
-    });
     if (clientName == "default") {
       const newClient = isCapacitorBuild()
         ? createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
@@ -53,6 +69,7 @@ export function getClient(clientName: string = "default"): SupabaseClient {
               detectSessionInUrl: false,
               persistSession: true,
               autoRefreshToken: true,
+              storage: capacitorStorage,
             },
           })
         : createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
@@ -62,6 +79,5 @@ export function getClient(clientName: string = "default"): SupabaseClient {
       throw new Error(`Supabase client ${clientName} not found`);
     }
   }
-  console.log("Supabase - getting client:", clientName);
   return client;
 }

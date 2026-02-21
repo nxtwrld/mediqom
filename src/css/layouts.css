@@ -1,6 +1,6 @@
 main.layout {
   padding: var(--safe-area-top) var(--safe-area-right)
-    calc(var(--toolbar-height) + var(--gap)) var(--safe-area-left);
+    calc(var(--toolbar-height) + var(--gap) + var(--safe-area-bottom)) var(--safe-area-left);
   height: 100vh;
   position: relative;
 }
@@ -109,7 +109,7 @@ main.layout.chat-open section.layout-content {
   /* Viewer becomes bottom sheet on mobile */
   section.layout-viewer {
     position: fixed;
-    bottom: var(--toolbar-height);
+    bottom: calc(var(--toolbar-height) + var(--safe-area-bottom));
     left: 0;
     right: 0;
     width: 100% !important;
