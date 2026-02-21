@@ -96,14 +96,13 @@
 <Loading type="line" />
 {:else if documents}
 <div class="tiles">
-<button class="tile -vertical -import" onclick={handleImport}>
-    <div class="tile-body">
-        <svg class="import-icon"><use href="/icons.svg#add-file" /></svg>
+    <div class="tile -import">
+        <button  onclick={handleImport} class="button -secondary">
+            <svg class="import-icon"><use href="/icons.svg#add-file" /></svg>
+        
+            { $t('app.nav.import') }
+        </button>
     </div>
-    <div class="tile-footer">
-        <span>{ $t('app.nav.import') }</span>
-    </div>
-</button>
 {#each $documents.sort(sortByDate) as document}
   <DocumentTile document={document as Document} />
 {/each}
@@ -119,26 +118,15 @@
     }
 
     .tile.-import {
-        border: 2px dashed var(--color-border);
         background: transparent;
         cursor: pointer;
-        color: var(--color-text-secondary);
-        text-align: left;
     }
-    .tile.-import:hover {
-        background-color: var(--color-surface);
-        color: var(--color-text-primary);
-    }
+    
     .tile.-import .import-icon {
         width: 2rem;
         height: 2rem;
         fill: currentColor;
         margin: .5rem;
-    }
-    .tile.-import .tile-footer {
-        background-color: var(--color-gray-600);
-        padding: .5rem;
-        font-size: 0.9rem;
     }
 </style>
 

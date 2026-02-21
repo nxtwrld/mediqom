@@ -246,11 +246,16 @@
 
     let previousLabels: typeof labels = [];
 
+    function labelsContentChanged(a: typeof labels, b: typeof labels): boolean {
+        if (a.length !== b.length) return true;
+        return a.some((la, i) => la.id !== b[i].id || la.tag !== b[i].tag || la.count !== b[i].count);
+    }
+
     $: {
         if (ready && labels !== previousLabels) {
             const oldLabels = previousLabels;
             previousLabels = labels;
-            if (oldLabels.length > 0) {
+            if (oldLabels.length > 0 && labelsContentChanged(labels, oldLabels)) {
                 cleanupLabels(oldLabels);
                 if (activeLayers === loadedLayers) {
                     refreshLabels();
@@ -1250,7 +1255,7 @@
 <div class="labels" bind:this={labelContainer}>
     {#each labels as label}
     <div class="label" id="label-id-{label.id}">
-        <a href="/med/p/{$profile.id}/documents/?tags={label.tag}" class="highlight" data-id={label.id}>
+        <a href="/med/p/{$profile.id}/documents/?tags={label.tag}" class="highlight" data-id={label.id} data-sveltekit-preload-data="false">
             <Label type={label.type} />
         </a>
     </div>

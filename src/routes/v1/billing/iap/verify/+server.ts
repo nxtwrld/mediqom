@@ -1,8 +1,11 @@
 // =====================================================
 // POST /v1/billing/iap/verify - Validate IAP receipts (iOS/Android)
 // =====================================================
-// This endpoint validates in-app purchase receipts from mobile platforms
-// and updates the user's subscription accordingly.
+// NOTE: This endpoint is superseded by RevenueCat webhooks.
+// RevenueCat validates receipts server-side and notifies us via
+// POST /v1/billing/revenuecat/webhook, which calls the same DB
+// update functions. This endpoint is kept as a fallback for
+// manual verification scenarios.
 // =====================================================
 
 import { error, json, type RequestHandler } from "@sveltejs/kit";

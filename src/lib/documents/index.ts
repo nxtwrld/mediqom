@@ -181,12 +181,25 @@ export async function decryptDocumentsNoStore(
 }
 
 /**
- * Replace the global documents store in one batched update and rebuild indices.
+ * Merge incoming docs into the global store, replacing only the profile(s)
+ * present in the batch. Docs from other profiles are preserved so that
+ * navigating between profiles does not erase previously-loaded data.
  */
 export function setDocuments(
   docs: (DocumentPreload | Document)[],
 ): (DocumentPreload | Document)[] {
-  documents.set(docs);
+  if (docs.length === 0) {
+    loadingDocumentsResolve(true);
+    return docs;
+  }
+
+  // Collect profile IDs present in the incoming batch
+  const incomingProfileIds = new Set(docs.map((d) => d.user_id).filter(Boolean));
+
+  // Keep documents from other profiles; replace only the incoming profile(s)
+  const others = get(documents).filter((d) => !incomingProfileIds.has(d.user_id));
+
+  documents.set([...others, ...docs]);
   updateIndex();
   loadingDocumentsResolve(true);
   return docs;

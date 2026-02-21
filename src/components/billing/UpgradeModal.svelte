@@ -18,6 +18,14 @@
         loadSubscription,
         getYearlySavingsPercent,
     } from '$lib/billing/store';
+    import {
+        getOfferings,
+        purchasePackage as rcPurchasePackage,
+        restorePurchases as rcRestorePurchases,
+        getNativeProductId,
+        getNativePackProductId,
+    } from '$lib/billing/revenuecat';
+    import { isNativePlatform } from '$lib/config/platform';
     import type { SubscriptionTierId, BillingCycle } from '$lib/billing/types';
     import { onMount } from 'svelte';
 
@@ -39,6 +47,12 @@
     let billingCycle: BillingCycle = $state('yearly');
     let currentTab: 'plans' | 'credits' = $state(mode === 'credits' ? 'credits' : 'plans');
 
+    // Mobile (RevenueCat) state
+    let isMobile = $state(false);
+    let mobilePurchasing = $state(false);
+    // Map of native productId → RC package object
+    let rcPackageMap = $state<Record<string, unknown>>({});
+
     const savingsPercent = $derived(
         $tiers.length > 0 ? getYearlySavingsPercent($tiers[1]) : 17
     );
@@ -47,9 +61,121 @@
         [...$tiers].sort((a, b) => a.sort_order - b.sort_order)
     );
 
+    // =====================================================
+    // RevenueCat helpers
+    // =====================================================
+
+    async function loadRCOfferings() {
+        const offerings = await getOfferings() as Record<string, unknown> | null;
+        // offerings is PurchasesOfferings: { current: PurchasesOffering | null, all: {...} }
+        const current = offerings?.current as Record<string, unknown> | null;
+        const packages = current?.availablePackages as Array<Record<string, unknown>> | null;
+        if (!packages) return;
+
+        const map: Record<string, unknown> = {};
+        for (const pkg of packages) {
+            const product = pkg.product as Record<string, unknown> | undefined;
+            // PurchasesStoreProduct uses .identifier (not .productIdentifier)
+            const productId = product?.identifier as string | undefined;
+            if (productId) map[productId] = pkg;
+        }
+        rcPackageMap = map;
+    }
+
+    async function handleMobilePurchaseTier(tierId: SubscriptionTierId) {
+        const tier = $tiers.find(t => t.id === tierId);
+        const productId = getNativeProductId(tier ?? {}, billingCycle);
+
+        if (!productId) {
+            checkoutError = 'Product not configured for this platform.';
+            viewState = 'error';
+            return;
+        }
+
+        const rcPackage = rcPackageMap[productId];
+        if (!rcPackage) {
+            checkoutError = 'Product not available in store. Please try again later.';
+            viewState = 'error';
+            return;
+        }
+
+        mobilePurchasing = true;
+        try {
+            const result = await rcPurchasePackage(rcPackage);
+            if (result.success) {
+                viewState = 'success';
+                // Reload subscription after a short delay to let webhook propagate
+                setTimeout(() => loadSubscription(), 2000);
+            } else if (!result.cancelled) {
+                checkoutError = result.error || 'Purchase failed. Please try again.';
+                viewState = 'error';
+            }
+            // If cancelled: user backed out, stay on select view
+        } finally {
+            mobilePurchasing = false;
+        }
+    }
+
+    async function handleMobileBuyPack(packId: string) {
+        const pack = $packs.find(p => p.id === packId);
+        const productId = getNativePackProductId(pack ?? {});
+
+        if (!productId) {
+            checkoutError = 'Product not configured for this platform.';
+            viewState = 'error';
+            return;
+        }
+
+        const rcPackage = rcPackageMap[productId];
+        if (!rcPackage) {
+            checkoutError = 'Product not available in store. Please try again later.';
+            viewState = 'error';
+            return;
+        }
+
+        mobilePurchasing = true;
+        try {
+            const result = await rcPurchasePackage(rcPackage);
+            if (result.success) {
+                viewState = 'success';
+                setTimeout(() => loadSubscription(), 2000);
+            } else if (!result.cancelled) {
+                checkoutError = result.error || 'Purchase failed. Please try again.';
+                viewState = 'error';
+            }
+        } finally {
+            mobilePurchasing = false;
+        }
+    }
+
+    async function handleRestorePurchases() {
+        mobilePurchasing = true;
+        try {
+            const result = await rcRestorePurchases();
+            if (result.success) {
+                viewState = 'success';
+                await loadSubscription();
+            } else {
+                checkoutError = result.error || 'Restore failed. Please try again.';
+                viewState = 'error';
+            }
+        } finally {
+            mobilePurchasing = false;
+        }
+    }
+
+    // =====================================================
+    // Plan / pack selection
+    // =====================================================
+
     async function handleSelectPlan(tierId: SubscriptionTierId) {
         const tier = $tiers.find(t => t.id === tierId);
         selectedTierName = tier?.name ?? tierId;
+
+        if (isMobile) {
+            await handleMobilePurchaseTier(tierId);
+            return;
+        }
 
         const result = await createEmbeddedCheckout(tierId, billingCycle);
         if (result) {
@@ -64,6 +190,11 @@
     async function handleBuyPack(packId: string) {
         const pack = $packs.find(p => p.id === packId);
         selectedTierName = pack?.name ?? packId;
+
+        if (isMobile) {
+            await handleMobileBuyPack(packId);
+            return;
+        }
 
         const result = await createEmbeddedPackCheckout(packId);
         if (result) {
@@ -105,9 +236,14 @@
         onclose?.();
     }
 
-    onMount(() => {
+    onMount(async () => {
         if ($tiers.length === 0) loadTiers();
         if ($packs.length === 0) loadPacks();
+
+        isMobile = isNativePlatform();
+        if (isMobile) {
+            await loadRCOfferings();
+        }
     });
 </script>
 
@@ -177,7 +313,15 @@
                 </div>
             {/if}
 
-            {#if $isLoading}
+            {#if isMobile}
+                <div class="restore-link">
+                    <button class="restore-button" onclick={handleRestorePurchases}>
+                        {$t('billing.restore-purchases')}
+                    </button>
+                </div>
+            {/if}
+
+            {#if $isLoading || mobilePurchasing}
                 <div class="loading-overlay">
                     <div class="loader"></div>
                     <span>{$t('billing.preparing-checkout')}</span>
@@ -344,6 +488,25 @@
         width: 1rem;
         height: 1rem;
         fill: currentColor;
+    }
+
+    .restore-link {
+        text-align: center;
+        margin-top: var(--ui-pad-medium);
+    }
+
+    .restore-button {
+        background: none;
+        border: none;
+        color: var(--color-text-secondary);
+        font-size: 0.8125rem;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0.25rem;
+    }
+
+    .restore-button:hover {
+        color: var(--color-text-primary);
     }
 
     .loading-overlay {

@@ -15,7 +15,7 @@
 </script>
 
 
-<a href="/med/p/{document.user_id}/documents/{document.id}" class="tile -vertical category-{document.metadata.category}">
+<a href="/med/p/{document.user_id}/documents/{document.id}" class="tile -document category-{document.metadata.category}">
     <!--Vertical date={document.metadata.date} /-->
 
     <div class="tile-header"> <BadgeHorizontal date={document.metadata.date} /> </div>
