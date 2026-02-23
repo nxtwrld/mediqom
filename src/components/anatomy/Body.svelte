@@ -159,6 +159,7 @@
     let objects: any[] = [];
     let currentContext: IContext | null = null;
     let muscleMatcapTexture: THREE.Texture | null = null;
+    let openedLabel: HTMLDivElement | null = null;
 
     let animationFrameId: number | null = null;
     let idleFrames: number = 0;
@@ -365,7 +366,12 @@
             resetFocus();
         });
 
+        window.addEventListener('mousedown', handleGlobalPointerDown);
+        window.addEventListener('touchstart', handleGlobalPointerDown as any);
+
         return () => {
+            window.removeEventListener('mousedown', handleGlobalPointerDown);
+            window.removeEventListener('touchstart', handleGlobalPointerDown as any);
             unsubscibeFocus();
             unsubscibeContext();
             unsubscribeProfileSwitch();
@@ -396,8 +402,12 @@
             if (resizeObserverListener) resizeObserverListener.disconnect();
             if (labelContainer) {
                 for (const labelEl of labelContainer.children) {
-                    (labelEl as HTMLElement).removeEventListener('click', clickLabel);
-                    (labelEl as HTMLElement).removeEventListener('mouseup', mouseUpLabel);
+                    (labelEl as HTMLElement).removeEventListener('mousedown', handleLabelMouseDown);
+                    (labelEl as HTMLElement).removeEventListener('mouseup', handleLabelMouseUp);
+                    for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
+                        actionEl.removeEventListener('pointerdown', handleActionPointerDown);
+                        actionEl.removeEventListener('pointerup', handleActionPointerUp);
+                    }
                 };
             }
 
@@ -743,9 +753,12 @@
                 label.center.set( 0, 1 );
                 (labels[index].object as any)?.add( label );
                 label.layers.set( 0 );
-                (labelEl as HTMLElement).addEventListener('click', clickLabel, false);
-                (labelEl as HTMLElement).addEventListener('mousedown', mouseUpLabel, false);
-                (labelEl as HTMLElement).addEventListener('mouseup', mouseUpLabel, false);
+                (labelEl as HTMLElement).addEventListener('mousedown', handleLabelMouseDown, false);
+                (labelEl as HTMLElement).addEventListener('mouseup', handleLabelMouseUp, false);
+                for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
+                    actionEl.addEventListener('pointerdown', handleActionPointerDown, false);
+                    actionEl.addEventListener('pointerup', handleActionPointerUp, false);
+                }
                 labels[index].label = label;
             }
         };
@@ -1046,23 +1059,39 @@
     }
 
 
-    function clickLabel(event: MouseEvent) {
-        event.stopPropagation();
-        event.preventDefault();
-        sounds.focus.play();
-        ($state as any).focusView = false;
+    function handleGlobalPointerDown(event: MouseEvent | TouchEvent) {
+        if (!openedLabel) return;
+        const target = event.target as HTMLElement;
+        if (openedLabel.contains(target)) return;
+        openedLabel.classList.remove('-open');
+        openedLabel = null;
     }
 
-    function mouseUpLabel(event: MouseEvent) {
-        ($state as any).focusView = true;
+    function handleActionPointerDown(event: PointerEvent) {
+        event.stopPropagation(); // prevents OrbitControls from capturing the pointer
+        event.preventDefault();  // suppresses compat mouse events to avoid double-fire
+    }
+
+    function handleActionPointerUp(event: PointerEvent) {
         event.stopPropagation();
         event.preventDefault();
-        const a = (event.target as HTMLElement)?.closest('a');
-        if (a) {
-            const href = a.getAttribute('href');
-            if (href) goto(href);
-            focused.set({ object: a.dataset.id });
-        }
+        const action = event.currentTarget as HTMLAnchorElement;
+        goto(action.getAttribute('href')!);
+        action.closest<HTMLElement>('.label')?.classList.remove('-open');
+        openedLabel = null;
+    }
+
+    function handleLabelMouseDown(event: MouseEvent) {
+        event.stopPropagation();
+        sounds.focus.play();
+        ($state as any).focusView = true;
+        openedLabel = (event.target as HTMLElement)?.closest('.label');
+        if (openedLabel) openedLabel.classList.add('-open');
+    }
+
+    function handleLabelMouseUp(event: MouseEvent) {
+        event.stopPropagation();
+        ($state as any).focusView = true;
     }
 
 
@@ -1254,11 +1283,26 @@
 
 <div class="labels" bind:this={labelContainer}>
     {#each labels as label}
+
     <div class="label" id="label-id-{label.id}">
+        <div class="highlight"  data-id={label.id}>
+            <div class="icon {label.type}  category-{label.type}">
+                <svg>
+                    <use href="/icons-o.svg#report-{label.type}" />
+                </svg>
+                <div class="label-menu">
+                    <a class="action" href="/med/p/{$profile.id}/documents/?tags={label.tag}" data-sveltekit-preload-data="false">Documents</a>
+                    <button class="action">Discuss</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--div class="label" id="label-id-{label.id}">
         <a href="/med/p/{$profile.id}/documents/?tags={label.tag}" class="highlight" data-id={label.id} data-sveltekit-preload-data="false">
             <Label type={label.type} />
         </a>
-    </div>
+    </div-->
     {/each}
 </div>
 
@@ -1342,9 +1386,9 @@
         transition: background-color .2s ease-in-out;
     }
     @media (hover: hover) {
-    .selected button:hover {
-        background-color: var(--color-negative);
-    }
+        .selected button:hover {
+            background-color: var(--color-negative);
+        }
     }
     .selected button svg {
         width: 2rem;
@@ -1374,13 +1418,37 @@
         top: 0;
         width: 1px;
         height: 1px;
+        --radius: 2rem;
+    }
+
+    .model :global(.label.-open .highlight) {
+        width: 13rem;
+        height: auto;
+        border-radius: var(--radius);
+    }
+
+    .model :global(.label-menu) {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        height: auto;
+        max-height: 0;
+        transition: all .2s ease-in-out;
+        width: 100%;
+        padding: 0;
+
+    }
+    .model :global(.label.-open .label-menu) {
+        max-height: 10rem;
+        padding: .5rem 1rem;
     }
     .model :global(.highlight) {
         display: block;
         transform: translate(-50%, -50%);
         width: 3rem;
         height: 3rem;
-        border-radius: 100%;
+        border-radius: var(--radius);
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
@@ -1392,34 +1460,54 @@
         display: block;
         height: 100%;
         width: 100%;
-        border-radius: 100%;
+        border-radius: calc(var(--radius) - .7rem);
         border: 1px solid var(--color-white);
         /*background: var(--label-color);*/
         box-shadow: 1px 1px 6px 0 rgba(0,0,0.3);
-        color: #FFF;
         transform: scale(.5);
         transition: transform .2s ease-in-out;
+        background-color: var(--color);
+        color: var(--color-text);
+        overflow: hidden;
+        aspect-ratio: 1/1;
+    }
+
+    .model :global(.action) {
+        display: block;
+        color: inherit;
+        text-align: center;
+        padding: .3rem .5rem;
+        border-radius: calc(var(--radius) - 1rem);
+        border: 1px solid var(--color-white);
     }
     .model :global(.highlight .icon svg) {
         width: 100%;
         height: 100%;
+        max-height: 3rem;
         transform: scale(.6);
         opacity: 0;
         transition: opacity .2s ease-in-out;
+        fill: currentColor;
     }
 
     
-    .model :global(.highlight:hover) {
+    .model :global(.highlight:hover),
+    .model :global(.-open .highlight) {
         padding: .5rem;
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
         width: 4rem;
         height: 4rem;
     }
-    .model :global(.highlight:hover .icon) {
+    .model :global(.highlight:hover .icon),
+    .model :global(.-open .highlight .icon) {
         transform: scale(1);
     }
-    .model :global(.highlight:hover .icon svg) {
+    .model :global(.-open .highlight .icon) {
+        aspect-ratio: unset;
+    }
+    .model :global(.highlight:hover .icon svg),
+    .model :global(.-open .highlight .icon svg) {
         opacity: 1
     }
 
