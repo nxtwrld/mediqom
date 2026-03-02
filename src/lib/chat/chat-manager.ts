@@ -1,10 +1,11 @@
 import { get } from "svelte/store";
-import { chatStore, chatActions, createMessage, isOpen } from "./store";
+import { chatStore, chatActions, createMessage, isOpen, resolveChatMode } from "./store";
 import ChatClientService from "./client-service";
 import AnatomyIntegration from "./anatomy-integration";
 import type {
   ChatMessage,
   ChatContext,
+  ChatMode,
   ChatResponse,
   ToolCallRequest,
   ToolCallResult,
@@ -208,7 +209,7 @@ export class ChatManager {
     const documentData = documentEvent?.data;
 
     return {
-      mode: isOwnProfile ? "patient" : "clinical",
+      mode: resolveChatMode(isOwnProfile, user.get()?.isMedical ?? false),
       currentProfileId: profileId,
       conversationThreadId: generateId(),
       language: language,
@@ -419,7 +420,7 @@ export class ChatManager {
     if (!freshState.context) return;
 
     const profileId = freshState.context.currentProfileId;
-    const displayMessage = this.buildAskAboutMessage(data, freshState.context.isOwnProfile);
+    const displayMessage = this.buildAskAboutMessage(data, freshState.context.mode, freshState.context.pageContext.profileName);
 
     // Pre-fetch tool data so AI has real data and generates ONE coherent answer
     const prefetchedJson = await this.prefetchAskAboutData(data, profileId);
@@ -485,18 +486,18 @@ export class ChatManager {
     }
   }
 
-  private buildAskAboutMessage(data: AskAboutEvent, isOwnProfile: boolean): string {
+  private buildAskAboutMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
     if (data.type === 'diagnosis') {
-      return this.buildDiagnosisMessage(data.data, isOwnProfile);
+      return this.buildDiagnosisMessage(data.data, mode, profileName);
     }
     const tr = get(t);
-    const mode = isOwnProfile ? 'patient' : 'clinical';
-    return tr(`app.chat.ask-about.${mode}`, { values: { type: data.type, label: data.label } });
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
+    return tr(`app.chat.ask-about.${modeKey}`, { values: { type: data.type, label: data.label, profileName } });
   }
 
-  private buildDiagnosisMessage(diagnosis: any, isOwnProfile: boolean): string {
+  private buildDiagnosisMessage(diagnosis: any, mode: ChatMode, profileName: string): string {
     const tr = get(t);
-    const mode = isOwnProfile ? 'patient' : 'clinical';
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
     const code = diagnosis.code ? ` (${diagnosis.code})` : '';
     const desc = diagnosis.description || 'this diagnosis';
     const diagnosisType = diagnosis.type || 'general';
@@ -504,11 +505,11 @@ export class ChatManager {
 
     // Normalise underscore to hyphen for i18n key lookup (rule_out → rule-out)
     const typeKey = diagnosisType.replace(/_/g, '-');
-    const extraKey = `app.chat.ask-about.diagnosis.type-extra.${typeKey}.${mode}`;
+    const extraKey = `app.chat.ask-about.diagnosis.type-extra.${typeKey}.${modeKey}`;
     const extraMsg = tr(extraKey) !== extraKey ? tr(extraKey) : '';
 
-    return tr(`app.chat.ask-about.diagnosis.${mode}`, {
-      values: { desc, code, diagnosisType, notes, extra: extraMsg },
+    return tr(`app.chat.ask-about.diagnosis.${modeKey}`, {
+      values: { desc, code, diagnosisType, notes, extra: extraMsg, profileName },
     });
   }
 
@@ -859,7 +860,7 @@ export class ChatManager {
       const newContext = this.createContextFromProfileData(
         currentProfile.id,
         currentProfile.fullName || profileName,
-        state.context?.isOwnProfile || true,
+        state.context?.isOwnProfile ?? false,
         currentProfile.language || state.context?.language || "en",
         currentProfile.health,
         currentProfile.healthDocumentId,
@@ -878,7 +879,7 @@ export class ChatManager {
         currentProfileId: profileId,
         conversationThreadId: generateId(),
         language: state.context?.language || "en",
-        isOwnProfile: state.context?.isOwnProfile || true,
+        isOwnProfile: state.context?.isOwnProfile ?? false,
         pageContext: {
           route: state.context?.pageContext?.route || "/",
           profileName: profileName,
@@ -1581,7 +1582,7 @@ export class ChatManager {
     chatActions.switchProfile(profileId, isOwnProfile);
 
     // Update context mode
-    const newMode = isOwnProfile ? "patient" : "clinical";
+    const newMode = resolveChatMode(isOwnProfile, user.get()?.isMedical ?? false);
     chatActions.updateContext({ mode: newMode });
 
     // Add profile switch message
@@ -1646,6 +1647,8 @@ export class ChatManager {
 
     if (context.mode === "patient") {
       return get(t)("app.chat.greetings.patient");
+    } else if (context.mode === "caregiver") {
+      return get(t)("app.chat.greetings.caregiver", { values: { profileName } });
     } else {
       return get(t)("app.chat.greetings.clinical", { values: { profileName } });
     }

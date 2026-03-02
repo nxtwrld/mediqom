@@ -551,7 +551,8 @@
       }
     },
     "settings": {
-      "title": "",
+      "title": "Nastavení",
+      "redirect": "Přesměrování na nastavení...",
       "tabs": {
         "general": "Obecné",
         "profile": "Profil",
@@ -560,72 +561,110 @@
         "about": "O aplikaci"
       },
       "general": {
-        "title": "",
+        "title": "Obecné nastavení",
         "language": {
-          "title": "",
-          "description": "",
-          "current": "",
-          "save": "",
-          "saved": ""
+          "title": "Jazyk",
+          "description": "Vyberte preferovaný jazyk rozhraní",
+          "current": "Aktuální jazyk",
+          "save": "Uložit jazyk",
+          "saved": "Jazyk byl úspěšně změněn"
+        },
+        "role": {
+          "label": "Role",
+          "description": "Určuje, jak AI asistent prezentuje zdravotní informace",
+          "individual": "Běžný uživatel / Pečovatel",
+          "medical": "Zdravotnický pracovník",
+          "save": "Uložit",
+          "saved": "Role aktualizována"
+        },
+        "error": {
+          "update-failed": "Aktualizace selhala",
+          "network": "Chyba sítě"
         }
       },
       "profile": {
-        "title": "",
-        "description": "",
-        "edit": "",
-        "edit-full": "",
-        "view": "",
-        "save": "",
-        "saved": ""
+        "title": "Informace o profilu",
+        "description": "Spravujte své osobní informace, pojištění, kontakty a zdravotní údaje",
+        "edit": "Upravit profil",
+        "edit-full": "Upravte kompletní profil včetně osobních informací, pojistných údajů, kontaktů a zdravotních dat.",
+        "view": "Zobrazit profil",
+        "save": "Uložit profil",
+        "saved": "Profil byl úspěšně uložen",
+        "reset": "Zahodit změny",
+        "no-changes": "Žádné změny k uložení",
+        "save-error": "Nepodařilo se uložit profil. Prosím zkuste to znovu.",
+        "loading": "Načítání profilu..."
       },
       "privacy": {
-        "title": "",
+        "title": "Soukromí a zabezpečení",
         "encryption": {
-          "title": "",
-          "status": "",
-          "enabled": "",
-          "not-enabled": "",
-          "method": "",
-          "passphrase": "",
-          "passkey": "",
-          "change": "",
-          "setup-recovery": ""
+          "title": "Šifrování",
+          "status": "Stav šifrování",
+          "enabled": "Šifrování je aktivní",
+          "not-enabled": "Šifrování není aktivní",
+          "method": "Metoda",
+          "passphrase": "Přístupová fráze",
+          "passkey": "Přístupový klíč",
+          "change": "Změnit metodu šifrování",
+          "setup-recovery": "Nastavit záchranný klíč",
+          "recovery-configured": "Záchranný klíč je nastaven",
+          "verify-current": "Ověřte aktuální přihlašovací údaje",
+          "enter-passphrase": "Zadejte aktuální přístupovou frázi",
+          "verify-passkey": "Ověřte pomocí přístupového klíče",
+          "key-available": "Váš šifrovací klíč je automaticky dostupný.",
+          "switch-to-passkey": "Přepnout na přístupový klíč",
+          "switch-to-passphrase": "Přepnout na přístupovou frázi",
+          "choose-new-method": "Zvolte novou metodu šifrování",
+          "switching": "Přepínání metody šifrování...",
+          "success": "Metoda šifrování byla úspěšně aktualizována!",
+          "success-passkey": "Vaše data jsou nyní chráněna přístupovým klíčem.",
+          "success-passphrase": "Vaše data jsou nyní chráněna přístupovou frází.",
+          "error": "Nepodařilo se aktualizovat metodu šifrování",
+          "error-verify": "Ověření se nezdařilo. Zkontrolujte přihlašovací údaje.",
+          "error-passkey-create": "Nepodařilo se vytvořit přístupový klíč. Zkuste to znovu.",
+          "error-browser-support": "Váš prohlížeč nepodporuje PRF přístupové klíče.",
+          "cancel": "Zrušit",
+          "close": "Zavřít",
+          "verify": "Ověřit",
+          "regenerate-recovery": "Znovu vygenerovat záchranný klíč",
+          "current-method": "Aktuální metoda",
+          "new-method": "Nová metoda"
         },
         "account": {
-          "title": "",
-          "created": "",
-          "last-login": "",
-          "email": ""
+          "title": "Informace o účtu",
+          "created": "Účet vytvořen",
+          "last-login": "Poslední přihlášení",
+          "email": "E-mail"
         },
         "data": {
-          "title": "",
-          "export": "",
-          "export-progress": "",
-          "export-error": "",
-          "delete": "",
-          "delete-confirm": "",
-          "delete-error": "",
-          "coming-soon": ""
+          "title": "Správa dat",
+          "export": "Exportovat všechna data",
+          "export-progress": "Exportování dat...",
+          "export-error": "Nepodařilo se exportovat data. Prosím zkuste to znovu.",
+          "delete": "Smazat účet",
+          "delete-confirm": "Opravdu chcete trvale smazat svůj účet? Tuto akci nelze vzít zpět.",
+          "delete-error": "Nepodařilo se smazat účet. Prosím zkuste to znovu.",
+          "coming-soon": "Tyto funkce budou brzy k dispozici"
         }
       },
       "about": {
-        "title": "",
-        "version": "",
-        "version-info": "",
-        "build": "",
-        "commit": "",
+        "title": "O aplikaci Mediqom",
+        "version": "Verze",
+        "version-info": "Informace o verzi",
+        "build": "Sestavení",
+        "commit": "Commit",
         "links": {
-          "title": "",
-          "documentation": "",
-          "privacy": "",
-          "terms": "",
-          "github": "",
-          "support": ""
+          "title": "Odkazy",
+          "documentation": "Dokumentace",
+          "privacy": "Zásady ochrany osobních údajů",
+          "terms": "Podmínky služby",
+          "github": "GitHub",
+          "support": "Podpora"
         },
         "credits": {
-          "title": "",
-          "licenses": "",
-          "description": ""
+          "title": "Poděkování",
+          "licenses": "Licence open source",
+          "description": "Mediqom je postaven na open source technologiích a příspěvcích komunity. Děkujeme všem přispěvatelům a správcům."
         }
       }
     },
@@ -1434,7 +1473,8 @@
     "insurance": {
       "health-insurance": "Zdravotní pojištění",
       "identification": "Číslo pojistné smlouvy",
-      "provider": "Poskytovatel"
+      "provider": "Poskytovatel",
+      "selectProvider": ""
     },
     "vcard": {
       "city": "Město",

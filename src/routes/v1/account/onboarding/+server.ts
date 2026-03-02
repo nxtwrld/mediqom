@@ -24,6 +24,7 @@ export const POST: RequestHandler = async ({
     avatarUrl,
     language,
     subscription,
+    role,
     passphrase,
     publicKey,
     privateKey,
@@ -48,6 +49,7 @@ export const POST: RequestHandler = async ({
       subscription,
       language,
       publicKey,
+      user_role: role ?? 'individual',
       updated_at: new Date(),
     })
     .eq("owner_id", user.id)

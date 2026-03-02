@@ -3,6 +3,8 @@ import { type Profile } from "$lib/types.d";
 import type { ChatContext, PageContext } from "$lib/chat/types.d";
 import { generateId } from "$lib/utils/id";
 import ui from "$lib/ui";
+import user from "$lib/user";
+import { resolveChatMode } from "$lib/chat/store";
 
 const store: Writable<Profile> = writable();
 
@@ -64,7 +66,7 @@ function createChatContext(
   };
 
   return {
-    mode: isOwnProfile ? "patient" : "clinical",
+    mode: resolveChatMode(isOwnProfile, user.get()?.isMedical ?? false),
     currentProfileId: profileId,
     conversationThreadId: generateId(),
     language: language,

@@ -1,4 +1,5 @@
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
+import { getLanguageEnglishName } from "$lib/languages";
 import { error } from "@sveltejs/kit";
 import { log } from "$lib/logging/logger";
 import featureDetection from "$lib/configurations/feature-detection";
@@ -181,7 +182,7 @@ export async function analyze(input: Input): Promise<ReportAnalysis> {
   };
 
   const content: Content[] = getContentDefinition(input);
-  const currentLanguage = input.language || "English";
+  const currentLanguage = getLanguageEnglishName(input.language || "en");
 
   console.log("🔍 About to update schemas for language:", currentLanguage);
   console.log(

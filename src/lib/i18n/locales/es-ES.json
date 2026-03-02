@@ -580,6 +580,7 @@
     },
     "settings": {
       "title": "Configuración",
+      "redirect": "Redirigiendo a la configuración...",
       "tabs": {
         "general": "General",
         "profile": "Perfil",
@@ -595,6 +596,18 @@
           "current": "Idioma actual",
           "save": "Guardar idioma",
           "saved": "Idioma actualizado correctamente"
+        },
+        "role": {
+          "label": "Rol",
+          "description": "Determina cómo el asistente de IA presenta la información médica",
+          "individual": "Usuario normal / Cuidador",
+          "medical": "Profesional médico",
+          "save": "Guardar",
+          "saved": "Rol actualizado"
+        },
+        "error": {
+          "update-failed": "Error al actualizar",
+          "network": "Error de red"
         }
       },
       "profile": {
@@ -622,6 +635,7 @@
           "passkey": "Clave de acceso",
           "change": "Cambiar método de cifrado",
           "setup-recovery": "Configurar clave de recuperación",
+          "recovery-configured": "Clave de recuperación configurada",
           "verify-current": "Verifique sus credenciales actuales",
           "enter-passphrase": "Introduzca su contraseña de cifrado actual",
           "verify-passkey": "Verificar con su clave de acceso",
@@ -1487,7 +1501,8 @@
     "insurance": {
       "health-insurance": "Seguro médico",
       "identification": "Número de póliza",
-      "provider": "Aseguradora"
+      "provider": "Aseguradora",
+      "selectProvider": ""
     },
     "vcard": {
       "city": "Ciudad",

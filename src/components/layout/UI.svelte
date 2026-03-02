@@ -22,6 +22,7 @@
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import { device } from '$lib/device';
     import { saveHealthProfile } from '$lib/health/save';
+    import user from '$lib/user';
     import { App } from '@capacitor/app';
     import { isNativePlatform } from '$lib/config/platform';
 
@@ -159,9 +160,8 @@
             currentProfile = p;
             
             // Determine if this is the user's own profile
-            // For now, assume all profiles are "own" profiles in patient mode
             if (p) {
-                isOwnProfile = true; // Default to patient mode
+                isOwnProfile = p.owner_id === user.getId();
                 userLanguage = p.language || 'en';
                 
                 // Emit navigation if we're in the medical section

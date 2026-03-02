@@ -1,5 +1,5 @@
 // AI Chat Types
-export type ChatMode = "patient" | "clinical";
+export type ChatMode = "patient" | "caregiver" | "clinical";
 export type ChatMessageRole = "user" | "assistant" | "system";
 
 export interface ContextPrompt {

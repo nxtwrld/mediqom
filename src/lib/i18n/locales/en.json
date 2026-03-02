@@ -483,6 +483,7 @@
       "title": "AI Medical Assistant",
       "mode": {
         "patient": "Patient Support",
+        "caregiver": "Care Support",
         "clinical": "Clinical Analysis"
       },
       "actions": {
@@ -517,6 +518,7 @@
       },
       "greetings": {
         "patient": "Hello! I'm here to help you understand your medical information and support you through your healthcare journey. Feel free to ask me about your health records, symptoms, or any questions you might have about your care.",
+        "caregiver": "Hello! I'm here to help you understand {profileName}'s medical information. I can explain health records, conditions, and medical terms in plain language. For any medical decisions, please consult {profileName}'s healthcare team.",
         "clinical": "Hello! I'm here to assist with clinical analysis of {profileName}'s medical profile. I can help analyze patterns, suggest differential considerations, and provide insights based on the available medical data."
       },
       "tool": {
@@ -553,25 +555,31 @@
         "button": "Ask",
         "aria": "Ask AI about: {label}",
         "patient": "Can you help me understand this {type}: {label}?",
+        "caregiver": "Can you help me understand this {type} for {profileName}: {label}?",
         "clinical": "Provide clinical analysis for this {type}: {label}. Include relevant clinical considerations.",
         "diagnosis": {
           "patient": "Can you help me understand my diagnosis: {desc}{code}? It was classified as a {diagnosisType} diagnosis.{notes}{extra}",
+          "caregiver": "Can you help me understand {profileName}'s diagnosis: {desc}{code}? It was classified as a {diagnosisType} diagnosis.{notes}{extra}",
           "clinical": "Provide clinical analysis for: {desc}{code} — {diagnosisType} diagnosis. Include differential considerations and management options.{notes}{extra}",
           "type-extra": {
             "differential": {
               "patient": " What are the chances I have this versus other conditions?",
+              "caregiver": " What does this mean for {profileName} and how should we discuss this with their doctor?",
               "clinical": " Discuss key distinguishing features and workup to narrow differentials."
             },
             "rule-out": {
               "patient": " What does it mean to \"rule out\" a diagnosis?",
+              "caregiver": " What does this mean for {profileName} and how should we discuss this with their doctor?",
               "clinical": " What investigations would definitively rule this out?"
             },
             "provisional": {
               "patient": " This is provisional — what does that mean for my treatment?",
+              "caregiver": " What does this mean for {profileName} and how should we discuss this with their doctor?",
               "clinical": " What additional evidence is needed to confirm or refute?"
             },
             "confirmed": {
               "patient": " This is confirmed — what should I expect next?",
+              "caregiver": " What does this mean for {profileName} and how should we discuss this with their doctor?",
               "clinical": " Outline evidence-based management pathway."
             }
           }
@@ -580,6 +588,7 @@
     },
     "settings": {
       "title": "Settings",
+      "redirect": "Redirecting to settings...",
       "tabs": {
         "general": "General",
         "profile": "Profile",
@@ -595,6 +604,18 @@
           "current": "Current language",
           "save": "Save Language",
           "saved": "Language updated successfully"
+        },
+        "role": {
+          "label": "Role",
+          "description": "Determines how the AI assistant presents medical information to you",
+          "individual": "Normal user / Caregiver",
+          "medical": "Medical professional",
+          "save": "Save",
+          "saved": "Role updated"
+        },
+        "error": {
+          "update-failed": "Failed to update",
+          "network": "Network error"
         }
       },
       "profile": {
@@ -622,6 +643,7 @@
           "passkey": "Passkey",
           "change": "Change Encryption Method",
           "setup-recovery": "Setup Recovery Key",
+          "recovery-configured": "Recovery key configured",
           "verify-current": "Verify Your Current Credentials",
           "enter-passphrase": "Enter your current passphrase",
           "verify-passkey": "Verify with your passkey",
@@ -1487,7 +1509,8 @@
     "insurance": {
       "health-insurance": "Health Insurance",
       "identification": "Policy Number",
-      "provider": "Provider"
+      "provider": "Provider",
+      "selectProvider": "Select Provider"
     },
     "vcard": {
       "city": "City",

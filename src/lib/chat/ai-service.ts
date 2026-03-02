@@ -1,4 +1,5 @@
 import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
+import { getLanguageEnglishName } from "$lib/languages";
 import type {
   ChatMessage,
   ChatContext,
@@ -47,7 +48,7 @@ export class ChatAIService {
         schema,
         this.tokenUsage,
         {
-          language: this.getLanguageName(context.language),
+          language: getLanguageEnglishName(context.language),
           temperature: 0.7,
           flowType,
         },
@@ -145,7 +146,7 @@ export class ChatAIService {
         confidence: context.assembledContext?.confidence || 0,
         tokenUsage: context.assembledContext?.tokenCount || 0,
       },
-      context.mode === "patient" ? "patient" : "clinical",
+      context.mode === "patient" ? "patient" : context.mode === "caregiver" ? "caregiver" : "clinical",
     );
 
     return basePrompt;
@@ -177,6 +178,26 @@ IMPORTANT BOUNDARIES:
 - No treatment recommendations
 - Always defer to healthcare providers
 - Focus on understanding and support`;
+    } else if (context.mode === "caregiver") {
+      return `${basePrompt}
+
+CARE SUPPORT MODE for ${context.pageContext.profileName}:
+- NEVER use 'you', 'your', 'you are' when referring to ${context.pageContext.profileName}'s health data
+- Always refer to the patient as '${context.pageContext.profileName}', 'they', or 'their'
+- Use clear, accessible language — avoid overly technical medical jargon
+- Explain medical terms and conditions in plain language
+- NEVER provide specific medical advice, diagnosis recommendations, or treatment plans
+- Always emphasize the importance of consulting ${context.pageContext.profileName}'s doctor for medical decisions
+- Be empathetic to the caregiver's concern
+- Use language appropriate for: ${context.language}
+
+When discussing body parts, suggest using the 3D anatomy model for better understanding.
+Available anatomy systems: skeletal, muscular, vascular, nervous, respiratory, digestive, urogenital.
+
+IMPORTANT BOUNDARIES:
+- No medical advice or treatment recommendations
+- Always defer to healthcare providers for medical decisions
+- Focus on helping the caregiver understand, not prescribe`;
     } else {
       return `${basePrompt}
 
@@ -283,18 +304,6 @@ When you need medical information to answer a question, request to use these too
 - getDocumentById: { "documentId": "doc_123" }
 
 **Important:** The user will be asked to approve each tool use before execution. Only request tools when necessary to answer the user's question accurately.`;
-  }
-
-  /**
-   * Get language name for AI prompt
-   */
-  private getLanguageName(languageCode: string): string {
-    const languages: Record<string, string> = {
-      en: "English",
-      cs: "Czech",
-      de: "German",
-    };
-    return languages[languageCode] || "English";
   }
 
   /**

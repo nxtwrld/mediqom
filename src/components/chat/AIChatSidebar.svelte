@@ -252,7 +252,7 @@
         <h3>{$t('app.chat.title')}</h3>
         <div class="chat-subtitle">
           <span class="chat-profile">{currentProfileName || 'No profile selected'}</span>
-          <span class="chat-mode">{$t(isOwnProfile ? 'app.chat.mode.patient' : 'app.chat.mode.clinical')}</span>
+          <span class="chat-mode">{$t('app.chat.mode.' + ($chatStore.context?.mode ?? (isOwnProfile ? 'patient' : 'clinical')))}</span>
         </div>
       </div>
       <div class="chat-actions">

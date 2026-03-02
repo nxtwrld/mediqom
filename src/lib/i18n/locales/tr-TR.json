@@ -580,6 +580,7 @@
     },
     "settings": {
       "title": "Ayarlar",
+      "redirect": "Ayarlara yönlendiriliyor...",
       "tabs": {
         "general": "Genel",
         "profile": "Profil",
@@ -595,6 +596,18 @@
           "current": "Mevcut dil",
           "save": "Dili Kaydet",
           "saved": "Dil başarıyla güncellendi"
+        },
+        "role": {
+          "label": "Rol",
+          "description": "AI asistanının tıbbi bilgileri nasıl sunduğunu belirler",
+          "individual": "Normal kullanıcı / Bakıcı",
+          "medical": "Tıp profesyoneli",
+          "save": "Kaydet",
+          "saved": "Rol güncellendi"
+        },
+        "error": {
+          "update-failed": "Güncelleme başarısız",
+          "network": "Ağ hatası"
         }
       },
       "profile": {
@@ -622,6 +635,7 @@
           "passkey": "Geçiş Anahtarı",
           "change": "Şifreleme Yöntemini Değiştir",
           "setup-recovery": "Kurtarma Anahtarı Ayarla",
+          "recovery-configured": "Kurtarma anahtarı yapılandırıldı",
           "verify-current": "Mevcut Kimlik Bilgilerinizi Doğrulayın",
           "enter-passphrase": "Mevcut parolanızı girin",
           "verify-passkey": "Geçiş anahtarınızla doğrulayın",
@@ -1487,7 +1501,8 @@
     "insurance": {
       "health-insurance": "Sağlık Sigortası",
       "identification": "Poliçe Numarası",
-      "provider": "Sağlayıcı"
+      "provider": "Sağlayıcı",
+      "selectProvider": ""
     },
     "vcard": {
       "city": "Şehir",

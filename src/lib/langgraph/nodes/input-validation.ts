@@ -41,16 +41,6 @@ export const inputValidationNode = async (
     }
   }
 
-  // Validate language if provided
-  state.emitProgress?.("input_validation", 60, "Validating language settings");
-
-  const supportedLanguages = ["English", "Czech", "German"];
-  if (state.language && !supportedLanguages.includes(state.language)) {
-    console.warn(
-      `Unsupported language: ${state.language}, defaulting to English`,
-    );
-  }
-
   // Convert images to content format for downstream processing
   state.emitProgress?.(
     "input_validation",

@@ -41,6 +41,7 @@ export type User = {
   key_pass: string;
   unlocked: boolean | undefined;
   isMedical: boolean;
+  role: 'individual' | 'medical' | string;
   // New encryption fields
   key_derivation_method?: KeyDerivationMethod;
   passkey_credential_id?: string;
@@ -114,9 +115,11 @@ export async function setUser(
     user.set({
       ...userProfile,
       unlocked: true, // Always set to true to disable lock behavior
+      role: userProfile.user_role ?? 'individual',
       isMedical:
-        userProfile.subscription === "medical" ||
-        userProfile.subscription === "gp",
+        userProfile.user_role != null
+          ? userProfile.user_role === "medical"
+          : userProfile.subscription === "medical" || userProfile.subscription === "gp",
       email: actualUserSession.email as string,
       //subscriptionStats
     });
