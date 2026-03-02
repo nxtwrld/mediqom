@@ -80,6 +80,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@capacitor/camera": "^8.0.1",
     "@google-cloud/speech": "^6.7.0",
     "@langchain/anthropic": "^0.3.24",
     "@langchain/core": "^0.3.62",

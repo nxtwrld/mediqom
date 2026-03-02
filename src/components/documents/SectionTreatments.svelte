@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     let hasTreatments = $derived(data && data.hasTreatments);
     
     let currentTreatments = $derived(data?.currentTreatments || []);
@@ -188,7 +189,7 @@
                                 {/if}
                             </div>
                         </div>
-                        
+
                         <div class="treatment-badges">
                             {#if treatment.status}
                                 <span class="status-badge {getStatusClass(treatment.status)}">
@@ -200,9 +201,16 @@
                                     {$t(`medical.enums.priority_levels.${treatment.priority}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="treatment"
+                                label={treatment.name}
+                                data={treatment}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
-                    
+
                     <div class="treatment-details">
                         {#if treatment.indication}
                             <div class="detail-item">
@@ -322,6 +330,13 @@
                                     {$t(`medical.enums.treatment_outcomes.${treatment.outcome}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="treatment"
+                                label={treatment.name}
+                                data={treatment}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -396,7 +411,7 @@
                                 {/if}
                             </div>
                         </div>
-                        
+
                         <div class="treatment-badges">
                             {#if treatment.status}
                                 <span class="status-badge {getStatusClass(treatment.status)}">
@@ -408,6 +423,13 @@
                                     {$t(`medical.enums.priority_levels.${treatment.priority}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="treatment"
+                                label={treatment.name}
+                                data={treatment}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     

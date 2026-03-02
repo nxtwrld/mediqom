@@ -22,6 +22,8 @@
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import { device } from '$lib/device';
     import { saveHealthProfile } from '$lib/health/save';
+    import { App } from '@capacitor/app';
+    import { isNativePlatform } from '$lib/config/platform';
 
     async function handleHealthFormClose() {
         logger.ui.debug('Health form modal close event fired');
@@ -181,6 +183,16 @@
         device.init();
         checkMobile();
         window.addEventListener('resize', checkMobile);
+
+        // Android hardware back button: close overlay instead of exiting app
+        let backButtonHandle: Promise<{ remove: () => void }> | null = null;
+        if (isNativePlatform()) {
+            backButtonHandle = App.addListener('backButton', () => {
+                if ($uiState.overlay !== null && $uiState.overlay !== 'none') {
+                    location.hash = '';
+                }
+            });
+        }
         document.addEventListener('touchmove', handleMobileResizeMove, { passive: false });
         document.addEventListener('touchend', handleMobileResizeEnd);
         
@@ -239,6 +251,7 @@
             window.removeEventListener('resize', checkMobile);
             document.removeEventListener('touchmove', handleMobileResizeMove);
             document.removeEventListener('touchend', handleMobileResizeEnd);
+            if (backButtonHandle) backButtonHandle.then(h => h.remove());
         }
 
     });

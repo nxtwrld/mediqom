@@ -177,3 +177,11 @@ export interface ChatResponse {
   consentRequests?: ConsentRequest[];
   clarifyingQuestions?: ClarifyingQuestion[];
 }
+
+export interface AskAboutEvent {
+  type: string;          // 'diagnosis', 'medication', 'lab', etc.
+  label: string;         // Human-readable item name (used in tooltip)
+  data: any;             // Raw section item object
+  documentId?: string;
+  documentTitle?: string;
+}

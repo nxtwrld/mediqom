@@ -21,7 +21,9 @@ function createChatContext(
 ): ChatContext {
   // Get cached document data if available (for consistency with existing behavior)
   const documentEvent = ui.getLatest("aicontext:document");
-  const documentData = documentEvent?.data;
+  // Only include document if it belongs to this profile (belt-and-suspenders guard)
+  const documentData =
+    documentEvent?.data?.profileId === profileId ? documentEvent.data : null;
 
   // Build available documents list including health document
   const availableDocuments = [];

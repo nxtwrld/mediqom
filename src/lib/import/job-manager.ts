@@ -3,6 +3,8 @@ import type { Task } from "./index";
 import { addJob, updateJob, removeJob, importJobs } from "./job-store";
 import { cacheFiles, clearFiles, hasFiles } from "./file-cache";
 import type { SSEProgressEvent } from "./sse-client";
+import { apiFetch } from "$lib/api/client";
+import { isNativePlatform } from "$lib/config/platform";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -28,7 +30,7 @@ export async function createJob(
   }));
 
   // Create job on server
-  const response = await fetch("/v1/import/jobs", {
+  const response = await apiFetch("/v1/import/jobs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files, language }),
@@ -71,25 +73,30 @@ export async function createJob(
   return jobId;
 }
 
-/** Process a job via SSE with polling fallback */
+/** Process a job via SSE with polling fallback (web), or polling-only (Capacitor) */
 export async function processJob(
   jobId: string,
   onProgress?: (event: SSEProgressEvent) => void,
 ): Promise<ImportJob> {
+  // On Capacitor: fire-and-forget the process endpoint, then poll
+  if (isNativePlatform()) {
+    // Trigger server processing — server continues even if we don't read the body
+    await apiFetch(`/v1/import/jobs/${jobId}/process`, {
+      method: "POST",
+      timeout: 0,
+      headers: { "Content-Type": "application/json" },
+    }).catch(() => null);
+
+    // 409 = already processing (server concurrency guard) — just poll
+    // Any other error we still poll; polling will surface the real status
+    return pollUntilDone(jobId, onProgress);
+  }
+
+  // Web: SSE with polling fallback
   return new Promise((resolve, reject) => {
-    let pollingTimer: ReturnType<typeof setInterval> | null = null;
     let resolved = false;
 
-    const cleanup = () => {
-      if (pollingTimer) {
-        clearInterval(pollingTimer);
-        pollingTimer = null;
-      }
-    };
-
     const finishWithPoll = async () => {
-      // SSE disconnected - fall back to polling
-      cleanup();
       try {
         const job = await pollUntilDone(jobId, onProgress);
         if (!resolved) {
@@ -105,8 +112,9 @@ export async function processJob(
     };
 
     // Start SSE request
-    fetch(`/v1/import/jobs/${jobId}/process`, {
+    apiFetch(`/v1/import/jobs/${jobId}/process`, {
       method: "POST",
+      timeout: 0,
       headers: {
         "Content-Type": "application/json",
         Accept: "text/event-stream",
@@ -162,7 +170,6 @@ export async function processJob(
                   onProgress?.(eventData);
 
                   if (eventData.type === "complete") {
-                    cleanup();
                     if (!resolved) {
                       resolved = true;
                       // Fetch final job from server
@@ -178,7 +185,6 @@ export async function processJob(
                   }
 
                   if (eventData.type === "error") {
-                    cleanup();
                     if (!resolved) {
                       resolved = true;
                       reject(new Error(eventData.message));
@@ -201,6 +207,11 @@ export async function processJob(
         };
 
         await readStream();
+
+        // Stream ended without complete/error event (e.g. network drop, app backgrounded)
+        if (!resolved) {
+          await finishWithPoll();
+        }
       })
       .catch(async () => {
         // Fetch/network error - fall back to polling
@@ -262,7 +273,7 @@ async function pollUntilDone(
 
 /** Fetch a single job from the server */
 export async function fetchJob(jobId: string): Promise<ImportJob | null> {
-  const response = await fetch(`/v1/import/jobs/${jobId}`);
+  const response = await apiFetch(`/v1/import/jobs/${jobId}`);
   if (!response.ok) return null;
   const { job } = await response.json();
   return job;
@@ -271,7 +282,7 @@ export async function fetchJob(jobId: string): Promise<ImportJob | null> {
 /** Check for pending jobs on app load/resume */
 export async function checkPendingJobs(): Promise<ImportJob[]> {
   try {
-    const response = await fetch("/v1/import/jobs");
+    const response = await apiFetch("/v1/import/jobs");
     if (!response.ok) return [];
 
     const { jobs } = await response.json();
@@ -295,14 +306,14 @@ export async function checkPendingJobs(): Promise<ImportJob[]> {
 
 /** Delete a job and clean up cached files */
 export async function deleteJob(jobId: string): Promise<void> {
-  await fetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" });
+  await apiFetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" });
   await clearFiles(jobId);
   removeJob(jobId);
 }
 
 /** Retry a failed job */
 export async function retryJob(jobId: string): Promise<void> {
-  const response = await fetch(`/v1/import/jobs/${jobId}`, {
+  const response = await apiFetch(`/v1/import/jobs/${jobId}`, {
     method: "PATCH",
   });
   if (!response.ok) {

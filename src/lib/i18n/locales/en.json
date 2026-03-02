@@ -461,7 +461,11 @@
     "languages": {
       "cs": "",
       "de": "",
-      "en": ""
+      "en": "",
+      "es": "",
+      "it": "",
+      "pl": "",
+      "tr": ""
     },
     "name": "mediqom",
     "download": "Download",
@@ -544,6 +548,34 @@
       },
       "clarifyingQuestion": {
         "placeholder": "Or type your own answer..."
+      },
+      "ask-about": {
+        "button": "Ask",
+        "aria": "Ask AI about: {label}",
+        "patient": "Can you help me understand this {type}: {label}?",
+        "clinical": "Provide clinical analysis for this {type}: {label}. Include relevant clinical considerations.",
+        "diagnosis": {
+          "patient": "Can you help me understand my diagnosis: {desc}{code}? It was classified as a {diagnosisType} diagnosis.{notes}{extra}",
+          "clinical": "Provide clinical analysis for: {desc}{code} — {diagnosisType} diagnosis. Include differential considerations and management options.{notes}{extra}",
+          "type-extra": {
+            "differential": {
+              "patient": " What are the chances I have this versus other conditions?",
+              "clinical": " Discuss key distinguishing features and workup to narrow differentials."
+            },
+            "rule-out": {
+              "patient": " What does it mean to \"rule out\" a diagnosis?",
+              "clinical": " What investigations would definitively rule this out?"
+            },
+            "provisional": {
+              "patient": " This is provisional — what does that mean for my treatment?",
+              "clinical": " What additional evidence is needed to confirm or refute?"
+            },
+            "confirmed": {
+              "patient": " This is confirmed — what should I expect next?",
+              "clinical": " Outline evidence-based management pathway."
+            }
+          }
+        }
       }
     },
     "settings": {
@@ -871,7 +903,9 @@
     "en": "English",
     "es": "Spanish",
     "fr": "French",
-    "it": "Italian"
+    "it": "Italian",
+    "pl": "Polish",
+    "tr": "Turkish"
   },
   "medical": {
     "prop-values": {

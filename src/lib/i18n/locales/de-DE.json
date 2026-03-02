@@ -461,7 +461,11 @@
     "languages": {
       "cs": "",
       "de": "",
-      "en": ""
+      "en": "",
+      "es": "",
+      "it": "",
+      "pl": "",
+      "tr": ""
     },
     "name": "mediqom",
     "nav": {
@@ -516,6 +520,34 @@
       },
       "clarifyingQuestion": {
         "placeholder": "Oder geben Sie Ihre eigene Antwort ein..."
+      },
+      "ask-about": {
+        "button": "Fragen",
+        "aria": "KI fragen zu: {label}",
+        "patient": "Können Sie mir helfen, dieses {type} zu verstehen: {label}?",
+        "clinical": "Führen Sie eine klinische Analyse für dieses {type} durch: {label}. Berücksichtigen Sie relevante klinische Aspekte.",
+        "diagnosis": {
+          "patient": "Können Sie mir helfen, meine Diagnose zu verstehen: {desc}{code}? Sie wurde als {diagnosisType}-Diagnose klassifiziert.{notes}{extra}",
+          "clinical": "Führen Sie eine klinische Analyse durch: {desc}{code} — {diagnosisType}-Diagnose. Berücksichtigen Sie Differentialdiagnosen und Behandlungsoptionen.{notes}{extra}",
+          "type-extra": {
+            "differential": {
+              "patient": " Wie wahrscheinlich ist es, dass ich diese Erkrankung und nicht eine andere habe?",
+              "clinical": " Diskutieren Sie wichtige Unterscheidungsmerkmale und die Vorgehensweise zur Eingrenzung der Differentialdiagnosen."
+            },
+            "rule-out": {
+              "patient": " Was bedeutet es, eine Diagnose \"auszuschließen\"?",
+              "clinical": " Welche Untersuchungen würden dies definitiv ausschließen?"
+            },
+            "provisional": {
+              "patient": " Diese Diagnose ist vorläufig — was bedeutet das für meine Behandlung?",
+              "clinical": " Welche weiteren Belege sind erforderlich, um dies zu bestätigen oder zu widerlegen?"
+            },
+            "confirmed": {
+              "patient": " Diese Diagnose ist bestätigt — was sollte ich als nächstes erwarten?",
+              "clinical": " Skizzieren Sie den evidenzbasierten Behandlungspfad."
+            }
+          }
+        }
       }
     },
     "settings": {
@@ -818,7 +850,9 @@
     "en": "Englisch",
     "es": "Spanisch",
     "fr": "Französisch",
-    "it": "Italienisch"
+    "it": "Italienisch",
+    "pl": "Polnisch",
+    "tr": "Türkisch"
   },
   "medical": {
     "prop-values": {

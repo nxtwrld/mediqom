@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -79,9 +80,18 @@
                 <li class="panel procedure-item">
                     <div class="procedure-header">
                         <h5 class="item-name">{procedure.name}</h5>
-                        {#if procedure.cptCode}
-                            <span class="cpt-code">{procedure.cptCode}</span>
-                        {/if}
+                        <div class="procedure-header-actions">
+                            {#if procedure.cptCode}
+                                <span class="cpt-code">{procedure.cptCode}</span>
+                            {/if}
+                            <AskButton
+                                type="procedure"
+                                label={procedure.name}
+                                data={procedure}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     
                     <div class="item-details">

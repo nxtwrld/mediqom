@@ -353,6 +353,21 @@ export class ChatMCPToolWrapper {
   }
 
   /**
+   * Execute a tool directly without approval flow (for pre-fetching in AskButton flow)
+   */
+  async executeToolDirectly(
+    toolName: string,
+    parameters: any,
+    profileId: string,
+  ): Promise<ToolCallResult> {
+    if (!this.toolExecutors.has(profileId)) {
+      this.toolExecutors.set(profileId, new ClientToolExecutor({ profileId }));
+    }
+    const executor = this.toolExecutors.get(profileId)!;
+    return executor.executeTool(toolName, parameters);
+  }
+
+  /**
    * Get number of pending tool calls
    */
   getPendingCount(): number {

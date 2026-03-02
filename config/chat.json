@@ -69,7 +69,8 @@
           "You are discussing the medical profile for: {profileName}",
           "Do not assume the user is the patient - they may be a parent, guardian, caregiver, or family member",
           "Address the user respectfully without assuming their relationship to the patient",
-          "When asking clarifying questions, use gentle, empathetic language that validates concerns while gathering information"
+          "When asking clarifying questions, use gentle, empathetic language that validates concerns while gathering information",
+          "IMPORTANT: Answer questions about this patient's health ONLY from their actual medical records and data. Never invent or assume patient-specific medical facts. If you do not have the data, say so and use the available tools to retrieve it."
         ],
         "anatomyInstructions": [
           "When discussing body parts, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -88,7 +89,8 @@
           "You have access to medical data tools. USE THESE TOOLS when the user asks about their medical information.",
           "When a user asks about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
-          "Example: If asked 'What medications am I taking?', use the queryMedicalHistory tool with category: 'medications'"
+          "Example: If asked 'What medications am I taking?', use the queryMedicalHistory tool with category: 'medications'",
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
         ]
       },
       "responseSchema": {
@@ -195,7 +197,8 @@
           "You are reviewing the medical profile for: {profileName}",
           "The user may be a healthcare provider, family member, or authorized person reviewing this profile",
           "Maintain professional clinical language while being accessible to the intended audience",
-          "When asking clarifying questions, use precise clinical language to gather relevant diagnostic information systematically"
+          "When asking clarifying questions, use precise clinical language to gather relevant diagnostic information systematically",
+          "IMPORTANT: Base all clinical assessments on this patient's documented medical records only. Do not speculate about patient-specific diagnoses or history from general medical knowledge. Use tools to retrieve actual patient data."
         ],
         "anatomyInstructions": [
           "When discussing anatomical structures, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -214,7 +217,8 @@
           "You have access to medical data tools. USE THESE TOOLS to retrieve patient information for clinical analysis.",
           "When analyzing patient data, medications, conditions, or test results, you MUST request the appropriate tool.",
           "Do not state 'no data available' without first attempting to use the relevant tools.",
-          "Example: For medication review, use queryMedicalHistory with category: 'medications'"
+          "Example: For medication review, use queryMedicalHistory with category: 'medications'",
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
         ]
       },
       "responseSchema": {
@@ -325,7 +329,7 @@
   "responseSchema": {
     "base": {
       "name": "chat_response",
-      "description": "AI medical chat response. CRITICAL: You MUST include toolCalls array whenever the user asks about their medical information.",
+      "description": "AI medical chat response. Only include toolCalls if your response needs data that was NOT provided in the context. If pre-fetched data or assembled context already answers the question, leave toolCalls empty.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -454,7 +458,7 @@
               },
               "required": ["name", "parameters", "reason"]
             },
-            "description": "MANDATORY: MCP tools the AI wants to use to answer the question. If user asks about medications, conditions, test results, documents, or any medical information, you MUST include appropriate tool calls here. DO NOT mention accessing data in your response without including the corresponding toolCalls."
+            "description": "MCP tools to call ONLY when the needed data was NOT available in the provided context or pre-fetched data. If the user message already contained medical data (e.g., in a pre-fetched JSON block), or the assembled context contained the answer, do NOT include tool calls. Only include tools when your response genuinely requires data you do not have."
           }
         },
         "required": ["response"]

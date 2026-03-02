@@ -6,9 +6,10 @@
 
     interface Props {
         data: any;
+        document?: any;
     }
 
-    let { data }: Props = $props();
+    let { data, document }: Props = $props();
 
     function showBodyPart(part: string) {
         ui.emit('viewer', { object: normalize(part) })

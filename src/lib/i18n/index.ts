@@ -7,11 +7,19 @@ const languages = {
   en: "English",
   cs: "Czech",
   de: "German",
+  it: "Italian",
+  es: "Spanish",
+  pl: "Polish",
+  tr: "Turkish",
 };
 
 register("en", () => import("./locales/en.json"));
 register("cs", () => import("./locales/cs-CZ.json"));
 register("de", () => import("./locales/de-DE.json"));
+register("it", () => import("./locales/it-IT.json"));
+register("es", () => import("./locales/es-ES.json"));
+register("pl", () => import("./locales/pl-PL.json"));
+register("tr", () => import("./locales/tr-TR.json"));
 
 init({
   fallbackLocale: defaultLocale,

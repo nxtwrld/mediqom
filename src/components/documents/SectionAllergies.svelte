@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     // Check if we have allergy data
     let hasAllergies = $derived(data && (
         data.hasAllergies || 
@@ -138,6 +139,13 @@
                             {#if allergy.status}
                                 <span class="status-badge {getStatusClass(allergy.status)}">{$t(`medical.enums.allergy_status.${allergy.status}`)}</span>
                             {/if}
+                            <AskButton
+                                type="allergy"
+                                label={allergy.allergen}
+                                data={allergy}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -240,7 +248,16 @@
                 <li class="panel intolerance-item">
                     <div class="intolerance-header">
                         <span class="medication-name">{intolerance.medication}</span>
-                        <span class="intolerance-badge">{$t('report.intolerance')}</span>
+                        <div class="intolerance-header-actions">
+                            <span class="intolerance-badge">{$t('report.intolerance')}</span>
+                            <AskButton
+                                type="drug-intolerance"
+                                label={intolerance.medication}
+                                data={intolerance}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     <div class="intolerance-details">
                         <div class="detail-item">
@@ -267,9 +284,18 @@
                 <li class="panel environmental-item {getSeverityClass(sensitivity.severity)}">
                     <div class="sensitivity-header">
                         <span class="trigger-name">{sensitivity.trigger}</span>
-                        {#if sensitivity.seasonal}
-                            <span class="seasonal-badge">{$t('report.seasonal')}</span>
-                        {/if}
+                        <div class="sensitivity-header-actions">
+                            {#if sensitivity.seasonal}
+                                <span class="seasonal-badge">{$t('report.seasonal')}</span>
+                            {/if}
+                            <AskButton
+                                type="environmental-sensitivity"
+                                label={sensitivity.trigger}
+                                data={sensitivity}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     <div class="sensitivity-details">
                         <div class="detail-item">

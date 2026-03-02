@@ -1,5 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import { isEmpty } from '$lib/object';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -92,6 +94,9 @@
         };
         return routeMap[route] || route;
     }
+
+
+
 </script>
 
 {#if hasMedications}
@@ -105,7 +110,16 @@
                         <li class="panel medication-active">
                             <div class="medication-header">
                                 <h5 class="medication-name">{medication.medicationName}</h5>
-                                <span class="medication-status {getStatusClass(medication.status)}">{$t(`medical.enums.medication_status.${medication.status || 'active'}`)}</span>
+                                <div class="medication-header-actions">
+                                    <span class="medication-status {getStatusClass(medication.status)}">{$t(`medical.enums.medication_status.${medication.status || 'active'}`)}</span>
+                                    <AskButton
+                                        type="medication"
+                                        label={medication.medicationName}
+                                        data={medication}
+                                        documentId={document?.id}
+                                        documentTitle={document?.content?.title}
+                                    />
+                                </div>
                             </div>
                             
                             <div class="item-details">
@@ -182,7 +196,16 @@
                         <li class="panel medication-new">
                             <div class="medication-header">
                                 <h5 class="medication-name">{prescription.medicationName}</h5>
-                                <span class="prescription-badge">{$t('report.new')}</span>
+                                <div class="medication-header-actions">
+                                    <span class="prescription-badge">{$t('report.new')}</span>
+                                    <AskButton
+                                        type="medication"
+                                        label={prescription.medicationName}
+                                        data={prescription}
+                                        documentId={document?.id}
+                                        documentTitle={document?.content?.title}
+                                    />
+                                </div>
                             </div>
                             
                             <div class="item-details">
@@ -238,7 +261,16 @@
                         <li class="panel {getChangeTypeClass(change.changeType)}">
                             <div class="change-header">
                                 <span class="medication-name">{change.medicationName}</span>
-                                <span class="change-type">{$t(`medical.enums.medication_change_types.${change.changeType}`)}</span>
+                                <div class="change-header-actions">
+                                    <span class="change-type">{$t(`medical.enums.medication_change_types.${change.changeType}`)}</span>
+                                    <AskButton
+                                        type="medication-change"
+                                        label={change.medicationName}
+                                        data={change}
+                                        documentId={document?.id}
+                                        documentTitle={document?.content?.title}
+                                    />
+                                </div>
                             </div>
                             
                             {#if change.previousDose || change.newDose}
@@ -292,6 +324,13 @@
                                 <span class="drug1">{interaction.drug1}</span>
                                 <span class="interaction-symbol">⚠️</span>
                                 <span class="drug2">{interaction.drug2}</span>
+                                <AskButton
+                                    type="drug-interaction"
+                                    label="{interaction.drug1} + {interaction.drug2}"
+                                    data={interaction}
+                                    documentId={document?.id}
+                                    documentTitle={document?.content?.title}
+                                />
                             </div>
                             <div class="interaction-details">
                                 <span class="severity {getSeverityClass(interaction.severity)}">{$t(`medical.enums.interaction_severity.${interaction.severity}`)}</span>
@@ -321,7 +360,7 @@
         {/if}
         
         <!-- Adherence Assessment -->
-        {#if adherenceAssessment}
+        {#if !isEmpty(adherenceAssessment)}
             
                 <h4 class="section-title-sub">{$t('report.adherence-assessment')}</h4>
                 <ul class="list-items">
@@ -466,6 +505,12 @@
         font-weight: 500;
     }
     
+    .medication-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     /* medication-details now uses global .item-details styles */
     
     .detail-item {
@@ -527,8 +572,14 @@
         font-size: 0.8rem;
     }
     
+    .change-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     /* medication-notes and medication-instructions now use global .item-notes styles */
-    
+
     /* Medication Changes */
     .change-header {
         display: flex;

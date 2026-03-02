@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     let hasImmunizations = $derived(data && data.hasImmunizations);
     
     let immunizations = $derived(data?.immunizations || []);
@@ -157,6 +158,13 @@
                                     {$t(`medical.enums.administration_routes.${immunization.route}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="immunization"
+                                label={immunization.vaccineName}
+                                data={immunization}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -343,7 +351,16 @@
                 <li class="panel contraindication-item">
                     <div class="contraindication-header">
                         <span class="vaccine-name">{contraindication.vaccineName}</span>
-                        <span class="contraindication-type">{$t(`medical.enums.contraindication_types.${contraindication.type}`)}</span>
+                        <div class="contraindication-header-actions">
+                            <span class="contraindication-type">{$t(`medical.enums.contraindication_types.${contraindication.type}`)}</span>
+                            <AskButton
+                                type="immunization-contraindication"
+                                label={contraindication.vaccineName}
+                                data={contraindication}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     
                     <div class="contraindication-details">

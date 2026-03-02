@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     let hasMolecular = $derived(data && data.hasMolecular);
     
     let geneticTesting = $derived(data?.geneticTesting || []);
@@ -160,6 +161,13 @@
                                     {$t(`medical.enums.significance_levels.${test.significance}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="genetic-test"
+                                label={test.name}
+                                data={test}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -340,6 +348,13 @@
                             {#if biomarker.level}
                                 <span class="level-badge">{biomarker.level}</span>
                             {/if}
+                            <AskButton
+                                type="biomarker"
+                                label={biomarker.name}
+                                data={biomarker}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -419,6 +434,13 @@
                             {#if mutation.alleleFrequency}
                                 <span class="frequency-badge">{formatAlleleFrequency(mutation.alleleFrequency)}</span>
                             {/if}
+                            <AskButton
+                                type="mutation"
+                                label={mutation.gene}
+                                data={mutation}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     

@@ -461,7 +461,11 @@
     "languages": {
       "cs": "",
       "de": "",
-      "en": ""
+      "en": "",
+      "es": "",
+      "it": "",
+      "pl": "",
+      "tr": ""
     },
     "name": "mediqom",
     "nav": {
@@ -516,6 +520,34 @@
       },
       "clarifyingQuestion": {
         "placeholder": "Nebo napište vlastní odpověď..."
+      },
+      "ask-about": {
+        "button": "Zeptat se",
+        "aria": "Zeptat se AI na: {label}",
+        "patient": "Můžete mi pomoci pochopit tento {type}: {label}?",
+        "clinical": "Proveďte klinickou analýzu tohoto {type}: {label}. Zahrňte relevantní klinické úvahy.",
+        "diagnosis": {
+          "patient": "Můžete mi pomoci pochopit mou diagnózu: {desc}{code}? Byla klasifikována jako {diagnosisType} diagnóza.{notes}{extra}",
+          "clinical": "Proveďte klinickou analýzu: {desc}{code} — {diagnosisType} diagnóza. Zahrňte diferenciální úvahy a možnosti léčby.{notes}{extra}",
+          "type-extra": {
+            "differential": {
+              "patient": " Jaká je pravděpodobnost, že mám tuto diagnózu oproti jiným onemocněním?",
+              "clinical": " Diskutujte o klíčových rozlišujících rysech a postupu pro zúžení diferenciálních diagnóz."
+            },
+            "rule-out": {
+              "patient": " Co znamená \"vyloučit\" diagnózu?",
+              "clinical": " Jaká vyšetření by tuto diagnózu definitivně vyloučila?"
+            },
+            "provisional": {
+              "patient": " Tato diagnóza je předběžná — co to znamená pro mou léčbu?",
+              "clinical": " Jaké další důkazy jsou potřeba k potvrzení nebo vyvrácení?"
+            },
+            "confirmed": {
+              "patient": " Tato diagnóza je potvrzena — co mám očekávat dál?",
+              "clinical": " Nastíněte postupy léčby založené na důkazech."
+            }
+          }
+        }
       }
     },
     "settings": {
@@ -818,7 +850,9 @@
     "en": "angličtina",
     "es": "španělština",
     "fr": "francouzština",
-    "it": "italština"
+    "it": "italština",
+    "pl": "polština",
+    "tr": "turečtina"
   },
   "medical": {
     "prop-values": {
