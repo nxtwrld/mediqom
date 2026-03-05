@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { select, scaleTime, scaleLinear, axisLeft, line } from 'd3';
+    import { select, scaleTime, scaleLinear, axisLeft, line, zoom as d3Zoom, zoomIdentity, type Selection, type ScaleTime, type ScaleLinear } from 'd3';
     import { onMount } from 'svelte';
     import { get } from 'svelte/store';
     import { t } from '$lib/i18n';
@@ -61,11 +61,16 @@
     let svgElement: SVGSVGElement | undefined = $state();
     let menu = $state<MenuState>({ visible: false, x: 0, y: 0, point: null, series: null });
 
+    // Module-level zoom state — persists between renders
+    let yBase: ScaleTime<number, number> | null = null;
+    let zoomBehavior: ReturnType<typeof d3Zoom<SVGSVGElement, unknown>> | null = null;
+
     function closeMenu() {
         menu = { ...menu, visible: false };
     }
 
-    function renderChart(data: SignalSeries[], highlighted: typeof highlightedPoint = null) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function renderDynamic(y: ScaleTime<number, number>, data: SignalSeries[], highlighted: typeof highlightedPoint, width: number, height: number, x: ScaleLinear<number, number>, axisGroup: Selection<SVGGElement, any, any, any>, zebraGroup: Selection<SVGGElement, any, any, any>, seriesContainer: Selection<SVGGElement, any, any, any>) {
         function isHighlighted(s: SignalSeries, d: SignalSeries['values'][number]): boolean {
             if (!highlighted) return false;
             if (s.name !== highlighted.signalName) return false;
@@ -74,6 +79,130 @@
                 ? valueMatch && d.documentId === highlighted.documentId
                 : valueMatch;
         }
+
+        // Y axis ticks
+        const tickCount = Math.max(2, Math.floor(height / 40));
+        const domainSpan = (y.domain()[1] as Date).getTime() - (y.domain()[0] as Date).getTime();
+
+        axisGroup.call(
+            axisLeft(y)
+                .ticks(tickCount)
+                .tickFormat((d) => {
+                    const date = d as Date;
+                    if (Math.abs(domainSpan) < 30 * 86400000) {
+                        return date.toLocaleString('default', { month: 'short', day: 'numeric' });
+                    }
+                    return date.getMonth() === 0
+                        ? date.getFullYear().toString()
+                        : date.toLocaleString('default', { month: 'short' });
+                })
+        );
+        axisGroup.attr('transform', 'translate(-8, 0)');
+
+        // Tick background pills
+        axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
+            const g = select(this);
+            const isDay = Math.abs(domainSpan) < 30 * 86400000;
+            const isYear = !isDay && d.getMonth() === 0;
+            const textEl = g.select<SVGTextElement>('text');
+            textEl.attr('class', isYear ? 'tick-label tick-year' : isDay ? 'tick-label tick-day' : 'tick-label tick-month');
+            const bbox = textEl.node()?.getBBox();
+            if (bbox) {
+                g.selectAll<SVGRectElement, null>('rect.tick-bg').data([null]).join('rect')
+                    .attr('class', isYear ? 'tick-bg tick-year-bg' : isDay ? 'tick-bg tick-day-bg' : 'tick-bg tick-month-bg')
+                    .attr('x', bbox.x - 4).attr('y', bbox.y - 2)
+                    .attr('width', bbox.width + 8).attr('height', bbox.height + 4)
+                    .attr('rx', 3)
+                    .lower();
+            }
+        });
+
+        // Zebra bands between ticks
+        const tickValues = y.ticks(tickCount);
+        const boundaries = [0, ...tickValues.map((d: Date) => y(d)), height];
+        const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
+            y0, y1: boundaries[i + 1], odd: i % 2 === 1
+        }));
+        zebraGroup.selectAll<SVGRectElement, typeof zebraData[0]>('rect')
+            .data(zebraData.filter(d => d.odd))
+            .join('rect')
+            .attr('class', 'zebra-band')
+            .attr('x', 0).attr('y', d => d.y0)
+            .attr('width', width).attr('height', d => d.y1 - d.y0);
+
+        // Series lines + dots
+        const valueLine = line<{ date: Date; normalized: number }>()
+            .x(d => x(d.normalized))
+            .y(d => y(d.date));
+
+        const isHoverDevice = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
+
+        const seriesGroups = seriesContainer
+            .selectAll<SVGGElement, SignalSeries>('g.series')
+            .data(data.filter(s => s.values.length > 0), d => d.name)
+            .join(
+                enter => enter.append('g').attr('class', d => `series series-${d.name}`),
+                update => update,
+                exit => exit.remove()
+            );
+
+        seriesGroups.each(function(s) {
+            const g = select(this);
+            const sorted = [...s.values].sort((a, b) => a.date.getTime() - b.date.getTime());
+            const currentSeries = s;
+
+            if (sorted.length > 1) {
+                g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                    .attr('class', 'series-line')
+                    .attr('stroke', s.color)
+                    .attr('d', valueLine(sorted) ?? '');
+            } else {
+                g.selectAll('path.series-line').remove();
+            }
+
+            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot-highlight-ring')
+                .data(sorted.filter(d => isHighlighted(currentSeries, d)), d => `${d.date.getTime()}-${d.value}`)
+                .join('circle')
+                .attr('class', 'dot-highlight-ring')
+                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                .attr('r', 11).attr('fill', 'none')
+                .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
+
+            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                .data(sorted, d => `${d.date.getTime()}-${d.value}`)
+                .join(
+                    enter => enter.append('circle')
+                        .attr('class', 'dot')
+                        .on('mouseover', function() {
+                            if (isHoverDevice) select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                        })
+                        .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                            if (isHoverDevice) {
+                                select(this)
+                                    .attr('r', isHighlighted(currentSeries, d) ? 7 : 4)
+                                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                            }
+                        })
+                        .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
+                            event.stopPropagation();
+                            menu = { visible: true, x: x(d.normalized) + margin.left, y: y(d.date) + margin.top, point: d, series: currentSeries };
+                        }),
+                    update => update,
+                    exit => exit.remove()
+                )
+                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                .attr('r', d => isHighlighted(currentSeries, d) ? 7 : 4)
+                .attr('fill', s.color)
+                .attr('stroke', 'white')
+                .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
+        });
+
+        if (onScaleReady) {
+            onScaleReady((date: Date) => y(date) + margin.top, height);
+        }
+    }
+
+    function renderChart(data: SignalSeries[], highlighted: typeof highlightedPoint = null) {
         if (!svgElement) return;
 
         const allPoints = data.flatMap(s => s.values);
@@ -114,23 +243,19 @@
         const domainMax = timeRange ? timeRange[1] : dataMaxDate;
         const dateSpan = Math.max(domainMax.getTime() - domainMin.getTime(), 86400000);
 
-        const y = scaleTime()
+        yBase = scaleTime<number, number>()
             .domain([
                 new Date(domainMax.getTime() + dateSpan * 0.05), // top of chart = newest
                 new Date(domainMin.getTime() - dateSpan * 0.05)  // bottom = oldest
             ])
             .range([0, height]);
 
-        if (onScaleReady) {
-            onScaleReady((date: Date) => y(date) + margin.top, height);
-        }
-
         // X axis: normalized space — 0 = refMin, 1 = refMax
-        const x = scaleLinear()
+        const x = scaleLinear<number, number>()
             .domain([-0.5, 1.5])
             .range([0, width]);
 
-        // Reference bands — keyed join
+        // Reference bands — keyed join (static, X-axis only)
         const bandData = [
             { id: 'low',    cls: 'band-low',    x: x(-0.5), width: Math.max(0, x(0) - x(-0.5)) },
             { id: 'normal', cls: 'band-normal', x: x(0),    width: Math.max(0, x(1) - x(0))    },
@@ -143,7 +268,7 @@
             .attr('x', d => d.x).attr('y', 0)
             .attr('width', d => d.width).attr('height', height);
 
-        // Reference boundary lines — join
+        // Reference boundary lines — static, X positions
         refLinesGroup.selectAll<SVGLineElement, number>('line')
             .data([x(0), x(1)])
             .join('line')
@@ -151,51 +276,7 @@
             .attr('x1', d => d).attr('x2', d => d)
             .attr('y1', 0).attr('y2', height);
 
-        // Y axis (time) — D3 handles tick enter/update/exit
-        const tickCount = Math.max(2, Math.floor(height / 40));
-        axisGroup.call(
-            axisLeft(y)
-                .ticks(tickCount)
-                .tickFormat((d) => {
-                    const date = d as Date;
-                    return date.getMonth() === 0
-                        ? date.getFullYear().toString()
-                        : date.toLocaleString('default', { month: 'short' });
-                })
-        );
-        axisGroup.attr('transform', 'translate(-8, 0)');
-
-        // Style year ticks with background pill, month ticks lighter
-        axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
-            const g = select(this);
-            const isYear = d.getMonth() === 0;
-            const textEl = g.select<SVGTextElement>('text');
-            textEl.attr('class', isYear ? 'tick-label tick-year' : 'tick-label tick-month');
-            const bbox = textEl.node()?.getBBox();
-            if (bbox) {
-                g.selectAll<SVGRectElement, null>('rect.tick-bg').data([null]).join('rect')
-                    .attr('class', isYear ? 'tick-bg tick-year-bg' : 'tick-bg tick-month-bg')
-                    .attr('x', bbox.x - 4).attr('y', bbox.y - 2)
-                    .attr('width', bbox.width + 8).attr('height', bbox.height + 4)
-                    .attr('rx', 3)
-                    .lower();
-            }
-        });
-
-        // Zebra bands between ticks
-        const tickValues = y.ticks(tickCount);
-        const boundaries = [0, ...tickValues.map((d: Date) => y(d)), height];
-        const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
-            y0, y1: boundaries[i + 1], odd: i % 2 === 1
-        }));
-        zebraGroup.selectAll<SVGRectElement, typeof zebraData[0]>('rect')
-            .data(zebraData.filter(d => d.odd))
-            .join('rect')
-            .attr('class', 'zebra-band')
-            .attr('x', 0).attr('y', d => d.y0)
-            .attr('width', width).attr('height', d => d.y1 - d.y0);
-
-        // Zone label boxes — LOW / NORMAL / HIGH
+        // Zone label boxes — LOW / NORMAL / HIGH (static, bottom of chart)
         const zones = [
             { name: 'low',    x1: x(-0.5), x2: x(0)   },
             { name: 'normal', x1: x(0),    x2: x(1)   },
@@ -220,76 +301,16 @@
                     .text(getRangeLabel(z.name));
             });
 
-        // Series lines + dots
-        const valueLine = line<{ date: Date; normalized: number }>()
-            .x(d => x(d.normalized))
-            .y(d => y(d.date));
+        // Update zoom translate extent for new chart height
+        zoomBehavior?.translateExtent([[0, 0], [0, height]]);
 
-        const isHoverDevice = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
+        // Reset zoom to identity when data/timeRange changes
+        if (zoomBehavior) {
+            select(svgElement).call(zoomBehavior.transform, zoomIdentity);
+        }
 
-        // Series groups keyed by name — enter/exit handled by D3
-        const seriesGroups = seriesContainer
-            .selectAll<SVGGElement, SignalSeries>('g.series')
-            .data(data.filter(s => s.values.length > 0), d => d.name)
-            .join(
-                enter => enter.append('g').attr('class', d => `series series-${d.name}`),
-                update => update,
-                exit => exit.remove()
-            );
-
-        seriesGroups.each(function(s) {
-            const g = select(this);
-            const sorted = [...s.values].sort((a, b) => a.date.getTime() - b.date.getTime());
-            const currentSeries = s;
-
-            // Line path
-            if (sorted.length > 1) {
-                g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
-                    .attr('class', 'series-line')
-                    .attr('stroke', s.color)
-                    .attr('d', valueLine(sorted) ?? '');
-            } else {
-                g.selectAll('path.series-line').remove();
-            }
-
-            // Highlight ring — full join so exit removes stale rings
-            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot-highlight-ring')
-                .data(sorted.filter(d => isHighlighted(currentSeries, d)), d => `${d.date.getTime()}-${d.value}`)
-                .join('circle')
-                .attr('class', 'dot-highlight-ring')
-                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', 11).attr('fill', 'none')
-                .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
-
-            // Dots — event handlers on enter only, attrs applied to enter + update
-            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
-                .data(sorted, d => `${d.date.getTime()}-${d.value}`)
-                .join(
-                    enter => enter.append('circle')
-                        .attr('class', 'dot')
-                        .on('mouseover', function() {
-                            if (isHoverDevice) select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
-                        })
-                        .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
-                            if (isHoverDevice) {
-                                select(this)
-                                    .attr('r', isHighlighted(currentSeries, d) ? 7 : 4)
-                                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
-                            }
-                        })
-                        .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
-                            event.stopPropagation();
-                            menu = { visible: true, x: x(d.normalized) + margin.left, y: y(d.date) + margin.top, point: d, series: currentSeries };
-                        }),
-                    update => update,
-                    exit => exit.remove()
-                )
-                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', d => isHighlighted(currentSeries, d) ? 7 : 4)
-                .attr('fill', s.color)
-                .attr('stroke', 'white')
-                .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
-        });
+        // Initial dynamic render with unzoomed scale
+        renderDynamic(yBase, data, highlighted, width, height, x, axisGroup, zebraGroup, seriesContainer);
     }
 
     $effect(() => {
@@ -301,6 +322,28 @@
 
         // SVG click handler lives here to avoid re-attachment on every render
         select(svgElement).on('click', () => { menu = { ...menu, visible: false }; });
+
+        // Set up D3 zoom — Y axis only, scaleExtent 1..20
+        zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
+            .scaleExtent([1, 20])
+            .on('zoom', (event) => {
+                if (!yBase || !svgElement) return;
+                const yZoomed = event.transform.rescaleY(yBase);
+                const width = svgElement.clientWidth - margin.left - margin.right;
+                const height = svgElement.clientHeight - margin.top - margin.bottom;
+                if (width <= 0 || height <= 0) return;
+                const svg = select(svgElement).select<SVGGElement>('g.chart-main');
+                const axisGroup = svg.select<SVGGElement>('g.axis');
+                const zebraGroup = svg.select<SVGGElement>('g.zebra-bands');
+                const seriesContainer = svg.select<SVGGElement>('g.series-container');
+                const x = scaleLinear<number, number>().domain([-0.5, 1.5]).range([0, width]);
+                renderDynamic(yZoomed, series, highlightedPoint, width, height, x, axisGroup, zebraGroup, seriesContainer);
+            });
+
+        select(svgElement).call(zoomBehavior);
+
+        // Prevent page scroll when mouse is over the chart
+        svgElement.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 
         let rTimer: ReturnType<typeof setTimeout>;
         const observer = new ResizeObserver(() => {
@@ -321,7 +364,7 @@
         return () => {
             clearTimeout(rTimer);
             observer.disconnect();
-            select(svgElement!).on('click', null);
+            select(svgElement!).on('.zoom', null).on('click', null);
             window.removeEventListener('pointerdown', handleOutsideClick);
         };
     });
@@ -447,6 +490,15 @@
     }
 
     .chart-wrap svg :global(.tick-month) {
+        font-size: 0.6rem;
+        fill: var(--color-gray-900);
+    }
+
+    .chart-wrap svg :global(.tick-day-bg) {
+        fill: var(--color-gray-200);
+    }
+
+    .chart-wrap svg :global(.tick-day) {
         font-size: 0.6rem;
         fill: var(--color-gray-900);
     }
