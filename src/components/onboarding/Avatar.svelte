@@ -127,6 +127,8 @@
 				return;
 			}
 			downloadImage(url);
+		} else if (loaded && !url) {
+			avatarUrl = null;
 		}
 	});
 

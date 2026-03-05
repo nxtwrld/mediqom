@@ -8,15 +8,18 @@
         billingCycle: BillingCycle;
         isCurrentPlan?: boolean;
         isRecommended?: boolean;
+        currentTierSortOrder?: number;
         onselect?: () => void;
     }
 
-    let { tier, billingCycle, isCurrentPlan = false, isRecommended = false, onselect }: Props = $props();
+    let { tier, billingCycle, isCurrentPlan = false, isRecommended = false,
+          currentTierSortOrder = -1, onselect }: Props = $props();
 
     const price = $derived(billingCycle === 'yearly' ? tier.price_yearly_eur : tier.price_monthly_eur);
     const pricePerMonth = $derived(billingCycle === 'yearly' ? Math.round(tier.price_yearly_eur / 12) : tier.price_monthly_eur);
     const features = $derived(getTierFeatures(tier.id));
     const isFree = $derived(tier.id === 'free');
+    const isDowngrade = $derived(currentTierSortOrder > -1 && tier.sort_order < currentTierSortOrder);
 </script>
 
 <div class="plan-card" class:-recommended={isRecommended} class:-current={isCurrentPlan}>
@@ -78,7 +81,7 @@
             </button>
         {:else}
             <button class="button -primary" onclick={onselect}>
-                {$t('billing.upgrade-to')} {tier.name}
+                {isDowngrade ? $t('billing.downgrade-to') : $t('billing.upgrade-to')} {tier.name}
             </button>
         {/if}
     </div>

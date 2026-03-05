@@ -337,6 +337,12 @@
       "documents": "Documents",
       "profiles": "Profiles"
     },
+    "nav": {
+      "anatomy-model": "3D Anatomy Model",
+      "documents": "Documents",
+      "profiles": "Profiles",
+      "settings": "Settings"
+    },
     "import": {
       "add-files": "Add files",
       "analyze-reports": "Analyze",
@@ -1997,6 +2003,7 @@
     "current-plan": "Current Plan",
     "free-tier": "Free Tier",
     "upgrade-to": "Upgrade to",
+    "downgrade-to": "Downgrade to",
     "profile": "profile",
     "profiles": "profiles",
     "unlimited-profiles": "Unlimited profiles",

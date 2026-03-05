@@ -440,7 +440,7 @@
     border-left: 1px solid var(--color-gray-400);
     display: flex;
     flex-direction: column;
-    z-index: 999;
+    z-index: 100001;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
   }
 
@@ -452,7 +452,7 @@
     height: 100%;
     background: transparent;
     cursor: col-resize;
-    z-index: 1001;
+    z-index: 100002;
   }
 
   .resize-handle:hover {

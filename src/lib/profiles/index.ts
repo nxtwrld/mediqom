@@ -25,6 +25,9 @@ export { profiles, profile };
 /** Store: true while background document loading for a profile is in progress */
 export const profileDocumentsLoading = writable(false);
 
+/** Store: true while Phase 2 profile enrichment (document decryption) is in progress */
+export const profilesEnriching = writable(false);
+
 /**
  *  Removes links between a parent and a profile
  */
@@ -89,12 +92,14 @@ export async function loadProfiles(
 
   // --- Phase 2: Background enrichment with documents ---
   // Re-fetch raw list for enrichment (use cached data for performance)
+  profilesEnriching.set(true);
   apiFetch("/v1/med/profiles", fetchOpts)
     .then((r) => r.json())
     .then((profilesLoaded: ProfileCore[]) =>
       enrichProfilesWithDocuments(profilesLoaded, fetchOpts, force)
     )
-    .catch((e) => console.error("Error loading profiles for enrichment", e));
+    .catch((e) => console.error("Error loading profiles for enrichment", e))
+    .finally(() => profilesEnriching.set(false));
 }
 
 /**
@@ -152,6 +157,8 @@ async function enrichProfilesWithDocuments(
   );
 
   profiles.set(results);
+
+  profilesEnriching.set(false);
 
   // Sync the singular profile store if the currently-viewed profile was enriched
   const currentProfile = profile.get();

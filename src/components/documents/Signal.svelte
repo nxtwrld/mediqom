@@ -3,6 +3,7 @@
     import defaults from '$data/lab.properties.defaults.json';
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     import type { Document } from '$lib/documents/types.d';
 
@@ -199,6 +200,13 @@
                         <use href="/icons.svg#chart-line"></use>
                     </svg>
                 </button>
+                <AskButton
+                    type="signal"
+                    label={title}
+                    data={item}
+                    documentId={document?.id}
+                    documentTitle={document?.content?.title}
+                />
             </div>
         </td>
 

@@ -12,6 +12,7 @@
         isLoading,
         createEmbeddedCheckout,
         createEmbeddedPackCheckout,
+        confirmSession,
         getSessionStatus,
         loadTiers,
         loadPacks,
@@ -41,6 +42,7 @@
     type ViewState = 'select' | 'checkout' | 'success' | 'error';
     let viewState: ViewState = $state('select');
     let clientSecret = $state<string | null>(null);
+    let sessionId = $state<string | null>(null);
     let checkoutError = $state<string | null>(null);
     let selectedTierName = $state<string | null>(null);
 
@@ -59,6 +61,10 @@
 
     const sortedTiers = $derived(
         [...$tiers].sort((a, b) => a.sort_order - b.sort_order)
+    );
+
+    const currentTierSortOrder = $derived(
+        $tiers.find(t => t.id === $subscription?.tier_id)?.sort_order ?? -1
     );
 
     // =====================================================
@@ -180,6 +186,7 @@
         const result = await createEmbeddedCheckout(tierId, billingCycle);
         if (result) {
             clientSecret = result.clientSecret;
+            sessionId = result.sessionId;
             viewState = 'checkout';
         } else {
             checkoutError = 'Failed to initialize checkout. Please try again.';
@@ -199,6 +206,7 @@
         const result = await createEmbeddedPackCheckout(packId);
         if (result) {
             clientSecret = result.clientSecret;
+            sessionId = result.sessionId;
             viewState = 'checkout';
         } else {
             checkoutError = 'Failed to initialize checkout. Please try again.';
@@ -206,9 +214,11 @@
         }
     }
 
-    function handleCheckoutComplete() {
+    async function handleCheckoutComplete() {
         viewState = 'success';
-        // Refresh subscription data
+        if (sessionId) {
+            await confirmSession(sessionId);
+        }
         loadSubscription();
     }
 
@@ -220,6 +230,7 @@
     function handleBackToPlans() {
         viewState = 'select';
         clientSecret = null;
+        sessionId = null;
         checkoutError = null;
         selectedTierName = null;
     }
@@ -285,6 +296,7 @@
                             {billingCycle}
                             isCurrentPlan={$subscription?.tier_id === tier.id}
                             isRecommended={recommendedTier === tier.id || (!recommendedTier && tier.id === 'caretaker')}
+                            {currentTierSortOrder}
                             onselect={() => handleSelectPlan(tier.id)}
                         />
                     {/each}

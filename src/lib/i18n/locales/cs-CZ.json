@@ -337,6 +337,12 @@
       "documents": "Dokumenty",
       "profiles": "Profily"
     },
+    "nav": {
+      "anatomy-model": "",
+      "documents": "",
+      "profiles": "",
+      "settings": ""
+    },
     "import": {
       "add-files": "Přidat soubory",
       "analyze-reports": "Analyzovat",
@@ -1910,6 +1916,7 @@
     "current-plan": "Aktuální plán",
     "free-tier": "Zdarma",
     "upgrade-to": "Upgradovat na",
+    "downgrade-to": "",
     "profile": "profil",
     "profiles": "profily",
     "unlimited-profiles": "Neomezený počet profilů",

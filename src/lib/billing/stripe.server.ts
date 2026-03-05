@@ -30,7 +30,7 @@ import type {
 
 let stripeClient: Stripe | null = null;
 
-function getStripe(): Stripe {
+export function getStripe(): Stripe {
   if (!stripeClient) {
     const secretKey = env.STRIPE_SECRET_KEY;
     if (!secretKey) {
@@ -72,6 +72,48 @@ export async function getOrCreateCustomer(
 }
 
 // =====================================================
+// Price Lookup by Product ID
+// =====================================================
+
+async function getPriceIdForProduct(
+  productId: string,
+  billingCycle: BillingCycle,
+): Promise<string> {
+  const stripe = getStripe();
+  const prices = await stripe.prices.list({
+    product: productId,
+    active: true,
+    limit: 10,
+  });
+  const interval = billingCycle === "yearly" ? "year" : "month";
+  const price = prices.data.find(
+    (p) => p.type === "recurring" && p.recurring?.interval === interval,
+  );
+  if (!price) {
+    throw new Error(
+      `No active ${billingCycle} price found for product: ${productId}`,
+    );
+  }
+  return price.id;
+}
+
+async function getPriceIdForPack(productId: string): Promise<string> {
+  const stripe = getStripe();
+  const prices = await stripe.prices.list({
+    product: productId,
+    active: true,
+    type: "one_time",
+    limit: 5,
+  });
+  if (!prices.data[0]) {
+    throw new Error(
+      `No active one-time price found for product: ${productId}`,
+    );
+  }
+  return prices.data[0].id;
+}
+
+// =====================================================
 // Checkout Session Creation
 // =====================================================
 
@@ -90,16 +132,11 @@ export async function createCheckoutSession(
     throw new Error(`Invalid tier: ${tierId}`);
   }
 
-  const priceId =
-    billingCycle === "yearly"
-      ? tier.stripe_price_yearly_eur
-      : tier.stripe_price_monthly_eur;
-
-  if (!priceId) {
-    throw new Error(
-      `Stripe price not configured for tier: ${tierId} (${billingCycle})`,
-    );
+  if (!tier.stripe_product_id) {
+    throw new Error(`Stripe product not configured for tier: ${tierId}`);
   }
+
+  const priceId = await getPriceIdForProduct(tier.stripe_product_id, billingCycle);
 
   // Get or create customer
   const customerId = await getOrCreateCustomer(userId, email);
@@ -127,6 +164,10 @@ export async function createCheckoutSession(
         user_id: userId,
         tier_id: tierId,
       },
+    },
+    customer_update: {
+      name: "auto",
+      address: "auto",
     },
     allow_promotion_codes: true,
     billing_address_collection: "auto",
@@ -164,16 +205,11 @@ export async function createEmbeddedCheckoutSession(
     throw new Error(`Invalid tier: ${tierId}`);
   }
 
-  const priceId =
-    billingCycle === "yearly"
-      ? tier.stripe_price_yearly_eur
-      : tier.stripe_price_monthly_eur;
-
-  if (!priceId) {
-    throw new Error(
-      `Stripe price not configured for tier: ${tierId} (${billingCycle})`,
-    );
+  if (!tier.stripe_product_id) {
+    throw new Error(`Stripe product not configured for tier: ${tierId}`);
   }
+
+  const priceId = await getPriceIdForProduct(tier.stripe_product_id, billingCycle);
 
   // Get or create customer
   const customerId = await getOrCreateCustomer(userId, email);
@@ -200,6 +236,10 @@ export async function createEmbeddedCheckoutSession(
         user_id: userId,
         tier_id: tierId,
       },
+    },
+    customer_update: {
+      name: "auto",
+      address: "auto",
     },
     allow_promotion_codes: true,
     billing_address_collection: "auto",
@@ -232,9 +272,11 @@ export async function createEmbeddedPackCheckoutSession(
     throw new Error(`Invalid pack: ${packId}`);
   }
 
-  if (!pack.stripe_price_id) {
-    throw new Error(`Stripe price not configured for pack: ${packId}`);
+  if (!pack.stripe_product_id) {
+    throw new Error(`Stripe product not configured for pack: ${packId}`);
   }
+
+  const priceId = await getPriceIdForPack(pack.stripe_product_id);
 
   // Get or create customer
   const customerId = await getOrCreateCustomer(userId, email);
@@ -246,7 +288,7 @@ export async function createEmbeddedPackCheckoutSession(
     mode: "payment",
     line_items: [
       {
-        price: pack.stripe_price_id,
+        price: priceId,
         quantity: 1,
       },
     ],
@@ -286,9 +328,11 @@ export async function createPackCheckoutSession(
     throw new Error(`Invalid pack: ${packId}`);
   }
 
-  if (!pack.stripe_price_id) {
-    throw new Error(`Stripe price not configured for pack: ${packId}`);
+  if (!pack.stripe_product_id) {
+    throw new Error(`Stripe product not configured for pack: ${packId}`);
   }
+
+  const priceId = await getPriceIdForPack(pack.stripe_product_id);
 
   // Get or create customer
   const customerId = await getOrCreateCustomer(userId, email);
@@ -300,7 +344,7 @@ export async function createPackCheckoutSession(
     payment_method_types: ["card"],
     line_items: [
       {
-        price: pack.stripe_price_id,
+        price: priceId,
         quantity: 1,
       },
     ],
@@ -378,12 +422,11 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
   }
 
   switch (event.type) {
-    case "checkout.session.completed":
-      await handleCheckoutCompleted(
-        event.data.object as Stripe.Checkout.Session,
-        idempotencyKey,
-      );
+    case "checkout.session.completed": {
+      const checkoutSession = event.data.object as Stripe.Checkout.Session;
+      await handleCheckoutCompleted(checkoutSession, checkoutSession.id);
       break;
+    }
 
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -419,7 +462,7 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
   }
 }
 
-async function handleCheckoutCompleted(
+export async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
   idempotencyKey: string,
 ): Promise<void> {

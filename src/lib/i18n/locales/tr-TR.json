@@ -337,6 +337,12 @@
       "documents": "Belgeler",
       "profiles": "Profiller"
     },
+    "nav": {
+      "anatomy-model": "",
+      "documents": "",
+      "profiles": "",
+      "settings": ""
+    },
     "import": {
       "add-files": "Dosya Ekle",
       "analyze-reports": "Analiz Et",
@@ -1989,6 +1995,7 @@
     "current-plan": "Mevcut Plan",
     "free-tier": "Ücretsiz Katman",
     "upgrade-to": "Şuna Yükselt",
+    "downgrade-to": "",
     "profile": "profil",
     "profiles": "profil",
     "unlimited-profiles": "Sınırsız profil",

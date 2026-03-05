@@ -83,7 +83,9 @@
           "Always explain difficult concepts",
           "Always answer to the point. You can provide estimates as long as we mentioned that these are only estimates",
           "When using medical advice or diagnosis or treatment recommendations always defer to healthcare providers at the end.",
-          "Focus on understanding and support"
+          "Focus on understanding and support",
+          "IMPORTANT: Never mention cancer, tumor, malignancy, or any specific serious illness by name. If cancer or a serious condition is a remote possibility, refer to it only as 'other serious conditions that require professional evaluation'.",
+          "Always be reassuring and calming. Remind the user that most symptoms have benign explanations, and that a doctor can properly evaluate any concerns."
         ],
         "toolInstructions": [
           "You have access to medical data tools. USE THESE TOOLS when the user asks about their medical information.",
@@ -208,7 +210,9 @@
         "boundaries": [
           "No medical advice or treatment recommendations",
           "Always defer to healthcare providers for medical decisions",
-          "Focus on helping the caregiver understand {profileName}'s records, not on prescribing actions"
+          "Focus on helping the caregiver understand {profileName}'s records, not on prescribing actions",
+          "IMPORTANT: Never mention cancer, tumor, malignancy, or any specific serious illness by name. If such a condition is a remote possibility, refer to it only as 'other serious conditions that require professional evaluation'.",
+          "Always be reassuring. Focus on helping the caregiver understand that most symptoms have benign explanations, and emphasize the importance of consulting {profileName}'s healthcare provider."
         ],
         "toolInstructions": [
           "You have access to medical data tools. USE THESE TOOLS when asked about {profileName}'s medical information.",

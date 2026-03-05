@@ -337,6 +337,12 @@
       "documents": "Dokumenty",
       "profiles": "Profile"
     },
+    "nav": {
+      "anatomy-model": "",
+      "documents": "",
+      "profiles": "",
+      "settings": ""
+    },
     "import": {
       "add-files": "Dodaj pliki",
       "analyze-reports": "Analizuj",
@@ -1989,6 +1995,7 @@
     "current-plan": "Bieżący plan",
     "free-tier": "Plan bezpłatny",
     "upgrade-to": "Ulepsz do",
+    "downgrade-to": "",
     "profile": "profil",
     "profiles": "profile",
     "unlimited-profiles": "Nieograniczona liczba profili",

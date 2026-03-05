@@ -1,6 +1,6 @@
 main.layout {
   padding: var(--safe-area-top) var(--safe-area-right)
-    calc(var(--toolbar-height) + var(--gap) + var(--safe-area-bottom)) var(--safe-area-left);
+    calc(var(--safe-area-bottom)) var(--safe-area-left);
   height: 100vh;
   position: relative;
 }
