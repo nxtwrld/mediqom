@@ -10,8 +10,10 @@
     import { sounds } from '$components/ui/Sounds.svelte';
     import { state } from '$lib/ui';
     import { t } from '$lib/i18n';
+    import ViewerTimeline from './ViewerTimeline.svelte';
 
     let showLayers: boolean = false;
+    let activePanel: 'anatomy' | 'timeline' = 'anatomy';
     let model: Body;
     let firstLoad: boolean = true;
 
@@ -91,82 +93,99 @@
 {#if $profile}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="model" on:mousedown={() => showLayers = false}>
-    {#key $profile.health.biologicalSex}
-    <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
-    {/key}
 
-    <div class="model-profile-name">
-        {$profile.fullName}
-    </div>
-
-    <div class="model-layers" class:-active={showLayers}>
-        <em>{activeLayers.length}</em>
-
-        <button class="toggle" on:mousedown|stopPropagation on:click|stopPropagation={() => showLayers = !showLayers}>
-            {#if showLayers}
-            <svg>
-                <use href="/icons.svg#arrow-nav-up" />
-            </svg>
-            {:else}
-            <svg>
-                <use href="/icons.svg#arrow-nav-down" />
-            </svg>
-            {/if}
+    <!-- Panel toggle -->
+    <div class="viewer-panel-toggle" on:mousedown|stopPropagation>
+        <button class:active={activePanel === 'anatomy'} on:click|stopPropagation={() => activePanel = 'anatomy'}>
+            {$t('viewer.panels.anatomy')}
         </button>
-
-        {#if showLayers}
-            {#each layers as layer}
-                <button class="layer" 
-                    on:mousedown|stopPropagation
-                    on:click={() => toggleLayer(layer)} 
-                    class:-active={activeLayers.includes(layer)}>
-                    <svg>
-                        <use href="/anatomy_models/layers.svg#figure" />
-                    </svg>
-                    <svg>
-                        <use href="/anatomy_models/layers.svg#{layer.toLowerCase()}" />
-                    </svg>
-                    <span>{$t('anatomy.layers.'+layer)}</span>
-                </button>
-            {/each} 
-        {/if}
+        <button class:active={activePanel === 'timeline'} on:click|stopPropagation={() => activePanel = 'timeline'}>
+            {$t('viewer.panels.timeline')}
+        </button>
     </div>
 
-    <div class="model-tools">
-        {#each tools as tool}
-            <button class="tool" 
-                on:mousedown|stopPropagation
-                on:click={() => toggleTool(tool)} 
-                class:-active={activeTools.includes(tool)}>
+    {#if activePanel === 'anatomy'}
+        {#key $profile.health.biologicalSex}
+        <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
+        {/key}
+
+        <div class="model-profile-name">
+            {$profile.fullName}
+        </div>
+
+        <div class="model-layers" class:-active={showLayers}>
+            <em>{activeLayers.length}</em>
+
+            <button class="toggle" on:mousedown|stopPropagation on:click|stopPropagation={() => showLayers = !showLayers}>
+                {#if showLayers}
                 <svg>
-                    <use href="/icons.svg#{tool.toLowerCase()}" />
+                    <use href="/icons.svg#arrow-nav-up" />
                 </svg>
-                <span>{$t('anatomy.tools.'+tool)}</span>
+                {:else}
+                <svg>
+                    <use href="/icons.svg#arrow-nav-down" />
+                </svg>
+                {/if}
             </button>
-        {/each}
-        <button class="tool"
-        on:mousedown|stopPropagation
-        on:click={resetModel} 
-        >
-            <svg>
-                <use href="/icons.svg#anatomy-reset" />
-            </svg>
-            <span>{$t('anatomy.tools.reset')}</span>
-        </button>
-        <button class="tool"
-        on:mousedown|stopPropagation
-        on:click={closeModel} 
-        >
-            <svg>
-                <use href="/icons.svg#close" />
-            </svg>
-            <span>{$t('anatomy.tools.close')}</span>
-        </button>
-    </div>
 
-    {#if modelLoaded === false}    
-        <div class="loading-shade" out:fade>
-            <Loading />
+            {#if showLayers}
+                {#each layers as layer}
+                    <button class="layer"
+                        on:mousedown|stopPropagation
+                        on:click={() => toggleLayer(layer)}
+                        class:-active={activeLayers.includes(layer)}>
+                        <svg>
+                            <use href="/anatomy_models/layers.svg#figure" />
+                        </svg>
+                        <svg>
+                            <use href="/anatomy_models/layers.svg#{layer.toLowerCase()}" />
+                        </svg>
+                        <span>{$t('anatomy.layers.'+layer)}</span>
+                    </button>
+                {/each}
+            {/if}
+        </div>
+
+        <div class="model-tools">
+            {#each tools as tool}
+                <button class="tool"
+                    on:mousedown|stopPropagation
+                    on:click={() => toggleTool(tool)}
+                    class:-active={activeTools.includes(tool)}>
+                    <svg>
+                        <use href="/icons.svg#{tool.toLowerCase()}" />
+                    </svg>
+                    <span>{$t('anatomy.tools.'+tool)}</span>
+                </button>
+            {/each}
+            <button class="tool"
+            on:mousedown|stopPropagation
+            on:click={resetModel}
+            >
+                <svg>
+                    <use href="/icons.svg#anatomy-reset" />
+                </svg>
+                <span>{$t('anatomy.tools.reset')}</span>
+            </button>
+            <button class="tool"
+            on:mousedown|stopPropagation
+            on:click={closeModel}
+            >
+                <svg>
+                    <use href="/icons.svg#close" />
+                </svg>
+                <span>{$t('anatomy.tools.close')}</span>
+            </button>
+        </div>
+
+        {#if modelLoaded === false}
+            <div class="loading-shade" out:fade>
+                <Loading />
+            </div>
+        {/if}
+    {:else}
+        <div class="timeline-wrap">
+            <ViewerTimeline />
         </div>
     {/if}
 </div>
@@ -374,6 +393,46 @@
         z-index: 1;
         text-transform: uppercase;
         letter-spacing: .05em;
+    }
+
+    .viewer-panel-toggle {
+        position: absolute;
+        top: 0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.15rem;
+        z-index: 10;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: var(--border-radius, 0.5rem);
+        padding: 0.2rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    .viewer-panel-toggle button {
+        font-size: 0.72rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: calc(var(--border-radius, 0.5rem) - 0.15rem);
+        border: none;
+        background: transparent;
+        color: #fff;
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        transition: background 0.15s;
+    }
+
+    .viewer-panel-toggle button.active {
+        background: rgba(255,255,255,0.9);
+        color: #333;
+    }
+
+    .timeline-wrap {
+        position: absolute;
+        inset: 0;
+        padding-top: 2.6rem;
+        overflow: hidden;
     }
 
     @keyframes rotate {

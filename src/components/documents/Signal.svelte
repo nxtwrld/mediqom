@@ -236,24 +236,6 @@
     </tr>
 
 
-    <!--tr class="lab-details" class:opened={showDetails}>
-        <td colspan="4" >
-            <div class="details"  class:opened={showDetails}>
-
-            {#if showDetails}
-
-                <SignalDetail
-                    {code}
-                    {status}
-                    {item}
-                    {unit}
-                    {value}
-                    {referenceRange}
-                    {report} />
-            {/if}
-            </div>
-        </td>
-    </tr-->
 
 
 <style>

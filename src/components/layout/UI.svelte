@@ -513,7 +513,6 @@
         height: 4rem !important;
         max-width: 5rem;
         max-height: 5rem;
-        border-radius: 50%;
     }
 
     /* ── Mobile toolbar row ──────────────────────────────────── */

@@ -217,7 +217,7 @@
 <div class="page -empty">
 {#if $profile}
     <div class="profile-header">
-        <div class="avatar">
+        <div class="profile-avatar">
             <Avatar id={$profile.id} bind:url={$profile.avatarUrl} editable={false} size={8} />
         </div>
         
@@ -371,10 +371,9 @@
 
     
 
-    .avatar {
+    .profile-avatar {
         width: 10rem;
         height: 10rem;
-
         display: flex;
         justify-content: center;
         align-items: center;

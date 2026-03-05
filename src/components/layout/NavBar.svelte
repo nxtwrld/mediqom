@@ -52,7 +52,7 @@
         {/if}
         {#if $profile?.id}
             <a class="profile-avatar-link" href="/med/p/{$profile.id}" aria-label={$profile.fullName}>
-                <ProfileImage profile={$profile} size={1.5} />
+                <ProfileImage profile={$profile} size={2.5} />
             </a>
             <a href="/med/p/{$profile.id}" aria-label={$profile.fullName} class="profile-name">{$profile.fullName}</a>
 

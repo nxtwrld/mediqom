@@ -55,30 +55,4 @@
 </div>
 
 <style>
-    .avatar {
-        border-radius: 25%;
-        width: 100%;
-       /* height: 100%;*/
-        background-color: var(--color-gray-500);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        border: 1px solid var(--color-gray-500);
-        box-shadow: 0 .3rem .2rem -.1rem var(--color-gray-800);
-        aspect-ratio: 1/1;
-    }
-
-    .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .avatar svg {
-        width: 100%;
-        height: 100%;
-        margin: 10%;
-        fill: var(--color-gray-300);
-    }
 </style>

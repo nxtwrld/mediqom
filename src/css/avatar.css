@@ -1,0 +1,26 @@
+/* Avatar — shared visual styles for profile image elements */
+.avatar {
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--color-gray-500);
+    border: 1px solid var(--color-gray-500);
+    box-shadow: 0 .3rem .2rem -.1rem var(--color-gray-800);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1/1;
+}
+
+/* Image inside avatar wrapper (ProfileImage pattern) */
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* SVG placeholder icon inside avatar wrapper */
+.avatar svg {
+    width: 60%;
+    height: 60%;
+    fill: var(--color-gray-300);
+}

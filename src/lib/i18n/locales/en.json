@@ -14,6 +14,16 @@
     "you-are-about-to-leave-mediqom-total-privacy-realm": "You are about to leave Mediqom's total privacy realm.",
     "you-are-about-to-share-data-withe-a-third-party-service": "You are about to share data with a third-party service."
   },
+  "viewer": {
+    "panels": {
+      "anatomy": "Anatomy",
+      "timeline": "Timeline"
+    },
+    "timeline": {
+      "no-signals": "No signals selected",
+      "no-data": "No health data available"
+    }
+  },
   "anatomy": {
     "layers": {
       "connective": "Connective",
