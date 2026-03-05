@@ -1,12 +1,14 @@
 <script lang="ts">
     import NavBar from '$components/layout/NavBar.svelte';
     import NavPanelProfiles from '$components/layout/NavPanelProfiles.svelte';
+    import ProfileImage from '$components/profile/ProfileImage.svelte';
     import DropFiles from '$components/import/DropFiles.svelte';
     import Modal from '$components/ui/Modal.svelte';
     import HealthForm from '../profile/HealthForm.svelte';
     import HealthProperty from '../healthProperty/Overview.svelte';
     import Import from '$components/import/Index.svelte';
     import ui from '$lib/ui';
+    import { t } from '$lib/i18n';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import { afterNavigate, goto } from '$app/navigation';
@@ -82,7 +84,21 @@
     let panelView = $state<PanelView>('profiles');
     let panelHeight = $state(0);
     let isSnappingPanel = $state(false);
-    let panelEl: HTMLElement | undefined = $state(undefined);
+    let navbarWrapEl = $state<HTMLElement | undefined>(undefined);
+
+    function handleAvatarClick() {
+        ui.emit('nav:profiles');
+    }
+
+    // ── Mobile toolbar handlers ──────────────────────────────────────────────
+    function isActive(path: string): boolean {
+        if ($uiState.overlay !== Overlay.none) return false;
+        return $page.url.pathname.startsWith(path);
+    }
+
+    function handleAnatomyMobile(e: MouseEvent) { e.stopPropagation(); ui.emit('nav:anatomy'); }
+    function handleImportMobile(e: MouseEvent)  { e.stopPropagation(); ui.emit('nav:import'); }
+    function handleMobileChatToggle()           { ui.emit('chat:toggle'); }
 
     const MAX_PANEL_HEIGHT: Record<PanelView, () => number> = {
         profiles: () => Math.round(Math.min(window.innerHeight * 0.55, 380)),
@@ -110,7 +126,7 @@
 
     function onPanelTouchStart(e: TouchEvent) {
         const target = e.target as HTMLElement;
-        if (target.closest('.panel-content')) return;
+        if (target.closest('.panel-section')) return;
         panelTouchStartY = e.touches[0].clientY;
         panelStartHeight = panelHeight;
         isDraggingPanel = false;
@@ -134,9 +150,9 @@
         panelHeight = panelHeight > maxH * 0.3 ? maxH : 0;
     }
 
-    // Register touch handlers on panel element whenever it mounts/unmounts
+    // Register touch handlers on NavBar's wrapEl whenever it becomes available
     $effect(() => {
-        const el = panelEl;
+        const el = navbarWrapEl;
         if (!el) return;
         el.addEventListener('touchstart', onPanelTouchStart, { passive: true });
         el.addEventListener('touchmove', onPanelTouchMove, { passive: false });
@@ -280,10 +296,12 @@
             ui.listen('viewer', () => {
                 $uiState.viewer = true;
             }),
-            // Nav events: mobile opens panel, desktop uses existing behaviour
+            // Nav events: mobile opens/toggles panel, desktop uses existing behaviour
             ui.listen('nav:profiles', () => {
-                if ($device.isMobile) openPanel('profiles');
-                else goto('/med/p/');
+                if ($device.isMobile) {
+                    if (panelOpen && panelView === 'profiles') closePanel();
+                    else openPanel('profiles');
+                } else goto('/med/p/');
             }),
             ui.listen('nav:anatomy', () => {
                 if ($device.isMobile) openPanel('anatomy');
@@ -321,38 +339,56 @@
 <svelte:window on:hashchange={manageOverlay} />
 
 <DropFiles>
-    <NavBar></NavBar>
+    <!--
+        MOBILE: floating pill, bottom-anchored.
+        Two-layer approach:
+        - .navbar-outer: overflow:visible so avatar can protrude above pill
+        - .navbar-inner: overflow:hidden clips the panel; owns bg/shadow/radius
+        - button.nav-avatar: absolute, centered, floats above .navbar-inner
+    -->
+    <div
+        class="panel-backdrop"
+        class:-open={panelOpen}
+        onclick={closePanel}
+        aria-hidden="true"
+    ></div>
 
-    {#if $device.isMobile}
-        <!-- Backdrop -->
-        <div
-            class="panel-backdrop"
-            class:-open={panelOpen}
-            onclick={closePanel}
-            aria-hidden="true"
-        ></div>
+    <div
+        class="navbar-outer"
+        class:-snapping={isSnappingPanel}
+        style="height: calc(var(--toolbar-height) + 1.25rem + {panelHeight}px)"
+        bind:this={navbarWrapEl}
+    >
+        <!-- Avatar floats above the pill — outside overflow:hidden boundary -->
+        <button class="nav-avatar" onclick={handleAvatarClick} aria-label={$profile?.fullName ?? 'Profile'}>
+            <ProfileImage profile={$profile} size={5} />
+        </button>
 
-        <!-- Mobile bottom-sheet panel -->
-        <div
-            class="mobile-panel"
-            class:-snapping={isSnappingPanel}
-            style="height: {panelHeight}px"
-            bind:this={panelEl}
-        >
-            <!-- Drag handle -->
-            <div class="panel-drag-handle">
-                <div class="panel-drag-bar"></div>
-            </div>
-            <!-- Back button for non-profiles views -->
-            {#if panelView !== 'profiles'}
-                <div class="panel-header">
-                    <button onclick={() => openPanel('profiles')} class="panel-back" aria-label="Back">
-                        <svg aria-hidden="true"><use href="/icons.svg#arrow-nav-left"></use></svg>
-                    </button>
-                </div>
-            {/if}
-            <!-- Panel content -->
-            <div class="panel-content">
+        <!-- Inner pill: clips the panel -->
+        <div class="navbar-inner">
+            <nav class="navbar-bar toolbar" aria-label="Main navigation">
+                <a
+                    class="nav-icon"
+                    href={$profile?.id ? `/med/p/${$profile.id}/documents` : '/med'}
+                    class:-active={!!$profile?.id && isActive(`/med/p/${$profile.id}/documents`)}
+                    aria-label={$t('app.nav.documents')}
+                >
+                    <svg aria-hidden="true"><use href="/icons.svg#report"></use></svg>
+                </a>
+                <button class="nav-icon" onclick={handleAnatomyMobile} aria-label={$t('app.nav.anatomy-model')}>
+                    <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
+                </button>
+                <div class="nav-avatar-slot"></div>
+                <button class="nav-icon" class:-active={$chatIsOpen} onclick={handleMobileChatToggle} aria-label="AI Chat">
+                    <svg aria-hidden="true"><use href="/icons.svg#doctor"></use></svg>
+                </button>
+                <button class="nav-icon" onclick={handleImportMobile} aria-label="Import">
+                    <svg aria-hidden="true"><use href="/icons.svg#plus"></use></svg>
+                </button>
+            </nav>
+            <div class="navbar-name">{$profile?.fullName ?? ''}</div>
+
+            <div class="panel-section">
                 {#if panelView === 'profiles'}
                     <NavPanelProfiles
                         onSelectProfile={(id) => { closePanel(); goto(`/med/p/${id}`); }}
@@ -365,7 +401,9 @@
                 {/if}
             </div>
         </div>
-    {/if}
+    </div>
+
+    <NavBar />
 
     <main class="layout" class:-viewer={$uiState.viewer && !$device.isMobile} class:chat-open={$chatIsOpen && $page.url.pathname.startsWith('/med')}>
         {#if $uiState.viewer && !$device.isMobile}
@@ -417,89 +455,124 @@
 <Sounds />
 
 <style>
-    .virtual-page {
-        position: fixed;
-        top: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top));
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 100000;
-        background: var(--background);
-    }
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE: floating pill
+       Bottom-anchored; grows UPWARD when panel opens.
+       Two-layer: outer (overflow:visible) + inner (overflow:hidden).
+    ═══════════════════════════════════════════════════════════ */
 
-    @media (max-width: 768px) {
-        .virtual-page {
-            top: var(--safe-area-top);
-            bottom: 0;
-        }
-    }
-
-    /* ── Mobile backdrop ─────────────────────────────────────────────────── */
-    .panel-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(255, 255, 255, 0);
-        backdrop-filter: blur(0px);
-        -webkit-backdrop-filter: blur(0px);
-        z-index: 999;
-        pointer-events: none;
-        transition:
-            background 0.32s ease,
-            backdrop-filter 0.32s ease,
-            -webkit-backdrop-filter 0.32s ease;
-    }
-
-    .panel-backdrop.-open {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        pointer-events: auto;
-    }
-
-    /* ── Mobile bottom-sheet panel ───────────────────────────────────────── */
-    .mobile-panel {
+    /* Outer: positioning context, overflow visible so avatar can protrude */
+    .navbar-outer {
         position: fixed;
         left: 1rem;
         right: 1rem;
-        /* Sit above the pill bar (toolbar-height + name row 1.25rem + margin 1rem) */
-        bottom: calc(var(--toolbar-height) + 1.25rem + 1rem + var(--safe-area-bottom, 0px));
-        height: 0;
-        overflow: hidden;
-        z-index: 1001;
-        background: var(--color-white);
-        border-radius: var(--radius-16, 1rem);
-        box-shadow: 0 -0.25rem 1.5rem rgba(0, 0, 0, 0.15);
+        bottom: calc(1rem + var(--safe-area-bottom, 0px));
+        /* height is set via inline style (toolbar + panelHeight) */
+        overflow: visible;
+        z-index: 1000;
+        /* No transition by default (during drag); added by .-snapping */
+    }
+
+    .navbar-outer.-snapping {
+        transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Hide mobile pill on desktop */
+    @media (min-width: 769px) {
+        .navbar-outer {
+            display: none;
+        }
+    }
+
+    /* Inner: the visible pill — owns overflow:hidden for panel clipping */
+    .navbar-inner {
+        position: absolute;
+        inset: 0;
         display: flex;
         flex-direction: column;
     }
 
-    .mobile-panel.-snapping {
-        transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Avatar: absolute, centered, protrudes above pill */
+    .nav-avatar {
+        position: absolute;
+        left: 50%;
+        top: calc(var(--toolbar-height) / 2 - 3rem);
+        transform: translateX(-50%);
+        width: 5rem;
+        height: 5rem;
+        padding: 0;
+        border: none;
+        background: none;
+        cursor: pointer;
+        z-index: 2;
+        border-radius: 50%;
     }
 
-    /* ── Drag handle ─────────────────────────────────────────────────────── */
-    .panel-drag-handle {
+    .nav-avatar :global(.avatar) {
+        width: 4rem !important;
+        height: 4rem !important;
+        max-width: 5rem;
+        max-height: 5rem;
+        border-radius: 50%;
+    }
+
+    /* ── Mobile toolbar row ──────────────────────────────────── */
+    .navbar-bar {
+        width: 100%;
+        height: var(--toolbar-height);
+        flex-shrink: 0;
+        border-radius: var(--radius-16, 1rem);
+        overflow: hidden;
+        --button-color: var(--color-gray-300);
+        background: var(--color-gray-300);
+        box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.18);
+    }
+
+    .nav-icon {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.4rem;
+        min-width: var(--toolbar-height);
+    }
+
+    .nav-avatar-slot {
+        flex: 1;
+        min-width: var(--toolbar-height);
+    }
+
+    .navbar-name {
+        height: 1.5rem;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 1.5rem;
-        flex-shrink: 0;
-        cursor: grab;
-        touch-action: none;
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: .2rem 0.75rem;
+        background-color: var(--color-gray-600);
+        margin: 0 1rem;
+        border-bottom-left-radius: var(--radius-16, 1rem);
+        border-bottom-right-radius: var(--radius-16, 1rem);
     }
 
-    .panel-drag-bar {
-        width: 2.5rem;
-        height: 0.25rem;
-        background: var(--color-gray-600);
-        border-radius: 0.125rem;
+    /* ── Panel section ───────────────────────────────────────── */
+    .panel-section {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        margin: 0 1rem;
     }
 
-    /* ── Panel header (back button) ──────────────────────────────────────── */
+    /* ── Panel header (back button row) ──────────────────────── */
     .panel-header {
         display: flex;
         align-items: center;
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 0;
         flex-shrink: 0;
     }
 
@@ -525,12 +598,47 @@
         height: 1.25rem;
     }
 
-    /* ── Panel content ───────────────────────────────────────────────────── */
-    .panel-content {
-        flex: 1;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        padding: 0 1rem;
+    /* ── Panel backdrop overlay (mobile only) ────────────────── */
+    .panel-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0);
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+        z-index: 999;
+        pointer-events: none;
+        transition:
+            background 0.32s ease,
+            backdrop-filter 0.32s ease,
+            -webkit-backdrop-filter 0.32s ease;
     }
+
+    .panel-backdrop.-open {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        pointer-events: auto;
+    }
+
+    @media (min-width: 769px) {
+        .panel-backdrop { display: none; }
+    }
+
+    .virtual-page {
+        position: fixed;
+        top: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top));
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100000;
+        background: var(--background);
+    }
+
+    @media (max-width: 768px) {
+        .virtual-page {
+            top: var(--safe-area-top);
+            bottom: 0;
+        }
+    }
+
 </style>
