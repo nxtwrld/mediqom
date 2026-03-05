@@ -33,9 +33,15 @@
         toolsPopupOpen = !toolsPopupOpen;
     }
 
-    function handleOpenViewer(e: MouseEvent) {
+    function handleOpenAnatomy(e: MouseEvent) {
         e.stopPropagation();
         ui.emit('viewer:anatomy', true);
+        toolsPopupOpen = false;
+    }
+
+    function handleOpenTimeline(e: MouseEvent) {
+        e.stopPropagation();
+        ui.emit('viewer:timeline', null);
         toolsPopupOpen = false;
     }
 
@@ -65,9 +71,21 @@
         {:else}
             <div class="profile-spacer"></div>
         {/if}
-            <button onclick={handleOpenViewer} aria-label={$t('app.nav.anatomy-model')}>
-                <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
-            </button>
+            <div class={toolsPopupOpen ? 'tools-wrapper -open' : 'tools-wrapper'}>
+                <button onclick={handleToolsClick} aria-label={$t('app.nav.anatomy-model')}>
+                    <svg aria-hidden="true"><use href="/icons.svg#medical-tools"></use></svg>
+                </button>
+                <div class="tools-popup">
+                    <button onclick={handleOpenAnatomy}>
+                        <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
+                        {$t('viewer.panels.anatomy')}
+                    </button>
+                    <button onclick={handleOpenTimeline}>
+                        <svg aria-hidden="true"><use href="/icons.svg#chart-line"></use></svg>
+                        {$t('viewer.panels.timeline')}
+                    </button>
+                </div>
+            </div>
 
         <button class:-active={$chatIsOpen} onclick={handleChatToggle} aria-label="AI Chat">
             <svg aria-hidden="true"><use href="/icons.svg#ai-chat"></use></svg>
@@ -137,6 +155,16 @@
     /* ── Desktop tools dropdown ──────────────────────────────── */
     .tools-wrapper {
         position: relative;
+        padding: 0;
+    }
+
+    .tools-wrapper > button {
+        height: 100%;
+        padding: 0 1rem;
+        min-width: var(--toolbar-height);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .tools-popup {
@@ -159,7 +187,9 @@
     }
 
     .tools-popup button {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
         width: 100%;
         padding: 0.65rem 1rem;
         text-align: left;
@@ -168,6 +198,13 @@
         cursor: pointer;
         color: var(--color-black);
         font-size: 0.875rem;
+    }
+
+    .tools-popup button > svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+        fill: currentColor;
     }
 
     .tools-popup button:hover {

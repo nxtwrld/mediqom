@@ -71,12 +71,17 @@
             showLayers = false;
         });
 
-        const unsubViewer = ui.listen('viewer:anatomy', () => {
+        const unsubAnatomy = ui.listen('viewer:anatomy', () => {
             activePanel = 'anatomy';
         });
 
+        const unsubTimeline = ui.listen('viewer:timeline', () => {
+            activePanel = 'timeline';
+        });
+
         return () => {
-            unsubViewer();
+            unsubAnatomy();
+            unsubTimeline();
         };
     });
 
