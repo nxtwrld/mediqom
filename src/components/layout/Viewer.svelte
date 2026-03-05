@@ -23,6 +23,10 @@
     ];
 
     export let activeTools: string[] = [];
+
+    export let signalHighlight: { signalName: string; value: number; documentId?: string } | null = null;
+
+    $: if (signalHighlight) activePanel = 'timeline';
     
     let showShade: boolean = true;
     let modelLoaded: boolean = false;
@@ -95,14 +99,14 @@
 <div class="model" on:mousedown={() => showLayers = false}>
 
     <!-- Panel toggle -->
-    <div class="viewer-panel-toggle" on:mousedown|stopPropagation>
+    <!--div class="viewer-panel-toggle" on:mousedown|stopPropagation>
         <button class:active={activePanel === 'anatomy'} on:click|stopPropagation={() => activePanel = 'anatomy'}>
             {$t('viewer.panels.anatomy')}
         </button>
         <button class:active={activePanel === 'timeline'} on:click|stopPropagation={() => activePanel = 'timeline'}>
             {$t('viewer.panels.timeline')}
         </button>
-    </div>
+    </div-->
 
     {#if activePanel === 'anatomy'}
         {#key $profile.health.biologicalSex}
@@ -185,7 +189,7 @@
         {/if}
     {:else}
         <div class="timeline-wrap">
-            <ViewerTimeline />
+            <ViewerTimeline {signalHighlight} />
         </div>
     {/if}
 </div>
@@ -431,7 +435,6 @@
     .timeline-wrap {
         position: absolute;
         inset: 0;
-        padding-top: 2.6rem;
         overflow: hidden;
     }
 

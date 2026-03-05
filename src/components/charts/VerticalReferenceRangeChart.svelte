@@ -46,6 +46,7 @@
         timeRange?: [Date, Date];
         profileId?: string;
         onScaleReady?: (getY: (date: Date) => number, chartHeight: number) => void;
+        highlightedPoint?: { signalName: string; value: number; documentId?: string } | null;
     }
 
     let {
@@ -54,6 +55,7 @@
         timeRange,
         profileId,
         onScaleReady,
+        highlightedPoint = null,
     }: Props = $props();
 
     let svgElement: SVGSVGElement | undefined = $state();
@@ -63,7 +65,15 @@
         menu = { ...menu, visible: false };
     }
 
-    function renderChart(data: SignalSeries[]) {
+    function renderChart(data: SignalSeries[], highlighted: typeof highlightedPoint = null) {
+        function isHighlighted(s: SignalSeries, d: SignalSeries['values'][number]): boolean {
+            if (!highlighted) return false;
+            if (s.name !== highlighted.signalName) return false;
+            const valueMatch = Math.abs(d.value - highlighted.value) < 0.001;
+            return highlighted.documentId
+                ? valueMatch && d.documentId === highlighted.documentId
+                : valueMatch;
+        }
         if (!svgElement) return;
         svgElement.innerHTML = '';
 
@@ -188,6 +198,24 @@
             }
 
             const currentSeries = s;
+
+            // Highlight ring behind the highlighted dot
+            const highlightedValues = sorted.filter(d => isHighlighted(currentSeries, d));
+            if (highlightedValues.length > 0) {
+                g.selectAll('.dot-highlight-ring')
+                    .data(highlightedValues)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'dot-highlight-ring')
+                    .attr('cx', d => x(d.normalized))
+                    .attr('cy', d => y(d.date))
+                    .attr('r', 11)
+                    .attr('fill', 'none')
+                    .attr('stroke', s.color)
+                    .attr('stroke-width', 2)
+                    .attr('opacity', 0.5);
+            }
+
             g.selectAll('.dot')
                 .data(sorted)
                 .enter()
@@ -195,18 +223,18 @@
                 .attr('class', 'dot')
                 .attr('cx', d => x(d.normalized))
                 .attr('cy', d => y(d.date))
-                .attr('r', 4)
+                .attr('r', (d: SignalSeries['values'][number]) => isHighlighted(currentSeries, d) ? 7 : 4)
                 .attr('fill', s.color)
                 .attr('stroke', 'white')
-                .attr('stroke-width', 1.5)
+                .attr('stroke-width', (d: SignalSeries['values'][number]) => isHighlighted(currentSeries, d) ? 2 : 1.5)
                 .on('mouseover', function() {
                     if (isHoverDevice) {
                         select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
                     }
                 })
-                .on('mouseout', function() {
+                .on('mouseout', function(event: MouseEvent, d: SignalSeries['values'][number]) {
                     if (isHoverDevice) {
-                        select(this).attr('r', 4).style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                        select(this).attr('r', isHighlighted(currentSeries, d) ? 7 : 4).style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
                     }
                 })
                 .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
@@ -219,7 +247,7 @@
     }
 
     $effect(() => {
-        renderChart(series);
+        renderChart(series, highlightedPoint);
     });
 
     onMount(() => {
@@ -227,7 +255,7 @@
         let rTimer: ReturnType<typeof setTimeout>;
         const observer = new ResizeObserver(() => {
             clearTimeout(rTimer);
-            rTimer = setTimeout(() => renderChart(series), 100);
+            rTimer = setTimeout(() => renderChart(series, highlightedPoint), 100);
         });
         observer.observe(svgElement);
 
@@ -324,7 +352,7 @@
 
     .chart-wrap svg :global(.series-line) {
         fill: none;
-        stroke-width: 2;
+        stroke-width: 4px;
         opacity: 0.8;
     }
 
@@ -332,6 +360,15 @@
         filter: drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2));
         cursor: pointer;
         transition: r 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.dot-highlight-ring) {
+        animation: highlight-pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes highlight-pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.15; }
     }
 
     .chart-wrap svg :global(.axis) {

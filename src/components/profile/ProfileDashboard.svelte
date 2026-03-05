@@ -168,7 +168,13 @@
             category
         }
 
-        ui.emit('modal.healthProperty', property);
+        const srcValues = Array.isArray(prop.source) ? prop.source : (prop.source ? [prop.source] : []);
+        const firstSrc = srcValues[0];
+        ui.emit('viewer.signal', {
+            signalName,
+            value: Number(property.value),
+            documentId: firstSrc?.refId ?? undefined
+        });
     }
 
     // Track previous profile to only emit when actually changing

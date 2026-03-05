@@ -1,5 +1,10 @@
 <script lang="ts">
     import { profile } from '$lib/profiles';
+
+    interface Props {
+        signalHighlight?: { signalName: string; value: number; documentId?: string } | null;
+    }
+    let { signalHighlight = null }: Props = $props();
     import { documents, loadDocuments } from '$lib/documents/index';
     import { DocumentType } from '$lib/documents/types.d';
     import VerticalReferenceRangeChart from '$components/charts/VerticalReferenceRangeChart.svelte';
@@ -54,6 +59,15 @@
     $effect(() => {
         if (availableSignals.length > 0 && selectedSignals.length === 0) {
             selectedSignals = availableSignals.slice(0, 3);
+        }
+    });
+
+    // Pre-select highlighted signal when set
+    $effect(() => {
+        if (signalHighlight && availableSignals.includes(signalHighlight.signalName)) {
+            if (!selectedSignals.includes(signalHighlight.signalName)) {
+                selectedSignals = [signalHighlight.signalName, ...selectedSignals];
+            }
         }
     });
 
@@ -232,6 +246,7 @@
                     timeRange={unifiedTimeRange}
                     profileId={$profile?.id}
                     onScaleReady={handleScaleReady}
+                    highlightedPoint={signalHighlight}
                 />
                 <div class="doc-overlay">
                     {#each groupedDocs as group}

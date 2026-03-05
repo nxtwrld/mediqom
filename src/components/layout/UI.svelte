@@ -67,6 +67,9 @@
     let isOwnProfile = $state(false);
     let userLanguage = $state('en');
 
+    // Viewer signal highlight state
+    let viewerSignalHighlight = $state<{ signalName: string; value: number; documentId?: string } | null>(null);
+
     // Desktop viewer resize state
     let viewerWidth = $state(33);
     let isResizingViewer = $state(false);
@@ -296,6 +299,11 @@
             ui.listen('viewer', () => {
                 $uiState.viewer = true;
             }),
+            ui.listen('viewer.signal', (highlight: any) => {
+                viewerSignalHighlight = highlight;
+                if ($device.isMobile) openPanel('anatomy');
+                else $uiState.viewer = true;
+            }),
             // Nav events: mobile opens/toggles panel, desktop uses existing behaviour
             ui.listen('nav:profiles', () => {
                 if ($device.isMobile) {
@@ -395,7 +403,7 @@
                         onClose={closePanel}
                     />
                 {:else if panelView === 'anatomy'}
-                    <Viewer />
+                    <Viewer signalHighlight={viewerSignalHighlight} />
                 {:else if panelView === 'import'}
                     <Import oncomplete={closePanel} />
                 {/if}
@@ -412,7 +420,7 @@
                 style="width: {viewerWidth}vw"
                 transition:fade
             >
-                <Viewer />
+                <Viewer signalHighlight={viewerSignalHighlight} />
                 <button
                     class="viewer-resize-handle"
                     onmousedown={startViewerResize}
