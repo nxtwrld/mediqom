@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import '../css/app.css';
 	import '../css/index.css';
 	import { isNativePlatform, isCapacitorBuild } from '$lib/config/platform';
 	import { session as CurrentSession } from '$lib/user';
 
 	let { data, children } = $props();
+	let authCleanup: (() => void) | undefined;
 
 	// Break reactive loop: use $derived.by to avoid self-reference
 	let session = $derived(data?.session || null);
@@ -58,8 +59,9 @@
 			lastUserId = newUserId;
 		});
 
-		return () => authListener.data.subscription.unsubscribe();
+		authCleanup = () => authListener.data.subscription.unsubscribe();
 	});
+	onDestroy(() => authCleanup?.());
 </script>
 
 {@render children()}

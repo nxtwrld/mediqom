@@ -296,10 +296,10 @@
                     }
                 }
             }),
-            ui.listen('viewer', () => {
+            ui.listen('viewer:anatomy', () => {
                 $uiState.viewer = true;
             }),
-            ui.listen('viewer.signal', (highlight: any) => {
+            ui.listen('viewer:timeline', (highlight: any) => {
                 viewerSignalHighlight = highlight;
                 if ($device.isMobile) openPanel('anatomy');
                 else $uiState.viewer = true;

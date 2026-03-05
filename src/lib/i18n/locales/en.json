@@ -599,6 +599,11 @@
               "clinical": " Outline evidence-based management pathway."
             }
           }
+        },
+        "anatomy": {
+          "patient": "Can you discuss the {count} medical document(s) related to my {bodyPart}?",
+          "caregiver": "Can you discuss the {count} medical document(s) related to {profileName}'s {bodyPart}?",
+          "clinical": "Please analyze the {count} medical document(s) associated with the {bodyPart} for this patient."
         }
       }
     },

@@ -12,7 +12,7 @@ const focused: Writable<Focused> = writable({
 
 // listen to viewer event and focus object if passed
 ui.listen(
-  "viewer",
+  "viewer:anatomy",
   (
     object:
       | true

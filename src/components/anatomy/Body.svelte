@@ -31,6 +31,7 @@
 	import { sounds } from '$components/ui/Sounds.svelte';
     import { t } from '$lib/i18n';
     import { translateAnatomy } from '$lib/i18n/anatomy';
+    import AskButton from '$components/chat/AskButton.svelte';
 	//import Error from '../../../routes/+error.svelte';
 
     const dispatch = createEventDispatcher();
@@ -126,6 +127,7 @@
                 id,
                 tag: k,
                 count: v.length,
+                documents: v,
                 geometry: null,
                 object: null,
                 label: undefined as any
@@ -407,6 +409,10 @@
                     for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
                         actionEl.removeEventListener('pointerdown', handleActionPointerDown);
                         actionEl.removeEventListener('pointerup', handleActionPointerUp);
+                    }
+                    for (const btnEl of (labelEl as HTMLElement).querySelectorAll<HTMLButtonElement>('.ask-btn')) {
+                        btnEl.removeEventListener('pointerdown', handleButtonPointerDown);
+                        btnEl.removeEventListener('pointerup', handleButtonPointerUp);
                     }
                 };
             }
@@ -759,6 +765,10 @@
                     actionEl.addEventListener('pointerdown', handleActionPointerDown, false);
                     actionEl.addEventListener('pointerup', handleActionPointerUp, false);
                 }
+                for (const btnEl of (labelEl as HTMLElement).querySelectorAll<HTMLButtonElement>('.ask-btn')) {
+                    btnEl.addEventListener('pointerdown', handleButtonPointerDown, false);
+                    btnEl.addEventListener('pointerup', handleButtonPointerUp, false);
+                }
                 labels[index].label = label;
             }
         };
@@ -1081,6 +1091,17 @@
         openedLabel = null;
     }
 
+    function handleButtonPointerDown(event: PointerEvent) {
+        event.stopPropagation(); // prevents OrbitControls from capturing the pointer
+        // no preventDefault — allows the click event to fire for Svelte onclick handlers
+    }
+
+    function handleButtonPointerUp(event: PointerEvent) {
+        event.stopPropagation();
+        (event.currentTarget as HTMLElement).closest<HTMLElement>('.label')?.classList.remove('-open');
+        openedLabel = null;
+    }
+
     function handleLabelMouseDown(event: MouseEvent) {
         event.stopPropagation();
         sounds.focus.play();
@@ -1273,6 +1294,21 @@
         }
     }
 
+    function getBodyPartAskData(label: (typeof labels)[0]) {
+        return {
+            bodyPart: translateAnatomy(label.id, $t),
+            tag: label.tag,
+            documents: label.documents.map(d => ({
+                id: d.id,
+                title: d.content?.title || d.metadata?.title,
+                category: d.metadata?.category || d.type,
+                date: d.created_at,
+                content: d.content,
+                report: d.report
+            }))
+        };
+    }
+
     function resetFocus() {
         focused.set({ object: undefined });
         clearContext();
@@ -1292,7 +1328,14 @@
                 </svg>
                 <div class="label-menu">
                     <a class="action" href="/med/p/{$profile.id}/documents/?tags={label.tag}" data-sveltekit-preload-data="false">Documents</a>
-                    <button class="action">Discuss</button>
+                    <AskButton
+                        className="action"
+                        type="anatomy"
+                        label={translateAnatomy(label.id, $t)}
+                        data={getBodyPartAskData(label)}
+                        documentId={label.documents?.[0]?.id}
+                        documentTitle={label.documents?.[0]?.content?.title || label.documents?.[0]?.metadata?.title}
+                    />
                 </div>
             </div>
 
@@ -1419,6 +1462,11 @@
         width: 1px;
         height: 1px;
         --radius: 2rem;
+        z-index: 1;
+    }
+
+    .model :global(.label.-open) {
+        z-index: 100;
     }
 
     .model :global(.label.-open .highlight) {
@@ -1479,6 +1527,7 @@
         padding: .3rem .5rem;
         border-radius: calc(var(--radius) - 1rem);
         border: 1px solid var(--color-white);
+        font-size: inherit;
     }
     .model :global(.highlight .icon svg) {
         width: 100%;

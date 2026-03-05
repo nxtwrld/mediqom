@@ -125,7 +125,7 @@
 
   .document-section .table-list .actions {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--gap);
   }
 }
 
@@ -385,7 +385,7 @@
 /* Action buttons in tables */
 .document-section .table-list .actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--gap);
 }
 
 .document-section .table-list .actions button {

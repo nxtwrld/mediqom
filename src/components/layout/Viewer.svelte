@@ -8,7 +8,7 @@
 	import Loading from '$components/ui/Loading.svelte';
     import { fade } from 'svelte/transition';
     import { sounds } from '$components/ui/Sounds.svelte';
-    import { state } from '$lib/ui';
+    import ui, { state } from '$lib/ui';
     import { t } from '$lib/i18n';
     import ViewerTimeline from './ViewerTimeline.svelte';
 
@@ -69,7 +69,15 @@
         firstLoad = true;
         window.addEventListener('mousedown', (e) => {
             showLayers = false;
-        })
+        });
+
+        const unsubViewer = ui.listen('viewer:anatomy', () => {
+            activePanel = 'anatomy';
+        });
+
+        return () => {
+            unsubViewer();
+        };
     });
 
     onDestroy(() => {
@@ -397,39 +405,6 @@
         z-index: 1;
         text-transform: uppercase;
         letter-spacing: .05em;
-    }
-
-    .viewer-panel-toggle {
-        position: absolute;
-        top: 0.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 0.15rem;
-        z-index: 10;
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-radius: var(--border-radius, 0.5rem);
-        padding: 0.2rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    }
-
-    .viewer-panel-toggle button {
-        font-size: 0.72rem;
-        padding: 0.25rem 0.7rem;
-        border-radius: calc(var(--border-radius, 0.5rem) - 0.15rem);
-        border: none;
-        background: transparent;
-        color: #fff;
-        cursor: pointer;
-        letter-spacing: 0.02em;
-        transition: background 0.15s;
-    }
-
-    .viewer-panel-toggle button.active {
-        background: rgba(255,255,255,0.9);
-        color: #333;
     }
 
     .timeline-wrap {

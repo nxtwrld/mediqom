@@ -553,6 +553,11 @@
               "clinical": " Nastíněte postupy léčby založené na důkazech."
             }
           }
+        },
+        "anatomy": {
+          "patient": "Můžete probrat {count} lékařský dokument(y) týkající se mého {bodyPart}?",
+          "caregiver": "Můžete probrat {count} lékařský dokument(y) týkající se oblasti {bodyPart} pacienta {profileName}?",
+          "clinical": "Proveďte analýzu {count} lékařského dokumentu (dokumentů) spojeného s oblastí {bodyPart} tohoto pacienta."
         }
       }
     },

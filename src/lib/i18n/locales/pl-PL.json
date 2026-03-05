@@ -581,6 +581,11 @@
               "clinical": " Proszę opisać opartą na dowodach ścieżkę postępowania."
             }
           }
+        },
+        "anatomy": {
+          "patient": "Czy możesz omówić {count} dokument(y) medyczny dotyczący mojego {bodyPart}?",
+          "caregiver": "Czy możesz omówić {count} dokument(y) medyczny dotyczący obszaru {bodyPart} pacjenta {profileName}?",
+          "clinical": "Proszę przeanalizować {count} dokument(y) medyczny dotyczący obszaru {bodyPart} tego pacjenta."
         }
       }
     },

@@ -553,6 +553,11 @@
               "clinical": " Skizzieren Sie den evidenzbasierten Behandlungspfad."
             }
           }
+        },
+        "anatomy": {
+          "patient": "Können Sie die {count} medizinische(n) Dokument(e) zu meinem {bodyPart} besprechen?",
+          "caregiver": "Können Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} von {profileName} besprechen?",
+          "clinical": "Bitte analysieren Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} dieses Patienten."
         }
       }
     },

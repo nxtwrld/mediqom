@@ -581,6 +581,11 @@
               "clinical": " Describa la vía de manejo basada en la evidencia."
             }
           }
+        },
+        "anatomy": {
+          "patient": "¿Puede analizar los {count} documento(s) médico(s) relacionados con mi {bodyPart}?",
+          "caregiver": "¿Puede analizar los {count} documento(s) médico(s) relacionados con el {bodyPart} de {profileName}?",
+          "clinical": "Por favor, analice los {count} documento(s) médico(s) asociados al {bodyPart} de este paciente."
         }
       }
     },

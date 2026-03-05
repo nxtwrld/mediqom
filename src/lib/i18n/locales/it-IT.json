@@ -581,6 +581,11 @@
               "clinical": " Si delinei il percorso terapeutico basato sull'evidenza."
             }
           }
+        },
+        "anatomy": {
+          "patient": "Può discutere i {count} documento/i medico/i riguardanti il mio {bodyPart}?",
+          "caregiver": "Può discutere i {count} documento/i medico/i riguardanti il {bodyPart} di {profileName}?",
+          "clinical": "Si prega di analizzare i {count} documento/i medico/i associati al {bodyPart} di questo paziente."
         }
       }
     },

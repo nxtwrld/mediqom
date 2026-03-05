@@ -19,7 +19,7 @@ import { t } from "$lib/i18n";
 import { chatContextService } from "$lib/context/integration/chat-service";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
 import { chatMCPToolWrapper } from "./mcp-tool-wrapper";
-import user from "$lib/user";
+import user, { type User } from "$lib/user";
 import { profile } from "$lib/profiles";
 import { logger } from "$lib/logging/logger";
 
@@ -209,7 +209,7 @@ export class ChatManager {
     const documentData = documentEvent?.data;
 
     return {
-      mode: resolveChatMode(isOwnProfile, user.get()?.isMedical ?? false),
+      mode: resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false),
       currentProfileId: profileId,
       conversationThreadId: generateId(),
       language: language,
@@ -456,6 +456,28 @@ export class ChatManager {
       }
     }
 
+    // For anatomy: register ALL associated document IDs in context
+    if (data.type === 'anatomy' && Array.isArray(data.data?.documents)) {
+      const freshState2 = get(chatStore);
+      if (freshState2.context) {
+        const existingDocs = freshState2.context.pageContext.availableData.documents;
+        const newDocIds = (data.data.documents as Array<{ id: string }>)
+          .map(d => d.id)
+          .filter(id => id && !existingDocs.includes(id));
+        if (newDocIds.length > 0) {
+          chatActions.updateContext({
+            pageContext: {
+              ...freshState2.context.pageContext,
+              availableData: {
+                ...freshState2.context.pageContext.availableData,
+                documents: [...existingDocs, ...newDocIds],
+              },
+            },
+          });
+        }
+      }
+    }
+
     // Build the tool key to pass into sendMessage so it can re-set lastToolCall after clearing,
     // preventing Phase 2 from re-triggering the same tool whose data was already pre-fetched.
     const prefetchedToolKey = prefetchedJson
@@ -490,9 +512,19 @@ export class ChatManager {
     if (data.type === 'diagnosis') {
       return this.buildDiagnosisMessage(data.data, mode, profileName);
     }
+    if (data.type === 'anatomy') {
+      return this.buildAnatomyMessage(data, mode, profileName);
+    }
     const tr = get(t);
     const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
     return tr(`app.chat.ask-about.${modeKey}`, { values: { type: data.type, label: data.label, profileName } });
+  }
+
+  private buildAnatomyMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
+    const tr = get(t);
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
+    const count = Array.isArray(data.data?.documents) ? data.data.documents.length : 0;
+    return tr(`app.chat.ask-about.anatomy.${modeKey}`, { values: { bodyPart: data.label, count, profileName } });
   }
 
   private buildDiagnosisMessage(diagnosis: any, mode: ChatMode, profileName: string): string {
@@ -1582,7 +1614,7 @@ export class ChatManager {
     chatActions.switchProfile(profileId, isOwnProfile);
 
     // Update context mode
-    const newMode = resolveChatMode(isOwnProfile, user.get()?.isMedical ?? false);
+    const newMode = resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false);
     chatActions.updateContext({ mode: newMode });
 
     // Add profile switch message

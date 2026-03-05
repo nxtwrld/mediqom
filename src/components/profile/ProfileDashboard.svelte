@@ -170,7 +170,7 @@
 
         const srcValues = Array.isArray(prop.source) ? prop.source : (prop.source ? [prop.source] : []);
         const firstSrc = srcValues[0];
-        ui.emit('viewer.signal', {
+        ui.emit('viewer:timeline', {
             signalName,
             value: Number(property.value),
             documentId: firstSrc?.refId ?? undefined

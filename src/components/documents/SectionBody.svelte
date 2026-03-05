@@ -12,7 +12,7 @@
     let { data, document }: Props = $props();
 
     function showBodyPart(part: string) {
-        ui.emit('viewer', { object: normalize(part) })
+        ui.emit('viewer:anatomy', { object: normalize(part) })
     }
 
     function normalize(str: string) {

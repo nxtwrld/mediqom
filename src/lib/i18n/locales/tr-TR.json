@@ -581,6 +581,11 @@
               "clinical": " Kanıta dayalı yönetim yolunu özetleyin."
             }
           }
+        },
+        "anatomy": {
+          "patient": "{bodyPart} ile ilgili {count} tıbbi belge(yi) inceleyebilir misiniz?",
+          "caregiver": "{profileName} hastasının {bodyPart} bölgesiyle ilgili {count} tıbbi belge(yi) inceleyebilir misiniz?",
+          "clinical": "Bu hastanın {bodyPart} bölgesiyle ilişkili {count} tıbbi belge(yi) lütfen analiz edin."
         }
       }
     },

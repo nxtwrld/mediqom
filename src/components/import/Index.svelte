@@ -138,7 +138,7 @@
                 // Use decryptJobResults to handle both encrypted and plaintext jobs
                 const { extraction, analysis } = await decryptJobResults(
                     job,
-                    ($user as User)?.keyPair?.privateKey ?? undefined,
+                    user.keyPair?.privateKey ?? undefined,
                 );
 
                 const documents = await assembleDocuments(
@@ -244,7 +244,7 @@
             // Use decryptJobResults to handle both encrypted and plaintext jobs
             const { extraction, analysis } = await decryptJobResults(
                 completedJob,
-                ($user as User)?.keyPair?.privateKey ?? undefined,
+                user.keyPair?.privateKey ?? undefined,
             );
 
             console.log('Normal flow - extraction:', extraction);

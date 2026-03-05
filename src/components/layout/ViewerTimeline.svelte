@@ -71,6 +71,17 @@
         }
     });
 
+    // Documents — sorted newest-first
+    const userDocs = $derived(
+        $documents
+            .filter(d => d.user_id === $profile?.id && d.type === DocumentType.document)
+            .sort((a, b) => {
+                const da = new Date((a.metadata as any)?.date ?? (a as any).created_at ?? 0).getTime();
+                const db = new Date((b.metadata as any)?.date ?? (b as any).created_at ?? 0).getTime();
+                return db - da;
+            })
+    );
+
     function toggleSignal(name: string) {
         if (selectedSignals.includes(name)) {
             selectedSignals = selectedSignals.filter(s => s !== name);
@@ -120,17 +131,6 @@
                 } satisfies SignalSeries;
             })
             .filter(Boolean) as SignalSeries[]
-    );
-
-    // Documents — sorted newest-first
-    const userDocs = $derived(
-        $documents
-            .filter(d => d.user_id === $profile?.id && d.type === DocumentType.document)
-            .sort((a, b) => {
-                const da = new Date((a.metadata as any)?.date ?? (a as any).created_at ?? 0).getTime();
-                const db = new Date((b.metadata as any)?.date ?? (b as any).created_at ?? 0).getTime();
-                return db - da;
-            })
     );
 
     // Load documents when profile is available
@@ -396,7 +396,7 @@
     .doc-overlay {
         position: absolute;
         top: 0.5rem;
-        right: 0.3rem;
+        right: 1rem;
         width: 2.4rem;
         pointer-events: none;
         z-index: 5;
@@ -408,4 +408,5 @@
         transform: translateY(-50%);
         pointer-events: all;
     }
+
 </style>

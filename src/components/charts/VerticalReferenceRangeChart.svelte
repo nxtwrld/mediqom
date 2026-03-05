@@ -51,7 +51,7 @@
 
     let {
         series = [],
-        margin = { top: 10, right: 20, bottom: LABEL_HEIGHT + 4, left: 52 },
+        margin = { top: 10, right: 20, bottom: LABEL_HEIGHT + 4, left: 60 },
         timeRange,
         profileId,
         onScaleReady,
@@ -75,21 +75,32 @@
                 : valueMatch;
         }
         if (!svgElement) return;
-        svgElement.innerHTML = '';
 
         const allPoints = data.flatMap(s => s.values);
-        if (allPoints.length === 0 && !timeRange) return;
+        if (allPoints.length === 0 && !timeRange) {
+            select(svgElement).selectAll('g.chart-main').remove();
+            return;
+        }
 
         const width = svgElement.clientWidth - margin.left - margin.right;
         const height = svgElement.clientHeight - margin.top - margin.bottom;
         if (width <= 0 || height <= 0) return;
 
+        // Persistent root group — created once, updated on resize
         const svg = select(svgElement)
-            .append('g')
+            .selectAll<SVGGElement, null>('g.chart-main')
+            .data([null])
+            .join('g')
+            .attr('class', 'chart-main')
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
-        // Close menu when clicking outside dots
-        select(svgElement).on('click', () => { menu = { ...menu, visible: false }; });
+        // Persistent sub-groups (SVG painter's order — later = on top)
+        const bandsGroup      = svg.selectAll<SVGGElement, null>('g.bands').data([null]).join('g').attr('class', 'bands');
+        const zebraGroup      = svg.selectAll<SVGGElement, null>('g.zebra-bands').data([null]).join('g').attr('class', 'zebra-bands');
+        const refLinesGroup   = svg.selectAll<SVGGElement, null>('g.ref-lines').data([null]).join('g').attr('class', 'ref-lines');
+        const axisGroup       = svg.selectAll<SVGGElement, null>('g.axis').data([null]).join('g').attr('class', 'axis');
+        const labelsGroup     = svg.selectAll<SVGGElement, null>('g.zone-labels').data([null]).join('g').attr('class', 'zone-labels');
+        const seriesContainer = svg.selectAll<SVGGElement, null>('g.series-container').data([null]).join('g').attr('class', 'series-container');
 
         // Y axis: time — newest at top, oldest at bottom
         const allDates = allPoints.map(p => p.date);
@@ -119,63 +130,95 @@
             .domain([-0.5, 1.5])
             .range([0, width]);
 
-        // Reference bands
-        const bands = svg.append('g').attr('class', 'bands');
+        // Reference bands — keyed join
+        const bandData = [
+            { id: 'low',    cls: 'band-low',    x: x(-0.5), width: Math.max(0, x(0) - x(-0.5)) },
+            { id: 'normal', cls: 'band-normal', x: x(0),    width: Math.max(0, x(1) - x(0))    },
+            { id: 'high',   cls: 'band-high',   x: x(1),    width: Math.max(0, x(1.5) - x(1))  },
+        ];
+        bandsGroup.selectAll<SVGRectElement, typeof bandData[0]>('rect')
+            .data(bandData, d => d.id)
+            .join('rect')
+            .attr('class', d => d.cls)
+            .attr('x', d => d.x).attr('y', 0)
+            .attr('width', d => d.width).attr('height', height);
 
-        bands.append('rect')
-            .attr('x', x(-0.5)).attr('y', 0)
-            .attr('width', Math.max(0, x(0) - x(-0.5))).attr('height', height)
-            .attr('class', 'band-low');
+        // Reference boundary lines — join
+        refLinesGroup.selectAll<SVGLineElement, number>('line')
+            .data([x(0), x(1)])
+            .join('line')
+            .attr('class', 'ref-line')
+            .attr('x1', d => d).attr('x2', d => d)
+            .attr('y1', 0).attr('y2', height);
 
-        bands.append('rect')
-            .attr('x', x(0)).attr('y', 0)
-            .attr('width', Math.max(0, x(1) - x(0))).attr('height', height)
-            .attr('class', 'band-normal');
+        // Y axis (time) — D3 handles tick enter/update/exit
+        const tickCount = Math.max(2, Math.floor(height / 40));
+        axisGroup.call(
+            axisLeft(y)
+                .ticks(tickCount)
+                .tickFormat((d) => {
+                    const date = d as Date;
+                    return date.getMonth() === 0
+                        ? date.getFullYear().toString()
+                        : date.toLocaleString('default', { month: 'short' });
+                })
+        );
+        axisGroup.attr('transform', 'translate(-8, 0)');
 
-        bands.append('rect')
-            .attr('x', x(1)).attr('y', 0)
-            .attr('width', Math.max(0, x(1.5) - x(1))).attr('height', height)
-            .attr('class', 'band-high');
+        // Style year ticks with background pill, month ticks lighter
+        axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
+            const g = select(this);
+            const isYear = d.getMonth() === 0;
+            const textEl = g.select<SVGTextElement>('text');
+            textEl.attr('class', isYear ? 'tick-label tick-year' : 'tick-label tick-month');
+            const bbox = textEl.node()?.getBBox();
+            if (bbox) {
+                g.selectAll<SVGRectElement, null>('rect.tick-bg').data([null]).join('rect')
+                    .attr('class', isYear ? 'tick-bg tick-year-bg' : 'tick-bg tick-month-bg')
+                    .attr('x', bbox.x - 4).attr('y', bbox.y - 2)
+                    .attr('width', bbox.width + 8).attr('height', bbox.height + 4)
+                    .attr('rx', 3)
+                    .lower();
+            }
+        });
 
-        // Reference boundary lines at normalized 0 and 1
-        svg.append('line')
-            .attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', height)
-            .attr('class', 'ref-line');
-        svg.append('line')
-            .attr('x1', x(1)).attr('x2', x(1)).attr('y1', 0).attr('y2', height)
-            .attr('class', 'ref-line');
+        // Zebra bands between ticks
+        const tickValues = y.ticks(tickCount);
+        const boundaries = [0, ...tickValues.map((d: Date) => y(d)), height];
+        const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
+            y0, y1: boundaries[i + 1], odd: i % 2 === 1
+        }));
+        zebraGroup.selectAll<SVGRectElement, typeof zebraData[0]>('rect')
+            .data(zebraData.filter(d => d.odd))
+            .join('rect')
+            .attr('class', 'zebra-band')
+            .attr('x', 0).attr('y', d => d.y0)
+            .attr('width', width).attr('height', d => d.y1 - d.y0);
 
-        // Y axis (time)
-        svg.append('g').attr('class', 'axis')
-            .call(axisLeft(y).ticks(5));
-
-        // Zone label boxes — LOW / NORMAL / HIGH — drawn below the chart area
+        // Zone label boxes — LOW / NORMAL / HIGH
         const zones = [
             { name: 'low',    x1: x(-0.5), x2: x(0)   },
             { name: 'normal', x1: x(0),    x2: x(1)   },
             { name: 'high',   x1: x(1),    x2: x(1.5) },
         ] as const;
 
-        const labelsGroup = svg.append('g').attr('class', 'zone-labels');
-
-        zones.forEach(z => {
-            const w = Math.max(0, z.x2 - z.x1);
-            const g = labelsGroup.append('g');
-
-            g.append('rect')
-                .attr('x', z.x1).attr('y', height + 4)
-                .attr('width', w).attr('height', LABEL_HEIGHT)
-                .attr('rx', 3)
-                .attr('class', `rangeLabelBack ${z.name}`);
-
-            g.append('text')
-                .attr('x', (z.x1 + z.x2) / 2)
-                .attr('y', height + 4 + LABEL_HEIGHT / 2)
-                .attr('text-anchor', 'middle')
-                .attr('dominant-baseline', 'middle')
-                .attr('class', `rangeLabelText ${z.name}`)
-                .text(getRangeLabel(z.name));
-        });
+        labelsGroup.selectAll<SVGGElement, typeof zones[number]>('g.zone')
+            .data(zones, d => d.name)
+            .join('g')
+            .attr('class', d => `zone zone-${d.name}`)
+            .each(function(z) {
+                const g = select(this);
+                const w = Math.max(0, z.x2 - z.x1);
+                g.selectAll<SVGRectElement, null>('rect').data([null]).join('rect')
+                    .attr('x', z.x1).attr('y', height + 4)
+                    .attr('width', w).attr('height', LABEL_HEIGHT).attr('rx', 3)
+                    .attr('class', `rangeLabelBack ${z.name}`);
+                g.selectAll<SVGTextElement, null>('text').data([null]).join('text')
+                    .attr('x', (z.x1 + z.x2) / 2).attr('y', height + 4 + LABEL_HEIGHT / 2)
+                    .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+                    .attr('class', `rangeLabelText ${z.name}`)
+                    .text(getRangeLabel(z.name));
+            });
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
@@ -184,65 +227,68 @@
 
         const isHoverDevice = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
 
-        data.forEach(s => {
-            if (s.values.length === 0) return;
+        // Series groups keyed by name — enter/exit handled by D3
+        const seriesGroups = seriesContainer
+            .selectAll<SVGGElement, SignalSeries>('g.series')
+            .data(data.filter(s => s.values.length > 0), d => d.name)
+            .join(
+                enter => enter.append('g').attr('class', d => `series series-${d.name}`),
+                update => update,
+                exit => exit.remove()
+            );
+
+        seriesGroups.each(function(s) {
+            const g = select(this);
             const sorted = [...s.values].sort((a, b) => a.date.getTime() - b.date.getTime());
-            const g = svg.append('g').attr('class', `series series-${s.name}`);
-
-            if (sorted.length > 1) {
-                g.append('path')
-                    .datum(sorted)
-                    .attr('class', 'series-line')
-                    .attr('stroke', s.color)
-                    .attr('d', valueLine);
-            }
-
             const currentSeries = s;
 
-            // Highlight ring behind the highlighted dot
-            const highlightedValues = sorted.filter(d => isHighlighted(currentSeries, d));
-            if (highlightedValues.length > 0) {
-                g.selectAll('.dot-highlight-ring')
-                    .data(highlightedValues)
-                    .enter()
-                    .append('circle')
-                    .attr('class', 'dot-highlight-ring')
-                    .attr('cx', d => x(d.normalized))
-                    .attr('cy', d => y(d.date))
-                    .attr('r', 11)
-                    .attr('fill', 'none')
+            // Line path
+            if (sorted.length > 1) {
+                g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                    .attr('class', 'series-line')
                     .attr('stroke', s.color)
-                    .attr('stroke-width', 2)
-                    .attr('opacity', 0.5);
+                    .attr('d', valueLine(sorted) ?? '');
+            } else {
+                g.selectAll('path.series-line').remove();
             }
 
-            g.selectAll('.dot')
-                .data(sorted)
-                .enter()
-                .append('circle')
-                .attr('class', 'dot')
-                .attr('cx', d => x(d.normalized))
-                .attr('cy', d => y(d.date))
-                .attr('r', (d: SignalSeries['values'][number]) => isHighlighted(currentSeries, d) ? 7 : 4)
+            // Highlight ring — full join so exit removes stale rings
+            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot-highlight-ring')
+                .data(sorted.filter(d => isHighlighted(currentSeries, d)), d => `${d.date.getTime()}-${d.value}`)
+                .join('circle')
+                .attr('class', 'dot-highlight-ring')
+                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                .attr('r', 11).attr('fill', 'none')
+                .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
+
+            // Dots — event handlers on enter only, attrs applied to enter + update
+            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                .data(sorted, d => `${d.date.getTime()}-${d.value}`)
+                .join(
+                    enter => enter.append('circle')
+                        .attr('class', 'dot')
+                        .on('mouseover', function() {
+                            if (isHoverDevice) select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                        })
+                        .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                            if (isHoverDevice) {
+                                select(this)
+                                    .attr('r', isHighlighted(currentSeries, d) ? 7 : 4)
+                                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                            }
+                        })
+                        .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
+                            event.stopPropagation();
+                            menu = { visible: true, x: x(d.normalized) + margin.left, y: y(d.date) + margin.top, point: d, series: currentSeries };
+                        }),
+                    update => update,
+                    exit => exit.remove()
+                )
+                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                .attr('r', d => isHighlighted(currentSeries, d) ? 7 : 4)
                 .attr('fill', s.color)
                 .attr('stroke', 'white')
-                .attr('stroke-width', (d: SignalSeries['values'][number]) => isHighlighted(currentSeries, d) ? 2 : 1.5)
-                .on('mouseover', function() {
-                    if (isHoverDevice) {
-                        select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
-                    }
-                })
-                .on('mouseout', function(event: MouseEvent, d: SignalSeries['values'][number]) {
-                    if (isHoverDevice) {
-                        select(this).attr('r', isHighlighted(currentSeries, d) ? 7 : 4).style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
-                    }
-                })
-                .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
-                    event.stopPropagation();
-                    const cx = x(d.normalized) + margin.left;
-                    const cy = y(d.date) + margin.top;
-                    menu = { visible: true, x: cx, y: cy, point: d, series: currentSeries };
-                });
+                .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
         });
     }
 
@@ -252,6 +298,10 @@
 
     onMount(() => {
         if (!svgElement) return;
+
+        // SVG click handler lives here to avoid re-attachment on every render
+        select(svgElement).on('click', () => { menu = { ...menu, visible: false }; });
+
         let rTimer: ReturnType<typeof setTimeout>;
         const observer = new ResizeObserver(() => {
             clearTimeout(rTimer);
@@ -271,6 +321,7 @@
         return () => {
             clearTimeout(rTimer);
             observer.disconnect();
+            select(svgElement!).on('click', null);
             window.removeEventListener('pointerdown', handleOutsideClick);
         };
     });
@@ -343,6 +394,11 @@
         opacity: 0.09;
     }
 
+    .chart-wrap svg :global(.zebra-band) {
+        fill: rgba(0, 0, 0, 0.05);
+        pointer-events: none;
+    }
+
     .chart-wrap svg :global(.ref-line) {
         stroke: var(--color-border, #ccc);
         stroke-dasharray: 4 2;
@@ -371,9 +427,28 @@
         50% { opacity: 0.15; }
     }
 
-    .chart-wrap svg :global(.axis) {
-        font-size: 0.65rem;
-        opacity: 0.6;
+    .chart-wrap svg :global(.axis .domain),
+    .chart-wrap svg :global(.axis .tick line) {
+        opacity: 0.25;
+    }
+
+    .chart-wrap svg :global(.tick-year) {
+        font-size: 0.7rem;
+        font-weight: 700;
+        fill: var(--color-white);
+    }
+
+    .chart-wrap svg :global(.tick-year-bg) {
+        fill: var(--color-gray-900);
+    }
+
+    .chart-wrap svg :global(.tick-month-bg) {
+        fill: var(--color-gray-400);
+    }
+
+    .chart-wrap svg :global(.tick-month) {
+        font-size: 0.6rem;
+        fill: var(--color-gray-900);
     }
 
     /* Zone label boxes */

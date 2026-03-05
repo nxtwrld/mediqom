@@ -35,7 +35,7 @@
 
     function handleOpenViewer(e: MouseEvent) {
         e.stopPropagation();
-        ui.emit('viewer', true);
+        ui.emit('viewer:anatomy', true);
         toolsPopupOpen = false;
     }
 
@@ -70,7 +70,7 @@
             </button>
 
         <button class:-active={$chatIsOpen} onclick={handleChatToggle} aria-label="AI Chat">
-            <svg aria-hidden="true"><use href="/icons.svg#doctor"></use></svg>
+            <svg aria-hidden="true"><use href="/icons.svg#ai-chat"></use></svg>
         </button>
         <button onclick={handleImport} aria-label="Import">
             <svg aria-hidden="true"><use href="/icons.svg#plus"></use></svg>

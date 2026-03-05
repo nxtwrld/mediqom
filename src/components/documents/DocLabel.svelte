@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-
     type DocItem = {
         id: string;
         user_id: string;
@@ -15,8 +13,7 @@
 
     let { docs }: Props = $props();
 
-    let isOpen = $state(false);
-    let el: HTMLDivElement | undefined = $state();
+    let popupOpen = $state(false);
 
     function getCategory(doc: DocItem): string {
         return (doc.metadata as any)?.category ?? 'other';
@@ -28,26 +25,14 @@
 
     function handleClick(e: MouseEvent) {
         e.stopPropagation();
-        isOpen = !isOpen;
+        popupOpen = !popupOpen;
     }
+
+    function closePopup() { popupOpen = false; }
 
     function handleKeydown(e: KeyboardEvent) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isOpen = !isOpen; }
-        if (e.key === 'Escape') isOpen = false;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); popupOpen = !popupOpen; }
     }
-
-    function onGlobalPointerDown(e: MouseEvent | TouchEvent) {
-        if (isOpen && el && !el.contains(e.target as Node)) isOpen = false;
-    }
-
-    onMount(() => {
-        window.addEventListener('mousedown', onGlobalPointerDown);
-        window.addEventListener('touchstart', onGlobalPointerDown as any);
-        return () => {
-            window.removeEventListener('mousedown', onGlobalPointerDown);
-            window.removeEventListener('touchstart', onGlobalPointerDown as any);
-        };
-    });
 
     const isGroup = $derived(docs.length > 1);
     const primary = $derived(docs[0]);
@@ -55,17 +40,14 @@
     const visibleDocs = $derived(docs.slice(0, 3));
 </script>
 
-<div class="doc-label" class:-open={isOpen} class:-group={isGroup} bind:this={el}>
-    <!-- Round anatomy-style button -->
-    
+<div class="doc-label" class:-group={isGroup}>
     <div
         class="highlight {isGroup ? '' : 'category-' + primaryCat}"
         onclick={handleClick}
         onkeydown={handleKeydown}
         role="button"
         tabindex="0"
-        aria-expanded={isOpen}
-        aria-label={isGroup ? `${docs.length} documents` : (getTitle(primary) || primaryCat)}
+        aria-label={isGroup ? `${docs.length} documents` : primaryCat}
     >
         {#if isGroup}
             <div class="icon-stack">
@@ -77,7 +59,6 @@
                     </div>
                 {/each}
             </div>
-
         {:else}
             <div class="icon">
                 <svg><use href="/icons-o.svg#report-{primaryCat}" /></svg>
@@ -88,35 +69,22 @@
     {#if docs.length > 1}
     <span class="badge">{docs.length}</span>
     {/if}
-    <!-- Panel that opens to the left -->
-    <div class="panel" aria-hidden={!isOpen}>
-        {#if isGroup}
+
+    {#if popupOpen}
+        <div class="popup-backdrop" onclick={closePopup}></div>
+        <div class="doc-popup" role="menu">
             {#each docs as doc}
                 <a
-                    class="action"
+                    class="doc-popup-action"
                     href="/med/p/{doc.user_id}/documents/{doc.id}"
-                    onclick={(e) => e.stopPropagation()}
-                    tabindex={isOpen ? 0 : -1}
+                    onclick={closePopup}
                 >
                     <span class="cat-dot category-{getCategory(doc)}"></span>
-                    <span class="action-text">{getTitle(doc) || getCategory(doc)}</span>
+                    <span>{getTitle(doc) || getCategory(doc)}</span>
                 </a>
             {/each}
-        {:else}
-            {#if getTitle(primary)}
-                <span class="doc-title">{getTitle(primary)}</span>
-            {/if}
-            <a
-                class="action"
-                href="/med/p/{primary.user_id}/documents/{primary.id}"
-                onclick={(e) => e.stopPropagation()}
-                tabindex={isOpen ? 0 : -1}
-            >
-                <span class="cat-dot category-{primaryCat}"></span>
-                <span class="action-text">Open</span>
-            </a>
-        {/if}
-    </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -150,13 +118,6 @@
         user-select: none;
     }
 
-    .doc-label.-open .highlight {
-        width: 2.8rem;
-        height: 2.8rem;
-        border-radius: 1.4rem;
-        padding: 0.3rem;
-    }
-
     /* ── Icon stack for grouped docs ── */
 
     .icon-stack {
@@ -184,15 +145,8 @@
         }
         .doc-label.-group .highlight:hover > * {
             transform: translateY(-.2rem);
-        } 
+        }
     }
-
-    .doc-label.-group.-open .highlight {
-        height: 3.4rem;
-    }
-    .doc-label.-group.-open .highlight > * {
-        transform: translateY(-.2rem);
-    } 
 
     .-group .icon-stack .icon {
         position: absolute;
@@ -232,7 +186,64 @@
         transition: opacity 0.2s ease-in-out;
     }
 
+    /* Popup backdrop (click-outside) */
+    .popup-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+    }
 
+    /* Popup menu */
+    .doc-popup {
+        position: absolute;
+        right: calc(100% + 0.5rem);
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 11;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding: 0.3rem;
+        min-width: 9rem;
+        max-width: 15rem;
+        background: rgba(20, 20, 30, 0.88);
+        color: #fff;
+        backdrop-filter: blur(1.2rem);
+        -webkit-backdrop-filter: blur(1.2rem);
+        border-radius: 0.4rem;
+        border: 0.1rem solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0.2rem 0.4rem 1.2rem rgba(0, 0, 0, 0.4);
+        pointer-events: all;
+    }
+
+    .doc-popup-action {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: inherit;
+        padding: 0.22rem 0.35rem;
+        border-radius: 0.25rem;
+        border: 0.1rem solid rgba(255, 255, 255, 0.14);
+        text-decoration: none;
+        font-size: 0.62rem;
+        overflow: hidden;
+        transition: background 0.15s;
+    }
+
+    @media (hover: hover) {
+        .doc-popup-action:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    }
+
+    .cat-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background-color: var(--color, #546e7a);
+        flex-shrink: 0;
+        display: inline-block;
+    }
 
     /* Count badge for groups */
     .badge {
@@ -252,87 +263,5 @@
         line-height: 1;
         pointer-events: none;
         z-index: 2;
-    }
-
-    /* ── Panel that slides in from the right edge (appears to the left) ── */
-
-    .panel {
-        position: absolute;
-        right: calc(100% + 0.4rem);
-        top: 50%;
-        transform: translateY(-50%) translateX(0.5rem);
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-        padding: 0.3rem;
-        min-width: 9rem;
-        max-width: 15rem;
-        background: rgba(20, 20, 30, 0.78);
-        color: #fff;
-        backdrop-filter: blur(1.2rem);
-        -webkit-backdrop-filter: blur(1.2rem);
-        border-radius: 0.4rem;
-        border: 0.1rem solid rgba(255, 255, 255, 0.12);
-        box-shadow:
-            0 0 0 0.1rem rgba(255, 255, 255, 0.08),
-            0.2rem 0.4rem 1.2rem rgba(0, 0, 0, 0.4);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        z-index: 20;
-    }
-
-    .doc-label.-open .panel {
-        opacity: 1;
-        pointer-events: all;
-        transform: translateY(-50%) translateX(0);
-    }
-
-    .doc-title {
-        font-size: 0.6rem;
-        opacity: 0.75;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 0.1rem 0.3rem 0.2rem;
-        display: block;
-    }
-
-    .action {
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        color: inherit;
-        padding: 0.22rem 0.35rem;
-        border-radius: 0.25rem;
-        border: 0.1rem solid rgba(255, 255, 255, 0.14);
-        text-decoration: none;
-        font-size: 0.62rem;
-        transition: background 0.15s;
-        overflow: hidden;
-    }
-
-    @media (hover: hover) {
-        .action:hover {
-            background: rgba(255, 255, 255, 0.12);
-        }
-    }
-
-    /* Colored dot showing the category of each doc (in group view) */
-    .cat-dot {
-        width: 0.55rem;
-        height: 0.55rem;
-        border-radius: 50%;
-        background-color: var(--color, #546e7a);
-        flex-shrink: 0;
-        display: inline-block;
-    }
-
-    .action-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
-        min-width: 0;
     }
 </style>
