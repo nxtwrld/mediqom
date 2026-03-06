@@ -303,8 +303,11 @@
     }
 
 
+    let destroyed = false;
+
     onMount(() => {
         console.log('🧍', 'Mounted');
+        destroyed = false;
 
         // Capture initial store values immediately before any async operations
         let initialFocused = $focused;
@@ -334,7 +337,9 @@
         // Initialize once dimensions are valid
         const initializeViewer = async () => {
             await waitForDimensions();
+            if (destroyed) return;
             await init();
+            if (destroyed) return;
 
             // Apply captured initial context AFTER init completes with valid dimensions
             // Note: Focus is deferred to updateModel() when actual body models are loaded
@@ -372,6 +377,7 @@
         window.addEventListener('touchstart', handleGlobalPointerDown as any);
 
         return () => {
+            destroyed = true;
             window.removeEventListener('mousedown', handleGlobalPointerDown);
             window.removeEventListener('touchstart', handleGlobalPointerDown as any);
             unsubscibeFocus();
@@ -384,7 +390,7 @@
             }
 
             // clear all three.js objects from the scene
-            clearObjects(scene);
+            if (scene) clearObjects(scene);
 
             if (renderer) {
                 renderer.forceContextLoss();
@@ -466,6 +472,7 @@
         objects = [...objects, ...newObjects];
 
         // Pre-cache materials and build focusable mesh list for fast highlight()
+        if (destroyed) return;
         precacheMaterials();
 
         requestRender();

@@ -1,3 +1,8 @@
+<script module>
+    import { writable } from 'svelte/store';
+    const activePopup = writable<symbol | null>(null);
+</script>
+
 <script lang="ts">
     type DocItem = {
         id: string;
@@ -14,6 +19,27 @@
     let { docs }: Props = $props();
 
     let popupOpen = $state(false);
+    const instanceId = Symbol();
+
+    // Close self when another instance opens
+    $effect(() => {
+        return activePopup.subscribe(active => {
+            if (active !== instanceId && popupOpen) {
+                popupOpen = false;
+            }
+        });
+    });
+
+    // Close on outside click
+    $effect(() => {
+        if (!popupOpen) return;
+        function handler() {
+            popupOpen = false;
+            activePopup.set(null);
+        }
+        window.addEventListener('click', handler);
+        return () => window.removeEventListener('click', handler);
+    });
 
     function getCategory(doc: DocItem): string {
         return (doc.metadata as any)?.category ?? 'other';
@@ -25,13 +51,18 @@
 
     function handleClick(e: MouseEvent) {
         e.stopPropagation();
-        popupOpen = !popupOpen;
+        const next = !popupOpen;
+        popupOpen = next;
+        activePopup.set(next ? instanceId : null);
     }
 
-    function closePopup() { popupOpen = false; }
-
     function handleKeydown(e: KeyboardEvent) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); popupOpen = !popupOpen; }
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const next = !popupOpen;
+            popupOpen = next;
+            activePopup.set(next ? instanceId : null);
+        }
     }
 
     const isGroup = $derived(docs.length > 1);
@@ -71,13 +102,11 @@
     {/if}
 
     {#if popupOpen}
-        <div class="popup-backdrop" onclick={closePopup}></div>
         <div class="doc-popup" role="menu">
             {#each docs as doc}
                 <a
                     class="doc-popup-action"
                     href="/med/p/{doc.user_id}/documents/{doc.id}"
-                    onclick={closePopup}
                 >
                     <span class="cat-dot category-{getCategory(doc)}"></span>
                     <span>{getTitle(doc) || getCategory(doc)}</span>
@@ -186,17 +215,10 @@
         transition: opacity 0.2s ease-in-out;
     }
 
-    /* Popup backdrop (click-outside) */
-    .popup-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 10;
-    }
-
     /* Popup menu */
     .doc-popup {
         position: absolute;
-        right: calc(100% + 0.5rem);
+        right: calc(100% + 10px);
         top: 50%;
         transform: translateY(-50%);
         z-index: 11;
@@ -206,33 +228,55 @@
         padding: 0.3rem;
         min-width: 9rem;
         max-width: 15rem;
-        background: rgba(20, 20, 30, 0.88);
-        color: #fff;
-        backdrop-filter: blur(1.2rem);
-        -webkit-backdrop-filter: blur(1.2rem);
-        border-radius: 0.4rem;
-        border: 0.1rem solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0.2rem 0.4rem 1.2rem rgba(0, 0, 0, 0.4);
+        background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        color: var(--color-text-primary);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        border-radius: var(--ui-radius-medium);
+        border: 1px solid var(--color-border);
+        box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.2);
         pointer-events: all;
+    }
+
+    .doc-popup::before,
+    .doc-popup::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        transform: translateY(-50%);
+        border: 9px solid transparent;
+        pointer-events: none;
+    }
+
+    .doc-popup::before {
+        border-left-color: var(--color-border);
+    }
+
+    .doc-popup::after {
+        margin-left: -2px;
+        border: 8px solid transparent;
+        border-left-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
     }
 
     .doc-popup-action {
         display: flex;
         align-items: center;
         gap: 0.3rem;
-        color: inherit;
+        color: var(--color-text-primary);
         padding: 0.22rem 0.35rem;
-        border-radius: 0.25rem;
-        border: 0.1rem solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--ui-radius-small);
+        border: none;
         text-decoration: none;
-        font-size: 0.62rem;
+        font-size: 0.72rem;
         overflow: hidden;
         transition: background 0.15s;
+        white-space: nowrap;
     }
 
     @media (hover: hover) {
         .doc-popup-action:hover {
-            background: rgba(255, 255, 255, 0.12);
+            background: var(--color-surface);
         }
     }
 

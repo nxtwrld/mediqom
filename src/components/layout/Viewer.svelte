@@ -14,6 +14,7 @@
 
     let showLayers: boolean = false;
     let activePanel: 'anatomy' | 'timeline' = 'anatomy';
+    let mounted = false;
     let model: Body;
     let firstLoad: boolean = true;
 
@@ -66,18 +67,19 @@
     }
 
     onMount(() => {
-        firstLoad = true;
-        window.addEventListener('mousedown', (e) => {
-            showLayers = false;
-        });
-
-        const unsubAnatomy = ui.listen('viewer:anatomy', () => {
-            activePanel = 'anatomy';
-        });
-
-        const unsubTimeline = ui.listen('viewer:timeline', () => {
+        // Initialize to the most recently requested panel
+        const latestTimeline = ui.getLatest('viewer:timeline');
+        const latestAnatomy  = ui.getLatest('viewer:anatomy');
+        if (latestTimeline && (!latestAnatomy || latestTimeline.timestamp > latestAnatomy.timestamp)) {
             activePanel = 'timeline';
-        });
+        }
+        mounted = true;
+
+        firstLoad = true;
+        window.addEventListener('mousedown', () => { showLayers = false; });
+
+        const unsubAnatomy  = ui.listen('viewer:anatomy',  () => { activePanel = 'anatomy';  });
+        const unsubTimeline = ui.listen('viewer:timeline', () => { activePanel = 'timeline'; });
 
         return () => {
             unsubAnatomy();
@@ -121,7 +123,7 @@
         </button>
     </div-->
 
-    {#if activePanel === 'anatomy'}
+    {#if activePanel === 'anatomy' && mounted}
         {#key $profile.health.biologicalSex}
         <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
         {/key}

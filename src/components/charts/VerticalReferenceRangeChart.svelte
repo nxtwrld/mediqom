@@ -4,6 +4,8 @@
     import { get } from 'svelte/store';
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
+    import ReferenceRange from '$components/charts/ReferenceRange.svelte';
+    import { dateTime } from '$lib/datetime';
 
     const LABEL_HEIGHT = 20;
 
@@ -36,6 +38,8 @@
         visible: boolean;
         x: number;
         y: number;
+        dotX: number;
+        placement: 'top' | 'bottom';
         point: SignalSeries['values'][number] | null;
         series: SignalSeries | null;
     }
@@ -51,7 +55,7 @@
 
     let {
         series = [],
-        margin = { top: 10, right: 20, bottom: LABEL_HEIGHT + 4, left: 60 },
+        margin = { top: 10, right: 52, bottom: LABEL_HEIGHT + 4, left: 60 },
         timeRange,
         profileId,
         onScaleReady,
@@ -59,10 +63,11 @@
     }: Props = $props();
 
     let svgElement: SVGSVGElement | undefined = $state();
-    let menu = $state<MenuState>({ visible: false, x: 0, y: 0, point: null, series: null });
+    let menu = $state<MenuState>({ visible: false, x: 0, y: 0, dotX: 0, placement: 'top', point: null, series: null });
 
     // Module-level zoom state — persists between renders
     let yBase: ScaleTime<number, number> | null = null;
+    let xDomain: [number, number] = [-0.5, 1.5];
     let zoomBehavior: ReturnType<typeof d3Zoom<SVGSVGElement, unknown>> | null = null;
 
     function closeMenu() {
@@ -80,36 +85,47 @@
                 : valueMatch;
         }
 
-        // Y axis ticks
+        // Y axis ticks — compute once, reuse for zebra bands
         const tickCount = Math.max(2, Math.floor(height / 40));
-        const domainSpan = (y.domain()[1] as Date).getTime() - (y.domain()[0] as Date).getTime();
+        const tickValues = y.ticks(tickCount) as Date[];
+
+        // Derive format from actual tick interval (not domain span)
+        const tickInterval = tickValues.length >= 2
+            ? Math.abs(tickValues[1].getTime() - tickValues[0].getTime())
+            : Math.abs((y.domain()[1] as Date).getTime() - (y.domain()[0] as Date).getTime());
+
+        const isYearInterval  = tickInterval >= 365 * 86400000;
+        const isMonthInterval = !isYearInterval && tickInterval >= 28 * 86400000;
+        const isDayInterval   = !isYearInterval && !isMonthInterval && tickInterval >= 86400000;
+
+        function tickFormat(date: Date): string {
+            if (isYearInterval) return date.getFullYear().toString();
+            if (isMonthInterval) {
+                return date.getMonth() === 0
+                    ? date.getFullYear().toString()
+                    : date.toLocaleString('default', { month: 'short' });
+            }
+            if (isDayInterval) return date.toLocaleString('default', { month: 'short', day: 'numeric' });
+            return date.toLocaleString('default', { hour: '2-digit', minute: '2-digit' });
+        }
 
         axisGroup.call(
             axisLeft(y)
-                .ticks(tickCount)
-                .tickFormat((d) => {
-                    const date = d as Date;
-                    if (Math.abs(domainSpan) < 30 * 86400000) {
-                        return date.toLocaleString('default', { month: 'short', day: 'numeric' });
-                    }
-                    return date.getMonth() === 0
-                        ? date.getFullYear().toString()
-                        : date.toLocaleString('default', { month: 'short' });
-                })
+                .tickValues(tickValues)
+                .tickFormat(d => tickFormat(d as Date))
         );
         axisGroup.attr('transform', 'translate(-8, 0)');
 
         // Tick background pills
         axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
             const g = select(this);
-            const isDay = Math.abs(domainSpan) < 30 * 86400000;
-            const isYear = !isDay && d.getMonth() === 0;
+            const isYearMarker = isYearInterval || (isMonthInterval && d.getMonth() === 0);
             const textEl = g.select<SVGTextElement>('text');
-            textEl.attr('class', isYear ? 'tick-label tick-year' : isDay ? 'tick-label tick-day' : 'tick-label tick-month');
+            textEl.attr('class', isYearMarker ? 'tick-label tick-year' : isDayInterval ? 'tick-label tick-day' : 'tick-label tick-month');
             const bbox = textEl.node()?.getBBox();
             if (bbox) {
                 g.selectAll<SVGRectElement, null>('rect.tick-bg').data([null]).join('rect')
-                    .attr('class', isYear ? 'tick-bg tick-year-bg' : isDay ? 'tick-bg tick-day-bg' : 'tick-bg tick-month-bg')
+                    .attr('class', isYearMarker ? 'tick-bg tick-year-bg' : isDayInterval ? 'tick-bg tick-day-bg' : 'tick-bg tick-month-bg')
                     .attr('x', bbox.x - 4).attr('y', bbox.y - 2)
                     .attr('width', bbox.width + 8).attr('height', bbox.height + 4)
                     .attr('rx', 3)
@@ -117,8 +133,7 @@
             }
         });
 
-        // Zebra bands between ticks
-        const tickValues = y.ticks(tickCount);
+        // Zebra bands between ticks (reuse tickValues — no second .ticks() call)
         const boundaries = [0, ...tickValues.map((d: Date) => y(d)), height];
         const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
             y0, y1: boundaries[i + 1], odd: i % 2 === 1
@@ -128,7 +143,7 @@
             .join('rect')
             .attr('class', 'zebra-band')
             .attr('x', 0).attr('y', d => d.y0)
-            .attr('width', width).attr('height', d => d.y1 - d.y0);
+            .attr('width', width + margin.right).attr('height', d => d.y1 - d.y0);
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
@@ -185,7 +200,16 @@
                         })
                         .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
                             event.stopPropagation();
-                            menu = { visible: true, x: x(d.normalized) + margin.left, y: y(d.date) + margin.top, point: d, series: currentSeries };
+                            const dotX = x(d.normalized) + margin.left;
+                            const dotY = y(d.date) + margin.top;
+                            const chartWidth  = svgElement!.clientWidth;
+                            const MENU_W = 260;
+                            const MENU_H = 210;
+                            const ARROW  = 10;
+                            const edgePad = 8;
+                            const placement = (dotY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
+                            const clampedX  = Math.max(MENU_W / 2 + edgePad, Math.min(dotX, chartWidth - MENU_W / 2 - edgePad));
+                            menu = { visible: true, x: clampedX, y: dotY, dotX, placement, point: d, series: currentSeries };
                         }),
                     update => update,
                     exit => exit.remove()
@@ -251,15 +275,24 @@
             .range([0, height]);
 
         // X axis: normalized space — 0 = refMin, 1 = refMax
+        // Compute dynamic domain from actual normalized values, minimum [-0.5, 1.5]
+        const allNorm = allPoints.map(p => p.normalized);
+        const normMin = allNorm.length > 0 ? Math.min(...allNorm) : 0;
+        const normMax = allNorm.length > 0 ? Math.max(...allNorm) : 1;
+        const pad = Math.max((normMax - normMin) * 0.1, 0.1);
+        xDomain = [
+            Math.min(-0.5, normMin - pad),
+            Math.max(1.5,  normMax + pad),
+        ];
         const x = scaleLinear<number, number>()
-            .domain([-0.5, 1.5])
+            .domain(xDomain)
             .range([0, width]);
 
         // Reference bands — keyed join (static, X-axis only)
         const bandData = [
-            { id: 'low',    cls: 'band-low',    x: x(-0.5), width: Math.max(0, x(0) - x(-0.5)) },
-            { id: 'normal', cls: 'band-normal', x: x(0),    width: Math.max(0, x(1) - x(0))    },
-            { id: 'high',   cls: 'band-high',   x: x(1),    width: Math.max(0, x(1.5) - x(1))  },
+            { id: 'low',    cls: 'band-low',    x: x(xDomain[0]), width: Math.max(0, x(0) - x(xDomain[0]))         },
+            { id: 'normal', cls: 'band-normal', x: x(0),          width: Math.max(0, x(1) - x(0))                   },
+            { id: 'high',   cls: 'band-high',   x: x(1),          width: Math.max(0, width + margin.right - x(1))   },
         ];
         bandsGroup.selectAll<SVGRectElement, typeof bandData[0]>('rect')
             .data(bandData, d => d.id)
@@ -278,10 +311,10 @@
 
         // Zone label boxes — LOW / NORMAL / HIGH (static, bottom of chart)
         const zones = [
-            { name: 'low',    x1: x(-0.5), x2: x(0)   },
-            { name: 'normal', x1: x(0),    x2: x(1)   },
-            { name: 'high',   x1: x(1),    x2: x(1.5) },
-        ] as const;
+            { name: 'low',    x1: x(xDomain[0]), x2: x(0)                  },
+            { name: 'normal', x1: x(0),          x2: x(1)                   },
+            { name: 'high',   x1: x(1),          x2: width + margin.right   },
+        ];
 
         labelsGroup.selectAll<SVGGElement, typeof zones[number]>('g.zone')
             .data(zones, d => d.name)
@@ -336,7 +369,7 @@
                 const axisGroup = svg.select<SVGGElement>('g.axis');
                 const zebraGroup = svg.select<SVGGElement>('g.zebra-bands');
                 const seriesContainer = svg.select<SVGGElement>('g.series-container');
-                const x = scaleLinear<number, number>().domain([-0.5, 1.5]).range([0, width]);
+                const x = scaleLinear<number, number>().domain(xDomain).range([0, width]);
                 renderDynamic(yZoomed, series, highlightedPoint, width, height, x, axisGroup, zebraGroup, seriesContainer);
             });
 
@@ -376,9 +409,28 @@
     {#if menu.visible && menu.point && menu.series}
     <div
         class="dot-menu"
-        style="left: {menu.x}px; top: {menu.y}px"
+        class:-top={menu.placement === 'top'}
+        class:-bottom={menu.placement === 'bottom'}
+        style="left: {menu.x}px; top: {menu.y}px; --arrow-offset: {menu.dotX - menu.x}px"
         role="menu"
     >
+        <div class="dot-menu-header">
+            <div class="dot-menu-title">{menu.series.label}</div>
+            {#if menu.point.rawData?.reference}
+                <ReferenceRange
+                    value={menu.point.value}
+                    reference={menu.point.rawData.reference}
+                    referenceRange={{
+                        low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
+                        high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
+                    }}
+                    labels={false}
+                    showValue={true}
+                />
+            {/if}
+            <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
+        </div>
+        <hr class="dot-menu-divider" />
         {#if menu.point.documentId && profileId}
             <a
                 class="dot-menu-action"
@@ -524,7 +576,6 @@
     /* Dot context menu */
     .dot-menu {
         position: absolute;
-        transform: translate(-50%, calc(-100% - 0.6rem));
         background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-medium);
@@ -535,7 +586,85 @@
         gap: 0.15rem;
         padding: 0.3rem;
         z-index: 10;
-        min-width: 10rem;
+        min-width: 16rem;
+    }
+
+    .dot-menu.-top {
+        transform: translate(-50%, calc(-100% - 20px));
+    }
+
+    .dot-menu.-bottom {
+        transform: translate(-50%, 20px);
+    }
+
+    /* Arrow — two pseudo-elements for border + fill */
+    .dot-menu::before,
+    .dot-menu::after {
+        content: '';
+        position: absolute;
+        left: calc(50% + var(--arrow-offset, 0px));
+        transform: translateX(-50%);
+        border: 9px solid transparent;
+        pointer-events: none;
+    }
+
+    /* Arrow pointing DOWN (menu is above dot) */
+    .dot-menu.-top::before {
+        top: 100%;
+        border-top-color: var(--color-border);
+    }
+
+    .dot-menu.-top::after {
+        top: 100%;
+        margin-top: -2px;
+        border: 8px solid transparent;
+        border-top-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+    }
+
+    /* Arrow pointing UP (menu is below dot) */
+    .dot-menu.-bottom::before {
+        bottom: 100%;
+        border-bottom-color: var(--color-border);
+    }
+
+    .dot-menu.-bottom::after {
+        bottom: 100%;
+        margin-bottom: -2px;
+        border: 8px solid transparent;
+        border-bottom-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+    }
+
+    .dot-menu-header {
+        padding: 0.4rem 0.5rem 0.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .dot-menu-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
+    .dot-menu-date {
+        font-size: 0.7rem;
+        color: var(--color-text-secondary);
+    }
+
+    .dot-menu-divider {
+        border: none;
+        border-top: 1px solid var(--color-border);
+        margin: 0.1rem 0;
+    }
+
+    .dot-menu-header :global(.range) {
+        min-width: unset;
+        margin: 0.1rem 0;
+    }
+
+    .dot-menu-header :global(.range.-value) {
+        padding-top: 1.6rem;
     }
 
     .dot-menu-action {
