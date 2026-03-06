@@ -4,6 +4,8 @@
 </script>
 
 <script lang="ts">
+    import { page } from '$app/stores';
+
     type DocItem = {
         id: string;
         user_id: string;
@@ -66,6 +68,12 @@
     }
 
     const isGroup = $derived(docs.length > 1);
+    const currentPath = $derived($page.url.pathname);
+    const isActive = $derived(
+        docs.some(doc =>
+            currentPath === `/med/p/${doc.user_id}/documents/${doc.id}`
+        )
+    );
     const primary = $derived(docs[0]);
     const primaryCat = $derived(getCategory(primary));
     const visibleDocs = $derived(docs.slice(0, 3));
@@ -99,6 +107,10 @@
 
     {#if docs.length > 1}
     <span class="badge">{docs.length}</span>
+    {/if}
+
+    {#if isActive}
+        <span class="active-caret" aria-hidden="true"></span>
     {/if}
 
     {#if popupOpen}
@@ -287,6 +299,21 @@
         background-color: var(--color, #546e7a);
         flex-shrink: 0;
         display: inline-block;
+    }
+
+    /* Active document caret */
+    .active-caret {
+        position: absolute;
+        right: -0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-top: 0.45rem solid transparent;
+        border-bottom: 0.45rem solid transparent;
+        border-left: 0.55rem solid white;
+        pointer-events: none;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
     }
 
     /* Count badge for groups */

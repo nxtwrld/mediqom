@@ -69,9 +69,43 @@
     let yBase: ScaleTime<number, number> | null = null;
     let xDomain: [number, number] = [-0.5, 1.5];
     let zoomBehavior: ReturnType<typeof d3Zoom<SVGSVGElement, unknown>> | null = null;
+    let focusedSeriesName: string | null = null;
+    let lastAutoFocusedKey: string | null = null;
 
     function closeMenu() {
         menu = { ...menu, visible: false };
+    }
+
+    function highlightKey(h: typeof highlightedPoint): string | null {
+        return h ? `${h.signalName}:${h.value}:${h.documentId ?? ''}` : null;
+    }
+
+    function applyFocusStyles(focusedName: string | null) {
+        if (!svgElement) return;
+        const container = select(svgElement)
+            .select<SVGGElement>('g.chart-main g.series-container');
+
+        container.selectAll<SVGGElement, SignalSeries>('g.series')
+            .each(function(s) {
+                const isFocused = !focusedName || s.name === focusedName;
+                const g = select(this);
+
+                g.attr('opacity', isFocused ? 1 : 0.5)
+                 .style('filter', !isFocused ? 'saturate(50%)' : null);
+
+                g.select<SVGPathElement>('path.series-line')
+                 .style('stroke-width', focusedName && isFocused ? '6px' : null);
+
+                g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                 .attr('r', (d) => {
+                     const isHL = highlightedPoint
+                         && s.name === highlightedPoint.signalName
+                         && Math.abs(d.value - highlightedPoint.value) < 0.001
+                         && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
+                     const baseR = isHL ? 7 : 4;
+                     return focusedName && isFocused ? baseR * 1.5 : baseR;
+                 });
+            });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,7 +204,14 @@
                 g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
                     .attr('class', 'series-line')
                     .attr('stroke', s.color)
-                    .attr('d', valueLine(sorted) ?? '');
+                    .attr('d', valueLine(sorted) ?? '')
+                    .style('cursor', 'pointer')
+                    .on('click', function(event: MouseEvent) {
+                        event.stopPropagation();
+                        focusedSeriesName = focusedSeriesName === s.name ? null : s.name;
+                        if (!focusedSeriesName) lastAutoFocusedKey = highlightKey(highlightedPoint);
+                        applyFocusStyles(focusedSeriesName);
+                    });
             } else {
                 g.selectAll('path.series-line').remove();
             }
@@ -200,6 +241,8 @@
                         })
                         .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
                             event.stopPropagation();
+                            focusedSeriesName = currentSeries.name;
+                            applyFocusStyles(focusedSeriesName);
                             const dotX = x(d.normalized) + margin.left;
                             const dotY = y(d.date) + margin.top;
                             const chartWidth  = svgElement!.clientWidth;
@@ -224,6 +267,16 @@
         if (onScaleReady) {
             onScaleReady((date: Date) => y(date) + margin.top, height);
         }
+
+        // Auto-focus when highlightedPoint is new (key changed)
+        const currentKey = highlightKey(highlighted);
+        if (!highlighted) {
+            lastAutoFocusedKey = null; // reset so next highlight auto-focuses
+        } else if (currentKey !== lastAutoFocusedKey) {
+            focusedSeriesName = highlighted.signalName;
+            lastAutoFocusedKey = currentKey;
+        }
+        applyFocusStyles(focusedSeriesName);
     }
 
     function renderChart(data: SignalSeries[], highlighted: typeof highlightedPoint = null) {
@@ -354,7 +407,12 @@
         if (!svgElement) return;
 
         // SVG click handler lives here to avoid re-attachment on every render
-        select(svgElement).on('click', () => { menu = { ...menu, visible: false }; });
+        select(svgElement).on('click', () => {
+            menu = { ...menu, visible: false };
+            focusedSeriesName = null;
+            lastAutoFocusedKey = highlightKey(highlightedPoint); // prevent re-focus on next render
+            applyFocusStyles(null);
+        });
 
         // Set up D3 zoom — Y axis only, scaleExtent 1..20
         zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
@@ -505,6 +563,7 @@
         fill: none;
         stroke-width: 4px;
         opacity: 0.8;
+        cursor: pointer;
     }
 
     .chart-wrap svg :global(.dot) {
