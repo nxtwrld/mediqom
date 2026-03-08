@@ -46,6 +46,7 @@ export async function saveSessionAsDocument(
     // Create document content with sessionAnalysis containing transcript and analysis children
     const documentContent = {
       title,
+      category: "qom",
       tags: ["Medical Session", "Consultation", performerName, formattedDate],
 
       // Store sessionAnalysis with transcript and analysis children
@@ -68,6 +69,7 @@ export async function saveSessionAsDocument(
 
     // Create metadata
     const metadata = {
+      category: "qom",
       sessionDate: analysis.timestamp,
       duration: sessionDuration || 0,
       analysisVersion: analysis.analysisVersion,

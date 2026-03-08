@@ -3,7 +3,7 @@
   --color: var(--button-color);
   --color-hover: var(--color-gray-400);
   --color-text: var(--button-text-color);
-  --color-text-hover: var(--button-text-color);
+  --color-text-hover: var(--color-black);
   --color-border: var(--button-border-color);
   --color-border-hover: var(--button-border-color-hover);
   display: inline-flex;
@@ -13,7 +13,7 @@
   background-color: var(--color);
   color: var(--color-text);
   font-weight: 700;
-  border-width: 0.1rem;
+  border-width: 1px;
   border-style: solid;
   /* transform: scale(1.01); */
   border-color: var(--color-border);

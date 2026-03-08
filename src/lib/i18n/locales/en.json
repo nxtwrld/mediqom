@@ -497,6 +497,9 @@
     },
     "chat": {
       "title": "AI Medical Assistant",
+      "sources": {
+        "label": "Source"
+      },
       "mode": {
         "patient": "Patient Support",
         "caregiver": "Care Support",
@@ -517,6 +520,12 @@
       },
       "sidebar": {
         "resize": "Resize chat sidebar"
+      },
+      "disclaimer": {
+        "short": "AI-generated content is for informational purposes only. Always consult a medical professional.",
+        "details": "The information provided by this AI assistant is intended to help you understand medical data and terminology. It does not constitute medical advice, diagnosis, or treatment. All AI-generated insights should be verified by a qualified healthcare provider before making any health-related decisions.",
+        "more": "More",
+        "less": "Less"
       },
       "document": {
         "add-prompt": "Do you want to add \"{title}\" to our chat?",
@@ -851,7 +860,8 @@
     },
     "documents": {
       "remove": "Remove",
-      "confirm-remove": "Are you sure you want to remove this document?"
+      "confirm-remove": "Are you sure you want to remove this document?",
+      "view-document": "View document"
     },
     "report": {
       "anatomy": {}
@@ -1885,7 +1895,39 @@
     "create-share": "Create Share",
     "open-email-app": "Open email app",
     "open-sms-app": "Open sms app",
-    "message-template": "Dear {name}, \nI would like to share my medical records with you. \nPlease, use the following link to access them: {url}\n\nPassword: {password}\n\nKindest regards,"
+    "message-template": "Dear {name}, \nI would like to share my medical records with you. \nPlease, use the following link to access them: {url}\n\nPassword: {password}\n\nKindest regards,",
+    "recipient-email-label": "Recipient email",
+    "recipient-email-placeholder": "doctor@example.com",
+    "share-button": "Share",
+    "processing-title": "Sharing…",
+    "done-title": "Shared!",
+    "done-description": "Shared with {email}. An invitation has been sent.",
+    "done-description-shared": "Documents have been shared with {email}. They can view them in their Mediqom app.",
+    "done-description-invited": "An invitation email has been sent to {email}. Once they accept, the documents will be available in their app.",
+    "invite-warning": "Documents were shared, but the invitation email failed to send. Please contact {email} directly to let them know.",
+    "error-no-keys": "Could not retrieve document encryption keys.",
+    "error-generic": "An error occurred. Please try again.",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "no-shares": "You have not shared any documents yet.",
+    "status-pending": "Pending",
+    "status-active": "Active",
+    "revoke": "Revoke share",
+    "my-shares-title": "Shared Documents",
+    "shared-count": "{count, plural, one {Shared with 1 person} other {Shared with # people}}",
+    "accept": {
+      "no-token": "Invalid share link. The token is missing.",
+      "no-public-key": "Your encryption keys are not set up. Please set them up in your account settings.",
+      "processing": "Accepting shared documents…",
+      "done-title": "Documents accepted!",
+      "done-description": "{count, plural, one {1 document} other {# documents}} added to your account.",
+      "error-title": "Could not accept share",
+      "error-generic": "An error occurred while accepting the share.",
+      "go-to-app": "Open Mediqom",
+      "setup-keys-title": "Set up your encryption keys",
+      "setup-keys-description": "Before you can view shared documents, you need to set up your encryption keys in your account settings.",
+      "setup-keys-button": "Go to account settings"
+    }
   },
   "aria": {
     "import": {
@@ -2005,7 +2047,24 @@
     "no-procedure-data": "No procedure data available",
     "diagnoses-list": "Diagnoses",
     "diagnosis-date": "Diagnosis Date",
-    "no-diagnosis-data": "No diagnosis data available"
+    "no-diagnosis-data": "No diagnosis data available",
+    "summary": "Summary",
+    "patient": "Patient",
+    "vital-signs": "Vital Signs",
+    "reference-range": "Reference",
+    "name": "Name",
+    "birth-date": "Date of Birth",
+    "blood-type": "Blood Type",
+    "sex": "Sex",
+    "value": "Value",
+    "icd-code": "ICD Code",
+    "blood-pressure": "Blood Pressure",
+    "heart-rate": "Heart Rate",
+    "temperature": "Temperature",
+    "weight": "Weight",
+    "height": "Height",
+    "oxygen-saturation": "Oxygen Saturation",
+    "respiratory-rate": "Respiratory Rate"
   },
   "billing": {
     "subscription": "Subscription",

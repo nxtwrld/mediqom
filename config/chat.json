@@ -54,7 +54,7 @@
   },
   "prompts": {
     "base": {
-      "instruction": "You are an AI medical assistant integrated with a 3D anatomy model. IMPORTANT: Never include technical IDs, anatomy references, or mention \"AnatomyReferences\" in your text responses. These are handled automatically by the system.\n\nBefore providing recommendations, use a Socratic approach:\n1. When the query is ambiguous or complex, ask clarifying questions using the clarifyingQuestions field\n2. Identify gaps or assumptions that need user input\n3. Understand the real goal or concern behind the question\n4. For complex medical topics, explore possible paths before recommending\n\nUse clarifyingQuestions for:\n- Ambiguous symptoms (location, duration, severity)\n- Multiple possible interpretations\n- Missing critical context\n- Complex medical decisions requiring user input\n\nStart with light clarifications; go deeper only when the topic requires it."
+      "instruction": "You are an AI medical assistant integrated with a 3D anatomy model. IMPORTANT: Never include technical IDs, anatomy references, or mention \"AnatomyReferences\" in your text responses. These are handled automatically by the system.\n\nBefore providing recommendations, use a Socratic approach:\n1. When the query is ambiguous or complex, ask clarifying questions using the clarifyingQuestions field\n2. Identify gaps or assumptions that need user input\n3. Understand the real goal or concern behind the question\n4. For complex medical topics, explore possible paths before recommending\n\nUse clarifyingQuestions for:\n- Ambiguous symptoms (location, duration, severity)\n- Multiple possible interpretations\n- Missing critical context\n- Complex medical decisions requiring user input\n\nStart with light clarifications; go deeper only when the topic requires it.\n\nSOURCE CITATIONS: When your response contains medical facts or clinical information, place a [N] marker at the end of each paragraph that states medical facts (where N is a sequential number starting from 1). Then include the corresponding source citations in the 'sources' array of your structured response. Each source must reference an approved medical resource with a real, valid URL. Do NOT add citations to greetings, casual conversation, or simple acknowledgments. Only cite paragraphs that contain substantive medical claims."
     },
     "patient": {
       "systemPrompt": {
@@ -525,6 +525,50 @@
               "required": ["id", "question", "options"]
             },
             "description": "Clarifying questions to ask before providing recommendations. Use for ambiguous queries or complex medical topics. Only include ONE question at a time."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Sequential citation number matching [N] marker in the response text"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Descriptive title of the source (e.g. 'Mayo Clinic - Hypertension Overview')"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Full URL to the source page"
+                },
+                "domain": {
+                  "type": "string",
+                  "enum": [
+                    "pubmed.ncbi.nlm.nih.gov",
+                    "ncbi.nlm.nih.gov",
+                    "cochranelibrary.com",
+                    "europepmc.org",
+                    "semanticscholar.org",
+                    "scholar.google.com",
+                    "bestpractice.bmj.com",
+                    "merckmanuals.com",
+                    "msdmanuals.com",
+                    "mayoclinic.org",
+                    "my.clevelandclinic.org",
+                    "who.int",
+                    "cdc.gov",
+                    "nih.gov",
+                    "nice.org.uk",
+                    "ecdc.europa.eu"
+                  ],
+                  "description": "Domain of the source from approved list"
+                }
+              },
+              "required": ["id", "title", "url", "domain"]
+            },
+            "description": "Source citations for medical facts stated in the response. Each entry corresponds to a [N] marker in the response text. Only include for paragraphs with substantive medical claims."
           },
           "toolCalls": {
             "type": "array",

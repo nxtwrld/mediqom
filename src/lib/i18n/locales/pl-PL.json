@@ -507,6 +507,12 @@
       "sidebar": {
         "resize": "Zmień rozmiar paska bocznego czatu"
       },
+      "disclaimer": {
+        "short": "Treści generowane przez AI służą wyłącznie celom informacyjnym. Zawsze skonsultuj się z lekarzem.",
+        "details": "Informacje dostarczane przez tego asystenta AI mają pomóc w zrozumieniu danych medycznych i terminologii. Nie stanowią porady medycznej, diagnozy ani leczenia. Wszystkie wnioski generowane przez AI powinny zostać zweryfikowane przez wykwalifikowanego pracownika służby zdrowia przed podjęciem jakichkolwiek decyzji zdrowotnych.",
+        "more": "Więcej",
+        "less": "Mniej"
+      },
       "document": {
         "add-prompt": "Czy chcesz dodać \"{title}\" do naszej rozmowy?",
         "add-yes": "Tak",

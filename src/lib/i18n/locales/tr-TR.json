@@ -507,6 +507,12 @@
       "sidebar": {
         "resize": "Sohbet kenar çubuğunu yeniden boyutlandır"
       },
+      "disclaimer": {
+        "short": "Yapay zeka tarafından oluşturulan içerik yalnızca bilgilendirme amaçlıdır. Her zaman bir sağlık uzmanına danışın.",
+        "details": "Bu yapay zeka asistanı tarafından sağlanan bilgiler, tıbbi verileri ve terminolojiyi anlamanıza yardımcı olmak içindir. Tıbbi tavsiye, teşhis veya tedavi niteliği taşımaz. Yapay zeka tarafından üretilen tüm bulgular, sağlıkla ilgili herhangi bir karar vermeden önce nitelikli bir sağlık uzmanı tarafından doğrulanmalıdır.",
+        "more": "Daha fazla",
+        "less": "Daha az"
+      },
       "document": {
         "add-prompt": "\"{title}\" adlı belgeyi sohbetimize eklemek ister misiniz?",
         "add-yes": "Evet",

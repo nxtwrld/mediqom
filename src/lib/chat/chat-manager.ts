@@ -1172,6 +1172,7 @@ export class ChatManager {
                 anatomyFocus: event.data.anatomyReferences,
                 documentsReferenced: event.data.documentReferences,
                 toolsUsed: [],
+                sources: event.data.sources || [],
               };
 
               // Update the message with metadata

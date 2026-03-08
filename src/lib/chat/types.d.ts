@@ -2,6 +2,13 @@
 export type ChatMode = "patient" | "caregiver" | "clinical";
 export type ChatMessageRole = "user" | "assistant" | "system";
 
+export interface SourceCitation {
+  id: number;
+  title: string;
+  url: string;
+  domain: string;
+}
+
 export interface ContextPrompt {
   type: "document" | "profile" | "tool" | "clarifyingQuestion";
   id: string;
@@ -45,6 +52,7 @@ export interface ChatMessage {
     shouldEnhanceGreeting?: boolean;
     // Tool execution result
     toolResult?: ToolCallResult;
+    sources?: SourceCitation[];
     // Keep legacy support temporarily
     documentPrompt?: {
       documentId: string;
@@ -176,6 +184,7 @@ export interface ChatResponse {
   suggestions?: AnatomySuggestion[];
   consentRequests?: ConsentRequest[];
   clarifyingQuestions?: ClarifyingQuestion[];
+  sources?: SourceCitation[];
 }
 
 export interface AskAboutEvent {

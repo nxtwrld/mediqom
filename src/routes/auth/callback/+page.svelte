@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { getClient } from '$lib/supabase';
 	import { session as CurrentSession } from '$lib/user';
 	import { t } from '$lib/i18n';
 
 	let status = $state('Processing authentication...');
 	let error = $state('');
+
+	// Optional redirect target after successful auth (e.g. /share/accept?t=TOKEN)
+	const nextUrl = browser
+		? new URLSearchParams(window.location.search).get('next') || ''
+		: '';
 
 	onMount(async () => {
 		try {
@@ -48,7 +54,7 @@
 
 				if (data.session) {
 					CurrentSession.set(data.session);
-					goto('/med');
+					goto(nextUrl || '/med');
 					return;
 				}
 			} else if (tokenHash) {
@@ -65,7 +71,7 @@
 
 				if (data.session) {
 					CurrentSession.set(data.session);
-					goto('/med');
+					goto(nextUrl || '/med');
 					return;
 				}
 			} else if (code) {
@@ -79,7 +85,7 @@
 
 				if (data.session) {
 					CurrentSession.set(data.session);
-					goto('/med');
+					goto(nextUrl || '/med');
 					return;
 				}
 			} else {

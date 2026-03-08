@@ -506,6 +506,12 @@
       "sidebar": {
         "resize": "Změnit velikost chat panelu"
       },
+      "disclaimer": {
+        "short": "Obsah generovaný AI slouží pouze k informačním účelům. Vždy se poraďte s lékařem.",
+        "details": "Informace poskytované tímto AI asistentem mají pomoci porozumět zdravotním údajům a terminologii. Nepředstavují lékařskou radu, diagnózu ani léčbu. Všechny poznatky generované AI by měly být ověřeny kvalifikovaným poskytovatelem zdravotní péče před jakýmkoli rozhodnutím souvisejícím se zdravím.",
+        "more": "Více",
+        "less": "Méně"
+      },
       "document": {
         "add-prompt": "Chcete přidat \"{title}\" do našeho chatu?",
         "add-yes": "Ano",
@@ -805,7 +811,8 @@
     },
     "documents": {
       "remove": "Odebrat",
-      "confirm-remove": "Opravdu chcete tento dokument odebrat?"
+      "confirm-remove": "Opravdu chcete tento dokument odebrat?",
+      "view-document": "Zobrazit dokument"
     },
     "report": {
       "anatomy": {}
@@ -1573,7 +1580,7 @@
       "reset-view": ""
     },
     "documents": {
-      "view-document": "",
+      "view-document": "Zobrazit dokument",
       "remove-document": ""
     },
     "report": {

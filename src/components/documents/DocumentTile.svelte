@@ -4,12 +4,14 @@
     import type { Document } from '$lib/documents/types.d';
     import BadgeHorizontal from '$components/ui/dates/BadgeHorizontal.svelte';
     import { profile } from '$lib/profiles';
+    import { t } from '$lib/i18n';
 
     interface Props {
         document: Document;
+        shareCount?: number;
     }
 
-    let { document }: Props = $props();
+    let { document, shareCount = 0 }: Props = $props();
 
     let author = $derived(getByAnotherAuthor(document))
 </script>
@@ -37,6 +39,17 @@
                 {$profile.fullName}
             {/if}
         </div>
+        {#if shareCount > 0}
+            <a
+                href="/med/p/{document.user_id}/shares"
+                class="share-badge"
+                onclick={(e) => e.stopPropagation()}
+                aria-label={$t('share.shared-count', { values: { count: shareCount } })}
+            >
+                <svg><use href="/icons.svg#share" /></svg>
+                <span>{shareCount}</span>
+            </a>
+        {/if}
     </div>
     <!--div class="actions"></div-->
 </a>
@@ -97,6 +110,26 @@
 
     .tile .people {
         margin: .5rem;
+    }
+
+    .share-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        margin: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        text-decoration: none;
+    }
+
+    .share-badge svg {
+        width: 0.9rem;
+        height: 0.9rem;
+        fill: currentColor;
+    }
+
+    .share-badge:hover {
+        color: var(--color-text-primary);
     }
 
 </style>

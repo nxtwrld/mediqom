@@ -68,12 +68,13 @@
     }
 
     const isGroup = $derived(docs.length > 1);
-    const currentPath = $derived($page.url.pathname);
+    const currentPath = $derived($page.url.pathname.replace(/\/$/, ''));
     const isActive = $derived(
         docs.some(doc =>
             currentPath === `/med/p/${doc.user_id}/documents/${doc.id}`
         )
     );
+
     const primary = $derived(docs[0]);
     const primaryCat = $derived(getCategory(primary));
     const visibleDocs = $derived(docs.slice(0, 3));
@@ -100,7 +101,7 @@
             </div>
         {:else}
             <div class="icon">
-                <svg><use href="/icons-o.svg#report-{primaryCat}" /></svg>
+                <svg><use href="/icons-o.svg#report-{primaryCat || 'other'}" /></svg>
             </div>
         {/if}
     </div>
@@ -304,7 +305,7 @@
     /* Active document caret */
     .active-caret {
         position: absolute;
-        right: -0.7rem;
+        right: -0.5rem;
         top: 50%;
         transform: translateY(-50%);
         width: 0;

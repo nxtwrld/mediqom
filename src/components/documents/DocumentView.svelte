@@ -9,6 +9,7 @@
     import SectionPerformer from './SectionPerformer.svelte';
     import SectionLinks from './SectionLinks.svelte';
     import SectionAttachments from './SectionAttachments.svelte';
+    import SharesList from '$components/apps/SharesList.svelte';
     import SectionMedications from './SectionMedications.svelte';
     import SectionProcedures from './SectionProcedures.svelte';
     import SectionAllergies from './SectionAllergies.svelte';
@@ -242,7 +243,7 @@
 
 <div class="report -heading-sub">
     <!-- Pure data-driven rendering: show sections that exist in the document -->
-    {#each sectionsToRender() as section}
+    {#each sectionsToRender().filter(s => s.id !== 'attachments') as section}
         <div class="document-section">
             {#if section.id === 'summary'}
                 <!-- Special handling for summary section to include tags -->
@@ -258,6 +259,16 @@
             {/if}
         </div>
     {/each}
+
+    <!-- Shares (above attachments) -->
+    <SharesList documentId={document.id} hideIfEmpty={true} />
+
+    <!-- Attachments last -->
+    {#if getSectionData('attachments')}
+        <div class="document-section">
+            <SectionAttachments data={getSectionData('attachments')} {document} key={document.key} />
+        </div>
+    {/if}
 </div>
 <!--pre>
     {JSON.stringify(document, null, 2)}

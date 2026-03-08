@@ -405,6 +405,10 @@
     .tile:last-child {
         grid-column: auto / -1; 
         --background-color: var(--color-highlight);
+        --button-border-color-hover: var(--color-highlight-text);
+        --button-text-color: var(--color-highlight-text);
+        --button-text-color-hover: var(--color-black);
+        color: var(--color-highlight-text);
         padding: 1rem;
     }
     .tile:last-child:first-child {

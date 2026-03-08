@@ -90,6 +90,8 @@
                 const isFocused = !focusedName || s.name === focusedName;
                 const g = select(this);
 
+                if (focusedName && isFocused) g.raise();
+
                 g.attr('opacity', isFocused ? 1 : 0.5)
                  .style('filter', !isFocused ? 'saturate(50%)' : null);
 
@@ -473,52 +475,50 @@
         role="menu"
     >
         <div class="dot-menu-header">
-            <div class="dot-menu-title">{menu.series.label}</div>
-            {#if menu.point.rawData?.reference}
-                <ReferenceRange
-                    value={menu.point.value}
-                    reference={menu.point.rawData.reference}
-                    referenceRange={{
-                        low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
-                        high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
-                    }}
-                    labels={false}
-                    showValue={true}
-                />
-            {/if}
+            <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
             <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
         </div>
         <hr class="dot-menu-divider" />
+        {#if menu.point.rawData?.reference}
+        <ReferenceRange
+            value={menu.point.value}
+            reference={menu.point.rawData.reference}
+            referenceRange={{
+                low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
+                high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
+            }}
+            labels={false}
+            showValue={true}
+        />
+        {/if}
+        <hr class="dot-menu-divider" />
         {#if menu.point.documentId && profileId}
             <a
-                class="dot-menu-action"
+                class="button"
                 href="/med/p/{profileId}/documents/{menu.point.documentId}"
                 data-sveltekit-preload-data="false"
                 onclick={closeMenu}
             >
-                <svg width="12" height="12"><use href="/icons.svg#document" /></svg>
-                {$t('viewer.documents.view-document')}
+                {$t('app.documents.view-document')}
             </a>
         {:else if profileId}
             <a
-                class="dot-menu-action"
+                class="button"
                 href="/med/p/{profileId}/documents/?tags={menu.series.name}"
                 data-sveltekit-preload-data="false"
                 onclick={closeMenu}
             >
-                <svg width="12" height="12"><use href="/icons.svg#document" /></svg>
-                {$t('viewer.search.commands.view-documents')}
+                {$t('app.documents.view-document')}
             </a>
         {/if}
-        <div class="dot-menu-action">
-            <AskButton
-                type="signal"
-                label={menu.series.label}
-                data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
-                documentId={menu.point.documentId}
-                documentTitle={menu.point.documentTitle}
-            />
-        </div>
+        <AskButton
+            className="button"
+            type="signal"
+            label={menu.series.label}
+            data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
+            documentId={menu.point.documentId}
+            documentTitle={menu.point.documentTitle}
+        />
     </div>
     {/if}
 </div>
@@ -643,7 +643,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.15rem;
-        padding: 0.3rem;
+        padding: 1rem;
         z-index: 10;
         min-width: 16rem;
     }
@@ -700,11 +700,6 @@
         gap: 0.25rem;
     }
 
-    .dot-menu-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--color-text-primary);
-    }
 
     .dot-menu-date {
         font-size: 0.7rem;
@@ -726,20 +721,7 @@
         padding-top: 1.6rem;
     }
 
-    .dot-menu-action {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.75rem;
-        padding: 0.3rem 0.5rem;
-        border-radius: var(--ui-radius-small);
-        color: var(--color-text-primary);
+    .dot-menu a.button {
         text-decoration: none;
-        white-space: nowrap;
-        cursor: pointer;
-    }
-
-    .dot-menu-action:hover {
-        background: var(--color-surface);
     }
 </style>

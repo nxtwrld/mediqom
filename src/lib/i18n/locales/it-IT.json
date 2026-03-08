@@ -507,6 +507,12 @@
       "sidebar": {
         "resize": "Ridimensiona la barra laterale della chat"
       },
+      "disclaimer": {
+        "short": "I contenuti generati dall'IA sono solo a scopo informativo. Consultare sempre un professionista medico.",
+        "details": "Le informazioni fornite da questo assistente IA hanno lo scopo di aiutare a comprendere i dati e la terminologia medica. Non costituiscono consulenza medica, diagnosi o trattamento. Tutti i risultati generati dall'IA devono essere verificati da un operatore sanitario qualificato prima di prendere qualsiasi decisione relativa alla salute.",
+        "more": "Altro",
+        "less": "Meno"
+      },
       "document": {
         "add-prompt": "Vuole aggiungere \"{title}\" alla nostra chat?",
         "add-yes": "Sì",

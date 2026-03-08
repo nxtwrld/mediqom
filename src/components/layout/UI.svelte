@@ -65,6 +65,7 @@
     // Chat state
     let currentProfile: Profile | null = $state(null);
     let isOwnProfile = $state(false);
+    let isProfileActive = $derived(isOwnProfile || $profile?.status === 'approved');
     let userLanguage = $state('en');
 
     // Viewer signal highlight state
@@ -99,7 +100,27 @@
         return $page.url.pathname.startsWith(path);
     }
 
-    function handleAnatomyMobile(e: MouseEvent) { e.stopPropagation(); ui.emit('nav:anatomy'); }
+    let mobileToolsOpen = $state(false);
+
+    function handleAnatomyMobile(e: MouseEvent) {
+        e.stopPropagation();
+        mobileToolsOpen = !mobileToolsOpen;
+    }
+
+    function handleMobileOpenAnatomy(e: MouseEvent) {
+        e.stopPropagation();
+        mobileToolsOpen = false;
+        ui.emit('viewer:anatomy', true);
+        openPanel('anatomy');
+    }
+
+    function handleMobileOpenTimeline(e: MouseEvent) {
+        e.stopPropagation();
+        mobileToolsOpen = false;
+        ui.emit('viewer:timeline', null);
+        openPanel('anatomy');
+    }
+
     function handleImportMobile(e: MouseEvent)  { e.stopPropagation(); ui.emit('nav:import'); }
     function handleMobileChatToggle()           { ui.emit('chat:toggle'); }
 
@@ -326,6 +347,9 @@
             })
         ];
 
+        const handleWindowClick = () => { mobileToolsOpen = false; };
+        window.addEventListener('click', handleWindowClick);
+
         const handleBeforeUnload = () => {
             chatManager.saveCurrentConversation();
         };
@@ -336,6 +360,7 @@
         return () => {
             offs.forEach(off => off());
             device.destroy();
+            window.removeEventListener('click', handleWindowClick);
             window.removeEventListener('beforeunload', handleBeforeUnload);
             document.removeEventListener('touchmove', handleMobileResizeMove);
             document.removeEventListener('touchend', handleMobileResizeEnd);
@@ -364,9 +389,28 @@
     <div
         class="navbar-outer"
         class:-snapping={isSnappingPanel}
+        class:-native={isNativePlatform()}
         style="height: calc(var(--toolbar-height) + 1.25rem + {panelHeight}px)"
         bind:this={navbarWrapEl}
     >
+        <!-- Mobile tools popup — outside navbar-inner so it escapes overflow:hidden.
+             Panel closed → popup appears above the pill.
+             Panel open   → toolbar is near screen top, so popup flips below the toolbar. -->
+        {#if mobileToolsOpen}
+            <div class="mobile-tools-popup" style={panelHeight > 0
+                ? 'top: calc(var(--toolbar-height) + 0.5rem)'
+                : 'bottom: calc(var(--toolbar-height) + 1.25rem + 0.5rem)'}>
+                <button onclick={handleMobileOpenAnatomy}>
+                    <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
+                    {$t('viewer.panels.anatomy')}
+                </button>
+                <button onclick={handleMobileOpenTimeline}>
+                    <svg aria-hidden="true"><use href="/icons.svg#chart-line"></use></svg>
+                    {$t('viewer.panels.timeline')}
+                </button>
+            </div>
+        {/if}
+
         <!-- Avatar floats above the pill — outside overflow:hidden boundary -->
         <button class="nav-avatar" onclick={handleAvatarClick} aria-label={$profile?.fullName ?? 'Profile'}>
             <ProfileImage profile={$profile} size={5} />
@@ -383,8 +427,13 @@
                 >
                     <svg aria-hidden="true"><use href="/icons.svg#report"></use></svg>
                 </a>
-                <button class="nav-icon" onclick={handleAnatomyMobile} aria-label={$t('app.nav.anatomy-model')}>
-                    <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
+                <button
+                    class="nav-icon"
+                    class:-disabled={!isProfileActive}
+                    onclick={isProfileActive ? handleAnatomyMobile : undefined}
+                    aria-label={$t('app.nav.anatomy-model')}
+                >
+                    <svg aria-hidden="true"><use href="/icons.svg#medical-tools"></use></svg>
                 </button>
                 <div class="nav-avatar-slot"></div>
                 <button class="nav-icon" class:-active={$chatIsOpen} onclick={handleMobileChatToggle} aria-label="AI Chat">
@@ -474,11 +523,17 @@
         position: fixed;
         left: 1rem;
         right: 1rem;
-        bottom: calc(1rem + var(--safe-area-bottom, 0px));
+        bottom: 0.5rem;
         /* height is set via inline style (toolbar + panelHeight) */
+        max-height: calc(100dvh - var(--safe-area-top, 0px) - var(--safe-area-bottom, 0px) - 1rem);
         overflow: visible;
         z-index: 1000;
         /* No transition by default (during drag); added by .-snapping */
+    }
+
+    /* On native Capacitor: respect safe-area-bottom (home indicator) */
+    .navbar-outer.-native {
+        bottom: var(--safe-area-bottom, 0px);
     }
 
     .navbar-outer.-snapping {
@@ -542,6 +597,11 @@
         align-items: center;
         padding: 0.4rem;
         min-width: var(--toolbar-height);
+    }
+
+    .nav-icon.-disabled {
+        opacity: 0.3;
+        pointer-events: none;
     }
 
     .nav-avatar-slot {
@@ -646,6 +706,47 @@
             top: var(--safe-area-top);
             bottom: 0;
         }
+    }
+
+    /* ── Mobile tools popup ───────────────────────────────── */
+    /* Rendered inside .navbar-outer (overflow:visible), so it escapes
+       .navbar-bar's overflow:hidden. Positioned above the toolbar. */
+    .mobile-tools-popup {
+        position: absolute;
+        /* bottom is set via inline style: toolbar-height + 1.25rem + panelHeight + gap */
+        left: 0.5rem;
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-8, 0.5rem);
+        box-shadow: var(--shadow-modal);
+        min-width: 10rem;
+        white-space: nowrap;
+        z-index: 1001;
+    }
+
+    .mobile-tools-popup button {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--color-black);
+        font-size: 0.875rem;
+    }
+
+    .mobile-tools-popup button > svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+        fill: currentColor;
+    }
+
+    .mobile-tools-popup button:hover {
+        background: var(--color-gray-300);
     }
 
 </style>

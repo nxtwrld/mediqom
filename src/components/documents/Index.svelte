@@ -15,6 +15,8 @@
     import JobCard from '$components/import/JobCard.svelte';
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
+    import { apiGet } from '$lib/api/client';
+    import type { DocumentShare } from '$lib/share/types.d';
 
   interface Props {
     user?: string;
@@ -25,6 +27,7 @@
 
     // Cache availability per job
     let cacheStatus: Record<string, boolean> = $state({});
+    let shareCountMap: Map<string, number> = $state(new Map());
 
     onMount(async () => {
         // Check for pending import jobs
@@ -39,6 +42,16 @@
         for (const job of $activeJobs) {
             processJob(job.id).catch(() => {});
         }
+
+        // Fetch share counts for badge display
+        try {
+            const myShares = await apiGet<DocumentShare[]>('/v1/share/my-shares');
+            const m = new Map<string, number>();
+            for (const s of myShares ?? []) {
+                if (s.status !== 'revoked') m.set(s.document_id, (m.get(s.document_id) ?? 0) + 1);
+            }
+            shareCountMap = m;
+        } catch { /* non-critical */ }
     });
 
     function sortByDate(a: any, b: any) {
@@ -104,7 +117,7 @@
         </button>
     </div>
 {#each $documents.sort(sortByDate) as document}
-  <DocumentTile document={document as Document} />
+  <DocumentTile document={document as Document} shareCount={shareCountMap.get(document.id) ?? 0} />
 {/each}
 </div>
 {/if}

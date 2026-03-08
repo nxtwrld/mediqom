@@ -507,6 +507,12 @@
       "sidebar": {
         "resize": "Redimensionar panel lateral del chat"
       },
+      "disclaimer": {
+        "short": "El contenido generado por IA es solo para fines informativos. Consulte siempre a un profesional médico.",
+        "details": "La información proporcionada por este asistente de IA está destinada a ayudarle a comprender datos y terminología médica. No constituye asesoramiento médico, diagnóstico ni tratamiento. Todas las conclusiones generadas por IA deben ser verificadas por un profesional de la salud cualificado antes de tomar cualquier decisión relacionada con la salud.",
+        "more": "Más",
+        "less": "Menos"
+      },
       "document": {
         "add-prompt": "¿Desea añadir \"{title}\" a nuestro chat?",
         "add-yes": "Sí",

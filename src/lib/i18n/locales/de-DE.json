@@ -506,6 +506,12 @@
       "sidebar": {
         "resize": "Chat-Seitenleiste vergrößern"
       },
+      "disclaimer": {
+        "short": "KI-generierte Inhalte dienen nur zu Informationszwecken. Konsultieren Sie immer einen Arzt.",
+        "details": "Die von diesem KI-Assistenten bereitgestellten Informationen sollen Ihnen helfen, medizinische Daten und Terminologie zu verstehen. Sie stellen keine medizinische Beratung, Diagnose oder Behandlung dar. Alle KI-generierten Erkenntnisse sollten von einem qualifizierten Gesundheitsdienstleister überprüft werden, bevor gesundheitsbezogene Entscheidungen getroffen werden.",
+        "more": "Mehr",
+        "less": "Weniger"
+      },
       "document": {
         "add-prompt": "Möchten Sie \"{title}\" zu unserem Chat hinzufügen?",
         "add-yes": "Ja",
@@ -1573,7 +1579,7 @@
       "reset-view": ""
     },
     "documents": {
-      "view-document": "",
+      "view-document": "Dokument ansehen",
       "remove-document": ""
     },
     "report": {

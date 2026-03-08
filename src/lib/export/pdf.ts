@@ -1,4 +1,13 @@
 import type { Content } from 'pdfmake/interfaces';
+import { get } from 'svelte/store';
+import { t } from '$lib/i18n';
+import { apiFetch } from '$lib/api/client';
+import { decrypt } from '$lib/documents/index';
+
+function tr(key: string): string {
+    const raw = (get(t)(key) as string) || key.split('.').pop() || key;
+    return raw.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+}
 
 function formatDate(date: string | undefined): string {
     if (!date) return '';
@@ -32,44 +41,128 @@ function keyValueTable(rows: [string, string][]): Content {
     };
 }
 
-function buildContent(item: any): Content[] {
+function buildProfileSection(profile: any): Content[] {
+    if (!profile) return [];
+    const rows: [string, string][] = [];
+    if (profile.fullName) rows.push([tr('report.name'), profile.fullName]);
+    if (profile.birthDate) rows.push([tr('report.birth-date'), formatDate(profile.birthDate)]);
+    if (profile.vcard?.gender) rows.push([tr('report.sex'), profile.vcard.gender]);
+    if (profile.health?.bloodType) rows.push([tr('report.blood-type'), profile.health.bloodType]);
+    if (!rows.length) return [];
+    return [sectionHeading(tr('report.patient')), keyValueTable(rows)];
+}
+
+function buildPerformerSection(performer: any): Content[] {
+    if (!performer) return [];
+    const list = Array.isArray(performer) ? performer : [performer];
+    const rows: [string, string][] = [];
+    for (const p of list) {
+        const name = p.name || p.fn || '';
+        if (name) rows.push([tr('report.name'), [p.title, name].filter(Boolean).join(' ')]);
+        if (p.specialty) rows.push(['Specialty', p.specialty]);
+        if (p.institution?.name) rows.push(['Institution', p.institution.name]);
+        if (p.institution?.department) rows.push(['Department', p.institution.department]);
+        if (p.datePerformed) rows.push(['Date', formatDate(p.datePerformed)]);
+    }
+    if (!rows.length) return [];
+    return [sectionHeading(tr('report.performer')), keyValueTable(rows)];
+}
+
+function vitalStr(v: any): string {
+    if (!v) return '';
+    if (typeof v === 'string' || typeof v === 'number') return String(v);
+    // e.g. bloodPressure: { systolic: 120, diastolic: 80 }
+    if (v.systolic != null && v.diastolic != null) return `${v.systolic}/${v.diastolic}`;
+    return JSON.stringify(v);
+}
+
+function buildContent(item: any, profile?: any): Content[] {
     const blocks: Content[] = [];
     const c = item.content ?? {};
 
+    blocks.push(...buildProfileSection(profile));
+
     // Summary
     if (c.summary) {
-        blocks.push(sectionHeading('Summary'));
+        blocks.push(sectionHeading(tr('report.summary')));
         blocks.push({ text: c.summary, margin: [0, 0, 0, 6] });
     }
 
-    // Diagnosis
-    if (c.diagnosis) {
-        blocks.push(sectionHeading('Diagnosis'));
+    // Diagnosis — array of { code, description, type, confidence, date, notes }
+    const diagArray = Array.isArray(c.diagnosis) ? c.diagnosis : null;
+    if (diagArray?.length) {
+        blocks.push(sectionHeading(tr('report.diagnosis')));
+        for (const d of diagArray) {
+            const rows: [string, string][] = [];
+            const typeKey = d.type ? `report.diagnosis-types.${d.type}` : '';
+            const typeLabel = typeKey ? tr(typeKey) : '';
+            const desc = [d.description, d.code ? `(${d.code})` : ''].filter(Boolean).join(' ');
+            rows.push([typeLabel || tr('report.diagnosis'), desc || '—']);
+            if (d.notes) rows.push([tr('report.notes'), d.notes]);
+            blocks.push(keyValueTable(rows));
+        }
+    }
+
+    // Lab results / signals — 3-column table: name | value | reference
+    const signals = c.signals || c.laboratory;
+    if (signals?.length) {
+        blocks.push(sectionHeading(tr('report.vitals-and-amp-results')));
+        blocks.push({
+            table: {
+                headerRows: 1,
+                widths: ['*', 'auto', 'auto'],
+                body: [
+                    [
+                        { text: tr('report.name'), bold: true },
+                        { text: tr('report.value'), bold: true },
+                        { text: tr('report.reference-range'), bold: true }
+                    ],
+                    ...signals.map((s: any) => [
+                        s.signal || s.test || s.name || '—',
+                        [s.value, s.unit].filter(v => v != null && v !== '').join(' ') || '—',
+                        s.reference || ''
+                    ])
+                ]
+            },
+            layout: 'lightHorizontalLines',
+            margin: [0, 2, 0, 6]
+        } as Content);
+    }
+
+    // Vital signs
+    if (c.vitalSigns && typeof c.vitalSigns === 'object') {
+        const vitals = c.vitalSigns;
         const rows: [string, string][] = [];
-        if (c.diagnosis.mainDiagnosis) rows.push(['Main diagnosis', c.diagnosis.mainDiagnosis]);
-        if (c.diagnosis.secondaryDiagnoses?.length) rows.push(['Secondary', c.diagnosis.secondaryDiagnoses.join(', ')]);
-        if (c.diagnosis.icdCodes?.length) rows.push(['ICD codes', c.diagnosis.icdCodes.join(', ')]);
-        if (rows.length) blocks.push(keyValueTable(rows));
-        if (c.diagnosis.notes) blocks.push({ text: c.diagnosis.notes, margin: [0, 0, 0, 6] });
+        if (vitals.bloodPressure) rows.push([tr('report.blood-pressure'), vitalStr(vitals.bloodPressure)]);
+        if (vitals.heartRate) rows.push([tr('report.heart-rate'), vitalStr(vitals.heartRate)]);
+        if (vitals.temperature) rows.push([tr('report.temperature'), vitalStr(vitals.temperature)]);
+        if (vitals.weight) rows.push([tr('report.weight'), vitalStr(vitals.weight)]);
+        if (vitals.height) rows.push([tr('report.height'), vitalStr(vitals.height)]);
+        if (vitals.oxygenSaturation) rows.push([tr('report.oxygen-saturation'), vitalStr(vitals.oxygenSaturation)]);
+        if (vitals.respiratoryRate) rows.push([tr('report.respiratory-rate'), vitalStr(vitals.respiratoryRate)]);
+        if (rows.length) {
+            blocks.push(sectionHeading(tr('report.vital-signs')));
+            blocks.push(keyValueTable(rows));
+        }
     }
 
     // Medications
     if (c.medications?.length) {
-        blocks.push(sectionHeading('Medications'));
+        blocks.push(sectionHeading(tr('report.medications')));
         blocks.push({
             table: {
                 headerRows: 1,
                 widths: ['*', 'auto', 'auto', '*'],
                 body: [
                     [
-                        { text: 'Name', bold: true },
-                        { text: 'Dose', bold: true },
-                        { text: 'Frequency', bold: true },
-                        { text: 'Notes', bold: true }
+                        { text: tr('report.name'), bold: true },
+                        { text: tr('report.dose'), bold: true },
+                        { text: tr('report.frequency'), bold: true },
+                        { text: tr('report.notes'), bold: true }
                     ],
                     ...c.medications.map((m: any) => [
                         m.name || '—',
-                        m.dosage || '—',
+                        m.dosage || m.dose || '—',
                         m.frequency || '—',
                         m.notes || ''
                     ])
@@ -77,55 +170,64 @@ function buildContent(item: any): Content[] {
             },
             layout: 'lightHorizontalLines',
             margin: [0, 2, 0, 6]
-        });
-    }
-
-    // Lab results / signals
-    if (c.signals?.length) {
-        blocks.push(sectionHeading('Signals & Lab Results'));
-        const sigRows: [string, string][] = c.signals.map((s: any) => [
-            s.name || s.type || '—',
-            [s.value, s.unit].filter(Boolean).join(' ') || '—'
-        ]);
-        blocks.push(keyValueTable(sigRows));
-    }
-
-    // Vital signs
-    if (c.vitalSigns) {
-        blocks.push(sectionHeading('Vital Signs'));
-        const vitals = c.vitalSigns;
-        const rows: [string, string][] = [];
-        if (vitals.bloodPressure) rows.push(['Blood pressure', vitals.bloodPressure]);
-        if (vitals.heartRate) rows.push(['Heart rate', String(vitals.heartRate)]);
-        if (vitals.temperature) rows.push(['Temperature', String(vitals.temperature)]);
-        if (vitals.weight) rows.push(['Weight', String(vitals.weight)]);
-        if (vitals.height) rows.push(['Height', String(vitals.height)]);
-        if (rows.length) blocks.push(keyValueTable(rows));
+        } as Content);
     }
 
     // Recommendations / plan
     if (c.recommendations?.length || c.treatmentPlan) {
-        blocks.push(sectionHeading('Recommendations'));
+        blocks.push(sectionHeading(tr('report.recommendations')));
         if (c.treatmentPlan) blocks.push({ text: c.treatmentPlan, margin: [0, 0, 0, 4] });
         if (c.recommendations?.length) {
-            blocks.push({
-                ul: c.recommendations,
-                margin: [0, 0, 0, 6]
-            });
+            blocks.push({ ul: c.recommendations, margin: [0, 0, 0, 6] } as Content);
         }
     }
 
-    // Notes / other text fields
+    // Notes
     if (c.notes) {
-        blocks.push(sectionHeading('Notes'));
+        blocks.push(sectionHeading(tr('report.notes')));
         blocks.push({ text: c.notes, margin: [0, 0, 0, 6] });
     }
+
+    blocks.push(...buildPerformerSection(c.performer));
 
     return blocks;
 }
 
-export async function downloadPdf(item: any): Promise<void> {
-    // Dynamic import to avoid bundle impact
+async function loadAttachmentData(att: any, item: any): Promise<{ base64: string; type: string } | null> {
+    try {
+        if (!att.path || !item.key) return null;
+        const profileId = att.path.split('/')[0];
+        const fileResponse = await apiFetch(
+            `/v1/med/profiles/${profileId}/attachments?path=${encodeURIComponent(att.path)}`
+        );
+        if (!fileResponse.ok) return null;
+        const encryptedData = await fileResponse.text();
+        const decrypted = await decrypt([encryptedData], item.key);
+        const json = JSON.parse(decrypted[0]);
+        return { base64: json.file, type: att.type || 'application/octet-stream' };
+    } catch {
+        return null;
+    }
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
+
+function triggerDownload(bytes: Uint8Array, filename: string) {
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+export async function downloadPdf(item: any, profile?: any): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfMake = (await import('pdfmake/build/pdfmake')).default as any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,10 +239,25 @@ export async function downloadPdf(item: any): Promise<void> {
     const date = formatDate(meta.date);
     const patient = meta.patientName || meta.patient || '';
 
+    const content = buildContent(item, profile);
+
+    // Append image attachments as extra pages in pdfmake
+    for (const att of (item.attachments ?? [])) {
+        if (!att.type?.startsWith('image/')) continue;
+        const data = await loadAttachmentData(att, item);
+        if (data) {
+            content.push({
+                image: `data:${data.type};base64,${data.base64}`,
+                width: 500,
+                pageBreak: 'before'
+            } as Content);
+        }
+    }
+
     const docDefinition = {
         info: { title },
         pageMargins: [50, 70, 50, 60],
-        header: (currentPage: number, pageCount: number) => ({
+        header: (_currentPage: number, _pageCount: number) => ({
             columns: [
                 {
                     stack: [
@@ -164,7 +281,7 @@ export async function downloadPdf(item: any): Promise<void> {
                 { text: `Page ${currentPage} of ${pageCount}`, alignment: 'right', fontSize: 9, color: '#aaa', margin: [0, 0, 50, 0] }
             ]
         }),
-        content: buildContent(item),
+        content,
         styles: {
             sectionHeader: {
                 fontSize: 13,
@@ -180,5 +297,28 @@ export async function downloadPdf(item: any): Promise<void> {
     };
 
     const filename = `${title}${date ? ' - ' + date : ''}.pdf`;
-    pdfMake.createPdf(docDefinition).download(filename);
+
+    // Generate pdfmake PDF as buffer (getBuffer() returns a Promise in this pdfmake version)
+    const pdfBytes: Uint8Array = await pdfMake.createPdf(docDefinition).getBuffer();
+
+    // Merge PDF attachments with pdf-lib
+    const pdfAttachments: Uint8Array[] = [];
+    for (const att of (item.attachments ?? [])) {
+        if (!att.type?.includes('pdf')) continue;
+        const data = await loadAttachmentData(att, item);
+        if (data) pdfAttachments.push(base64ToBytes(data.base64));
+    }
+
+    if (pdfAttachments.length > 0) {
+        const { PDFDocument } = await import('pdf-lib');
+        const mainDoc = await PDFDocument.load(pdfBytes);
+        for (const attBytes of pdfAttachments) {
+            const attDoc = await PDFDocument.load(attBytes);
+            const pages = await mainDoc.copyPages(attDoc, attDoc.getPageIndices());
+            pages.forEach(p => mainDoc.addPage(p));
+        }
+        triggerDownload(await mainDoc.save(), filename);
+    } else {
+        triggerDownload(pdfBytes, filename);
+    }
 }
