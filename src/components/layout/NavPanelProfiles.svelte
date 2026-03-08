@@ -13,12 +13,12 @@
 
 <nav class="panel-profiles">
     {#each $profiles as p (p.id)}
-        <button class="panel-profile-item" onclick={() => onSelectProfile(p.id)}>
-            <ProfileImage profile={p} size={2} />
+        <button class="button panel-profile-item" onclick={() => onSelectProfile(p.id)}>
+            <ProfileImage profile={p} size={2.5} />
             <span>{p.fullName}</span>
         </button>
     {/each}
-    <a href="/med/settings" onclick={onClose} class="panel-settings-link">
+    <a href="/med/settings" onclick={onClose} class="button panel-settings-link">
         {$t('app.nav.settings')}
     </a>
 </nav>
@@ -28,39 +28,25 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 1.8rem;
+        margin: 3rem 0 0;
     }
 
     .panel-profile-item {
+        position: relative;
         display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 0.75rem;
-        background: none;
-        border: none;
-        cursor: pointer;
+        align-items: left;
         text-align: left;
         width: 100%;
         font-size: 1rem;
-        color: var(--color-black);
-        border-radius: var(--radius-16, 1rem);
-        background-color: var(--color-gray-300);
+        padding: 1rem .5rem .5rem;
     }
 
-    .panel-profile-item:hover {
-        background: rgba(0, 0, 0, 0.05);
+    .panel-profile-item :global(.avatar) {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translate(-50%, -70%);
     }
 
-    .panel-settings-link {
-        display: block;
-        padding: 0.65rem 0.75rem;
-        color: var(--color-gray-800);
-        text-decoration: none;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    .panel-settings-link:hover {
-        color: var(--color-black);
-    }
 </style>
