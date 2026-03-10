@@ -1,8 +1,6 @@
 <script lang="ts">
     import ProfileImage from "$components/profile/ProfileImage.svelte";
     import { t } from "$lib/i18n";
-    import { logger } from '$lib/logging/logger';
-
     interface Performer {
         role?: string;
         name?: string;
@@ -33,7 +31,6 @@
     }
 
     let { data }: Props = $props();
-    $effect(() => { logger.api.debug('Performer data:', $state.snapshot(data)); });
 
     // Generic function to check if a value is valid (not undefined, null, empty string, or "undefined" string)
     function isValidValue(value: any): boolean {

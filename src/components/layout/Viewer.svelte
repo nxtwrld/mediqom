@@ -26,6 +26,8 @@
     export let activeTools: string[] = [];
 
     export let signalHighlight: { signalName: string; value: number; documentId?: string } | null = null;
+    export let fullscreen: boolean = false;
+    export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
 
     $: if (signalHighlight) activePanel = 'timeline';
     
@@ -33,7 +35,6 @@
     let modelLoaded: boolean = false;
 
     const layers: string[] = ['shade',...Object.keys(objects)];
-    console.log('layers', layers);
     const tools: string[] = [
         'selection',
         //'marker'
@@ -111,7 +112,7 @@
 
 {#if $profile}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="model" on:mousedown={() => showLayers = false}>
+<div class="model" class:-fullscreen={fullscreen} on:mousedown={() => showLayers = false}>
 
     <!-- Panel toggle -->
     <!--div class="viewer-panel-toggle" on:mousedown|stopPropagation>
@@ -125,7 +126,7 @@
 
     {#if activePanel === 'anatomy' && mounted}
         {#key $profile.health.biologicalSex}
-        <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
+        <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} {fullscreen} {viewportRect} />
         {/key}
 
         <div class="model-profile-name">
@@ -221,7 +222,6 @@
         align-items: center;
         justify-content: center;
         z-index: 100000;
-        background-color: var(--background);
     }
 
     .model {
@@ -231,7 +231,6 @@
 /*
         background-image: linear-gradient(90deg, var(--color-shade) 0%, var(--color-shade) 5%, transparent 35%, #FFF 50%, transparent 65%, var(--color-shade) 95%, var(--color-shade) 100%);*/
     }
-
     .model-tools,
     .model-layers {
         --size: 3.5rem;
@@ -268,18 +267,32 @@
         top: auto;
     }
 
-    @media only screen and (max-width: 768px) { 
+    @media only screen and (max-width: 768px) {
 
         .model-layers {
-            position: fixed;
-            left: 1rem;
-            /*top: calc(var(--top-offset) + 1rem);*/
             z-index: 100000;
         }
 
         .model-tools {
             left: auto;
             right: 1rem;
+        }
+
+        /* In fullscreen anatomy mode, escape overflow:hidden by going fixed */
+        .model.-fullscreen .model-layers {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 999;
+        }
+
+        .model.-fullscreen .model-tools {
+            position: fixed;
+            right: 1rem;
+            bottom: calc(var(--toolbar-height) + 2rem);
+            top: auto;
+            left: auto;
+            z-index: 999;
         }
     }
 

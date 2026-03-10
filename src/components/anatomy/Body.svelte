@@ -64,7 +64,9 @@
     export let activeTools: string[] = [];
 
     export let showShade: boolean = true;
-    
+    export let fullscreen: boolean = false;
+    export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
+
     export let selected: THREE.Object3D | null = null;
 
     let shade: THREE.Group;
@@ -120,7 +122,8 @@
         .map(([k,v]) => {
             const id: string = mapped[k] || k;
 
-            if (!activeLayers.includes(objectToFileMapping[id])) activeLayers = [...activeLayers, objectToFileMapping[id]];
+            const fileGroup = objectToFileMapping[id];
+            if (fileGroup && !activeLayers.includes(fileGroup)) activeLayers = [...activeLayers, fileGroup];
 
             return {
                 type: v[0].metadata.category,
@@ -212,6 +215,19 @@
     }
 
     */
+    // When fullscreen on mobile, shift the model down so it appears centred in
+    // the visible area above the pill rather than centred in the whole screen.
+    $: pillModelYOffset = (() => {
+        if (!fullscreen || !viewportRect) return 0;
+        const pillH = window.innerHeight - viewportRect.height - viewportRect.y;
+        if (pillH <= 0) return 0;
+        // Camera is at approx (cameraX=800, cameraY=500, z=minZoom=1500) for male.
+        // Approximate world units per screen pixel at the target plane.
+        const camDist = Math.hypot(800, 500, 1500); // ≈ 1772
+        const worldPerPx = (2 * camDist * Math.tan(35 * Math.PI / 180)) / window.innerHeight;
+        return -(pillH / 2) * worldPerPx; // negative = shift model down in world space
+    })();
+
     $: defaultState = (model === 'female') ? {
         minZoom : 150,
         maxZoom : 0,
@@ -222,7 +238,7 @@
     } : {
         minZoom : 1500,
         maxZoom : 300,
-        modelY : isTouchDevice() ? -1050 : -960,
+        modelY : (isTouchDevice() ? -1050 : -960) + pillModelYOffset,
         modelZ : isTouchDevice() ? 500 : 600,
         cameraY : 500,
         cameraX : 800
@@ -230,21 +246,29 @@
 
     $: {
 
-        if (activeLayers != loadedLayers) {
-            let toLoad = activeLayers.filter(l => !loadedLayers.includes(l));
+        if (ready && activeLayers != loadedLayers) {
+            let toLoad = activeLayers.filter(l => l && !loadedLayers.includes(l));
             //console.log('toLoad', toLoad);
-            let filesToLoad = toLoad.reduce((acc, l) => {
+            let filesToLoad = toLoad.filter(l => objects3d[l as keyof typeof objects3d]).reduce((acc, l) => {
                 return [...acc, ...objects3d[l as keyof typeof objects3d].files]
             }, [] as string[]).filter(f => !loadedFiles.includes(f));
-            let objectsToShow = activeLayers.reduce((acc, l) => {
+            let objectsToShow = activeLayers.filter(l => objects3d[l as keyof typeof objects3d]).reduce((acc, l) => {
                 return [...acc, ...objects3d[l as keyof typeof objects3d].objects]
             }, [] as string[]);
             loadedLayers = activeLayers;
             updateModel(filesToLoad, objectsToShow);
         }
 
-        toggleShade(showShade);
+        if (ready) toggleShade(showShade);
 
+    }
+
+    // When the pill offset changes (viewportRect updated after model loaded),
+    // push the new modelY to all loaded objects in the group.
+    $: if (ready && group) {
+        void pillModelYOffset; // track
+        group.children.forEach(obj => { obj.position.y = defaultState.modelY; });
+        requestRender?.();
     }
 
     let previousLabels: typeof labels = [];
@@ -270,6 +294,13 @@
 
 
 
+    // React to viewportRect / fullscreen changes
+    $: void viewportRect, void fullscreen, (() => {
+        if (renderer && camera) {
+            resize();
+            requestRender();
+        }
+    })();
 
     function  setHighlight(name: string | null) {
         if (name) {
@@ -316,18 +347,32 @@
         // Wait for valid dimensions before initializing Three.js
         const waitForDimensions = (): Promise<void> => {
             return new Promise((resolve) => {
+                let timeout: ReturnType<typeof setTimeout>;
+
+                const done = () => {
+                    clearTimeout(timeout);
+                    resolve();
+                };
+
                 // Check if dimensions are already valid
                 if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-                    resolve();
+                    done();
                     return;
                 }
+
+                // Fallback timeout so init never hangs
+                timeout = setTimeout(() => {
+                    console.warn('🧍', 'waitForDimensions timed out, using fallback');
+                    observer.disconnect();
+                    done();
+                }, 2000);
 
                 // Wait for ResizeObserver to report valid dimensions
                 const observer = new ResizeObserver((entries) => {
                     const entry = entries[0];
                     if (entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) {
                         observer.disconnect();
-                        resolve();
+                        done();
                     }
                 });
                 observer.observe(container);
@@ -451,46 +496,51 @@
     }
 
     async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
-        //console.log('updateModel', filesToLoad, objectsToShow);
-        let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
-            id: f,
-            name: f
-        })));
+        try {
+            //console.log('updateModel', filesToLoad, objectsToShow);
+            let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
+                id: f,
+                name: f
+            })));
 
 
-        let labelIds = [... new Set(labels.map(l => l.id))];
+            let labelIds = [... new Set(labels.map(l => l.id))];
 
-        insertObject(newObjects, objectsToShow, labelIds, group);
+            insertObject(newObjects, objectsToShow, labelIds, group);
 
-        
-        objects.forEach(object => {
-            object.traverse( function ( child: any ) {
-                // mark labeled objects
-                checkObject(child, objectsToShow, labelIds);
-            } );
-        })
-        objects = [...objects, ...newObjects];
 
-        // Pre-cache materials and build focusable mesh list for fast highlight()
-        if (destroyed) return;
-        precacheMaterials();
+            objects.forEach(object => {
+                object.traverse( function ( child: any ) {
+                    // mark labeled objects
+                    checkObject(child, objectsToShow, labelIds);
+                } );
+            })
+            objects = [...objects, ...newObjects];
 
-        requestRender();
-        loadLabels();
+            // Pre-cache materials and build focusable mesh list for fast highlight()
+            if (destroyed) return;
+            precacheMaterials();
 
-        // Mark model as loaded and apply any pending focus
-        modelLoaded = true;
-        if (pendingFocus) {
-            setHighlight(pendingFocus);
-            pendingFocus = null;
-        } else {
-            setHighlight($focused.object ?? null);
-        }
+            requestRender();
+            loadLabels();
 
-        if (!initialViewState) initialViewState = {
-            position: camera.position.clone(),
-            rotation: camera.rotation.clone(),
-            target: controls.target.clone()
+            // Mark model as loaded and apply any pending focus
+            modelLoaded = true;
+            if (pendingFocus) {
+                setHighlight(pendingFocus);
+                pendingFocus = null;
+            } else {
+                setHighlight($focused.object ?? null);
+            }
+
+            if (!initialViewState) initialViewState = {
+                position: camera.position.clone(),
+                rotation: camera.rotation.clone(),
+                target: controls.target.clone()
+            }
+        } catch (error) {
+            console.error('🧍', 'updateModel error:', error);
+            modelLoaded = true;
         }
 
         dispatch('ready');
@@ -796,8 +846,8 @@
 
         resizeObserverListener = new ResizeObserver(() => { resize(); requestRender(); });
         resizeObserverListener.observe(container);
-        let w = container.offsetWidth;
-        let h = container.offsetHeight;
+        let w = fullscreen ? window.innerWidth : (container.offsetWidth || 300);
+        let h = fullscreen ? window.innerHeight : (container.offsetHeight || 400);
         const minZoom = defaultState.minZoom;
         const maxZoom = defaultState.maxZoom;
 
@@ -830,7 +880,7 @@
         renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } );
         renderer.setClearColor( 0x000000, 0 ); // the default
         renderer.setPixelRatio( Math.min(window.devicePixelRatio, 2) );
-        renderer.setSize( container.offsetWidth, container.offsetHeight );
+        renderer.setSize( w, h );
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.0;
@@ -839,7 +889,7 @@
         // CSS2DRenderer
 
         labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+        labelRenderer.setSize( w, h );
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         container.appendChild( labelRenderer.domElement );
@@ -1029,10 +1079,22 @@
 
     function resize () {
         if (!container || !renderer) return;
-        camera.aspect = container.offsetWidth / container.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize( container.offsetWidth, container.offsetHeight );
-        if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+
+        if (fullscreen) {
+            const fw = window.innerWidth;
+            const fh = window.innerHeight;
+            camera.aspect = fw / fh;
+            camera.clearViewOffset();
+            camera.updateProjectionMatrix();
+            renderer.setSize(fw, fh);
+            if (labelRenderer) labelRenderer.setSize(fw, fh);
+        } else {
+            camera.clearViewOffset();
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( container.offsetWidth, container.offsetHeight );
+            if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+        }
     }
 
     function requestRender() {
@@ -1356,7 +1418,7 @@
     {/each}
 </div>
 
-<div class="model" bind:this={container}></div>
+<div class="model" class:-fullscreen={fullscreen} bind:this={container}></div>
 
 {#if selected}
     {#key selected}
@@ -1400,6 +1462,13 @@
         height: 100%;
         transform: translateX(0);
         /*background-image: radial-gradient(ellipse at center, rgba(102, 255, 196, 100)  0%, rgba(102, 255, 196, 0) 100%);*/
+    }
+    .model.-fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+        transform: none;
+        pointer-events: auto;
     }
     /*
     @media only screen and (min-width: 769px) {

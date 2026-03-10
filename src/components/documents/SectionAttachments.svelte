@@ -23,8 +23,6 @@
 
   let { data, key = undefined }: Props = $props();
 
-    $effect(() => { logger.api.debug('Attachments data:', data); });
-
     const loadedAttachments = new Map<string, ArrayBuffer>();
 
     // Modal state - using Svelte 5 runes

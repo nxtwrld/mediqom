@@ -64,9 +64,6 @@ function updateIndex() {
             (doc) =>
               doc.user_id === user_id && doc.type === DocumentType.document,
           );
-          logger.documents.debug("Update profile store", {
-            user_id,
-          });
           set(userDocuments);
         });
       })();

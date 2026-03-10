@@ -123,6 +123,7 @@
     let panelHeight = $state(0);
     let isSnappingPanel = $state(false);
     let navbarWrapEl = $state<HTMLElement | undefined>(undefined);
+    let navbarBarEl = $state<HTMLElement | undefined>(undefined);
 
     function handleAvatarClick() {
         ui.emit("nav:profiles");
@@ -164,12 +165,54 @@
     }
 
     const MAX_PANEL_HEIGHT: Record<PanelView, () => number> = {
-        profiles: () => Math.round(Math.min(window.innerHeight * 0.55, 380)),
+        profiles: () => Math.round(Math.min(window.innerHeight * 0.65, 380)),
         anatomy: () => Math.round(window.innerHeight * 0.82),
         import: () => Math.round(window.innerHeight * 0.88),
     };
 
     let panelOpen = $derived(panelHeight > 0);
+
+    // Fullscreen anatomy canvas
+    let panelSectionEl = $state<HTMLElement | undefined>(undefined);
+    let anatomyViewportRect = $state<{ x: number; y: number; width: number; height: number } | null>(null);
+    let anatomyFullscreen = $derived($device.isMobile && panelView === 'anatomy');
+
+    // Compute viewportRect: area above the floating pill (navbar-outer).
+    // Use window.innerHeight minus safe-area-top, pill height, and bottom gap
+    // rather than getBoundingClientRect() which can be unreliable during layout.
+    function computeAnatomyViewportRect() {
+        if (!navbarBarEl) return null;
+        const style = getComputedStyle(document.documentElement);
+        const safeTop = parseFloat(style.getPropertyValue('--safe-area-top')) || 0;
+        const safeBottom = parseFloat(style.getPropertyValue('--safe-area-bottom')) || 0;
+        const rem = parseFloat(style.fontSize);
+        // Use only the toolbar row height (excludes expanded panel content)
+        const toolbarH = navbarBarEl.offsetHeight;
+        // bottom inset: native uses safe-area-bottom, web uses 0.5rem
+        const bottomGap = safeBottom > 0 ? safeBottom : 0.5 * rem;
+        const height = window.innerHeight - safeTop - toolbarH - bottomGap;
+        const rect = { x: 0, y: safeTop, width: window.innerWidth, height };
+        console.log('[anatomy] viewportRect', $state.snapshot(rect), { toolbarH, safeTop, safeBottom, bottomGap });
+        return rect;
+    }
+
+    $effect(() => {
+        const el = panelSectionEl;
+        void panelHeight; // track drag changes
+        if (!el || !anatomyFullscreen) {
+            anatomyViewportRect = null;
+            return;
+        }
+
+        function updateRect() {
+            anatomyViewportRect = computeAnatomyViewportRect();
+        }
+
+        updateRect();
+        const ro = new ResizeObserver(updateRect);
+        ro.observe(el);
+        return () => ro.disconnect();
+    });
 
     // Touch drag tracking (plain vars, not reactive)
     let panelTouchStartY = 0;
@@ -208,7 +251,7 @@
         const deltaY = panelTouchStartY - e.touches[0].clientY;
         if (!isDraggingPanel && Math.abs(deltaY) < 6) return;
         isDraggingPanel = true;
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const maxH = MAX_PANEL_HEIGHT[panelView]();
         panelHeight = Math.max(0, Math.min(maxH, panelStartHeight + deltaY));
     }
@@ -466,6 +509,7 @@
     <div
         class="panel-backdrop"
         class:-open={panelOpen}
+        class:-anatomy={anatomyFullscreen}
         onclick={closePanel}
         aria-hidden="true"
     ></div>
@@ -513,7 +557,7 @@
 
         <!-- Inner pill: clips the panel -->
         <div class="navbar-inner">
-            <nav class="navbar-bar toolbar" aria-label="Main navigation">
+            <nav class="navbar-bar toolbar" aria-label="Main navigation" bind:this={navbarBarEl}>
                 <a
                     class="nav-icon"
                     href={$profile?.id
@@ -560,7 +604,7 @@
             </nav>
             <div class="navbar-name">{$profile?.fullName ?? ""}</div>
 
-            <div class="panel-section">
+            <div class="panel-section" class:-anatomy={anatomyFullscreen} bind:this={panelSectionEl}>
                 {#if panelView === "profiles"}
                     <NavPanelProfiles
                         onSelectProfile={(id) => {
@@ -571,7 +615,7 @@
                     />
                 {:else if panelView === "anatomy"}
                     {#if viewerAlive}
-                        <Viewer signalHighlight={viewerSignalHighlight} />
+                        <Viewer signalHighlight={viewerSignalHighlight} fullscreen={anatomyFullscreen} viewportRect={anatomyViewportRect} />
                     {/if}
                 {:else if panelView === "import"}
                     <Import oncomplete={closePanel} />
@@ -700,6 +744,7 @@
         cursor: pointer;
         z-index: 2;
         border-radius: 50%;
+        z-index: 1002;
     }
 
     .nav-avatar :global(.avatar) {
@@ -723,6 +768,7 @@
             0 -5px 1rem rgba(0, 0, 0, 0.2),
             0 3px 0.2rem 0 rgba(0, 0, 0, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.9);
+        z-index: 1001;
     }
 
     .nav-icon {
@@ -760,7 +806,7 @@
         border-bottom-left-radius: var(--radius-16, 1rem);
         border-bottom-right-radius: var(--radius-16, 1rem);
         text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
-        z-index: -1;
+        z-index: 1000;
     }
 
     /* ── Panel section ───────────────────────────────────────── */
@@ -770,6 +816,10 @@
         display: flex;
         flex-direction: column;
         padding: 0 1rem;
+    }
+    .panel-section.-anatomy {
+        pointer-events: none;
+        overflow: hidden;
     }
 
     /* ── Panel header (back button row) ──────────────────────── */
@@ -822,6 +872,13 @@
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         pointer-events: auto;
+    }
+
+    .panel-backdrop.-open.-anatomy {
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        pointer-events: none;
     }
 
     @media (min-width: 769px) {

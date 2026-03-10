@@ -36,10 +36,6 @@
 
     let items = $derived(cleanItems(shared));
 
-    $effect(() => {
-        if (shared) logger.api.debug('Shared items', shared);
-    });
-
     function cleanItems(items: any[]): any[] {
         return items.map(item => {
             // Create a deep copy to avoid mutating the original

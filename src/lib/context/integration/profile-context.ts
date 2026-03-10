@@ -62,13 +62,6 @@ export class ProfileContextManager {
     },
   ): Promise<void> {
     try {
-      logger
-        .namespace("ProfileContext")
-        .info("Initializing profile context with medical terms", {
-          profileId,
-          includePreload: options.includePreload,
-        });
-
       options.onProgress?.("Loading profile documents...", 10);
 
       // Get documents for the profile
@@ -91,14 +84,6 @@ export class ProfileContextManager {
       const processedDocuments = userDocuments.filter((doc) => {
         return doc.medicalTerms || (doc as Document).content;
       });
-
-      logger
-        .namespace("ProfileContext")
-        .info("Profile context initialization completed", {
-          profileId,
-          totalDocuments: userDocuments.length,
-          processedDocuments: processedDocuments.length,
-        });
 
       options.onProgress?.("Profile context ready", 100);
     } catch (error) {

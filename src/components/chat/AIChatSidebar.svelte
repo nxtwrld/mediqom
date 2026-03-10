@@ -218,15 +218,6 @@
           previousLanguage !== userLanguage || 
           previousIsOwnProfile !== isOwnProfile) {
         
-        console.log('Profile or language changed, emitting profile switch event:', {
-          profileId: currentProfileId,
-          language: userLanguage,
-          isOwnProfile,
-          previousProfileId,
-          previousLanguage,
-          previousIsOwnProfile
-        });
-        
         // Emit profile switch event
         ui.emit('chat:profile_switch', {
           profileId: currentProfileId,
