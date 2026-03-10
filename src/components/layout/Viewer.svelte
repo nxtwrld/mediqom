@@ -106,7 +106,7 @@
         model.reset();
     }
     function closeModel() {
-        $state.viewer = false;
+        ui.emit('viewer:close');
     }
 </script>
 
@@ -281,7 +281,7 @@
         /* In fullscreen anatomy mode, escape overflow:hidden by going fixed */
         .model.-fullscreen .model-layers {
             position: fixed;
-            top: 1rem;
+            top: calc(env(safe-area-inset-top) + var(--toolbar-height) + 7rem);
             left: 1rem;
             z-index: 999;
         }
@@ -289,7 +289,7 @@
         .model.-fullscreen .model-tools {
             position: fixed;
             right: 1rem;
-            bottom: calc(var(--toolbar-height) + 2rem);
+            bottom: 1rem;
             top: auto;
             left: auto;
             z-index: 999;

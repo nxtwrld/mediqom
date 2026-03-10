@@ -262,7 +262,16 @@
         isDraggingPanel = false;
         isSnappingPanel = true;
         const maxH = MAX_PANEL_HEIGHT[panelView]();
-        panelHeight = panelHeight > maxH * 0.3 ? maxH : 0;
+        const willClose = panelHeight <= maxH * 0.3;
+        panelHeight = willClose ? 0 : maxH;
+        // Swipe-down on anatomy panel — destroy viewer immediately (no grace period)
+        if (willClose && panelView === 'anatomy') {
+            if (viewerUnloadTimer !== null) {
+                clearTimeout(viewerUnloadTimer);
+                viewerUnloadTimer = null;
+            }
+            viewerAlive = false;
+        }
     }
 
     // Register touch handlers on NavBar's wrapEl whenever it becomes available
@@ -440,6 +449,16 @@
                         history.back();
                     }
                 }
+            }),
+            ui.listen("viewer:close", () => {
+                if ($device.isMobile) closePanel();
+                else $uiState.viewer = false;
+                // Explicit close — bypass the 5s grace period, destroy Viewer immediately
+                if (viewerUnloadTimer !== null) {
+                    clearTimeout(viewerUnloadTimer);
+                    viewerUnloadTimer = null;
+                }
+                viewerAlive = false;
             }),
             ui.listen("viewer:anatomy", () => {
                 if ($device.isMobile) openPanel("anatomy");
