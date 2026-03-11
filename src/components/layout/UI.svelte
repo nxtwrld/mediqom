@@ -80,27 +80,47 @@
     // Keep Viewer mounted for 5s after panel/sidebar closes to avoid thrashing
     let viewerAlive = $state(false);
     let viewerUnloadTimer: ReturnType<typeof setTimeout> | null = null;
+    let viewerMountTimer: ReturnType<typeof setTimeout> | null = null;
 
     $effect(() => {
         const isActive =
             (panelOpen && panelView === "anatomy") ||
             ($uiState.viewer && !$device.isMobile);
         if (isActive) {
+            // Cancel any pending unload
             if (viewerUnloadTimer !== null) {
                 clearTimeout(viewerUnloadTimer);
                 viewerUnloadTimer = null;
             }
-            viewerAlive = true;
-        } else if (viewerAlive && viewerUnloadTimer === null) {
-            viewerUnloadTimer = setTimeout(() => {
-                viewerAlive = false;
-                viewerUnloadTimer = null;
-            }, 5000);
+            // Delay mount so panel transition finishes first
+            if (!viewerAlive && viewerMountTimer === null) {
+                viewerMountTimer = setTimeout(() => {
+                    viewerAlive = true;
+                    viewerMountTimer = null;
+                }, 700);
+            }
+        } else {
+            // Cancel pending mount
+            if (viewerMountTimer !== null) {
+                clearTimeout(viewerMountTimer);
+                viewerMountTimer = null;
+            }
+            // Start unload grace period
+            if (viewerAlive && viewerUnloadTimer === null) {
+                viewerUnloadTimer = setTimeout(() => {
+                    viewerAlive = false;
+                    viewerUnloadTimer = null;
+                }, 5000);
+            }
         }
         return () => {
             if (viewerUnloadTimer !== null) {
                 clearTimeout(viewerUnloadTimer);
                 viewerUnloadTimer = null;
+            }
+            if (viewerMountTimer !== null) {
+                clearTimeout(viewerMountTimer);
+                viewerMountTimer = null;
             }
         };
     });
@@ -180,6 +200,7 @@
     // Compute viewportRect: area above the floating pill (navbar-outer).
     // Use window.innerHeight minus safe-area-top, pill height, and bottom gap
     // rather than getBoundingClientRect() which can be unreliable during layout.
+    /*
     function computeAnatomyViewportRect() {
         if (!navbarBarEl) return null;
         const style = getComputedStyle(document.documentElement);
@@ -192,11 +213,12 @@
         const bottomGap = safeBottom > 0 ? safeBottom : 0.5 * rem;
         const height = window.innerHeight - safeTop - toolbarH - bottomGap;
         const rect = { x: 0, y: safeTop, width: window.innerWidth, height };
-        console.log('[anatomy] viewportRect', $state.snapshot(rect), { toolbarH, safeTop, safeBottom, bottomGap });
+
         return rect;
     }
 
     $effect(() => {
+        
         const el = panelSectionEl;
         void panelHeight; // track drag changes
         if (!el || !anatomyFullscreen) {
@@ -208,11 +230,13 @@
             anatomyViewportRect = computeAnatomyViewportRect();
         }
 
-        updateRect();
+        //updateRect();
+        
         const ro = new ResizeObserver(updateRect);
         ro.observe(el);
         return () => ro.disconnect();
     });
+    */
 
     // Touch drag tracking (plain vars, not reactive)
     let panelTouchStartY = 0;
@@ -266,6 +290,10 @@
         panelHeight = willClose ? 0 : maxH;
         // Swipe-down on anatomy panel — destroy viewer immediately (no grace period)
         if (willClose && panelView === 'anatomy') {
+            if (viewerMountTimer !== null) {
+                clearTimeout(viewerMountTimer);
+                viewerMountTimer = null;
+            }
             if (viewerUnloadTimer !== null) {
                 clearTimeout(viewerUnloadTimer);
                 viewerUnloadTimer = null;
@@ -454,6 +482,10 @@
                 if ($device.isMobile) closePanel();
                 else $uiState.viewer = false;
                 // Explicit close — bypass the 5s grace period, destroy Viewer immediately
+                if (viewerMountTimer !== null) {
+                    clearTimeout(viewerMountTimer);
+                    viewerMountTimer = null;
+                }
                 if (viewerUnloadTimer !== null) {
                     clearTimeout(viewerUnloadTimer);
                     viewerUnloadTimer = null;
@@ -893,12 +925,12 @@
         pointer-events: auto;
     }
 
-    .panel-backdrop.-open.-anatomy {
+    /*.panel-backdrop.-open.-anatomy {
         background: transparent;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         pointer-events: none;
-    }
+    }/*
 
     @media (min-width: 769px) {
         .panel-backdrop {

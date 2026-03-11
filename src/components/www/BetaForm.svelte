@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { apiFetch } from '$lib/api/client';
   
   interface FormData {
     user_type: string;
@@ -105,11 +106,8 @@
     submitting = true;
     
     try {
-      const response = await fetch('/v1/beta/apply', {
+      const response = await apiFetch('/v1/beta/apply', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(formData)
       });
       

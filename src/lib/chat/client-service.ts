@@ -1,5 +1,6 @@
 import type { ChatMessage, ChatContext, ChatResponse } from "./types.d";
 import { generateId } from "$lib/utils/id";
+import { apiFetch } from "$lib/api/client";
 
 export interface ChatStreamEvent {
   type:
@@ -37,11 +38,8 @@ export class ChatClientService {
     this.abortController = new AbortController();
 
     try {
-      const response = await fetch("/v1/chat/conversation", {
+      const response = await apiFetch("/v1/chat/conversation", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           message,
           mode: context.mode,
@@ -63,7 +61,7 @@ export class ChatClientService {
           assembledContext: context.assembledContext,
           availableTools: context.availableTools,
         }),
-        signal: this.abortController.signal,
+        timeout: 300000,
       });
 
       if (!response.ok) {

@@ -4,6 +4,7 @@
 	import user from '$lib/user';
 	import Select from '$components/forms/Select.svelte';
 	import SUPPORTED_LANGUAGES from '$lib/languages';
+	import { apiFetch } from '$lib/api/client';
 
 	// Read language from $user store
 	let selectedLanguage = $state($user?.language || 'en');
@@ -31,9 +32,8 @@
 		message = null;
 
 		try {
-			const response = await fetch('/v1/user/language', {
+			const response = await apiFetch('/v1/user/language', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ language: selectedLanguage })
 			});
 
@@ -64,9 +64,8 @@
 		roleMessage = null;
 
 		try {
-			const response = await fetch('/v1/user/language', {
+			const response = await apiFetch('/v1/user/language', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ language: selectedLanguage, user_role: selectedRole })
 			});
 

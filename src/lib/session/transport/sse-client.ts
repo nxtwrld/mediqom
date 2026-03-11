@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 import type { PartialTranscript } from "../manager";
 import { convertFloat32ToMp3 } from "$lib/audio/microphone";
+import { apiFetch } from "$lib/api/client";
 
 export interface SSEOptions {
   sessionId: string;
@@ -189,7 +190,7 @@ export class SSEClient extends EventEmitter {
       formData.append("sequenceNumber", sequenceNumber.toString());
       formData.append("timestamp", timestamp.toString());
 
-      const response = await fetch(`/v1/session/${this.sessionId}/transcribe`, {
+      const response = await apiFetch(`/v1/session/${this.sessionId}/transcribe`, {
         method: "POST",
         body: formData,
       });

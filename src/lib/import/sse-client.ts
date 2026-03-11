@@ -2,6 +2,7 @@ import type { Assessment, ReportAnalysis } from "$lib/import/types";
 import type { Task } from "$lib/files/index";
 import { resizeImage } from "$lib/images";
 import { PROCESS_SIZE } from "$lib/files/CONFIG";
+import { apiFetch } from "$lib/api/client";
 
 // Generic Task Processor Interface
 interface TaskProcessor {
@@ -633,14 +634,12 @@ export async function processDocumentsFallback(
       const resized = await resizeImage(base64, PROCESS_SIZE);
 
       // Call extract endpoint for assessment
-      const extractResponse = await fetch("/v1/import/extract", {
+      const extractResponse = await apiFetch("/v1/import/extract", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           images: [resized],
         }),
+        timeout: 300000,
       });
 
       if (!extractResponse.ok) {
@@ -658,15 +657,13 @@ export async function processDocumentsFallback(
           .join("\n");
 
         // Call analyze endpoint
-        const analyzeResponse = await fetch("/v1/import/report", {
+        const analyzeResponse = await apiFetch("/v1/import/report", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({
             text: documentText,
             language: options.language || "English",
           }),
+          timeout: 300000,
         });
 
         if (!analyzeResponse.ok) {

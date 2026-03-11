@@ -1,4 +1,5 @@
 import { readAsArrayBuffer, readAsText, readAsBase64 } from "./reader";
+import { apiFetch } from "$lib/api/client";
 import {
   processPDF,
   CODES as PDF_CODES,
@@ -46,11 +47,8 @@ async function processDicomImages(
       );
 
       // Enhanced request with DICOM metadata - call specialized medical imaging endpoint
-      const response = await fetch("/v1/import/medical-imaging", {
+      const response = await apiFetch("/v1/import/medical-imaging", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           images: resizedImages,
           language: "English", // Default language for DICOM processing

@@ -3,6 +3,7 @@
   import SerenityFormResults from '$components/serenity/SerenityFormResults.svelte';
   import type { SerenityFormResponse } from '$lib/serenity/types';
   import type { PageData } from './$types';
+  import { apiFetch } from '$lib/api/client';
 
   let { data }: { data: PageData } = $props();
 
@@ -32,7 +33,7 @@
         translate: false
       }));
 
-      const transcribeResponse = await fetch('/v1/transcribe', {
+      const transcribeResponse = await apiFetch('/v1/transcribe', {
         method: 'POST',
         body: formData
       });
@@ -50,9 +51,8 @@
 
       // Stage 2: Analyze
       processingStage = 'analyzing';
-      const analyzeResponse = await fetch('/v1/serenity/analyze', {
+      const analyzeResponse = await apiFetch('/v1/serenity/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript, formType, language })
       });
 

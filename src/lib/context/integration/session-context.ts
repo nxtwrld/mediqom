@@ -12,6 +12,7 @@ import { contextAssembler } from "../context-assembly/context-composer";
 import type { SessionData, Message } from "$lib/session/manager";
 import type { ChatContextResult } from "./chat-service";
 import { logger } from "$lib/logging/logger";
+import { apiFetch } from "$lib/api/client";
 
 export interface SessionContextOptions {
   profileId: string;
@@ -482,11 +483,8 @@ export class SessionContextService {
    */
   private async generateQueryEmbedding(query: string): Promise<Float32Array> {
     try {
-      const response = await fetch("/v1/embeddings/query", {
+      const response = await apiFetch("/v1/embeddings/query", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ query }),
       });
 

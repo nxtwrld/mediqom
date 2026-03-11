@@ -419,6 +419,13 @@
         // Set up D3 zoom — Y axis only, scaleExtent 1..20
         zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
             .scaleExtent([1, 20])
+            .filter((event: any) => {
+                if (event.type === 'wheel' || event.type === 'dblclick') return true;
+                if (event.touches?.length >= 2) return true;
+                const target = event.target as Element;
+                if (target.classList.contains('dot')) return false;
+                return true;
+            })
             .on('zoom', (event) => {
                 if (!yBase || !svgElement) return;
                 const yZoomed = event.transform.rescaleY(yBase);

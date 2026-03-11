@@ -215,30 +215,18 @@
     }
 
     */
-    // When fullscreen on mobile, shift the model down so it appears centred in
-    // the visible area above the pill rather than centred in the whole screen.
-    $: pillModelYOffset = (() => {
-        if (!fullscreen || !viewportRect) return 0;
-        const pillH = window.innerHeight - viewportRect.height - viewportRect.y;
-        if (pillH <= 0) return 0;
-        // Camera is at approx (cameraX=800, cameraY=500, z=minZoom=1500) for male.
-        // Approximate world units per screen pixel at the target plane.
-        const camDist = Math.hypot(800, 500, 1500); // ≈ 1772
-        const worldPerPx = (2 * camDist * Math.tan(35 * Math.PI / 180)) / window.innerHeight;
-        return -(pillH / 2) * worldPerPx; // negative = shift model down in world space
-    })();
 
     $: defaultState = (model === 'female') ? {
-        minZoom : 150,
+        minZoom : 160,
         maxZoom : 0,
-        modelY : -95,
+        modelY : isTouchDevice() ? -105 : -95,
         modelZ : 0,
         cameraY : 35,
         cameraX : 70
     } : {
         minZoom : 1500,
         maxZoom : 300,
-        modelY : (isTouchDevice() ? -1050 : -960) + pillModelYOffset,
+        modelY : (isTouchDevice() ? -1215  : -960),
         modelZ : isTouchDevice() ? 500 : 600,
         cameraY : 500,
         cameraX : 800
@@ -266,7 +254,7 @@
     // When the pill offset changes (viewportRect updated after model loaded),
     // push the new modelY to all loaded objects in the group.
     $: if (ready && group) {
-        void pillModelYOffset; // track
+
         group.children.forEach(obj => { obj.position.y = defaultState.modelY; });
         requestRender?.();
     }
@@ -1161,12 +1149,15 @@
     }
 
     function handleButtonPointerDown(event: PointerEvent) {
-        event.stopPropagation(); // prevents OrbitControls from capturing the pointer
-        // no preventDefault — allows the click event to fire for Svelte onclick handlers
+        event.stopPropagation();
+        event.preventDefault(); // suppress compat mousedown (matches action link pattern)
     }
 
     function handleButtonPointerUp(event: PointerEvent) {
         event.stopPropagation();
+        event.preventDefault();
+        // Programmatically fire click so Svelte's onclick handler runs
+        (event.currentTarget as HTMLButtonElement).click();
         (event.currentTarget as HTMLElement).closest<HTMLElement>('.label')?.classList.remove('-open');
         openedLabel = null;
     }
@@ -1400,6 +1391,7 @@
                     <AskButton
                         className="action"
                         type="anatomy"
+                        showIcon={false}
                         label={translateAnatomy(label.id, $t)}
                         data={getBodyPartAskData(label)}
                         documentId={label.documents?.[0]?.id}
@@ -1598,7 +1590,7 @@
     }
 
     .model :global(.action) {
-        display: block;
+        display: flex;
         color: inherit;
         text-align: center;
         padding: .3rem .5rem;

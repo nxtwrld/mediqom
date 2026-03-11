@@ -6,6 +6,7 @@ import { SSEClient } from "../transport/sse-client";
 import { logger } from "$lib/logging/logger";
 import ui from "$lib/ui";
 import { getLocale } from "$lib/i18n";
+import { apiFetch } from "$lib/api/client";
 import {
   unifiedSessionStore,
   type AudioButtonPosition,
@@ -304,11 +305,8 @@ export const audioActions = {
 
     try {
       logger.session.debug("Making request to /v1/session/start...");
-      const response = await fetch("/v1/session/start", {
+      const response = await apiFetch("/v1/session/start", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           language,
           models: models.filter((model) => model && model.trim()),

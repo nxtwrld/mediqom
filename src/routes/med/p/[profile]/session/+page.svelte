@@ -16,6 +16,7 @@
     import { sessionStorage, loadSessionData, removeSessionData, hasStoredSessionData, type StoredSessionData } from '$lib/session-deprecated/local-storage';
     import { log } from '$lib/logging/logger';
     import { t } from '$lib/i18n';
+    import { apiFetch } from '$lib/api/client';
   
     
     const MIN_AUDIO_SIZE: number = 10000 * 8;
@@ -325,7 +326,7 @@
         }));
 
         try {
-            const results = await fetch('/v1/transcribe', {
+            const results = await apiFetch('/v1/transcribe', {
                 method: 'POST',
                 /*headers: {
                     'Content-Type': 'application/json'
@@ -401,11 +402,8 @@
         // Get previous analysis snapshot for context
         const previousAnalysisSnapshot = type === ANALYZE_STEPS.diagnosis ? $state.snapshot(analysis) : undefined;
 
-        const response = await fetch('/v1/med/session', {
+        const response = await apiFetch('/v1/med/session', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 language: getLanguageForAPI('analysis'),
                 type,
@@ -760,11 +758,8 @@
         };
 
         log.session.debug('Finalized', toFinalize);
-        const result = await fetch('/v1/med/session/finalize', {
+        const result = await apiFetch('/v1/med/session/finalize', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 language: getLanguageForAPI('analysis'),
                 text: JSON.stringify(toFinalize)
@@ -835,11 +830,8 @@
         (window as any).testSessionAPI = async () => {
             log.session.debug('Testing session API...');
             try {
-                const response = await fetch('/v1/session/start', {
+                const response = await apiFetch('/v1/session/start', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({
                         language: getLanguageForAPI('session'),
                         models: ['GP']
@@ -1081,11 +1073,8 @@
                 `;
 
                 try {
-                    const response = await fetch('/v1/med/session', {
+                    const response = await apiFetch('/v1/med/session', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
                         body: JSON.stringify({
                             language: language,
                             type: ANALYZE_STEPS.diagnosis,
