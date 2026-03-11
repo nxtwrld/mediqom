@@ -20,10 +20,23 @@
 
   interface Props {
     user?: string;
+    filterTags?: string[];
   }
 
-  let { user = $profile?.id || $userStore?.id as string }: Props = $props();
+  let { user = $profile?.id || $userStore?.id as string, filterTags = [] }: Props = $props();
     let documents = $derived(byUser(user));
+
+    function normalize(s: string): string {
+        return s.toLowerCase().replace(/[_\s]+/g, ' ').trim();
+    }
+
+    let normalizedFilterTags = $derived(filterTags.map(normalize).filter(Boolean));
+
+    function matchesFilter(doc: any): boolean {
+        if (normalizedFilterTags.length === 0) return true;
+        const docTags: string[] = doc.metadata?.tags || [];
+        return docTags.some((tag: string) => normalizedFilterTags.includes(normalize(tag)));
+    }
 
     // Cache availability per job
     let cacheStatus: Record<string, boolean> = $state({});
@@ -116,7 +129,7 @@
             { $t('app.nav.import') }
         </button>
     </div>
-{#each $documents.sort(sortByDate) as document}
+{#each $documents.filter(matchesFilter).sort(sortByDate) as document}
   <DocumentTile document={document as Document} shareCount={shareCountMap.get(document.id) ?? 0} />
 {/each}
 </div>

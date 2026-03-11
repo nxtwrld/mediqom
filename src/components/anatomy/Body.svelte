@@ -1143,9 +1143,10 @@
         event.stopPropagation();
         event.preventDefault();
         const action = event.currentTarget as HTMLAnchorElement;
-        goto(action.getAttribute('href')!);
         action.closest<HTMLElement>('.label')?.classList.remove('-open');
         openedLabel = null;
+        ui.emit('viewer:close');
+        goto(action.getAttribute('href')!);
     }
 
     function handleButtonPointerDown(event: PointerEvent) {

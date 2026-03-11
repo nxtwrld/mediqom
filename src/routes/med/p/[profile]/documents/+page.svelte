@@ -23,6 +23,6 @@
 
 <h1 class="h1 heading">{$t('app.nav.documents')}</h1>
 
-<Documents user={$profile.id}/>
+<Documents user={$profile.id} filterTags={data.filters.tags} />
 
 </div>
