@@ -32,6 +32,7 @@
     import { t } from '$lib/i18n';
     import { translateAnatomy } from '$lib/i18n/anatomy';
     import AskButton from '$components/chat/AskButton.svelte';
+    import { date } from '$lib/datetime';
 	//import Error from '../../../routes/+error.svelte';
 
     const dispatch = createEventDispatcher();
@@ -1388,7 +1389,6 @@
                     <use href="/icons-o.svg#report-{label.type}" />
                 </svg>
                 <div class="label-menu">
-                    <a class="action" href="/med/p/{$profile.id}/documents/?tags={label.tag}" data-sveltekit-preload-data="false">Documents</a>
                     <AskButton
                         className="action"
                         type="anatomy"
@@ -1398,6 +1398,16 @@
                         documentId={label.documents?.[0]?.id}
                         documentTitle={label.documents?.[0]?.content?.title || label.documents?.[0]?.metadata?.title}
                     />
+                    {#if label.count > 10}
+                        <a class="action" href="/med/p/{$profile.id}/documents/?tags={label.tag}" data-sveltekit-preload-data="false">Documents</a>
+                    {:else}
+                        {#each label.documents as doc}
+                            <a class="action -doc" href="/med/p/{$profile.id}/documents/{doc.id}" data-sveltekit-preload-data="false">
+                                <span class="doc-title">{doc.content?.title || doc.metadata?.title || doc.id}</span>
+                                <span class="doc-date">{date(doc.metadata?.date || doc.created_at)}</span>
+                            </a>
+                        {/each}
+                    {/if}
                 </div>
             </div>
 
@@ -1558,8 +1568,27 @@
 
     }
     .model :global(.label.-open .label-menu) {
-        max-height: 10rem;
+        max-height: 20rem;
+        overflow-y: auto;
         padding: .5rem 1rem;
+    }
+    .model :global(.action.-doc) {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+    .model :global(.action.-doc .doc-title) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+    }
+    .model :global(.action.-doc .doc-date) {
+        flex-shrink: 0;
+        opacity: 0.7;
+        font-size: 0.75rem;
     }
     .model :global(.highlight) {
         display: block;
