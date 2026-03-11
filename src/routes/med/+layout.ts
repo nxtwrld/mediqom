@@ -1,7 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 import { setUser } from "$lib/user";
-import { waitLocale } from "svelte-i18n";
+import { locale, waitLocale } from "svelte-i18n";
 import { loadProfiles } from "$lib/profiles";
 import { log } from "$lib/logging/logger";
 import { apiFetch } from "$lib/api/client";
@@ -40,8 +40,10 @@ export const load: LayoutLoad = async ({ parent, fetch }) => {
     userData.private_keys &&
     userData.publicKey
   ) {
-    // Language is already set in root layout, no need to set it again
-    // Just ensure locale is ready
+    // Set locale from user's saved language preference
+    if (userData.language) {
+      locale.set(userData.language);
+    }
     await waitLocale();
 
     // Pass the user session to avoid auth calls during hydration

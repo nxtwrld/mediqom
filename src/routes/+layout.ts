@@ -17,7 +17,6 @@ import "$lib/i18n"; // Import to initialize. Important :)
 import { locale, waitLocale } from "svelte-i18n";
 import "$lib/config/logging-config"; // Initialize logging from environment variables
 import { isNativePlatform, isCapacitorBuild } from "$lib/config/platform";
-import { apiFetch } from "$lib/api/client";
 
 // Initialize mixpanel only if token is available (may not be in mobile builds)
 try {
@@ -39,7 +38,7 @@ export const trailingSlash = "ignore";
 // Disable SSR for Capacitor builds - server load functions won't be available
 export const ssr = !IS_CAPACITOR;
 
-export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
+export const load: LayoutLoad = async ({ data, depends, fetch }) => {
   /**
    * Declare a dependency so the layout can be invalidated, for example, on
    * session refresh.
@@ -106,34 +105,8 @@ export const load: LayoutLoad = async ({ data, depends, fetch, url }) => {
     }
   }
 
-  // Determine and set the appropriate locale
-  let userLanguage = null;
-
-  // If user is authenticated, try to fetch their language preference
-  if (session && user) {
-    try {
-      // Check if we're on a route that needs user data
-      const needsUserData =
-        url.pathname.startsWith("/med") || url.pathname.startsWith("/account");
-
-      if (needsUserData) {
-        const userData = await apiFetch("/v1/med/user", { fetch })
-          .then((r) => r.json())
-          .catch(() => null);
-
-        if (userData?.language) {
-          userLanguage = userData.language;
-        }
-      }
-    } catch (e) {
-      // Fail silently, will use fallback
-    }
-  }
-
-  // Set locale based on priority: user preference > browser language > default
-  if (userLanguage) {
-    locale.set(userLanguage);
-  } else if (!import.meta.env.SSR) {
+  // Set locale based on browser language — user-specific locale set in med/+layout.ts
+  if (!import.meta.env.SSR) {
     locale.set(window.navigator.language);
   } else {
     locale.set("en");
