@@ -212,6 +212,7 @@
     .apps :global(> .popover-wrapper > button) {
         display: inline-block;
         width: 7rem;
+        height: 100%;
         padding: 0.5rem;
         text-align: center;
         color: #FFF;
