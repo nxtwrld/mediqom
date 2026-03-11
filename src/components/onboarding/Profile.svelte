@@ -78,8 +78,8 @@
 <div class="input">
     <label for="language">{ $t('app.onboarding.language') }</label>
     <select id="language" name="language" bind:value={data.bio.language}>
-        <option value="en">{ $t('languages.en') }</option>
-        <option value="cs">{ $t('languages.cs') }</option>
-        <option value="de">{ $t('languages.de') }</option>
+        {#each Object.entries(Languages) as [code]}
+            <option value={code}>{$t('languages.' + code)}</option>
+        {/each}
     </select>
 </div>

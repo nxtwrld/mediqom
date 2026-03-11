@@ -6,6 +6,7 @@
 	import { t } from '$lib/i18n';
 	import { logger } from '$lib/logging/logger';
 	import ImageCropModal from '$components/ui/ImageCropModal.svelte';
+	import { apiFetch } from '$lib/api/client';
 
 	interface Props {
 		size?: number;
@@ -35,7 +36,7 @@
 	const downloadImage = async (path: string) => {
 		try {
 
-			const data = await fetch(`/v1/med/profiles/${id}/avatar?path=${path}`).then((res) => res.blob())
+			const data = await apiFetch(`/v1/med/profiles/${id}/avatar?path=${path}`).then((res) => res.blob())
 
 			// blob data to base64
 			const reader = new FileReader();
@@ -68,7 +69,7 @@
 			uploading = true;
 			const filenameNew = `${Math.random()}.png`;
 
-			const { filename } = await fetch(`/v1/med/profiles/${id}/avatar`, {
+			const { filename } = await apiFetch(`/v1/med/profiles/${id}/avatar`, {
 				method: 'POST',
 				body: JSON.stringify({ file: croppedImage, filename: filenameNew, type: 'image/png' }),
 			})
@@ -126,6 +127,8 @@
 				return;
 			}
 			downloadImage(url);
+		} else if (loaded && !url) {
+			avatarUrl = null;
 		}
 	});
 
@@ -189,23 +192,6 @@
 		width: 100%;
 		height: 100%;
 	}
-	.avatar {
-		border-radius: 50%;
-		width: 100%;
-		height: 100%;
-	}
-
-	.avatar svg {
-		width: 100%;
-		height: 100%;
-		padding: 1rem;
-		fill: var(--color-gray-300);
-	}
-
-	.no-image {
-		background-color: var(--color-gray-500);
-	}
-
 	.upload {
 		position: absolute;
 		margin-top: 1em;

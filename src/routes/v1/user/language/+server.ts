@@ -3,17 +3,10 @@ import type { RequestHandler } from "./$types";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import SUPPORTED_LANGUAGES from "$lib/languages";
 
-const languageSchema = {
-  validate: (data: any): data is { language: "en" | "cs" | "de" } => {
-    return (
-      data &&
-      typeof data === "object" &&
-      typeof data.language === "string" &&
-      ["en", "cs", "de"].includes(data.language)
-    );
-  },
-};
+const validLanguages = Object.keys(SUPPORTED_LANGUAGES);
+const VALID_ROLES = ["individual", "medical"];
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   const { session, user } = await locals.safeGetSession();
@@ -25,11 +18,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   try {
     const body = await request.json();
 
-    if (!languageSchema.validate(body)) {
+    if (
+      !body ||
+      typeof body !== "object" ||
+      typeof body.language !== "string" ||
+      !validLanguages.includes(body.language)
+    ) {
       return json(
         { success: false, error: "Invalid language" },
         { status: 400 },
       );
+    }
+
+    const userRole = body.user_role;
+    if (userRole !== undefined && !VALID_ROLES.includes(userRole)) {
+      return json({ success: false, error: "Invalid role value" }, { status: 400 });
     }
 
     // Use service role client for database update
@@ -38,9 +41,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       SUPABASE_SERVICE_ROLE_KEY,
     );
 
+    const updateFields: Record<string, unknown> = { language: body.language };
+    if (userRole !== undefined) updateFields.user_role = userRole;
+
     const { error } = await supabase
       .from("profiles")
-      .update({ language: body.language })
+      .update(updateFields)
       .eq("id", user.id);
 
     if (error) {

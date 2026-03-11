@@ -109,7 +109,7 @@
 				{#if hasRecoveryKey}
 					<div class="info-item">
 						<span class="status-icon -small">✓</span>
-						<span>Recovery key configured</span>
+						<span>{$t('app.settings.privacy.encryption.recovery-configured')}</span>
 					</div>
 				{/if}
 			</div>

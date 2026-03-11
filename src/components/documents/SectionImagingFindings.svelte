@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     let hasImagingFindings = $derived(data && data.hasImagingFindings);
     
     let studyType = $derived(data?.studyType || '');
@@ -246,9 +247,18 @@
                 <li class="panel emergent-finding {getUrgencyClass(finding.urgency)}">
                     <div class="emergent-header">
                         <span class="finding-description">{finding.finding}</span>
-                        <span class="urgency-badge {getUrgencyClass(finding.urgency)}">
-                            {$t(`medical.enums.urgency_levels.${finding.urgency}`)}
-                        </span>
+                        <div class="emergent-header-actions">
+                            <span class="urgency-badge {getUrgencyClass(finding.urgency)}">
+                                {$t(`medical.enums.urgency_levels.${finding.urgency}`)}
+                            </span>
+                            <AskButton
+                                type="imaging-finding"
+                                label={finding.finding}
+                                data={finding}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     
                     {#if finding.recommendedAction}
@@ -298,6 +308,13 @@
                                     {$t(`medical.enums.change_from_prior.${finding.changeFromPrior}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="imaging-finding"
+                                label={finding.organ || finding.region || finding.finding}
+                                data={finding}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -491,9 +508,18 @@
                 <li class="panel diagnosis-item">
                     <div class="diagnosis-header">
                         <span class="diagnosis-name">{diagnosis.name}</span>
-                        {#if diagnosis.confidence}
-                            <span class="confidence-badge">{Math.round(diagnosis.confidence * 100)}%</span>
-                        {/if}
+                        <div class="diagnosis-header-actions">
+                            {#if diagnosis.confidence}
+                                <span class="confidence-badge">{Math.round(diagnosis.confidence * 100)}%</span>
+                            {/if}
+                            <AskButton
+                                type="imaging-diagnosis"
+                                label={diagnosis.name}
+                                data={diagnosis}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
+                        </div>
                     </div>
                     {#if diagnosis.description}
                         <p class="diagnosis-description">{diagnosis.description}</p>

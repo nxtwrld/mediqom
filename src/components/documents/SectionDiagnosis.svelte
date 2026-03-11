@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -63,6 +64,13 @@
                         <!--{#if diagnosis.confidence}
                             <span class="confidence-badge {getConfidenceClass(diagnosis.confidence)}">{diagnosis.confidence}</span>
                         {/if}-->
+                        <AskButton
+                            type="diagnosis"
+                            label={diagnosis.description}
+                            data={diagnosis}
+                            documentId={document?.id}
+                            documentTitle={document?.content?.title}
+                        />
                     </div>
                 </div>
                 

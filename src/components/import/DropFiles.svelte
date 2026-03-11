@@ -3,9 +3,10 @@
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { files } from '$lib/files';
-    import { fromEvent } from 'file-selector'; 
+    import { fromEvent } from 'file-selector';
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
+    import { isNativePlatform } from '$lib/config/platform';
     interface Props {
         children?: import('svelte').Snippet;
     }
@@ -50,15 +51,18 @@
 </script>
 
 
+    {#if !isNativePlatform()}
     <div class="droparea" role="region" aria-label={ $t('app.import.file-drop-area') } ondrop={handleDrop} ondragover={handleDragOver} ondragleave={handleDragEnd} ondragend={handleDragEnd}>
         {@render children?.()}
         {#if dragover}
         <div class="drag-active overlay" transition:fade>
             <p>{ $t('app.import.drop-files-here') }</p>
         </div>
-
-    {/if}
+        {/if}
     </div>
+    {:else}
+        {@render children?.()}
+    {/if}
 
 
 

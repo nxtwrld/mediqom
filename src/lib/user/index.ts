@@ -11,6 +11,8 @@ import {
   type KeyDerivationMethod,
 } from "../encryption/passkey-prf";
 import { recoverPrivateKey } from "../encryption/recovery";
+import { clearCache } from "$lib/cache";
+import { stopRealtimeSync } from "$lib/cache/realtime";
 //import { loadSubscription } from "./subscriptions";
 
 export type UserFirstTime = {
@@ -39,6 +41,7 @@ export type User = {
   key_pass: string;
   unlocked: boolean | undefined;
   isMedical: boolean;
+  role: 'individual' | 'medical' | string;
   // New encryption fields
   key_derivation_method?: KeyDerivationMethod;
   passkey_credential_id?: string;
@@ -112,9 +115,11 @@ export async function setUser(
     user.set({
       ...userProfile,
       unlocked: true, // Always set to true to disable lock behavior
+      role: userProfile.user_role ?? 'individual',
       isMedical:
-        userProfile.subscription === "medical" ||
-        userProfile.subscription === "gp",
+        userProfile.user_role != null
+          ? userProfile.user_role === "medical"
+          : userProfile.subscription === "medical" || userProfile.subscription === "gp",
       email: actualUserSession.email as string,
       //subscriptionStats
     });
@@ -159,8 +164,15 @@ export async function setUser(
 
 export function clearUser() {
   console.log("Clearing user");
+  // auth_id equals root profile UUID in this schema — same value used in initCache.
+  const $user = get(user);
+  const cacheUserId = ($user as any)?.auth_id || getId();
   user.set(null);
   keyPair.destroy();
+  stopRealtimeSync();
+  if (cacheUserId) {
+    clearCache(cacheUserId).catch(() => {});
+  }
 }
 
 function getId(): string | null {

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     interface Props {
         data: any;
@@ -8,7 +9,7 @@
     }
 
     let { data, document, key }: Props = $props();
-    
+
     let hasTreatmentPlan = $derived(data && data.hasTreatmentPlan);
     
     let treatmentGoals = $derived(data?.treatmentGoals || []);
@@ -169,6 +170,13 @@
                                     {$t(`medical.enums.complexity_levels.${therapy.complexity}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="therapy"
+                                label={therapy.name}
+                                data={therapy}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -245,6 +253,13 @@
                                     {$t(`medical.enums.priority_levels.${medication.priority}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="medication"
+                                label={medication.name}
+                                data={medication}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     
@@ -316,6 +331,13 @@
                                     {$t(`medical.enums.treatment_status.${procedure.status}`)}
                                 </span>
                             {/if}
+                            <AskButton
+                                type="procedure"
+                                label={procedure.name}
+                                data={procedure}
+                                documentId={document?.id}
+                                documentTitle={document?.content?.title}
+                            />
                         </div>
                     </div>
                     

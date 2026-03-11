@@ -168,7 +168,13 @@
             category
         }
 
-        ui.emit('modal.healthProperty', property);
+        const srcValues = Array.isArray(prop.source) ? prop.source : (prop.source ? [prop.source] : []);
+        const firstSrc = srcValues[0];
+        ui.emit('viewer:timeline', {
+            signalName,
+            value: Number(property.value),
+            documentId: firstSrc?.refId ?? undefined
+        });
     }
 
     // Track previous profile to only emit when actually changing
@@ -217,7 +223,7 @@
 <div class="page -empty">
 {#if $profile}
     <div class="profile-header">
-        <div class="avatar">
+        <div class="profile-avatar">
             <Avatar id={$profile.id} bind:url={$profile.avatarUrl} editable={false} size={8} />
         </div>
         
@@ -371,10 +377,9 @@
 
     
 
-    .avatar {
+    .profile-avatar {
         width: 10rem;
         height: 10rem;
-
         display: flex;
         justify-content: center;
         align-items: center;
@@ -400,6 +405,10 @@
     .tile:last-child {
         grid-column: auto / -1; 
         --background-color: var(--color-highlight);
+        --button-border-color-hover: var(--color-highlight-text);
+        --button-text-color: var(--color-highlight-text);
+        --button-text-color-hover: var(--color-black);
+        color: var(--color-highlight-text);
         padding: 1rem;
     }
     .tile:last-child:first-child {

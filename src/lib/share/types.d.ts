@@ -36,3 +36,55 @@ export interface ShareItem {
   data: string;
   metadata: string;
 }
+
+/** A document share record as returned from the API */
+export interface DocumentShare {
+  id: string;
+  sharer_id: string;
+  owner_id: string;
+  recipient_email: string;
+  recipient_id: string | null;
+  document_id: string;
+  status: "pending" | "active" | "revoked";
+  created_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  /** Document metadata (joined) */
+  document?: {
+    id: string;
+    metadata: any;
+    type: string;
+  };
+}
+
+/** Result from the recipient lookup endpoint */
+export interface RecipientInfo {
+  exists: boolean;
+  publicKey?: string;
+  profile_id?: string;
+}
+
+/** One share entry in the create request */
+export interface ShareCreateItem {
+  document_id: string;
+  owner_id: string;
+  /** AES key encrypted with recipient's RSA public key (existing user) */
+  encrypted_key_for_recipient: string | null;
+  /** AES key encrypted with share_secret (new user) */
+  pending_encrypted_key: string | null;
+}
+
+/** Body for POST /v1/share/create */
+export interface ShareCreateBody {
+  recipient_email: string;
+  /** One-time share secret — only present for new users */
+  share_secret?: string;
+  shares: ShareCreateItem[];
+}
+
+/** Body for POST /v1/share/accept */
+export interface ShareAcceptBody {
+  share_id: string;
+  /** AES key re-encrypted with User B's RSA public key */
+  encrypted_key_for_me: string;
+}

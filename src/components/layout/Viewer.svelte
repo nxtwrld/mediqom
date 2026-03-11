@@ -8,10 +8,13 @@
 	import Loading from '$components/ui/Loading.svelte';
     import { fade } from 'svelte/transition';
     import { sounds } from '$components/ui/Sounds.svelte';
-    import { state } from '$lib/ui';
+    import ui, { state } from '$lib/ui';
     import { t } from '$lib/i18n';
+    import ViewerTimeline from './ViewerTimeline.svelte';
 
     let showLayers: boolean = false;
+    let activePanel: 'anatomy' | 'timeline' = 'anatomy';
+    let mounted = false;
     let model: Body;
     let firstLoad: boolean = true;
 
@@ -21,12 +24,17 @@
     ];
 
     export let activeTools: string[] = [];
+
+    export let signalHighlight: { signalName: string; value: number; documentId?: string } | null = null;
+    export let fullscreen: boolean = false;
+    export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
+
+    $: if (signalHighlight) activePanel = 'timeline';
     
     let showShade: boolean = true;
     let modelLoaded: boolean = false;
 
     const layers: string[] = ['shade',...Object.keys(objects)];
-    console.log('layers', layers);
     const tools: string[] = [
         'selection',
         //'marker'
@@ -60,10 +68,24 @@
     }
 
     onMount(() => {
+        // Initialize to the most recently requested panel
+        const latestTimeline = ui.getLatest('viewer:timeline');
+        const latestAnatomy  = ui.getLatest('viewer:anatomy');
+        if (latestTimeline && (!latestAnatomy || latestTimeline.timestamp > latestAnatomy.timestamp)) {
+            activePanel = 'timeline';
+        }
+        mounted = true;
+
         firstLoad = true;
-        window.addEventListener('mousedown', (e) => {
-            showLayers = false;
-        })
+        window.addEventListener('mousedown', () => { showLayers = false; });
+
+        const unsubAnatomy  = ui.listen('viewer:anatomy',  () => { activePanel = 'anatomy';  });
+        const unsubTimeline = ui.listen('viewer:timeline', () => { activePanel = 'timeline'; });
+
+        return () => {
+            unsubAnatomy();
+            unsubTimeline();
+        };
     });
 
     onDestroy(() => {
@@ -84,89 +106,106 @@
         model.reset();
     }
     function closeModel() {
-        $state.viewer = false;
+        ui.emit('viewer:close');
     }
 </script>
 
 {#if $profile}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="model" on:mousedown={() => showLayers = false}>
-    {#key $profile.health.biologicalSex}
-    <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} />
-    {/key}
+<div class="model" class:-fullscreen={fullscreen} on:mousedown={() => showLayers = false}>
 
-    <div class="model-profile-name">
-        {$profile.fullName}
-    </div>
-
-    <div class="model-layers" class:-active={showLayers}>
-        <em>{activeLayers.length}</em>
-
-        <button class="toggle" on:mousedown|stopPropagation on:click|stopPropagation={() => showLayers = !showLayers}>
-            {#if showLayers}
-            <svg>
-                <use href="/icons.svg#arrow-nav-up" />
-            </svg>
-            {:else}
-            <svg>
-                <use href="/icons.svg#arrow-nav-down" />
-            </svg>
-            {/if}
+    <!-- Panel toggle -->
+    <!--div class="viewer-panel-toggle" on:mousedown|stopPropagation>
+        <button class:active={activePanel === 'anatomy'} on:click|stopPropagation={() => activePanel = 'anatomy'}>
+            {$t('viewer.panels.anatomy')}
         </button>
+        <button class:active={activePanel === 'timeline'} on:click|stopPropagation={() => activePanel = 'timeline'}>
+            {$t('viewer.panels.timeline')}
+        </button>
+    </div-->
 
-        {#if showLayers}
-            {#each layers as layer}
-                <button class="layer" 
-                    on:mousedown|stopPropagation
-                    on:click={() => toggleLayer(layer)} 
-                    class:-active={activeLayers.includes(layer)}>
-                    <svg>
-                        <use href="/anatomy_models/layers.svg#figure" />
-                    </svg>
-                    <svg>
-                        <use href="/anatomy_models/layers.svg#{layer.toLowerCase()}" />
-                    </svg>
-                    <span>{$t('anatomy.layers.'+layer)}</span>
-                </button>
-            {/each} 
-        {/if}
-    </div>
+    {#if activePanel === 'anatomy' && mounted}
+        {#key $profile.health.biologicalSex}
+        <Body bind:this={model} on:ready={ready} on:focus bind:activeLayers={activeLayers} {activeTools} {showShade} {fullscreen} {viewportRect} />
+        {/key}
 
-    <div class="model-tools">
-        {#each tools as tool}
-            <button class="tool" 
-                on:mousedown|stopPropagation
-                on:click={() => toggleTool(tool)} 
-                class:-active={activeTools.includes(tool)}>
+        <div class="model-profile-name">
+            {$profile.fullName}
+        </div>
+
+        <div class="model-layers" class:-active={showLayers}>
+            <em>{activeLayers.length}</em>
+
+            <button class="toggle" on:mousedown|stopPropagation on:click|stopPropagation={() => showLayers = !showLayers}>
+                {#if showLayers}
                 <svg>
-                    <use href="/icons.svg#{tool.toLowerCase()}" />
+                    <use href="/icons.svg#arrow-nav-up" />
                 </svg>
-                <span>{$t('anatomy.tools.'+tool)}</span>
+                {:else}
+                <svg>
+                    <use href="/icons.svg#arrow-nav-down" />
+                </svg>
+                {/if}
             </button>
-        {/each}
-        <button class="tool"
-        on:mousedown|stopPropagation
-        on:click={resetModel} 
-        >
-            <svg>
-                <use href="/icons.svg#anatomy-reset" />
-            </svg>
-            <span>{$t('anatomy.tools.reset')}</span>
-        </button>
-        <button class="tool"
-        on:mousedown|stopPropagation
-        on:click={closeModel} 
-        >
-            <svg>
-                <use href="/icons.svg#close" />
-            </svg>
-            <span>{$t('anatomy.tools.close')}</span>
-        </button>
-    </div>
 
-    {#if modelLoaded === false}    
-        <div class="loading-shade" out:fade>
-            <Loading />
+            {#if showLayers}
+                {#each layers as layer}
+                    <button class="layer"
+                        on:mousedown|stopPropagation
+                        on:click={() => toggleLayer(layer)}
+                        class:-active={activeLayers.includes(layer)}>
+                        <svg>
+                            <use href="/anatomy_models/layers.svg#figure" />
+                        </svg>
+                        <svg>
+                            <use href="/anatomy_models/layers.svg#{layer.toLowerCase()}" />
+                        </svg>
+                        <span>{$t('anatomy.layers.'+layer)}</span>
+                    </button>
+                {/each}
+            {/if}
+        </div>
+
+        <div class="model-tools">
+            {#each tools as tool}
+                <button class="tool"
+                    on:mousedown|stopPropagation
+                    on:click={() => toggleTool(tool)}
+                    class:-active={activeTools.includes(tool)}>
+                    <svg>
+                        <use href="/icons.svg#{tool.toLowerCase()}" />
+                    </svg>
+                    <span>{$t('anatomy.tools.'+tool)}</span>
+                </button>
+            {/each}
+            <button class="tool"
+            on:mousedown|stopPropagation
+            on:click={resetModel}
+            >
+                <svg>
+                    <use href="/icons.svg#anatomy-reset" />
+                </svg>
+                <span>{$t('anatomy.tools.reset')}</span>
+            </button>
+            <button class="tool"
+            on:mousedown|stopPropagation
+            on:click={closeModel}
+            >
+                <svg>
+                    <use href="/icons.svg#close" />
+                </svg>
+                <span>{$t('anatomy.tools.close')}</span>
+            </button>
+        </div>
+
+        {#if modelLoaded === false}
+            <div class="loading-shade" out:fade>
+                <Loading />
+            </div>
+        {/if}
+    {:else}
+        <div class="timeline-wrap">
+            <ViewerTimeline {signalHighlight} />
         </div>
     {/if}
 </div>
@@ -183,7 +222,6 @@
         align-items: center;
         justify-content: center;
         z-index: 100000;
-        background-color: var(--background);
     }
 
     .model {
@@ -193,7 +231,6 @@
 /*
         background-image: linear-gradient(90deg, var(--color-shade) 0%, var(--color-shade) 5%, transparent 35%, #FFF 50%, transparent 65%, var(--color-shade) 95%, var(--color-shade) 100%);*/
     }
-
     .model-tools,
     .model-layers {
         --size: 3.5rem;
@@ -230,18 +267,32 @@
         top: auto;
     }
 
-    @media only screen and (max-width: 768px) { 
+    @media only screen and (max-width: 768px) {
 
         .model-layers {
-            position: fixed;
-            left: 1rem;
-            /*top: calc(var(--top-offset) + 1rem);*/
             z-index: 100000;
         }
 
         .model-tools {
             left: auto;
             right: 1rem;
+        }
+
+        /* In fullscreen anatomy mode, escape overflow:hidden by going fixed */
+        .model.-fullscreen .model-layers {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + var(--toolbar-height) + 7rem);
+            left: 1rem;
+            z-index: 999;
+        }
+
+        .model.-fullscreen .model-tools {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            top: auto;
+            left: auto;
+            z-index: 999;
         }
     }
 
@@ -374,6 +425,12 @@
         z-index: 1;
         text-transform: uppercase;
         letter-spacing: .05em;
+    }
+
+    .timeline-wrap {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
     }
 
     @keyframes rotate {

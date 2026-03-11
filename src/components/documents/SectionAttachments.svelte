@@ -6,6 +6,7 @@
     import { logger } from '$lib/logging/logger';
     import DocumentViewer from '../viewers/DocumentViewer.svelte';
     import Modal from '$components/ui/Modal.svelte';
+    import { apiFetch } from '$lib/api/client';
 
     type Attachment = {
         thumbnail: string;
@@ -21,8 +22,6 @@
   }
 
   let { data, key = undefined }: Props = $props();
-
-    $effect(() => { logger.api.debug('Attachments data:', data); });
 
     const loadedAttachments = new Map<string, ArrayBuffer>();
 
@@ -46,7 +45,7 @@
 
         // Extract profile ID from the path (format: profileId/filename)
         const profileId = attachment.path.split('/')[0];
-        const fileResponse = await fetch(`/v1/med/profiles/${profileId}/attachments?path=${encodeURIComponent(attachment.path)}`);
+        const fileResponse = await apiFetch(`/v1/med/profiles/${profileId}/attachments?path=${encodeURIComponent(attachment.path)}`);
         logger.api.debug('File response:', fileResponse);
         
         if (!fileResponse.ok) {

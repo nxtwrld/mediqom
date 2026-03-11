@@ -2,18 +2,15 @@ import type { LayoutServerLoad } from "./$types";
 import { log } from "$lib/logging/logger";
 
 export const load: LayoutServerLoad = async ({
-  locals: { safeGetSession },
+  locals: { session, user },
   cookies,
   url,
 }) => {
   try {
-    const { session, user } = await safeGetSession();
-    const allCookies = cookies.getAll();
-
     return {
       session,
       user,
-      cookies: allCookies,
+      cookies: cookies.getAll(),
     };
   } catch (error) {
     log.api.error(

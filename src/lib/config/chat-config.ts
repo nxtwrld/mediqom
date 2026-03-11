@@ -1,4 +1,5 @@
 import chatConfig from "../../../config/chat.json";
+import { getLanguageEnglishName } from "$lib/languages";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -45,7 +46,6 @@ export interface ChatConfig {
   responseSchema: {
     base: any;
   };
-  languages: Record<string, string>;
 }
 
 export interface PromptConfig {
@@ -357,7 +357,7 @@ Use this date to calculate time since procedures, estimate healing progress, and
    * Get language name from code
    */
   getLanguageName(languageCode: string): string {
-    return this.config.languages[languageCode] || this.config.languages["en"];
+    return getLanguageEnglishName(languageCode);
   }
 
   /**

@@ -4,10 +4,7 @@ import type { AppRecord } from "./types.d";
 //import { get as vaultGet, set as vaultSet } from '$lib/vault/index';
 import ui from "$lib/ui";
 import sampleData from "./samplefile.apps.json";
-console.log(sampleData);
 const STORE_NAME = "apps";
-
-console.log("🌍", "Apps store created");
 
 const store: Writable<AppRecord[]> = writable(sampleData.slice(0, 2));
 /*

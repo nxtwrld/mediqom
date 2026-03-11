@@ -2,6 +2,7 @@ import type FileProcessor from "./processor";
 import type { ProcessedFile } from "./types.d";
 import { resizeImage } from "$lib/images";
 import { THUMBNAIL_SIZE, PROCESS_SIZE } from "./CONFIG";
+import { apiFetch } from "$lib/api/client";
 const DEFAULT_DELAY = 20;
 
 export async function processImages(images: string[]): Promise<ProcessedFile> {
@@ -12,11 +13,8 @@ export async function processImages(images: string[]): Promise<ProcessedFile> {
 
     /*        console.log('Number of images', resizedImages.length);*/
 
-    const response = await fetch("/v1/import/extract", {
+    const response = await apiFetch("/v1/import/extract", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         images: resizedImages,
       }),

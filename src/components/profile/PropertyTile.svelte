@@ -220,7 +220,7 @@
     .grid-tile-wrapper .icon {
         width: 3rem;
         height: 3rem;
-        margin: 1rem 1rem 2rem 0.5rem;
+        margin: 2rem 1rem 2rem 0.5rem;
         fill: var(--color-gray-500);
     }
 

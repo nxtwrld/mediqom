@@ -31,6 +31,8 @@
 	import { sounds } from '$components/ui/Sounds.svelte';
     import { t } from '$lib/i18n';
     import { translateAnatomy } from '$lib/i18n/anatomy';
+    import AskButton from '$components/chat/AskButton.svelte';
+    import { date } from '$lib/datetime';
 	//import Error from '../../../routes/+error.svelte';
 
     const dispatch = createEventDispatcher();
@@ -63,7 +65,9 @@
     export let activeTools: string[] = [];
 
     export let showShade: boolean = true;
-    
+    export let fullscreen: boolean = false;
+    export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
+
     export let selected: THREE.Object3D | null = null;
 
     let shade: THREE.Group;
@@ -119,13 +123,15 @@
         .map(([k,v]) => {
             const id: string = mapped[k] || k;
 
-            if (!activeLayers.includes(objectToFileMapping[id])) activeLayers = [...activeLayers, objectToFileMapping[id]];
+            const fileGroup = objectToFileMapping[id];
+            if (fileGroup && !activeLayers.includes(fileGroup)) activeLayers = [...activeLayers, fileGroup];
 
             return {
                 type: v[0].metadata.category,
                 id,
                 tag: k,
                 count: v.length,
+                documents: v,
                 geometry: null,
                 object: null,
                 label: undefined as any
@@ -159,6 +165,7 @@
     let objects: any[] = [];
     let currentContext: IContext | null = null;
     let muscleMatcapTexture: THREE.Texture | null = null;
+    let openedLabel: HTMLDivElement | null = null;
 
     let animationFrameId: number | null = null;
     let idleFrames: number = 0;
@@ -209,17 +216,18 @@
     }
 
     */
+
     $: defaultState = (model === 'female') ? {
-        minZoom : 150,
+        minZoom : 160,
         maxZoom : 0,
-        modelY : -95,
+        modelY : isTouchDevice() ? -105 : -95,
         modelZ : 0,
         cameraY : 35,
         cameraX : 70
     } : {
         minZoom : 1500,
         maxZoom : 300,
-        modelY : isTouchDevice() ? -1050 : -960,
+        modelY : (isTouchDevice() ? -1215  : -960),
         modelZ : isTouchDevice() ? 500 : 600,
         cameraY : 500,
         cameraX : 800
@@ -227,30 +235,43 @@
 
     $: {
 
-        if (activeLayers != loadedLayers) {
-            let toLoad = activeLayers.filter(l => !loadedLayers.includes(l));
+        if (ready && activeLayers != loadedLayers) {
+            let toLoad = activeLayers.filter(l => l && !loadedLayers.includes(l));
             //console.log('toLoad', toLoad);
-            let filesToLoad = toLoad.reduce((acc, l) => {
+            let filesToLoad = toLoad.filter(l => objects3d[l as keyof typeof objects3d]).reduce((acc, l) => {
                 return [...acc, ...objects3d[l as keyof typeof objects3d].files]
             }, [] as string[]).filter(f => !loadedFiles.includes(f));
-            let objectsToShow = activeLayers.reduce((acc, l) => {
+            let objectsToShow = activeLayers.filter(l => objects3d[l as keyof typeof objects3d]).reduce((acc, l) => {
                 return [...acc, ...objects3d[l as keyof typeof objects3d].objects]
             }, [] as string[]);
             loadedLayers = activeLayers;
             updateModel(filesToLoad, objectsToShow);
         }
 
-        toggleShade(showShade);
+        if (ready) toggleShade(showShade);
 
     }
 
+    // When the pill offset changes (viewportRect updated after model loaded),
+    // push the new modelY to all loaded objects in the group.
+    $: if (ready && group) {
+
+        group.children.forEach(obj => { obj.position.y = defaultState.modelY; });
+        requestRender?.();
+    }
+
     let previousLabels: typeof labels = [];
+
+    function labelsContentChanged(a: typeof labels, b: typeof labels): boolean {
+        if (a.length !== b.length) return true;
+        return a.some((la, i) => la.id !== b[i].id || la.tag !== b[i].tag || la.count !== b[i].count);
+    }
 
     $: {
         if (ready && labels !== previousLabels) {
             const oldLabels = previousLabels;
             previousLabels = labels;
-            if (oldLabels.length > 0) {
+            if (oldLabels.length > 0 && labelsContentChanged(labels, oldLabels)) {
                 cleanupLabels(oldLabels);
                 if (activeLayers === loadedLayers) {
                     refreshLabels();
@@ -262,6 +283,13 @@
 
 
 
+    // React to viewportRect / fullscreen changes
+    $: void viewportRect, void fullscreen, (() => {
+        if (renderer && camera) {
+            resize();
+            requestRender();
+        }
+    })();
 
     function  setHighlight(name: string | null) {
         if (name) {
@@ -295,8 +323,11 @@
     }
 
 
+    let destroyed = false;
+
     onMount(() => {
         console.log('🧍', 'Mounted');
+        destroyed = false;
 
         // Capture initial store values immediately before any async operations
         let initialFocused = $focused;
@@ -305,18 +336,32 @@
         // Wait for valid dimensions before initializing Three.js
         const waitForDimensions = (): Promise<void> => {
             return new Promise((resolve) => {
+                let timeout: ReturnType<typeof setTimeout>;
+
+                const done = () => {
+                    clearTimeout(timeout);
+                    resolve();
+                };
+
                 // Check if dimensions are already valid
                 if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-                    resolve();
+                    done();
                     return;
                 }
+
+                // Fallback timeout so init never hangs
+                timeout = setTimeout(() => {
+                    console.warn('🧍', 'waitForDimensions timed out, using fallback');
+                    observer.disconnect();
+                    done();
+                }, 2000);
 
                 // Wait for ResizeObserver to report valid dimensions
                 const observer = new ResizeObserver((entries) => {
                     const entry = entries[0];
                     if (entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) {
                         observer.disconnect();
-                        resolve();
+                        done();
                     }
                 });
                 observer.observe(container);
@@ -326,7 +371,9 @@
         // Initialize once dimensions are valid
         const initializeViewer = async () => {
             await waitForDimensions();
+            if (destroyed) return;
             await init();
+            if (destroyed) return;
 
             // Apply captured initial context AFTER init completes with valid dimensions
             // Note: Focus is deferred to updateModel() when actual body models are loaded
@@ -360,7 +407,13 @@
             resetFocus();
         });
 
+        window.addEventListener('mousedown', handleGlobalPointerDown);
+        window.addEventListener('touchstart', handleGlobalPointerDown as any);
+
         return () => {
+            destroyed = true;
+            window.removeEventListener('mousedown', handleGlobalPointerDown);
+            window.removeEventListener('touchstart', handleGlobalPointerDown as any);
             unsubscibeFocus();
             unsubscibeContext();
             unsubscribeProfileSwitch();
@@ -371,7 +424,7 @@
             }
 
             // clear all three.js objects from the scene
-            clearObjects(scene);
+            if (scene) clearObjects(scene);
 
             if (renderer) {
                 renderer.forceContextLoss();
@@ -391,8 +444,16 @@
             if (resizeObserverListener) resizeObserverListener.disconnect();
             if (labelContainer) {
                 for (const labelEl of labelContainer.children) {
-                    (labelEl as HTMLElement).removeEventListener('click', clickLabel);
-                    (labelEl as HTMLElement).removeEventListener('mouseup', mouseUpLabel);
+                    (labelEl as HTMLElement).removeEventListener('mousedown', handleLabelMouseDown);
+                    (labelEl as HTMLElement).removeEventListener('mouseup', handleLabelMouseUp);
+                    for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
+                        actionEl.removeEventListener('pointerdown', handleActionPointerDown);
+                        actionEl.removeEventListener('pointerup', handleActionPointerUp);
+                    }
+                    for (const btnEl of (labelEl as HTMLElement).querySelectorAll<HTMLButtonElement>('.ask-btn')) {
+                        btnEl.removeEventListener('pointerdown', handleButtonPointerDown);
+                        btnEl.removeEventListener('pointerup', handleButtonPointerUp);
+                    }
                 };
             }
 
@@ -424,45 +485,51 @@
     }
 
     async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
-        //console.log('updateModel', filesToLoad, objectsToShow);
-        let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
-            id: f,
-            name: f
-        })));
+        try {
+            //console.log('updateModel', filesToLoad, objectsToShow);
+            let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
+                id: f,
+                name: f
+            })));
 
 
-        let labelIds = [... new Set(labels.map(l => l.id))];
+            let labelIds = [... new Set(labels.map(l => l.id))];
 
-        insertObject(newObjects, objectsToShow, labelIds, group);
+            insertObject(newObjects, objectsToShow, labelIds, group);
 
-        
-        objects.forEach(object => {
-            object.traverse( function ( child: any ) {
-                // mark labeled objects
-                checkObject(child, objectsToShow, labelIds);
-            } );
-        })
-        objects = [...objects, ...newObjects];
 
-        // Pre-cache materials and build focusable mesh list for fast highlight()
-        precacheMaterials();
+            objects.forEach(object => {
+                object.traverse( function ( child: any ) {
+                    // mark labeled objects
+                    checkObject(child, objectsToShow, labelIds);
+                } );
+            })
+            objects = [...objects, ...newObjects];
 
-        requestRender();
-        loadLabels();
+            // Pre-cache materials and build focusable mesh list for fast highlight()
+            if (destroyed) return;
+            precacheMaterials();
 
-        // Mark model as loaded and apply any pending focus
-        modelLoaded = true;
-        if (pendingFocus) {
-            setHighlight(pendingFocus);
-            pendingFocus = null;
-        } else {
-            setHighlight($focused.object ?? null);
-        }
+            requestRender();
+            loadLabels();
 
-        if (!initialViewState) initialViewState = {
-            position: camera.position.clone(),
-            rotation: camera.rotation.clone(),
-            target: controls.target.clone()
+            // Mark model as loaded and apply any pending focus
+            modelLoaded = true;
+            if (pendingFocus) {
+                setHighlight(pendingFocus);
+                pendingFocus = null;
+            } else {
+                setHighlight($focused.object ?? null);
+            }
+
+            if (!initialViewState) initialViewState = {
+                position: camera.position.clone(),
+                rotation: camera.rotation.clone(),
+                target: controls.target.clone()
+            }
+        } catch (error) {
+            console.error('🧍', 'updateModel error:', error);
+            modelLoaded = true;
         }
 
         dispatch('ready');
@@ -738,9 +805,16 @@
                 label.center.set( 0, 1 );
                 (labels[index].object as any)?.add( label );
                 label.layers.set( 0 );
-                (labelEl as HTMLElement).addEventListener('click', clickLabel, false);
-                (labelEl as HTMLElement).addEventListener('mousedown', mouseUpLabel, false);
-                (labelEl as HTMLElement).addEventListener('mouseup', mouseUpLabel, false);
+                (labelEl as HTMLElement).addEventListener('mousedown', handleLabelMouseDown, false);
+                (labelEl as HTMLElement).addEventListener('mouseup', handleLabelMouseUp, false);
+                for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
+                    actionEl.addEventListener('pointerdown', handleActionPointerDown, false);
+                    actionEl.addEventListener('pointerup', handleActionPointerUp, false);
+                }
+                for (const btnEl of (labelEl as HTMLElement).querySelectorAll<HTMLButtonElement>('.ask-btn')) {
+                    btnEl.addEventListener('pointerdown', handleButtonPointerDown, false);
+                    btnEl.addEventListener('pointerup', handleButtonPointerUp, false);
+                }
                 labels[index].label = label;
             }
         };
@@ -761,8 +835,8 @@
 
         resizeObserverListener = new ResizeObserver(() => { resize(); requestRender(); });
         resizeObserverListener.observe(container);
-        let w = container.offsetWidth;
-        let h = container.offsetHeight;
+        let w = fullscreen ? window.innerWidth : (container.offsetWidth || 300);
+        let h = fullscreen ? window.innerHeight : (container.offsetHeight || 400);
         const minZoom = defaultState.minZoom;
         const maxZoom = defaultState.maxZoom;
 
@@ -795,7 +869,7 @@
         renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true } );
         renderer.setClearColor( 0x000000, 0 ); // the default
         renderer.setPixelRatio( Math.min(window.devicePixelRatio, 2) );
-        renderer.setSize( container.offsetWidth, container.offsetHeight );
+        renderer.setSize( w, h );
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.0;
@@ -804,7 +878,7 @@
         // CSS2DRenderer
 
         labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+        labelRenderer.setSize( w, h );
         labelRenderer.domElement.style.position = 'absolute';
         labelRenderer.domElement.style.top = '0px';
         container.appendChild( labelRenderer.domElement );
@@ -994,10 +1068,22 @@
 
     function resize () {
         if (!container || !renderer) return;
-        camera.aspect = container.offsetWidth / container.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize( container.offsetWidth, container.offsetHeight );
-        if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+
+        if (fullscreen) {
+            const fw = window.innerWidth;
+            const fh = window.innerHeight;
+            camera.aspect = fw / fh;
+            camera.clearViewOffset();
+            camera.updateProjectionMatrix();
+            renderer.setSize(fw, fh);
+            if (labelRenderer) labelRenderer.setSize(fw, fh);
+        } else {
+            camera.clearViewOffset();
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( container.offsetWidth, container.offsetHeight );
+            if (labelRenderer) labelRenderer.setSize( container.offsetWidth, container.offsetHeight );
+        }
     }
 
     function requestRender() {
@@ -1041,23 +1127,54 @@
     }
 
 
-    function clickLabel(event: MouseEvent) {
-        event.stopPropagation();
-        event.preventDefault();
-        sounds.focus.play();
-        ($state as any).focusView = false;
+    function handleGlobalPointerDown(event: MouseEvent | TouchEvent) {
+        if (!openedLabel) return;
+        const target = event.target as HTMLElement;
+        if (openedLabel.contains(target)) return;
+        openedLabel.classList.remove('-open');
+        openedLabel = null;
     }
 
-    function mouseUpLabel(event: MouseEvent) {
-        ($state as any).focusView = true;
+    function handleActionPointerDown(event: PointerEvent) {
+        event.stopPropagation(); // prevents OrbitControls from capturing the pointer
+        event.preventDefault();  // suppresses compat mouse events to avoid double-fire
+    }
+
+    function handleActionPointerUp(event: PointerEvent) {
         event.stopPropagation();
         event.preventDefault();
-        const a = (event.target as HTMLElement)?.closest('a');
-        if (a) {
-            const href = a.getAttribute('href');
-            if (href) goto(href);
-            focused.set({ object: a.dataset.id });
-        }
+        const action = event.currentTarget as HTMLAnchorElement;
+        action.closest<HTMLElement>('.label')?.classList.remove('-open');
+        openedLabel = null;
+        ui.emit('viewer:close');
+        goto(action.getAttribute('href')!);
+    }
+
+    function handleButtonPointerDown(event: PointerEvent) {
+        event.stopPropagation();
+        event.preventDefault(); // suppress compat mousedown (matches action link pattern)
+    }
+
+    function handleButtonPointerUp(event: PointerEvent) {
+        event.stopPropagation();
+        event.preventDefault();
+        // Programmatically fire click so Svelte's onclick handler runs
+        (event.currentTarget as HTMLButtonElement).click();
+        (event.currentTarget as HTMLElement).closest<HTMLElement>('.label')?.classList.remove('-open');
+        openedLabel = null;
+    }
+
+    function handleLabelMouseDown(event: MouseEvent) {
+        event.stopPropagation();
+        sounds.focus.play();
+        ($state as any).focusView = true;
+        openedLabel = (event.target as HTMLElement)?.closest('.label');
+        if (openedLabel) openedLabel.classList.add('-open');
+    }
+
+    function handleLabelMouseUp(event: MouseEvent) {
+        event.stopPropagation();
+        ($state as any).focusView = true;
     }
 
 
@@ -1239,6 +1356,21 @@
         }
     }
 
+    function getBodyPartAskData(label: (typeof labels)[0]) {
+        return {
+            bodyPart: translateAnatomy(label.id, $t),
+            tag: label.tag,
+            documents: label.documents.map(d => ({
+                id: d.id,
+                title: d.content?.title || d.metadata?.title,
+                category: d.metadata?.category || d.type,
+                date: d.created_at,
+                content: d.content,
+                report: d.report
+            }))
+        };
+    }
+
     function resetFocus() {
         focused.set({ object: undefined });
         clearContext();
@@ -1249,15 +1381,47 @@
 
 <div class="labels" bind:this={labelContainer}>
     {#each labels as label}
+
     <div class="label" id="label-id-{label.id}">
-        <a href="/med/p/{$profile.id}/documents/?tags={label.tag}" class="highlight" data-id={label.id}>
+        <div class="highlight"  data-id={label.id}>
+            <div class="icon {label.type}  category-{label.type}">
+                <svg>
+                    <use href="/icons-o.svg#report-{label.type}" />
+                </svg>
+                <div class="label-menu">
+                    <AskButton
+                        className="action"
+                        type="anatomy"
+                        showIcon={false}
+                        label={translateAnatomy(label.id, $t)}
+                        data={getBodyPartAskData(label)}
+                        documentId={label.documents?.[0]?.id}
+                        documentTitle={label.documents?.[0]?.content?.title || label.documents?.[0]?.metadata?.title}
+                    />
+                    {#if label.count > 10}
+                        <a class="action" href="/med/p/{$profile.id}/documents/?tags={label.tag}" data-sveltekit-preload-data="false">Documents</a>
+                    {:else}
+                        {#each label.documents as doc}
+                            <a class="action -doc" href="/med/p/{$profile.id}/documents/{doc.id}" data-sveltekit-preload-data="false">
+                                <span class="doc-title">{doc.content?.title || doc.metadata?.title || doc.id}</span>
+                                <span class="doc-date">{date(doc.metadata?.date || doc.created_at)}</span>
+                            </a>
+                        {/each}
+                    {/if}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--div class="label" id="label-id-{label.id}">
+        <a href="/med/p/{$profile.id}/documents/?tags={label.tag}" class="highlight" data-id={label.id} data-sveltekit-preload-data="false">
             <Label type={label.type} />
         </a>
-    </div>
+    </div-->
     {/each}
 </div>
 
-<div class="model" bind:this={container}></div>
+<div class="model" class:-fullscreen={fullscreen} bind:this={container}></div>
 
 {#if selected}
     {#key selected}
@@ -1302,6 +1466,13 @@
         transform: translateX(0);
         /*background-image: radial-gradient(ellipse at center, rgba(102, 255, 196, 100)  0%, rgba(102, 255, 196, 0) 100%);*/
     }
+    .model.-fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 998;
+        transform: none;
+        pointer-events: auto;
+    }
     /*
     @media only screen and (min-width: 769px) {
         .model {
@@ -1337,9 +1508,9 @@
         transition: background-color .2s ease-in-out;
     }
     @media (hover: hover) {
-    .selected button:hover {
-        background-color: var(--color-negative);
-    }
+        .selected button:hover {
+            background-color: var(--color-negative);
+        }
     }
     .selected button svg {
         width: 2rem;
@@ -1369,13 +1540,62 @@
         top: 0;
         width: 1px;
         height: 1px;
+        --radius: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .model :global(.label.-open) {
+        z-index: 100;
+    }
+
+    .model :global(.label.-open .highlight) {
+        width: 13rem;
+        height: auto;
+        border-radius: var(--radius);
+    }
+
+    .model :global(.label-menu) {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        height: auto;
+        max-height: 0;
+        transition: all .2s ease-in-out;
+        width: 100%;
+        padding: 0;
+
+    }
+    .model :global(.label.-open .label-menu) {
+        max-height: 20rem;
+        overflow-y: auto;
+        padding: .5rem 1rem;
+    }
+    .model :global(.action.-doc) {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+    .model :global(.action.-doc .doc-title) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+    }
+    .model :global(.action.-doc .doc-date) {
+        flex-shrink: 0;
+        opacity: 0.7;
+        font-size: 0.75rem;
     }
     .model :global(.highlight) {
         display: block;
         transform: translate(-50%, -50%);
         width: 3rem;
         height: 3rem;
-        border-radius: 100%;
+        border-radius: var(--radius);
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
@@ -1387,34 +1607,55 @@
         display: block;
         height: 100%;
         width: 100%;
-        border-radius: 100%;
+        border-radius: calc(var(--radius) - .7rem);
         border: 1px solid var(--color-white);
         /*background: var(--label-color);*/
         box-shadow: 1px 1px 6px 0 rgba(0,0,0.3);
-        color: #FFF;
         transform: scale(.5);
         transition: transform .2s ease-in-out;
+        background-color: var(--color);
+        color: var(--color-text);
+        overflow: hidden;
+        aspect-ratio: 1/1;
+    }
+
+    .model :global(.action) {
+        display: flex;
+        color: inherit;
+        text-align: center;
+        padding: .3rem .5rem;
+        border-radius: calc(var(--radius) - 1rem);
+        border: 1px solid var(--color-white);
+        font-size: inherit;
     }
     .model :global(.highlight .icon svg) {
         width: 100%;
         height: 100%;
+        max-height: 3rem;
         transform: scale(.6);
         opacity: 0;
         transition: opacity .2s ease-in-out;
+        fill: currentColor;
     }
 
     
-    .model :global(.highlight:hover) {
+    .model :global(.highlight:hover),
+    .model :global(.-open .highlight) {
         padding: .5rem;
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
         width: 4rem;
         height: 4rem;
     }
-    .model :global(.highlight:hover .icon) {
+    .model :global(.highlight:hover .icon),
+    .model :global(.-open .highlight .icon) {
         transform: scale(1);
     }
-    .model :global(.highlight:hover .icon svg) {
+    .model :global(.-open .highlight .icon) {
+        aspect-ratio: unset;
+    }
+    .model :global(.highlight:hover .icon svg),
+    .model :global(.-open .highlight .icon svg) {
         opacity: 1
     }
 

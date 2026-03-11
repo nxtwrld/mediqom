@@ -257,6 +257,17 @@ export async function createEmbeddedPackCheckout(
   }
 }
 
+export async function confirmSession(sessionId: string): Promise<void> {
+  try {
+    await apiPost("/v1/billing/stripe/confirm-session", {
+      session_id: sessionId,
+    });
+  } catch (err) {
+    console.error("Failed to confirm session:", err);
+    // Non-fatal — credits will arrive via webhook eventually
+  }
+}
+
 export async function getSessionStatus(
   sessionId: string,
 ): Promise<SessionStatusResponse | null> {

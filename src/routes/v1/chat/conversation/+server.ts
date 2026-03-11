@@ -307,6 +307,18 @@ async function processAIRequest(
       );
     }
 
+    // Filter sources to only approved domains
+    const APPROVED_DOMAINS = new Set([
+      "pubmed.ncbi.nlm.nih.gov", "ncbi.nlm.nih.gov", "cochranelibrary.com",
+      "europepmc.org", "semanticscholar.org", "scholar.google.com",
+      "bestpractice.bmj.com", "merckmanuals.com", "msdmanuals.com",
+      "mayoclinic.org", "my.clevelandclinic.org", "who.int",
+      "cdc.gov", "nih.gov", "nice.org.uk", "ecdc.europa.eu",
+    ]);
+    const validatedSources = (structuredData.sources || []).filter(
+      (s: any) => s.url && s.domain && APPROVED_DOMAINS.has(s.domain),
+    );
+
     // Send the structured data as metadata with context information
     const metadata = {
       type: "metadata",
@@ -316,6 +328,7 @@ async function processAIRequest(
         consentRequests: structuredData.consentRequests || [],
         toolCalls: structuredData.toolCalls || [],
         clarifyingQuestions: structuredData.clarifyingQuestions || [],
+        sources: validatedSources,
         tokenUsage: tokenUsage.total,
         mode,
         // Include context metadata

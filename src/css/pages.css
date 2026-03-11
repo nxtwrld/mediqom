@@ -19,6 +19,13 @@
   padding: 0;
 }
 
+@media (max-width: 768px) {
+  .page,
+  .page.-empty {
+    padding-bottom: calc(var(--safe-area-bottom) + var(--toolbar-height) + 3rem);
+  }
+}
+
 .p-page {
   width: 100%;
   height: 100%;

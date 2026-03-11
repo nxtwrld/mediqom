@@ -6,6 +6,7 @@
  */
 
 import { DeepgramStreamingProvider } from "./DeepgramStreamingProvider";
+import { apiFetch } from "$lib/api/client";
 import {
   StreamingState,
   type StreamingProvider,
@@ -213,9 +214,8 @@ export class StreamingTranscriptionClient {
    * Fetch token from server
    */
   private async fetchToken(): Promise<TokenResponse> {
-    const response = await fetch(this.config.tokenEndpoint!, {
+    const response = await apiFetch(this.config.tokenEndpoint!, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         provider: this.config.preferredProvider,
         language: this.config.language,

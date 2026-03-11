@@ -3,6 +3,12 @@ import type { Writable } from "svelte/store";
 import type { ChatState, ChatMessage, ChatContext, ChatMode } from "./types.d";
 import { profile } from "$lib/profiles";
 import { generateId } from "$lib/utils/id";
+import user, { type User } from "$lib/user";
+
+export function resolveChatMode(isOwnProfile: boolean, isMedical: boolean): ChatMode {
+  if (isOwnProfile) return "patient";
+  return isMedical ? "clinical" : "caregiver";
+}
 
 const initialState: ChatState = {
   isOpen: false,
@@ -106,7 +112,7 @@ export const chatActions = {
             ...s.context,
             currentProfileId: profileId,
             isOwnProfile,
-            mode: isOwnProfile ? "patient" : "clinical",
+            mode: resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false),
           }
         : null,
     }));

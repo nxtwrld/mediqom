@@ -3,6 +3,7 @@
     import defaults from '$data/lab.properties.defaults.json';
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
+    import AskButton from '$components/chat/AskButton.svelte';
 
     import type { Document } from '$lib/documents/types.d';
 
@@ -194,11 +195,20 @@
 
         <td class="-empty">
             <div class="actions">
-                <button onclick={() => ui.emit('modal.healthProperty', itemWithDocument )} aria-label="View signal chart">
+                <button onclick={() => ui.emit('viewer:timeline', { signalName: item.signal, value: Number(value), documentId: document?.id })} aria-label="View signal chart">
                     <svg>
                         <use href="/icons.svg#chart-line"></use>
                     </svg>
                 </button>
+                <AskButton
+                    type="signal"
+                    label={title}
+                    data={item}
+                    documentId={document?.id}
+                    documentTitle={document?.content?.title}
+                    showText={false}
+                    className=""
+                />
             </div>
         </td>
 
@@ -228,24 +238,6 @@
     </tr>
 
 
-    <!--tr class="lab-details" class:opened={showDetails}>
-        <td colspan="4" >
-            <div class="details"  class:opened={showDetails}>
-
-            {#if showDetails}
-
-                <SignalDetail
-                    {code}
-                    {status}
-                    {item}
-                    {unit}
-                    {value}
-                    {referenceRange}
-                    {report} />
-            {/if}
-            </div>
-        </td>
-    </tr-->
 
 
 <style>

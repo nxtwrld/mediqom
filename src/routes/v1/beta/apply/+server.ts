@@ -2,6 +2,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getClient } from "$lib/supabase";
 import { z } from "zod";
+import SUPPORTED_LANGUAGES from "$lib/languages";
 
 // Validation schema for beta application
 const betaApplicationSchema = z.object({
@@ -19,7 +20,7 @@ const betaApplicationSchema = z.object({
   phone: z.string().optional(),
   organization: z.string().optional(),
   country: z.enum(["CZ", "DE", "US"]),
-  language: z.enum(["en", "cs", "de"]),
+  language: z.enum(Object.keys(SUPPORTED_LANGUAGES) as [string, ...string[]]),
   additional_info: z.string().optional(),
   beta_agreement: z.literal(true, {
     errorMap: () => ({ message: "You must agree to beta terms" }),

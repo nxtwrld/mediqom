@@ -1,28 +1,29 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import '../css/app.css';
 	import '../css/index.css';
 	import { isNativePlatform, isCapacitorBuild } from '$lib/config/platform';
 	import { session as CurrentSession } from '$lib/user';
 
 	let { data, children } = $props();
+	let authCleanup: (() => void) | undefined;
 
 	// Break reactive loop: use $derived.by to avoid self-reference
 	let session = $derived(data?.session || null);
 	let supabase = $derived(data?.supabase);
 
-	onMount(() => {
+	onMount(async () => {
 		const currentSupabase = data?.supabase;
 		if (!currentSupabase) return;
 
 		const isMobile = isNativePlatform() || isCapacitorBuild();
 
 		// Initialize mobile auth (deep link listeners, cold start handling)
+		// AWAITED: ensures session is in CurrentSession before UI continues
 		if (isMobile) {
-			import('$lib/capacitor/auth').then(({ initMobileAuth }) => {
-				initMobileAuth();
-			});
+			const { initMobileAuth } = await import('$lib/capacitor/auth');
+			await initMobileAuth();
 		}
 
 		let lastUserId: string | null = data?.session?.user?.id || null;
@@ -34,7 +35,7 @@
 			if (isMobile) {
 				// Mobile: update session store directly, never call invalidate
 				// (invalidate triggers __data.json fetch which fails in static SPA)
-				if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+				if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
 					if (sessionData) {
 						CurrentSession.set(sessionData);
 					}
@@ -58,8 +59,9 @@
 			lastUserId = newUserId;
 		});
 
-		return () => authListener.data.subscription.unsubscribe();
+		authCleanup = () => authListener.data.subscription.unsubscribe();
 	});
+	onDestroy(() => authCleanup?.());
 </script>
 
 {@render children()}

@@ -41,6 +41,7 @@ export interface ScanPack {
   name: string;
   scans: number;
   price_eur: number; // cents
+  stripe_product_id: string | null;
   stripe_price_id: string | null;
   apple_product_id: string | null;
   google_product_id: string | null;

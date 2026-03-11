@@ -20,7 +20,7 @@
   --font-face-cursive: "Caveat", cursive;
   --color-blue: #3571ff;
   --color-purple: #a989ee;
-  --color-reglight: #ff6f93;
+  --color-redlight: #ff6f93;
   --color-red: #fb104a;
   --color-yellow: #fec400;
   --color-green: #29cc97;
@@ -53,6 +53,8 @@
   --color-warning: var(--color-yellow);
   --color-warning-text: var(--color-black);
 
+
+
   --color-info: var(--color-purple);
   --color-info-text: var(--color-white);
 
@@ -75,10 +77,10 @@
   --radius-16: min(1rem, 20px);
   --radius-8: min(0.5rem, 10px);
 
-  --button-color: var(--color-gray-300);
+  --button-color: transparent; /* var(--color-gray-300); */
   --button-border-color: var(--color-gray-800);
   --button-border-color-hover: var(--color-black);
-  --button-text-color: var(--color-black);
+  --button-text-color: inherit;/*var(--color-black)*/;
 
   --button-color-primary: var(--color-blue);
   --button-border-color-primary: var(--color-blue);

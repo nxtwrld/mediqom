@@ -4,6 +4,7 @@ import { browser } from "$app/environment";
 import { page } from "$app/stores";
 import { logger } from "$lib/logging/logger";
 import ui from "$lib/ui";
+import { apiFetch } from "$lib/api/client";
 import { AudioState, convertFloat32ToMp3 } from "$lib/audio/microphone";
 import { getAudioManager } from "$lib/audio/AudioManager";
 import { audioActions } from "./audio-actions";
@@ -399,9 +400,8 @@ export const unifiedSessionActions = {
       getAudioManager().on("state-change", handleStateChange);
 
       // Create session on server (server will generate the session ID)
-      const createSessionResponse = await fetch("/v1/session/start", {
+      const createSessionResponse = await apiFetch("/v1/session/start", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           language,
           models,
@@ -981,7 +981,7 @@ export const unifiedSessionActions = {
       formData.append("sequenceNumber", sequenceNumber.toString());
       formData.append("timestamp", Date.now().toString());
 
-      const response = await fetch(
+      const response = await apiFetch(
         `/v1/session/${currentState.audio.sessionId}/transcribe`,
         {
           method: "POST",

@@ -28,6 +28,7 @@ import {
 import { base64ToArrayBuffer } from "$lib/arrays";
 import { logger } from "$lib/logging/logger";
 import { profileContextManager } from "$lib/context/integration/profile-context";
+import { apiFetch } from "$lib/api/client";
 // Removed embedding migration import - now using medical terms classification
 
 export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
@@ -63,9 +64,6 @@ function updateIndex() {
             (doc) =>
               doc.user_id === user_id && doc.type === DocumentType.document,
           );
-          logger.documents.debug("Update profile store", {
-            user_id,
-          });
           set(userDocuments);
         });
       })();
@@ -93,7 +91,7 @@ let loadingDocuments: Promise<boolean> = new Promise(
 export async function loadDocuments(
   profile_id: string,
 ): Promise<(DocumentPreload | Document)[]> {
-  const documentsResponse = await fetch(
+  const documentsResponse = await apiFetch(
     `/v1/med/profiles/${profile_id}/documents`,
   );
   const result = await documentsResponse.json();
@@ -180,12 +178,25 @@ export async function decryptDocumentsNoStore(
 }
 
 /**
- * Replace the global documents store in one batched update and rebuild indices.
+ * Merge incoming docs into the global store, replacing only the profile(s)
+ * present in the batch. Docs from other profiles are preserved so that
+ * navigating between profiles does not erase previously-loaded data.
  */
 export function setDocuments(
   docs: (DocumentPreload | Document)[],
 ): (DocumentPreload | Document)[] {
-  documents.set(docs);
+  if (docs.length === 0) {
+    loadingDocumentsResolve(true);
+    return docs;
+  }
+
+  // Collect profile IDs present in the incoming batch
+  const incomingProfileIds = new Set(docs.map((d) => d.user_id).filter(Boolean));
+
+  // Keep documents from other profiles; replace only the incoming profile(s)
+  const others = get(documents).filter((d) => !incomingProfileIds.has(d.user_id));
+
+  documents.set([...others, ...docs]);
   updateIndex();
   loadingDocumentsResolve(true);
   return docs;
@@ -210,7 +221,7 @@ export async function loadDocument(
     throw new Error(Errors.Unauthenticated);
   }
 
-  const documentEncrypted = await fetch(
+  const documentEncrypted = await apiFetch(
     "/v1/med/profiles/" + profile_id + "/documents/" + id,
   )
     .then((r) => r.json())
@@ -355,7 +366,7 @@ export async function updateDocument(documentData: Document) {
     key,
   );
 
-  return await fetch(
+  return await apiFetch(
     "/v1/med/profiles/" + document.user_id + "/documents/" + document.id,
     {
       method: "PUT",
@@ -480,7 +491,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
   }
 
   // save the report itself
-  const response = await fetch(
+  const response = await apiFetch(
     "/v1/med/profiles/" + (profile_id || user_id) + "/documents",
     {
       method: "POST",
@@ -552,7 +563,7 @@ export async function removeDocument(id: string): Promise<void> {
   if (document?.content?.attachments)
     await removeAttachments(document?.content?.attachments);
   // remove document
-  await fetch("/v1/med/profiles/" + document.user_id + "/documents/" + id, {
+  await apiFetch("/v1/med/profiles/" + document.user_id + "/documents/" + id, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -596,7 +607,7 @@ async function saveAttachements(
   // store attachments
   const urls = await Promise.all(
     attachments.map(async (attachment, i) => {
-      const response = await fetch(
+      const response = await apiFetch(
         "/v1/med/profiles/" + user_id + "/attachments",
         {
           method: "POST",
@@ -620,7 +631,7 @@ async function removeAttachments(attachments: Attachment[]): Promise<void> {
   logger.documents.debug("Delete attachments from storage", { attachments });
   await Promise.all(
     attachments.map(async (attachment) => {
-      const response = await fetch(
+      const response = await apiFetch(
         "/v1/med/profiles/" +
           user.getId() +
           "/attachments?path=" +

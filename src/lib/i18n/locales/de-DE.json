@@ -337,6 +337,12 @@
       "documents": "Unterlagen",
       "profiles": "Profile"
     },
+    "nav": {
+      "anatomy-model": "",
+      "documents": "",
+      "profiles": "",
+      "settings": ""
+    },
     "import": {
       "add-files": "Dateien hinzufügen",
       "analyze-reports": "Analysieren",
@@ -461,7 +467,11 @@
     "languages": {
       "cs": "",
       "de": "",
-      "en": ""
+      "en": "",
+      "es": "",
+      "it": "",
+      "pl": "",
+      "tr": ""
     },
     "name": "mediqom",
     "nav": {
@@ -496,6 +506,12 @@
       "sidebar": {
         "resize": "Chat-Seitenleiste vergrößern"
       },
+      "disclaimer": {
+        "short": "KI-generierte Inhalte dienen nur zu Informationszwecken. Konsultieren Sie immer einen Arzt.",
+        "details": "Die von diesem KI-Assistenten bereitgestellten Informationen sollen Ihnen helfen, medizinische Daten und Terminologie zu verstehen. Sie stellen keine medizinische Beratung, Diagnose oder Behandlung dar. Alle KI-generierten Erkenntnisse sollten von einem qualifizierten Gesundheitsdienstleister überprüft werden, bevor gesundheitsbezogene Entscheidungen getroffen werden.",
+        "more": "Mehr",
+        "less": "Weniger"
+      },
       "document": {
         "add-prompt": "Möchten Sie \"{title}\" zu unserem Chat hinzufügen?",
         "add-yes": "Ja",
@@ -516,10 +532,44 @@
       },
       "clarifyingQuestion": {
         "placeholder": "Oder geben Sie Ihre eigene Antwort ein..."
+      },
+      "ask-about": {
+        "button": "Fragen",
+        "aria": "KI fragen zu: {label}",
+        "patient": "Können Sie mir helfen, dieses {type} zu verstehen: {label}?",
+        "clinical": "Führen Sie eine klinische Analyse für dieses {type} durch: {label}. Berücksichtigen Sie relevante klinische Aspekte.",
+        "diagnosis": {
+          "patient": "Können Sie mir helfen, meine Diagnose zu verstehen: {desc}{code}? Sie wurde als {diagnosisType}-Diagnose klassifiziert.{notes}{extra}",
+          "clinical": "Führen Sie eine klinische Analyse durch: {desc}{code} — {diagnosisType}-Diagnose. Berücksichtigen Sie Differentialdiagnosen und Behandlungsoptionen.{notes}{extra}",
+          "type-extra": {
+            "differential": {
+              "patient": " Wie wahrscheinlich ist es, dass ich diese Erkrankung und nicht eine andere habe?",
+              "clinical": " Diskutieren Sie wichtige Unterscheidungsmerkmale und die Vorgehensweise zur Eingrenzung der Differentialdiagnosen."
+            },
+            "rule-out": {
+              "patient": " Was bedeutet es, eine Diagnose \"auszuschließen\"?",
+              "clinical": " Welche Untersuchungen würden dies definitiv ausschließen?"
+            },
+            "provisional": {
+              "patient": " Diese Diagnose ist vorläufig — was bedeutet das für meine Behandlung?",
+              "clinical": " Welche weiteren Belege sind erforderlich, um dies zu bestätigen oder zu widerlegen?"
+            },
+            "confirmed": {
+              "patient": " Diese Diagnose ist bestätigt — was sollte ich als nächstes erwarten?",
+              "clinical": " Skizzieren Sie den evidenzbasierten Behandlungspfad."
+            }
+          }
+        },
+        "anatomy": {
+          "patient": "Können Sie die {count} medizinische(n) Dokument(e) zu meinem {bodyPart} besprechen?",
+          "caregiver": "Können Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} von {profileName} besprechen?",
+          "clinical": "Bitte analysieren Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} dieses Patienten."
+        }
       }
     },
     "settings": {
       "title": "Einstellungen",
+      "redirect": "Weiterleitung zu den Einstellungen...",
       "tabs": {
         "general": "Allgemein",
         "profile": "Profil",
@@ -528,72 +578,110 @@
         "about": "Über"
       },
       "general": {
-        "title": "",
+        "title": "Allgemeine Einstellungen",
         "language": {
-          "title": "",
-          "description": "",
-          "current": "",
-          "save": "",
-          "saved": ""
+          "title": "Sprache",
+          "description": "Wählen Sie Ihre bevorzugte Sprache für die Benutzeroberfläche",
+          "current": "Aktuelle Sprache",
+          "save": "Sprache speichern",
+          "saved": "Sprache erfolgreich aktualisiert"
+        },
+        "role": {
+          "label": "Rolle",
+          "description": "Bestimmt, wie der KI-Assistent medizinische Informationen präsentiert",
+          "individual": "Normaler Benutzer / Pflegeperson",
+          "medical": "Medizinischer Fachmann",
+          "save": "Speichern",
+          "saved": "Rolle aktualisiert"
+        },
+        "error": {
+          "update-failed": "Aktualisierung fehlgeschlagen",
+          "network": "Netzwerkfehler"
         }
       },
       "profile": {
-        "title": "",
-        "description": "",
-        "edit": "",
-        "edit-full": "",
-        "view": "",
-        "save": "",
-        "saved": ""
+        "title": "Profilinformationen",
+        "description": "Verwalten Sie Ihre persönlichen Informationen, Versicherung, Kontakte und Gesundheitsdaten",
+        "edit": "Profil bearbeiten",
+        "edit-full": "Bearbeiten Sie Ihr vollständiges Profil einschließlich persönlicher Informationen, Versicherungsdetails, Kontakte und Gesundheitsdaten.",
+        "view": "Profil anzeigen",
+        "save": "Profil speichern",
+        "saved": "Profil erfolgreich gespeichert",
+        "reset": "Änderungen verwerfen",
+        "no-changes": "Keine Änderungen zu speichern",
+        "save-error": "Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "loading": "Profil wird geladen..."
       },
       "privacy": {
-        "title": "",
+        "title": "Datenschutz & Sicherheit",
         "encryption": {
-          "title": "",
-          "status": "",
-          "enabled": "",
-          "not-enabled": "",
-          "method": "",
-          "passphrase": "",
-          "passkey": "",
-          "change": "",
-          "setup-recovery": ""
+          "title": "Verschlüsselung",
+          "status": "Verschlüsselungsstatus",
+          "enabled": "Verschlüsselung aktiviert",
+          "not-enabled": "Verschlüsselung ist nicht aktiviert",
+          "method": "Methode",
+          "passphrase": "Passphrase",
+          "passkey": "Passkey",
+          "change": "Verschlüsselungsmethode ändern",
+          "setup-recovery": "Wiederherstellungsschlüssel einrichten",
+          "recovery-configured": "Wiederherstellungsschlüssel konfiguriert",
+          "verify-current": "Aktuelle Anmeldedaten überprüfen",
+          "enter-passphrase": "Geben Sie Ihre aktuelle Passphrase ein",
+          "verify-passkey": "Mit Passkey verifizieren",
+          "key-available": "Ihr Verschlüsselungsschlüssel ist automatisch verfügbar.",
+          "switch-to-passkey": "Zum Passkey wechseln",
+          "switch-to-passphrase": "Zur Passphrase wechseln",
+          "choose-new-method": "Wählen Sie Ihre neue Verschlüsselungsmethode",
+          "switching": "Verschlüsselungsmethode wird gewechselt...",
+          "success": "Verschlüsselungsmethode erfolgreich aktualisiert!",
+          "success-passkey": "Ihre Daten sind jetzt mit Ihrem Passkey geschützt.",
+          "success-passphrase": "Ihre Daten sind jetzt mit Ihrer Passphrase geschützt.",
+          "error": "Verschlüsselungsmethode konnte nicht aktualisiert werden",
+          "error-verify": "Überprüfung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
+          "error-passkey-create": "Passkey konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+          "error-browser-support": "Ihr Browser unterstützt keine Passkey PRF.",
+          "cancel": "Abbrechen",
+          "close": "Schließen",
+          "verify": "Verifizieren",
+          "regenerate-recovery": "Wiederherstellungsschlüssel neu generieren",
+          "current-method": "Aktuelle Methode",
+          "new-method": "Neue Methode"
         },
         "account": {
-          "title": "",
-          "created": "",
-          "last-login": "",
-          "email": ""
+          "title": "Kontoinformationen",
+          "created": "Konto erstellt",
+          "last-login": "Letzte Anmeldung",
+          "email": "E-Mail"
         },
         "data": {
-          "title": "",
-          "export": "",
-          "export-progress": "",
-          "export-error": "",
-          "delete": "",
-          "delete-confirm": "",
-          "delete-error": "",
-          "coming-soon": ""
+          "title": "Datenverwaltung",
+          "export": "Alle Daten exportieren",
+          "export-progress": "Daten werden exportiert...",
+          "export-error": "Daten konnten nicht exportiert werden. Bitte versuchen Sie es erneut.",
+          "delete": "Konto löschen",
+          "delete-confirm": "Möchten Sie Ihr Konto wirklich dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+          "delete-error": "Konto konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+          "coming-soon": "Diese Funktionen werden bald verfügbar sein"
         }
       },
       "about": {
-        "title": "",
-        "version": "",
-        "version-info": "",
-        "build": "",
-        "commit": "",
+        "title": "Über Mediqom",
+        "version": "Version",
+        "version-info": "Versionsinformationen",
+        "build": "Build",
+        "commit": "Commit",
         "links": {
-          "title": "",
-          "documentation": "",
-          "privacy": "",
-          "terms": "",
-          "github": "",
-          "support": ""
+          "title": "Links",
+          "documentation": "Dokumentation",
+          "privacy": "Datenschutzrichtlinie",
+          "terms": "Nutzungsbedingungen",
+          "github": "GitHub",
+          "support": "Support"
         },
         "credits": {
-          "title": "",
-          "licenses": "",
-          "description": ""
+          "title": "Danksagungen",
+          "licenses": "Open-Source-Lizenzen",
+          "description": "Mediqom basiert auf Open-Source-Technologien und Beiträgen der Community. Vielen Dank an alle Mitwirkenden und Betreuer."
         }
       }
     },
@@ -818,7 +906,9 @@
     "en": "Englisch",
     "es": "Spanisch",
     "fr": "Französisch",
-    "it": "Italienisch"
+    "it": "Italienisch",
+    "pl": "Polnisch",
+    "tr": "Türkisch"
   },
   "medical": {
     "prop-values": {
@@ -1400,7 +1490,8 @@
     "insurance": {
       "health-insurance": "Krankenversicherung",
       "identification": "Versicherungsnummer",
-      "provider": "Anbieter"
+      "provider": "Anbieter",
+      "selectProvider": ""
     },
     "vcard": {
       "city": "Stadt",
@@ -1488,7 +1579,7 @@
       "reset-view": ""
     },
     "documents": {
-      "view-document": "",
+      "view-document": "Dokument ansehen",
       "remove-document": ""
     },
     "report": {
@@ -1836,6 +1927,7 @@
     "current-plan": "Aktueller Plan",
     "free-tier": "Kostenlos",
     "upgrade-to": "Upgrade auf",
+    "downgrade-to": "",
     "profile": "Profil",
     "profiles": "Profile",
     "unlimited-profiles": "Unbegrenzte Profile",

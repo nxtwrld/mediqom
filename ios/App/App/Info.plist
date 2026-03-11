@@ -61,6 +61,8 @@
 	<string>Mediqom needs microphone access to record doctor-patient consultations for transcription and analysis.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Mediqom needs camera access to scan and import medical documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mediqom needs photo library access to import medical images.</string>
 	<key>UIRequiresFullScreen</key>
 	<true/>
 </dict>

@@ -6,6 +6,8 @@
     import  user, { type User } from '$lib/user';
     import { onMount } from 'svelte';
     import { t } from '$lib/i18n';
+    import { isNativePlatform } from '$lib/config/platform';
+    import { pickFromGallery, captureFromCamera } from '$lib/capacitor/file-picker';
     import DocumentView from '$components/documents/DocumentView.svelte';
     import SelectProfile from './SelectProfile.svelte';
     import { play } from '$components/ui/Sounds.svelte';
@@ -72,6 +74,16 @@
         files.set([...$files, ...e.target.files]);
     }
 
+    async function handleGalleryPick() {
+        const picked = await pickFromGallery().catch(() => []);
+        if (picked.length > 0) files.set([...$files, ...picked]);
+    }
+
+    async function handleCameraCapture() {
+        const photo = await captureFromCamera().catch(() => null);
+        if (photo) files.set([...$files, photo]);
+    }
+
     onMount(() => {
         // If resuming a job, load its results
         if (jobId) {
@@ -124,7 +136,10 @@
                 noCachedFiles = !cachedFiles;
 
                 // Use decryptJobResults to handle both encrypted and plaintext jobs
-                const { extraction, analysis } = await decryptJobResults(job);
+                const { extraction, analysis } = await decryptJobResults(
+                    job,
+                    user.keyPair?.privateKey ?? undefined,
+                );
 
                 const documents = await assembleDocuments(
                     extraction,
@@ -227,7 +242,10 @@
             const cachedFiles = await getCachedFiles(id);
 
             // Use decryptJobResults to handle both encrypted and plaintext jobs
-            const { extraction, analysis } = await decryptJobResults(completedJob);
+            const { extraction, analysis } = await decryptJobResults(
+                completedJob,
+                user.keyPair?.privateKey ?? undefined,
+            );
 
             console.log('Normal flow - extraction:', extraction);
             console.log('Normal flow - analysis:', analysis);
@@ -400,6 +418,31 @@
                 </div>
             </label>
             </div>
+            {#if isNativePlatform()}
+            <div class="report-import">
+                <button class="button report" onclick={handleCameraCapture}>
+                    <div class="preview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="title">{$t('app.import.camera')}</div>
+                </button>
+            </div>
+            <div class="report-import">
+                <button class="button report" onclick={handleGalleryPick}>
+                    <div class="preview">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <div class="title">{$t('app.import.gallery')}</div>
+                </button>
+            </div>
+            {/if}
             {/if}
         </div>
     </div>
@@ -541,6 +584,7 @@
         width: 100%;
         height: 100%;
         fill: var(--color-interactivity);
+        stroke: var(--color-interactivity);
     }
 
     .report .title {

@@ -1,361 +1,393 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
+    import { onMount } from 'svelte';
     import { createEventDispatcher } from "svelte";
-	import Input from '$components/forms/Input.svelte';
-    import Textarea from '$components/forms/Textarea.svelte';
-    //import ContactSelector from "$components/contact/ContactSelector.svelte";
-	import type { VCard } from "$lib/contact/types.d";
-    import type { Item } from "$lib/common.utils";
-    import type { Link } from "$lib/common.types.d";
-    import PublicKey from "$components/ui/PublicKey.svelte";
-    import share from "$lib/share/store";
-	import ProgressBar from "$components/ui/ProgressBar.svelte";
-    //import createShares from "$lib/share/create";
+    import Input from '$components/forms/Input.svelte';
     import { t } from '$lib/i18n';
-
-    import ShareLinkedItems from "./ShareLinkedItems.svelte";
+    import { date } from '$lib/datetime';
+    import { apiGet, apiPost } from '$lib/api/client';
+    import { decrypt } from '$lib/user';
+    import { encrypt as rsaEncrypt, pemToKey } from '$lib/encryption/rsa';
+    import { encryptString } from '$lib/encryption/passphrase';
+    import type { RecipientInfo } from '$lib/share/types.d';
+    import { decryptDocumentsNoStore } from '$lib/documents/index';
 
     const dispatch = createEventDispatcher();
 
     interface Props {
-        items?: Link[];
+        items?: any[];
     }
 
     let { items = [] }: Props = $props();
 
-    let contact: VCard | undefined = $state(undefined);
+    type Step = 0 | 1;
+    let step: Step = $state(0);
 
-    const lastStep: number = 5;
-    let step: 0 | 1 | 2 | 3 | 4 | 5 = $state(0);
+    let email: string = $state('');
+    let processing = $state(false);
+    let done = $state(false);
+    let errorMsg: string = $state('');
+    let sharedEmail: string = $state('');
+    let recipientExists: boolean = $state(false);
+    let inviteWarning: string = $state('');
 
-    let password: string = $state('');
-    let message: string = $state('');
-    let url: string = $state('https://mediqom.com/ext/adasdasdaqdqwdasdqwwde2342tf342fwqefqwefsac');
+    // All documents available for this profile
+    let availableDocuments: any[] = $state([]);
+    let loadingDocs = $state(false);
 
-    let selectedRoute: number = $state(0);
+    // IDs of documents selected for sharing — pre-seeded from items prop
+    let selectedIds = $state<Set<string>>(new Set(items.map((i) => i.id).filter(Boolean)));
 
+    // Map of id → full item (from prop) for docs already loaded
+    const preloaded = new Map(items.map((i) => [i.id, i]));
 
+    const ownerId: string | undefined = items[0]?.user_id;
 
+    onMount(async () => {
+        if (!ownerId) return;
+        loadingDocs = true;
+        try {
+            const docs = await apiGet<any[]>(
+                `/v1/med/profiles/${ownerId}/documents?types=document`
+            );
+            if (!docs?.length) {
+                availableDocuments = items;
+                return;
+            }
+            // Separate preloaded (already decrypted) from those needing decryption
+            const toDecrypt = docs.filter((d) => !preloaded.has(d.id));
+            const decrypted = toDecrypt.length
+                ? await decryptDocumentsNoStore(toDecrypt as any)
+                : [];
+            const decryptedMap = new Map(decrypted.map((d) => [d.id, d]));
 
-
-    function getKeyDetails(contact: VCard) {
-        // import spki key and get details
-        //crypto.subtle.importKey('spki', contact.publicKey, false ,['encrypt']);
-    }
-
-    function checkIsNextAllowed(step: number, contact: VCard | undefined, password: string, uploadProgress: number = 0) {
-        switch (step) {
-            case 0:
-                return false;
-            case 1:
-                return contact === undefined;
-            case 2:
-                return false;
-            case 3:
-                return password === '' && contact?.publicKey === '';
-            case 4:
-                return uploadProgress < 100;
-            case 5:
-                return false;
-            default:
-                return false;
+            availableDocuments = docs.map(
+                (d) => preloaded.get(d.id) ?? decryptedMap.get(d.id) ?? d
+            );
+        } catch {
+            // Fall back to just the passed-in items
+            availableDocuments = items;
+        } finally {
+            loadingDocs = false;
         }
-    }
+    });
 
-
-    function getTitle(step: number) {
-        switch (step) {
-            case 0:
-                return $t('share.title', { values: { title: items[0]?.title || '' } });
-            case 1:
-                return $t('share.share-with', { values: { name: contact?.fn || '...' } });
-            case 2:
-                return $t('share.share-with', { values: { name: contact?.fn || '...' } }) + ' - ' + $t('share.review-items');
-            case 3:
-                return $t('share.share-with', { values: { name: contact?.fn || '...' } }) + ' - ' + $t('share.privacy');
-            case 4:
-                return $t('share.uploading');
-            case 5:
-                return $t('share.share-it');
+    function toggleDoc(id: string) {
+        const next = new Set(selectedIds);
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
         }
-    }
-
-
-    function createMessagBody(items: Link[], url: string, password: string, message: string) {
-        return {
-            subject: 'Medical Records: ' + (items[0].title || 'Untitled'),
-            body: message.replace(/\n\r?/g, '%0D%0A')
-
-        }
-    }
-
-
-
-    let uploadProgress: number = 0;
-    async function createShare() {
-        
-        next();
-/*
-        uploadProgress = 1;
-
-        const upload = createShares(items, password, contact?.publicKey);
-        
-        upload.on('progress', (progress: number) => {
-            uploadProgress = progress;
-        });
-        upload.on('done', (url: string) => {
-            uploadProgress = 100;
-            share.add({
-                title: items[0]?.title || items[0]?.question || 'Untitled',
-                contact: contact.uid,
-                href: '/' + items[0].type + '/' + items[0]?.uid,
-                url,
-                password: password,
-                publicKey: contact.publicKey,
-                created: new Date().toISOString(),
-                links: items
-
-            });
-            next();
-        });
-        */
-        next();
-    }
-
-    function generatePassword() {
-        password = Math.random().toString(36).slice(-10);
-    }
-
-
-    function next() {
-        if (step < lastStep) step++;
-    }
-    function previous() {
-        if (step > 0) step--;
-        else dispatch('abort');
-    }
-
-    function setContact(event: any) {
-        contact = event.detail;
-        next();
+        selectedIds = next;
     }
 
     function abort() {
         dispatch('abort');
     }
-    run(() => {
-        if (contact && contact.publicKey != '') {
-            // TODO!!
-            getKeyDetails(contact);
+
+    async function handleShare() {
+        if (!email.trim() || selectedIds.size === 0) return;
+
+        processing = true;
+        errorMsg = '';
+        step = 1;
+
+        // Build the list of items to share from availableDocuments filtered by selectedIds
+        const toShare = availableDocuments.filter((d) => selectedIds.has(d.id));
+
+        try {
+            // 1. Lookup recipient
+            const recipient = await apiGet<RecipientInfo & { auth_id?: string }>(
+                `/v1/share/recipient-info?email=${encodeURIComponent(email.trim())}`
+            );
+
+            // 2. Generate a share secret for new users
+            const shareSecret = recipient.exists
+                ? undefined
+                : Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                    .map((b) => b.toString(16).padStart(2, '0'))
+                    .join('');
+
+            // 3. Prepare per-document share entries
+            const shares = [];
+            for (const item of toShare) {
+                const docOwnerId = item.user_id ?? ownerId;
+                const docId = item.id;
+
+                if (!docOwnerId || !docId) continue;
+
+                // Fetch the document key (encrypted with our RSA public key)
+                let encryptedDocKey: string | null = null;
+                try {
+                    const doc = await apiGet<{ keys: Array<{ key: string }> }>(
+                        `/v1/med/profiles/${docOwnerId}/documents/${docId}`
+                    );
+                    encryptedDocKey = doc?.keys?.[0]?.key ?? null;
+                } catch {
+                    console.warn('[Share] Could not fetch key for document', docId);
+                    continue;
+                }
+
+                if (!encryptedDocKey) continue;
+
+                // Decrypt the AES key with our own RSA private key
+                let rawAesKey: string;
+                try {
+                    rawAesKey = await decrypt(encryptedDocKey);
+                } catch {
+                    console.warn('[Share] Could not decrypt key for document', docId);
+                    continue;
+                }
+
+                if (recipient.exists && recipient.publicKey) {
+                    const recipientPubKey = await pemToKey(recipient.publicKey, false);
+                    const encryptedForRecipient = await rsaEncrypt(recipientPubKey, rawAesKey);
+                    shares.push({
+                        document_id: docId,
+                        owner_id: docOwnerId,
+                        encrypted_key_for_recipient: encryptedForRecipient,
+                        pending_encrypted_key: null,
+                    });
+                } else {
+                    const pendingKey = await encryptString(rawAesKey, shareSecret!);
+                    shares.push({
+                        document_id: docId,
+                        owner_id: docOwnerId,
+                        encrypted_key_for_recipient: null,
+                        pending_encrypted_key: pendingKey,
+                    });
+                }
+            }
+
+            if (shares.length === 0) {
+                throw new Error($t('share.error-no-keys'));
+            }
+
+            const result = await apiPost<{ status: string; recipient_exists: boolean; invite_error?: string }>('/v1/share/create', {
+                recipient_email: email.trim(),
+                share_secret: shareSecret,
+                shares,
+            });
+
+            sharedEmail = email.trim();
+            recipientExists = result?.recipient_exists ?? false;
+            if (result?.invite_error) inviteWarning = result.invite_error;
+            done = true;
+        } catch (e: any) {
+            errorMsg = e?.message || $t('share.error-generic');
+            step = 0;
+        } finally {
+            processing = false;
         }
+    }
 
-        if (url != '' && password != '' && message == '') {
-
-            message = `Dear ${contact?.fn || 'Sir/Madame'}, 
-I would like to share my medical records with you. 
-Please, use the following link to access them: ${url}  
-
-Password: ${password}
-
-Kindest regards, 
-            `;
-        }
-    });
-    let sharedMessage = $derived(createMessagBody(items, url, password, message));
-    let slidesCount = $derived(lastStep + 1);
-    let stepTitle = $derived(getTitle(step));
-    let isNextAllowed = $derived(checkIsNextAllowed(step, contact, password, uploadProgress));
-    let routes = $derived((contact) ? [...((contact as any).email || []).map((e: any) => {
-        return {
-            ...e,
-            type: 'email'
-        };
-    }), ... ((contact as any).tel || []).map((e: any) => {
-        return {
-            ...e,
-            type: 'tel'
-        };
-    })] : [])
-    let route = $derived(routes[selectedRoute]);
+    function retry() {
+        errorMsg = '';
+        step = 0;
+        done = false;
+    }
 </script>
 
-<h3 class="h3">{stepTitle}</h3>
+{#if step === 0}
+    <h3 class="h3">{$t('share.title', { values: { title: items[0]?.metadata?.title || items[0]?.title || '' } })}</h3>
 
-{#if contact && step > 1}
-    <p class="p">{$t('share.sharing-with')} <strong>{contact.fn}</strong></p>
-{/if}
+    {#if errorMsg}
+        <p class="p -error">{errorMsg}</p>
+    {/if}
 
+    <p class="p">{$t('share.description')}</p>
 
-<div class="steps">
-    <div class="steps-canvas" style="width: {100*slidesCount}%;transform: translateX(-{100 / slidesCount * step}%)">
-
-        <div class="step">
-            <div class="step-contents">
-                <p class="p">{$t('share.description')}</p>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-contents">
-                <!--ContactSelector on:link={setContact} response="VCard" simplified={true} /-->
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-contents">
-                <ShareLinkedItems {items} />
-
-            </div>
-        </div>
-
-        <div class="step">
-
-
-            <div class="step-contents">
-                {#if contact && contact.publicKey}
-                <svg>
-                    <use href="/sprite.svg#public-key" />
-                </svg>
-                    <p class="p">
-                        {$t('share.public-key-info', { values: { name: contact.fn } })}
-                    </p>
-                        <PublicKey value={contact.publicKey} />
-                {:else}
-                <svg>
-                    <use href="/sprite.svg#encrypted-data" />
-                </svg>
-                <p class="p">{$t('share.password-info')}</p>
-
-                <div class="password-row">
-                    <div>
-                        <Input type="password" bind:value={password} placeholder={$t('share.password-placeholder')} label={$t('share.password-label')} required copyable autocomplete="off" />
+    <div class="share-docs">
+        {#if loadingDocs}
+            <p class="p -muted">{$t('share.loading')}</p>
+        {:else}
+            {#each availableDocuments as doc (doc.id)}
+                {@const category = doc.metadata?.category || 'other'}
+                {@const title = doc.metadata?.title || doc.title || '—'}
+                {@const docDate = doc.metadata?.date}
+                <label class="share-doc category-{category}" class:-selected={selectedIds.has(doc.id)}>
+                    <input
+                        type="checkbox"
+                        checked={selectedIds.has(doc.id)}
+                        onchange={() => toggleDoc(doc.id)}
+                    />
+                    <div class="share-doc-icon-wrap">
+                        <svg class="share-doc-icon" aria-hidden="true">
+                            <use href="/icons-o.svg#report-{category}" />
+                        </svg>
                     </div>
-                    <div>
-                        <button class="button" onclick={generatePassword}>{$t('share.generate')}</button>
-                    </div>
-                </div>
-                {/if}
-            </div>
-     
-        </div>
-
-
-        <div class="step">
-            <div class="step-contents">
-
-                <div class="centered">
-                    <h4 class="h4">{$t('share.encrypting-uploading')}</h4>
-                    <div class="upload-progress">
-                        <ProgressBar value={uploadProgress} />
-                    </div>
-                    <div>{uploadProgress}%</div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="step">
-
-            <div class="step-contents">
-
-                <p class="p">{$t('share.password-note')}</p>
-
-                {#each routes as route, index}
-                <div>
-                    <Input type="radio" bind:group={selectedRoute} value={index} label={route.value} />
-                </div>
-                {/each}
-
-
-                <Input type="text" bind:value={url} placeholder={$t('share.url-label')} label={$t('share.url-label')} readonly copyable />
-
-                <Textarea bind:value={message} placeholder={$t('share.message-label')} label={$t('share.message-label')} />
-            </div>
-        </div>
+                    <span class="share-doc-title">{title}</span>
+                    {#if docDate}
+                        <span class="share-doc-date">{date(docDate, 'DD MMM YYYY')}</span>
+                    {/if}
+                </label>
+            {/each}
+        {/if}
     </div>
-    <div class="buttons-row">
 
-        <button class="button" onclick={previous}>
-            {#if step == 0}
-                {$t('share.cancel')}
-            {:else}
-                {$t('share.back')}
+    <div class="form share-form">
+        <Input
+            type="email"
+            bind:value={email}
+            label={$t('share.recipient-email-label')}
+            placeholder={$t('share.recipient-email-placeholder')}
+            required
+            autocomplete="email"
+        />
+    </div>
+
+    <div class="buttons-row">
+        <button class="button" onclick={abort}>{$t('share.cancel')}</button>
+        <button
+            class="button -primary"
+            onclick={handleShare}
+            disabled={!email.trim() || selectedIds.size === 0 || processing}
+        >
+            {$t('share.share-button')}
+            {#if selectedIds.size > 0}
+                ({selectedIds.size})
             {/if}
         </button>
-
-        {#if step == lastStep}
-            {#if route?.type == 'email'}
-                <a href="mailto:{route.value}?subject={sharedMessage.subject}&body={sharedMessage.body}" class="button">{$t('share.open-email-app')}</a>
-            {:else if routes[selectedRoute].type == 'tel'}
-                <a href="sms:{route.value}?body={sharedMessage.body}" class="button">{$t('share.open-sms-app')}</a>
-            {/if}
-            <button class="button -primary" onclick={abort}>{$t('share.done')}</button>
-        {:else if step == lastStep -2}
-        <button class="button -primary" onclick={createShare} disabled={isNextAllowed}>{$t('share.create-share')}</button>
-        {:else}
-            <button class="button -primary" onclick={next} disabled={isNextAllowed}>{$t('share.next')}</button>
-        {/if}
-
     </div>
-</div>
+
+{:else}
+    <h3 class="h3">{done ? $t('share.done-title') : $t('share.processing-title')}</h3>
+
+    {#if done}
+        <p class="p">
+            {#if recipientExists}
+                {$t('share.done-description-shared', { values: { email: sharedEmail } })}
+            {:else}
+                {$t('share.done-description-invited', { values: { email: sharedEmail } })}
+            {/if}
+        </p>
+        {#if inviteWarning}
+            <p class="p -warning">{$t('share.invite-warning', { values: { email: sharedEmail } })}</p>
+        {/if}
+        <div class="buttons-row">
+            <button class="button -primary" onclick={abort}>{$t('share.done')}</button>
+        </div>
+    {:else if errorMsg}
+        <p class="p -error">{errorMsg}</p>
+        <div class="buttons-row">
+            <button class="button" onclick={retry}>{$t('share.retry')}</button>
+            <button class="button -primary" onclick={abort}>{$t('share.cancel')}</button>
+        </div>
+    {:else}
+        <div class="share-spinner" aria-label={$t('share.processing-title')} role="status">
+            <div class="spinner"></div>
+        </div>
+    {/if}
+{/if}
 
 <style>
-
-    .steps {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-    }
-    
-    .steps-canvas {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-
-        height: 100%;
-        transition: transform 0.3s ease-in-out;
-    }
-    .step {
-        width: 25%;
+    .share-form {
+        margin: var(--ui-pad-medium) 0;
     }
 
-    .step-contents {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        max-height: 60vh;
-        overflow: auto;
-    }
-    .password-row {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: stretch;
-    }
-    .password-row > div {
-        flex-grow: 2;
-    }
-    .password-row > div:last-child {
-        margin-left: var(--gap);
-        flex-grow: 0;
-    }
-
-    .upload-progress {
-        margin: 0 auto;
-        width: 50%;
-        height: 1rem;
-        background-color: var(--color-shade);
-        color: var(--color-primary);
-        border-radius: var(--border-radius);
-        overflow: hidden;
-    }
-    .centered {
+    .share-docs {
         display: flex;
         flex-direction: column;
+        gap: 0.35rem;
+        margin-bottom: var(--ui-pad-medium);
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+
+    .share-doc {
+        display: flex;
+        align-items: center;
+        gap: var(--ui-pad-small);
+        padding: 0.4rem var(--ui-pad-small);
+        border-radius: var(--ui-radius-small);
+        border: 1px solid var(--color-border);
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+    }
+
+    .share-doc:hover {
+        background: var(--color-surface);
+    }
+
+    .share-doc.-selected {
+        border-color: var(--color, var(--color-primary, #3182ce));
+        background: color-mix(in srgb, var(--color, var(--color-primary, #3182ce)) 10%, transparent);
+    }
+
+    .share-doc input[type="checkbox"] {
+        flex-shrink: 0;
+        width: 1rem;
+        height: 1rem;
+        accent-color: var(--color, var(--color-primary, #3182ce));
+        cursor: pointer;
+    }
+
+    .share-doc-icon-wrap {
+        flex-shrink: 0;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: 50%;
+        background-color: var(--color, #546e7a);
+        color: var(--color-text, #fff);
+        display: flex;
         align-items: center;
         justify-content: center;
-        height: 100%;
-        width: 100%;
+    }
+
+    .share-doc-icon {
+        width: 65%;
+        height: 65%;
+        fill: currentColor;
+        display: block;
+    }
+
+    .share-doc-title {
+        flex: 1;
+        font-size: 0.9em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .share-doc-date {
+        flex-shrink: 0;
+        font-size: 0.75em;
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+    }
+
+    .p.-error {
+        color: var(--color-negative);
+    }
+
+    .p.-warning {
+        color: var(--color-warning);
+    }
+
+    .p.-muted {
+        color: var(--color-text-secondary);
+        font-size: 0.9em;
+    }
+
+    .share-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: var(--ui-pad-xlarge) 0;
+    }
+
+    .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid var(--color-border);
+        border-top-color: var(--color-primary, #3182ce);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>

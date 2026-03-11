@@ -20,23 +20,26 @@ export const load: PageLoad = async ({ parent, url }) => {
 
   // For Capacitor/mobile builds, handle auth check on client side
   if (IS_CAPACITOR || isNativePlatform() || isCapacitorBuild()) {
+    let session = null;
     try {
-      const { session } = await parent();
-      const redirectPath = url.searchParams.get("redirect") || "/med";
-
-      // If user is already logged in, redirect to med
-      if (session) {
-        console.log(
-          "[Auth Page] Mobile: User already logged in, redirecting to:",
-          redirectPath,
-        );
-        redirect(303, redirectPath);
-      }
+      const parentData = await parent();
+      session = parentData.session;
     } catch (e) {
       console.log(
         "[Auth Page] Mobile: Error getting parent data, continuing without session",
         e,
       );
+    }
+
+    const redirectPath = url.searchParams.get("redirect") || "/med";
+
+    // If user is already logged in, redirect to med (outside try-catch so redirect isn't swallowed)
+    if (session) {
+      console.log(
+        "[Auth Page] Mobile: User already logged in, redirecting to:",
+        redirectPath,
+      );
+      redirect(303, redirectPath);
     }
 
     return {

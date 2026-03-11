@@ -1,6 +1,7 @@
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "./database.types.ts"; // import generated types
 declare global {
+  const __CAPACITOR_BUILD__: boolean | undefined;
   namespace App {
     // interface Error {}
     interface Locals {

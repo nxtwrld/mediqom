@@ -1,11 +1,10 @@
-import { fail, redirect } from "@sveltejs/kit";
+import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 import { log } from "$lib/logging/logger";
 
 export const load: LayoutServerLoad = async ({
-  locals: { safeGetSession },
+  locals: { session, user },
 }) => {
-  const { session, user } = await safeGetSession();
 
   // The auth guard in hooks should have already redirected unauthenticated users
   if (!session) {

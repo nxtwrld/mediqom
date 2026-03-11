@@ -16,6 +16,7 @@
 	} from '$lib/health/property-categories';
 	import { addSignalEntry } from '$lib/health/signal-crud';
 	import EntryForm from './EntryForm.svelte';
+	import AskButton from '$components/chat/AskButton.svelte';
 
 	interface PropertyWithCategory extends Signal {
 		category?: PropertyCategory;
@@ -83,7 +84,16 @@
 </script>
 
 <div class="property-overview">
-	<h2 class="h2">{$t('profile.health.props.' + property.signal)}</h2>
+	<div class="property-header">
+		<h2 class="h2">{$t('profile.health.props.' + property.signal)}</h2>
+		<AskButton
+			type="vitals"
+			label={$t('profile.health.props.' + property.signal)}
+			data={{ signal: property.signal, value: property.value, unit, reference: property.reference, history, category }}
+			documentId={undefined}
+			documentTitle={undefined}
+		/>
+	</div>
 
 	{#if showChartTab}
 		<Tabs fixedHeight={false}>
@@ -135,6 +145,14 @@
 </div>
 
 <style>
+	.property-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--gap-small);
+		flex-wrap: wrap;
+	}
+
 	.property-overview {
 		min-width: 350px;
 		width: 50vw;

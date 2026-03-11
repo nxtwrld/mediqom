@@ -14,7 +14,7 @@
 .tile {
   background-color: var(--background-color);
   min-height: 6rem;
-  min-width: 12rem;
+  /*min-width: 12rem;*/
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -7,6 +7,7 @@
         isLoading,
         error,
         loadSubscription,
+        confirmSession,
         openPortal,
     } from '$lib/billing/store';
     import SubscriptionStatus from '$components/billing/SubscriptionStatus.svelte';
@@ -41,15 +42,23 @@
         showUpgradeModal = false;
     }
 
-    onMount(() => {
-        // Refresh subscription data if we came from checkout
-        if (showSuccess || showCanceled) {
-            loadSubscription();
-            // Clean up URL params
+    onMount(async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        if (sessionId) {
+            await confirmSession(sessionId);
+            await loadSubscription();
             const url = new URL(window.location.href);
             url.searchParams.delete('success');
             url.searchParams.delete('canceled');
             url.searchParams.delete('session_id');
+            window.history.replaceState({}, '', url.toString());
+        } else if (showSuccess || showCanceled) {
+            loadSubscription();
+            const url = new URL(window.location.href);
+            url.searchParams.delete('success');
+            url.searchParams.delete('canceled');
             window.history.replaceState({}, '', url.toString());
         }
     });

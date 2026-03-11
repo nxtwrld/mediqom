@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { profiles, profile } from '$lib/profiles';
+	import { profiles, profile, profilesEnriching } from '$lib/profiles';
 	import ProfileEdit from '$components/profile/ProfileEdit.svelte';
 	import { saveHealthProfile } from '$lib/health/save';
 	import { saveProfileDocument } from '$lib/profiles/save';
@@ -14,18 +14,14 @@
 	let saving = $state(false);
 	let message = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
-	// Set the current user's profile as active when component mounts
+	// Always reset to the current user's own profile when this page is active
 	$effect(() => {
 		const userId = $user?.id;
-		if (userId && !$profile) {
-			console.log('[ProfileSettings] Setting active profile for user:', userId);
+		if (userId && $profile?.id !== userId) {
 			try {
 				const userProfile = profiles.get(userId) as Profile;
 				if (userProfile) {
 					profile.set(userProfile);
-					console.log('[ProfileSettings] Active profile set:', userProfile.id);
-				} else {
-					console.error('[ProfileSettings] User profile not found in profiles store');
 				}
 			} catch (e) {
 				console.error('[ProfileSettings] Error setting active profile:', e);
@@ -33,12 +29,13 @@
 		}
 	});
 
-	// Initialize editing profile when profile becomes available
+	// Initialize editing profile when profile becomes available and enrichment is done
 	$effect(() => {
-		if ($profile && !editingProfile) {
-			console.log('[ProfileSettings] Initializing editing profile from store');
-			editingProfile = JSON.parse(JSON.stringify($profile));
-			originalProfile = JSON.parse(JSON.stringify($profile));
+		if ($profile && !$profilesEnriching) {
+			if (!editingProfile || editingProfile.id !== $profile.id) {
+				editingProfile = JSON.parse(JSON.stringify($profile));
+				originalProfile = JSON.parse(JSON.stringify($profile));
+			}
 		}
 	});
 

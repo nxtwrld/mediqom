@@ -1,15 +1,17 @@
 import { get } from "svelte/store";
-import { chatStore, chatActions, createMessage, isOpen } from "./store";
+import { chatStore, chatActions, createMessage, isOpen, resolveChatMode } from "./store";
 import ChatClientService from "./client-service";
 import AnatomyIntegration from "./anatomy-integration";
 import type {
   ChatMessage,
   ChatContext,
+  ChatMode,
   ChatResponse,
   ToolCallRequest,
   ToolCallResult,
   ClarifyingQuestion,
   ContextPrompt,
+  AskAboutEvent,
 } from "./types.d";
 import { generateId } from "$lib/utils/id";
 import ui from "$lib/ui";
@@ -17,7 +19,7 @@ import { t } from "$lib/i18n";
 import { chatContextService } from "$lib/context/integration/chat-service";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
 import { chatMCPToolWrapper } from "./mcp-tool-wrapper";
-import user from "$lib/user";
+import user, { type User } from "$lib/user";
 import { profile } from "$lib/profiles";
 import { logger } from "$lib/logging/logger";
 
@@ -30,6 +32,23 @@ export class ChatManager {
   private currentContextResult: ChatContextResult | null = null;
   private currentPromptProfileId: string | null = null; // Track active profile prompt
   private lastToolCall: string | null = null; // Track last executed tool to prevent immediate duplicates
+
+  private static readonly AVAILABLE_TOOLS = [
+    'searchDocuments',
+    'getAssembledContext',
+    'getProfileData',
+    'queryMedicalHistory',
+    'getDocumentById',
+  ];
+
+  private readonly askAboutTypeToTool: Record<string, string> = {
+    medications: 'medications',
+    conditions: 'conditions',
+    allergies: 'allergies',
+    procedures: 'procedures',
+    diagnosis: 'conditions',
+    vitals: 'vitals',
+  };
 
   constructor() {
     this.clientService = new ChatClientService();
@@ -91,6 +110,9 @@ export class ChatManager {
       this.handleChatToggle();
     });
 
+    // Listen for ask-about events from section components
+    const askAboutListener = ui.listen("chat:ask_about", this.handleAskAbout);
+
     // Listen for document context events
     const documentContextListener = ui.listen(
       "aicontext:document",
@@ -126,6 +148,7 @@ export class ChatManager {
       chatToggleListener,
       documentContextListener,
       profileContextListener,
+      askAboutListener,
     );
   }
 
@@ -186,7 +209,7 @@ export class ChatManager {
     const documentData = documentEvent?.data;
 
     return {
-      mode: isOwnProfile ? "patient" : "clinical",
+      mode: resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false),
       currentProfileId: profileId,
       conversationThreadId: generateId(),
       language: language,
@@ -375,6 +398,154 @@ export class ChatManager {
   }
 
   /**
+   * Handle ask-about events from section components
+   */
+  private handleAskAbout = async (data: AskAboutEvent): Promise<void> => {
+    const state = get(chatStore);
+
+    if (!state.context) {
+      chatActions.open();
+      this.initializeChatWithCurrentProfile();
+      // Wait up to 3s for context to initialize
+      let retries = 0;
+      while (!get(chatStore).context && retries < 30) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+    } else if (!state.isOpen) {
+      chatActions.open();
+    }
+
+    const freshState = get(chatStore);
+    if (!freshState.context) return;
+
+    const profileId = freshState.context.currentProfileId;
+    const displayMessage = this.buildAskAboutMessage(data, freshState.context.mode, freshState.context.pageContext.profileName);
+
+    // Pre-fetch tool data so AI has real data and generates ONE coherent answer
+    const prefetchedJson = await this.prefetchAskAboutData(data, profileId);
+
+    // Build rich context block embedding the specific item, its source document, and pre-fetched records
+    const itemJson = data.data ? JSON.stringify(data.data, null, 2) : null;
+    const sourceRef = data.documentId
+      ? `Source document: ${data.documentTitle || data.documentId} (id: ${data.documentId})`
+      : null;
+
+    const contextBlock = [
+      itemJson && `[Specific item the user is asking about:]\n\`\`\`json\n${itemJson}\n\`\`\``,
+      sourceRef && `[${sourceRef}]`,
+      prefetchedJson && `[Pre-fetched ${data.type} records for this profile:]\n\`\`\`json\n${prefetchedJson}\n\`\`\``,
+    ].filter(Boolean).join('\n\n');
+
+    const aiMessage = contextBlock ? `${displayMessage}\n\n${contextBlock}` : undefined;
+
+    // Silently register source document in context so Phase 2 sees it in documentsInContext
+    if (data.documentId) {
+      const freshState2 = get(chatStore);
+      const already = freshState2.context?.pageContext.availableData.documents.includes(data.documentId);
+      if (!already && freshState2.context) {
+        chatActions.updateContext({
+          pageContext: {
+            ...freshState2.context.pageContext,
+            availableData: {
+              ...freshState2.context.pageContext.availableData,
+              documents: [...freshState2.context.pageContext.availableData.documents, data.documentId],
+            },
+          },
+        });
+      }
+    }
+
+    // For anatomy: register ALL associated document IDs in context
+    if (data.type === 'anatomy' && Array.isArray(data.data?.documents)) {
+      const freshState2 = get(chatStore);
+      if (freshState2.context) {
+        const existingDocs = freshState2.context.pageContext.availableData.documents;
+        const newDocIds = (data.data.documents as Array<{ id: string }>)
+          .map(d => d.id)
+          .filter(id => id && !existingDocs.includes(id));
+        if (newDocIds.length > 0) {
+          chatActions.updateContext({
+            pageContext: {
+              ...freshState2.context.pageContext,
+              availableData: {
+                ...freshState2.context.pageContext.availableData,
+                documents: [...existingDocs, ...newDocIds],
+              },
+            },
+          });
+        }
+      }
+    }
+
+    // Build the tool key to pass into sendMessage so it can re-set lastToolCall after clearing,
+    // preventing Phase 2 from re-triggering the same tool whose data was already pre-fetched.
+    const prefetchedToolKey = prefetchedJson
+      ? `queryMedicalHistory_${JSON.stringify({ queryType: this.askAboutTypeToTool[data.type] })}`
+      : undefined;
+
+    try {
+      await this.sendMessage(displayMessage, aiMessage, prefetchedToolKey);
+    } catch (error) {
+      logger.namespace('Chat').error('handleAskAbout: sendMessage failed', { error });
+    }
+  }
+
+  private async prefetchAskAboutData(data: AskAboutEvent, profileId: string): Promise<string | null> {
+    const queryType = this.askAboutTypeToTool[data.type];
+    if (!queryType) return null;
+
+    try {
+      const result = await chatMCPToolWrapper.executeToolDirectly(
+        'queryMedicalHistory',
+        { queryType },
+        profileId,
+      );
+      if (!result.success || !result.data) return null;
+      return JSON.stringify(result.data, null, 2);
+    } catch {
+      return null;
+    }
+  }
+
+  private buildAskAboutMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
+    if (data.type === 'diagnosis') {
+      return this.buildDiagnosisMessage(data.data, mode, profileName);
+    }
+    if (data.type === 'anatomy') {
+      return this.buildAnatomyMessage(data, mode, profileName);
+    }
+    const tr = get(t);
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
+    return tr(`app.chat.ask-about.${modeKey}`, { values: { type: data.type, label: data.label, profileName } });
+  }
+
+  private buildAnatomyMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
+    const tr = get(t);
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
+    const count = Array.isArray(data.data?.documents) ? data.data.documents.length : 0;
+    return tr(`app.chat.ask-about.anatomy.${modeKey}`, { values: { bodyPart: data.label, count, profileName } });
+  }
+
+  private buildDiagnosisMessage(diagnosis: any, mode: ChatMode, profileName: string): string {
+    const tr = get(t);
+    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
+    const code = diagnosis.code ? ` (${diagnosis.code})` : '';
+    const desc = diagnosis.description || 'this diagnosis';
+    const diagnosisType = diagnosis.type || 'general';
+    const notes = diagnosis.notes ? ` Notes: ${diagnosis.notes}` : '';
+
+    // Normalise underscore to hyphen for i18n key lookup (rule_out → rule-out)
+    const typeKey = diagnosisType.replace(/_/g, '-');
+    const extraKey = `app.chat.ask-about.diagnosis.type-extra.${typeKey}.${modeKey}`;
+    const extraMsg = tr(extraKey) !== extraKey ? tr(extraKey) : '';
+
+    return tr(`app.chat.ask-about.diagnosis.${modeKey}`, {
+      values: { desc, code, diagnosisType, notes, extra: extraMsg, profileName },
+    });
+  }
+
+  /**
    * Initialize chat with current profile when chat is opened
    */
   private initializeChatWithCurrentProfile(): void {
@@ -403,11 +574,18 @@ export class ChatManager {
       },
     );
 
+    // Determine isOwnProfile from the latest profile switch event emitted by AIChatSidebar on mount
+    const profileSwitchEvent = ui.getLatest('chat:profile_switch');
+    const isOwnProfile =
+      profileSwitchEvent?.data?.profileId === currentProfile.id
+        ? profileSwitchEvent.data.isOwnProfile
+        : true; // fallback to patient mode if event not yet emitted
+
     // Create context from current profile including health data
     const initialContext = this.createContextFromProfileData(
       currentProfile.id,
       currentProfile.fullName || "Unknown",
-      true, // For now, assume all profiles are "own" profiles in patient mode
+      isOwnProfile,
       currentProfile.language || "en",
       currentProfile.health, // Pass health data
       currentProfile.healthDocumentId, // Pass health document ID
@@ -714,7 +892,7 @@ export class ChatManager {
       const newContext = this.createContextFromProfileData(
         currentProfile.id,
         currentProfile.fullName || profileName,
-        state.context?.isOwnProfile || true,
+        state.context?.isOwnProfile ?? false,
         currentProfile.language || state.context?.language || "en",
         currentProfile.health,
         currentProfile.healthDocumentId,
@@ -733,7 +911,7 @@ export class ChatManager {
         currentProfileId: profileId,
         conversationThreadId: generateId(),
         language: state.context?.language || "en",
-        isOwnProfile: state.context?.isOwnProfile || true,
+        isOwnProfile: state.context?.isOwnProfile ?? false,
         pageContext: {
           route: state.context?.pageContext?.route || "/",
           profileName: profileName,
@@ -866,16 +1044,22 @@ export class ChatManager {
   }
 
   /**
-   * Process user message and get AI response via SSE
+   * Process user message and get AI response via SSE.
+   * @param userMessage - The message shown to the user in the chat bubble.
+   * @param aiMessage - Optional override for what the AI receives (e.g. with pre-fetched data).
+   *                    When provided, the user still sees userMessage but the AI sees aiMessage.
+   * @param prefetchedToolKey - Optional tool signature to set as lastToolCall after clearing,
+   *                            preventing Phase 2 from re-triggering a tool whose data was pre-fetched.
    */
-  async sendMessage(userMessage: string): Promise<void> {
+  async sendMessage(userMessage: string, aiMessage?: string, prefetchedToolKey?: string): Promise<void> {
     if (this.isProcessing) {
       console.warn("Chat is already processing a message");
       return;
     }
 
-    // Clear last tool call on new user message to allow fresh tool usage
-    this.lastToolCall = null;
+    // Clear last tool call on new user message to allow fresh tool usage,
+    // but immediately re-set if a pre-fetched tool key is provided (prevents Phase 2 re-trigger)
+    this.lastToolCall = prefetchedToolKey ?? null;
 
     const state = get(chatStore);
     if (!state.context) {
@@ -920,7 +1104,9 @@ export class ChatManager {
       const enhancedContext = {
         ...state.context,
         assembledContext: this.currentContextResult?.assembledContext,
-        availableTools: this.currentContextResult?.availableTools || [],
+        availableTools: this.currentContextResult?.availableTools?.length
+          ? this.currentContextResult.availableTools
+          : ChatManager.AVAILABLE_TOOLS,
         mcpTools: chatContextService.getMCPToolsForChat(
           state.context.currentProfileId,
         ),
@@ -940,9 +1126,10 @@ export class ChatManager {
       let accumulatedContent = "";
       let messageMetadata: any = {};
 
-      // Send message via SSE with enhanced context
+      // Send message via SSE with enhanced context.
+      // Use aiMessage (with pre-fetched context) if provided; user still sees userMessage above.
       await this.clientService.sendMessage(
-        userMessage,
+        aiMessage ?? userMessage,
         enhancedContext,
         state.messages,
         (event) => {
@@ -985,6 +1172,7 @@ export class ChatManager {
                 anatomyFocus: event.data.anatomyReferences,
                 documentsReferenced: event.data.documentReferences,
                 toolsUsed: [],
+                sources: event.data.sources || [],
               };
 
               // Update the message with metadata
@@ -1427,7 +1615,7 @@ export class ChatManager {
     chatActions.switchProfile(profileId, isOwnProfile);
 
     // Update context mode
-    const newMode = isOwnProfile ? "patient" : "clinical";
+    const newMode = resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false);
     chatActions.updateContext({ mode: newMode });
 
     // Add profile switch message
@@ -1492,6 +1680,8 @@ export class ChatManager {
 
     if (context.mode === "patient") {
       return get(t)("app.chat.greetings.patient");
+    } else if (context.mode === "caregiver") {
+      return get(t)("app.chat.greetings.caregiver", { values: { profileName } });
     } else {
       return get(t)("app.chat.greetings.clinical", { values: { profileName } });
     }

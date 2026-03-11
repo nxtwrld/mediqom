@@ -167,7 +167,13 @@
 
 			if (response.ok && result.success) {
 				log.ui.info('should go to /med');
-				goto('/med');
+				const pendingShare = sessionStorage.getItem('pending_share_token');
+				if (pendingShare) {
+					sessionStorage.removeItem('pending_share_token');
+					goto(`/share/accept?t=${pendingShare}`);
+				} else {
+					goto('/med');
+				}
 				return;
 			}
 

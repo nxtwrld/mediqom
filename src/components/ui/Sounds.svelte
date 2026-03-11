@@ -57,7 +57,6 @@
         }
 
 
-        console.log('sound effects enabled');
         window.removeEventListener('mousedown', enableSoundEffects);
         window.removeEventListener('keydown', enableSoundEffects);
     };

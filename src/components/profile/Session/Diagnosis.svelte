@@ -6,6 +6,7 @@
     import PropertyTile from '../PropertyTile.svelte';
     import { log } from '$lib/logging/logger';
     import { t } from '$lib/i18n';
+    import { apiFetch } from '$lib/api/client';
 
     interface Props {
         analysis: any;
@@ -116,11 +117,8 @@
     async function sendFeedbackToAI(item: any, feedback: string) {
         try {
             // We'll implement this endpoint to store feedback for AI learning
-            const response = await fetch('/v1/session/feedback', {
+            const response = await apiFetch('/v1/session/feedback', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
                     itemType: getItemType(item),
                     itemContent: item,

@@ -2,11 +2,32 @@
   import { onMount, onDestroy } from 'svelte';
   import { chatStore, chatActions, isOpen, messages, isLoading } from '$lib/chat/store';
   import { chatManager } from '$lib/chat/chat-manager';
-  import type { ChatMessage } from '$lib/chat/types.d';
+  import type { ChatMessage, SourceCitation } from '$lib/chat/types.d';
   import ui from '$lib/ui';
   import { t } from '$lib/i18n';
   import ContextPrompt from './ContextPrompt.svelte';
   import Markdown from '$components/ui/Markdown.svelte';
+
+  /**
+   * Inject source citation links into message text.
+   * Replaces [N] markers with clickable source links.
+   */
+  function injectSourceLinks(text: string, sources?: SourceCitation[]): string {
+    if (!sources || sources.length === 0) return text;
+
+    return text.replace(/\[(\d+)\]/g, (match, numStr) => {
+      const num = parseInt(numStr, 10);
+      const source = sources.find(s => s.id === num);
+      if (!source) return match;
+
+      const truncatedUrl = source.url.replace(/^https?:\/\//, '').substring(0, 25);
+      const display = truncatedUrl.length < source.url.replace(/^https?:\/\//, '').length
+        ? truncatedUrl + '...'
+        : truncatedUrl;
+
+      return `<sup>[${num}]</sup> <a href="${source.url}" target="_blank" rel="noopener noreferrer" class="source-link" title="${source.title}">${display}</a>`;
+    });
+  }
   
   interface Props {
     currentProfile: any;
@@ -18,6 +39,7 @@
   
   // Local component state
   let messageInput = $state('');
+  let disclaimerExpanded = $state(false);
   let messagesContainer = $state<HTMLElement>();
   let sidebarWidth = $state(400);
   let isResizing = $state(false);
@@ -196,15 +218,6 @@
           previousLanguage !== userLanguage || 
           previousIsOwnProfile !== isOwnProfile) {
         
-        console.log('Profile or language changed, emitting profile switch event:', {
-          profileId: currentProfileId,
-          language: userLanguage,
-          isOwnProfile,
-          previousProfileId,
-          previousLanguage,
-          previousIsOwnProfile
-        });
-        
         // Emit profile switch event
         ui.emit('chat:profile_switch', {
           profileId: currentProfileId,
@@ -252,7 +265,7 @@
         <h3>{$t('app.chat.title')}</h3>
         <div class="chat-subtitle">
           <span class="chat-profile">{currentProfileName || 'No profile selected'}</span>
-          <span class="chat-mode">{$t(isOwnProfile ? 'app.chat.mode.patient' : 'app.chat.mode.clinical')}</span>
+          <span class="chat-mode">{$t('app.chat.mode.' + ($chatStore.context?.mode ?? (isOwnProfile ? 'patient' : 'clinical')))}</span>
         </div>
       </div>
       <div class="chat-actions">
@@ -288,8 +301,8 @@
               {#if message.metadata?.translationKey}
                 {$t(message.metadata.translationKey, { values: message.metadata.translationParams })}
               {:else if message.role === 'assistant'}
-                <!-- Render assistant messages with markdown formatting -->
-                <Markdown text={message.content} />
+                <!-- Render assistant messages with markdown formatting and source citations -->
+                <Markdown text={injectSourceLinks(message.content, message.metadata?.sources)} />
               {:else}
                 <!-- Render user and system messages as plain text -->
                 {message.content}
@@ -400,6 +413,17 @@
           </div>
         </div>
       {/if}
+
+      <!-- AI Disclaimer -->
+      <div class="ai-disclaimer">
+        <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}</p>
+        {#if disclaimerExpanded}
+          <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
+        {/if}
+        <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
+          {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
+        </button>
+      </div>
     </div>
 
     <!-- Input Area -->
@@ -440,7 +464,7 @@
     border-left: 1px solid var(--color-gray-400);
     display: flex;
     flex-direction: column;
-    z-index: 999;
+    z-index: 100001;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
   }
 
@@ -452,7 +476,7 @@
     height: 100%;
     background: transparent;
     cursor: col-resize;
-    z-index: 1001;
+    z-index: 100002;
   }
 
   .resize-handle:hover {
@@ -618,6 +642,24 @@
     user-select: text;
   }
 
+  /* Source citation links */
+  .message-text :global(.source-link) {
+    font-size: 0.75em;
+    color: var(--color-gray-800);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .message-text :global(.source-link:hover) {
+    color: var(--color-blue);
+    text-decoration: underline;
+  }
+
+  .message-text :global(sup) {
+    font-size: 0.7em;
+    color: var(--color-gray-800);
+  }
+
   /* Override markdown styles for chat messages */
   .message-text :global(.markdown) {
     margin: 0;
@@ -766,6 +808,35 @@
       transform: scale(1.2);
       opacity: 1;
     }
+  }
+
+  .ai-disclaimer {
+    margin-top: auto;
+    padding: 10px 12px;
+    background: var(--color-warning);
+    border-radius: var(--radius-8);
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--color-warning-text);
+  }
+
+  .ai-disclaimer-short {
+    margin: 0;
+  }
+
+  .ai-disclaimer-details {
+    margin: 6px 0 0;
+  }
+
+  .ai-disclaimer-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--color-blue);
+    cursor: pointer;
+    text-decoration: underline;
   }
 
   .input-area {

@@ -15,6 +15,7 @@
     import { generateRecoveryData } from '$lib/encryption/recovery';
     import { downloadRecoveryPDF } from '$lib/encryption/recovery-document';
     import { onMount } from 'svelte';
+    import { apiFetch } from '$lib/api/client';
 
     type RecoveryStep =
         | 'enter-key'
@@ -103,9 +104,8 @@
 
         try {
             // Fetch the user's recovery_encrypted_key from the server
-            const response = await fetch('/v1/recover/verify', {
+            const response = await apiFetch('/v1/recover/verify', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
                     recoveryKey: recoveryKeyInput
@@ -163,9 +163,8 @@
             );
 
             // Save to server
-            const response = await fetch('/v1/recover/update', {
+            const response = await apiFetch('/v1/recover/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
                     recoveryKey: recoveryKeyInput,
@@ -211,9 +210,8 @@
             const keyHash = await createHash(newPassphrase);
 
             // Save to server
-            const response = await fetch('/v1/recover/update', {
+            const response = await apiFetch('/v1/recover/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
                     recoveryKey: recoveryKeyInput,
@@ -253,9 +251,8 @@
             newRecoveryKey = recoveryData.recoveryKey;
 
             // Update server with new recovery key
-            const response = await fetch('/v1/recover/update-recovery', {
+            const response = await apiFetch('/v1/recover/update-recovery', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
                     recoveryKey: recoveryKeyInput,
