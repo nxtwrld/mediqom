@@ -1,4 +1,5 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { Buffer } from "node:buffer";
 import { type Attachment } from "$lib/documents/types.d";
 
 export const GET: RequestHandler = async ({
@@ -15,20 +16,23 @@ export const GET: RequestHandler = async ({
   if (!path) {
     return error(400, "Path parameter required");
   }
-  const storagePath = params.pid + "_" + path;
-  console.log("path", path);
   const { data, error: errorDownload } = await supabase.storage
     .from("attachments")
     .download(path);
 
   if (errorDownload) {
-    throw errorDownload;
+    return json({ error: errorDownload.message || "Failed to download attachment" }, { status: 500 });
   }
 
-  return new Response(data);
+  // Convert binary back to base64 text for client decryption
+  const arrayBuffer = await data.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString("base64");
+  return new Response(base64, {
+    headers: { "Content-Type": "text/plain" },
+  });
 };
 
-// upload new avatar
+// upload attachment
 export const POST: RequestHandler = async ({
   request,
   params,
@@ -48,16 +52,17 @@ export const POST: RequestHandler = async ({
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15);
 
-  // store the encrypted base64 string as text
-  const file = new File([fileData], filename, { type: "text/plain" });
+  // Convert base64 encrypted string to binary to reduce storage size by ~33%
+  const binaryData = Buffer.from(fileData, "base64");
+  const file = new File([binaryData], filename, { type: "application/octet-stream" });
 
   const { error: errorUploading } = await supabase.storage
     .from("attachments")
     .upload(userID + "/" + filename, file);
   if (errorUploading) {
-    throw errorUploading;
+    console.error("Upload error:", errorUploading.message);
+    return json({ error: errorUploading.message || "Failed to upload attachment" }, { status: 500 });
   }
-  console.log("uploaded", userID + "/" + filename);
 
   const { data } = supabase.storage
     .from("attachments")
@@ -91,7 +96,7 @@ export const DELETE: RequestHandler = async ({
     .remove([storagePath]);
 
   if (errorDelete) {
-    throw errorDelete;
+    return json({ error: errorDelete.message || "Failed to delete attachment" }, { status: 500 });
   }
 
   return json({ deleted: true });

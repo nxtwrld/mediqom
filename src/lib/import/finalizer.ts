@@ -17,6 +17,7 @@ import type { Profile } from "$lib/types.d";
 import type { Assessment, ReportAnalysis, ImportJob } from "./types";
 import { importKey, decrypt as decryptAES } from "$lib/encryption/aes";
 import { decrypt as decryptRSA } from "$lib/encryption/rsa";
+import { browser } from "$app/environment";
 import type { User } from "@supabase/supabase-js";
 
 // Attachment processing
@@ -24,6 +25,50 @@ import { selectPagesFromPdf, createPdfFromImageBuffers } from "$lib/files/pdf";
 import { toBase64, base64ToArrayBuffer } from "$lib/arrays";
 import { resizeImage } from "$lib/images";
 import { THUMBNAIL_SIZE } from "$lib/files/CONFIG";
+
+/**
+ * Normalize MIME types for attachments to ensure consistent type-based checks.
+ */
+function normalizeMimeType(type: string | undefined, path?: string): string {
+  if (!type && !path) return "application/octet-stream";
+
+  const t = (type || "").toLowerCase().trim();
+  const ext = (path || "").split(".").pop()?.toLowerCase() || "";
+
+  // DICOM
+  if (
+    t === "application/dicom" ||
+    t === "application/x-dicom" ||
+    ["dcm", "dicom", "dic"].includes(ext)
+  ) {
+    return "application/dicom";
+  }
+
+  // PDF
+  if (t === "application/pdf" || ext === "pdf") {
+    return "application/pdf";
+  }
+
+  // Images
+  if (t.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff", "svg"].includes(ext)) {
+    const imageExtMap: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+      bmp: "image/bmp",
+      tif: "image/tiff",
+      tiff: "image/tiff",
+      svg: "image/svg+xml",
+    };
+    if (ext && imageExtMap[ext]) return imageExtMap[ext];
+    if (t.startsWith("image/")) return t;
+    return "image/png";
+  }
+
+  return t || "application/octet-stream";
+}
 
 /**
  * Decrypt extraction and analysis results from an encrypted import job.
@@ -213,6 +258,42 @@ export async function assembleDocuments(
                 type: attachment.type,
               });
             }
+          } else if (
+            originalFile.type === "application/dicom" ||
+            originalFile.name.match(/\.(dcm|dicom|dic)$/i) ||
+            (!originalFile.type && !originalFile.name.match(/\.(pdf|jpg|jpeg|png|gif|webp|bmp|tiff?)$/i))
+          ) {
+            // DICOM file — store raw file as attachment with thumbnail from assessment
+            const dicomBuffer = await originalFile.arrayBuffer();
+            const docPages = assessment.pages.filter((p) => doc.pages.includes(p.page));
+            let thumbnail = docPages[0]?.thumbnail || "";
+
+            // Fallback: generate thumbnail from DICOM using cornerstone if none available
+            if (!thumbnail && browser) {
+              try {
+                const { dicomHandler } = await import("$lib/files/dicom-handler");
+                const dicomFile = new File([dicomBuffer], originalFile.name, { type: "application/dicom" });
+                const result = await dicomHandler.processDicomFile(dicomFile);
+                thumbnail = result.thumbnails[0] || "";
+              } catch (e) {
+                console.warn("Failed to generate DICOM thumbnail:", e);
+              }
+            }
+
+            attachment = {
+              thumbnail,
+              type: "application/dicom",
+              file: await toBase64(dicomBuffer),
+              path: "",
+              url: "",
+            };
+            console.log("📎 [Finalizer] Created DICOM attachment:", {
+              hasThumbnail: !!thumbnail,
+              thumbnailLength: thumbnail?.length || 0,
+              hasFile: !!attachment.file,
+              fileSize: attachment.file.length,
+              type: attachment.type,
+            });
           } else if (originalFile.type.startsWith("image/")) {
             const reader = new FileReader();
             const originalImageBase64 = await new Promise<string>(
@@ -350,6 +431,7 @@ export async function saveDocuments(
         attachments:
           document.attachments?.map((a) => ({
             ...a,
+            type: normalizeMimeType(a.type, (a as any).path),
             path: (a as any).path || "",
             url: (a as any).url || "",
           })) || [],

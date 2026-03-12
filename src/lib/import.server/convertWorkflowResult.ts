@@ -51,7 +51,21 @@ export function convertWorkflowResult(
     actualContent = {
       ...workflowResult,
       type: workflowResult.report?.type || "report",
-      category: workflowResult.report?.category || "report",
+      category: (() => {
+        const featureDocumentType = workflowResult.featureDetectionResults?.documentType;
+        const documentTypeToCategory: Record<string, string> = {
+          laboratory_results: "laboratory",
+          imaging_report: "imaging",
+          radiology_report: "imaging",
+          prescription: "prescription",
+          immunization_record: "immunization",
+        };
+        return (
+          workflowResult.report?.category ||
+          (featureDocumentType ? documentTypeToCategory[featureDocumentType] : undefined) ||
+          "report"
+        );
+      })(),
       isMedical:
         workflowResult.report?.isMedical !== undefined
           ? workflowResult.report.isMedical

@@ -1659,7 +1659,82 @@
     "no-procedure-data": "Žádné údaje o zákrocích nejsou k dispozici",
     "diagnoses-list": "Diagnózy",
     "diagnosis-date": "Datum diagnózy",
-    "no-diagnosis-data": "Žádné údaje o diagnóze nejsou k dispozici"
+    "no-diagnosis-data": "Žádné údaje o diagnóze nejsou k dispozici",
+    "imaging": "Zobrazovací vyšetření",
+    "imaging-quality": "Kvalita",
+    "imaging-anomalies": "Anomálie",
+    "imaging-urgent": "Urgentní",
+    "imaging-size": "Velikost",
+    "imaging-assessment": "Hodnocení",
+    "imaging-recommended-actions": "Doporučené kroky",
+    "imaging-modality": "Modalita",
+    "imaging-modalities": {
+      "X-ray": "Rentgen",
+      "CT": "CT vyšetření",
+      "MRI": "MRI",
+      "Ultrasound": "Ultrazvuk",
+      "PET": "PET vyšetření",
+      "Mammography": "Mamografie",
+      "Nuclear Medicine": "Nukleární medicína",
+      "Fluoroscopy": "Fluoroskopie",
+      "Unknown": "Neznámé"
+    },
+    "imaging-regions": {
+      "Head": "Hlava",
+      "Neck": "Krk",
+      "Chest": "Hrudník",
+      "Abdomen": "Břicho",
+      "Pelvis": "Pánev",
+      "Spine": "Páteř",
+      "Upper Extremity": "Horní končetina",
+      "Lower Extremity": "Dolní končetina",
+      "Multiple Regions": "Více oblastí",
+      "Unknown": "Neznámé"
+    },
+    "imaging-views": {
+      "AP": "AP",
+      "PA": "PA",
+      "Lateral": "Laterální",
+      "Oblique": "Šikmý",
+      "Axial": "Axiální",
+      "Coronal": "Koronální",
+      "Sagittal": "Sagitální",
+      "Cross-sectional": "Průřezový",
+      "Longitudinal": "Podélný",
+      "Unknown": "Neznámý"
+    },
+    "imaging-quality-values": {
+      "excellent": "Výborná",
+      "good": "Dobrá",
+      "fair": "Průměrná",
+      "poor": "Špatná"
+    },
+    "imaging-anomaly-types": {
+      "mass": "Útvar",
+      "fracture": "Zlomenina",
+      "foreign_object": "Cizí těleso",
+      "inflammation": "Zánět",
+      "deformity": "Deformita",
+      "calcification": "Kalcifikace",
+      "fluid_collection": "Výpotek",
+      "pneumothorax": "Pneumotorax",
+      "enlarged_organ": "Zvětšený orgán",
+      "atrophy": "Atrofie",
+      "other": "Ostatní"
+    },
+    "imaging-severity": {
+      "critical": "Kritický",
+      "severe": "Závažný",
+      "moderate": "Středně závažný",
+      "mild": "Mírný"
+    },
+    "imaging-sides": {
+      "left": "Levá",
+      "right": "Pravá",
+      "bilateral": "Oboustranně",
+      "central": "Centrální",
+      "not_applicable": "Neaplikovatelné"
+    }
   },
   "session": {
     "diagram": "Diagram",

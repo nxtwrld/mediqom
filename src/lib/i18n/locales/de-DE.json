@@ -1658,7 +1658,82 @@
     "no-procedure-data": "Keine Verfahrensdaten verfügbar",
     "diagnoses-list": "Diagnosen",
     "diagnosis-date": "Diagnosedatum",
-    "no-diagnosis-data": "Keine Diagnosedaten verfügbar"
+    "no-diagnosis-data": "Keine Diagnosedaten verfügbar",
+    "imaging": "Bildgebende Untersuchungen",
+    "imaging-quality": "Qualität",
+    "imaging-anomalies": "Anomalien",
+    "imaging-urgent": "Dringend",
+    "imaging-size": "Größe",
+    "imaging-assessment": "Beurteilung",
+    "imaging-recommended-actions": "Empfohlene Maßnahmen",
+    "imaging-modality": "Modalität",
+    "imaging-modalities": {
+      "X-ray": "Röntgen",
+      "CT": "CT-Untersuchung",
+      "MRI": "MRT",
+      "Ultrasound": "Ultraschall",
+      "PET": "PET-Untersuchung",
+      "Mammography": "Mammographie",
+      "Nuclear Medicine": "Nuklearmedizin",
+      "Fluoroscopy": "Fluoroskopie",
+      "Unknown": "Unbekannt"
+    },
+    "imaging-regions": {
+      "Head": "Kopf",
+      "Neck": "Hals",
+      "Chest": "Brustkorb",
+      "Abdomen": "Bauch",
+      "Pelvis": "Becken",
+      "Spine": "Wirbelsäule",
+      "Upper Extremity": "Obere Extremität",
+      "Lower Extremity": "Untere Extremität",
+      "Multiple Regions": "Mehrere Regionen",
+      "Unknown": "Unbekannt"
+    },
+    "imaging-views": {
+      "AP": "AP",
+      "PA": "PA",
+      "Lateral": "Lateral",
+      "Oblique": "Schräg",
+      "Axial": "Axial",
+      "Coronal": "Koronar",
+      "Sagittal": "Sagittal",
+      "Cross-sectional": "Querschnitt",
+      "Longitudinal": "Längsschnitt",
+      "Unknown": "Unbekannt"
+    },
+    "imaging-quality-values": {
+      "excellent": "Ausgezeichnet",
+      "good": "Gut",
+      "fair": "Ausreichend",
+      "poor": "Schlecht"
+    },
+    "imaging-anomaly-types": {
+      "mass": "Raumforderung",
+      "fracture": "Fraktur",
+      "foreign_object": "Fremdkörper",
+      "inflammation": "Entzündung",
+      "deformity": "Deformität",
+      "calcification": "Verkalkung",
+      "fluid_collection": "Flüssigkeitsansammlung",
+      "pneumothorax": "Pneumothorax",
+      "enlarged_organ": "Organvergrößerung",
+      "atrophy": "Atrophie",
+      "other": "Sonstige"
+    },
+    "imaging-severity": {
+      "critical": "Kritisch",
+      "severe": "Schwerwiegend",
+      "moderate": "Mäßig",
+      "mild": "Leicht"
+    },
+    "imaging-sides": {
+      "left": "Links",
+      "right": "Rechts",
+      "bilateral": "Beidseitig",
+      "central": "Zentral",
+      "not_applicable": "Nicht zutreffend"
+    }
   },
   "session": {
     "diagram": "Diagramm",

@@ -15,8 +15,9 @@
     import SectionAllergies from './SectionAllergies.svelte';
     import SectionTriage from './SectionTriage.svelte';
     import SectionAnesthesia from './SectionAnesthesia.svelte';
+    import SectionImaging from './SectionImaging.svelte';
     import SectionSession from './SectionSession.svelte';
-    
+
     import type { Document } from '$lib/documents/types.d';
 
     interface Props {
@@ -38,10 +39,10 @@
         { id: 'allergies', component: SectionAllergies, name: 'Allergies' },
         { id: 'triage', component: SectionTriage, name: 'Triage' },
         { id: 'anesthesia', component: SectionAnesthesia, name: 'Anesthesia' },
+        { id: 'imaging', component: SectionImaging, name: 'Imaging Studies' },
         { id: 'signals', component: SectionSignals, name: 'Signals & Lab Results' },
         { id: 'sessionAnalysis', component: SectionSession, name: 'Session Analysis' },
         { id: 'text', component: SectionText, name: 'Text Content' },
-                // { id: 'imaging', component: SectionImaging, name: 'Imaging Studies' },
         // { id: 'specimens', component: SectionSpecimens, name: 'Specimens' },
         { id: 'performer', component: SectionPerformer, name: 'Healthcare Provider' },
         { id: 'links', component: SectionLinks, name: 'Related Links' },
@@ -110,6 +111,9 @@
                        data.anesthesiaDetails ||
                        (data.medications && data.medications.length > 0);
             
+            case 'imaging':
+                return (data.studies?.length > 0) || (data.attachments?.length > 0);
+
             case 'signals':
                 // Handle both array format (direct signals) and object format
                 if (Array.isArray(data)) {
@@ -154,6 +158,20 @@
         }
     }
     
+    // Merge paths from top-level document.attachments into content attachments
+    // Content attachments (inside encrypted blob) may lack path/url fields,
+    // while top-level attachments (stored as separate DB column) always have them
+    function enrichAttachmentsWithPaths(contentAttachments: any[], docAttachments: any[]): any[] {
+        if (!contentAttachments?.length || !docAttachments?.length) return contentAttachments || [];
+        return contentAttachments.map((ca, index) => {
+            if (ca.path) return ca; // already has path
+            // Fallback: index-based match (arrays are built from same source, same order)
+            const byIndex = docAttachments[index];
+            if (byIndex?.path) return { ...ca, path: byIndex.path, url: byIndex.url };
+            return ca;
+        });
+    }
+
     // Get data for a section from the document
     function getSectionData(sectionId: string) {
         switch(sectionId) {
@@ -181,10 +199,23 @@
             case 'links':
                 return document.content.links;
             case 'attachments':
-                return document.content.attachments;
+                return enrichAttachmentsWithPaths(
+                    document.content.attachments || [],
+                    document.attachments || []
+                );
             // Enhanced sections - will be rendered when AI populates them
-            case 'imaging':
-                return document.content.imaging;
+            case 'imaging': {
+                const imaging = document.content.imaging;
+                if (!imaging) return null;
+                // Include all attachments for imaging documents — MIME normalization
+                // ensures types are correct, and documents with imaging data should
+                // show all their attachments (DICOM, images, even PDFs of scans)
+                const allAttachments = enrichAttachmentsWithPaths(
+                    document.content.attachments || [],
+                    document.attachments || []
+                );
+                return { studies: Array.isArray(imaging) ? imaging : [imaging], attachments: allAttachments };
+            }
             case 'dental':
                 return document.content.dental;
             case 'immunizations':
@@ -247,14 +278,14 @@
         <div class="document-section">
             {#if section.id === 'summary'}
                 <!-- Special handling for summary section to include tags -->
-                <section.component data={getSectionData(section.id)} {document} key={document.key} />
+                <section.component data={getSectionData(section.id)} {document} encryptionKey={document.key} />
                 <div class="page -block">
                     <Tags tags={document.content.tags} />
                 </div>
             {:else}
                 {@const data = getSectionData(section.id)}
                 {#if data}
-                    <section.component {data} {document} key={document.key} />
+                    <section.component {data} {document} encryptionKey={document.key} />
                 {/if}
             {/if}
         </div>
@@ -266,7 +297,7 @@
     <!-- Attachments last -->
     {#if getSectionData('attachments')}
         <div class="document-section">
-            <SectionAttachments data={getSectionData('attachments')} {document} key={document.key} />
+            <SectionAttachments data={getSectionData('attachments')} encryptionKey={document.key} />
         </div>
     {/if}
 </div>

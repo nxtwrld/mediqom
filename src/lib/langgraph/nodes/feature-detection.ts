@@ -214,6 +214,133 @@ export const featureDetectionNode = async (
       hasSocialHistory: parsedResult.hasSocialHistory || false,
     };
 
+    // Safety override: if documentType is laboratory_results, signals must be present
+    if (
+      aiFeatureDetectionResults.documentType === "laboratory_results" &&
+      !aiFeatureDetectionResults.hasSignals
+    ) {
+      console.warn(
+        "⚠️ Feature detection: documentType=laboratory_results but hasSignals=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasSignals = true;
+    }
+
+    // imaging_report / radiology_report → must have imaging content
+    if (
+      (aiFeatureDetectionResults.documentType === "imaging_report" ||
+        aiFeatureDetectionResults.documentType === "radiology_report") &&
+      !aiFeatureDetectionResults.hasImaging
+    ) {
+      console.warn(
+        "⚠️ Feature detection: imaging documentType but hasImaging=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasImaging = true;
+    }
+
+    // pathology_report → must have microscopic + specimens
+    if (aiFeatureDetectionResults.documentType === "pathology_report") {
+      if (!aiFeatureDetectionResults.hasMicroscopic) {
+        console.warn(
+          "⚠️ Feature detection: pathology_report but hasMicroscopic=false — forcing true",
+        );
+        aiFeatureDetectionResults.hasMicroscopic = true;
+      }
+      if (!aiFeatureDetectionResults.hasSpecimens) {
+        console.warn(
+          "⚠️ Feature detection: pathology_report but hasSpecimens=false — forcing true",
+        );
+        aiFeatureDetectionResults.hasSpecimens = true;
+      }
+    }
+
+    // prescription → must have prescriptions
+    if (
+      aiFeatureDetectionResults.documentType === "prescription" &&
+      !aiFeatureDetectionResults.hasPrescriptions
+    ) {
+      console.warn(
+        "⚠️ Feature detection: prescription documentType but hasPrescriptions=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasPrescriptions = true;
+    }
+
+    // discharge_summary → must have admission info
+    if (
+      aiFeatureDetectionResults.documentType === "discharge_summary" &&
+      !aiFeatureDetectionResults.hasAdmission
+    ) {
+      console.warn(
+        "⚠️ Feature detection: discharge_summary but hasAdmission=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasAdmission = true;
+    }
+
+    // surgical_report → must have procedures
+    if (
+      aiFeatureDetectionResults.documentType === "surgical_report" &&
+      !aiFeatureDetectionResults.hasProcedures
+    ) {
+      console.warn(
+        "⚠️ Feature detection: surgical_report but hasProcedures=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasProcedures = true;
+    }
+
+    // immunization_record → must have immunizations
+    if (
+      aiFeatureDetectionResults.documentType === "immunization_record" &&
+      !aiFeatureDetectionResults.hasImmunizations
+    ) {
+      console.warn(
+        "⚠️ Feature detection: immunization_record but hasImmunizations=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasImmunizations = true;
+    }
+
+    // dental_record → must have dental content
+    if (
+      aiFeatureDetectionResults.documentType === "dental_record" &&
+      !aiFeatureDetectionResults.hasDental
+    ) {
+      console.warn(
+        "⚠️ Feature detection: dental_record but hasDental=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasDental = true;
+    }
+
+    // genetic_analysis → must have molecular content
+    if (
+      aiFeatureDetectionResults.documentType === "genetic_analysis" &&
+      !aiFeatureDetectionResults.hasMolecular
+    ) {
+      console.warn(
+        "⚠️ Feature detection: genetic_analysis but hasMolecular=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasMolecular = true;
+    }
+
+    // oncology_report → must have tumor characteristics
+    if (
+      aiFeatureDetectionResults.documentType === "oncology_report" &&
+      !aiFeatureDetectionResults.hasTumorCharacteristics
+    ) {
+      console.warn(
+        "⚠️ Feature detection: oncology_report but hasTumorCharacteristics=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasTumorCharacteristics = true;
+    }
+
+    // emergency_report → must have triage
+    if (
+      aiFeatureDetectionResults.documentType === "emergency_report" &&
+      !aiFeatureDetectionResults.hasTriage
+    ) {
+      console.warn(
+        "⚠️ Feature detection: emergency_report but hasTriage=false — forcing true",
+      );
+      aiFeatureDetectionResults.hasTriage = true;
+    }
+
     // Verbose logging of state being returned (only if enabled)
     if (isStateTransitionDebuggingEnabled()) {
       log.analysis.debug("Feature detection node returning state", {

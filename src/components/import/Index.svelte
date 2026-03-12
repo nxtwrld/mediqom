@@ -371,7 +371,7 @@
         </div>
     {/if}
 
-    <input type="file" id="upload-file" class="-none" accept=".pdf,.jpg,.jpeg,.png,.webp,.webm" onchange={fileInput} />
+    <input type="file" id="upload-file" class="-none" multiple onchange={fileInput} />
 
     <div class="import-canvas">
         <div class="imports">

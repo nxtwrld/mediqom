@@ -821,7 +821,12 @@
         border: 1px solid rgba(255, 255, 255, 0.9);
         z-index: 1001;
     }
-
+    .navbar-bar  > *:first-child {
+        border-bottom-left-radius: var(--radius-16, 1rem);
+    }
+    .navbar-bar > *:last-child {
+        border-bottom-right-radius: var(--radius-16, 1rem);
+    }
     .nav-icon {
         flex: 1;
         display: flex;

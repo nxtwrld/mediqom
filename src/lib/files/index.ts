@@ -208,6 +208,24 @@ export async function createTasks(files: File[]): Promise<Task[]> {
     }
   }
 
+  // Filter out unsupported file types from rest group before processing
+  const supportedTypes = ["application/pdf"];
+  const unsupportedFiles = groupped.rest.filter(
+    (f) => !supportedTypes.includes(f.type),
+  );
+  if (unsupportedFiles.length > 0) {
+    const names = unsupportedFiles.map((f) => f.name).join(", ");
+    console.warn(
+      `⚠️ Skipping unsupported file(s): ${names}. Supported formats: PDF, images, DICOM.`,
+    );
+    alert(
+      `Unsupported file type(s): ${names}\n\nSupported formats: PDF, images (JPG, PNG, WebP), and DICOM files.`,
+    );
+    groupped.rest = groupped.rest.filter((f) =>
+      supportedTypes.includes(f.type),
+    );
+  }
+
   // process individual files 1 by 1 (not multipage or dealt with inside the processPDF)
   while (groupped.rest.length > 0) {
     const file = groupped.rest[0];
@@ -297,8 +315,7 @@ export async function createTasks(files: File[]): Promise<Task[]> {
         }
         break;
       default:
-        //reject('Unsupported file type');
-        console.log("Unsupported file type", file.type);
+        console.warn("Skipping unsupported file type:", file.type);
         break;
     }
     groupped.rest.shift();

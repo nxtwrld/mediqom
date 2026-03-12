@@ -1,16 +1,15 @@
 /**
  * DICOM File Handler
  *
- * Handles client-side DICOM file processing using Cornerstone.js
+ * Handles client-side DICOM file processing using Cornerstone3D
  * - Detects DICOM files by header magic bytes (not file extension)
  * - Extracts metadata from DICOM tags
  * - Converts DICOM images to PNG format for AI processing
  * - Preserves original DICOM data for attachment storage
  *
- * IMPORTANT: This module only works in browser environments due to Cornerstone.js dependencies
+ * IMPORTANT: This module only works in browser environments due to Cornerstone3D dependencies
  */
 
-// Dynamic imports to avoid UI crashes - cornerstone has publicPath issues with static imports
 import { browser } from "$app/environment";
 import { resizeImage } from "$lib/images";
 import { THUMBNAIL_SIZE } from "$lib/files/CONFIG";
@@ -70,18 +69,16 @@ export interface DicomProcessingResult {
 
 export class DicomHandler {
   private isInitialized = false;
-  private cornerstone: any = null;
-  private cornerstoneWADOImageLoader: any = null;
   private dicomParser: any = null;
+  private cs3d: any = null;
 
   /**
-   * Initialize with currentScript fix for publicPath issue
+   * Initialize Cornerstone3D and dicom-parser
    * BROWSER ONLY - will throw error if called server-side
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    // Critical: Only initialize in browser environment
     if (!browser) {
       throw new Error(
         "DICOM Handler can only be initialized in browser environment",
@@ -89,45 +86,33 @@ export class DicomHandler {
     }
 
     try {
-      // Fix for publicPath issue - ensure document.currentScript exists
-      if (typeof document !== "undefined" && !document.currentScript) {
-        const script = document.createElement("script");
-        script.setAttribute("src", window.location.origin + "/");
-        Object.defineProperty(document, "currentScript", {
-          value: script,
-          configurable: true,
-        });
-      }
+      console.log("[DICOM] Loading Cornerstone3D modules...");
 
-      // Dynamic imports - only safe in browser
-      console.log("[DICOM] Loading Cornerstone modules...");
-      this.cornerstone = await import("cornerstone-core");
-      this.cornerstoneWADOImageLoader = await import(
-        "cornerstone-wado-image-loader"
+      // Initialize Cornerstone3D via shared initializer
+      const { getCornerstone3D } = await import(
+        "$lib/files/cornerstone3d-init"
       );
-      this.dicomParser = await import("dicom-parser");
+      this.cs3d = await getCornerstone3D();
 
-      // Configure external dependencies (like working code)
-      this.cornerstoneWADOImageLoader.external.dicomParser = this.dicomParser;
-      this.cornerstoneWADOImageLoader.external.cornerstone = this.cornerstone;
+      // Load dicom-parser separately for metadata extraction
+      const dpMod = await import("dicom-parser");
+      this.dicomParser = dpMod.default || dpMod;
 
       this.isInitialized = true;
-      console.log("✅ DICOM Handler initialized successfully");
+      console.log("[DICOM] Handler initialized successfully");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error("❌ Failed to initialize DICOM Handler:", error);
+      console.error("[DICOM] Failed to initialize Handler:", error);
       throw new Error(`DICOM Handler initialization failed: ${errorMessage}`);
     }
   }
 
   /**
    * Detect if a file is a DICOM file by examining file header
-   * Most DICOM files don't have extensions, so we check the magic bytes
    * BROWSER ONLY - returns false if called server-side
    */
   async detectDicomFile(file: File): Promise<boolean> {
-    // Fail gracefully on server side
     if (!browser) {
       console.warn(
         "[DICOM] detectDicomFile called server-side, returning false",
@@ -136,12 +121,10 @@ export class DicomHandler {
     }
 
     try {
-      // First check by MIME type (if available)
       if (file.type === "application/dicom") {
         return true;
       }
 
-      // Check by file extension as secondary method
       const dicomExtensions = [
         ".dcm",
         ".dicom",
@@ -158,14 +141,10 @@ export class DicomHandler {
         return true;
       }
 
-      // Primary method: Check DICOM header magic bytes
-      // Read first 132 bytes to check for DICOM preamble and prefix
       const headerBuffer = await this.readFileHeader(file, 132);
       const headerBytes = new Uint8Array(headerBuffer);
 
-      // DICOM files have a 128-byte preamble followed by 'DICM' (0x4449434D)
       if (headerBytes.length >= 132) {
-        // Check for 'DICM' at offset 128
         const dicmBytes = headerBytes.slice(128, 132);
         const dicmString = String.fromCharCode(...dicmBytes);
         if (dicmString === "DICM") {
@@ -173,13 +152,8 @@ export class DicomHandler {
         }
       }
 
-      // Some DICOM files might not have the preamble, check for common DICOM tags at the beginning
-      // Look for common Group 0002 or Group 0008 elements
       if (headerBytes.length >= 8) {
         const firstTag = this.readUint16LE(headerBytes, 0);
-        const secondTag = this.readUint16LE(headerBytes, 2);
-
-        // Common DICOM groups: 0002 (File Meta Information), 0008 (Identifying Information)
         if (
           firstTag === 0x0002 ||
           firstTag === 0x0008 ||
@@ -194,14 +168,11 @@ export class DicomHandler {
 
       return false;
     } catch (error) {
-      console.warn("⚠️ Error detecting DICOM file:", error);
+      console.warn("[DICOM] Error detecting DICOM file:", error);
       return false;
     }
   }
 
-  /**
-   * Read the first N bytes of a file
-   */
   private async readFileHeader(
     file: File,
     bytes: number,
@@ -214,9 +185,6 @@ export class DicomHandler {
     });
   }
 
-  /**
-   * Read 16-bit little-endian integer from byte array
-   */
   private readUint16LE(bytes: Uint8Array, offset: number): number {
     return bytes[offset] | (bytes[offset + 1] << 8);
   }
@@ -225,7 +193,6 @@ export class DicomHandler {
    * Main processing function - extract images and metadata from DICOM file
    */
   async processDicomFile(file: File): Promise<DicomProcessingResult> {
-    // Critical: Only process in browser environment
     if (!browser) {
       throw new Error(
         "DICOM processing can only be performed in browser environment",
@@ -236,18 +203,10 @@ export class DicomHandler {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-
-      // Parse DICOM file
       const byteArray = new Uint8Array(arrayBuffer);
       const dataSet = this.dicomParser.parseDicom(byteArray);
-
-      // Extract metadata
       const metadata = this.extractMetadata(dataSet, file);
-
-      // Extract images
-      const extractedImages = await this.extractImages(file, dataSet);
-
-      // Create thumbnails
+      const extractedImages = await this.extractImages(file);
       const thumbnails = await this.createThumbnails(extractedImages);
 
       return {
@@ -257,49 +216,35 @@ export class DicomHandler {
         thumbnails,
       };
     } catch (error) {
-      console.error("❌ Error processing DICOM file:", error);
+      console.error("[DICOM] Error processing DICOM file:", error);
       throw new Error(`DICOM processing failed: ${(error as Error).message}`);
     }
   }
 
-  /**
-   * Extract DICOM metadata from parsed dataset
-   */
   private extractMetadata(dataSet: any, file: File): DicomMetadata {
     try {
       return {
-        // Patient Information
         patientName: this.getStringValue(dataSet, "x00100010"),
         patientId: this.getStringValue(dataSet, "x00100020"),
         patientBirthDate: this.getStringValue(dataSet, "x00100030"),
         patientSex: this.getStringValue(dataSet, "x00100040"),
-
-        // Study Information
         studyDate: this.getStringValue(dataSet, "x00080020"),
         studyTime: this.getStringValue(dataSet, "x00080030"),
         studyDescription: this.getStringValue(dataSet, "x00081030"),
         studyInstanceUID: this.getStringValue(dataSet, "x0020000d"),
         accessionNumber: this.getStringValue(dataSet, "x00080050"),
-
-        // Series Information
         seriesInstanceUID: this.getStringValue(dataSet, "x0020000e"),
         seriesNumber: this.getStringValue(dataSet, "x00200011"),
         seriesDescription: this.getStringValue(dataSet, "x0008103e"),
         modality: this.getStringValue(dataSet, "x00080060"),
-
-        // Image Information
         instanceNumber: this.getStringValue(dataSet, "x00200013"),
         sopInstanceUID: this.getStringValue(dataSet, "x00080018"),
         bodyPartExamined: this.getStringValue(dataSet, "x00180015"),
         viewPosition: this.getStringValue(dataSet, "x00185101"),
-
-        // Institution Information
         institutionName: this.getStringValue(dataSet, "x00080080"),
         stationName: this.getStringValue(dataSet, "x00081010"),
         referringPhysician: this.getStringValue(dataSet, "x00080090"),
         performingPhysician: this.getStringValue(dataSet, "x00081050"),
-
-        // Technical Parameters
         rows: this.getNumberValue(dataSet, "x00280010"),
         columns: this.getNumberValue(dataSet, "x00280011"),
         pixelSpacing: this.parsePixelSpacing(
@@ -312,15 +257,12 @@ export class DicomHandler {
         windowWidth: this.parseNumberArray(
           this.getStringValue(dataSet, "x00281051"),
         ),
-
-        // Processing Metadata
         extractedAt: new Date().toISOString(),
         fileSize: file.size,
         fileName: file.name,
       };
     } catch (error) {
-      console.error("❌ Error extracting DICOM metadata:", error);
-      // Return basic metadata even if extraction fails
+      console.error("[DICOM] Error extracting metadata:", error);
       return {
         extractedAt: new Date().toISOString(),
         fileSize: file.size,
@@ -330,37 +272,34 @@ export class DicomHandler {
   }
 
   /**
-   * Extract PNG images from DICOM file using the proven DOM-based approach
+   * Extract PNG images from DICOM file using Cornerstone3D offscreen rendering
    */
-  private async extractImages(file: File, dataSet: any): Promise<string[]> {
+  private async extractImages(file: File): Promise<string[]> {
     try {
-      // Use the proven approach from working code
       const pngDataUrl = await this.loadDICOMAndConvertToPNG(file, 512, 512);
-
       if (!pngDataUrl) {
         throw new Error("Failed to convert DICOM to PNG");
       }
-
-      // Return full data URL for proper system compatibility
       return [pngDataUrl];
     } catch (error) {
-      console.error("❌ Error extracting DICOM images:", error);
+      console.error("[DICOM] Error extracting images:", error);
       throw new Error(`Image extraction failed: ${(error as Error).message}`);
     }
   }
 
   /**
-   * Load DICOM file and convert to PNG using DOM rendering (proven approach)
+   * Load DICOM file and convert to PNG using Cornerstone3D stack viewport
    */
   private async loadDICOMAndConvertToPNG(
     file: File,
     width: number,
     height: number,
   ): Promise<string | null> {
-    const imageId =
-      this.cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+    const { core, dicomImageLoader } = this.cs3d;
 
-    // Create an off-screen canvas element
+    const imageId = dicomImageLoader.wadouri.fileManager.add(file);
+
+    // Create an offscreen container
     const container = document.createElement("div");
     container.setAttribute(
       "style",
@@ -368,82 +307,64 @@ export class DicomHandler {
     );
     document.body.appendChild(container);
 
+    const engineId = "dicom-png-export-" + Date.now();
+    let renderingEngine: any = null;
+
     try {
-      const image = await this.cornerstone.loadImage(imageId);
-      this.cornerstone.enable(container);
+      renderingEngine = new core.RenderingEngine(engineId);
 
-      return new Promise((resolve, reject) => {
-        const self = this;
-        container.addEventListener(
-          "cornerstoneimagerendered",
-          function handler() {
-            try {
-              const canvas = container.querySelector("canvas");
-              const dataUrl = canvas?.toDataURL("image/png");
-              if (dataUrl) {
-                resolve(dataUrl);
-              } else {
-                reject(new Error("Failed to get canvas data URL"));
-              }
-            } catch (error) {
-              console.error("Error converting DICOM to PNG:", error);
-              reject(error);
-            } finally {
-              // Cleanup
-              self.cornerstone.disable(container);
-              document.body.removeChild(container);
-              container.removeEventListener(
-                "cornerstoneimagerendered",
-                handler,
-              );
-            }
-          },
-          { once: true },
-        );
-
-        this.cornerstone.displayImage(container, image);
+      renderingEngine.enableElement({
+        viewportId: "export-vp",
+        element: container,
+        type: core.Enums.ViewportType.STACK,
       });
+
+      const viewport = renderingEngine.getViewport("export-vp");
+      await viewport.setStack([imageId], 0);
+
+      // Wait for render
+      renderingEngine.render();
+
+      // Give it a frame to render
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      const canvas = container.querySelector("canvas");
+      const dataUrl = canvas?.toDataURL("image/png");
+
+      return dataUrl || null;
     } catch (error) {
-      console.error("Error loading DICOM image:", error);
-      this.cornerstone.disable(container);
-      document.body.removeChild(container);
+      console.error("[DICOM] Error converting to PNG:", error);
       return null;
+    } finally {
+      if (renderingEngine) {
+        renderingEngine.destroy();
+      }
+      document.body.removeChild(container);
     }
   }
 
-  /**
-   * Create thumbnails from extracted images
-   */
   private async createThumbnails(
     images: string[],
     maxSize: number = THUMBNAIL_SIZE,
   ): Promise<string[]> {
     const thumbnails: string[] = [];
-
     for (const imageDataUrl of images) {
       try {
-        // Use system resizeImage function for consistency
         const thumbnail = await resizeImage(imageDataUrl, maxSize);
         thumbnails.push(thumbnail);
       } catch (error) {
-        console.error("❌ Error creating thumbnail:", error);
-        // Use original image as fallback
+        console.error("[DICOM] Error creating thumbnail:", error);
         thumbnails.push(imageDataUrl);
       }
     }
-
     return thumbnails;
   }
 
-  // Removed custom resizeImage - now using system resizeImage function for consistency
-
-  /**
-   * Helper functions for metadata extraction
-   */
   private getStringValue(dataSet: any, tag: string): string | undefined {
     try {
       return dataSet.string(tag);
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }
@@ -452,7 +373,7 @@ export class DicomHandler {
     try {
       const value = dataSet.intString(tag);
       return value !== undefined ? parseInt(value) : undefined;
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }
@@ -461,7 +382,7 @@ export class DicomHandler {
     if (!value) return undefined;
     try {
       return value.split("\\").map((v) => parseFloat(v.trim()));
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }
@@ -470,7 +391,7 @@ export class DicomHandler {
     if (!value) return undefined;
     try {
       return value.split("\\").map((v) => parseFloat(v.trim()));
-    } catch (error) {
+    } catch {
       return [parseFloat(value)];
     }
   }

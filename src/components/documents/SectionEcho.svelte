@@ -811,8 +811,7 @@
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
-        border-bottom: 1px solid var(--color-border);
-        padding-bottom: 0.5rem;
+        padding: 0.5rem 1rem;
     }
     
     .measurements-grid {

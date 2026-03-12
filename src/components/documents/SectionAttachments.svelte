@@ -18,10 +18,10 @@
 
   interface Props {
     data: Attachment[];
-    key?: string | undefined;
+    encryptionKey?: string | undefined;
   }
 
-  let { data, key = undefined }: Props = $props();
+  let { data, encryptionKey = undefined }: Props = $props();
 
     const loadedAttachments = new Map<string, ArrayBuffer>();
 
@@ -32,9 +32,13 @@
     let isLoading = $state(false);
     let loadError = $state<string | null>(null);
 
+    function hasPath(attachment: Attachment): boolean {
+        return !!(attachment.path && encryptionKey);
+    }
+
     async function loadAttachement(attachment: Attachment): Promise<ArrayBuffer> {
         logger.api.debug('Loading attachment:', attachment);
-        if (!attachment.path || !key) {
+        if (!attachment.path || !encryptionKey) {
             throw new Error('Missing attachment path or decryption key');
         }
 
@@ -55,7 +59,7 @@
         // read the encrypted base64 string from storage
         const encryptedData = await fileResponse.text();
         // decrypt the base64 encrypted data
-        const file = await decrypt([encryptedData], key);
+        const file = await decrypt([encryptedData], encryptionKey);
         // parse the decrypted JSON and extract the file data
         logger.api.debug('Decrypted file:', file);
         const json = JSON.parse(file[0]);
@@ -126,8 +130,9 @@
     }
 
     function isPreviewSupported(mimeType: string): boolean {
-        return mimeType === 'application/pdf' || 
-               mimeType.startsWith('image/') || 
+        return mimeType === 'application/pdf' ||
+               mimeType === 'application/dicom' ||
+               mimeType.startsWith('image/') ||
                mimeType.startsWith('text/') ||
                mimeType === 'application/json' ||
                mimeType === 'application/xml';
@@ -146,32 +151,42 @@
 
     <div class="attachments">
         {#each data as attachment}
-            <button class="attachment" onclick={() => previewAttachment(attachment)} title="{$t('report.attachments-click-to-preview', { filename: getFileName(attachment) } as any)}">
-                {#if attachment.thumbnail}
-                    <img src={attachment.thumbnail} loading="lazy" alt={attachment.type} />
-                {:else}
-                    <div class="attachment-placeholder">
-                        {#if attachment.type === 'application/pdf'}
-                            📄
-                        {:else if attachment.type.startsWith('image/')}
-                            🖼️
-                        {:else if attachment.type.startsWith('text/')}
-                            📝
+            {#if hasPath(attachment)}
+                <button class="attachment" onclick={() => previewAttachment(attachment)} title="{$t('report.attachments-click-to-preview', { filename: getFileName(attachment) } as any)}">
+                    {#if attachment.thumbnail}
+                        <img src={attachment.thumbnail} loading="lazy" alt={attachment.type} />
+                    {:else}
+                        <div class="attachment-placeholder">
+                            {#if attachment.type === 'application/pdf'}
+                                📄
+                            {:else if attachment.type.startsWith('image/')}
+                                🖼️
+                            {:else if attachment.type.startsWith('text/')}
+                                📝
+                            {:else}
+                                📎
+                            {/if}
+                        </div>
+                    {/if}
+
+                    <!-- Preview/unsupported indicator -->
+                    <div class="attachment-overlay">
+                        {#if isPreviewSupported(attachment.type)}
+                            <div class="preview-indicator">👁️</div>
                         {:else}
-                            📎
+                            <div class="download-indicator">⬇️</div>
                         {/if}
                     </div>
-                {/if}
-                
-                <!-- Preview/unsupported indicator -->
-                <div class="attachment-overlay">
-                    {#if isPreviewSupported(attachment.type)}
-                        <div class="preview-indicator">👁️</div>
-                    {:else}
-                        <div class="download-indicator">⬇️</div>
-                    {/if}
+                </button>
+            {:else if attachment.thumbnail}
+                <div class="attachment -no-file">
+                    <img src={attachment.thumbnail} loading="lazy" alt={attachment.type} />
                 </div>
-            </button>
+            {:else}
+                <div class="attachment -no-file">
+                    <div class="attachment-placeholder">📎</div>
+                </div>
+            {/if}
         {/each}
     </div>
 {/if}
@@ -246,9 +261,13 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .attachment:hover {
+    .attachment:not(.-no-file):hover {
         transform: scale(1.05);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .attachment.-no-file {
+        cursor: default;
     }
 
     .attachment img {
