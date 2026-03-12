@@ -55,7 +55,7 @@
                         {#if diagnosis.code}
                             <span class="diagnosis-code">{diagnosis.code}</span>
                         {/if}
-                        <h5 class="item-name">{diagnosis.description}</h5>
+                        <h5 class="item-name">{diagnosis.description || diagnosis.name}</h5>
                     </div>
                     <div class="diagnosis-badges">
                         {#if diagnosis.type}
@@ -66,7 +66,7 @@
                         {/if}-->
                         <AskButton
                             type="diagnosis"
-                            label={diagnosis.description}
+                            label={diagnosis.description || diagnosis.name}
                             data={diagnosis}
                             documentId={document?.id}
                             documentTitle={document?.content?.title}

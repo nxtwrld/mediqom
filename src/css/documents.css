@@ -13,6 +13,12 @@
   background-color: var(--color-surface, #fff);
 }
 
+.document-section .h4 {
+  font-size: clamp(0.6rem, 2vw, 1.2rem);
+  padding: .5rem 1rem;
+  margin: 0;
+}
+
 /* Target all heading elements within document sections */
 .document-section .heading > h1,
 .document-section .heading > h2,
@@ -21,6 +27,8 @@
   line-height: 1.2;
   padding: 0 1rem;
 }
+
+
 
 /* Container-specific heading adjustments with named container */
 @container document-section (max-width: 600px) {

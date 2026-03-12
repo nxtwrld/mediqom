@@ -1,5 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
+    import { translateAnatomy } from '$lib/i18n/anatomy';
+    import ui from '$lib/ui';
     import Modal from '$components/ui/Modal.svelte';
     import { decrypt } from '$lib/documents/index';
     import { base64ToArrayBuffer } from '$lib/arrays';
@@ -115,6 +117,25 @@
     let studies = $derived(data?.studies || []);
     let attachments = $derived(data?.attachments || []);
 
+    function translateEnum(prefix: string, value: string): string {
+        const key = `report.${prefix}.${value}`;
+        const translated = $t(key);
+        return translated && translated !== key ? translated : value.replace(/_/g, ' ');
+    }
+
+    function hasSidePrefix(part: string): boolean {
+        const normalized = normalize(part);
+        return normalized.startsWith('L_') || normalized.startsWith('R_');
+    }
+
+    function normalize(str: string): string {
+        return str.replace(/ /gi, '_');
+    }
+
+    function showBodyPart(part: string) {
+        ui.emit('viewer:anatomy', { object: normalize(part) });
+    }
+
     function getSeverityClass(severity?: string): string {
         switch (severity) {
             case 'critical': return '-critical';
@@ -153,16 +174,16 @@
             <!-- Study metadata -->
             <div class="study-meta">
                 {#if study.modality}
-                    <span class="badge -modality">{study.modality}</span>
+                    <span class="badge -modality">{translateEnum('imaging-modalities', study.modality)}</span>
                 {/if}
                 {#if study.anatomicalRegion}
-                    <span class="badge -region">{study.anatomicalRegion}</span>
+                    <span class="badge -region">{translateEnum('imaging-regions', study.anatomicalRegion)}</span>
                 {/if}
                 {#if study.viewPosition}
-                    <span class="badge -view">{study.viewPosition}</span>
+                    <span class="badge -view">{translateEnum('imaging-views', study.viewPosition)}</span>
                 {/if}
                 {#if study.imageQuality}
-                    <span class="badge -quality -{study.imageQuality}">{$t('report.imaging-quality')}: {study.imageQuality}</span>
+                    <span class="badge -quality -{study.imageQuality}">{$t('report.imaging-quality')}: {translateEnum('imaging-quality-values', study.imageQuality)}</span>
                 {/if}
             </div>
 
@@ -170,35 +191,40 @@
             {#if study.visualDescription}
                 <p class="visual-description">{study.visualDescription}</p>
             {/if}
-
+        </div>
             <!-- Anomalies -->
             {#if study.anomalies && study.anomalies.length > 0}
-                <h4 class="subsection-title">{$t('report.imaging-anomalies')}</h4>
+                <h4 class="h4">{$t('report.imaging-anomalies')}</h4>
                 <ul class="list-items">
                     {#each study.anomalies as anomaly}
                         <li class="panel anomaly-item {getSeverityClass(anomaly.severity)}">
                             <div class="anomaly-header">
                                 {#if anomaly.type}
-                                    <span class="anomaly-type">{anomaly.type.replace(/_/g, ' ')}</span>
+                                    <span class="anomaly-type">{translateEnum('imaging-anomaly-types', anomaly.type)}</span>
                                 {/if}
                                 {#if anomaly.severity}
-                                    <span class="badge -severity {getSeverityClass(anomaly.severity)}">{anomaly.severity}</span>
+                                    <span class="badge -severity {getSeverityClass(anomaly.severity)}">{translateEnum('imaging-severity', anomaly.severity)}</span>
                                 {/if}
                                 {#if anomaly.urgentFinding}
                                     <span class="badge -urgent">{$t('report.imaging-urgent')}</span>
                                 {/if}
                             </div>
                             {#if anomaly.description}
-                                <p class="anomaly-description">{anomaly.description}</p>
+                                <p class="p anomaly-description">{anomaly.description}</p>
                             {/if}
                             {#if anomaly.location}
                                 <div class="anomaly-detail">
                                     <span class="label">{$t('report.location')}:</span>
                                     <span>
-                                        {anomaly.location.bodyPart || ''}
-                                        {#if anomaly.location.region} - {anomaly.location.region}{/if}
-                                        {#if anomaly.location.side} ({anomaly.location.side}){/if}
+                                        {anomaly.location.bodyPart ? translateAnatomy(normalize(anomaly.location.bodyPart), $t) : ''}
+                                        {#if anomaly.location.region} - {translateAnatomy(normalize(anomaly.location.region), $t)}{/if}
+                                        {#if anomaly.location.side && !(anomaly.location.bodyPart && hasSidePrefix(anomaly.location.bodyPart))} ({translateEnum('imaging-sides', anomaly.location.side)}){/if}
                                     </span>
+                                    {#if anomaly.location.bodyPart}
+                                        <button class="anatomy-btn" onclick={() => showBodyPart(anomaly.location!.bodyPart!)} aria-label="View body part anatomy">
+                                            <svg><use href="/icons.svg#anatomy" /></svg>
+                                        </button>
+                                    {/if}
                                 </div>
                             {/if}
                             {#if anomaly.measurements?.size}
@@ -213,8 +239,10 @@
             {/if}
 
             <!-- Overall assessment -->
+
             {#if study.overallAssessment}
-                <h4 class="subsection-title">{$t('report.imaging-assessment')}</h4>
+                <h4 class="h4">{$t('report.imaging-assessment')}</h4>
+                <div class="page -block imaging-study">
                 <div class="assessment">
                     {#if study.overallAssessment.summary}
                         <p class="assessment-summary">{study.overallAssessment.summary}</p>
@@ -240,8 +268,8 @@
                         </div>
                     {/if}
                 </div>
+            </div>
             {/if}
-        </div>
     {/each}
 {/if}
 
@@ -442,7 +470,6 @@
     }
 
     .visual-description {
-        color: var(--color-text-secondary);
         line-height: 1.5;
         margin: 0;
     }
@@ -475,7 +502,6 @@
 
     .anomaly-description {
         margin: 0;
-        color: var(--color-text-secondary);
         line-height: 1.4;
     }
 
@@ -500,7 +526,6 @@
     .assessment-summary {
         margin: 0;
         line-height: 1.5;
-        color: var(--color-text-primary);
     }
 
     .findings-list {
@@ -521,10 +546,28 @@
 
     .panel.-critical,
     .panel.-severe {
-        border-left: 3px solid var(--color-negative);
+        border-left: var(--indicator-width) solid var(--color-negative);
     }
 
     .panel.-moderate {
-        border-left: 3px solid var(--color-warning);
+        border-left: var(--indicator-width) solid var(--color-warning);
+    }
+
+    .anatomy-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.125rem;
+        color: var(--color-text-secondary);
+        flex-shrink: 0;
+    }
+
+    .anatomy-btn:hover {
+        color: var(--color-interactivity);
+    }
+
+    .anatomy-btn svg {
+        width: 1.25rem;
+        height: 1.25rem;
     }
 </style>

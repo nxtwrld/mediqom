@@ -32,6 +32,21 @@
     const RENDERING_ENGINE_ID = 'dicomRenderingEngine';
     const TOOL_GROUP_ID = 'dicomToolGroup';
 
+    // Zoom configuration
+    const ZOOM_SENSITIVITY = 0.001;
+    const PINCH_SENSITIVITY = 0.08;
+    const ZOOM_MIN = 0.1;
+    const ZOOM_MAX = 50;
+
+    function applyZoom(delta: number) {
+        if (!viewport) return;
+        const currentZoom = viewport.getZoom();
+        const zoomFactor = 1 + delta * ZOOM_SENSITIVITY;
+        const newZoom = Math.max(ZOOM_MIN, Math.min(currentZoom * zoomFactor, ZOOM_MAX));
+        viewport.setZoom(newZoom);
+        viewport.render();
+    }
+
     const VOI_PRESETS = [
         { name: 'Default', wc: 0, ww: 0, auto: true },
         { name: 'Bone', wc: 500, ww: 2000 },
@@ -130,10 +145,10 @@
             toolGroup.setToolActive(tools.WindowLevelTool.toolName, {
                 bindings: [{ mouseButton: tools.Enums.MouseBindings.Primary }],
             });
+            // Zoom on right mouse only — pinch handled by custom touch handler below
             toolGroup.setToolActive(tools.ZoomTool.toolName, {
                 bindings: [
                     { mouseButton: tools.Enums.MouseBindings.Secondary },
-                    { numTouchPoints: 2 },
                 ],
             });
             toolGroup.setToolActive(tools.PanTool.toolName, {
@@ -154,6 +169,49 @@
             }
 
             renderingEngine.render();
+
+            // Wheel zoom handler
+            viewportDiv.addEventListener('wheel', (e: WheelEvent) => {
+                e.preventDefault();
+                applyZoom(-e.deltaY);
+            }, { passive: false });
+
+            // Touch pinch-to-zoom handler
+            let lastTouchDistance: number | null = null;
+
+            function getTouchDistance(touches: TouchList): number {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            // Touch pinch-to-zoom — capture phase to intercept before Cornerstone
+            viewportDiv.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    e.stopPropagation();
+                    lastTouchDistance = getTouchDistance(e.touches);
+                }
+            }, { capture: true, passive: false });
+
+            viewportDiv.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && lastTouchDistance !== null) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const dist = getTouchDistance(e.touches);
+                    const pixelDelta = dist - lastTouchDistance;
+                    const currentZoom = viewport?.getZoom() ?? 1;
+                    const zoomFactor = 1 + pixelDelta * PINCH_SENSITIVITY;
+                    const newZoom = Math.max(ZOOM_MIN, Math.min(currentZoom * zoomFactor, ZOOM_MAX));
+                    if (viewport) {
+                        viewport.setZoom(newZoom);
+                        viewport.render();
+                    }
+                    lastTouchDistance = dist;
+                }
+            }, { capture: true, passive: false });
+
+            viewportDiv.addEventListener('touchend', () => { lastTouchDistance = null; }, { capture: true });
+
             isLoading = false;
         } catch (e) {
             console.error('[DicomViewer] Failed to initialize:', e);
@@ -515,6 +573,8 @@
         flex: 1;
         min-height: 500px;
         position: relative;
+        touch-action: none;
+        overflow: hidden;
     }
 
     .loading-state {

@@ -2077,7 +2077,75 @@
     "imaging-urgent": "Urgent",
     "imaging-size": "Size",
     "imaging-assessment": "Assessment",
-    "imaging-recommended-actions": "Recommended Actions"
+    "imaging-recommended-actions": "Recommended Actions",
+    "imaging-modality": "Modality",
+    "imaging-modalities": {
+      "X-ray": "X-Ray",
+      "CT": "CT Scan",
+      "MRI": "MRI",
+      "Ultrasound": "Ultrasound",
+      "PET": "PET Scan",
+      "Mammography": "Mammography",
+      "Nuclear Medicine": "Nuclear Medicine",
+      "Fluoroscopy": "Fluoroscopy",
+      "Unknown": "Unknown"
+    },
+    "imaging-regions": {
+      "Head": "Head",
+      "Neck": "Neck",
+      "Chest": "Chest",
+      "Abdomen": "Abdomen",
+      "Pelvis": "Pelvis",
+      "Spine": "Spine",
+      "Upper Extremity": "Upper Extremity",
+      "Lower Extremity": "Lower Extremity",
+      "Multiple Regions": "Multiple Regions",
+      "Unknown": "Unknown"
+    },
+    "imaging-views": {
+      "AP": "AP",
+      "PA": "PA",
+      "Lateral": "Lateral",
+      "Oblique": "Oblique",
+      "Axial": "Axial",
+      "Coronal": "Coronal",
+      "Sagittal": "Sagittal",
+      "Cross-sectional": "Cross-sectional",
+      "Longitudinal": "Longitudinal",
+      "Unknown": "Unknown"
+    },
+    "imaging-quality-values": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "imaging-anomaly-types": {
+      "mass": "Mass",
+      "fracture": "Fracture",
+      "foreign_object": "Foreign Object",
+      "inflammation": "Inflammation",
+      "deformity": "Deformity",
+      "calcification": "Calcification",
+      "fluid_collection": "Fluid Collection",
+      "pneumothorax": "Pneumothorax",
+      "enlarged_organ": "Enlarged Organ",
+      "atrophy": "Atrophy",
+      "other": "Other"
+    },
+    "imaging-severity": {
+      "critical": "Critical",
+      "severe": "Severe",
+      "moderate": "Moderate",
+      "mild": "Mild"
+    },
+    "imaging-sides": {
+      "left": "Left",
+      "right": "Right",
+      "bilateral": "Bilateral",
+      "central": "Central",
+      "not_applicable": "N/A"
+    }
   },
   "billing": {
     "subscription": "Subscription",
