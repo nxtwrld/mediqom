@@ -3,6 +3,7 @@
     import PdfViewer from './Pdf.svelte';
     import ImageViewer from './ImageViewer.svelte';
     import TextViewer from './TextViewer.svelte';
+    import DicomViewer from './DicomViewer.svelte';
     import UnsupportedViewer from './UnsupportedViewer.svelte';
     import { t } from '$lib/i18n';
 
@@ -19,29 +20,24 @@
 
     // Document type detection and routing
     function getViewerComponent(mimeType: string) {
-        // PDF documents
         if (mimeType === 'application/pdf') {
             return PdfViewer;
         }
-        
-        // Image documents
+
+        if (mimeType === 'application/dicom') {
+            return DicomViewer;
+        }
+
         if (mimeType.startsWith('image/')) {
             return ImageViewer;
         }
-        
-        // Text documents
-        if (mimeType.startsWith('text/') || 
+
+        if (mimeType.startsWith('text/') ||
             mimeType === 'application/json' ||
             mimeType === 'application/xml') {
             return TextViewer;
         }
 
-        // Add more document types here as needed
-        // Examples for future expansion:
-        // - Word documents: application/vnd.openxmlformats-officedocument.wordprocessingml.document
-        // - Excel: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-        // - PowerPoint: application/vnd.openxmlformats-officedocument.presentationml.presentation
-        
         return UnsupportedViewer;
     }
 
@@ -49,17 +45,21 @@
         if (mimeType === 'application/pdf') {
             return { pdfData: data };
         }
-        
+
+        if (mimeType === 'application/dicom') {
+            return { dicomData: data };
+        }
+
         if (mimeType.startsWith('image/')) {
             return { imageData: data, mimeType };
         }
-        
-        if (mimeType.startsWith('text/') || 
+
+        if (mimeType.startsWith('text/') ||
             mimeType === 'application/json' ||
             mimeType === 'application/xml') {
             return { textData: data, mimeType };
         }
-        
+
         return { data, mimeType, fileName };
     }
 

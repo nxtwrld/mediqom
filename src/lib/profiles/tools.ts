@@ -34,10 +34,91 @@ export function normalizeName(
   // Trim whitespace
   name = name.trim();
 
+  // Replace DICOM-style separators (^) with spaces before removing punctuation
+  name = name.replace(/\^/g, " ");
+
   // Remove punctuation
-  name = name.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+  name = name.replace(/[.,\/#!$%&\*;:{}=\-_`~()]/g, "");
+
+  // Remove single-character initials (e.g., middle initial from DICOM "Last^First^M")
+  name = name
+    .split(/\s+/)
+    .filter((w) => w.length > 1)
+    .join(" ");
 
   return removePrefixes(name);
+}
+
+/**
+ * Compute Levenshtein edit distance between two strings
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () =>
+    new Array(n + 1).fill(0),
+  );
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] =
+        a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+
+  return dp[m][n];
+}
+
+/**
+ * Check if two name parts are similar enough to be considered a match.
+ * Allows up to ~30% edit distance relative to the longer string.
+ */
+function namePartsMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  // One contains the other (handles abbreviations)
+  if (a.includes(b) || b.includes(a)) return true;
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen <= 2) return a === b; // Too short for fuzzy matching
+  const threshold = Math.max(1, Math.floor(maxLen * 0.3));
+  return levenshteinDistance(a, b) <= threshold;
+}
+
+/**
+ * Fuzzy name matching: splits names into parts, finds best part-to-part
+ * matches regardless of order. Handles DICOM format, diacritics differences,
+ * and minor transliteration variations (e.g., "ondrey" vs "ondrej").
+ */
+export function fuzzyNameMatch(nameA: string, nameB: string): boolean {
+  const partsA = normalizeName(nameA).split(/\s+/).filter(Boolean);
+  const partsB = normalizeName(nameB).split(/\s+/).filter(Boolean);
+
+  if (partsA.length === 0 || partsB.length === 0) return false;
+
+  // For each part in the shorter list, find a matching part in the longer list
+  const [shorter, longer] =
+    partsA.length <= partsB.length ? [partsA, partsB] : [partsB, partsA];
+
+  const used = new Set<number>();
+  let matchCount = 0;
+
+  for (const partS of shorter) {
+    for (let i = 0; i < longer.length; i++) {
+      if (used.has(i)) continue;
+      if (namePartsMatch(partS, longer[i])) {
+        used.add(i);
+        matchCount++;
+        break;
+      }
+    }
+  }
+
+  // Require all parts of the shorter name to match
+  return matchCount === shorter.length;
 }
 
 export function removePrefixes(name: string): string {
@@ -256,6 +337,10 @@ export function findInProfiles(contact: {
           )
         ) {
           r.matchName = true;
+        }
+        // Fallback: fuzzy name matching (handles DICOM format, name reordering, transliteration)
+        if (!r.matchName && name) {
+          r.matchName = fuzzyNameMatch(name, p.fullName || "");
         }
       }
       if (insurance_numbers.length > 0) {

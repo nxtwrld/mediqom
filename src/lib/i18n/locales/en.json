@@ -845,7 +845,13 @@
       "uploading": "Uploading ...",
       "value-age": "{value, plural, =0 {# years} one {1 year} other {# years}}",
       "crop-image": "Crop Image",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "edit": {
+        "delete": "Delete Profile",
+        "disconnect": "Disconnect Profile",
+        "confirm-delete": "Are you sure you want to delete this profile and all its data? This cannot be undone.",
+        "confirm-disconnect": "Are you sure you want to disconnect this profile? You will lose access to the shared documents."
+      }
     },
     "general": {
       "cancel": "Cancel",
@@ -2064,7 +2070,14 @@
     "weight": "Weight",
     "height": "Height",
     "oxygen-saturation": "Oxygen Saturation",
-    "respiratory-rate": "Respiratory Rate"
+    "respiratory-rate": "Respiratory Rate",
+    "imaging": "Imaging Studies",
+    "imaging-quality": "Quality",
+    "imaging-anomalies": "Anomalies",
+    "imaging-urgent": "Urgent",
+    "imaging-size": "Size",
+    "imaging-assessment": "Assessment",
+    "imaging-recommended-actions": "Recommended Actions"
   },
   "billing": {
     "subscription": "Subscription",
@@ -2141,5 +2154,23 @@
       "cancel-subscription": "How do I cancel my subscription?",
       "cancel-subscription-answer": "Click 'Manage Billing' to access the Stripe customer portal where you can cancel, change payment method, or view invoices."
     }
+  },
+  "dicom": {
+    "loading": "Loading DICOM image...",
+    "error": "Failed to load DICOM image",
+    "window-level": "Window/Level",
+    "pan": "Pan",
+    "zoom": "Zoom",
+    "flip-h": "Flip Horizontal",
+    "flip-v": "Flip Vertical",
+    "rotate-cw": "Rotate Clockwise",
+    "rotate-ccw": "Rotate Counter-clockwise",
+    "invert": "Invert",
+    "reset": "Reset",
+    "angle": "Angle Measurement",
+    "length": "Length Measurement",
+    "voi-presets": "VOI Presets",
+    "color-map": "Color Map",
+    "slice": "Slice"
   }
 }

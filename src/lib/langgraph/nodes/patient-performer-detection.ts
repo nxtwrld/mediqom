@@ -34,11 +34,11 @@ function validatePatient(patient: any): any {
   if (!patient) return {};
 
   return {
-    fullName: patient.fullName || patient.name || "Unknown Patient",
+    fullName: patient.fullName || patient.name || undefined,
     biologicalSex: ["male", "female"].includes(patient.biologicalSex)
       ? patient.biologicalSex
       : undefined,
-    identifier: patient.identifier || patient.patientId || "unknown",
+    identifier: patient.identifier || patient.patientId || undefined,
     birthDate: patient.birthDate || patient.dateOfBirth || undefined,
     insurance: patient.insurance
       ? {
@@ -55,7 +55,7 @@ function validatePatient(patient: any): any {
 function validatePerformers(performers: any[]): any[] {
   return performers.map((performer) => ({
     role: performer.role || "other_specialist",
-    name: performer.name || "Unknown",
+    name: performer.name || undefined,
     title: performer.title || undefined,
     specialty: performer.specialty || undefined,
     licenseNumber: performer.licenseNumber || undefined,
@@ -205,7 +205,9 @@ export const patientPerformerDetectionNode = async (
     });
 
     if (dicomData && Object.keys(dicomData).length > 0) {
-      let metadataText = `Please extract patient information, medical performers, and technical parameters from this DICOM metadata:
+      let metadataText = `Please extract patient information, medical performers, and technical parameters from this DICOM metadata.
+
+CRITICAL RULE: Do NOT fabricate, invent, or guess any information that is not present in the DICOM metadata. If a field shows "Unknown", is empty, or is not available, return null for that field. Never invent patient names, performer names, or other identifying information.
 
 PATIENT INFORMATION:
 - Look for patient name, ID, birth date, sex/gender

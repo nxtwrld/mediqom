@@ -10,6 +10,7 @@
     import Modal from '$components/ui/Modal.svelte';
     import ProfileEdit from './ProfileEdit.svelte';
     import { saveProfileChanges, prepareProfileForEditing } from '$lib/profiles/save';
+    import { goto } from '$app/navigation';
     import { getPropertyCategory } from '$lib/health/property-categories';
     
     // Local state for ProfileEdit modal
@@ -31,6 +32,12 @@
         editingProfile = null;
         originalProfile = null;
         showProfileEdit = false;
+    }
+
+    async function handleProfileDeleted() {
+        showProfileEdit = false;
+        editingProfile = null;
+        await goto('/med');
     }
     
     interface Property {
@@ -311,7 +318,7 @@
 {#if showProfileEdit && editingProfile}
     <Modal onclose={saveProfile}>
     <div class="modal-header">Profile Edit</div>
-        <ProfileEdit bind:profile={editingProfile} />
+        <ProfileEdit bind:profile={editingProfile} ondelete={handleProfileDeleted} />
     </Modal>
 {/if}
 

@@ -28,7 +28,8 @@ export default {
       },
       documentType: {
         type: "string",
-        description: "Primary document type based on content analysis",
+        description:
+          "Primary document type based on content analysis. Choose the most specific type: 'laboratory_results' for any lab panel, blood test, urinalysis, or biochemistry results; 'imaging_report' for CT/MRI/PET/scintigraphy reports; 'radiology_report' for X-ray/ultrasound reports with written findings; 'pathology_report' for histology/biopsy/autopsy; 'surgical_report' for operative notes; 'discharge_summary' for hospital admission/discharge documents; 'prescription' for medication prescription documents; 'emergency_report' for ER/urgent care visits; 'oncology_report' for oncology/cancer follow-ups; 'cardiology_report' for cardiology consultations (ECG, echo, stress test); 'consultation_note' for specialist consultations; 'clinical_report' as fallback for general medical reports.",
         enum: [
           "clinical_report",
           "laboratory_results",
@@ -83,7 +84,7 @@ export default {
       hasSignals: {
         type: "boolean",
         description:
-          "Does the document contain vital signs, lab values, measurements, or quantitative data? Look for: blood pressure, heart rate, temperature, lab test results, numerical values with units (mg, ml, %), blood counts, chemistry panels, etc.",
+          "Does the document contain vital signs, lab values, measurements, or quantitative data? Look for: laboratory test results (any language), result tables showing test name / value / reference range / unit, blood counts, chemistry panels (biochemistry, hematology, immunology, endocrinology), urine analysis, blood pressure, heart rate, temperature, numerical values with medical units (mmol/l, g/l, mg/dl, ukat/l, nmol/l, 10^9/l, etc.). Set TRUE for any standard laboratory report showing test results with reference ranges.",
       },
       hasPrescriptions: {
         type: "boolean",
@@ -100,7 +101,7 @@ export default {
       hasImaging: {
         type: "boolean",
         description:
-          "Does the document contain imaging studies (CT, MRI, X-ray, ultrasound, etc.)?",
+          "Does the document contain imaging studies or references to them? Look for: CT (computed tomography), MRI (magnetic resonance imaging), X-ray/RTG, PET scan, ultrasound/sonography/USG, scintigraphy, DEXA scan, mammography, fluoroscopy, angiography, or any radiology/nuclear medicine study — whether ordered, performed, or referenced. 'CT břicha' (Czech: abdominal CT), 'Röntgen' (German: X-ray).",
       },
       hasDental: {
         type: "boolean",
@@ -110,7 +111,7 @@ export default {
       hasAdmission: {
         type: "boolean",
         description:
-          "Does the document contain hospital admission/discharge information?",
+          "Does the document contain hospital admission or discharge information? Look for: admission date, discharge date, hospital ward/department, length of stay, discharge diagnosis, DRG codes, discharge condition, readmission risk, discharge instructions, inpatient stay details, 'propuštěn' (Czech: discharged), 'Entlassung' (German: discharge), hospital name with dates.",
       },
       hasProcedures: {
         type: "boolean",
@@ -125,17 +126,17 @@ export default {
       hasSpecimens: {
         type: "boolean",
         description:
-          "Does the document contain specimen collection or tissue sample information?",
+          "Does the document contain specimen collection or tissue sample information? Look for: biopsy specimen details, blood/urine/tissue sample IDs, specimen collection site/date, sample processing notes, fixation type (formalin), gross specimen description before sectioning, 'vzorek' (Czech: sample), 'Probe/Biopsie' (German).",
       },
       hasMicroscopic: {
         type: "boolean",
         description:
-          "Does the document contain microscopic examination or histology findings?",
+          "Does the document contain microscopic examination or histopathology findings? Look for: microscopic description of tissue sections, cell morphology (pleomorphism, mitotic figures), histological grading, 'microscopic:', H&E staining findings, histopathological diagnosis, Gleason score, Bloom-Richardson grade, 'mikroskopický nález' (Czech), 'mikroskopischer Befund' (German).",
       },
       hasMolecular: {
         type: "boolean",
         description:
-          "Does the document contain molecular, genetic, or biomarker analysis?",
+          "Does the document contain molecular, genetic, or biomarker analysis? Look for: gene mutation results (BRCA1/2, KRAS, EGFR, TP53), next-generation sequencing (NGS) panels, PCR results, chromosomal analysis, microsatellite instability (MSI), tumor mutational burden (TMB), pharmacogenomics, flow cytometry immunophenotyping, molecular diagnostics, 'genetická analýza' (Czech), 'Molekulardiagnostik' (German).",
       },
       hasECG: {
         type: "boolean",
@@ -150,17 +151,17 @@ export default {
       hasTriage: {
         type: "boolean",
         description:
-          "Does the document contain emergency triage or acuity assessment?",
+          "Does the document contain emergency triage or acuity assessment? Look for: triage category/level (1-5, immediate/urgent/delayed), emergency department visit, chief complaint on arrival, vital signs at triage, Manchester Triage System scores, ESI levels, 'urgentní příjem' (Czech), 'Notaufnahme' (German: emergency admission), FAST exam, trauma assessment.",
       },
       hasTreatments: {
         type: "boolean",
         description:
-          "Does the document contain treatment protocols or therapeutic interventions?",
+          "Does the document describe treatments that were ALREADY PERFORMED or are currently ongoing? Look for: completed procedures, administered medications/infusions, performed interventions, ongoing therapy descriptions, 'patient received', 'was treated with', rehabilitation in progress, 'léčen' (Czech: treated), 'behandelt' (German: treated). NOTE: For planned future treatments (chemotherapy schedules, radiation plans), use hasTreatmentPlan instead.",
       },
       hasAssessment: {
         type: "boolean",
         description:
-          "Does the document contain clinical assessment or specialist evaluation?",
+          "Does the document contain a specialist's clinical assessment or structured evaluation? Look for: specialist examination findings, clinical judgment sections, assessment of patient's condition, scoring systems (GCS, APACHE, SOFA, PHQ-9), functional assessment, specialist opinion/conclusion, 'závěr' (Czech: conclusion/assessment), 'Beurteilung' (German: assessment). NOTE: hasSummary is for overall document summaries; hasAssessment is for structured clinical evaluation by a specialist.",
       },
 
       // Enhanced Medical Specialty Sections
@@ -172,7 +173,7 @@ export default {
       hasTreatmentPlan: {
         type: "boolean",
         description:
-          "Does the document contain structured treatment plans (chemotherapy, radiation, etc.)?",
+          "Does the document contain a PLANNED/FUTURE structured treatment plan? Look for: scheduled chemotherapy cycles, radiation therapy planning, planned surgical interventions, future medication schedules, oncology treatment protocols, rehabilitation plans, 'plan:', 'doporučujeme' (Czech: we recommend), treatment timeline/schedule. NOTE: For treatments already performed/ongoing, use hasTreatments instead.",
       },
       hasTreatmentResponse: {
         type: "boolean",
@@ -182,7 +183,7 @@ export default {
       hasImagingFindings: {
         type: "boolean",
         description:
-          "Does the document contain detailed radiology findings and measurements?",
+          "Does the document contain DETAILED radiology findings with measurements or descriptions (not just a reference to an imaging study)? Look for: radiologist's written report with organ descriptions, lesion sizes in mm/cm, Hounsfield units, signal intensity descriptions, RECIST measurements, 'nález:' (Czech: findings), detailed descriptive text from CT/MRI/ultrasound reports. NOTE: hasImaging=true for documents that ORDER or reference imaging; hasImagingFindings=true for the actual radiologist report text.",
       },
       hasGrossFindings: {
         type: "boolean",
@@ -197,7 +198,7 @@ export default {
       hasAllergies: {
         type: "boolean",
         description:
-          "Does the document contain allergy information or adverse reactions?",
+          "Does the document contain allergy information or adverse drug reactions? Look for: drug allergies (penicillin, NSAIDs, contrast media), food allergies, allergy list, 'alergie' (Czech), 'Allergie' (German), ADR (adverse drug reaction), hypersensitivity reactions, RAST results, allergy testing, 'no known allergies', contraindications due to allergy.",
       },
       hasMedications: {
         type: "boolean",
@@ -207,7 +208,7 @@ export default {
       hasSocialHistory: {
         type: "boolean",
         description:
-          "Does the document contain social history or lifestyle factors?",
+          "Does the document contain social history or lifestyle risk factors? Look for: smoking status (pack-years, ex-smoker), alcohol consumption, recreational drug use, occupation/work exposure, physical activity level, diet description, family situation, living conditions, 'anamnéza' social section (Czech), 'Sozialanamnese' (German), BMI context, sexual history in relevant specialties.",
       },
 
       // Medical Context Tags

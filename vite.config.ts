@@ -2,6 +2,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vitest/config";
 import { type ViteDevServer, normalizePath, type Plugin } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import { viteCommonjs } from "@originjs/vite-plugin-commonjs";
 // Removed topLevelAwait plugin - was causing 'Server is not a constructor' error on Vercel
 // import topLevelAwait from "vite-plugin-top-level-await";
 import path from "path";
@@ -33,6 +34,7 @@ export default defineConfig({
   plugins: [
     // Removed topLevelAwait plugin - was causing SSR issues on Vercel production
     // If async imports are needed, handle them manually in components with dynamic imports
+    viteCommonjs(),
     nodePolyfillsPlugin(),
     qomConfigPlugin(),
     promptsPlugin(),
@@ -68,6 +70,51 @@ export default defineConfig({
             path.join(__dirname, "node_modules/pdfjs-dist/build/*.*"),
           ),
           dest: normalizePath(path.join(__dirname, "static/pdfjs")),
+        },
+        // Cornerstone3D codec WASM files
+        {
+          src: normalizePath(
+            path.join(
+              __dirname,
+              "node_modules/@cornerstonejs/codec-openjpeg/dist/*.wasm",
+            ),
+          ),
+          dest: normalizePath(
+            path.join(__dirname, "static/cornerstone"),
+          ),
+        },
+        {
+          src: normalizePath(
+            path.join(
+              __dirname,
+              "node_modules/@cornerstonejs/codec-libjpeg-turbo-8bit/dist/*.wasm",
+            ),
+          ),
+          dest: normalizePath(
+            path.join(__dirname, "static/cornerstone"),
+          ),
+        },
+        {
+          src: normalizePath(
+            path.join(
+              __dirname,
+              "node_modules/@cornerstonejs/codec-charls/dist/*.wasm",
+            ),
+          ),
+          dest: normalizePath(
+            path.join(__dirname, "static/cornerstone"),
+          ),
+        },
+        {
+          src: normalizePath(
+            path.join(
+              __dirname,
+              "node_modules/@cornerstonejs/codec-openjph/dist/*.wasm",
+            ),
+          ),
+          dest: normalizePath(
+            path.join(__dirname, "static/cornerstone"),
+          ),
         },
       ],
     }),
@@ -105,9 +152,7 @@ export default defineConfig({
     },
     exclude: [
       "onnx-runtime-web",
-      "cornerstone-core",
-      "cornerstone-wado-image-loader",
-      "dicom-parser",
+      "@cornerstonejs/dicom-image-loader",
     ],
     include: [
       "buffer",
@@ -116,10 +161,12 @@ export default defineConfig({
       "events",
       "stream-browserify",
       "crypto-browserify",
+      "dicom-parser",
     ],
   },
   resolve: {
     alias: {
+      globalthis: path.resolve(__dirname, "src/lib/files/globalthis-shim.js"),
       crypto: "crypto-browserify",
       buffer: "buffer",
       stream: "stream-browserify",
@@ -139,10 +186,14 @@ export default defineConfig({
     ],
     external: [
       // Force these browser-only packages to be external in SSR
-      "cornerstone-core",
-      "cornerstone-wado-image-loader",
+      "@cornerstonejs/core",
+      "@cornerstonejs/tools",
+      "@cornerstonejs/dicom-image-loader",
       "dicom-parser",
     ],
+  },
+  worker: {
+    format: 'es',
   },
   test: {
     include: ["src/**/*.{test,spec}.{js,ts}"],

@@ -36,7 +36,7 @@ class DicomTaskProcessor implements TaskProcessor {
         isDicomExtracted: true,
         dicomMetadata: task.dicomMetadata,
       },
-      language: "English", // TODO: Get from user preferences
+      language: this.sseClient.getLanguage(),
     };
 
     // Use SSE streaming endpoint for real-time progress
@@ -172,6 +172,7 @@ export class SSEImportClient {
   private onErrorCallback?: ErrorCallback;
   private activeConnections: Map<string, EventSource> = new Map();
   private taskProcessors: TaskProcessor[];
+  private language: string = "English";
 
   constructor() {
     // Initialize task processors
@@ -179,6 +180,16 @@ export class SSEImportClient {
       new DicomTaskProcessor(this),
       new DocumentTaskProcessor(this),
     ];
+  }
+
+  // Set language for processing
+  setLanguage(language: string): void {
+    this.language = language;
+  }
+
+  // Get current language
+  getLanguage(): string {
+    return this.language;
   }
 
   // Set progress callback
@@ -504,6 +515,11 @@ export class SSEImportClient {
     } = {},
   ): Promise<{ assessments: Assessment[]; analyses: ReportAnalysis[] }> {
     try {
+      // Set language for DICOM and other processors
+      if (options.language) {
+        this.setLanguage(options.language);
+      }
+
       // Stage 1: Extract documents from tasks (for non-DICOM) and direct process DICOM
       options.onStageChange?.("extract");
       const assessments = await this.extractDocumentsFromTasks(tasks);

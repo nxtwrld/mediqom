@@ -619,6 +619,10 @@ async function saveAttachements(
           }),
         },
       );
+      if (!response.ok) {
+        const errBody = await response.text().catch(() => '');
+        throw new Error(`Failed to upload attachment (${response.status}): ${errBody}`);
+      }
       const data = await response.json();
       return data;
     }),

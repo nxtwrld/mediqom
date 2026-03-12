@@ -35,7 +35,7 @@
         <div class="people">
             {#if author}
                 {author.fullName}
-            {:else}
+            {:else if $profile}
                 {$profile.fullName}
             {/if}
         </div>

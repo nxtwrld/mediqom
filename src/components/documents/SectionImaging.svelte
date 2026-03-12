@@ -1,580 +1,530 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
-    import { onMount } from 'svelte';
-    import { browser } from '$app/environment';
+    import Modal from '$components/ui/Modal.svelte';
+    import { decrypt } from '$lib/documents/index';
+    import { base64ToArrayBuffer } from '$lib/arrays';
+    import { apiFetch } from '$lib/api/client';
+    import { logger } from '$lib/logging/logger';
+
+    let selectedImage = $state<string | null>(null);
+    let dicomData = $state<ArrayBuffer | null>(null);
+    let isDicomLoading = $state(false);
+    let dicomError = $state<string | null>(null);
+
+    function openPreview(src: string) {
+        selectedImage = src;
+    }
+
+    function closePreview() {
+        selectedImage = null;
+        dicomData = null;
+        dicomError = null;
+    }
+
+    async function openDicomViewer(attachment: Attachment) {
+        if (!encryptionKey || !attachment.path) return;
+        dicomData = null;
+        dicomError = null;
+        isDicomLoading = true;
+        selectedImage = attachment.thumbnail || '__dicom__';
+
+        try {
+            const profileId = attachment.path.split('/')[0];
+            const fileResponse = await apiFetch(`/v1/med/profiles/${profileId}/attachments?path=${encodeURIComponent(attachment.path)}`);
+
+            if (!fileResponse.ok) {
+                throw new Error(`Failed to fetch: ${fileResponse.status}`);
+            }
+
+            const encryptedData = await fileResponse.text();
+            const file = await decrypt([encryptedData], encryptionKey);
+            const json = JSON.parse(file[0]);
+            dicomData = base64ToArrayBuffer(json.file);
+        } catch (e) {
+            logger.api.error('[SectionImaging] Failed to load DICOM:', e);
+            dicomError = e instanceof Error ? e.message : 'Failed to load DICOM data';
+        } finally {
+            isDicomLoading = false;
+        }
+    }
+
+    function handleThumbnailClick(attachment: Attachment) {
+        logger.api.info('[SectionImaging] handleThumbnailClick:', {
+            type: attachment.type,
+            path: attachment.path,
+            hasKey: !!encryptionKey,
+            hasThumbnail: !!attachment.thumbnail,
+        });
+        if (isDicomAttachment(attachment)) {
+            if (attachment.path && encryptionKey) {
+                openDicomViewer(attachment);
+            } else {
+                dicomError = !encryptionKey ? 'Missing encryption key' : 'Missing DICOM file path';
+                selectedImage = attachment.thumbnail || '__dicom__';
+            }
+        } else if (attachment.thumbnail) {
+            openPreview(attachment.thumbnail);
+        }
+    }
+
+    interface Anomaly {
+        type?: string;
+        description?: string;
+        location?: { bodyPart?: string; region?: string; side?: string };
+        measurements?: { size?: string; area?: string; volume?: string; other?: string };
+        severity?: string;
+        confidence?: number;
+        urgentFinding?: boolean;
+    }
+
+    interface Study {
+        modality?: string;
+        anatomicalRegion?: string;
+        viewPosition?: string;
+        imageQuality?: string;
+        anomalies?: Anomaly[];
+        overallAssessment?: {
+            summary?: string;
+            primaryFindings?: string[];
+            hasUrgentFindings?: boolean;
+            recommendedActions?: string[];
+            overallConfidence?: number;
+        };
+        visualDescription?: string;
+        technicalQuality?: { contrast?: string; brightness?: string; artifacts?: boolean; positioning?: string };
+    }
+
+    interface Attachment {
+        type?: string;
+        thumbnail?: string;
+        path?: string;
+    }
 
     interface Props {
-        data: any;
+        data: { studies?: Study[]; attachments?: Attachment[] };
         document?: any;
-        key?: string;
+        encryptionKey?: string;
     }
 
-    let { data, document, key }: Props = $props();
-    
-    let hasImaging = $derived(data && (data.title || data.bodyParts?.length > 0));
-    
-    let title = $derived(data?.title || '');
-    let bodyParts = $derived(data?.bodyParts || []);
-    let date = $derived(data?.date);
-    let imageUrls = $derived(data?.imageUrls || []);
-    let dicomData = $derived(data?.dicomData || []);
-    
-    // Cornerstone.js variables
-    let cornerstoneElements: HTMLDivElement[] = [];
-    let cornerstoneLoaded = $state(false);
-    
-    // Load Cornerstone.js on mount - BROWSER ONLY
-    onMount(async () => {
-        // Critical: Only load Cornerstone in browser environment
-        if (!browser) {
-            console.warn('[SectionImaging] Cornerstone loading skipped - not in browser');
-            return;
-        }
+    let { data, document: doc, encryptionKey }: Props = $props();
 
-        try {
-            console.log('[SectionImaging] Loading Cornerstone modules...');
-            // Dynamically import Cornerstone.js - browser only
-            const cornerstone = await import('cornerstone-core');
-            const cornerstoneWADOImageLoader = await import('cornerstone-wado-image-loader');
-            const dicomParser = await import('dicom-parser');
-            
-            // Initialize Cornerstone
-            cornerstone.external.cornerstone = cornerstone;
-            cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-            cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-            
-            // Configure WADO image loader
-            cornerstoneWADOImageLoader.configure({
-                beforeSend: (xhr: XMLHttpRequest) => {
-                    // Add authorization headers if needed
-                    if (key) {
-                        xhr.setRequestHeader('Authorization', `Bearer ${key}`);
-                    }
-                }
-            });
-            
-            cornerstoneLoaded = true;
-            
-            // Load DICOM images if available
-            if (dicomData.length > 0) {
-                await loadDicomImages(cornerstone);
-            }
-        } catch (error) {
-            console.error('[SectionImaging] Failed to load Cornerstone.js:', error);
-            console.warn('[SectionImaging] DICOM viewing will not be available');
-            // Set a flag to show fallback UI
-            cornerstoneLoaded = false;
+    function isDicomAttachment(attachment: Attachment): boolean {
+        return attachment.type?.includes('dicom') === true;
+    }
+
+    let studies = $derived(data?.studies || []);
+    let attachments = $derived(data?.attachments || []);
+
+    function getSeverityClass(severity?: string): string {
+        switch (severity) {
+            case 'critical': return '-critical';
+            case 'severe': return '-severe';
+            case 'moderate': return '-moderate';
+            case 'mild': return '-mild';
+            default: return '';
         }
-    });
-    
-    async function loadDicomImages(cornerstone: any) {
-        for (let i = 0; i < dicomData.length && i < cornerstoneElements.length; i++) {
-            const element = cornerstoneElements[i];
-            const dicomUrl = dicomData[i].url || dicomData[i];
-            
-            try {
-                cornerstone.enable(element);
-                const imageId = `wadouri:${dicomUrl}`;
-                const image = await cornerstone.loadImage(imageId);
-                cornerstone.displayImage(element, image);
-                
-                // Add mouse tools
-                element.addEventListener('mousedown', (e: MouseEvent) => {
-                    let lastX = e.pageX;
-                    let lastY = e.pageY;
-                    
-                    function mouseMoveHandler(e: MouseEvent) {
-                        const deltaX = e.pageX - lastX;
-                        const deltaY = e.pageY - lastY;
-                        lastX = e.pageX;
-                        lastY = e.pageY;
-                        
-                        const viewport = cornerstone.getViewport(element);
-                        viewport.translation.x += deltaX;
-                        viewport.translation.y += deltaY;
-                        cornerstone.setViewport(element, viewport);
-                    }
-                    
-                    function mouseUpHandler() {
-                        document.removeEventListener('mousemove', mouseMoveHandler);
-                        document.removeEventListener('mouseup', mouseUpHandler);
-                    }
-                    
-                    document.addEventListener('mousemove', mouseMoveHandler);
-                    document.addEventListener('mouseup', mouseUpHandler);
-                });
-                
-                // Add wheel zoom
-                element.addEventListener('wheel', (e: WheelEvent) => {
-                    e.preventDefault();
-                    const viewport = cornerstone.getViewport(element);
-                    const scaleFactor = 1.1;
-                    viewport.scale = e.deltaY < 0 ? viewport.scale * scaleFactor : viewport.scale / scaleFactor;
-                    cornerstone.setViewport(element, viewport);
-                });
-                
-            } catch (error) {
-                console.error('Error loading DICOM image:', error);
-            }
-        }
-    }
-    
-    function getUrgencyClass(urgency: number): string {
-        if (urgency >= 5) return 'urgency-5';
-        if (urgency >= 4) return 'urgency-4';
-        if (urgency >= 3) return 'urgency-3';
-        if (urgency >= 2) return 'urgency-2';
-        return 'urgency-1';
-    }
-    
-    function getStatusClass(status: string): string {
-        if (!status) return 'status-unknown';
-        
-        const lowerStatus = status.toLowerCase();
-        if (lowerStatus.includes('normal') || lowerStatus.includes('unremarkable')) {
-            return 'status-normal';
-        } else if (lowerStatus.includes('abnormal') || lowerStatus.includes('pathological')) {
-            return 'status-abnormal';
-        } else if (lowerStatus.includes('suspicious') || lowerStatus.includes('concerning')) {
-            return 'status-suspicious';
-        }
-        return 'status-findings';
-    }
-    
-    function getBodyPartClass(bodyPartId: string): string {
-        // Map body part IDs to visual categories for styling
-        const bodyPartCategories: Record<string, string> = {
-            // Head and Brain
-            'head': 'category-head',
-            'skull': 'category-head',
-            'brain': 'category-head',
-            'neck': 'category-head',
-            
-            // Chest and Respiratory
-            'chest': 'category-chest',
-            'thorax': 'category-chest',
-            'lungs': 'category-chest',
-            'heart': 'category-chest',
-            'sternum': 'category-chest',
-            
-            // Abdomen and Digestive
-            'abdomen': 'category-abdomen',
-            'stomach': 'category-abdomen',
-            'liver_right': 'category-abdomen',
-            'liver_left': 'category-abdomen',
-            'pancreas': 'category-abdomen',
-            'kidneys': 'category-abdomen',
-            
-            // Spine
-            'cervical_spine': 'category-spine',
-            'thoracic_spine': 'category-spine',
-            'lumbar_spine': 'category-spine',
-            'coccyx': 'category-spine',
-            
-            // Extremities
-            'L_femur': 'category-extremities',
-            'R_femur': 'category-extremities',
-            'L_tibia': 'category-extremities',
-            'R_tibia': 'category-extremities',
-            'L_humerus': 'category-extremities',
-            'R_humerus': 'category-extremities',
-            
-            // Pelvis and Urogenital
-            'pelvis': 'category-pelvis',
-            'bladder': 'category-pelvis',
-            'uterus': 'category-pelvis',
-            'prostate': 'category-pelvis'
-        };
-        
-        return bodyPartCategories[bodyPartId] || 'category-general';
-    }
-    
-    function formatDate(dateString: string): string {
-        if (!dateString) return '';
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        } catch {
-            return dateString;
-        }
-    }
-    
-    function formatBodyPartName(bodyPartId: string): string {
-        // Convert body part ID to human-readable format
-        return bodyPartId
-            .replace(/_/g, ' ')
-            .replace(/^L_/, 'Left ')
-            .replace(/^R_/, 'Right ')
-            .replace(/\b\w/g, (l) => l.toUpperCase());
     }
 </script>
 
-{#if hasImaging}
+{#if studies.length > 0 || attachments.length > 0}
     <h3 class="h3 heading -sticky">{$t('report.imaging')}</h3>
-    
-    {#if title}
+
+    <!-- Thumbnail gallery from attachments -->
+    {#if attachments.length > 0}
         <div class="page -block">
-            <div class="imaging-header">
-                <h4 class="imaging-title">{title}</h4>
-                {#if date}
-                    <span class="imaging-date">{formatDate(date)}</span>
+            <div class="thumbnail-gallery">
+                {#each attachments as attachment}
+                    {#if attachment.thumbnail}
+                        <button class="thumbnail-item" onclick={() => handleThumbnailClick(attachment)}>
+                            <img src={attachment.thumbnail} loading="lazy" alt={attachment.type || 'Medical image'} />
+                            {#if isDicomAttachment(attachment)}
+                                <div class="dicom-badge">DICOM</div>
+                            {/if}
+                        </button>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+    {/if}
+
+    <!-- Per-study analysis -->
+    {#each studies as study, i}
+        <div class="page -block imaging-study">
+            <!-- Study metadata -->
+            <div class="study-meta">
+                {#if study.modality}
+                    <span class="badge -modality">{study.modality}</span>
+                {/if}
+                {#if study.anatomicalRegion}
+                    <span class="badge -region">{study.anatomicalRegion}</span>
+                {/if}
+                {#if study.viewPosition}
+                    <span class="badge -view">{study.viewPosition}</span>
+                {/if}
+                {#if study.imageQuality}
+                    <span class="badge -quality -{study.imageQuality}">{$t('report.imaging-quality')}: {study.imageQuality}</span>
                 {/if}
             </div>
-        </div>
-    {/if}
-    
-    <!-- DICOM Images Display -->
-    {#if dicomData.length > 0}
-        <h4 class="section-title-sub">{$t('report.dicom-images')}</h4>
-        <div class="page -block">
-            <div class="dicom-grid">
-                {#each dicomData as dicom, index}
-                    <div class="dicom-container">
-                        <div 
-                            class="dicom-viewer"
-                            bind:this={cornerstoneElements[index]}
-                        >
-                            {#if !cornerstoneLoaded}
-                                <div class="loading-placeholder">
-                                    <span>{$t('report.loading-dicom')}</span>
+
+            <!-- Visual description -->
+            {#if study.visualDescription}
+                <p class="visual-description">{study.visualDescription}</p>
+            {/if}
+
+            <!-- Anomalies -->
+            {#if study.anomalies && study.anomalies.length > 0}
+                <h4 class="subsection-title">{$t('report.imaging-anomalies')}</h4>
+                <ul class="list-items">
+                    {#each study.anomalies as anomaly}
+                        <li class="panel anomaly-item {getSeverityClass(anomaly.severity)}">
+                            <div class="anomaly-header">
+                                {#if anomaly.type}
+                                    <span class="anomaly-type">{anomaly.type.replace(/_/g, ' ')}</span>
+                                {/if}
+                                {#if anomaly.severity}
+                                    <span class="badge -severity {getSeverityClass(anomaly.severity)}">{anomaly.severity}</span>
+                                {/if}
+                                {#if anomaly.urgentFinding}
+                                    <span class="badge -urgent">{$t('report.imaging-urgent')}</span>
+                                {/if}
+                            </div>
+                            {#if anomaly.description}
+                                <p class="anomaly-description">{anomaly.description}</p>
+                            {/if}
+                            {#if anomaly.location}
+                                <div class="anomaly-detail">
+                                    <span class="label">{$t('report.location')}:</span>
+                                    <span>
+                                        {anomaly.location.bodyPart || ''}
+                                        {#if anomaly.location.region} - {anomaly.location.region}{/if}
+                                        {#if anomaly.location.side} ({anomaly.location.side}){/if}
+                                    </span>
                                 </div>
                             {/if}
-                        </div>
-                        {#if dicom.title}
-                            <div class="dicom-title">{dicom.title}</div>
-                        {/if}
-                    </div>
-                {/each}
-            </div>
-        </div>
-    {/if}
-    
-    <!-- Standard Images -->
-    {#if imageUrls.length > 0}
-        <h4 class="section-title-sub">{$t('report.images')}</h4>
-        <div class="page -block">
-            <div class="image-grid">
-                {#each imageUrls as imageUrl}
-                    <div class="image-container">
-                        <img src={imageUrl} alt="Medical imaging" loading="lazy" class="medical-image" />
-                    </div>
-                {/each}
-            </div>
-        </div>
-    {/if}
-    
-    <!-- Body Parts Analysis -->
-    {#if bodyParts.length > 0}
-        <h4 class="section-title-sub">{$t('report.anatomical-findings')}</h4>
-        <ul class="list-items">
-            {#each bodyParts as bodyPart}
-                <li class="panel {getBodyPartClass(bodyPart.identification)} {getUrgencyClass(bodyPart.urgency)}">
-                    <div class="bodypart-header">
-                        <div class="bodypart-name-section">
-                            <h5 class="bodypart-name">{formatBodyPartName(bodyPart.identification)}</h5>
-                            {#if bodyPart.urgency}
-                                <span class="urgency-badge urgency-{bodyPart.urgency}">
-                                    {$t('report.urgency')} {bodyPart.urgency}
-                                </span>
+                            {#if anomaly.measurements?.size}
+                                <div class="anomaly-detail">
+                                    <span class="label">{$t('report.imaging-size')}:</span>
+                                    <span>{anomaly.measurements.size}</span>
+                                </div>
                             {/if}
+                        </li>
+                    {/each}
+                </ul>
+            {/if}
+
+            <!-- Overall assessment -->
+            {#if study.overallAssessment}
+                <h4 class="subsection-title">{$t('report.imaging-assessment')}</h4>
+                <div class="assessment">
+                    {#if study.overallAssessment.summary}
+                        <p class="assessment-summary">{study.overallAssessment.summary}</p>
+                    {/if}
+                    {#if study.overallAssessment.primaryFindings && study.overallAssessment.primaryFindings.length > 0}
+                        <div class="findings-list">
+                            <span class="label">{$t('report.findings')}:</span>
+                            <ul>
+                                {#each study.overallAssessment.primaryFindings as finding}
+                                    <li>{finding}</li>
+                                {/each}
+                            </ul>
                         </div>
-                        {#if bodyPart.status}
-                            <span class="status-badge {getStatusClass(bodyPart.status)}">
-                                {bodyPart.status}
-                            </span>
-                        {/if}
+                    {/if}
+                    {#if study.overallAssessment.recommendedActions && study.overallAssessment.recommendedActions.length > 0}
+                        <div class="findings-list">
+                            <span class="label">{$t('report.imaging-recommended-actions')}:</span>
+                            <ul>
+                                {#each study.overallAssessment.recommendedActions as action}
+                                    <li>{action}</li>
+                                {/each}
+                            </ul>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+    {/each}
+{/if}
+
+{#if selectedImage}
+    <Modal onclose={closePreview} style="padding: 0;">
+        {#if dicomData || isDicomLoading || dicomError}
+            <!-- DICOM Viewer modal -->
+            <div class="dicom-modal-content">
+                {#if isDicomLoading}
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>{$t('dicom.loading')}</p>
                     </div>
-                    
-                    <div class="bodypart-details">
-                        {#if bodyPart.diagnosis}
-                            <div class="detail-item">
-                                <span class="label">{$t('report.diagnosis')}:</span>
-                                <span class="value diagnosis-text">{bodyPart.diagnosis}</span>
-                            </div>
-                        {/if}
-                        
-                        {#if bodyPart.treatment}
-                            <div class="detail-item">
-                                <span class="label">{$t('report.treatment')}:</span>
-                                <span class="value treatment-text">{bodyPart.treatment}</span>
-                            </div>
-                        {/if}
+                {:else if dicomError}
+                    <div class="error-state">
+                        <p>{dicomError}</p>
                     </div>
-                </li>
-            {/each}
-        </ul>
-    {/if}
-    
-{:else if data}
-    <h3 class="h3 heading -sticky">{$t('report.imaging')}</h3>
-    <div class="page -block">
-        <p class="no-data">{$t('report.no-imaging-data')}</p>
-    </div>
+                {:else if dicomData}
+                    {#await import('../viewers/DicomViewer.svelte') then module}
+                        <module.default dicomData={dicomData} />
+                    {/await}
+                {/if}
+            </div>
+        {:else}
+            <!-- Static image fallback -->
+            <div class="fullscreen-image">
+                <img src={selectedImage} alt="Medical imaging" />
+            </div>
+        {/if}
+    </Modal>
 {/if}
 
 <style>
-    .imaging-header {
+    .thumbnail-gallery {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-        gap: 1rem;
+        flex-wrap: wrap;
+        gap: var(--ui-pad-small);
     }
-    
-    .imaging-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin: 0;
-        color: var(--color-text-primary);
-        flex: 1;
-    }
-    
-    .imaging-date {
-        color: var(--color-text-secondary);
-        font-size: 0.9rem;
-        white-space: nowrap;
-    }
-    
-    /* DICOM Viewer Styles */
-    .dicom-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .dicom-container {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .dicom-viewer {
-        width: 100%;
-        height: 300px;
-        border: 2px solid var(--color-border);
-        border-radius: 0.5rem;
-        background-color: var(--color-background-secondary);
-        position: relative;
+
+    .thumbnail-item {
+        height: 15rem;
+        border-radius: var(--ui-radius-medium);
         overflow: hidden;
-        cursor: grab;
+        background: #000;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+        position: relative;
     }
-    
-    .dicom-viewer:active {
-        cursor: grabbing;
+
+    .thumbnail-item:hover {
+        opacity: 0.85;
     }
-    
-    .loading-placeholder {
+
+    .thumbnail-item img {
+        height: 100%;
+        width: auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    .dicom-badge {
+        position: absolute;
+        bottom: 0.375rem;
+        right: 0.375rem;
+        background: rgba(0, 0, 0, 0.75);
+        color: #4a9eff;
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 0.125rem 0.375rem;
+        border-radius: 3px;
+        letter-spacing: 0.05em;
+    }
+
+    .fullscreen-image {
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
         height: 100%;
-        color: var(--color-text-secondary);
-        font-style: italic;
     }
-    
-    .dicom-title {
-        text-align: center;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--color-text-secondary);
+
+    .fullscreen-image img {
+        max-width: 90vw;
+        max-height: 85vh;
+        object-fit: contain;
     }
-    
-    /* Standard Images */
-    .image-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
+
+    .dicom-modal-content {
+        width: 90vw;
+        height: 85vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        color: #aaa;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #333;
+        border-top: 4px solid #aaa;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
         margin-bottom: 1rem;
     }
-    
-    .image-container {
-        border: 1px solid var(--color-border);
-        border-radius: 0.5rem;
-        overflow: hidden;
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-    
-    .medical-image {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-    
-    /* Body Parts Analysis */
-    .bodypart-header {
+
+    .error-state {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        color: #f66;
+        padding: 2rem;
+        text-align: center;
     }
-    
-    .bodypart-name-section {
+
+    .imaging-study {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ui-pad-small);
+    }
+
+    .study-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+
+    .badge {
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--ui-radius-small);
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    .badge.-modality {
+        background: var(--color-interactivity);
+        color: #fff;
+    }
+
+    .badge.-region {
+        background: var(--color-gray-200);
+        color: var(--color-text-primary);
+    }
+
+    .badge.-view {
+        background: var(--color-gray-200);
+        color: var(--color-text-secondary);
+    }
+
+    .badge.-quality {
+        background: var(--color-gray-100);
+        color: var(--color-text-secondary);
+    }
+
+    .badge.-severity {
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+
+    .badge.-severity.-critical,
+    .badge.-severity.-severe {
+        background: var(--color-negative);
+        color: #fff;
+    }
+
+    .badge.-severity.-moderate {
+        background: var(--color-warning);
+        color: #fff;
+    }
+
+    .badge.-severity.-mild {
+        background: var(--color-positive);
+        color: #fff;
+    }
+
+    .badge.-urgent {
+        background: var(--color-negative);
+        color: #fff;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+
+    .visual-description {
+        color: var(--color-text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .subsection-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: var(--ui-pad-small) 0 0;
+        color: var(--color-text-primary);
+    }
+
+    .anomaly-item {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
-        flex: 1;
     }
-    
-    .bodypart-name {
-        font-size: 1.1rem;
+
+    .anomaly-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .anomaly-type {
         font-weight: 600;
-        margin: 0;
+        text-transform: capitalize;
         color: var(--color-text-primary);
     }
-    
-    .urgency-badge {
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.7rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        width: fit-content;
+
+    .anomaly-description {
+        margin: 0;
+        color: var(--color-text-secondary);
+        line-height: 1.4;
     }
-    
-    .urgency-1 {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
-    }
-    
-    .urgency-2 {
-        background-color: var(--color-info-light);
-        color: var(--color-info-dark);
-    }
-    
-    .urgency-3 {
-        background-color: var(--color-warning-light);
-        color: var(--color-warning-dark);
-    }
-    
-    .urgency-4 {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
-    }
-    
-    .urgency-5 {
-        background-color: var(--color-danger);
-        color: white;
-    }
-    
-    .status-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-    
-    .status-normal {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
-    }
-    
-    .status-abnormal {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
-    }
-    
-    .status-suspicious {
-        background-color: var(--color-warning-light);
-        color: var(--color-warning-dark);
-    }
-    
-    .status-findings {
-        background-color: var(--color-info-light);
-        color: var(--color-info-dark);
-    }
-    
-    .status-unknown {
-        background-color: var(--color-secondary-light);
-        color: var(--color-secondary-dark);
-    }
-    
-    .bodypart-details {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .detail-item {
+
+    .anomaly-detail {
         display: flex;
         gap: 0.5rem;
-        align-items: flex-start;
+        font-size: 0.9rem;
     }
-    
+
     .label {
         font-weight: 500;
         color: var(--color-text-secondary);
-        min-width: 80px;
         flex-shrink: 0;
     }
-    
-    .value {
+
+    .assessment {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ui-pad-small);
+    }
+
+    .assessment-summary {
+        margin: 0;
+        line-height: 1.5;
         color: var(--color-text-primary);
-        flex: 1;
+    }
+
+    .findings-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .findings-list ul {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .findings-list li {
         line-height: 1.4;
-    }
-    
-    .diagnosis-text {
-        font-weight: 500;
         color: var(--color-text-primary);
     }
-    
-    .treatment-text {
-        color: var(--color-text-secondary);
-        font-style: italic;
+
+    .panel.-critical,
+    .panel.-severe {
+        border-left: 3px solid var(--color-negative);
     }
-    
-    /* Body part category colors */
-    .category-head {
-        border-left-color: var(--color-primary);
-    }
-    
-    .category-chest {
-        border-left-color: var(--color-info);
-    }
-    
-    .category-abdomen {
-        border-left-color: var(--color-warning);
-    }
-    
-    .category-spine {
-        border-left-color: var(--color-success);
-    }
-    
-    .category-extremities {
-        border-left-color: var(--color-secondary);
-    }
-    
-    .category-pelvis {
-        border-left-color: var(--color-danger);
-    }
-    
-    .category-general {
-        border-left-color: var(--color-text-secondary);
-    }
-    
-    /* Urgency-based panel coloring overrides */
-    .urgency-5 {
-        border-left-color: var(--color-danger);
-        border-left-width: 4px;
-    }
-    
-    .urgency-4 {
-        border-left-color: var(--color-danger);
-        border-left-width: 3px;
-    }
-    
-    .urgency-3 {
-        border-left-color: var(--color-warning);
-    }
-    
-    .urgency-2 {
-        border-left-color: var(--color-info);
-    }
-    
-    .urgency-1 {
-        border-left-color: var(--color-success);
+
+    .panel.-moderate {
+        border-left: 3px solid var(--color-warning);
     }
 </style>

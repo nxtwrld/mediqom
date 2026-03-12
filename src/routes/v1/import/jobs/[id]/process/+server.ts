@@ -5,6 +5,8 @@ import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import assess from "$lib/import.server/assessInputs";
 import { runDocumentProcessingWorkflow } from "$lib/langgraph/workflows/document-processing";
 import { convertWorkflowResult } from "$lib/import.server/convertWorkflowResult";
+import { processMedicalImaging } from "$lib/langgraph/workflows/medical-imaging-workflow";
+import type { MedicalImagingState } from "$lib/langgraph/state-medical-imaging";
 import { consumeScan } from "$lib/billing/subscription.server";
 import type {
   ImportJob,
@@ -229,23 +231,94 @@ export const POST: RequestHandler = async ({
             message: `Extracting ${file.name}`,
           } as any);
 
-          // Run extraction using assess() with images from file manifest
-          const assessResult = await assess(
-            { images: file.processedImages },
-            (stage, progress, message) => {
-              sendEvent({
-                type: "progress",
-                stage: `extraction_${stage}`,
-                progress: Math.round(
-                  5 + ((i + progress / 100) / fileManifest.length) * 25,
-                ),
-                message,
-                timestamp: Date.now(),
-              });
-            },
-          );
+          if (file.taskType === "application/dicom" && file.dicomMetadata) {
+            // Route DICOM files to specialized medical imaging workflow
+            console.log(`🏥 [Import] Routing DICOM file to medical imaging workflow: ${file.name}`);
 
-          extractionResults.push(assessResult);
+            const imagingState: MedicalImagingState = {
+              images: file.processedImages,
+              language: job.language || "English",
+              metadata: {
+                isDicomExtracted: true,
+                dicomMetadata: file.dicomMetadata,
+                imageSource: "dicom",
+              },
+              content: [{
+                type: "text" as const,
+                text: `DICOM Context:\n- Modality: ${file.dicomMetadata.modality || "Unknown"}\n- Body Part: ${file.dicomMetadata.bodyPartExamined || "Unknown"}\n- Study: ${file.dicomMetadata.studyDescription || "Not specified"}`,
+              }],
+              imagingMetadata: {
+                modality: file.dicomMetadata.modality || "Unknown",
+                bodyPartExamined: file.dicomMetadata.bodyPartExamined || "Unknown",
+                studyDescription: file.dicomMetadata.studyDescription,
+                viewPosition: file.dicomMetadata.viewPosition || "Unknown",
+                studyDate: file.dicomMetadata.studyDate,
+                isDicomExtracted: true,
+              },
+              detectedBodyParts: [],
+              detectedAnomalies: [],
+              measurements: [],
+              urgentFindings: false,
+              tokenUsage: { total: 0 },
+            };
+
+            const workflowResult = await processMedicalImaging(
+              imagingState,
+              undefined,
+              (event) => {
+                sendEvent({
+                  type: "progress",
+                  stage: `dicom_${event.stage}`,
+                  progress: Math.round(
+                    5 + ((i + (event.progress || 0) / 100) / fileManifest.length) * 25,
+                  ),
+                  message: event.message || `Processing DICOM ${file.name}...`,
+                  timestamp: Date.now(),
+                });
+              },
+            );
+
+            const unifiedResult = workflowResult.medicalImagingAnalysis;
+
+            // Format as Assessment with full analysis (matching SSE endpoint output)
+            const assessResult = {
+              ...unifiedResult,
+              isMedicalImaging: true,
+              pages: file.processedImages.map((_: string, index: number) => ({
+                page: index + 1,
+                text: "",
+                image: `medical-image-${index + 1}`,
+                thumbnail: file.thumbnail || `medical-thumbnail-${index + 1}`,
+              })),
+              documents: [{
+                title: file.dicomMetadata.studyDescription || "Medical Imaging Study",
+                date: file.dicomMetadata.studyDate || new Date().toISOString().split("T")[0],
+                language: (job.language || "english").toLowerCase(),
+                isMedical: true,
+                isMedicalImaging: true,
+                pages: file.processedImages.map((_: string, index: number) => index + 1),
+              }],
+            };
+            extractionResults.push(assessResult);
+          } else {
+            // Existing generic extraction path for PDFs and images
+            const assessResult = await assess(
+              { images: file.processedImages },
+              (stage, progress, message) => {
+                sendEvent({
+                  type: "progress",
+                  stage: `extraction_${stage}`,
+                  progress: Math.round(
+                    5 + ((i + progress / 100) / fileManifest.length) * 25,
+                  ),
+                  message,
+                  timestamp: Date.now(),
+                });
+              },
+            );
+
+            extractionResults.push(assessResult);
+          }
 
           // Persist after each file (with encryption if available)
           if (useEncryption && jobKey) {
@@ -304,9 +377,23 @@ export const POST: RequestHandler = async ({
           docIndex: number;
           text: string;
           title: string;
+          isPreAnalyzed: boolean;
         }[] = [];
         for (let ai = 0; ai < extractionResults.length; ai++) {
           const assessment = extractionResults[ai];
+
+          // DICOM assessments already contain full analysis from medical imaging workflow
+          if (assessment.isMedicalImaging && assessment.report) {
+            allDocuments.push({
+              assessmentIndex: ai,
+              docIndex: 0,
+              text: "",
+              title: assessment.documents?.[0]?.title || "Medical Imaging Study",
+              isPreAnalyzed: true,
+            });
+            continue;
+          }
+
           for (let di = 0; di < assessment.documents.length; di++) {
             const doc = assessment.documents[di];
             const documentText = assessment.pages
@@ -318,6 +405,7 @@ export const POST: RequestHandler = async ({
               docIndex: di,
               text: documentText,
               title: doc.title || `Document ${ai + 1}-${di + 1}`,
+              isPreAnalyzed: false,
             });
           }
         }
@@ -340,37 +428,43 @@ export const POST: RequestHandler = async ({
             message: `Analyzing ${doc.title}`,
           } as any);
 
-          // Run LangGraph workflow
-          const workflowResult = await runDocumentProcessingWorkflow(
-            [], // images not needed for text analysis
-            doc.text,
-            job.language,
-            {
-              useEnhancedSignals: true,
-              enableExternalValidation: false,
-              streamResults: true,
-              jobId: job.id, // Add jobId for debug output
-            },
-            (event: any) => {
-              sendEvent({
-                type: "progress",
-                stage: `analysis_${event.stage || "processing"}`,
-                progress: Math.round(
-                  30 +
-                    ((i + (event.progress || 0) / 100) / allDocuments.length) *
-                      65,
-                ),
-                message: event.message || `Processing ${doc.title}...`,
-                timestamp: Date.now(),
-              });
-            },
-          );
+          // DICOM: assessment already contains full analysis from medical imaging workflow
+          if (doc.isPreAnalyzed) {
+            console.log(`✅ [Import] Using pre-analyzed DICOM result for: ${doc.title}`);
+            analysisResults.push(extractionResults[doc.assessmentIndex] as any);
+          } else {
+            // Run LangGraph workflow for regular documents
+            const workflowResult = await runDocumentProcessingWorkflow(
+              [], // images not needed for text analysis
+              doc.text,
+              job.language,
+              {
+                useEnhancedSignals: true,
+                enableExternalValidation: false,
+                streamResults: true,
+                jobId: job.id, // Add jobId for debug output
+              },
+              (event: any) => {
+                sendEvent({
+                  type: "progress",
+                  stage: `analysis_${event.stage || "processing"}`,
+                  progress: Math.round(
+                    30 +
+                      ((i + (event.progress || 0) / 100) / allDocuments.length) *
+                        65,
+                  ),
+                  message: event.message || `Processing ${doc.title}...`,
+                  timestamp: Date.now(),
+                });
+              },
+            );
 
-          const result = convertWorkflowResult(workflowResult, doc.text);
-          analysisResults.push(result);
+            const result = convertWorkflowResult(workflowResult, doc.text);
+            analysisResults.push(result);
 
-          // Save individual document workflow for debugging
-          saveDocumentWorkflow(job.id, i, workflowResult);
+            // Save individual document workflow for debugging
+            saveDocumentWorkflow(job.id, i, workflowResult);
+          }
 
           // Persist after each document (with encryption if available)
           if (useEncryption && jobKey) {

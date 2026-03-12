@@ -3,9 +3,16 @@
     import VCardFrom from "./VCardFrom.svelte";
     import HealthForm from "./HealthForm.svelte";
     import Avatar from "$components/onboarding/Avatar.svelte";
-    import { profile as profileStore } from '$lib/profiles';
+    import { profile as profileStore, removeLinkedProfile } from '$lib/profiles';
+    import { t } from '$lib/i18n';
 
-    let { profile = $bindable() } = $props();
+    interface Props {
+        profile: any;
+        ondelete?: () => void;
+    }
+    let { profile = $bindable(), ondelete }: Props = $props();
+
+    const isShared = $derived(!!(profile as any).auth_id);
 
     // No reactive initialization needed - parent (ProfileDashboard) handles all setup
 
@@ -15,6 +22,15 @@
             ...p,
             avatarUrl: profile.avatarUrl
         }));
+    }
+
+    async function handleDelete() {
+        const msg = isShared
+            ? $t('profile.edit.confirm-disconnect')
+            : $t('profile.edit.confirm-delete');
+        if (!confirm(msg)) return;
+        await removeLinkedProfile(profile.id);
+        ondelete?.();
     }
 </script>
 
@@ -30,6 +46,12 @@
     <VCardFrom bind:data={profile.vcard} />
     <HealthForm config={{ data: profile.health }} bind:data={profile.health} />
 
+    <div class="danger-zone">
+        <button class="button -danger" onclick={handleDelete}>
+            {isShared ? $t('profile.edit.disconnect') : $t('profile.edit.delete')}
+        </button>
+    </div>
+
 </div>
 
 <style>
@@ -41,5 +63,13 @@
     .profile-edit :global(.tab-body) {
         padding: 1rem;
         background-color: var(--color-background);
+    }
+
+    .danger-zone {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        justify-content: flex-end;
     }
 </style>
