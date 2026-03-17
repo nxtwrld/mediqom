@@ -9,7 +9,7 @@
  */
 
 import { isCapacitorBuild } from '$lib/config/platform';
-import { setMemory } from './memory';
+import { setMemoryStale } from './memory';
 
 const PREFIX = 'mediqom_cache_';
 
@@ -47,7 +47,7 @@ export async function restoreCache(userId: string): Promise<void> {
 			const { value } = await Preferences.get({ key: prefKey });
 			if (value) {
 				try {
-					setMemory(cacheKey, JSON.parse(value));
+					setMemoryStale(cacheKey, JSON.parse(value));
 				} catch {
 					// ignore malformed entries
 				}

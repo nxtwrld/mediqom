@@ -14,18 +14,21 @@
     let { document, shareCount = 0 }: Props = $props();
 
     let author = $derived(getByAnotherAuthor(document))
+    let thumbnail = $derived(document.thumbnail as string | undefined)
 </script>
 
 
-<a href="/med/p/{document.user_id}/documents/{document.id}" class="tile -document category-{document.metadata.category}">
-    <!--Vertical date={document.metadata.date} /-->
+<a href="/med/p/{document.user_id}/documents/{document.id}" class="tile -document category-{document.metadata.category}" class:-has-thumbnail={thumbnail}>
+    {#if thumbnail}
+        <div class="tile-thumbnail" style:background-image="url({thumbnail})"></div>
+    {/if}
 
     <div class="tile-header"> <BadgeHorizontal date={document.metadata.date} /> </div>
     <div class="tile-body">
         <h4 class="h4">{document.metadata.title}</h4>
     </div>
 
-    <div class="tile-footer">
+    <div class="tile-footer  category-{document.metadata.category}">
 
 
         <svg class="category">
@@ -62,8 +65,33 @@
         flex-direction: column;
         align-items: stretch;
         justify-content: space-between;
-
+        overflow: hidden;
     }
+
+    .tile-thumbnail {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        z-index: 0;
+    }
+
+    .tile.-has-thumbnail .tile-header,
+    .tile.-has-thumbnail .tile-body,
+    .tile.-has-thumbnail .tile-footer {
+        position: relative;
+        z-index: 1;
+    }
+
+    .tile.-has-thumbnail .tile-body {
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+        color: var(--color-white);
+    }
+
+    .tile.-has-thumbnail .tile-header {
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+    }
+
     .tile .tile-body {
         flex-grow: 1;
         padding: .5rem;
@@ -85,7 +113,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background-color: var(--color-gray-600);
+        background-color: var(--color);
+        color: var(--color-text);
     }
 
     .tile:hover {
@@ -98,7 +127,6 @@
     }
 
     .tile  svg.category {
-        color: var(--color);
         margin: .5rem;
         width: 1.6rem;
         height: 1.6rem;

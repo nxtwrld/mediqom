@@ -7,6 +7,7 @@
     import HealthForm from "../profile/HealthForm.svelte";
     import HealthProperty from "../healthProperty/Overview.svelte";
     import Import from "$components/import/Index.svelte";
+    import JobsList from "$components/import/JobsList.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
     import { onMount } from "svelte";
@@ -26,6 +27,7 @@
     import { device } from "$lib/device";
     import { saveHealthProfile } from "$lib/health/save";
     import user from "$lib/user";
+    import { pendingJobs, activeJobs } from "$lib/import/job-store";
     import { App } from "@capacitor/app";
     import { isNativePlatform } from "$lib/config/platform";
 
@@ -175,6 +177,8 @@
         ui.emit("viewer:timeline", null);
         openPanel("anatomy");
     }
+
+    let importBadge = $derived($pendingJobs.length + $activeJobs.length);
 
     function handleImportMobile(e: MouseEvent) {
         e.stopPropagation();
@@ -392,11 +396,8 @@
     });
 
     function manageOverlay() {
-        if (location.hash.indexOf("#overlay-") == 0) {
-            const overlay = location.hash.replace("#overlay-", "");
-            if (Object.values(Overlay).includes(overlay as Overlay))
-                $uiState.overlay = overlay as Overlay;
-        } else {
+        // Only close overlay when hash is cleared (back button / escape)
+        if (location.hash.indexOf("#overlay-") !== 0 && $uiState.overlay !== Overlay.none) {
             $uiState.overlay = Overlay.none;
         }
     }
@@ -469,10 +470,13 @@
                         state.autoOpen
                     );
                 }
-                if (state) location.hash = "#overlay-import";
-                else {
+                if (state) {
+                    location.hash = "#overlay-import";
+                    $uiState.overlay = Overlay.import;
+                } else {
                     importJobId = undefined;
                     importAutoOpen = false;
+                    $uiState.overlay = Overlay.none;
                     if (location.hash.indexOf("#overlay-") == 0) {
                         history.back();
                     }
@@ -547,7 +551,7 @@
     });
 </script>
 
-<svelte:window on:hashchange={manageOverlay} />
+<svelte:window onhashchange={manageOverlay} />
 
 <DropFiles>
     <!--
@@ -622,6 +626,19 @@
                         ><use href="/icons.svg#report"></use></svg
                     >
                 </a>
+                <a
+                    class="nav-icon"
+                    href={$profile?.id
+                        ? `/med/p/${$profile.id}/medications`
+                        : "/med"}
+                    class:-active={!!$profile?.id &&
+                        isActive(`/med/p/${$profile.id}/medications`)}
+                    aria-label={$t("medications.title")}
+                >
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#medical-tools"></use></svg
+                    >
+                </a>
                 <button
                     class="nav-icon"
                     class:-disabled={!isProfileActive}
@@ -644,13 +661,16 @@
                     >
                 </button>
                 <button
-                    class="nav-icon"
+                    class="nav-icon import-btn"
                     onclick={handleImportMobile}
                     aria-label="Import"
                 >
                     <svg aria-hidden="true"
                         ><use href="/icons.svg#plus"></use></svg
                     >
+                    {#if importBadge > 0}
+                        <span class="badge">{importBadge}</span>
+                    {/if}
                 </button>
             </nav>
             <div class="navbar-name">{$profile?.fullName ?? ""}</div>
@@ -702,13 +722,17 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            <Import
-                jobId={importJobId}
-                autoOpen={importAutoOpen}
-                oncomplete={() => {
-                    importJobId = undefined;
-                }}
-            />
+            {#if importJobId || importAutoOpen}
+                <Import
+                    jobId={importJobId}
+                    autoOpen={importAutoOpen}
+                    oncomplete={() => {
+                        importJobId = undefined;
+                    }}
+                />
+            {:else}
+                <JobsList />
+            {/if}
         </div>
     {/if}
 
@@ -935,7 +959,7 @@
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         pointer-events: none;
-    }/*
+    }*/
 
     @media (min-width: 769px) {
         .panel-backdrop {
@@ -999,5 +1023,27 @@
 
     .mobile-tools-popup button:hover {
         background: var(--color-gray-300);
+    }
+
+    /* ── Import button badge ─────────────────────────────────── */
+    .import-btn {
+        position: relative;
+    }
+
+    .badge {
+        position: absolute;
+        top: 0.15rem;
+        right: 0.15rem;
+        min-width: 1.1rem;
+        height: 1.1rem;
+        padding: 0 0.3rem;
+        border-radius: 1rem;
+        background: var(--color-negative);
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        line-height: 1.1rem;
+        text-align: center;
+        pointer-events: none;
     }
 </style>

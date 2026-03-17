@@ -318,30 +318,34 @@
   },
   "app": {
     "apps": {
-      "add-contact": "",
-      "confirm-remove-share": "",
-      "download": "",
-      "items-linked-count": "",
-      "loading-data": "",
-      "permissions": "",
-      "quick-share": "",
-      "share": "",
-      "shared-on-date": ""
+      "add-contact": "Kontakt hinzufügen",
+      "confirm-remove-share": "Dadurch wird das geteilte Element entfernt und {name} kann nicht mehr darauf zugreifen.",
+      "download": "Herunterladen",
+      "items-linked-count": "Verknüpfte Elemente: {count}",
+      "loading-data": "Daten werden geladen...",
+      "permissions": "Berechtigungen",
+      "quick-share": "Schnellfreigabe",
+      "share": "Teilen",
+      "shared-on-date": "am {date}"
     },
     "duration": {
-      "days-ago": "",
-      "months-ago": "",
-      "years-ago": ""
+      "days-ago": "{value, plural, =0 {gerade eben} one {vor einem Tag} other {vor # Tagen}}",
+      "months-ago": "{value, plural, =0 {gerade eben} one {vor einem Monat} other {vor # Monaten}}",
+      "years-ago": "{value, plural, =0 {gerade eben} one {vor einem Jahr} other {vor # Jahren}}"
     },
     "headings": {
       "documents": "Unterlagen",
       "profiles": "Profile"
     },
     "nav": {
-      "anatomy-model": "",
-      "documents": "",
-      "profiles": "",
-      "settings": ""
+      "add-profile": "Profil hinzufügen",
+      "documents": "Unterlagen",
+      "history": "Geschichte",
+      "import": "Import",
+      "logout": "Abmelden",
+      "new-session": "Neue Sitzung",
+      "profiles": "Profile",
+      "settings": "Einstellungen"
     },
     "import": {
       "add-files": "Dateien hinzufügen",
@@ -384,8 +388,13 @@
       "no-cached-files-warning": "Originaldateien sind auf diesem Gerät nicht verfügbar. Sie können ohne Anhänge speichern oder auf dem Gerät abschließen, auf dem Sie den Import gestartet haben.",
       "extracting-text-and-data": "Text und Daten extrahieren...",
       "analyzing-medical-content": "Medizinischen Inhalt analysieren...",
-      "loading-job": "",
-      "preparing-documents": ""
+      "loading-job": "Importauftrag wird geladen...",
+      "preparing-documents": "Dokumente werden zur Überprüfung vorbereitet...",
+      "no-jobs": "Noch keine Importaufträge. Starten Sie einen neuen Import, um Ihre medizinischen Dokumente zu analysieren.",
+      "new-import": "Neuer Import",
+      "section-processing": "Verarbeitung",
+      "section-ready": "Bereit zur Überprüfung",
+      "section-errors": "Fehler"
     },
     "buttons": {
       "retry": "Wiederholen",
@@ -395,7 +404,8 @@
       "save": "Speichern",
       "cancel": "Abbrechen",
       "create": "Erstellen",
-      "continue": "Weiter"
+      "continue": "Weiter",
+      "saving": "Speichern..."
     },
     "auth": {
       "title": "Authentifizierung",
@@ -406,7 +416,7 @@
       "sending": "Wird gesendet...",
       "email-sent": "E-Mail gesendet!",
       "send-again": "Erneut senden",
-      "email-sent-to": "",
+      "email-sent-to": "E-Mail gesendet an",
       "magic-link-sent": "Magic Link gesendet! Prüfen Sie Ihre E-Mail und tippen Sie auf den Link zum Anmelden.",
       "magic-link-failed": "Magic Link konnte nicht gesendet werden",
       "invalid-email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
@@ -465,30 +475,21 @@
       "sign-out": "Abmelden"
     },
     "languages": {
-      "cs": "",
-      "de": "",
-      "en": "",
-      "es": "",
-      "it": "",
-      "pl": "",
-      "tr": ""
+      "cs": "Čeština",
+      "de": "Deutsch",
+      "en": "English",
+      "es": "Español",
+      "it": "Italiano",
+      "pl": "Polski",
+      "tr": "Türkçe"
     },
     "name": "mediqom",
-    "nav": {
-      "add-profile": "Profil hinzufügen",
-      "documents": "Unterlagen",
-      "history": "Geschichte",
-      "import": "Import",
-      "logout": "Abmelden",
-      "new-session": "Neue Sitzung",
-      "profiles": "Profile",
-      "settings": ""
-    },
     "chat": {
       "title": "KI-Medizinassistent",
       "mode": {
         "patient": "Patientenunterstützung",
-        "clinical": "Klinische Analyse"
+        "clinical": "Klinische Analyse",
+        "caregiver": "Pflegeunterstützung"
       },
       "actions": {
         "clear": "Unterhaltung löschen",
@@ -528,7 +529,8 @@
       },
       "greetings": {
         "patient": "Hallo! Ich bin hier, um Ihnen zu helfen, Ihre medizinischen Informationen zu verstehen und Sie auf Ihrem Gesundheitsweg zu unterstützen. Fragen Sie mich gerne nach Ihren Gesundheitsakten, Symptomen oder allen Fragen zu Ihrer Pflege.",
-        "clinical": "Hallo! Ich bin hier, um bei der klinischen Analyse des medizinischen Profils von {profileName} zu helfen. Ich kann bei der Analyse von Mustern helfen, Differentialüberlegungen vorschlagen und Erkenntnisse basierend auf verfügbaren medizinischen Daten liefern."
+        "clinical": "Hallo! Ich bin hier, um bei der klinischen Analyse des medizinischen Profils von {profileName} zu helfen. Ich kann bei der Analyse von Mustern helfen, Differentialüberlegungen vorschlagen und Erkenntnisse basierend auf verfügbaren medizinischen Daten liefern.",
+        "caregiver": "Hallo! Ich bin hier, um Ihnen zu helfen, die medizinischen Informationen von {profileName} zu verstehen. Ich kann Gesundheitsakten, Erkrankungen und medizinische Begriffe in einfacher Sprache erklären. Für medizinische Entscheidungen wenden Sie sich bitte an das Ärzteteam von {profileName}."
       },
       "clarifyingQuestion": {
         "placeholder": "Oder geben Sie Ihre eigene Antwort ein..."
@@ -544,26 +546,62 @@
           "type-extra": {
             "differential": {
               "patient": " Wie wahrscheinlich ist es, dass ich diese Erkrankung und nicht eine andere habe?",
-              "clinical": " Diskutieren Sie wichtige Unterscheidungsmerkmale und die Vorgehensweise zur Eingrenzung der Differentialdiagnosen."
+              "clinical": " Diskutieren Sie wichtige Unterscheidungsmerkmale und die Vorgehensweise zur Eingrenzung der Differentialdiagnosen.",
+              "caregiver": " Was bedeutet das für {profileName} und wie sollten wir das mit dem Arzt besprechen?"
             },
             "rule-out": {
               "patient": " Was bedeutet es, eine Diagnose \"auszuschließen\"?",
-              "clinical": " Welche Untersuchungen würden dies definitiv ausschließen?"
+              "clinical": " Welche Untersuchungen würden dies definitiv ausschließen?",
+              "caregiver": " Was bedeutet das für {profileName} und wie sollten wir das mit dem Arzt besprechen?"
             },
             "provisional": {
               "patient": " Diese Diagnose ist vorläufig — was bedeutet das für meine Behandlung?",
-              "clinical": " Welche weiteren Belege sind erforderlich, um dies zu bestätigen oder zu widerlegen?"
+              "clinical": " Welche weiteren Belege sind erforderlich, um dies zu bestätigen oder zu widerlegen?",
+              "caregiver": " Was bedeutet das für {profileName} und wie sollten wir das mit dem Arzt besprechen?"
             },
             "confirmed": {
               "patient": " Diese Diagnose ist bestätigt — was sollte ich als nächstes erwarten?",
-              "clinical": " Skizzieren Sie den evidenzbasierten Behandlungspfad."
+              "clinical": " Skizzieren Sie den evidenzbasierten Behandlungspfad.",
+              "caregiver": " Was bedeutet das für {profileName} und wie sollten wir das mit dem Arzt besprechen?"
             }
-          }
+          },
+          "caregiver": "Können Sie mir helfen, die Diagnose von {profileName} zu verstehen: {desc}{code}? Sie wurde als {diagnosisType}-Diagnose eingestuft.{notes}{extra}"
         },
         "anatomy": {
           "patient": "Können Sie die {count} medizinische(n) Dokument(e) zu meinem {bodyPart} besprechen?",
           "caregiver": "Können Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} von {profileName} besprechen?",
           "clinical": "Bitte analysieren Sie die {count} medizinische(n) Dokument(e) zum {bodyPart} dieses Patienten."
+        },
+        "caregiver": "Können Sie mir helfen, dieses {type} für {profileName} zu verstehen: {label}?"
+      },
+      "sources": {
+        "label": "Quelle"
+      },
+      "tool": {
+        "approve": "Zugriff erlauben",
+        "declined": "Zugriff auf {toolName} wurde verweigert",
+        "deny": "Zugriff verweigern",
+        "error": "{toolName} fehlgeschlagen: {error}",
+        "executed": "{toolName} erfolgreich ausgeführt",
+        "getAssembledContext": {
+          "prompt": "KI möchte umfassenden medizinischen Kontext sammeln über: {query}"
+        },
+        "getDocumentById": {
+          "prompt": "KI möchte auf Dokument zugreifen: {documentTitle}"
+        },
+        "getProfileData": {
+          "prompt": "KI möchte auf Ihre grundlegenden Gesundheitsprofil-Informationen zugreifen"
+        },
+        "queryMedicalHistory": {
+          "prompt": "KI möchte Ihre {category}-Historie abfragen"
+        },
+        "searchDocuments": {
+          "prompt": "KI möchte Ihre medizinischen Dokumente durchsuchen nach: {query}"
+        },
+        "security": {
+          "high": "Sensible Daten",
+          "low": "Basiszugriff",
+          "medium": "Medizinische Daten"
         }
       }
     },
@@ -686,102 +724,102 @@
       }
     },
     "onboarding": {
-      "basic-profile": "",
-      "click-here": "",
-      "copy-to-clipboard": "",
-      "date-of-birth": "",
-      "email": "",
-      "enable-total-privacy": "",
-      "full-name": "",
-      "healh-profile": "",
-      "hide-passphrase": "",
-      "hit-save-to-start": "",
-      "i-am-not-sure": "",
-      "i-stored-or-remembered-the-passphrase-myself": "",
-      "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "",
-      "language": "",
-      "optional": "",
-      "or": "",
-      "please-select-your-anatomy": "",
+      "basic-profile": "Basisprofil",
+      "click-here": "hier klicken.",
+      "copy-to-clipboard": "In die Zwischenablage kopieren",
+      "date-of-birth": "Geburtsdatum",
+      "email": "E-Mail",
+      "enable-total-privacy": "Vollständigen Datenschutz aktivieren",
+      "full-name": "Vollständiger Name",
+      "healh-profile": "Gesundheitsprofil",
+      "hide-passphrase": "Passphrase verbergen.",
+      "hit-save-to-start": "Klicken Sie auf SPEICHERN, um zu beginnen!",
+      "i-am-not-sure": "Ich bin mir nicht sicher",
+      "i-stored-or-remembered-the-passphrase-myself": "Ich habe die Passphrase selbst gespeichert oder mir gemerkt.",
+      "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Wenn Sie diese Passphrase verlieren, kann sie nie wiederhergestellt werden und alle Ihre Daten gehen verloren. Wir empfehlen, sie sicher in einem Passwort-Manager aufzubewahren.",
+      "language": "Sprache",
+      "optional": "optional",
+      "or": "oder",
+      "please-select-your-anatomy": "Bitte wählen Sie Ihre Anatomie",
       "privacy": {
-        "check-saved-passphrase": "",
-        "configure-again": "",
-        "i-dont-need-to-store-it": "",
-        "i-have-it-stored": "",
-        "passphrase-is-not-saved-in-password-manager": "",
-        "passphrase-is-saved-in-password-manager": "",
-        "store-this-password-securely": "",
-        "to-generate-a-random-passphrase": "",
-        "try-again": "",
-        "your-passphrase-is-not-yet-set": "",
-        "your-total-privacy-is-configured": "",
-        "choose-security-level": "",
-        "convenience-mode": "",
-        "recommended": "",
-        "convenience-backup": "",
-        "convenience-recovery": "",
-        "convenience-encrypted": "",
-        "zero-knowledge-mode": "",
-        "maximum-security": "",
-        "zero-knowledge-only-you": "",
-        "zero-knowledge-no-access": "",
-        "zero-knowledge-recovery-required": "",
-        "zero-knowledge-warning": "",
-        "continue-with-convenience": "",
-        "continue-with-zero-knowledge": "",
-        "setting-up": "",
-        "choose-unlock-method": "",
-        "passkey": "",
-        "passkey-description": "",
-        "passphrase": "",
-        "passphrase-description": "",
-        "passkey-not-supported": "",
-        "back": "",
-        "continue": "",
-        "passkey-setup-instructions": "",
-        "setting-up-passkey": "",
-        "create-passkey": "",
-        "passphrase-setup-instructions": "",
-        "your-passphrase": "",
-        "strength": "",
-        "hide-passphrase": "",
-        "view-passphrase": "",
-        "use-custom": "",
-        "generate-random": "",
-        "recovery-document-intro": "",
-        "generating-recovery": "",
-        "recovery-key-label": "",
-        "download-pdf": "",
-        "print": "",
-        "confirm-saved": "",
-        "confirm-understand": "",
-        "recovery-warning": "",
-        "complete-setup": "",
-        "zero-knowledge-configured": "",
-        "using-passkey": "",
-        "using-passphrase": "",
-        "convenience-configured": "",
-        "convenience-explanation": ""
+        "check-saved-passphrase": "Gespeicherte Passphrase überprüfen",
+        "configure-again": "Erneut konfigurieren",
+        "i-dont-need-to-store-it": "Ich muss sie nicht speichern",
+        "i-have-it-stored": "Ich habe sie gespeichert!",
+        "passphrase-is-not-saved-in-password-manager": "Passphrase ist nicht im Passwort-Manager gespeichert",
+        "passphrase-is-saved-in-password-manager": "Passphrase ist im Passwort-Manager gespeichert",
+        "store-this-password-securely": "Bewahren Sie dieses Passwort sicher auf.",
+        "to-generate-a-random-passphrase": "Um eine zufällige Passphrase zu generieren,",
+        "try-again": "Erneut versuchen",
+        "your-passphrase-is-not-yet-set": "Ihre Passphrase ist noch nicht festgelegt.",
+        "your-total-privacy-is-configured": "Ihr vollständiger Datenschutz ist konfiguriert.",
+        "choose-security-level": "Wählen Sie Ihre Sicherheitsstufe",
+        "convenience-mode": "Komfortmodus",
+        "recommended": "Empfohlen",
+        "convenience-backup": "Wir speichern eine verschlüsselte Sicherungskopie",
+        "convenience-recovery": "Kontowiederherstellung ist jederzeit möglich",
+        "convenience-encrypted": "Ihre Daten sind weiterhin verschlüsselt",
+        "zero-knowledge-mode": "Zero-Knowledge-Modus",
+        "maximum-security": "Maximale Sicherheit",
+        "zero-knowledge-only-you": "Nur Sie können Ihre Daten entschlüsseln",
+        "zero-knowledge-no-access": "Der Server hat KEINEN Zugriff auf Ihre Schlüssel",
+        "zero-knowledge-recovery-required": "Wiederherstellungsdokument ist ERFORDERLICH",
+        "zero-knowledge-warning": "Verlorene Passphrase = Daten für immer verloren",
+        "continue-with-convenience": "Mit Komfortmodus fortfahren",
+        "continue-with-zero-knowledge": "Mit Zero-Knowledge-Modus fortfahren",
+        "setting-up": "Wird eingerichtet...",
+        "choose-unlock-method": "Wählen Sie Ihre Entsperrmethode",
+        "passkey": "Passkey",
+        "passkey-description": "Verwenden Sie Face ID, Touch ID oder Windows Hello. Keine Passphrase erforderlich.",
+        "passphrase": "Passphrase",
+        "passphrase-description": "Erstellen Sie eine starke Master-Passphrase. Im Passwort-Manager speichern oder merken.",
+        "passkey-not-supported": "Passkey PRF wird in diesem Browser nicht unterstützt",
+        "back": "Zurück",
+        "continue": "Weiter",
+        "passkey-setup-instructions": "Klicken Sie auf die Schaltfläche unten, um einen Passkey mit der biometrischen Authentifizierung Ihres Geräts zu erstellen.",
+        "setting-up-passkey": "Passkey wird eingerichtet...",
+        "create-passkey": "Passkey erstellen",
+        "passphrase-setup-instructions": "Erstellen Sie eine starke Passphrase oder verwenden Sie die generierte unten.",
+        "your-passphrase": "Ihre Passphrase",
+        "strength": "Stärke",
+        "hide-passphrase": "Passphrase verbergen",
+        "view-passphrase": "Passphrase anzeigen",
+        "use-custom": "Eigene Passphrase verwenden",
+        "generate-random": "Zufällig generieren",
+        "recovery-document-intro": "Laden Sie Ihr Wiederherstellungsdokument herunter. Dies ist Ihre EINZIGE Möglichkeit, den Zugang wiederherzustellen, wenn Sie Ihre Passphrase oder Ihren Passkey verlieren.",
+        "generating-recovery": "Wiederherstellungsdokument wird generiert...",
+        "recovery-key-label": "Ihr Wiederherstellungsschlüssel",
+        "download-pdf": "PDF herunterladen",
+        "print": "Drucken",
+        "confirm-saved": "Ich habe das Wiederherstellungsdokument gespeichert",
+        "confirm-understand": "Ich verstehe, dass dies meine einzige Wiederherstellungsmöglichkeit ist",
+        "recovery-warning": "Jeder mit diesem Schlüssel kann auf Ihre Daten zugreifen. Bewahren Sie ihn sicher offline auf.",
+        "complete-setup": "Einrichtung abschließen",
+        "zero-knowledge-configured": "Zero-Knowledge-Verschlüsselung ist konfiguriert!",
+        "using-passkey": "Ihre Daten sind mit Ihrem Passkey geschützt.",
+        "using-passphrase": "Ihre Daten sind mit Ihrer Passphrase geschützt.",
+        "convenience-configured": "Komfortmodus ist konfiguriert!",
+        "convenience-explanation": "Ihre Daten sind verschlüsselt und wir können Ihnen bei Bedarf helfen, den Zugang wiederherzustellen."
       },
-      "privacy-and-amp-encryption": "",
-      "required": "",
-      "set-passphrase": "",
+      "privacy-and-amp-encryption": "Datenschutz &amp; Verschlüsselung",
+      "required": "erforderlich",
+      "set-passphrase": "Passphrase festlegen",
       "subscription": {
-        "call": "",
-        "connected-accounts": "",
-        "family": "",
-        "free-beta-access": "",
-        "individual": "",
-        "medical-institution": "",
-        "medical-practice": "",
-        "price": "",
-        "select": ""
+        "call": "Anrufen",
+        "connected-accounts": "Verbundene Konten",
+        "family": "Familie",
+        "free-beta-access": "Kostenloser Beta-Zugang",
+        "individual": "Einzelperson",
+        "medical-institution": "Medizinische Einrichtung",
+        "medical-practice": "Arztpraxis",
+        "price": "Preis",
+        "select": "Auswählen"
       },
-      "to-set-your-own-custom-passphrase": "",
-      "total-privacy-lets-you-add-another-layer-of-privacy-by-encrypt-all-your-data-with-a-custom-passphrase-that-even-the-serv": "",
-      "view-passphrase": "",
-      "you-account-is-almost-ready": "",
-      "your-data-are-currently-stored-securely-on-our-backend-in-encrypted-form": ""
+      "to-set-your-own-custom-passphrase": "Um Ihre eigene Passphrase festzulegen,",
+      "total-privacy-lets-you-add-another-layer-of-privacy-by-encrypt-all-your-data-with-a-custom-passphrase-that-even-the-serv": "Vollständiger Datenschutz ermöglicht es Ihnen, eine zusätzliche Datenschutzebene hinzuzufügen, indem alle Ihre Daten mit einer benutzerdefinierten Passphrase verschlüsselt werden, die selbst der Server nicht kennt.",
+      "view-passphrase": "Passphrase anzeigen.",
+      "you-account-is-almost-ready": "Ihr Konto ist fast bereit!",
+      "your-data-are-currently-stored-securely-on-our-backend-in-encrypted-form": "Ihre Daten werden derzeit sicher und verschlüsselt auf unserem Server gespeichert."
     },
     "profile": {
       "age": "Alter",
@@ -794,9 +832,15 @@
       "edit-profile": "Profil bearbeiten",
       "upload": "Hochladen",
       "uploading": "Hochladen ...",
-      "value-age": "",
+      "value-age": "{value, plural, =0 {# Jahre} one {1 Jahr} other {# Jahre}}",
       "crop-image": "Bild zuschneiden",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "edit": {
+        "confirm-delete": "Sind Sie sicher, dass Sie dieses Profil und alle zugehörigen Daten löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+        "confirm-disconnect": "Sind Sie sicher, dass Sie dieses Profil trennen möchten? Sie verlieren den Zugriff auf die geteilten Dokumente.",
+        "delete": "Profil löschen",
+        "disconnect": "Profil trennen"
+      }
     },
     "general": {
       "cancel": "Abbrechen",
@@ -807,11 +851,12 @@
       "delete": "Löschen",
       "open": "Offen",
       "request-access": "Zugriff anfordern",
-      "unlink": ""
+      "unlink": "Verknüpfung aufheben"
     },
     "documents": {
       "remove": "Entfernen",
-      "confirm-remove": "Sind Sie sicher, dass Sie dieses Dokument entfernen möchten?"
+      "confirm-remove": "Sind Sie sicher, dass Sie dieses Dokument entfernen möchten?",
+      "view-document": "Dokument ansehen"
     },
     "report": {
       "anatomy": {}
@@ -838,46 +883,47 @@
       "please-upgrade-your-subscription-to-continue": "Bitte aktualisieren Sie Ihr Abonnement, um fortzufahren."
     },
     "recover": {
-      "title": "",
-      "enter-key-description": "",
-      "email": "",
-      "recovery-key": "",
-      "verify-key": "",
-      "help-text": "",
-      "verifying": "",
-      "invalid-key-format": "",
-      "verification-failed": "",
-      "key-verified": "",
-      "choose-new-method": "",
-      "passkey": "",
-      "passkey-description": "",
-      "passphrase": "",
-      "passphrase-description": "",
-      "continue": "",
-      "setup-new-passkey": "",
-      "setting-up": "",
-      "create-passkey": "",
-      "back": "",
-      "setup-new-passphrase": "",
-      "new-passphrase": "",
-      "hide": "",
-      "show": "",
-      "copy": "",
-      "use-custom": "",
-      "generate-random": "",
-      "set-passphrase": "",
-      "credentials-updated": "",
-      "generate-new-recovery": "",
-      "generating": "",
-      "download-pdf": "",
-      "confirm-saved": "",
-      "complete": "",
-      "success-title": "",
-      "success-description": "",
-      "go-to-login": "",
-      "error-title": "",
-      "try-again": ""
-    }
+      "title": "Kontowiederherstellung",
+      "enter-key-description": "Geben Sie Ihren Wiederherstellungsschlüssel ein, um wieder Zugang zu Ihren verschlüsselten Daten zu erhalten.",
+      "email": "E-Mail-Adresse",
+      "recovery-key": "Wiederherstellungsschlüssel",
+      "verify-key": "Wiederherstellungsschlüssel überprüfen",
+      "help-text": "Ihr Wiederherstellungsschlüssel befindet sich im Wiederherstellungsdokument, das Sie bei der Einrichtung heruntergeladen haben.",
+      "verifying": "Ihr Wiederherstellungsschlüssel wird überprüft...",
+      "invalid-key-format": "Ungültiges Format des Wiederherstellungsschlüssels. Bitte überprüfen und erneut versuchen.",
+      "verification-failed": "Wiederherstellung fehlgeschlagen. Bitte überprüfen Sie Ihre E-Mail und Ihren Wiederherstellungsschlüssel.",
+      "key-verified": "Wiederherstellungsschlüssel erfolgreich überprüft!",
+      "choose-new-method": "Wählen Sie eine neue Entsperrmethode für Ihr Konto.",
+      "passkey": "Passkey",
+      "passkey-description": "Biometrische Authentifizierung verwenden (Face ID, Touch ID, Windows Hello)",
+      "passphrase": "Passphrase",
+      "passphrase-description": "Erstellen Sie eine neue Passphrase zum Schutz Ihrer Daten",
+      "continue": "Weiter",
+      "setup-new-passkey": "Klicken Sie, um einen neuen Passkey für Ihr Konto einzurichten.",
+      "setting-up": "Wird eingerichtet...",
+      "create-passkey": "Passkey erstellen",
+      "back": "Zurück",
+      "setup-new-passphrase": "Erstellen Sie eine neue Passphrase für Ihr Konto.",
+      "new-passphrase": "Neue Passphrase",
+      "hide": "Verbergen",
+      "show": "Anzeigen",
+      "copy": "Kopieren",
+      "use-custom": "Eigene verwenden",
+      "generate-random": "Zufällig generieren",
+      "set-passphrase": "Passphrase festlegen",
+      "credentials-updated": "Ihre Anmeldedaten wurden aktualisiert!",
+      "generate-new-recovery": "Erstellen Sie ein neues Wiederherstellungsdokument. Ihr alter Wiederherstellungsschlüssel funktioniert dann nicht mehr.",
+      "generating": "Neues Wiederherstellungsdokument wird generiert...",
+      "download-pdf": "PDF herunterladen",
+      "confirm-saved": "Ich habe das neue Wiederherstellungsdokument gespeichert",
+      "complete": "Wiederherstellung abschließen",
+      "success-title": "Wiederherstellung abgeschlossen!",
+      "success-description": "Ihr Konto wurde erfolgreich wiederhergestellt. Sie können sich jetzt mit Ihren neuen Anmeldedaten anmelden.",
+      "go-to-login": "Zur Anmeldung",
+      "error-title": "Wiederherstellung fehlgeschlagen",
+      "try-again": "Erneut versuchen"
+    },
+    "download": "Herunterladen"
   },
   "charts": {
     "reference-range": {
@@ -886,7 +932,7 @@
       "high": "Hoch"
     }
   },
-  "click-here": "",
+  "click-here": "hier klicken",
   "nav": {
     "home": "Startseite",
     "families": "Für Familien",
@@ -1491,7 +1537,7 @@
       "health-insurance": "Krankenversicherung",
       "identification": "Versicherungsnummer",
       "provider": "Anbieter",
-      "selectProvider": ""
+      "selectProvider": "Anbieter auswählen"
     },
     "vcard": {
       "city": "Stadt",
@@ -1511,35 +1557,67 @@
       "suffix": "Suffix",
       "tel": "Telefon",
       "title": "Titel",
-      "willUpdateTo": ""
+      "willUpdateTo": "Wird aktualisiert auf"
     }
   },
   "share": {
-    "title": "",
-    "share-with": "",
-    "review-items": "",
-    "privacy": "",
-    "uploading": "",
-    "share-it": "",
-    "sharing-with": "",
-    "description": "",
-    "public-key-info": "",
-    "password-info": "",
-    "password-placeholder": "",
-    "password-label": "",
-    "generate": "",
-    "encrypting-uploading": "",
-    "password-note": "",
-    "url-label": "",
-    "message-label": "",
-    "cancel": "",
-    "back": "",
-    "next": "",
-    "done": "",
-    "create-share": "",
-    "open-email-app": "",
-    "open-sms-app": "",
-    "message-template": ""
+    "title": "{title} teilen",
+    "share-with": "Teilen mit {name}",
+    "review-items": "Elemente überprüfen",
+    "privacy": "Datenschutz",
+    "uploading": "Verschlüsselte Daten werden hochgeladen...",
+    "share-it": "Teilen!",
+    "sharing-with": "Sie teilen mit",
+    "description": "Beim Teilen wird ein verschlüsselter Speicher auf unserem Server für die ausgewählte Krankenakte erstellt. Die Unterlagen können über den generierten Link und das Passwort abgerufen werden.",
+    "public-key-info": "Ihre Unterlagen werden verschlüsselt auf unserem Server gespeichert. {name} hat einen öffentlichen Schlüssel konfiguriert, den wir zur Verschlüsselung der Unterlagen verwenden. Wir können nicht auf Ihre Unterlagen zugreifen.",
+    "password-info": "Ihre Unterlagen werden verschlüsselt auf unserem Server gespeichert. Sie müssen ein benutzerdefiniertes Passwort erstellen, das Sie mit Ihrem Kontakt teilen können. Wir können nicht auf Ihre Unterlagen zugreifen.",
+    "password-placeholder": "Ihre Unterlagen mit Passwort schützen",
+    "password-label": "Passwort",
+    "generate": "Generieren",
+    "encrypting-uploading": "Schlüssel werden verschlüsselt und Daten auf den Server hochgeladen",
+    "password-note": "Bitte beachten Sie, dass das Passwort nur in Ihrer App gespeichert wird. Sie müssen es mit Ihrem Kontakt teilen.",
+    "url-label": "URL",
+    "message-label": "Nachricht",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig",
+    "create-share": "Freigabe erstellen",
+    "open-email-app": "E-Mail-App öffnen",
+    "open-sms-app": "SMS-App öffnen",
+    "message-template": "Sehr geehrte/r {name}, \nich möchte meine medizinischen Unterlagen mit Ihnen teilen. \nBitte verwenden Sie den folgenden Link, um darauf zuzugreifen: {url}\n\nPasswort: {password}\n\nMit freundlichen Grüßen,",
+    "accept": {
+      "done-description": "{count, plural, one {1 Dokument} other {# Dokumente}} zu Ihrem Konto hinzugefügt.",
+      "done-title": "Dokumente angenommen!",
+      "error-generic": "Beim Annehmen der Freigabe ist ein Fehler aufgetreten.",
+      "error-title": "Freigabe konnte nicht angenommen werden",
+      "go-to-app": "Mediqom öffnen",
+      "no-public-key": "Ihre Verschlüsselungsschlüssel sind nicht eingerichtet. Bitte richten Sie sie in Ihren Kontoeinstellungen ein.",
+      "no-token": "Ungültiger Freigabelink. Das Token fehlt.",
+      "processing": "Geteilte Dokumente werden angenommen…",
+      "setup-keys-button": "Zu den Kontoeinstellungen",
+      "setup-keys-description": "Bevor Sie geteilte Dokumente anzeigen können, müssen Sie Ihre Verschlüsselungsschlüssel in den Kontoeinstellungen einrichten.",
+      "setup-keys-title": "Verschlüsselungsschlüssel einrichten"
+    },
+    "done-description": "Geteilt mit {email}. Eine Einladung wurde gesendet.",
+    "done-description-invited": "Eine Einladungs-E-Mail wurde an {email} gesendet. Sobald die Einladung angenommen wird, sind die Dokumente in der App verfügbar.",
+    "done-description-shared": "Dokumente wurden mit {email} geteilt. Sie können sie in ihrer Mediqom-App einsehen.",
+    "done-title": "Geteilt!",
+    "error-generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "error-no-keys": "Dokumentverschlüsselungsschlüssel konnten nicht abgerufen werden.",
+    "invite-warning": "Dokumente wurden geteilt, aber die Einladungs-E-Mail konnte nicht gesendet werden. Bitte kontaktieren Sie {email} direkt.",
+    "loading": "Wird geladen…",
+    "my-shares-title": "Geteilte Dokumente",
+    "no-shares": "Sie haben noch keine Dokumente geteilt.",
+    "processing-title": "Wird geteilt…",
+    "recipient-email-label": "E-Mail des Empfängers",
+    "recipient-email-placeholder": "arzt@example.com",
+    "retry": "Erneut versuchen",
+    "revoke": "Freigabe widerrufen",
+    "share-button": "Teilen",
+    "shared-count": "{count, plural, one {Mit 1 Person geteilt} other {Mit # Personen geteilt}}",
+    "status-active": "Aktiv",
+    "status-pending": "Ausstehend"
   },
   "aria": {
     "import": {
@@ -1550,22 +1628,22 @@
       "open-document": "Dokument öffnen: {title}"
     },
     "session": {
-      "dismiss-notification": "",
-      "test-analysis": "",
-      "remove-symptom": "",
-      "pin-diagnosis": "",
-      "remove-diagnosis": "",
-      "clear-approval": "",
-      "clear-rejection": "",
-      "approve-suggestion": "",
-      "reject-suggestion": "",
-      "remove-question": "",
-      "pin-treatment": "",
-      "remove-treatment": "",
-      "pin-follow-up": "",
-      "remove-follow-up": "",
-      "pin-medication": "",
-      "remove-medication": ""
+      "dismiss-notification": "Benachrichtigung verwerfen",
+      "test-analysis": "Analyse mit Beispieldaten testen",
+      "remove-symptom": "Symptom entfernen",
+      "pin-diagnosis": "Diagnose anheften",
+      "remove-diagnosis": "Diagnose entfernen",
+      "clear-approval": "Genehmigung aufheben",
+      "clear-rejection": "Ablehnung aufheben",
+      "approve-suggestion": "Vorschlag genehmigen",
+      "reject-suggestion": "Vorschlag ablehnen",
+      "remove-question": "Frage entfernen",
+      "pin-treatment": "Behandlung anheften",
+      "remove-treatment": "Behandlung entfernen",
+      "pin-follow-up": "Nachverfolgung anheften",
+      "remove-follow-up": "Nachverfolgung entfernen",
+      "pin-medication": "Medikament anheften",
+      "remove-medication": "Medikament entfernen"
     },
     "ui": {
       "close-modal": "Dialog schließen",
@@ -1573,19 +1651,19 @@
       "toggle-menu": "Menü umschalten"
     },
     "anatomy": {
-      "rotate-model": "",
-      "zoom-in": "",
-      "zoom-out": "",
-      "reset-view": ""
+      "rotate-model": "Anatomiemodell drehen",
+      "zoom-in": "Vergrößern",
+      "zoom-out": "Verkleinern",
+      "reset-view": "Ansicht zurücksetzen"
     },
     "documents": {
       "view-document": "Dokument ansehen",
-      "remove-document": ""
+      "remove-document": "Dokument entfernen"
     },
     "report": {
-      "print-report": "",
-      "copy-report": "",
-      "download-report": ""
+      "print-report": "Bericht drucken",
+      "copy-report": "Berichtstext kopieren",
+      "download-report": "Bericht herunterladen"
     }
   },
   "report": {
@@ -1733,51 +1811,74 @@
       "bilateral": "Beidseitig",
       "central": "Zentral",
       "not_applicable": "Nicht zutreffend"
-    }
+    },
+    "attachments-download": "Herunterladen",
+    "birth-date": "Geburtsdatum",
+    "blood-pressure": "Blutdruck",
+    "blood-type": "Blutgruppe",
+    "heart-rate": "Herzfrequenz",
+    "height": "Größe",
+    "icd-code": "ICD-Code",
+    "name": "Name",
+    "oxygen-saturation": "Sauerstoffsättigung",
+    "patient": "Patient",
+    "reference-range": "Referenz",
+    "respiratory-rate": "Atemfrequenz",
+    "sex": "Geschlecht",
+    "summary": "Zusammenfassung",
+    "temperature": "Temperatur",
+    "value": "Wert",
+    "vital-signs": "Vitalzeichen",
+    "weight": "Gewicht"
   },
   "session": {
     "diagram": "Diagramm",
-    "qom": "Quorum Orchestrierte Modelle",
+    "qom": {
+      "cost": "Kosten",
+      "duration": "Dauer",
+      "nodes": "Knoten",
+      "status": "Status"
+    },
     "report": {
-      "title": "",
-      "patient": "",
-      "residence": "",
-      "date": ""
+      "title": "Ambulanter Untersuchungsbericht",
+      "patient": "Patient:",
+      "residence": "Wohnort:",
+      "date": "Datum:"
     },
     "blocks": {
-      "assisted-analysis": "",
-      "finalizing": "",
-      "finalize-report": "",
-      "end-session": "",
-      "end-session-confirm": "",
-      "transcript": "",
-      "report": "",
-      "back": "",
-      "copy": "",
-      "print": "",
-      "save": "",
-      "session-restored": "",
-      "session-restored-description": "",
-      "start-recording": "",
-      "listening": ""
+      "assisted-analysis": "Unterstützte Analyse",
+      "finalizing": "Wird abgeschlossen",
+      "finalize-report": "Bericht abschließen",
+      "end-session": "Sitzung beenden",
+      "end-session-confirm": "Möchten Sie diese Sitzung wirklich beenden? Alle Daten werden gelöscht.",
+      "transcript": "Transkript",
+      "report": "Bericht",
+      "back": "Zurück",
+      "copy": "Kopieren",
+      "print": "Drucken",
+      "save": "Speichern",
+      "session-restored": "Sitzung wiederhergestellt",
+      "session-restored-description": "Ihre vorherigen Sitzungsdaten wurden aus dem lokalen Speicher wiederhergestellt",
+      "start-recording": "Starten Sie die Aufnahme Ihrer Sitzung, indem Sie auf die Mikrofontaste klicken.",
+      "listening": "Zuhören..."
     },
     "diagnosis": {
-      "signals": "",
-      "symptoms": "",
-      "diagnostic-results": "",
-      "clinical-reasoning": "",
-      "supporting-symptoms": "",
-      "clinical-recommendations": "",
-      "clarifying-questions": "",
-      "treatment-plan": "",
-      "targets": "",
-      "follow-up": "",
-      "suggested-medication": "",
-      "purpose": "",
-      "alternatives": "",
-      "approved": "",
-      "rejected": "",
-      "effectiveness": ""
+      "signals": "Signale",
+      "symptoms": "Symptome",
+      "diagnostic-results": "Diagnostische Ergebnisse",
+      "clinical-reasoning": "Klinische Begründung",
+      "supporting-symptoms": "Unterstützende Symptome",
+      "clinical-recommendations": "Klinische Empfehlungen",
+      "clarifying-questions": "Klärende Fragen",
+      "treatment-plan": "Behandlungsplan",
+      "targets": "Ziele",
+      "follow-up": "Nachverfolgung",
+      "suggested-medication": "Vorgeschlagene Medikation",
+      "purpose": "Zweck",
+      "alternatives": "Alternativen",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "effectiveness": "Wirksamkeit"
     },
     "actions": {
       "accept": "Akzeptieren",
@@ -1790,20 +1891,32 @@
       "hide": "Verbergen",
       "show": "Anzeigen",
       "show-panel": "Panel anzeigen",
-      "hide-panel": "Panel verbergen"
+      "hide-panel": "Panel verbergen",
+      "cancel": "Abbrechen",
+      "discard": "Verwerfen",
+      "end": "Sitzung beenden",
+      "save": "Speichern",
+      "saving": "Wird gespeichert..."
     },
     "status": {
       "pending": "ausstehend",
       "answered": "beantwortet",
       "acknowledged": "bestätigt",
       "skipped": "übersprungen",
-      "resolved": "gelöst"
+      "resolved": "gelöst",
+      "continue": "Sitzung fortsetzen",
+      "listening": "Hört zu...",
+      "paused": "Sitzung pausiert",
+      "recording": "Aufnahme..."
     },
     "tabs": {
       "questions": "Fragen",
       "transcript": "Transkript",
       "details": "Details",
-      "legend": "Legende"
+      "legend": "Legende",
+      "diagnosis": "Diagnose",
+      "symptoms": "Symptome",
+      "treatments": "Behandlungen"
     },
     "headers": {
       "symptoms": "Symptome",
@@ -1821,7 +1934,9 @@
       "side-effects": "Nebenwirkungen",
       "contraindications": "Kontraindikationen",
       "relationships": "Beziehungen",
-      "related-actions": "Verwandte Aktionen"
+      "related-actions": "Verwandte Aktionen",
+      "related-alerts": "Zugehörige Warnungen",
+      "related-questions": "Zugehörige Fragen"
     },
     "priority": {
       "critical": "Kritisch",
@@ -1967,7 +2082,8 @@
       "relationship": "Beziehung",
       "direction": "Richtung",
       "strength": "Stärke",
-      "status": "Status"
+      "status": "Status",
+      "awaiting-clinical-input": "Warten auf klinische Eingabe für weitere Analyse"
     },
     "empty-states": {
       "no-questions": "Keine Fragen anzuzeigen",
@@ -1989,6 +2105,29 @@
       "days": "Tage",
       "days-short": "T",
       "percent": "%"
+    },
+    "empty": {
+      "no-alerts": "Keine Warnungen vorhanden",
+      "no-data": "Keine Daten zur Visualisierung",
+      "no-diagnoses": "Keine Diagnosen verfügbar",
+      "no-questions": "Keine Fragen vorhanden",
+      "no-symptoms": "Keine Symptome gefunden",
+      "no-treatments": "Keine Behandlungen verfügbar",
+      "select-node": "Wählen Sie einen Knoten oder Link, um Details anzuzeigen",
+      "select-node-diagram": "Wählen Sie einen Knoten oder Link aus dem Diagramm, um Details anzuzeigen"
+    },
+    "end": {
+      "description": "Was möchten Sie mit dieser Sitzung tun?",
+      "title": "Sitzung beenden"
+    },
+    "filters": {
+      "all-alerts": "Alle Warnungen",
+      "all-questions": "Alle Fragen"
+    },
+    "save": {
+      "error": {
+        "missing_data": "Erforderliche Informationen zum Speichern der Sitzung fehlen"
+      }
     }
   },
   "billing": {
@@ -2002,7 +2141,7 @@
     "current-plan": "Aktueller Plan",
     "free-tier": "Kostenlos",
     "upgrade-to": "Upgrade auf",
-    "downgrade-to": "",
+    "downgrade-to": "Downgrade auf",
     "profile": "Profil",
     "profiles": "Profile",
     "unlimited-profiles": "Unbegrenzte Profile",
@@ -2054,6 +2193,138 @@
       "base-scans-reset-answer": "Ihr Basis-Scan-Kontingent wird am Jahrestag Ihres Abonnements zurückgesetzt. Ungenutzte Basis-Scans werden nicht übertragen.",
       "cancel-subscription": "Wie kündige ich mein Abonnement?",
       "cancel-subscription-answer": "Klicken Sie auf 'Abrechnung verwalten', um das Stripe-Kundenportal zu öffnen, wo Sie kündigen, die Zahlungsmethode ändern oder Rechnungen einsehen können."
+    },
+    "back-to-plans": "Zurück zu den Plänen",
+    "cancel": "Abbrechen",
+    "complete-purchase": "Kauf abschließen",
+    "continue": "Weiter",
+    "generic-error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "loading-checkout": "Zahlungsformular wird geladen...",
+    "payment-failed": "Zahlung fehlgeschlagen",
+    "payment-successful": "Zahlung erfolgreich!",
+    "preparing-checkout": "Kasse wird vorbereitet...",
+    "subscription-updated": "Ihr Abonnement wurde aktualisiert. Vielen Dank für Ihren Kauf!",
+    "try-again": "Erneut versuchen"
+  },
+  "medications": {
+    "title": "Medikamente",
+    "add": "Medikament hinzufügen",
+    "edit": "Medikament bearbeiten",
+    "add-first": "Fügen Sie Ihr erstes Medikament hinzu",
+    "no-medications": "Noch keine Medikamente hinzugefügt",
+    "medication-info": "Medikamenteninformation",
+    "medication-name": "Medikamentenname",
+    "search-placeholder": "Medikament suchen...",
+    "generic-name": "Generischer Name",
+    "dosage": "Dosierung",
+    "strength": "Stärke",
+    "route": "Verabreichungsweg",
+    "indication": "Indikation",
+    "notes": "Notizen",
+    "frequency": "Häufigkeit",
+    "form": "Darreichungsform",
+    "prescriber": "Verschreibender Arzt",
+    "schedule": "Zeitplan",
+    "start-date": "Startdatum",
+    "end-date": "Enddatum",
+    "pill-count": "Tablettenanzahl",
+    "times-of-day": "Tageszeiten",
+    "add-time": "Zeit hinzufügen",
+    "days-of-week": "Wochentage",
+    "days-of-month": "Monatstage",
+    "status": "Status",
+    "status-active": "Aktiv",
+    "status-paused": "Pausiert",
+    "status-completed": "Abgeschlossen",
+    "status-discontinued": "Abgesetzt",
+    "confirm-delete": "Möchten Sie dieses Medikament wirklich löschen?",
+    "not-found": "Medikament nicht gefunden",
+    "view-all": "Alle anzeigen",
+    "your-medications": "Ihre Medikamente",
+    "form-tablet": "Tablette",
+    "form-capsule": "Kapsel",
+    "form-sublingual": "Sublingual",
+    "form-liquid": "Flüssigkeit",
+    "form-inhaler": "Inhalator",
+    "form-spray": "Spray",
+    "form-topical": "Topisch",
+    "form-patch": "Pflaster",
+    "form-injection": "Injektion",
+    "form-suppository": "Zäpfchen",
+    "form-cream": "Creme",
+    "form-ointment": "Salbe",
+    "form-gel": "Gel",
+    "form-drops": "Tropfen",
+    "form-powder": "Pulver",
+    "route-oral": "Oral",
+    "route-sublingual": "Sublingual",
+    "route-nasal": "Nasal",
+    "route-inhalation": "Inhalation",
+    "route-topical": "Topisch",
+    "route-transdermal": "Transdermal",
+    "route-rectal": "Rektal",
+    "route-intravenous": "Intravenös",
+    "route-intramuscular": "Intramuskulär",
+    "route-subcutaneous": "Subkutan",
+    "route-ophthalmic": "Ophthalmisch",
+    "route-otic": "Otisch",
+    "route-vaginal": "Vaginal",
+    "route-buccal": "Bukkal",
+    "frequency-once": "Einmalig",
+    "frequency-daily": "Täglich",
+    "frequency-weekly": "Wöchentlich",
+    "frequency-monthly": "Monatlich",
+    "frequency-as_needed": "Bei Bedarf",
+    "day-mo": "Mo",
+    "day-tu": "Di",
+    "day-we": "Mi",
+    "day-th": "Do",
+    "day-fr": "Fr",
+    "day-sa": "Sa",
+    "day-su": "So",
+    "week-ahead": "Woche voraus",
+    "morning": "Morgen",
+    "afternoon": "Nachmittag",
+    "night": "Nacht"
+  },
+  "dicom": {
+    "angle": "Winkelmessung",
+    "color-map": "Farbkarte",
+    "error": "DICOM-Bild konnte nicht geladen werden",
+    "flip-h": "Horizontal spiegeln",
+    "flip-v": "Vertikal spiegeln",
+    "invert": "Invertieren",
+    "length": "Längenmessung",
+    "loading": "DICOM-Bild wird geladen...",
+    "pan": "Verschieben",
+    "reset": "Zurücksetzen",
+    "rotate-ccw": "Gegen den Uhrzeigersinn drehen",
+    "rotate-cw": "Im Uhrzeigersinn drehen",
+    "slice": "Schicht",
+    "voi-presets": "VOI-Voreinstellungen",
+    "window-level": "Fenster/Stufe",
+    "zoom": "Zoom"
+  },
+  "documents": {
+    "session": {
+      "date": "Datum",
+      "duration": "Dauer",
+      "loadingAnalysis": "Analyse wird geladen...",
+      "noData": "Keine Sitzungsdaten verfügbar",
+      "performer": "Durchführender",
+      "time": "Uhrzeit",
+      "title": "Sitzungsanalyse",
+      "version": "Version"
+    }
+  },
+  "viewer": {
+    "panels": {
+      "anatomy": "Anatomie",
+      "timeline": "Zeitverlauf"
+    },
+    "timeline": {
+      "no-data": "Keine Gesundheitsdaten verfügbar",
+      "no-signals": "Keine Signale ausgewählt"
     }
   }
 }

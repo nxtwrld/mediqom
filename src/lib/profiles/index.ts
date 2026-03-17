@@ -173,15 +173,11 @@ async function enrichProfilesWithDocuments(
 /** Tracks in-flight document loads per profile to prevent concurrent duplicate fetches */
 const profileDocumentLoads = new Map<string, Promise<void>>();
 
-/** Tracks profiles whose documents have already been successfully loaded this session */
-const profileDocumentsLoaded = new Set<string>();
-
 /**
- * Clears the loaded-flag and cache for a profile so the next call re-fetches.
+ * Clears the in-flight load for a profile so the next call re-fetches.
  * Call after document mutations or when a realtime event fires.
  */
 export function invalidateProfileDocuments(profileId: string): void {
-  profileDocumentsLoaded.delete(profileId);
   profileDocumentLoads.delete(profileId);
 }
 
@@ -194,11 +190,6 @@ export async function loadProfileDocuments(
   profileId: string,
   fetchFn?: typeof globalThis.fetch,
 ): Promise<void> {
-  // Skip entirely if already successfully loaded this session
-  if (profileDocumentsLoaded.has(profileId)) {
-    return;
-  }
-
   // Return existing promise if already loading for this profile
   const existing = profileDocumentLoads.get(profileId);
   if (existing) {
@@ -230,8 +221,6 @@ export async function loadProfileDocuments(
       if (docs.length > 0) {
         setDocuments(docs as any);
       }
-
-      profileDocumentsLoaded.add(profileId);
 
       if (docs.length > 0) {
         try {

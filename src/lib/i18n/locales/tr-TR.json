@@ -338,10 +338,14 @@
       "profiles": "Profiller"
     },
     "nav": {
-      "anatomy-model": "",
-      "documents": "",
-      "profiles": "",
-      "settings": ""
+      "add-profile": "Profil Ekle",
+      "documents": "Belgeler",
+      "history": "Geçmiş",
+      "import": "İçe Aktar",
+      "logout": "Çıkış Yap",
+      "new-session": "Yeni Oturum",
+      "profiles": "Profiller",
+      "settings": "Ayarlar"
     },
     "import": {
       "add-files": "Dosya Ekle",
@@ -385,7 +389,12 @@
       "extracting-text-and-data": "Metin ve veriler çıkarılıyor...",
       "analyzing-medical-content": "Tıbbi içerik analiz ediliyor...",
       "loading-job": "İçe aktarma işi yükleniyor...",
-      "preparing-documents": "Belgeler inceleme için hazırlanıyor..."
+      "preparing-documents": "Belgeler inceleme için hazırlanıyor...",
+      "new-import": "Yeni İçe Aktarma",
+      "no-jobs": "Henüz içe aktarma işi yok. Tıbbi belgelerinizi analiz etmek için yeni bir içe aktarma başlatın.",
+      "section-errors": "Hatalar",
+      "section-processing": "İşleniyor",
+      "section-ready": "İncelemeye Hazır"
     },
     "buttons": {
       "retry": "Tekrar Dene",
@@ -395,7 +404,8 @@
       "save": "Kaydet",
       "cancel": "İptal",
       "create": "Oluştur",
-      "continue": "Devam Et"
+      "continue": "Devam Et",
+      "saving": "Kaydediliyor..."
     },
     "auth": {
       "title": "Kimlik Doğrulama",
@@ -475,21 +485,12 @@
     },
     "name": "mediqom",
     "download": "İndir",
-    "nav": {
-      "add-profile": "Profil Ekle",
-      "documents": "Belgeler",
-      "history": "Geçmiş",
-      "import": "İçe Aktar",
-      "logout": "Çıkış Yap",
-      "new-session": "Yeni Oturum",
-      "profiles": "Profiller",
-      "settings": "Ayarlar"
-    },
     "chat": {
       "title": "Yapay Zekâ Tıbbi Asistan",
       "mode": {
         "patient": "Hasta Desteği",
-        "clinical": "Klinik Analiz"
+        "clinical": "Klinik Analiz",
+        "caregiver": "Bakım Desteği"
       },
       "actions": {
         "clear": "Konuşmayı temizle",
@@ -529,7 +530,8 @@
       },
       "greetings": {
         "patient": "Merhaba! Tıbbi bilgilerinizi anlamanıza ve sağlık sürecinizde size destek olmaya hazırım. Sağlık kayıtlarınız, belirtileriniz veya bakımınızla ilgili sorularınızı bana sormaktan çekinmeyin.",
-        "clinical": "Merhaba! {profileName}'in tıbbi profilinin klinik analizinde yardımcı olmaya hazırım. Kalıpları analiz etmek, ayırıcı tanı önerileri sunmak ve mevcut tıbbi verilere dayalı içgörüler sağlamak için buradayım."
+        "clinical": "Merhaba! {profileName}'in tıbbi profilinin klinik analizinde yardımcı olmaya hazırım. Kalıpları analiz etmek, ayırıcı tanı önerileri sunmak ve mevcut tıbbi verilere dayalı içgörüler sağlamak için buradayım.",
+        "caregiver": "Merhaba! {profileName} adlı kişinin tıbbi bilgilerini anlamanıza yardımcı olmak için buradayım. Sağlık kayıtlarını, durumları ve tıbbi terimleri anlaşılır bir dilde açıklayabilirim. Tıbbi kararlar için lütfen {profileName} adlı kişinin sağlık ekibine danışın."
       },
       "tool": {
         "searchDocuments": {
@@ -572,27 +574,36 @@
           "type-extra": {
             "differential": {
               "patient": " Bu hastalığa sahip olma olasılığım diğer durumlarla kıyaslandığında nasıl?",
-              "clinical": " Ayırıcı tanıyı daraltmak için temel ayırt edici özellikleri ve inceleme adımlarını tartışın."
+              "clinical": " Ayırıcı tanıyı daraltmak için temel ayırt edici özellikleri ve inceleme adımlarını tartışın.",
+              "caregiver": " Bu {profileName} için ne anlama geliyor ve bunu doktoruyla nasıl konuşmalıyız?"
             },
             "rule-out": {
               "patient": " Bir tanıyı \"dışlamak\" ne anlama gelir?",
-              "clinical": " Bu tanıyı kesin olarak dışlamak için hangi incelemeler yapılmalıdır?"
+              "clinical": " Bu tanıyı kesin olarak dışlamak için hangi incelemeler yapılmalıdır?",
+              "caregiver": " Bu {profileName} için ne anlama geliyor ve bunu doktoruyla nasıl konuşmalıyız?"
             },
             "provisional": {
               "patient": " Bu geçici bir tanı — tedavim için ne anlama geliyor?",
-              "clinical": " Tanıyı doğrulamak veya çürütmek için hangi ek kanıtlara ihtiyaç var?"
+              "clinical": " Tanıyı doğrulamak veya çürütmek için hangi ek kanıtlara ihtiyaç var?",
+              "caregiver": " Bu {profileName} için ne anlama geliyor ve bunu doktoruyla nasıl konuşmalıyız?"
             },
             "confirmed": {
               "patient": " Bu kesinleşti — bundan sonra ne bekliyorum?",
-              "clinical": " Kanıta dayalı yönetim yolunu özetleyin."
+              "clinical": " Kanıta dayalı yönetim yolunu özetleyin.",
+              "caregiver": " Bu {profileName} için ne anlama geliyor ve bunu doktoruyla nasıl konuşmalıyız?"
             }
-          }
+          },
+          "caregiver": "{profileName} adlı kişinin tanısını anlamama yardımcı olabilir misiniz: {desc}{code}? Bu bir {diagnosisType} tanısı olarak sınıflandırıldı.{notes}{extra}"
         },
         "anatomy": {
           "patient": "{bodyPart} ile ilgili {count} tıbbi belge(yi) inceleyebilir misiniz?",
           "caregiver": "{profileName} hastasının {bodyPart} bölgesiyle ilgili {count} tıbbi belge(yi) inceleyebilir misiniz?",
           "clinical": "Bu hastanın {bodyPart} bölgesiyle ilişkili {count} tıbbi belge(yi) lütfen analiz edin."
-        }
+        },
+        "caregiver": "Bu {type} hakkında {profileName} için yardımcı olabilir misiniz: {label}?"
+      },
+      "sources": {
+        "label": "Kaynak"
       }
     },
     "settings": {
@@ -824,7 +835,13 @@
       "uploading": "Yükleniyor ...",
       "value-age": "{value, plural, one {1 yıl} other {# yıl}}",
       "crop-image": "Görüntüyü Kırp",
-      "zoom": "Yakınlaştır"
+      "zoom": "Yakınlaştır",
+      "edit": {
+        "confirm-delete": "Bu profili ve tüm verilerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+        "confirm-disconnect": "Bu profili bağlantısını kesmek istediğinizden emin misiniz? Paylaşılan belgelere erişiminizi kaybedeceksiniz.",
+        "delete": "Profili Sil",
+        "disconnect": "Profil Bağlantısını Kes"
+      }
     },
     "general": {
       "cancel": "İptal",
@@ -839,7 +856,8 @@
     },
     "documents": {
       "remove": "Kaldır",
-      "confirm-remove": "Bu belgeyi kaldırmak istediğinizden emin misiniz?"
+      "confirm-remove": "Bu belgeyi kaldırmak istediğinizden emin misiniz?",
+      "view-document": "Belgeyi görüntüle"
     },
     "report": {
       "anatomy": {}
@@ -1408,7 +1426,7 @@
         "glucose": "Glukoz",
         "glucose_urine": "Glukoz",
         "hdl_cholesterol": "HDL Kolesterol",
-        "heartRate": "",
+        "heartRate": "Kalp Hızı",
         "heart_rate": "Kalp Hızı",
         "heart_rate_index": "Kalp Hızı İndeksi",
         "height": "Boy",
@@ -1519,7 +1537,7 @@
       "health-insurance": "Sağlık Sigortası",
       "identification": "Poliçe Numarası",
       "provider": "Sağlayıcı",
-      "selectProvider": ""
+      "selectProvider": "Sağlayıcı Seçin"
     },
     "vcard": {
       "city": "Şehir",
@@ -1873,7 +1891,39 @@
     "create-share": "Paylaşım Oluştur",
     "open-email-app": "E-posta uygulamasını aç",
     "open-sms-app": "SMS uygulamasını aç",
-    "message-template": "Sayın {name}, \nTıbbi kayıtlarımı sizinle paylaşmak istiyorum. \nLütfen kayıtlara erişmek için aşağıdaki bağlantıyı kullanın: {url}\n\nŞifre: {password}\n\nSaygılarımla,"
+    "message-template": "Sayın {name}, \nTıbbi kayıtlarımı sizinle paylaşmak istiyorum. \nLütfen kayıtlara erişmek için aşağıdaki bağlantıyı kullanın: {url}\n\nŞifre: {password}\n\nSaygılarımla,",
+    "accept": {
+      "done-description": "{count, plural, one {1 belge} other {# belge}} hesabınıza eklendi.",
+      "done-title": "Belgeler kabul edildi!",
+      "error-generic": "Paylaşımı kabul ederken bir hata oluştu.",
+      "error-title": "Paylaşım kabul edilemedi",
+      "go-to-app": "Mediqom'u Aç",
+      "no-public-key": "Şifreleme anahtarlarınız yapılandırılmamış. Lütfen hesap ayarlarınızdan yapılandırın.",
+      "no-token": "Geçersiz paylaşım bağlantısı. Token eksik.",
+      "processing": "Paylaşılan belgeler kabul ediliyor…",
+      "setup-keys-button": "Hesap ayarlarına git",
+      "setup-keys-description": "Paylaşılan belgeleri görüntüleyebilmek için önce hesap ayarlarınızdan şifreleme anahtarlarınızı yapılandırmanız gerekiyor.",
+      "setup-keys-title": "Şifreleme anahtarlarınızı yapılandırın"
+    },
+    "done-description": "{email} ile paylaşıldı. Davet gönderildi.",
+    "done-description-invited": "{email} adresine davet e-postası gönderildi. Kabul ettikten sonra belgeler uygulamalarında görünecektir.",
+    "done-description-shared": "Belgeler {email} ile paylaşıldı. Mediqom uygulamasında görüntüleyebilirler.",
+    "done-title": "Paylaşıldı!",
+    "error-generic": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "error-no-keys": "Belge şifreleme anahtarları alınamadı.",
+    "invite-warning": "Belgeler paylaşıldı, ancak davet e-postası gönderilemedi. Lütfen {email} ile doğrudan iletişime geçin.",
+    "loading": "Yükleniyor…",
+    "my-shares-title": "Paylaşılan Belgeler",
+    "no-shares": "Henüz hiçbir belge paylaşmadınız.",
+    "processing-title": "Paylaşılıyor…",
+    "recipient-email-label": "Alıcı e-postası",
+    "recipient-email-placeholder": "doktor@example.com",
+    "retry": "Tekrar Dene",
+    "revoke": "Paylaşımı İptal Et",
+    "share-button": "Paylaş",
+    "shared-count": "{count, plural, one {1 kişiyle paylaşıldı} other {# kişiyle paylaşıldı}}",
+    "status-active": "Aktif",
+    "status-pending": "Beklemede"
   },
   "aria": {
     "import": {
@@ -1993,7 +2043,99 @@
     "no-procedure-data": "Prosedür verisi mevcut değil",
     "diagnoses-list": "Tanılar",
     "diagnosis-date": "Tanı Tarihi",
-    "no-diagnosis-data": "Tanı verisi mevcut değil"
+    "no-diagnosis-data": "Tanı verisi mevcut değil",
+    "birth-date": "Doğum Tarihi",
+    "blood-pressure": "Kan Basıncı",
+    "blood-type": "Kan Grubu",
+    "heart-rate": "Kalp Atış Hızı",
+    "height": "Boy",
+    "icd-code": "ICD Kodu",
+    "name": "Ad",
+    "oxygen-saturation": "Oksijen Satürasyonu",
+    "patient": "Hasta",
+    "reference-range": "Referans Aralığı",
+    "respiratory-rate": "Solunum Hızı",
+    "sex": "Cinsiyet",
+    "summary": "Özet",
+    "temperature": "Vücut Sıcaklığı",
+    "value": "Değer",
+    "vital-signs": "Yaşamsal Bulgular",
+    "weight": "Kilo",
+    "imaging": "Görüntüleme Çalışmaları",
+    "imaging-anomalies": "Anomaliler",
+    "imaging-anomaly-types": {
+      "atrophy": "Atrofi",
+      "calcification": "Kalsifikasyon",
+      "deformity": "Deformite",
+      "enlarged_organ": "Büyümüş Organ",
+      "fluid_collection": "Sıvı Birikimi",
+      "foreign_object": "Yabancı Cisim",
+      "fracture": "Kırık",
+      "inflammation": "İltihap",
+      "mass": "Kitle",
+      "other": "Diğer",
+      "pneumothorax": "Pnömotoraks"
+    },
+    "imaging-assessment": "Değerlendirme",
+    "imaging-modalities": {
+      "CT": "BT Taraması",
+      "Fluoroscopy": "Floroskopi",
+      "MRI": "MRI",
+      "Mammography": "Mamografi",
+      "Nuclear Medicine": "Nükleer Tıp",
+      "PET": "PET Taraması",
+      "Ultrasound": "Ultrason",
+      "Unknown": "Bilinmiyor",
+      "X-ray": "Röntgen"
+    },
+    "imaging-modality": "Modalite",
+    "imaging-quality": "Kalite",
+    "imaging-quality-values": {
+      "excellent": "Mükemmel",
+      "fair": "Orta",
+      "good": "İyi",
+      "poor": "Zayıf"
+    },
+    "imaging-recommended-actions": "Önerilen İşlemler",
+    "imaging-regions": {
+      "Abdomen": "Karın",
+      "Chest": "Göğüs",
+      "Head": "Baş",
+      "Lower Extremity": "Alt Ekstremite",
+      "Multiple Regions": "Birden Fazla Bölge",
+      "Neck": "Boyun",
+      "Pelvis": "Pelvis",
+      "Spine": "Omurga",
+      "Unknown": "Bilinmiyor",
+      "Upper Extremity": "Üst Ekstremite"
+    },
+    "imaging-severity": {
+      "critical": "Kritik",
+      "mild": "Hafif",
+      "moderate": "Orta",
+      "severe": "Şiddetli"
+    },
+    "imaging-sides": {
+      "bilateral": "Bilateral",
+      "central": "Merkezi",
+      "left": "Sol",
+      "not_applicable": "Uygulanamaz",
+      "right": "Sağ"
+    },
+    "imaging-size": "Boyut",
+    "imaging-urgent": "Acil",
+    "imaging-views": {
+      "AP": "AP",
+      "Axial": "Aksiyal",
+      "Coronal": "Koronal",
+      "Cross-sectional": "Kesitsel",
+      "Lateral": "Lateral",
+      "Longitudinal": "Longitudinal",
+      "Oblique": "Oblik",
+      "PA": "PA",
+      "Sagittal": "Sagittal",
+      "Unknown": "Bilinmiyor"
+    }
   },
   "billing": {
     "subscription": "Abonelik",
@@ -2006,7 +2148,7 @@
     "current-plan": "Mevcut Plan",
     "free-tier": "Ücretsiz Katman",
     "upgrade-to": "Şuna Yükselt",
-    "downgrade-to": "",
+    "downgrade-to": "Şuna Düşür",
     "profile": "profil",
     "profiles": "profil",
     "unlimited-profiles": "Sınırsız profil",
@@ -2069,6 +2211,115 @@
       "base-scans-reset-answer": "Temel tarama hakkınız, abonelik yıl dönümü tarihinizde sıfırlanır. Kullanılmayan temel taramalar bir sonraki döneme aktarılmaz.",
       "cancel-subscription": "Aboneliğimi nasıl iptal ederim?",
       "cancel-subscription-answer": "İptal etmek, ödeme yöntemini değiştirmek veya faturaları görüntülemek için Stripe müşteri portalına erişmek üzere 'Faturalamayı Yönet'e tıklayın."
+    }
+  },
+  "medications": {
+    "title": "İlaçlar",
+    "add": "İlaç Ekle",
+    "edit": "İlacı Düzenle",
+    "add-first": "İlk ilacınızı ekleyin",
+    "no-medications": "Henüz ilaç eklenmedi",
+    "medication-info": "İlaç Bilgisi",
+    "medication-name": "İlaç Adı",
+    "search-placeholder": "İlaç ara...",
+    "generic-name": "Jenerik Ad",
+    "dosage": "Dozaj",
+    "strength": "Güç",
+    "route": "Uygulama Yolu",
+    "indication": "Endikasyon",
+    "notes": "Notlar",
+    "frequency": "Sıklık",
+    "form": "Form",
+    "prescriber": "Reçete Yazan",
+    "schedule": "Program",
+    "start-date": "Başlangıç Tarihi",
+    "end-date": "Bitiş Tarihi",
+    "pill-count": "Hap Sayısı",
+    "times-of-day": "Günün Saatleri",
+    "add-time": "Saat Ekle",
+    "days-of-week": "Haftanın Günleri",
+    "days-of-month": "Ayın Günleri",
+    "status": "Durum",
+    "status-active": "Aktif",
+    "status-paused": "Duraklatılmış",
+    "status-completed": "Tamamlanmış",
+    "status-discontinued": "Kesilmiş",
+    "confirm-delete": "Bu ilacı silmek istediğinizden emin misiniz?",
+    "not-found": "İlaç bulunamadı",
+    "view-all": "Tümünü görüntüle",
+    "your-medications": "İlaçlarınız",
+    "form-tablet": "Tablet",
+    "form-capsule": "Kapsül",
+    "form-sublingual": "Dil Altı",
+    "form-liquid": "Sıvı",
+    "form-inhaler": "İnhaler",
+    "form-spray": "Sprey",
+    "form-topical": "Topikal",
+    "form-patch": "Yama",
+    "form-injection": "Enjeksiyon",
+    "form-suppository": "Supozituvar",
+    "form-cream": "Krem",
+    "form-ointment": "Merhem",
+    "form-gel": "Jel",
+    "form-drops": "Damla",
+    "form-powder": "Toz",
+    "route-oral": "Ağızdan",
+    "route-sublingual": "Dil Altı",
+    "route-nasal": "Burundan",
+    "route-inhalation": "İnhalasyon",
+    "route-topical": "Topikal",
+    "route-transdermal": "Transdermal",
+    "route-rectal": "Rektal",
+    "route-intravenous": "Damar İçi",
+    "route-intramuscular": "Kas İçi",
+    "route-subcutaneous": "Deri Altı",
+    "route-ophthalmic": "Göz",
+    "route-otic": "Kulak",
+    "route-vaginal": "Vajinal",
+    "route-buccal": "Bukkal",
+    "frequency-once": "Bir Kez",
+    "frequency-daily": "Günlük",
+    "frequency-weekly": "Haftalık",
+    "frequency-monthly": "Aylık",
+    "frequency-as_needed": "Gerektiğinde",
+    "day-mo": "Pzt",
+    "day-tu": "Sal",
+    "day-we": "Çar",
+    "day-th": "Per",
+    "day-fr": "Cum",
+    "day-sa": "Cmt",
+    "day-su": "Paz",
+    "week-ahead": "Önümüzdeki Hafta",
+    "morning": "Sabah",
+    "afternoon": "Öğleden Sonra",
+    "night": "Gece"
+  },
+  "dicom": {
+    "angle": "Açı Ölçümü",
+    "color-map": "Renk Haritası",
+    "error": "DICOM görüntüsü yüklenemedi",
+    "flip-h": "Yatay Çevir",
+    "flip-v": "Dikey Çevir",
+    "invert": "Ters Çevir",
+    "length": "Uzunluk Ölçümü",
+    "loading": "DICOM görüntüsü yükleniyor...",
+    "pan": "Kaydır",
+    "reset": "Sıfırla",
+    "rotate-ccw": "Saat Yönünün Tersine Döndür",
+    "rotate-cw": "Saat Yönünde Döndür",
+    "slice": "Kesit",
+    "voi-presets": "VOI Ön Ayarları",
+    "window-level": "Pencere/Seviye",
+    "zoom": "Yakınlaştır"
+  },
+  "viewer": {
+    "panels": {
+      "anatomy": "Anatomi",
+      "timeline": "Zaman Çizelgesi"
+    },
+    "timeline": {
+      "no-data": "Sağlık verisi mevcut değil",
+      "no-signals": "Sinyal seçilmedi"
     }
   }
 }

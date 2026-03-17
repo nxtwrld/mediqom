@@ -16,8 +16,8 @@ export const GET: RequestHandler = async ({
     return error(401, { message: "Unauthorized" });
   }
   const query = full
-    ? "id, metadata, type, user_id, content, attachments, author_id, keys!inner(*)(key, owner_id)"
-    : "id, metadata, type, user_id, author_id, keys!inner(*)(key, owner_id)";
+    ? "id, metadata, type, user_id, content, attachments, thumbnail, author_id, keys!inner(*)(key, owner_id)"
+    : "id, metadata, type, user_id, thumbnail, author_id, keys!inner(*)(key, owner_id)";
 
   const { data: documentsLoad, error: documentsError } = await supabase
     .from("documents")
@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({
     return error(401, { message: "Unauthorized" });
   }
 
-  const { type, metadata, content, attachments, keys } = await request.json();
+  const { type, metadata, content, thumbnail, attachments, keys } = await request.json();
 
   // Debug logging
   console.log("📝 [Documents API] POST request:", {
@@ -100,6 +100,7 @@ export const POST: RequestHandler = async ({
         type,
         metadata,
         content,
+        thumbnail,
         author_id: user.id,
         attachments,
       },

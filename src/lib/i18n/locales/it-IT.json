@@ -338,10 +338,14 @@
       "profiles": "Profili"
     },
     "nav": {
-      "anatomy-model": "",
-      "documents": "",
-      "profiles": "",
-      "settings": ""
+      "add-profile": "Aggiungi profilo",
+      "documents": "Documenti",
+      "history": "Cronologia",
+      "import": "Importa",
+      "logout": "Esci",
+      "new-session": "Nuova sessione",
+      "profiles": "Profili",
+      "settings": "Impostazioni"
     },
     "import": {
       "add-files": "Aggiungi file",
@@ -385,7 +389,12 @@
       "extracting-text-and-data": "Estrazione di testo e dati...",
       "analyzing-medical-content": "Analisi del contenuto medico...",
       "loading-job": "Caricamento importazione...",
-      "preparing-documents": "Preparazione dei documenti per la revisione..."
+      "preparing-documents": "Preparazione dei documenti per la revisione...",
+      "new-import": "Nuova importazione",
+      "no-jobs": "Nessun lavoro di importazione. Avvia una nuova importazione per analizzare i tuoi documenti medici.",
+      "section-errors": "Errori",
+      "section-processing": "In elaborazione",
+      "section-ready": "Pronto per la revisione"
     },
     "buttons": {
       "retry": "Riprova",
@@ -395,7 +404,8 @@
       "save": "Salva",
       "cancel": "Annulla",
       "create": "Crea",
-      "continue": "Continua"
+      "continue": "Continua",
+      "saving": "Salvataggio..."
     },
     "auth": {
       "title": "Autenticazione",
@@ -475,21 +485,12 @@
     },
     "name": "mediqom",
     "download": "Scarica",
-    "nav": {
-      "add-profile": "Aggiungi profilo",
-      "documents": "Documenti",
-      "history": "Cronologia",
-      "import": "Importa",
-      "logout": "Esci",
-      "new-session": "Nuova sessione",
-      "profiles": "Profili",
-      "settings": "Impostazioni"
-    },
     "chat": {
       "title": "Assistente medico AI",
       "mode": {
         "patient": "Supporto al paziente",
-        "clinical": "Analisi clinica"
+        "clinical": "Analisi clinica",
+        "caregiver": "Supporto al caregiver"
       },
       "actions": {
         "clear": "Cancella conversazione",
@@ -529,7 +530,8 @@
       },
       "greetings": {
         "patient": "Salve! Sono qui per aiutarla a comprendere le sue informazioni mediche e supportarla nel suo percorso di cura. Si senta libero di chiedermi dei suoi referti, dei sintomi o di qualsiasi domanda relativa alla sua salute.",
-        "clinical": "Salve! Sono qui per assistere nell'analisi clinica del profilo medico di {profileName}. Posso aiutare ad analizzare i pattern, suggerire considerazioni differenziali e fornire approfondimenti basati sui dati medici disponibili."
+        "clinical": "Salve! Sono qui per assistere nell'analisi clinica del profilo medico di {profileName}. Posso aiutare ad analizzare i pattern, suggerire considerazioni differenziali e fornire approfondimenti basati sui dati medici disponibili.",
+        "caregiver": "Salve! Sono qui per aiutarla a comprendere le informazioni mediche di {profileName}. Posso spiegare cartelle cliniche, condizioni e termini medici in un linguaggio semplice. Per qualsiasi decisione medica, consultate il team sanitario di {profileName}."
       },
       "tool": {
         "searchDocuments": {
@@ -572,27 +574,36 @@
           "type-extra": {
             "differential": {
               "patient": " Quali sono le probabilità che abbia questa condizione rispetto ad altre?",
-              "clinical": " Si discutano le caratteristiche distintive chiave e il percorso diagnostico per ridurre le diagnosi differenziali."
+              "clinical": " Si discutano le caratteristiche distintive chiave e il percorso diagnostico per ridurre le diagnosi differenziali.",
+              "caregiver": " Cosa significa questo per {profileName} e come dovremmo discuterne con il suo medico?"
             },
             "rule-out": {
               "patient": " Cosa significa \"escludere\" una diagnosi?",
-              "clinical": " Quali indagini escluderebbero definitivamente questa diagnosi?"
+              "clinical": " Quali indagini escluderebbero definitivamente questa diagnosi?",
+              "caregiver": " Cosa significa questo per {profileName} e come dovremmo discuterne con il suo medico?"
             },
             "provisional": {
               "patient": " Questa diagnosi è provvisoria — cosa significa per il mio trattamento?",
-              "clinical": " Quali ulteriori evidenze sono necessarie per confermare o confutare?"
+              "clinical": " Quali ulteriori evidenze sono necessarie per confermare o confutare?",
+              "caregiver": " Cosa significa questo per {profileName} e come dovremmo discuterne con il suo medico?"
             },
             "confirmed": {
               "patient": " Questa diagnosi è confermata — cosa devo aspettarmi?",
-              "clinical": " Si delinei il percorso terapeutico basato sull'evidenza."
+              "clinical": " Si delinei il percorso terapeutico basato sull'evidenza.",
+              "caregiver": " Cosa significa questo per {profileName} e come dovremmo discuterne con il suo medico?"
             }
-          }
+          },
+          "caregiver": "Può aiutarmi a capire la diagnosi di {profileName}: {desc}{code}? È stata classificata come diagnosi {diagnosisType}.{notes}{extra}"
         },
         "anatomy": {
           "patient": "Può discutere i {count} documento/i medico/i riguardanti il mio {bodyPart}?",
           "caregiver": "Può discutere i {count} documento/i medico/i riguardanti il {bodyPart} di {profileName}?",
           "clinical": "Si prega di analizzare i {count} documento/i medico/i associati al {bodyPart} di questo paziente."
-        }
+        },
+        "caregiver": "Può aiutarmi a capire questo {type} per {profileName}: {label}?"
+      },
+      "sources": {
+        "label": "Fonte"
       }
     },
     "settings": {
@@ -824,7 +835,13 @@
       "uploading": "Caricamento...",
       "value-age": "{value, plural, =0 {# anni} one {1 anno} other {# anni}}",
       "crop-image": "Ritaglia immagine",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "edit": {
+        "confirm-delete": "Sei sicuro di voler eliminare questo profilo e tutti i suoi dati? Questa azione non può essere annullata.",
+        "confirm-disconnect": "Sei sicuro di voler disconnettere questo profilo? Perderai l'accesso ai documenti condivisi.",
+        "delete": "Elimina profilo",
+        "disconnect": "Disconnetti profilo"
+      }
     },
     "general": {
       "cancel": "Annulla",
@@ -839,7 +856,8 @@
     },
     "documents": {
       "remove": "Rimuovi",
-      "confirm-remove": "È sicuro di voler rimuovere questo documento?"
+      "confirm-remove": "È sicuro di voler rimuovere questo documento?",
+      "view-document": "Visualizza documento"
     },
     "report": {
       "anatomy": {}
@@ -1408,7 +1426,7 @@
         "glucose": "Glucosio",
         "glucose_urine": "Glucosio",
         "hdl_cholesterol": "Colesterolo HDL",
-        "heartRate": "",
+        "heartRate": "Frequenza cardiaca",
         "heart_rate": "Frequenza cardiaca",
         "heart_rate_index": "Indice della frequenza cardiaca",
         "height": "Altezza",
@@ -1519,7 +1537,7 @@
       "health-insurance": "Assicurazione sanitaria",
       "identification": "Numero di polizza",
       "provider": "Fornitore",
-      "selectProvider": ""
+      "selectProvider": "Seleziona fornitore"
     },
     "vcard": {
       "city": "Città",
@@ -1873,7 +1891,39 @@
     "create-share": "Crea condivisione",
     "open-email-app": "Apri app email",
     "open-sms-app": "Apri app SMS",
-    "message-template": "Gentile {name},\nDesidero condividere con Lei i miei referti medici.\nUtilizzi il seguente link per accedervi: {url}\n\nPassword: {password}\n\nCordiali saluti,"
+    "message-template": "Gentile {name},\nDesidero condividere con Lei i miei referti medici.\nUtilizzi il seguente link per accedervi: {url}\n\nPassword: {password}\n\nCordiali saluti,",
+    "accept": {
+      "done-description": "{count, plural, one {1 documento} other {# documenti}} aggiunti al tuo account.",
+      "done-title": "Documenti accettati!",
+      "error-generic": "Si è verificato un errore durante l'accettazione della condivisione.",
+      "error-title": "Impossibile accettare la condivisione",
+      "go-to-app": "Apri Mediqom",
+      "no-public-key": "Le tue chiavi di crittografia non sono configurate. Configurale nelle impostazioni del tuo account.",
+      "no-token": "Link di condivisione non valido. Il token è mancante.",
+      "processing": "Accettazione dei documenti condivisi…",
+      "setup-keys-button": "Vai alle impostazioni dell'account",
+      "setup-keys-description": "Prima di poter visualizzare i documenti condivisi, devi configurare le tue chiavi di crittografia nelle impostazioni dell'account.",
+      "setup-keys-title": "Configura le tue chiavi di crittografia"
+    },
+    "done-description": "Condiviso con {email}. È stato inviato un invito.",
+    "done-description-invited": "È stata inviata un'email di invito a {email}. Una volta accettata, i documenti saranno disponibili nella loro app.",
+    "done-description-shared": "I documenti sono stati condivisi con {email}. Possono visualizzarli nella loro app Mediqom.",
+    "done-title": "Condiviso!",
+    "error-generic": "Si è verificato un errore. Riprova.",
+    "error-no-keys": "Impossibile recuperare le chiavi di crittografia del documento.",
+    "invite-warning": "I documenti sono stati condivisi, ma l'email di invito non è stata inviata. Contatta direttamente {email} per informarlo.",
+    "loading": "Caricamento…",
+    "my-shares-title": "Documenti condivisi",
+    "no-shares": "Non hai ancora condiviso alcun documento.",
+    "processing-title": "Condivisione…",
+    "recipient-email-label": "Email del destinatario",
+    "recipient-email-placeholder": "dottore@esempio.com",
+    "retry": "Riprova",
+    "revoke": "Revoca condivisione",
+    "share-button": "Condividi",
+    "shared-count": "{count, plural, one {Condiviso con 1 persona} other {Condiviso con # persone}}",
+    "status-active": "Attivo",
+    "status-pending": "In attesa"
   },
   "aria": {
     "import": {
@@ -1993,7 +2043,99 @@
     "no-procedure-data": "Nessun dato sulle procedure disponibile",
     "diagnoses-list": "Diagnosi",
     "diagnosis-date": "Data della diagnosi",
-    "no-diagnosis-data": "Nessun dato sulla diagnosi disponibile"
+    "no-diagnosis-data": "Nessun dato sulla diagnosi disponibile",
+    "birth-date": "Data di nascita",
+    "blood-pressure": "Pressione arteriosa",
+    "blood-type": "Gruppo sanguigno",
+    "heart-rate": "Frequenza cardiaca",
+    "height": "Altezza",
+    "icd-code": "Codice ICD",
+    "name": "Nome",
+    "oxygen-saturation": "Saturazione di ossigeno",
+    "patient": "Paziente",
+    "reference-range": "Riferimento",
+    "respiratory-rate": "Frequenza respiratoria",
+    "sex": "Sesso",
+    "summary": "Riepilogo",
+    "temperature": "Temperatura",
+    "value": "Valore",
+    "vital-signs": "Segni vitali",
+    "weight": "Peso",
+    "imaging": "Studi di imaging",
+    "imaging-anomalies": "Anomalie",
+    "imaging-anomaly-types": {
+      "atrophy": "Atrofia",
+      "calcification": "Calcificazione",
+      "deformity": "Deformità",
+      "enlarged_organ": "Organo ingrossato",
+      "fluid_collection": "Raccolta di liquido",
+      "foreign_object": "Corpo estraneo",
+      "fracture": "Frattura",
+      "inflammation": "Infiammazione",
+      "mass": "Massa",
+      "other": "Altro",
+      "pneumothorax": "Pneumotorace"
+    },
+    "imaging-assessment": "Valutazione",
+    "imaging-modalities": {
+      "CT": "TAC",
+      "Fluoroscopy": "Fluoroscopia",
+      "MRI": "Risonanza magnetica",
+      "Mammography": "Mammografia",
+      "Nuclear Medicine": "Medicina nucleare",
+      "PET": "PET",
+      "Ultrasound": "Ecografia",
+      "Unknown": "Sconosciuto",
+      "X-ray": "Radiografia"
+    },
+    "imaging-modality": "Modalità",
+    "imaging-quality": "Qualità",
+    "imaging-quality-values": {
+      "excellent": "Eccellente",
+      "fair": "Sufficiente",
+      "good": "Buona",
+      "poor": "Scarsa"
+    },
+    "imaging-recommended-actions": "Azioni raccomandate",
+    "imaging-regions": {
+      "Abdomen": "Addome",
+      "Chest": "Torace",
+      "Head": "Testa",
+      "Lower Extremity": "Arto inferiore",
+      "Multiple Regions": "Regioni multiple",
+      "Neck": "Collo",
+      "Pelvis": "Bacino",
+      "Spine": "Colonna vertebrale",
+      "Unknown": "Sconosciuta",
+      "Upper Extremity": "Arto superiore"
+    },
+    "imaging-severity": {
+      "critical": "Critico",
+      "mild": "Lieve",
+      "moderate": "Moderato",
+      "severe": "Grave"
+    },
+    "imaging-sides": {
+      "bilateral": "Bilaterale",
+      "central": "Centrale",
+      "left": "Sinistra",
+      "not_applicable": "N/A",
+      "right": "Destra"
+    },
+    "imaging-size": "Dimensione",
+    "imaging-urgent": "Urgente",
+    "imaging-views": {
+      "AP": "AP",
+      "Axial": "Assiale",
+      "Coronal": "Coronale",
+      "Cross-sectional": "Trasversale",
+      "Lateral": "Laterale",
+      "Longitudinal": "Longitudinale",
+      "Oblique": "Obliqua",
+      "PA": "PA",
+      "Sagittal": "Sagittale",
+      "Unknown": "Sconosciuta"
+    }
   },
   "billing": {
     "subscription": "Abbonamento",
@@ -2006,7 +2148,7 @@
     "current-plan": "Piano attuale",
     "free-tier": "Piano gratuito",
     "upgrade-to": "Aggiorna a",
-    "downgrade-to": "",
+    "downgrade-to": "Passa a",
     "profile": "profilo",
     "profiles": "profili",
     "unlimited-profiles": "Profili illimitati",
@@ -2069,6 +2211,115 @@
       "base-scans-reset-answer": "Il suo contingente di scansioni base si reimposta alla data anniversario del suo abbonamento. Le scansioni base non utilizzate non vengono riportate.",
       "cancel-subscription": "Come posso cancellare il mio abbonamento?",
       "cancel-subscription-answer": "Clicchi su 'Gestisci fatturazione' per accedere al portale clienti Stripe dove potrà cancellare, modificare il metodo di pagamento o visualizzare le fatture."
+    }
+  },
+  "medications": {
+    "title": "Farmaci",
+    "add": "Aggiungi farmaco",
+    "edit": "Modifica farmaco",
+    "add-first": "Aggiunga il suo primo farmaco",
+    "no-medications": "Nessun farmaco ancora aggiunto",
+    "medication-info": "Informazioni sul farmaco",
+    "medication-name": "Nome del farmaco",
+    "search-placeholder": "Cerca farmaco...",
+    "generic-name": "Nome generico",
+    "dosage": "Dosaggio",
+    "strength": "Concentrazione",
+    "route": "Via di somministrazione",
+    "indication": "Indicazione",
+    "notes": "Note",
+    "frequency": "Frequenza",
+    "form": "Forma",
+    "prescriber": "Prescrittore",
+    "schedule": "Programma",
+    "start-date": "Data di inizio",
+    "end-date": "Data di fine",
+    "pill-count": "Conteggio pillole",
+    "times-of-day": "Orari del giorno",
+    "add-time": "Aggiungi orario",
+    "days-of-week": "Giorni della settimana",
+    "days-of-month": "Giorni del mese",
+    "status": "Stato",
+    "status-active": "Attivo",
+    "status-paused": "In pausa",
+    "status-completed": "Completato",
+    "status-discontinued": "Sospeso",
+    "confirm-delete": "È sicuro di voler eliminare questo farmaco?",
+    "not-found": "Farmaco non trovato",
+    "view-all": "Vedi tutti",
+    "your-medications": "I suoi farmaci",
+    "form-tablet": "Compressa",
+    "form-capsule": "Capsula",
+    "form-sublingual": "Sublinguale",
+    "form-liquid": "Liquido",
+    "form-inhaler": "Inalatore",
+    "form-spray": "Spray",
+    "form-topical": "Topico",
+    "form-patch": "Cerotto",
+    "form-injection": "Iniezione",
+    "form-suppository": "Supposta",
+    "form-cream": "Crema",
+    "form-ointment": "Unguento",
+    "form-gel": "Gel",
+    "form-drops": "Gocce",
+    "form-powder": "Polvere",
+    "route-oral": "Orale",
+    "route-sublingual": "Sublinguale",
+    "route-nasal": "Nasale",
+    "route-inhalation": "Inalazione",
+    "route-topical": "Topica",
+    "route-transdermal": "Transdermica",
+    "route-rectal": "Rettale",
+    "route-intravenous": "Endovenosa",
+    "route-intramuscular": "Intramuscolare",
+    "route-subcutaneous": "Sottocutanea",
+    "route-ophthalmic": "Oftalmica",
+    "route-otic": "Otica",
+    "route-vaginal": "Vaginale",
+    "route-buccal": "Buccale",
+    "frequency-once": "Una volta",
+    "frequency-daily": "Giornaliero",
+    "frequency-weekly": "Settimanale",
+    "frequency-monthly": "Mensile",
+    "frequency-as_needed": "Al bisogno",
+    "day-mo": "Lun",
+    "day-tu": "Mar",
+    "day-we": "Mer",
+    "day-th": "Gio",
+    "day-fr": "Ven",
+    "day-sa": "Sab",
+    "day-su": "Dom",
+    "week-ahead": "Prossima settimana",
+    "morning": "Mattina",
+    "afternoon": "Pomeriggio",
+    "night": "Notte"
+  },
+  "dicom": {
+    "angle": "Misurazione angolo",
+    "color-map": "Mappa colori",
+    "error": "Impossibile caricare l'immagine DICOM",
+    "flip-h": "Rifletti orizzontale",
+    "flip-v": "Rifletti verticale",
+    "invert": "Inverti",
+    "length": "Misurazione lunghezza",
+    "loading": "Caricamento immagine DICOM...",
+    "pan": "Sposta",
+    "reset": "Ripristina",
+    "rotate-ccw": "Ruota in senso antiorario",
+    "rotate-cw": "Ruota in senso orario",
+    "slice": "Sezione",
+    "voi-presets": "Preset VOI",
+    "window-level": "Finestra/Livello",
+    "zoom": "Zoom"
+  },
+  "viewer": {
+    "panels": {
+      "anatomy": "Anatomia",
+      "timeline": "Linea temporale"
+    },
+    "timeline": {
+      "no-data": "Nessun dato sanitario disponibile",
+      "no-signals": "Nessun segnale selezionato"
     }
   }
 }

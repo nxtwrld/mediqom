@@ -6,13 +6,13 @@ $ARGUMENTS
 
 ## Overview
 
-This skill scans Svelte component files, extracts hardcoded English text strings, converts them to `$t()` calls, and updates all locale JSON files (`en.json`, `cs-CZ.json`, `de-DE.json`).
+This skill scans Svelte component files, extracts hardcoded English text strings, converts them to `$t()` calls, and updates all locale JSON files (`en.json`, `cs-CZ.json`, `de-DE.json`, `es-ES.json`, `it-IT.json`, `pl-PL.json`, `tr-TR.json`).
 
 ## Translation Library
 
 - **Library**: svelte-i18n v4.0.1
 - **Import**: `import { t } from '$lib/i18n';`
-- **Locales**: `src/lib/i18n/locales/{en.json, cs-CZ.json, de-DE.json}`
+- **Locales**: `src/lib/i18n/locales/{en.json, cs-CZ.json, de-DE.json, es-ES.json, it-IT.json, pl-PL.json, tr-TR.json}`
 - **Key pattern**: `namespace.category.kebab-case-key`
 
 ## Workflow
@@ -54,11 +54,15 @@ Example: "Processing files" in `src/components/import/JobCard.svelte` → `app.i
 
 ### Step 3: Update Files
 
-1. **Locale files**: Add entries to all three with actual translations:
+1. **Locale files**: Add entries to all seven with actual translations:
 
    - `en.json`: Full English text value
    - `cs-CZ.json`: Czech translation (provide actual translation, never empty strings)
    - `de-DE.json`: German translation (provide actual translation, never empty strings)
+   - `es-ES.json`: Spanish translation (provide actual translation, never empty strings)
+   - `it-IT.json`: Italian translation (provide actual translation, never empty strings)
+   - `pl-PL.json`: Polish translation (provide actual translation, never empty strings)
+   - `tr-TR.json`: Turkish translation (provide actual translation, never empty strings)
 
 2. **Svelte file**:
    - Add import if missing: `import { t } from '$lib/i18n';`
@@ -164,5 +168,7 @@ These files likely contain many untranslated strings:
 - Preserve interpolation variables as ICU MessageFormat syntax
 - Skip markdown content and `{@html}` blocks
 - Maintain alphabetical key ordering in JSON files
-- Czech pluralization uses: `=0`, `one`, `few`, `other` (more complex than English)
+- Czech/Polish pluralization uses: `=0`, `one`, `few`, `other` (more complex than English)
+- Turkish has no grammatical plural — use `=0`, `one`, `other`
+- All 7 locale files must be updated for every new key
 - Run `npm run check` after modifications to verify compilation

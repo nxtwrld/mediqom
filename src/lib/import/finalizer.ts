@@ -19,6 +19,7 @@ import { importKey, decrypt as decryptAES } from "$lib/encryption/aes";
 import { decrypt as decryptRSA } from "$lib/encryption/rsa";
 import { browser } from "$app/environment";
 import type { User } from "@supabase/supabase-js";
+import { deriveSections } from "$lib/documents/sections";
 
 // Attachment processing
 import { selectPagesFromPdf, createPdfFromImageBuffers } from "$lib/files/pdf";
@@ -436,6 +437,12 @@ export async function saveDocuments(
             url: (a as any).url || "",
           })) || [],
       };
+
+      // Derive sections from feature detection and actual content
+      const sections = deriveSections(content);
+      if (sections.length > 0) {
+        documentNew.metadata!.sections = sections;
+      }
 
       if (content.summary) {
         documentNew.metadata!.summary = content.summary;

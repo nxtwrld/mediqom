@@ -29,6 +29,7 @@ import { base64ToArrayBuffer } from "$lib/arrays";
 import { logger } from "$lib/logging/logger";
 import { profileContextManager } from "$lib/context/integration/profile-context";
 import { apiFetch } from "$lib/api/client";
+import { deriveSections } from "$lib/documents/sections";
 // Removed embedding migration import - now using medical terms classification
 
 export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
@@ -62,7 +63,9 @@ function updateIndex() {
         profileStores[user_id] = derived(documents, ($documents, set) => {
           const userDocuments = $documents.filter(
             (doc) =>
-              doc.user_id === user_id && doc.type === DocumentType.document,
+              doc.user_id === user_id &&
+              doc.type === DocumentType.document &&
+              doc.metadata?.category !== 'medication',
           );
           set(userDocuments);
         });
@@ -147,6 +150,17 @@ export async function decryptDocumentsNoStore(
         typeof att === "string" ? { url: att, path: att } : (att as Attachment),
       );
 
+      // Decrypt thumbnail separately if present
+      let thumbnailDecrypted: string | undefined;
+      if (document.thumbnail) {
+        try {
+          const thumbDec = await decrypt([document.thumbnail], key);
+          thumbnailDecrypted = thumbDec[0] || undefined;
+        } catch (e) {
+          logger.documents.warn("Failed to decrypt thumbnail", { id: document.id });
+        }
+      }
+
       const base: Document | DocumentPreload = {
         key,
         id: document.id,
@@ -154,9 +168,11 @@ export async function decryptDocumentsNoStore(
         type: document.type,
         metadata: parsedMetadata,
         content: undefined,
+        thumbnail: thumbnailDecrypted,
         owner_id: document.keys[0].owner_id,
         author_id: document.author_id,
         attachments: normalizedAttachments,
+        ...(parsedMetadata.subtype && { subtype: parsedMetadata.subtype }),
       };
 
       // Attach embedding metadata on the object without affecting type checks
@@ -193,10 +209,27 @@ export function setDocuments(
   // Collect profile IDs present in the incoming batch
   const incomingProfileIds = new Set(docs.map((d) => d.user_id).filter(Boolean));
 
+  // Build a map of existing docs that have content loaded
+  const existingWithContent = new Map<string, Document>();
+  for (const d of get(documents)) {
+    if (incomingProfileIds.has(d.user_id) && (d as Document).content) {
+      existingWithContent.set(d.id, d as Document);
+    }
+  }
+
+  // Merge: preserve content from existing docs when incoming is a preload
+  const merged = docs.map((doc) => {
+    const existing = existingWithContent.get(doc.id);
+    if (existing && !(doc as Document).content) {
+      return existing;
+    }
+    return doc;
+  });
+
   // Keep documents from other profiles; replace only the incoming profile(s)
   const others = get(documents).filter((d) => !incomingProfileIds.has(d.user_id));
 
-  documents.set([...others, ...docs]);
+  documents.set([...others, ...merged]);
   updateIndex();
   loadingDocumentsResolve(true);
   return docs;
@@ -235,19 +268,33 @@ export async function loadDocument(
     documentEncrypted.keys[0].key,
   );
 
+  // Decrypt thumbnail if present
+  let thumbnailDecrypted: string | undefined;
+  if (documentEncrypted.thumbnail) {
+    try {
+      const thumbDec = await decrypt([documentEncrypted.thumbnail], documentEncrypted.keys[0].key);
+      thumbnailDecrypted = thumbDec[0] || undefined;
+    } catch (e) {
+      logger.documents.warn("Failed to decrypt thumbnail", { id });
+    }
+  }
+
   documents.update((docs) => {
     const index = docs.findIndex((doc) => doc.id === id);
     if (index < 0) {
+      const parsedMetadata = JSON.parse(documentDecrypted[0]);
       docs.push({
         key: documentEncrypted.keys[0].key,
         id: documentEncrypted.id,
         user_id: documentEncrypted.user_id,
         type: documentEncrypted.type,
-        metadata: JSON.parse(documentDecrypted[0]),
+        metadata: parsedMetadata,
         content: JSON.parse(documentDecrypted[1]),
+        thumbnail: thumbnailDecrypted,
         owner_id: documentEncrypted.keys[0].owner_id,
         author_id: documentEncrypted.author_id,
         attachments: documentEncrypted.attachments || [],
+        ...(parsedMetadata.subtype && { subtype: parsedMetadata.subtype }),
       });
     }
     if (index >= 0) {
@@ -260,8 +307,20 @@ export async function loadDocument(
   });
   updateIndex();
 
-  // Ensure document has embeddings before returning
+  // Backfill metadata.sections for pre-existing documents
   const loadedDocument = byID[id] as Document;
+  if (loadedDocument?.content && !loadedDocument.metadata?.sections) {
+    const sections = deriveSections(loadedDocument.content);
+    if (sections.length > 0) {
+      loadedDocument.metadata = { ...loadedDocument.metadata, sections };
+      // Fire-and-forget — don't block document loading
+      updateDocument(loadedDocument).catch((e) =>
+        logger.documents.warn('Failed to backfill metadata.sections', { id, error: e })
+      );
+    }
+  }
+
+  // Ensure document has embeddings before returning
   if (loadedDocument.content) {
     try {
       // Medical terms are now generated during LangGraph workflow processing
@@ -361,8 +420,13 @@ export async function updateDocument(documentData: Document) {
     })),
   ];
 
+  // Extract first thumbnail for the dedicated thumbnail column
+  const firstThumbnail = (document.content.attachments || [])
+    .map((a: any) => a.thumbnail)
+    .find((t: any) => !!t) || '';
+
   const { data: enc } = await encrypt(
-    [JSON.stringify(documentData.content), JSON.stringify(metadata)],
+    [JSON.stringify(documentData.content), JSON.stringify(metadata), firstThumbnail],
     key,
   );
 
@@ -376,6 +440,7 @@ export async function updateDocument(documentData: Document) {
       body: JSON.stringify({
         metadata: enc[1],
         content: enc[0],
+        thumbnail: firstThumbnail ? enc[2] : null,
         attachments: document.content.attachments.map((a: Attachment) => a.url),
       }),
     },
@@ -462,9 +527,14 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
     })),
   ];
   logger.documents.info("Add document", { document });
-  // encrypt document, metadata using the same key as attachments
+  // Extract first thumbnail for the dedicated thumbnail column
+  const firstThumbnail = (document.content.attachments || [])
+    .map((a: any) => a.thumbnail)
+    .find((t: any) => !!t) || '';
+
+  // encrypt document, metadata, and thumbnail using the same key as attachments
   const { data: enc } = await encrypt(
-    [JSON.stringify(document.content), JSON.stringify(metadata)],
+    [JSON.stringify(document.content), JSON.stringify(metadata), firstThumbnail],
     key,
   );
   const keys = [
@@ -502,6 +572,7 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
         type: document.type || DocumentType.document,
         metadata: enc[1],
         content: enc[0],
+        thumbnail: firstThumbnail ? enc[2] : null,
         attachments: attachmentsUrls,
         keys,
       }),
@@ -726,14 +797,25 @@ export async function decrypt(
   return decrypted;
 }
 
+function mergeBodyPartTags(tags: string[], bodyParts?: any[]): string[] {
+  if (!bodyParts || !Array.isArray(bodyParts)) return tags;
+  const bodyPartTags = bodyParts
+    .map((bp: any) => bp.identification)
+    .filter((id: any) => typeof id === 'string' && id.length > 0);
+  if (bodyPartTags.length === 0) return tags;
+  return [...new Set([...tags, ...bodyPartTags])];
+}
+
 function deriveMetadata(
   document: Document | DocumentNew,
   metadata?: { [key: string]: any },
 ): { [key: string]: any } {
   let result: { [key: string]: any } = {
     title: document.content.title,
-    tags: document.content.tags || [],
+    tags: mergeBodyPartTags(document.content.tags || [], document.content.bodyParts),
     date: document.content.date || new Date().toISOString(),
+    ...(document.content.category && { category: document.content.category }),
+    ...(document.subtype && { subtype: document.subtype }),
     ...metadata,
   };
 

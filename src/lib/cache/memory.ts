@@ -25,6 +25,11 @@ export function setMemory<T>(key: string, data: T): void {
 	store.set(key, { data, fetchedAt: Date.now() });
 }
 
+/** Sets data without updating fetchedAt — entry is immediately stale. */
+export function setMemoryStale<T>(key: string, data: T): void {
+	store.set(key, { data, fetchedAt: 0 });
+}
+
 export function invalidateMemory(key: string): void {
 	store.delete(key);
 }
