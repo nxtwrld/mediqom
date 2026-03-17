@@ -398,7 +398,7 @@
                         .style('fill', `var(--color-categ1-${d.colorIndex})`)
                         .attr('stroke', 'white')
                         .attr('stroke-width', 1.5)
-                        .attr('opacity', isActive ? 0.85 : 0.4);
+                        .attr('opacity', isActive ? 1 : 0.75);
                 } else {
                     // Bar for duration meds
                     g.selectAll('circle.med-dot').remove();
@@ -415,7 +415,7 @@
                         .attr('height', barHeight)
                         .attr('rx', 5)
                         .style('fill', `var(--color-categ1-${d.colorIndex})`)
-                        .attr('opacity', isActive ? 0.75 : 0.35);
+                        .attr('opacity', isActive ? 1 : 0.75);
 
                     // Ongoing indicator — vertical dashed line from bar top to chart top
                     if (!d.item.endDate) {
@@ -426,7 +426,7 @@
                             .attr('y1', yTop).attr('y2', 0)
                             .style('stroke', `var(--color-categ1-${d.colorIndex})`).attr('stroke-width', 1.5)
                             .attr('stroke-dasharray', '4 3')
-                            .attr('opacity', 0.5);
+                            .attr('opacity', 0.6);
                     } else {
                         g.selectAll('line.med-ongoing').remove();
                     }
@@ -736,15 +736,6 @@
                 <a
                     class="button"
                     href="/med/p/{profileId}/documents/{menu.point.documentId}"
-                    data-sveltekit-preload-data="false"
-                    onclick={closeMenu}
-                >
-                    {$t('app.documents.view-document')}
-                </a>
-            {:else if profileId}
-                <a
-                    class="button"
-                    href="/med/p/{profileId}/documents/?tags={menu.series.name}"
                     data-sveltekit-preload-data="false"
                     onclick={closeMenu}
                 >

@@ -1871,6 +1871,9 @@
     }
   },
   "documents": {
+    "not-found": "Document not found",
+    "not-found-description": "This document may have been deleted or is no longer available.",
+    "back-to-documents": "Back to Documents",
     "session": {
       "title": "Session Analysis",
       "date": "Date",

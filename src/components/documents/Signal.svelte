@@ -4,6 +4,7 @@
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
+    import { getSignalColor } from '$lib/signals/colors';
 
     import type { Document } from '$lib/documents/types.d';
 
@@ -195,7 +196,7 @@
 
         <td class="-empty">
             <div class="actions">
-                <button onclick={() => ui.emit('viewer:timeline', { signalName: item.signal, value: Number(value), documentId: document?.id })} aria-label="View signal chart">
+                <button style="background-color: {getSignalColor(code)}" onclick={() => ui.emit('viewer:timeline', { signalName: item.signal, value: Number(value), documentId: document?.id })} aria-label="View signal chart">
                     <svg>
                         <use href="/icons.svg#chart-line"></use>
                     </svg>

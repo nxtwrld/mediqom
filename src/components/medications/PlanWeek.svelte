@@ -2,6 +2,7 @@
     import { t } from '$lib/i18n';
     import { weekSchedule, loadMedicationContent } from '$lib/medications/store';
     import type { MedicationOccurrence } from '$lib/medications/types';
+    import { loadProfileDocuments } from '$lib/profiles';
 
     // Map JS day index (0=Sun..6=Sat) to translation key suffix
     const dayKeyMap: Record<number, string> = { 0: 'su', 1: 'mo', 2: 'tu', 3: 'we', 4: 'th', 5: 'fr', 6: 'sa' };
@@ -15,7 +16,9 @@
     const occurrences = weekSchedule(profileId);
 
     $effect(() => {
-        loadMedicationContent(profileId);
+        loadProfileDocuments(profileId).then(() => {
+            loadMedicationContent(profileId);
+        });
     });
 
     // Monday-first day indices
@@ -183,8 +186,8 @@
         margin-bottom: var(--ui-pad-small);
     }
     .weekday.today .weekday-name {
-        background-color: var(--color-primary);
-        color: var(--color-white);
+        background-color: var(--color-highlight);
+        color: var(--color-highlight-text);
     }
 
     /* Expanded view */

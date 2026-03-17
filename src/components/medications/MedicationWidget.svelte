@@ -5,6 +5,7 @@
     import MedicationCard from './MedicationCard.svelte';
     import MedicationForm from './MedicationForm.svelte';
     import Modal from '$components/ui/Modal.svelte';
+    import { loadProfileDocuments } from '$lib/profiles';
 
     interface Props {
         profileId: string;
@@ -16,8 +17,10 @@
     const extracted = extractedMedicationsByProfile(profileId);
 
     $effect(() => {
-        loadMedicationContent(profileId);
-        loadExtractedMedicationContent(profileId);
+        loadProfileDocuments(profileId).then(() => {
+            loadMedicationContent(profileId);
+            loadExtractedMedicationContent(profileId);
+        });
     });
 
     let showAddModal = $state(false);

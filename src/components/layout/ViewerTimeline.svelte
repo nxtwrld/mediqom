@@ -13,17 +13,7 @@
     import { t } from '$lib/i18n';
     import { medicationsByProfile, loadMedicationContent, extractedMedicationsByProfile, loadExtractedMedicationContent } from '$lib/medications/store';
     import type { MedicationDocument, Medication } from '$lib/medications/types';
-
-    const SIGNAL_COLORS = [
-        '#4a90d9',
-        '#e67e22',
-        '#9b59b6',
-        '#1abc9c',
-        '#e91e63',
-        '#f1c40f',
-        '#c0392b',
-        '#16a085',
-    ];
+    import { getSignalColor } from '$lib/signals/colors';
 
     function parseReference(ref: string): [number, number] | null {
         if (!ref) return null;
@@ -92,9 +82,14 @@
         }
     }
 
-    // Document lookup by ID
+    // Document lookup by ID — use all profile documents, not just filtered userDocs,
+    // so signal refIds from any document type (sessions, medications) resolve correctly
     const docById = $derived(
-        Object.fromEntries(userDocs.map(d => [d.id, d]))
+        Object.fromEntries(
+            $documents
+                .filter(d => d.user_id === $profile?.id)
+                .map(d => [d.id, d])
+        )
     );
 
     // Build chart series from selected signals
@@ -124,12 +119,11 @@
 
                 if (values.length === 0) return null;
 
-                const colorIdx = availableSignals.indexOf(name);
                 return {
                     name,
                     label: $t('profile.health.props.' + name) || name,
                     values: values.sort((a, b) => a.date.getTime() - b.date.getTime()),
-                    color: SIGNAL_COLORS[colorIdx % SIGNAL_COLORS.length],
+                    color: getSignalColor(name),
                 } satisfies SignalSeries;
             })
             .filter(Boolean) as SignalSeries[]
@@ -300,7 +294,7 @@
                     {#each selectedSignals as name}
                         <span
                             class="signal-chip"
-                            style="--signal-color: {SIGNAL_COLORS[availableSignals.indexOf(name) % SIGNAL_COLORS.length]}"
+                            style="--signal-color: {getSignalColor(name)}"
                         >{$t('profile.health.props.' + name) || name}</span>
                     {/each}
                 {:else}
@@ -317,11 +311,11 @@
         <div class="signal-picker-backdrop" onclick={() => showSignalPicker = false}></div>
         <!-- Floating picker overlay -->
         <div class="signal-picker-overlay">
-            {#each availableSignals as name, i}
+            {#each availableSignals as name}
                 <button
                     class="signal-btn"
                     class:-active={selectedSignals.includes(name)}
-                    style="--signal-color: {SIGNAL_COLORS[i % SIGNAL_COLORS.length]}"
+                    style="--signal-color: {getSignalColor(name)}"
                     onclick={() => toggleSignal(name)}
                 >
                     {$t('profile.health.props.' + name) || name}
@@ -465,7 +459,7 @@
     .timeline-body {
         position: relative;
         flex: 1;
-        overflow: hidden;
+        overflow: visible;
     }
 
     .chart-area {
