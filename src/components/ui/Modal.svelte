@@ -14,11 +14,12 @@
 
     interface Props {
         style?: string | undefined;
+        type?: 'default' | 'fullscreen';
         children?: import('svelte').Snippet;
         onclose?: () => void | Promise<void>;
     }
 
-    let { style = undefined, children, onclose }: Props = $props();
+    let { style = undefined, type = 'default', children, onclose }: Props = $props();
 
     let showShade: boolean = $state(false);
     let modalContainer: HTMLDivElement | undefined = $state();
@@ -58,7 +59,7 @@
 </script>
 
 <div class="overlay flex -center" role="dialog" aria-modal="true" tabindex="0" onmousedown={handleOverlayMousedown} class:-shade={showShade} bind:this={modalContainer} onkeydown={handleKeydown} transition:fade>
-    <div class="modal-content" role="document" transition:scale>
+    <div class="modal-content" class:-fullscreen={type === 'fullscreen'} role="document" transition:scale>
         <button class="close" aria-label={$t('aria.ui.close-modal')} onclick={closeModal}>
             <svg>
                 <use href="/icons.svg#close"></use>
@@ -89,11 +90,37 @@
         background-color: var(--color-background);
     }
 
+    .modal-content.-fullscreen {
+        --radius: 0;
+        max-width: 100vw;
+        max-height: 100vh;
+        width: 100vw;
+        height: 100vh;
+        box-shadow: none;
+    }
+
+    .modal-content.-fullscreen .modal {
+        max-height: 100vh;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        border-radius: 0;
+    }
+
+    .modal-content.-fullscreen .close {
+        border-radius: 0;
+        top: env(safe-area-inset-top);
+        right: env(safe-area-inset-right);
+    }
+
     @media screen and (max-width: 768px) {
         .modal-content {
             max-width: 100vw !important;
             max-height: 90vh;
             margin-top: 5vh;
+        }
+
+        .modal-content.-fullscreen {
+            max-height: 100vh;
+            margin-top: 0;
         }
     }
 

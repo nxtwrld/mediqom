@@ -274,7 +274,7 @@
 {/if}
 
 {#if selectedImage}
-    <Modal onclose={closePreview} style="padding: 0;">
+    <Modal onclose={closePreview} type="fullscreen" style="padding: 0;">
         {#if dicomData || isDicomLoading || dicomError}
             <!-- DICOM Viewer modal -->
             <div class="dicom-modal-content">
@@ -360,8 +360,8 @@
     }
 
     .dicom-modal-content {
-        width: 90vw;
-        height: 85vh;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
     }

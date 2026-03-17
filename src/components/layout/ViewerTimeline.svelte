@@ -341,6 +341,7 @@
                     profileId={$profile?.id}
                     onScaleReady={handleScaleReady}
                     highlightedPoint={signalHighlight}
+                    documentCount={userDocs.length}
                 />
                 <div class="doc-overlay">
                     {#each groupedDocs as group}

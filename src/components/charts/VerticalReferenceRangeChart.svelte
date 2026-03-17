@@ -65,6 +65,7 @@
         profileId?: string;
         onScaleReady?: (getY: (date: Date) => number, chartHeight: number) => void;
         highlightedPoint?: { signalName: string; value: number; documentId?: string } | null;
+        documentCount?: number;
     }
 
     let {
@@ -76,12 +77,14 @@
         profileId,
         onScaleReady,
         highlightedPoint = null,
+        documentCount = 0,
     }: Props = $props();
 
     // Medication lane packing & margin computation
     const LANE_WIDTH = 14;
     const LANE_GAP = 2;
     const MED_COLOR_COUNT = 10;
+    const DOC_ZONE_WIDTH = 5;
 
     interface PackedMedLane {
         item: MedicationLane;
@@ -116,10 +119,11 @@
     let _packedLanes: PackedMedLane[] = [];
     let _numMedLanes = 0;
 
-    // Dynamic margin based on medication lanes
+    // Dynamic margin based on medication lanes (left) and document zone (right)
     const margin = $derived({
         ...marginProp,
-        left: marginProp.left + (_numMedLanes > 0 ? _numMedLanes * (LANE_WIDTH + LANE_GAP) + 8 : 0),
+        left: marginProp.left + (_numMedLanes > 0 ? _numMedLanes * (LANE_WIDTH + LANE_GAP) + 14 : 0),
+        right: marginProp.right + (documentCount > 0 ? DOC_ZONE_WIDTH : 0),
     });
 
     interface MedMenuState {
@@ -224,7 +228,9 @@
                 .tickValues(tickValues)
                 .tickFormat(d => tickFormat(d as Date))
         );
-        axisGroup.attr('transform', 'translate(-8, 0)');
+        // Position axis to the left of medication lanes (or just left of chart if no meds)
+        const axisOffset = _numMedLanes > 0 ? -(margin.left - marginProp.left) - 4 : -8;
+        axisGroup.attr('transform', `translate(${axisOffset}, 0)`);
 
         // Tick background pills
         axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
@@ -248,12 +254,13 @@
         const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
             y0, y1: boundaries[i + 1], odd: i % 2 === 1
         }));
+        const zebraLeft = _numMedLanes > 0 ? -(margin.left - marginProp.left) : 0;
         zebraGroup.selectAll<SVGRectElement, typeof zebraData[0]>('rect')
             .data(zebraData.filter(d => d.odd))
             .join('rect')
             .attr('class', 'zebra-band')
-            .attr('x', 0).attr('y', d => d.y0)
-            .attr('width', width + margin.right).attr('height', d => d.y1 - d.y0);
+            .attr('x', zebraLeft).attr('y', d => d.y0)
+            .attr('width', width + margin.right - zebraLeft).attr('height', d => d.y1 - d.y0);
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
@@ -429,6 +436,11 @@
                 g.selectAll<SVGTitleElement, null>('title').data([null]).join('title')
                     .text(d.item.name);
             });
+            // Vertical separator line between med zone and reference chart
+            medGroup.selectAll<SVGLineElement, null>('line.med-separator').data([null]).join('line')
+                .attr('class', 'med-separator')
+                .attr('x1', -3).attr('x2', -3)
+                .attr('y1', 0).attr('y2', height);
         } else {
             medGroup.selectAll('*').remove();
         }
@@ -514,7 +526,7 @@
         const bandData = [
             { id: 'low',    cls: 'band-low',    x: x(xDomain[0]), width: Math.max(0, x(0) - x(xDomain[0]))         },
             { id: 'normal', cls: 'band-normal', x: x(0),          width: Math.max(0, x(1) - x(0))                   },
-            { id: 'high',   cls: 'band-high',   x: x(1),          width: Math.max(0, width + margin.right - x(1))   },
+            { id: 'high',   cls: 'band-high',   x: x(1),          width: Math.max(0, width - x(1))   },
         ];
         bandsGroup.selectAll<SVGRectElement, typeof bandData[0]>('rect')
             .data(bandData, d => d.id)
@@ -535,7 +547,7 @@
         const zones = [
             { name: 'low',    x1: x(xDomain[0]), x2: x(0)                  },
             { name: 'normal', x1: x(0),          x2: x(1)                   },
-            { name: 'high',   x1: x(1),          x2: width + margin.right   },
+            { name: 'high',   x1: x(1),          x2: width   },
         ];
 
         labelsGroup.selectAll<SVGGElement, typeof zones[number]>('g.zone')
@@ -555,6 +567,55 @@
                     .attr('class', `rangeLabelText ${z.name}`)
                     .text(getRangeLabel(z.name));
             });
+
+        // Medication zone label — rendered below chart, aligned with zone labels
+        if (_numMedLanes > 0) {
+            const medBaseX = -margin.left + marginProp.left;
+            const medZoneWidth = _numMedLanes * (LANE_WIDTH + LANE_GAP) + 4;
+            const medCenterX = medBaseX - 2 + medZoneWidth / 2;
+            const medLabelGroup = svg.selectAll<SVGGElement, null>('g.med-zone-label').data([null]).join('g').attr('class', 'med-zone-label');
+            medLabelGroup.selectAll<SVGRectElement, null>('rect').data([null]).join('rect')
+                .attr('x', medBaseX - 2).attr('y', height + 4)
+                .attr('width', medZoneWidth).attr('height', LABEL_HEIGHT).attr('rx', 3)
+                .attr('class', 'med-label-back');
+            const iconSize = 14;
+            medLabelGroup.selectAll<SVGUseElement, null>('use.med-label-icon').data([null]).join('svg:use')
+                .attr('class', 'med-label-icon')
+                .attr('href', '/icons.svg#pills')
+                .attr('x', medCenterX - iconSize / 2).attr('y', height + 4 + (LABEL_HEIGHT - iconSize) / 2)
+                .attr('width', iconSize).attr('height', iconSize);
+        } else {
+            svg.selectAll('g.med-zone-label').remove();
+        }
+
+        // Document zone label — rendered below chart on the right, mirrors medication zone on the left
+        if (documentCount > 0) {
+            const docZoneX = width + 3;
+            const docZoneW = margin.right - 3; // from separator to right edge of margin
+
+            // Vertical separator line
+            svg.selectAll<SVGLineElement, null>('line.doc-separator').data([null]).join('line')
+                .attr('class', 'doc-separator')
+                .attr('x1', docZoneX).attr('x2', docZoneX)
+                .attr('y1', 0).attr('y2', height);
+
+            // Zone label at bottom with document icon
+            const docLabelGroup = svg.selectAll<SVGGElement, null>('g.doc-zone-label').data([null]).join('g').attr('class', 'doc-zone-label');
+            docLabelGroup.selectAll<SVGRectElement, null>('rect').data([null]).join('rect')
+                .attr('x', docZoneX).attr('y', height + 4)
+                .attr('width', docZoneW).attr('height', LABEL_HEIGHT).attr('rx', 3)
+                .attr('class', 'doc-label-back');
+            const iconSize = 14;
+            const docCenterX = docZoneX + docZoneW / 2;
+            docLabelGroup.selectAll<SVGUseElement, null>('use.doc-label-icon').data([null]).join('svg:use')
+                .attr('class', 'doc-label-icon')
+                .attr('href', '/icons.svg#report')
+                .attr('x', docCenterX - iconSize / 2).attr('y', height + 4 + (LABEL_HEIGHT - iconSize) / 2)
+                .attr('width', iconSize).attr('height', iconSize);
+        } else {
+            svg.selectAll('line.doc-separator').remove();
+            svg.selectAll('g.doc-zone-label').remove();
+        }
 
         // Update zoom translate extent for new chart height
         zoomBehavior?.translateExtent([[0, 0], [0, height]]);
@@ -872,6 +933,21 @@
         text-decoration: none;
     }
 
+    /* Medication zone */
+    .chart-wrap svg :global(.med-separator) {
+        stroke: var(--color-border);
+        stroke-width: 1;
+        opacity: 0.4;
+    }
+
+    .chart-wrap svg :global(.med-label-back) {
+        fill: var(--color-gray-300, #ddd);
+    }
+
+    .chart-wrap svg :global(.med-label-icon) {
+        fill: var(--color-gray-700, #555);
+    }
+
     /* Medication lanes */
     .chart-wrap svg :global(.med-bar) {
         transition: opacity 0.15s ease;
@@ -891,5 +967,20 @@
 
     .chart-wrap svg :global(.med-item) {
         cursor: pointer;
+    }
+
+    /* Document zone */
+    .chart-wrap svg :global(.doc-separator) {
+        stroke: var(--color-border);
+        stroke-width: 1;
+        opacity: 0.4;
+    }
+
+    .chart-wrap svg :global(.doc-label-back) {
+        fill: var(--color-gray-300, #ddd);
+    }
+
+    .chart-wrap svg :global(.doc-label-icon) {
+        fill: var(--color-gray-700, #555);
     }
 </style>
