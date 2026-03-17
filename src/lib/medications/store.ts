@@ -13,6 +13,7 @@ import type {
 } from './types';
 import { extractMedicationsFromDocument } from './convert';
 import { calculateAllOccurrences } from './occurrences';
+import { migrateMedicationContent } from './migrate';
 
 /**
  * Get the Monday of the current week.
@@ -122,6 +123,20 @@ export async function loadMedicationContent(profileId: string): Promise<void> {
 	);
 	if (medicationPreloads.length === 0) return;
 	await Promise.all(medicationPreloads.map((doc) => loadDocument(doc.id, profileId)));
+
+	// Migrate old medication content structure if needed
+	const $docsAfterLoad = get(documents);
+	const medicationDocs = $docsAfterLoad.filter(
+		(doc) =>
+			(doc.metadata?.category === 'medication' || doc.subtype === 'medication') &&
+			doc.user_id === profileId &&
+			!!doc.content
+	);
+	for (const doc of medicationDocs) {
+		if (migrateMedicationContent(doc.content as Record<string, any>)) {
+			await updateDocument(doc as Document);
+		}
+	}
 }
 
 /**

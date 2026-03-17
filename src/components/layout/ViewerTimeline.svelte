@@ -8,9 +8,11 @@
     import { documents, loadDocuments } from '$lib/documents/index';
     import { DocumentType } from '$lib/documents/types.d';
     import VerticalReferenceRangeChart from '$components/charts/VerticalReferenceRangeChart.svelte';
-    import type { SignalSeries } from '$components/charts/VerticalReferenceRangeChart.svelte';
+    import type { SignalSeries, MedicationLane } from '$components/charts/VerticalReferenceRangeChart.svelte';
     import DocLabel from '$components/documents/DocLabel.svelte';
     import { t } from '$lib/i18n';
+    import { medicationsByProfile, loadMedicationContent, extractedMedicationsByProfile, loadExtractedMedicationContent } from '$lib/medications/store';
+    import type { MedicationDocument, Medication } from '$lib/medications/types';
 
     const SIGNAL_COLORS = [
         '#4a90d9',
@@ -74,7 +76,7 @@
     // Documents — sorted newest-first
     const userDocs = $derived(
         $documents
-            .filter(d => d.user_id === $profile?.id && d.type === DocumentType.document)
+            .filter(d => d.user_id === $profile?.id && d.type === DocumentType.document && d.metadata?.category !== 'medication')
             .sort((a, b) => {
                 const da = new Date((a.metadata as any)?.date ?? (a as any).created_at ?? 0).getTime();
                 const db = new Date((b.metadata as any)?.date ?? (b as any).created_at ?? 0).getTime();
@@ -133,11 +135,95 @@
             .filter(Boolean) as SignalSeries[]
     );
 
-    // Load documents when profile is available
+    // Load documents when profile is available, then load medication content
     $effect(() => {
         const id = $profile?.id;
-        if (id) loadDocuments(id);
+        if (!id) return;
+        loadDocuments(id).then(() => {
+            loadMedicationContent(id);
+            loadExtractedMedicationContent(id);
+        });
     });
+
+    // Load medication documents
+    let medications = $state<MedicationDocument[]>([]);
+    $effect(() => {
+        const id = $profile?.id;
+        if (!id) { medications = []; return; }
+        return medicationsByProfile(id).subscribe(v => { medications = v; });
+    });
+
+    // Load and subscribe to extracted medications from imported documents
+    let extractedMeds = $state<Partial<Medication>[]>([]);
+    $effect(() => {
+        const id = $profile?.id;
+        if (!id) { extractedMeds = []; return; }
+        return extractedMedicationsByProfile(id).subscribe(v => { extractedMeds = v; });
+    });
+
+    // Transform medications to MedicationLane[]
+    function getMedStartDate(m: MedicationDocument): Date | null {
+        const med = m.content?.medication;
+        if (!med) return null;
+        const raw = med.schedule?.startDate
+            || med.prescriptionDate
+            || med.sourceDocumentDate
+            || (m.metadata as any)?.date
+            || (m as any).created_at;
+        return raw ? new Date(raw) : null;
+    }
+
+    const standaloneMedLanes: MedicationLane[] = $derived(
+        medications
+            .map(m => {
+                const startDate = getMedStartDate(m);
+                if (!startDate) return null;
+                const med = m.content.medication;
+                return {
+                    id: m.id,
+                    name: med.medicationName,
+                    startDate,
+                    endDate: med.schedule?.endDate
+                        ? new Date(med.schedule.endDate) : null,
+                    isOnce: med.schedule?.frequency === 'once' || !med.schedule,
+                    status: m.content.status as string,
+                };
+            })
+            .filter((x): x is NonNullable<typeof x> => x !== null)
+    );
+
+    const extractedMedLanes: MedicationLane[] = $derived(
+        extractedMeds
+            .map(m => {
+                const raw = m.schedule?.startDate
+                    || m.prescriptionDate
+                    || m.sourceDocumentDate;
+                if (!raw || !m.medicationName) return null;
+                return {
+                    id: (m.sourceDocumentId ?? '') + ':' + m.medicationName,
+                    name: m.medicationName,
+                    startDate: new Date(raw),
+                    endDate: null,
+                    isOnce: true,
+                    status: (m.status as string) ?? 'unknown',
+                };
+            })
+            .filter((x): x is NonNullable<typeof x> => x !== null)
+    );
+
+    const medLanes: MedicationLane[] = $derived(
+        [...standaloneMedLanes, ...extractedMedLanes]
+    );
+
+    // Map keyed by MedicationLane ID for popover lookup
+    const medicationData = $derived(
+        new Map<string, { medication?: MedicationDocument; extracted?: Partial<Medication> }>([
+            ...medications.map(m => [m.id, { medication: m }] as const),
+            ...extractedMeds
+                .filter(m => m.medicationName)
+                .map(m => [(m.sourceDocumentId ?? '') + ':' + m.medicationName, { extracted: m }] as const),
+        ])
+    );
 
     // Signal picker open/close
     let showSignalPicker = $state(false);
@@ -164,9 +250,15 @@
         const dates: number[] = [
             ...chartSeries.flatMap(s => s.values.map(v => v.date.getTime())),
             ...userDocs.map(d => getDocDate(d).getTime()),
+            ...medLanes.map(m => m.startDate.getTime()),
+            ...medLanes.filter(m => m.endDate).map(m => m.endDate!.getTime()),
         ];
         if (dates.length === 0) return undefined;
-        return [new Date(Math.min(...dates)), new Date(Math.max(...dates))];
+        const min = Math.min(...dates);
+        const max = Math.max(...dates);
+        const twoMonthsFromNow = new Date();
+        twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+        return [new Date(min), new Date(Math.max(max, twoMonthsFromNow.getTime()))];
     });
 
     // Document grouping by Y position
@@ -240,9 +332,11 @@
 
     <div class="timeline-body">
         <div class="chart-area">
-            {#if chartSeries.length > 0 || userDocs.length > 0}
+            {#if chartSeries.length > 0 || userDocs.length > 0 || medLanes.length > 0}
                 <VerticalReferenceRangeChart
                     series={chartSeries}
+                    medications={medLanes}
+                    {medicationData}
                     timeRange={unifiedTimeRange}
                     profileId={$profile?.id}
                     onScaleReady={handleScaleReady}

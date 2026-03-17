@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { profile } from '$lib/profiles';
+	import { profile, loadProfileDocuments } from '$lib/profiles';
 	import { medicationsByProfile, extractedMedicationsByProfile, addMedication, loadMedicationContent, loadExtractedMedicationContent } from '$lib/medications/store';
 	import type { Medication } from '$lib/medications/types';
 	import { t } from '$lib/i18n';
@@ -7,12 +7,15 @@
 	import MedicationForm from '$components/medications/MedicationForm.svelte';
 	import Modal from '$components/ui/Modal.svelte';
 
-	const medications = medicationsByProfile($profile.id);
-	const extracted = extractedMedicationsByProfile($profile.id);
+	let medications = $derived(medicationsByProfile($profile.id));
+	let extracted = $derived(extractedMedicationsByProfile($profile.id));
 
 	$effect(() => {
-		loadMedicationContent($profile.id);
-		loadExtractedMedicationContent($profile.id);
+		const id = $profile.id;
+		loadProfileDocuments(id).then(() => {
+			loadMedicationContent(id);
+			loadExtractedMedicationContent(id);
+		});
 	});
 
 	let showAddModal = $state(false);

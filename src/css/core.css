@@ -38,6 +38,18 @@
   --color-gray-300-alpha: #e6e7ea7c;
   --color-white: #f9fafb;
 
+  /* Categorical palette 1 (pastel) */
+  --color-categ1-1: #a78bfa;   /* violet */
+  --color-categ1-2: #7dd3fc;   /* sky */
+  --color-categ1-3: #6ee7b7;   /* emerald */
+  --color-categ1-4: #fcd34d;   /* amber */
+  --color-categ1-5: #fca5a5;   /* red */
+  --color-categ1-6: #a5b4fc;   /* indigo */
+  --color-categ1-7: #67e8f9;   /* cyan */
+  --color-categ1-8: #f9a8d4;   /* pink */
+  --color-categ1-9: #fdba74;   /* orange */
+  --color-categ1-10: #86efac;  /* green */
+
   --color-background: var(--color-gray-300);
   --color-border: var(--color-white);
 

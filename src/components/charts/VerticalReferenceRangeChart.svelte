@@ -5,6 +5,9 @@
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
     import ReferenceRange from '$components/charts/ReferenceRange.svelte';
+    import Popover from '$components/ui/Popover.svelte';
+    import MedicationCard from '$components/medications/MedicationCard.svelte';
+    import type { MedicationDocument, Medication } from '$lib/medications/types';
     import { dateTime } from '$lib/datetime';
 
     const LABEL_HEIGHT = 20;
@@ -17,6 +20,15 @@
             high:   translate('charts.reference-range.high'),
         };
         return labels[name] ?? name;
+    }
+
+    export interface MedicationLane {
+        id: string;
+        name: string;
+        startDate: Date;
+        endDate: Date | null;   // null = ongoing
+        isOnce: boolean;        // frequency === 'once'
+        status: string;
     }
 
     export interface SignalSeries {
@@ -46,6 +58,8 @@
 
     interface Props {
         series?: SignalSeries[];
+        medications?: MedicationLane[];
+        medicationData?: Map<string, { medication?: MedicationDocument; extracted?: Partial<Medication> }>;
         margin?: { top: number; right: number; bottom: number; left: number };
         timeRange?: [Date, Date];
         profileId?: string;
@@ -55,15 +69,71 @@
 
     let {
         series = [],
-        margin = { top: 10, right: 52, bottom: LABEL_HEIGHT + 4, left: 60 },
+        medications = [],
+        medicationData,
+        margin: marginProp = { top: 10, right: 52, bottom: LABEL_HEIGHT + 4, left: 60 },
         timeRange,
         profileId,
         onScaleReady,
         highlightedPoint = null,
     }: Props = $props();
 
+    // Medication lane packing & margin computation
+    const LANE_WIDTH = 14;
+    const LANE_GAP = 2;
+    const MED_COLOR_COUNT = 10;
+
+    interface PackedMedLane {
+        item: MedicationLane;
+        lane: number;
+        colorIndex: number;
+    }
+
+    function packMedLanes(meds: MedicationLane[]): PackedMedLane[] {
+        if (meds.length === 0) return [];
+        const sorted = [...meds].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+        const laneEnds: number[] = [];
+        const nameIndexMap = new Map<string, number>();
+        let nextIndex = 0;
+        return sorted.map(item => {
+            const start = item.startDate.getTime();
+            let lane = laneEnds.findIndex(end => end < start);
+            if (lane === -1) { lane = laneEnds.length; laneEnds.push(0); }
+            laneEnds[lane] = (item.endDate ?? new Date(8640000000000000)).getTime();
+            if (!nameIndexMap.has(item.name)) {
+                nameIndexMap.set(item.name, (nextIndex++ % MED_COLOR_COUNT) + 1);
+            }
+            return { item, lane, colorIndex: nameIndexMap.get(item.name)! };
+        });
+    }
+
+    $effect(() => {
+        // recompute packed lanes whenever medications change — stored in module var for render use
+        _packedLanes = packMedLanes(medications);
+        _numMedLanes = _packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0;
+    });
+
+    let _packedLanes: PackedMedLane[] = [];
+    let _numMedLanes = 0;
+
+    // Dynamic margin based on medication lanes
+    const margin = $derived({
+        ...marginProp,
+        left: marginProp.left + (_numMedLanes > 0 ? _numMedLanes * (LANE_WIDTH + LANE_GAP) + 8 : 0),
+    });
+
+    interface MedMenuState {
+        visible: boolean;
+        x: number;
+        y: number;
+        barX: number;
+        placement: 'top' | 'bottom';
+        laneData: PackedMedLane | null;
+    }
+
     let svgElement: SVGSVGElement | undefined = $state();
     let menu = $state<MenuState>({ visible: false, x: 0, y: 0, dotX: 0, placement: 'top', point: null, series: null });
+    let medMenu = $state<MedMenuState>({ visible: false, x: 0, y: 0, barX: 0, placement: 'top', laneData: null });
 
     // Module-level zoom state — persists between renders
     let yBase: ScaleTime<number, number> | null = null;
@@ -74,6 +144,10 @@
 
     function closeMenu() {
         menu = { ...menu, visible: false };
+    }
+
+    function closeMedMenu() {
+        medMenu = { ...medMenu, visible: false };
     }
 
     function highlightKey(h: typeof highlightedPoint): string | null {
@@ -243,6 +317,7 @@
                         })
                         .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
                             event.stopPropagation();
+                            medMenu = { ...medMenu, visible: false }; // close med menu
                             focusedSeriesName = currentSeries.name;
                             applyFocusStyles(focusedSeriesName);
                             const dotX = x(d.normalized) + margin.left;
@@ -265,6 +340,98 @@
                 .attr('stroke', 'white')
                 .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
         });
+
+        // Medication lanes — rendered in the left margin area
+        const chartMain = select(svgElement!).select<SVGGElement>('g.chart-main');
+        const medGroup = chartMain.selectAll<SVGGElement, null>('g.medication-lanes').data([null]).join('g').attr('class', 'medication-lanes');
+
+        if (_packedLanes.length > 0) {
+            const medBaseX = -margin.left + marginProp.left; // start of med area within chart-main
+            const now = new Date();
+
+            const medItems = medGroup.selectAll<SVGGElement, PackedMedLane>('g.med-item')
+                .data(_packedLanes, d => d.item.id)
+                .join(
+                    enter => enter.append('g').attr('class', 'med-item'),
+                    update => update,
+                    exit => exit.remove()
+                );
+
+            medItems.each(function(d) {
+                const g = select(this);
+                const laneX = medBaseX + d.lane * (LANE_WIDTH + LANE_GAP) + 4;
+                const isActive = d.item.status === 'active';
+                const endDate = d.item.endDate ?? now;
+
+                // Click handler for medication popover
+                g.style('cursor', 'pointer')
+                 .on('click', function(event: MouseEvent) {
+                    event.stopPropagation();
+                    menu = { ...menu, visible: false }; // close vitals menu
+                    const barX = laneX + LANE_WIDTH / 2 + margin.left;
+                    const barY = y(d.item.startDate) + margin.top;
+                    const chartWidth = svgElement!.clientWidth;
+                    const MENU_W = 260;
+                    const MENU_H = 180;
+                    const ARROW = 10;
+                    const edgePad = 8;
+                    const placement: 'top' | 'bottom' = (barY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
+                    const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(barX, chartWidth - MENU_W / 2 - edgePad));
+                    medMenu = { visible: true, x: clampedX, y: barY, barX, placement, laneData: d };
+                });
+
+                if (d.item.isOnce) {
+                    // Dot for single-occurrence meds
+                    g.selectAll('rect').remove();
+                    g.selectAll<SVGCircleElement, null>('circle.med-dot').data([null]).join('circle')
+                        .attr('class', 'med-dot')
+                        .attr('cx', laneX + LANE_WIDTH / 2)
+                        .attr('cy', y(d.item.startDate))
+                        .attr('r', 5)
+                        .style('fill', `var(--color-categ1-${d.colorIndex})`)
+                        .attr('stroke', 'white')
+                        .attr('stroke-width', 1.5)
+                        .attr('opacity', isActive ? 0.85 : 0.4);
+                } else {
+                    // Bar for duration meds
+                    g.selectAll('circle.med-dot').remove();
+                    const yStart = y(d.item.startDate);
+                    const yEnd = y(endDate);
+                    const yTop = Math.min(yStart, yEnd);
+                    const barHeight = Math.max(10, Math.abs(yStart - yEnd));
+
+                    g.selectAll<SVGRectElement, null>('rect.med-bar').data([null]).join('rect')
+                        .attr('class', 'med-bar')
+                        .attr('x', laneX + (LANE_WIDTH - 10) / 2)
+                        .attr('y', yTop)
+                        .attr('width', 10)
+                        .attr('height', barHeight)
+                        .attr('rx', 5)
+                        .style('fill', `var(--color-categ1-${d.colorIndex})`)
+                        .attr('opacity', isActive ? 0.75 : 0.35);
+
+                    // Ongoing indicator — vertical dashed line from bar top to chart top
+                    if (!d.item.endDate) {
+                        const centerX = laneX + LANE_WIDTH / 2;
+                        g.selectAll<SVGLineElement, null>('line.med-ongoing').data([null]).join('line')
+                            .attr('class', 'med-ongoing')
+                            .attr('x1', centerX).attr('x2', centerX)
+                            .attr('y1', yTop).attr('y2', 0)
+                            .style('stroke', `var(--color-categ1-${d.colorIndex})`).attr('stroke-width', 1.5)
+                            .attr('stroke-dasharray', '4 3')
+                            .attr('opacity', 0.5);
+                    } else {
+                        g.selectAll('line.med-ongoing').remove();
+                    }
+                }
+
+                // Tooltip via <title>
+                g.selectAll<SVGTitleElement, null>('title').data([null]).join('title')
+                    .text(d.item.name);
+            });
+        } else {
+            medGroup.selectAll('*').remove();
+        }
 
         if (onScaleReady) {
             onScaleReady((date: Date) => y(date) + margin.top, height);
@@ -411,6 +578,7 @@
         // SVG click handler lives here to avoid re-attachment on every render
         select(svgElement).on('click', () => {
             menu = { ...menu, visible: false };
+            medMenu = { ...medMenu, visible: false };
             focusedSeriesName = null;
             lastAutoFocusedKey = highlightKey(highlightedPoint); // prevent re-focus on next render
             applyFocusStyles(null);
@@ -453,10 +621,11 @@
         observer.observe(svgElement);
 
         function handleOutsideClick(e: PointerEvent) {
-            if (!menu.visible) return;
+            if (!menu.visible && !medMenu.visible) return;
             const wrap = svgElement?.closest('.chart-wrap');
             if (wrap && !wrap.contains(e.target as Node)) {
                 menu = { ...menu, visible: false };
+                medMenu = { ...medMenu, visible: false };
             }
         }
         window.addEventListener('pointerdown', handleOutsideClick);
@@ -473,60 +642,83 @@
 <div class="chart-wrap">
     <svg bind:this={svgElement}></svg>
 
-    {#if menu.visible && menu.point && menu.series}
-    <div
-        class="dot-menu"
-        class:-top={menu.placement === 'top'}
-        class:-bottom={menu.placement === 'bottom'}
-        style="left: {menu.x}px; top: {menu.y}px; --arrow-offset: {menu.dotX - menu.x}px"
-        role="menu"
+    <!-- Vitals popover -->
+    {#if menu.point && menu.series}
+    <Popover
+        open={menu.visible}
+        placement={menu.placement}
+        x={menu.x}
+        y={menu.y}
+        arrowOffset={menu.dotX - menu.x}
+        onclose={closeMenu}
     >
-        <div class="dot-menu-header">
-            <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
-            <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
+        <div class="dot-menu-content">
+            <div class="dot-menu-header">
+                <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
+                <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
+            </div>
+            <hr class="dot-menu-divider" />
+            {#if menu.point.rawData?.reference}
+            <ReferenceRange
+                value={menu.point.value}
+                reference={menu.point.rawData.reference}
+                referenceRange={{
+                    low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
+                    high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
+                }}
+                labels={false}
+                showValue={true}
+            />
+            {/if}
+            <hr class="dot-menu-divider" />
+            {#if menu.point.documentId && profileId}
+                <a
+                    class="button"
+                    href="/med/p/{profileId}/documents/{menu.point.documentId}"
+                    data-sveltekit-preload-data="false"
+                    onclick={closeMenu}
+                >
+                    {$t('app.documents.view-document')}
+                </a>
+            {:else if profileId}
+                <a
+                    class="button"
+                    href="/med/p/{profileId}/documents/?tags={menu.series.name}"
+                    data-sveltekit-preload-data="false"
+                    onclick={closeMenu}
+                >
+                    {$t('app.documents.view-document')}
+                </a>
+            {/if}
+            <AskButton
+                className="button"
+                type="signal"
+                label={menu.series.label}
+                data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
+                documentId={menu.point.documentId}
+                documentTitle={menu.point.documentTitle}
+            />
         </div>
-        <hr class="dot-menu-divider" />
-        {#if menu.point.rawData?.reference}
-        <ReferenceRange
-            value={menu.point.value}
-            reference={menu.point.rawData.reference}
-            referenceRange={{
-                low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
-                high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
-            }}
-            labels={false}
-            showValue={true}
-        />
-        {/if}
-        <hr class="dot-menu-divider" />
-        {#if menu.point.documentId && profileId}
-            <a
-                class="button"
-                href="/med/p/{profileId}/documents/{menu.point.documentId}"
-                data-sveltekit-preload-data="false"
-                onclick={closeMenu}
-            >
-                {$t('app.documents.view-document')}
-            </a>
-        {:else if profileId}
-            <a
-                class="button"
-                href="/med/p/{profileId}/documents/?tags={menu.series.name}"
-                data-sveltekit-preload-data="false"
-                onclick={closeMenu}
-            >
-                {$t('app.documents.view-document')}
-            </a>
-        {/if}
-        <AskButton
-            className="button"
-            type="signal"
-            label={menu.series.label}
-            data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
-            documentId={menu.point.documentId}
-            documentTitle={menu.point.documentTitle}
-        />
-    </div>
+    </Popover>
+    {/if}
+
+    <!-- Medication popover -->
+    {#if medMenu.laneData}
+        {@const data = medicationData?.get(medMenu.laneData.item.id)}
+        <Popover
+            open={medMenu.visible}
+            placement={medMenu.placement}
+            x={medMenu.x}
+            y={medMenu.y}
+            arrowOffset={medMenu.barX - medMenu.x}
+            onclose={closeMedMenu}
+        >
+            <MedicationCard
+                medication={data?.medication}
+                extracted={data?.extracted}
+                profileId={profileId ?? ''}
+            />
+        </Popover>
     {/if}
 </div>
 
@@ -639,65 +831,13 @@
         letter-spacing: 0.05em;
     }
 
-    /* Dot context menu */
-    .dot-menu {
-        position: absolute;
-        background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
-        border: 1px solid var(--color-border);
-        border-radius: var(--ui-radius-medium);
-        backdrop-filter: blur(4px);
-        box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
+    /* Dot context menu content */
+    .dot-menu-content {
         display: flex;
         flex-direction: column;
         gap: 0.15rem;
-        padding: 1rem;
-        z-index: 10;
-        min-width: 16rem;
-    }
-
-    .dot-menu.-top {
-        transform: translate(-50%, calc(-100% - 20px));
-    }
-
-    .dot-menu.-bottom {
-        transform: translate(-50%, 20px);
-    }
-
-    /* Arrow — two pseudo-elements for border + fill */
-    .dot-menu::before,
-    .dot-menu::after {
-        content: '';
-        position: absolute;
-        left: calc(50% + var(--arrow-offset, 0px));
-        transform: translateX(-50%);
-        border: 9px solid transparent;
-        pointer-events: none;
-    }
-
-    /* Arrow pointing DOWN (menu is above dot) */
-    .dot-menu.-top::before {
-        top: 100%;
-        border-top-color: var(--color-border);
-    }
-
-    .dot-menu.-top::after {
-        top: 100%;
-        margin-top: -2px;
-        border: 8px solid transparent;
-        border-top-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
-    }
-
-    /* Arrow pointing UP (menu is below dot) */
-    .dot-menu.-bottom::before {
-        bottom: 100%;
-        border-bottom-color: var(--color-border);
-    }
-
-    .dot-menu.-bottom::after {
-        bottom: 100%;
-        margin-bottom: -2px;
-        border: 8px solid transparent;
-        border-bottom-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        padding: 0.7rem;
+        min-width: 14rem;
     }
 
     .dot-menu-header {
@@ -719,16 +859,37 @@
         margin: 0.1rem 0;
     }
 
-    .dot-menu-header :global(.range) {
+    .dot-menu-content :global(.range) {
         min-width: unset;
         margin: 0.1rem 0;
     }
 
-    .dot-menu-header :global(.range.-value) {
+    .dot-menu-content :global(.range.-value) {
         padding-top: 1.6rem;
     }
 
-    .dot-menu a.button {
+    .dot-menu-content a.button {
         text-decoration: none;
+    }
+
+    /* Medication lanes */
+    .chart-wrap svg :global(.med-bar) {
+        transition: opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.med-bar:hover) {
+        opacity: 1 !important;
+    }
+
+    .chart-wrap svg :global(.med-dot) {
+        transition: opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.med-dot:hover) {
+        opacity: 1 !important;
+    }
+
+    .chart-wrap svg :global(.med-item) {
+        cursor: pointer;
     }
 </style>
