@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({
   const { data: documentsLoad, error: documentsError } = await supabase
     .from("documents")
     .select(
-      "id, metadata, content, type, attachments, user_id, author_id, keys!inner(key, owner_id)",
+      "id, metadata, content, type, attachments, thumbnail, user_id, author_id, keys!inner(key, owner_id)",
     )
     .eq("user_id", params.pid)
     .eq("id", params.did)
@@ -63,7 +63,7 @@ export const PUT: RequestHandler = async ({
     return error(401, { message: "Unauthorized" });
   }
 
-  const { metadata, content, attachments } = await request.json();
+  const { metadata, content, thumbnail, attachments } = await request.json();
 
   if (!metadata || !content) {
     return error(400, { message: "Invalid request" });
@@ -76,6 +76,7 @@ export const PUT: RequestHandler = async ({
     .update({
       metadata,
       content,
+      thumbnail,
       attachments,
       updated_at: new Date(),
     })

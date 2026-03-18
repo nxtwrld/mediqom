@@ -90,7 +90,15 @@
       "Bash(npx vitest:*)",
       "Bash(grep -A 10 -B 10 \"request.json\\(\\)\" /Users/nxtwrld/Documents/GitHub/mediqom/src/routes/v1/med/profiles/\\\\[pid\\\\]/attachments/+server.ts)",
       "Bash(npm ls:*)",
-      "Bash(find /Users/nxtwrld/Documents/GitHub/mediqom/node_modules/@cornerstonejs/core -name \"*StackViewport*\" -o -name \"*Camera*\" | grep -E \"\\\\.\\(d\\\\.ts\\)$\" | head -10)"
+      "Bash(find /Users/nxtwrld/Documents/GitHub/mediqom/node_modules/@cornerstonejs/core -name \"*StackViewport*\" -o -name \"*Camera*\" | grep -E \"\\\\.\\(d\\\\.ts\\)$\" | head -10)",
+      "Bash(mkdir -p /Users/nxtwrld/Documents/GitHub/mediqom/src/routes/med/p/\\\\[profile\\\\]/medications/add && mkdir -p /Users/nxtwrld/Documents/GitHub/mediqom/src/routes/med/p/\\\\[profile\\\\]/medications/\\\\[medicationId\\\\]/edit)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script",
+      "WebFetch(domain:epreskripce.gov.cz)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.sukl.cz)",
+      "WebFetch(domain:pacient.erecept.sukl.cz)",
+      "WebFetch(domain:testapi.sukl.cz)",
+      "Bash(jq:*)"
     ],
     "deny": []
   }

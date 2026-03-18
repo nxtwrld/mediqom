@@ -5,6 +5,9 @@
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
     import ReferenceRange from '$components/charts/ReferenceRange.svelte';
+    import Popover from '$components/ui/Popover.svelte';
+    import MedicationCard from '$components/medications/MedicationCard.svelte';
+    import type { MedicationDocument, Medication } from '$lib/medications/types';
     import { dateTime } from '$lib/datetime';
 
     const LABEL_HEIGHT = 20;
@@ -17,6 +20,15 @@
             high:   translate('charts.reference-range.high'),
         };
         return labels[name] ?? name;
+    }
+
+    export interface MedicationLane {
+        id: string;
+        name: string;
+        startDate: Date;
+        endDate: Date | null;   // null = ongoing
+        isOnce: boolean;        // frequency === 'once'
+        status: string;
     }
 
     export interface SignalSeries {
@@ -46,24 +58,86 @@
 
     interface Props {
         series?: SignalSeries[];
+        medications?: MedicationLane[];
+        medicationData?: Map<string, { medication?: MedicationDocument; extracted?: Partial<Medication> }>;
         margin?: { top: number; right: number; bottom: number; left: number };
         timeRange?: [Date, Date];
         profileId?: string;
         onScaleReady?: (getY: (date: Date) => number, chartHeight: number) => void;
         highlightedPoint?: { signalName: string; value: number; documentId?: string } | null;
+        documentCount?: number;
     }
 
     let {
         series = [],
-        margin = { top: 10, right: 52, bottom: LABEL_HEIGHT + 4, left: 60 },
+        medications = [],
+        medicationData,
+        margin: marginProp = { top: 10, right: 52, bottom: LABEL_HEIGHT + 4, left: 60 },
         timeRange,
         profileId,
         onScaleReady,
         highlightedPoint = null,
+        documentCount = 0,
     }: Props = $props();
+
+    // Medication lane packing & margin computation
+    const LANE_WIDTH = 14;
+    const LANE_GAP = 2;
+    const MED_COLOR_COUNT = 10;
+    const DOC_ZONE_WIDTH = 5;
+
+    interface PackedMedLane {
+        item: MedicationLane;
+        lane: number;
+        colorIndex: number;
+    }
+
+    function packMedLanes(meds: MedicationLane[]): PackedMedLane[] {
+        if (meds.length === 0) return [];
+        const sorted = [...meds].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+        const laneEnds: number[] = [];
+        const nameIndexMap = new Map<string, number>();
+        let nextIndex = 0;
+        return sorted.map(item => {
+            const start = item.startDate.getTime();
+            let lane = laneEnds.findIndex(end => end < start);
+            if (lane === -1) { lane = laneEnds.length; laneEnds.push(0); }
+            laneEnds[lane] = (item.endDate ?? new Date(8640000000000000)).getTime();
+            if (!nameIndexMap.has(item.name)) {
+                nameIndexMap.set(item.name, (nextIndex++ % MED_COLOR_COUNT) + 1);
+            }
+            return { item, lane, colorIndex: nameIndexMap.get(item.name)! };
+        });
+    }
+
+    $effect(() => {
+        // recompute packed lanes whenever medications change — stored in module var for render use
+        _packedLanes = packMedLanes(medications);
+        _numMedLanes = _packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0;
+    });
+
+    let _packedLanes: PackedMedLane[] = [];
+    let _numMedLanes = 0;
+
+    // Dynamic margin based on medication lanes (left) and document zone (right)
+    const margin = $derived({
+        ...marginProp,
+        left: marginProp.left + (_numMedLanes > 0 ? _numMedLanes * (LANE_WIDTH + LANE_GAP) + 14 : 0),
+        right: marginProp.right + (documentCount > 0 ? DOC_ZONE_WIDTH : 0),
+    });
+
+    interface MedMenuState {
+        visible: boolean;
+        x: number;
+        y: number;
+        barX: number;
+        placement: 'top' | 'bottom';
+        laneData: PackedMedLane | null;
+    }
 
     let svgElement: SVGSVGElement | undefined = $state();
     let menu = $state<MenuState>({ visible: false, x: 0, y: 0, dotX: 0, placement: 'top', point: null, series: null });
+    let medMenu = $state<MedMenuState>({ visible: false, x: 0, y: 0, barX: 0, placement: 'top', laneData: null });
 
     // Module-level zoom state — persists between renders
     let yBase: ScaleTime<number, number> | null = null;
@@ -74,6 +148,10 @@
 
     function closeMenu() {
         menu = { ...menu, visible: false };
+    }
+
+    function closeMedMenu() {
+        medMenu = { ...medMenu, visible: false };
     }
 
     function highlightKey(h: typeof highlightedPoint): string | null {
@@ -108,6 +186,52 @@
                      return focusedName && isFocused ? baseR * 1.5 : baseR;
                  });
             });
+    }
+
+    // Reusable interaction handlers for click + tap
+    function handleDotInteraction(d: SignalSeries['values'][number], currentSeries: SignalSeries) {
+        medMenu = { ...medMenu, visible: false };
+        focusedSeriesName = currentSeries.name;
+        applyFocusStyles(focusedSeriesName);
+        if (!svgElement || !yBase) return;
+        const width = svgElement.clientWidth - margin.left - margin.right;
+        const x = scaleLinear<number, number>().domain(xDomain).range([0, width]);
+        // Recompute y from current zoom state
+        const currentTransform = select(svgElement).property('__zoom') ?? zoomIdentity;
+        const y = currentTransform.rescaleY(yBase);
+        const dotX = x(d.normalized) + margin.left;
+        const dotY = y(d.date) + margin.top;
+        const chartWidth = svgElement.clientWidth;
+        const MENU_W = 260;
+        const MENU_H = 210;
+        const ARROW = 10;
+        const edgePad = 8;
+        const placement = (dotY - margin.top) >= (MENU_H + ARROW) ? 'top' as const : 'bottom' as const;
+        const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(dotX, chartWidth - MENU_W / 2 - edgePad));
+        menu = { visible: true, x: clampedX, y: dotY, dotX, placement, point: d, series: currentSeries };
+    }
+
+    function handleMedInteraction(d: PackedMedLane, laneX: number) {
+        menu = { ...menu, visible: false };
+        if (!svgElement || !yBase) return;
+        const currentTransform = select(svgElement).property('__zoom') ?? zoomIdentity;
+        const y = currentTransform.rescaleY(yBase);
+        const barX = laneX + LANE_WIDTH / 2 + margin.left;
+        const barY = y(d.item.startDate) + margin.top;
+        const chartWidth = svgElement.clientWidth;
+        const MENU_W = 260;
+        const MENU_H = 180;
+        const ARROW = 10;
+        const edgePad = 8;
+        const placement: 'top' | 'bottom' = (barY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
+        const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(barX, chartWidth - MENU_W / 2 - edgePad));
+        medMenu = { visible: true, x: clampedX, y: barY, barX, placement, laneData: d };
+    }
+
+    function handleSeriesLineClick(seriesName: string) {
+        focusedSeriesName = focusedSeriesName === seriesName ? null : seriesName;
+        if (!focusedSeriesName) lastAutoFocusedKey = highlightKey(highlightedPoint);
+        applyFocusStyles(focusedSeriesName);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,7 +274,9 @@
                 .tickValues(tickValues)
                 .tickFormat(d => tickFormat(d as Date))
         );
-        axisGroup.attr('transform', 'translate(-8, 0)');
+        // Position axis to the left of medication lanes (or just left of chart if no meds)
+        const axisOffset = _numMedLanes > 0 ? -(margin.left - marginProp.left) - 4 : -8;
+        axisGroup.attr('transform', `translate(${axisOffset}, 0)`);
 
         // Tick background pills
         axisGroup.selectAll<SVGGElement, Date>('.tick').each(function(d) {
@@ -174,12 +300,13 @@
         const zebraData = boundaries.slice(0, -1).map((y0, i) => ({
             y0, y1: boundaries[i + 1], odd: i % 2 === 1
         }));
+        const zebraLeft = _numMedLanes > 0 ? -(margin.left - marginProp.left) : 0;
         zebraGroup.selectAll<SVGRectElement, typeof zebraData[0]>('rect')
             .data(zebraData.filter(d => d.odd))
             .join('rect')
             .attr('class', 'zebra-band')
-            .attr('x', 0).attr('y', d => d.y0)
-            .attr('width', width + margin.right).attr('height', d => d.y1 - d.y0);
+            .attr('x', zebraLeft).attr('y', d => d.y0)
+            .attr('width', width + margin.right - zebraLeft).attr('height', d => d.y1 - d.y0);
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
@@ -207,13 +334,7 @@
                     .attr('class', 'series-line')
                     .attr('stroke', s.color)
                     .attr('d', valueLine(sorted) ?? '')
-                    .style('cursor', 'pointer')
-                    .on('click', function(event: MouseEvent) {
-                        event.stopPropagation();
-                        focusedSeriesName = focusedSeriesName === s.name ? null : s.name;
-                        if (!focusedSeriesName) lastAutoFocusedKey = highlightKey(highlightedPoint);
-                        applyFocusStyles(focusedSeriesName);
-                    });
+                    .style('cursor', 'pointer');
             } else {
                 g.selectAll('path.series-line').remove();
             }
@@ -241,21 +362,7 @@
                                     .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
                             }
                         })
-                        .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
-                            event.stopPropagation();
-                            focusedSeriesName = currentSeries.name;
-                            applyFocusStyles(focusedSeriesName);
-                            const dotX = x(d.normalized) + margin.left;
-                            const dotY = y(d.date) + margin.top;
-                            const chartWidth  = svgElement!.clientWidth;
-                            const MENU_W = 260;
-                            const MENU_H = 210;
-                            const ARROW  = 10;
-                            const edgePad = 8;
-                            const placement = (dotY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
-                            const clampedX  = Math.max(MENU_W / 2 + edgePad, Math.min(dotX, chartWidth - MENU_W / 2 - edgePad));
-                            menu = { visible: true, x: clampedX, y: dotY, dotX, placement, point: d, series: currentSeries };
-                        }),
+                        ,
                     update => update,
                     exit => exit.remove()
                 )
@@ -265,6 +372,88 @@
                 .attr('stroke', 'white')
                 .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
         });
+
+        // Medication lanes — rendered in the left margin area
+        const chartMain = select(svgElement!).select<SVGGElement>('g.chart-main');
+        const medGroup = chartMain.selectAll<SVGGElement, null>('g.medication-lanes').data([null]).join('g').attr('class', 'medication-lanes');
+
+        if (_packedLanes.length > 0) {
+            const medBaseX = -margin.left + marginProp.left; // start of med area within chart-main
+            const now = new Date();
+
+            const medItems = medGroup.selectAll<SVGGElement, PackedMedLane>('g.med-item')
+                .data(_packedLanes, d => d.item.id)
+                .join(
+                    enter => enter.append('g').attr('class', 'med-item'),
+                    update => update,
+                    exit => exit.remove()
+                );
+
+            medItems.each(function(d) {
+                const g = select(this);
+                const laneX = medBaseX + d.lane * (LANE_WIDTH + LANE_GAP) + 4;
+                const isActive = d.item.status === 'active';
+                const endDate = d.item.endDate ?? now;
+
+                g.style('cursor', 'pointer');
+
+                if (d.item.isOnce) {
+                    // Dot for single-occurrence meds
+                    g.selectAll('rect').remove();
+                    g.selectAll<SVGCircleElement, null>('circle.med-dot').data([null]).join('circle')
+                        .attr('class', 'med-dot')
+                        .attr('cx', laneX + LANE_WIDTH / 2)
+                        .attr('cy', y(d.item.startDate))
+                        .attr('r', 5)
+                        .style('fill', `var(--color-categ1-${d.colorIndex})`)
+                        .attr('stroke', 'white')
+                        .attr('stroke-width', 1.5)
+                        .attr('opacity', isActive ? 1 : 0.75);
+                } else {
+                    // Bar for duration meds
+                    g.selectAll('circle.med-dot').remove();
+                    const yStart = y(d.item.startDate);
+                    const yEnd = y(endDate);
+                    const yTop = Math.min(yStart, yEnd);
+                    const barHeight = Math.max(10, Math.abs(yStart - yEnd));
+
+                    g.selectAll<SVGRectElement, null>('rect.med-bar').data([null]).join('rect')
+                        .attr('class', 'med-bar')
+                        .attr('x', laneX + (LANE_WIDTH - 10) / 2)
+                        .attr('y', yTop)
+                        .attr('width', 10)
+                        .attr('height', barHeight)
+                        .attr('rx', 5)
+                        .style('fill', `var(--color-categ1-${d.colorIndex})`)
+                        .attr('opacity', isActive ? 1 : 0.75);
+
+                    // Ongoing indicator — vertical dashed line from bar top to chart top
+                    if (!d.item.endDate) {
+                        const centerX = laneX + LANE_WIDTH / 2;
+                        g.selectAll<SVGLineElement, null>('line.med-ongoing').data([null]).join('line')
+                            .attr('class', 'med-ongoing')
+                            .attr('x1', centerX).attr('x2', centerX)
+                            .attr('y1', yTop).attr('y2', 0)
+                            .style('stroke', `var(--color-categ1-${d.colorIndex})`).attr('stroke-width', 1.5)
+                            .attr('stroke-dasharray', '4 3')
+                            .attr('opacity', 0.6);
+                    } else {
+                        g.selectAll('line.med-ongoing').remove();
+                    }
+                }
+
+                // Tooltip via <title>
+                g.selectAll<SVGTitleElement, null>('title').data([null]).join('title')
+                    .text(d.item.name);
+            });
+            // Vertical separator line between med zone and reference chart
+            medGroup.selectAll<SVGLineElement, null>('line.med-separator').data([null]).join('line')
+                .attr('class', 'med-separator')
+                .attr('x1', -3).attr('x2', -3)
+                .attr('y1', 0).attr('y2', height);
+        } else {
+            medGroup.selectAll('*').remove();
+        }
 
         if (onScaleReady) {
             onScaleReady((date: Date) => y(date) + margin.top, height);
@@ -347,7 +536,7 @@
         const bandData = [
             { id: 'low',    cls: 'band-low',    x: x(xDomain[0]), width: Math.max(0, x(0) - x(xDomain[0]))         },
             { id: 'normal', cls: 'band-normal', x: x(0),          width: Math.max(0, x(1) - x(0))                   },
-            { id: 'high',   cls: 'band-high',   x: x(1),          width: Math.max(0, width + margin.right - x(1))   },
+            { id: 'high',   cls: 'band-high',   x: x(1),          width: Math.max(0, width - x(1))   },
         ];
         bandsGroup.selectAll<SVGRectElement, typeof bandData[0]>('rect')
             .data(bandData, d => d.id)
@@ -368,7 +557,7 @@
         const zones = [
             { name: 'low',    x1: x(xDomain[0]), x2: x(0)                  },
             { name: 'normal', x1: x(0),          x2: x(1)                   },
-            { name: 'high',   x1: x(1),          x2: width + margin.right   },
+            { name: 'high',   x1: x(1),          x2: width   },
         ];
 
         labelsGroup.selectAll<SVGGElement, typeof zones[number]>('g.zone')
@@ -388,6 +577,55 @@
                     .attr('class', `rangeLabelText ${z.name}`)
                     .text(getRangeLabel(z.name));
             });
+
+        // Medication zone label — rendered below chart, aligned with zone labels
+        if (_numMedLanes > 0) {
+            const medBaseX = -margin.left + marginProp.left;
+            const medZoneWidth = _numMedLanes * (LANE_WIDTH + LANE_GAP) + 4;
+            const medCenterX = medBaseX - 2 + medZoneWidth / 2;
+            const medLabelGroup = svg.selectAll<SVGGElement, null>('g.med-zone-label').data([null]).join('g').attr('class', 'med-zone-label');
+            medLabelGroup.selectAll<SVGRectElement, null>('rect').data([null]).join('rect')
+                .attr('x', medBaseX - 2).attr('y', height + 4)
+                .attr('width', medZoneWidth).attr('height', LABEL_HEIGHT).attr('rx', 3)
+                .attr('class', 'med-label-back');
+            const iconSize = 14;
+            medLabelGroup.selectAll<SVGUseElement, null>('use.med-label-icon').data([null]).join('svg:use')
+                .attr('class', 'med-label-icon')
+                .attr('href', '/icons.svg#pills')
+                .attr('x', medCenterX - iconSize / 2).attr('y', height + 4 + (LABEL_HEIGHT - iconSize) / 2)
+                .attr('width', iconSize).attr('height', iconSize);
+        } else {
+            svg.selectAll('g.med-zone-label').remove();
+        }
+
+        // Document zone label — rendered below chart on the right, mirrors medication zone on the left
+        if (documentCount > 0) {
+            const docZoneX = width + 3;
+            const docZoneW = margin.right - 3; // from separator to right edge of margin
+
+            // Vertical separator line
+            svg.selectAll<SVGLineElement, null>('line.doc-separator').data([null]).join('line')
+                .attr('class', 'doc-separator')
+                .attr('x1', docZoneX).attr('x2', docZoneX)
+                .attr('y1', 0).attr('y2', height);
+
+            // Zone label at bottom with document icon
+            const docLabelGroup = svg.selectAll<SVGGElement, null>('g.doc-zone-label').data([null]).join('g').attr('class', 'doc-zone-label');
+            docLabelGroup.selectAll<SVGRectElement, null>('rect').data([null]).join('rect')
+                .attr('x', docZoneX).attr('y', height + 4)
+                .attr('width', docZoneW).attr('height', LABEL_HEIGHT).attr('rx', 3)
+                .attr('class', 'doc-label-back');
+            const iconSize = 14;
+            const docCenterX = docZoneX + docZoneW / 2;
+            docLabelGroup.selectAll<SVGUseElement, null>('use.doc-label-icon').data([null]).join('svg:use')
+                .attr('class', 'doc-label-icon')
+                .attr('href', '/icons.svg#report')
+                .attr('x', docCenterX - iconSize / 2).attr('y', height + 4 + (LABEL_HEIGHT - iconSize) / 2)
+                .attr('width', iconSize).attr('height', iconSize);
+        } else {
+            svg.selectAll('line.doc-separator').remove();
+            svg.selectAll('g.doc-zone-label').remove();
+        }
 
         // Update zoom translate extent for new chart height
         zoomBehavior?.translateExtent([[0, 0], [0, height]]);
@@ -409,12 +647,97 @@
         if (!svgElement) return;
 
         // SVG click handler lives here to avoid re-attachment on every render
-        select(svgElement).on('click', () => {
+        function dismissAll() {
             menu = { ...menu, visible: false };
+            medMenu = { ...medMenu, visible: false };
             focusedSeriesName = null;
-            lastAutoFocusedKey = highlightKey(highlightedPoint); // prevent re-focus on next render
+            lastAutoFocusedKey = highlightKey(highlightedPoint);
             applyFocusStyles(null);
-        });
+        }
+
+        // Native delegated tap detection — bypasses D3's event system entirely.
+        // Uses capture phase so handlers fire BEFORE D3 zoom's bubble-phase handlers.
+        // This solves mobile touch issues where D3 .on() handlers don't work in WKWebView.
+        let tapStartX = 0, tapStartY = 0, tapStartTime = 0;
+        let tapTarget: Element | null = null;
+        let bgTapStartX = 0, bgTapStartY = 0, bgTapStartTime = 0;
+
+        // After a successful tap on an interactive element, the browser synthesizes a
+        // click event from the pointer pair. That click would bubble to window and
+        // trigger Popover's handleClickOutside, instantly closing the popover we just
+        // opened. This one-shot capture handler eats that synthesized click.
+        function suppressNextClick() {
+            svgElement!.addEventListener('click', (ev) => { ev.stopPropagation(); }, { capture: true, once: true });
+        }
+
+        function onPointerDown(e: PointerEvent) {
+            const target = e.target as Element;
+            // Track background taps (no stopPropagation — D3 zoom can still pan)
+            bgTapStartX = e.clientX;
+            bgTapStartY = e.clientY;
+            bgTapStartTime = Date.now();
+            // Check if tapping an interactive element
+            if (target.classList.contains('dot')
+                || target.classList.contains('series-line')
+                || target.classList.contains('med-bar')
+                || target.classList.contains('med-dot')
+                || target.closest('.med-item')) {
+                tapStartX = e.clientX;
+                tapStartY = e.clientY;
+                tapStartTime = Date.now();
+                tapTarget = target;
+                e.stopPropagation(); // prevent D3 zoom from capturing this
+            }
+        }
+
+        function onPointerUp(e: PointerEvent) {
+            if (tapTarget) {
+                const dx = e.clientX - tapStartX;
+                const dy = e.clientY - tapStartY;
+                const dt = Date.now() - tapStartTime;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const wasTap = dist < 10 && dt < 300;
+                const capturedTarget = tapTarget;
+                tapTarget = null;
+                if (!wasTap) return;
+                e.stopPropagation();
+
+                // Determine what was tapped and dispatch
+                if (capturedTarget.classList.contains('dot')) {
+                    const d = select(capturedTarget).datum() as SignalSeries['values'][number];
+                    const seriesG = capturedTarget.closest('g.series');
+                    const s = seriesG ? select(seriesG).datum() as SignalSeries : null;
+                    if (d && s) { handleDotInteraction(d, s); suppressNextClick(); }
+                } else if (capturedTarget.classList.contains('series-line')) {
+                    const seriesG = capturedTarget.closest('g.series');
+                    const s = seriesG ? select(seriesG).datum() as SignalSeries : null;
+                    if (s) { handleSeriesLineClick(s.name); suppressNextClick(); }
+                } else if (capturedTarget.classList.contains('med-bar')
+                           || capturedTarget.classList.contains('med-dot')
+                           || capturedTarget.closest('.med-item')) {
+                    const medG = capturedTarget.closest('.med-item');
+                    const d = medG ? select(medG).datum() as PackedMedLane : null;
+                    if (d) {
+                        const medBaseX = -margin.left + marginProp.left;
+                        const laneX = medBaseX + d.lane * (LANE_WIDTH + LANE_GAP) + 4;
+                        handleMedInteraction(d, laneX);
+                        suppressNextClick();
+                    }
+                }
+            } else {
+                // Background tap — dismiss popovers
+                const dx = e.clientX - bgTapStartX;
+                const dy = e.clientY - bgTapStartY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const dt = Date.now() - bgTapStartTime;
+                if (dist < 10 && dt < 300) {
+                    dismissAll();
+                }
+            }
+        }
+
+        svgElement.addEventListener('pointerdown', onPointerDown, true);
+        svgElement.addEventListener('pointerup', onPointerUp, true);
 
         // Set up D3 zoom — Y axis only, scaleExtent 1..20
         zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
@@ -423,7 +746,12 @@
                 if (event.type === 'wheel' || event.type === 'dblclick') return true;
                 if (event.touches?.length >= 2) return true;
                 const target = event.target as Element;
-                if (target.classList.contains('dot')) return false;
+                // Don't let zoom capture taps on interactive elements
+                if (target.classList.contains('dot')
+                    || target.classList.contains('series-line')
+                    || target.classList.contains('med-bar')
+                    || target.classList.contains('med-dot')
+                    || target.closest?.('.med-item')) return false;
                 return true;
             })
             .on('zoom', (event) => {
@@ -453,10 +781,11 @@
         observer.observe(svgElement);
 
         function handleOutsideClick(e: PointerEvent) {
-            if (!menu.visible) return;
+            if (!menu.visible && !medMenu.visible) return;
             const wrap = svgElement?.closest('.chart-wrap');
             if (wrap && !wrap.contains(e.target as Node)) {
                 menu = { ...menu, visible: false };
+                medMenu = { ...medMenu, visible: false };
             }
         }
         window.addEventListener('pointerdown', handleOutsideClick);
@@ -464,7 +793,9 @@
         return () => {
             clearTimeout(rTimer);
             observer.disconnect();
-            select(svgElement!).on('.zoom', null).on('click', null);
+            select(svgElement!).on('.zoom', null);
+            svgElement!.removeEventListener('pointerdown', onPointerDown, true);
+            svgElement!.removeEventListener('pointerup', onPointerUp, true);
             window.removeEventListener('pointerdown', handleOutsideClick);
         };
     });
@@ -473,60 +804,74 @@
 <div class="chart-wrap">
     <svg bind:this={svgElement}></svg>
 
-    {#if menu.visible && menu.point && menu.series}
-    <div
-        class="dot-menu"
-        class:-top={menu.placement === 'top'}
-        class:-bottom={menu.placement === 'bottom'}
-        style="left: {menu.x}px; top: {menu.y}px; --arrow-offset: {menu.dotX - menu.x}px"
-        role="menu"
+    <!-- Vitals popover -->
+    {#if menu.point && menu.series}
+    <Popover
+        open={menu.visible}
+        placement={menu.placement}
+        x={menu.x}
+        y={menu.y}
+        arrowOffset={menu.dotX - menu.x}
+        onclose={closeMenu}
     >
-        <div class="dot-menu-header">
-            <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
-            <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
+        <div class="dot-menu-content">
+            <div class="dot-menu-header">
+                <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
+                <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
+            </div>
+            <hr class="dot-menu-divider" />
+            {#if menu.point.rawData?.reference}
+            <ReferenceRange
+                value={menu.point.value}
+                reference={menu.point.rawData.reference}
+                referenceRange={{
+                    low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
+                    high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
+                }}
+                labels={false}
+                showValue={true}
+            />
+            {/if}
+            <hr class="dot-menu-divider" />
+            {#if menu.point.documentId && profileId}
+                <a
+                    class="button"
+                    href="/med/p/{profileId}/documents/{menu.point.documentId}"
+                    data-sveltekit-preload-data="false"
+                    onclick={closeMenu}
+                >
+                    {$t('app.documents.view-document')}
+                </a>
+            {/if}
+            <AskButton
+                className="button"
+                type="signal"
+                label={menu.series.label}
+                data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
+                documentId={menu.point.documentId}
+                documentTitle={menu.point.documentTitle}
+            />
         </div>
-        <hr class="dot-menu-divider" />
-        {#if menu.point.rawData?.reference}
-        <ReferenceRange
-            value={menu.point.value}
-            reference={menu.point.rawData.reference}
-            referenceRange={{
-                low: { value: Number(menu.point.rawData.reference.split('-')[0]), unit: menu.point.unit ?? '' },
-                high: { value: Number(menu.point.rawData.reference.split('-')[1]), unit: menu.point.unit ?? '' }
-            }}
-            labels={false}
-            showValue={true}
-        />
-        {/if}
-        <hr class="dot-menu-divider" />
-        {#if menu.point.documentId && profileId}
-            <a
-                class="button"
-                href="/med/p/{profileId}/documents/{menu.point.documentId}"
-                data-sveltekit-preload-data="false"
-                onclick={closeMenu}
-            >
-                {$t('app.documents.view-document')}
-            </a>
-        {:else if profileId}
-            <a
-                class="button"
-                href="/med/p/{profileId}/documents/?tags={menu.series.name}"
-                data-sveltekit-preload-data="false"
-                onclick={closeMenu}
-            >
-                {$t('app.documents.view-document')}
-            </a>
-        {/if}
-        <AskButton
-            className="button"
-            type="signal"
-            label={menu.series.label}
-            data={menu.point.rawData ?? { signal: menu.series.name, value: menu.point.value, unit: menu.point.unit, date: menu.point.date }}
-            documentId={menu.point.documentId}
-            documentTitle={menu.point.documentTitle}
-        />
-    </div>
+    </Popover>
+    {/if}
+
+    <!-- Medication popover -->
+    {#if medMenu.laneData}
+        {@const data = medicationData?.get(medMenu.laneData.item.id)}
+        <Popover
+            open={medMenu.visible}
+            placement={medMenu.placement}
+            x={medMenu.x}
+            y={medMenu.y}
+            arrowOffset={medMenu.barX - medMenu.x}
+            onclose={closeMedMenu}
+        >
+            <MedicationCard
+                medication={data?.medication}
+                extracted={data?.extracted}
+                profileId={profileId ?? ''}
+            />
+        </Popover>
     {/if}
 </div>
 
@@ -541,6 +886,7 @@
     .chart-wrap svg {
         width: 100%;
         height: 100%;
+        touch-action: none;
     }
 
     .chart-wrap svg :global(.band-low),
@@ -639,65 +985,13 @@
         letter-spacing: 0.05em;
     }
 
-    /* Dot context menu */
-    .dot-menu {
-        position: absolute;
-        background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
-        border: 1px solid var(--color-border);
-        border-radius: var(--ui-radius-medium);
-        backdrop-filter: blur(4px);
-        box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
+    /* Dot context menu content */
+    .dot-menu-content {
         display: flex;
         flex-direction: column;
         gap: 0.15rem;
-        padding: 1rem;
-        z-index: 10;
-        min-width: 16rem;
-    }
-
-    .dot-menu.-top {
-        transform: translate(-50%, calc(-100% - 20px));
-    }
-
-    .dot-menu.-bottom {
-        transform: translate(-50%, 20px);
-    }
-
-    /* Arrow — two pseudo-elements for border + fill */
-    .dot-menu::before,
-    .dot-menu::after {
-        content: '';
-        position: absolute;
-        left: calc(50% + var(--arrow-offset, 0px));
-        transform: translateX(-50%);
-        border: 9px solid transparent;
-        pointer-events: none;
-    }
-
-    /* Arrow pointing DOWN (menu is above dot) */
-    .dot-menu.-top::before {
-        top: 100%;
-        border-top-color: var(--color-border);
-    }
-
-    .dot-menu.-top::after {
-        top: 100%;
-        margin-top: -2px;
-        border: 8px solid transparent;
-        border-top-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
-    }
-
-    /* Arrow pointing UP (menu is below dot) */
-    .dot-menu.-bottom::before {
-        bottom: 100%;
-        border-bottom-color: var(--color-border);
-    }
-
-    .dot-menu.-bottom::after {
-        bottom: 100%;
-        margin-bottom: -2px;
-        border: 8px solid transparent;
-        border-bottom-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        padding: 0.7rem;
+        min-width: 14rem;
     }
 
     .dot-menu-header {
@@ -719,16 +1013,67 @@
         margin: 0.1rem 0;
     }
 
-    .dot-menu-header :global(.range) {
+    .dot-menu-content :global(.range) {
         min-width: unset;
         margin: 0.1rem 0;
     }
 
-    .dot-menu-header :global(.range.-value) {
+    .dot-menu-content :global(.range.-value) {
         padding-top: 1.6rem;
     }
 
-    .dot-menu a.button {
+    .dot-menu-content a.button {
         text-decoration: none;
+    }
+
+    /* Medication zone */
+    .chart-wrap svg :global(.med-separator) {
+        stroke: var(--color-border);
+        stroke-width: 1;
+        opacity: 0.4;
+    }
+
+    .chart-wrap svg :global(.med-label-back) {
+        fill: var(--color-gray-300, #ddd);
+    }
+
+    .chart-wrap svg :global(.med-label-icon) {
+        fill: var(--color-gray-700, #555);
+    }
+
+    /* Medication lanes */
+    .chart-wrap svg :global(.med-bar) {
+        transition: opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.med-bar:hover) {
+        opacity: 1 !important;
+    }
+
+    .chart-wrap svg :global(.med-dot) {
+        transition: opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.med-dot:hover) {
+        opacity: 1 !important;
+    }
+
+    .chart-wrap svg :global(.med-item) {
+        cursor: pointer;
+    }
+
+    /* Document zone */
+    .chart-wrap svg :global(.doc-separator) {
+        stroke: var(--color-border);
+        stroke-width: 1;
+        opacity: 0.4;
+    }
+
+    .chart-wrap svg :global(.doc-label-back) {
+        fill: var(--color-gray-300, #ddd);
+    }
+
+    .chart-wrap svg :global(.doc-label-icon) {
+        fill: var(--color-gray-700, #555);
     }
 </style>

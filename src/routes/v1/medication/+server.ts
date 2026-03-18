@@ -16,7 +16,12 @@ const form = {
 };
 
 export const GET: RequestHandler = async ({ url }) => {
-  const str = url.searchParams.get("drug");
+  const str = url.searchParams.get("drug") || "";
+
+  if (str.length < 3) {
+    return json([]);
+  }
+
   const response = await fetch("https://prehledy.sukl.cz/prehledy/v1/dlprc", {
     method: "POST",
     mode: "cors",
@@ -28,7 +33,7 @@ export const GET: RequestHandler = async ({ url }) => {
     redirect: "follow",
     referrerPolicy: "no-referrer",
     body: JSON.stringify({
-      filtr: "ibalgin",
+      filtr: str,
       pocet: 20,
       stranka: 1,
       sort: ["nazev"],

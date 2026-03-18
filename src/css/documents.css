@@ -408,7 +408,7 @@
 .document-section .table-list .actions button svg {
   width: 1.25rem;
   height: 1.25rem;
-  background: var(--color-interactivity);
+  background-color: transparent;
 }
 
 .document-section .table-list .actions button:hover svg {

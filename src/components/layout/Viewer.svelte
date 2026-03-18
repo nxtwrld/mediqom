@@ -431,6 +431,7 @@
         position: absolute;
         inset: 0;
         overflow: hidden;
+        pointer-events: auto;
     }
 
     @keyframes rotate {

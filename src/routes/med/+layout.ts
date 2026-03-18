@@ -7,6 +7,7 @@ import { log } from "$lib/logging/logger";
 import { apiFetch } from "$lib/api/client";
 import { initCache } from "$lib/cache";
 import { startRealtimeSync } from "$lib/cache/realtime";
+import { invalidateCachePattern } from "$lib/cache";
 import { isNativePlatform } from "$lib/config/platform";
 
 export const load: LayoutLoad = async ({ parent, fetch }) => {
@@ -51,6 +52,18 @@ export const load: LayoutLoad = async ({ parent, fetch }) => {
 
     // Start realtime sync — invalidates cache and re-fetches on DB changes.
     startRealtimeSync(supabase, authUserId);
+
+    // Refresh data when tab/app becomes visible again (throttled to 30s)
+    if (typeof document !== 'undefined') {
+      let lastRefresh = Date.now();
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && navigator.onLine && Date.now() - lastRefresh > 30_000) {
+          lastRefresh = Date.now();
+          invalidateCachePattern('documents:');
+          loadProfiles(true).catch(() => {});
+        }
+      });
+    }
 
     // Initialize RevenueCat on native platforms after we have the user ID
     if (isNativePlatform()) {

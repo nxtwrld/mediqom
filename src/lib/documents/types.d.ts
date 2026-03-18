@@ -33,18 +33,21 @@ export interface DocumentPreload {
     [key: string]: any;
   };
   content?: string | undefined;
+  thumbnail?: string;
   author_id?: string;
   owner_id: string;
 
   // Unified medical terms for search
   medicalTerms?: string[]; // Single array: categories + bodyParts + diagnoses + temporal + procedures
   temporalType?: TemporalType; // Simple temporal classification
+  subtype?: 'medication' | 'medication-plan';
 }
 
 export interface DocumentEncrypted {
   id: string;
   metadata: string;
   content?: string;
+  thumbnail?: string;
   attachments?: string[];
   type: DocumentType;
   user_id: string;
@@ -71,6 +74,7 @@ export interface Document {
     [key: string]: any;
   };
   attachments: Attachment[];
+  thumbnail?: string;
   author_id?: string;
   owner_id: string;
   created_at?: string; // Document creation timestamp
@@ -78,6 +82,7 @@ export interface Document {
   // Unified medical terms for search
   medicalTerms?: string[]; // Single array: categories + bodyParts + diagnoses + temporal + procedures
   temporalType?: TemporalType; // Simple temporal classification
+  subtype?: 'medication' | 'medication-plan';
 
   // Legacy report analysis data (from LangGraph workflows)
   report?: any;
@@ -99,6 +104,7 @@ export interface DocumentNew {
   // Optional medical terms from analysis
   medicalTerms?: string[];
   temporalType?: TemporalType;
+  subtype?: 'medication' | 'medication-plan';
 }
 
 export interface Attachment {

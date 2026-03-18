@@ -318,15 +318,15 @@
   },
   "app": {
     "apps": {
-      "add-contact": "",
-      "confirm-remove-share": "",
-      "download": "",
-      "items-linked-count": "",
-      "loading-data": "",
-      "permissions": "",
-      "quick-share": "",
-      "share": "",
-      "shared-on-date": ""
+      "add-contact": "Přidat kontakt",
+      "confirm-remove-share": "Tímto odstraníte sdílenou položku a {name} k ní ztratí přístup.",
+      "download": "Stáhnout",
+      "items-linked-count": "Propojené položky: {count}",
+      "loading-data": "Načítání dat...",
+      "permissions": "Oprávnění",
+      "quick-share": "Rychlé sdílení",
+      "share": "Sdílet",
+      "shared-on-date": "dne {date}"
     },
     "duration": {
       "days-ago": "{value, plural, =0 {právě teď} one {včera} other {před # dny}}",
@@ -338,10 +338,14 @@
       "profiles": "Profily"
     },
     "nav": {
-      "anatomy-model": "",
-      "documents": "",
-      "profiles": "",
-      "settings": ""
+      "add-profile": "Přidat profil",
+      "documents": "Dokumenty",
+      "history": "Historie",
+      "import": "Importovat",
+      "logout": "Odhlášení",
+      "new-session": "Nové sezení",
+      "profiles": "Profily",
+      "settings": "Nastavení"
     },
     "import": {
       "add-files": "Přidat soubory",
@@ -384,8 +388,13 @@
       "no-cached-files-warning": "Původní soubory nejsou na tomto zařízení k dispozici. Můžete uložit bez příloh, nebo dokončit na zařízení, kde jste import zahájili.",
       "extracting-text-and-data": "Extrahování textu a dat...",
       "analyzing-medical-content": "Analýza lékařského obsahu...",
-      "loading-job": "",
-      "preparing-documents": ""
+      "loading-job": "Načítání importu...",
+      "preparing-documents": "Příprava dokumentů ke kontrole...",
+      "no-jobs": "Zatím žádné importy. Zahajte nový import pro analýzu vašich lékařských dokumentů.",
+      "new-import": "Nový import",
+      "section-processing": "Zpracovávání",
+      "section-ready": "Připraveno ke kontrole",
+      "section-errors": "Chyby"
     },
     "buttons": {
       "retry": "Opakovat",
@@ -395,7 +404,8 @@
       "save": "Uložit",
       "cancel": "Zrušit",
       "create": "Vytvořit",
-      "continue": "Pokračovat"
+      "continue": "Pokračovat",
+      "saving": "Ukládání..."
     },
     "auth": {
       "title": "Přihlášení",
@@ -406,7 +416,7 @@
       "sending": "Odesílání...",
       "email-sent": "E-mail odeslán!",
       "send-again": "Odeslat znovu",
-      "email-sent-to": "",
+      "email-sent-to": "E-mail odeslán na",
       "magic-link-sent": "Magický odkaz odeslán! Zkontrolujte svůj e-mail a klikněte na odkaz pro přihlášení.",
       "magic-link-failed": "Nepodařilo se odeslat magický odkaz",
       "invalid-email": "Zadejte prosím platnou e-mailovou adresu",
@@ -465,30 +475,21 @@
       "sign-out": "Odhlásit se"
     },
     "languages": {
-      "cs": "",
-      "de": "",
-      "en": "",
-      "es": "",
-      "it": "",
-      "pl": "",
-      "tr": ""
+      "cs": "Čeština",
+      "de": "Deutsch",
+      "en": "English",
+      "es": "Español",
+      "it": "Italiano",
+      "pl": "Polski",
+      "tr": "Türkçe"
     },
     "name": "mediqom",
-    "nav": {
-      "add-profile": "Přidat profil",
-      "documents": "Dokumenty",
-      "history": "Historie",
-      "import": "Importovat",
-      "logout": "Odhlášení",
-      "new-session": "Nové sezení",
-      "profiles": "Profily",
-      "settings": ""
-    },
     "chat": {
       "title": "AI Lékařský asistent",
       "mode": {
         "patient": "Podpora pacienta",
-        "clinical": "Klinická analýza"
+        "clinical": "Klinická analýza",
+        "caregiver": "Podpora péče"
       },
       "actions": {
         "clear": "Vymazat konverzaci",
@@ -528,7 +529,8 @@
       },
       "greetings": {
         "patient": "Ahoj! Jsem tu, abych vám pomohl porozumět vašim lékařským informacím a podpořil vás na vaší cestě zdravotní péče. Neváhejte se mě zeptat na vaše zdravotní záznamy, příznaky nebo jakékoli otázky týkající se vaší péče.",
-        "clinical": "Ahoj! Jsem tu, abych asistoval s klinickou analýzou lékařského profilu {profileName}. Mohu pomoci analyzovat vzory, navrhnout diferenciální úvahy a poskytnout poznatky založené na dostupných lékařských datech."
+        "clinical": "Ahoj! Jsem tu, abych asistoval s klinickou analýzou lékařského profilu {profileName}. Mohu pomoci analyzovat vzory, navrhnout diferenciální úvahy a poskytnout poznatky založené na dostupných lékařských datech.",
+        "caregiver": "Dobrý den! Jsem tu, abych vám pomohl porozumět zdravotním informacím pacienta {profileName}. Mohu vysvětlit zdravotní záznamy, stavy a lékařské pojmy srozumitelným jazykem. Pro jakékoliv lékařské rozhodnutí se prosím obraťte na zdravotnický tým pacienta {profileName}."
       },
       "clarifyingQuestion": {
         "placeholder": "Nebo napište vlastní odpověď..."
@@ -544,26 +546,62 @@
           "type-extra": {
             "differential": {
               "patient": " Jaká je pravděpodobnost, že mám tuto diagnózu oproti jiným onemocněním?",
-              "clinical": " Diskutujte o klíčových rozlišujících rysech a postupu pro zúžení diferenciálních diagnóz."
+              "clinical": " Diskutujte o klíčových rozlišujících rysech a postupu pro zúžení diferenciálních diagnóz.",
+              "caregiver": " Co to znamená pro {profileName} a jak bychom to měli probrat s lékařem?"
             },
             "rule-out": {
               "patient": " Co znamená \"vyloučit\" diagnózu?",
-              "clinical": " Jaká vyšetření by tuto diagnózu definitivně vyloučila?"
+              "clinical": " Jaká vyšetření by tuto diagnózu definitivně vyloučila?",
+              "caregiver": " Co to znamená pro {profileName} a jak bychom to měli probrat s lékařem?"
             },
             "provisional": {
               "patient": " Tato diagnóza je předběžná — co to znamená pro mou léčbu?",
-              "clinical": " Jaké další důkazy jsou potřeba k potvrzení nebo vyvrácení?"
+              "clinical": " Jaké další důkazy jsou potřeba k potvrzení nebo vyvrácení?",
+              "caregiver": " Co to znamená pro {profileName} a jak bychom to měli probrat s lékařem?"
             },
             "confirmed": {
               "patient": " Tato diagnóza je potvrzena — co mám očekávat dál?",
-              "clinical": " Nastíněte postupy léčby založené na důkazech."
+              "clinical": " Nastíněte postupy léčby založené na důkazech.",
+              "caregiver": " Co to znamená pro {profileName} a jak bychom to měli probrat s lékařem?"
             }
-          }
+          },
+          "caregiver": "Můžete mi pomoci porozumět diagnóze {profileName}: {desc}{code}? Byla klasifikována jako {diagnosisType} diagnóza.{notes}{extra}"
         },
         "anatomy": {
           "patient": "Můžete probrat {count} lékařský dokument(y) týkající se mého {bodyPart}?",
           "caregiver": "Můžete probrat {count} lékařský dokument(y) týkající se oblasti {bodyPart} pacienta {profileName}?",
           "clinical": "Proveďte analýzu {count} lékařského dokumentu (dokumentů) spojeného s oblastí {bodyPart} tohoto pacienta."
+        },
+        "caregiver": "Můžete mi pomoci porozumět tomuto {type} pro {profileName}: {label}?"
+      },
+      "sources": {
+        "label": "Zdroj"
+      },
+      "tool": {
+        "approve": "Povolit přístup",
+        "declined": "Přístup k {toolName} byl zamítnut",
+        "deny": "Zamítnout přístup",
+        "error": "{toolName} selhalo: {error}",
+        "executed": "{toolName} úspěšně provedeno",
+        "getAssembledContext": {
+          "prompt": "AI chce shromáždit komplexní zdravotní kontext o: {query}"
+        },
+        "getDocumentById": {
+          "prompt": "AI chce přistoupit k dokumentu: {documentTitle}"
+        },
+        "getProfileData": {
+          "prompt": "AI chce přistoupit k základním informacím vašeho zdravotního profilu"
+        },
+        "queryMedicalHistory": {
+          "prompt": "AI chce prohledat vaši historii {category}"
+        },
+        "searchDocuments": {
+          "prompt": "AI chce prohledat vaše zdravotní dokumenty pro: {query}"
+        },
+        "security": {
+          "high": "Citlivé údaje",
+          "low": "Základní přístup",
+          "medium": "Zdravotní údaje"
         }
       }
     },
@@ -686,102 +724,102 @@
       }
     },
     "onboarding": {
-      "basic-profile": "",
-      "click-here": "",
-      "copy-to-clipboard": "",
-      "date-of-birth": "",
-      "email": "",
-      "enable-total-privacy": "",
-      "full-name": "",
-      "healh-profile": "",
-      "hide-passphrase": "",
-      "hit-save-to-start": "",
-      "i-am-not-sure": "",
-      "i-stored-or-remembered-the-passphrase-myself": "",
-      "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "",
-      "language": "",
-      "optional": "",
-      "or": "",
-      "please-select-your-anatomy": "",
+      "basic-profile": "Základní profil",
+      "click-here": "klikněte zde.",
+      "copy-to-clipboard": "Kopírovat do schránky",
+      "date-of-birth": "Datum narození",
+      "email": "E-mail",
+      "enable-total-privacy": "Povolit úplné soukromí",
+      "full-name": "Celé jméno",
+      "healh-profile": "Zdravotní profil",
+      "hide-passphrase": "Skrýt přístupovou frázi.",
+      "hit-save-to-start": "Stiskněte ULOŽIT a začněte!",
+      "i-am-not-sure": "Nejsem si jistý/á",
+      "i-stored-or-remembered-the-passphrase-myself": "Uložil/a jsem si přístupovou frázi nebo si ji pamatuji.",
+      "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Pokud tuto přístupovou frázi ztratíte, nelze ji nikdy obnovit a všechna vaše data budou ztracena. Doporučujeme ji bezpečně uložit ve správci hesel.",
+      "language": "Jazyk",
+      "optional": "volitelné",
+      "or": "nebo",
+      "please-select-your-anatomy": "Vyberte prosím svou anatomii",
       "privacy": {
-        "check-saved-passphrase": "",
-        "configure-again": "",
-        "i-dont-need-to-store-it": "",
-        "i-have-it-stored": "",
-        "passphrase-is-not-saved-in-password-manager": "",
-        "passphrase-is-saved-in-password-manager": "",
-        "store-this-password-securely": "",
-        "to-generate-a-random-passphrase": "",
-        "try-again": "",
-        "your-passphrase-is-not-yet-set": "",
-        "your-total-privacy-is-configured": "",
-        "choose-security-level": "",
-        "convenience-mode": "",
-        "recommended": "",
-        "convenience-backup": "",
-        "convenience-recovery": "",
-        "convenience-encrypted": "",
-        "zero-knowledge-mode": "",
-        "maximum-security": "",
-        "zero-knowledge-only-you": "",
-        "zero-knowledge-no-access": "",
-        "zero-knowledge-recovery-required": "",
-        "zero-knowledge-warning": "",
-        "continue-with-convenience": "",
-        "continue-with-zero-knowledge": "",
-        "setting-up": "",
-        "choose-unlock-method": "",
-        "passkey": "",
-        "passkey-description": "",
-        "passphrase": "",
-        "passphrase-description": "",
-        "passkey-not-supported": "",
-        "back": "",
-        "continue": "",
-        "passkey-setup-instructions": "",
-        "setting-up-passkey": "",
-        "create-passkey": "",
-        "passphrase-setup-instructions": "",
-        "your-passphrase": "",
-        "strength": "",
-        "hide-passphrase": "",
-        "view-passphrase": "",
-        "use-custom": "",
-        "generate-random": "",
-        "recovery-document-intro": "",
-        "generating-recovery": "",
-        "recovery-key-label": "",
-        "download-pdf": "",
-        "print": "",
-        "confirm-saved": "",
-        "confirm-understand": "",
-        "recovery-warning": "",
-        "complete-setup": "",
-        "zero-knowledge-configured": "",
-        "using-passkey": "",
-        "using-passphrase": "",
-        "convenience-configured": "",
-        "convenience-explanation": ""
+        "check-saved-passphrase": "Zkontrolovat uloženou přístupovou frázi",
+        "configure-again": "Nastavit znovu",
+        "i-dont-need-to-store-it": "Nepotřebuji ji ukládat",
+        "i-have-it-stored": "Mám ji uloženou!",
+        "passphrase-is-not-saved-in-password-manager": "Přístupová fráze není uložena ve správci hesel",
+        "passphrase-is-saved-in-password-manager": "Přístupová fráze je uložena ve správci hesel",
+        "store-this-password-securely": "Uložte toto heslo bezpečně.",
+        "to-generate-a-random-passphrase": "Pro vygenerování náhodné přístupové fráze",
+        "try-again": "Zkusit znovu",
+        "your-passphrase-is-not-yet-set": "Vaše přístupová fráze ještě není nastavena.",
+        "your-total-privacy-is-configured": "Vaše úplné soukromí je nakonfigurováno.",
+        "choose-security-level": "Vyberte úroveň zabezpečení",
+        "convenience-mode": "Komfortní režim",
+        "recommended": "Doporučeno",
+        "convenience-backup": "Bezpečně ukládáme šifrovanou zálohu",
+        "convenience-recovery": "Obnovení účtu je vždy možné",
+        "convenience-encrypted": "Vaše data jsou stále šifrována",
+        "zero-knowledge-mode": "Režim nulové znalosti",
+        "maximum-security": "Maximální zabezpečení",
+        "zero-knowledge-only-you": "Pouze vy můžete dešifrovat svá data",
+        "zero-knowledge-no-access": "Server NEMÁ přístup k vašim klíčům",
+        "zero-knowledge-recovery-required": "Záchranný dokument je POVINNÝ",
+        "zero-knowledge-warning": "Ztracená fráze = navždy ztracená data",
+        "continue-with-convenience": "Pokračovat s komfortním režimem",
+        "continue-with-zero-knowledge": "Pokračovat s režimem nulové znalosti",
+        "setting-up": "Nastavování...",
+        "choose-unlock-method": "Vyberte metodu odemknutí",
+        "passkey": "Přístupový klíč",
+        "passkey-description": "Použijte Face ID, Touch ID nebo Windows Hello. Nemusíte si pamatovat frázi.",
+        "passphrase": "Přístupová fráze",
+        "passphrase-description": "Vytvořte silnou přístupovou frázi. Uložte ji do správce hesel nebo si ji zapamatujte.",
+        "passkey-not-supported": "Přístupový klíč PRF není v tomto prohlížeči podporován",
+        "back": "Zpět",
+        "continue": "Pokračovat",
+        "passkey-setup-instructions": "Klikněte na tlačítko níže pro vytvoření přístupového klíče pomocí biometrického ověření vašeho zařízení.",
+        "setting-up-passkey": "Nastavování přístupového klíče...",
+        "create-passkey": "Vytvořit přístupový klíč",
+        "passphrase-setup-instructions": "Vytvořte silnou přístupovou frázi nebo použijte vygenerovanou níže.",
+        "your-passphrase": "Vaše přístupová fráze",
+        "strength": "Síla",
+        "hide-passphrase": "Skrýt přístupovou frázi",
+        "view-passphrase": "Zobrazit přístupovou frázi",
+        "use-custom": "Použít vlastní frázi",
+        "generate-random": "Vygenerovat náhodnou",
+        "recovery-document-intro": "Stáhněte si záchranný dokument. Toto je JEDINÝ způsob, jak obnovit přístup, pokud ztratíte přístupovou frázi nebo klíč.",
+        "generating-recovery": "Generování záchranného dokumentu...",
+        "recovery-key-label": "Váš záchranný klíč",
+        "download-pdf": "Stáhnout PDF",
+        "print": "Vytisknout",
+        "confirm-saved": "Uložil/a jsem záchranný dokument",
+        "confirm-understand": "Rozumím, že toto je jediný způsob obnovení",
+        "recovery-warning": "Kdokoli s tímto klíčem může přistoupit k vašim datům. Uložte ho bezpečně offline.",
+        "complete-setup": "Dokončit nastavení",
+        "zero-knowledge-configured": "Šifrování s nulovou znalostí je nakonfigurováno!",
+        "using-passkey": "Vaše data jsou chráněna přístupovým klíčem.",
+        "using-passphrase": "Vaše data jsou chráněna přístupovou frází.",
+        "convenience-configured": "Komfortní režim je nakonfigurován!",
+        "convenience-explanation": "Vaše data jsou šifrována a v případě potřeby vám pomůžeme obnovit přístup."
       },
-      "privacy-and-amp-encryption": "",
-      "required": "",
-      "set-passphrase": "",
+      "privacy-and-amp-encryption": "Soukromí &amp; Šifrování",
+      "required": "povinné",
+      "set-passphrase": "Nastavit přístupovou frázi",
       "subscription": {
-        "call": "",
-        "connected-accounts": "",
-        "family": "",
-        "free-beta-access": "",
-        "individual": "",
-        "medical-institution": "",
-        "medical-practice": "",
-        "price": "",
-        "select": ""
+        "call": "zavolat",
+        "connected-accounts": "Propojené účty",
+        "family": "Rodina",
+        "free-beta-access": "Bezplatný beta přístup",
+        "individual": "Jednotlivec",
+        "medical-institution": "Zdravotnické zařízení",
+        "medical-practice": "Lékařská praxe",
+        "price": "Cena",
+        "select": "Vybrat"
       },
-      "to-set-your-own-custom-passphrase": "",
-      "total-privacy-lets-you-add-another-layer-of-privacy-by-encrypt-all-your-data-with-a-custom-passphrase-that-even-the-serv": "",
-      "view-passphrase": "",
-      "you-account-is-almost-ready": "",
-      "your-data-are-currently-stored-securely-on-our-backend-in-encrypted-form": ""
+      "to-set-your-own-custom-passphrase": "Pro nastavení vlastní přístupové fráze",
+      "total-privacy-lets-you-add-another-layer-of-privacy-by-encrypt-all-your-data-with-a-custom-passphrase-that-even-the-serv": "Úplné soukromí vám umožňuje přidat další vrstvu ochrany šifrováním všech vašich dat vlastní přístupovou frází, kterou nezná ani server.",
+      "view-passphrase": "Zobrazit přístupovou frázi.",
+      "you-account-is-almost-ready": "Váš účet je téměř připraven!",
+      "your-data-are-currently-stored-securely-on-our-backend-in-encrypted-form": "Vaše data jsou aktuálně bezpečně uložena na našem serveru v šifrované podobě."
     },
     "profile": {
       "age": "Věk",
@@ -796,7 +834,13 @@
       "uploading": "Nahrávání ...",
       "value-age": "{value, plural, =0 {# let} one {# rok} two {# roky} few {# roky} other {# let}}",
       "crop-image": "Oříznout obrázek",
-      "zoom": "Přiblížení"
+      "zoom": "Přiblížení",
+      "edit": {
+        "confirm-delete": "Opravdu chcete smazat tento profil a všechna jeho data? Tuto akci nelze vrátit zpět.",
+        "confirm-disconnect": "Opravdu chcete odpojit tento profil? Ztratíte přístup ke sdíleným dokumentům.",
+        "delete": "Smazat profil",
+        "disconnect": "Odpojit profil"
+      }
     },
     "general": {
       "cancel": "Zrušit",
@@ -839,46 +883,47 @@
       "please-upgrade-your-subscription-to-continue": "Chcete-li pokračovat, upgradujte své předplatné."
     },
     "recover": {
-      "title": "",
-      "enter-key-description": "",
-      "email": "",
-      "recovery-key": "",
-      "verify-key": "",
-      "help-text": "",
-      "verifying": "",
-      "invalid-key-format": "",
-      "verification-failed": "",
-      "key-verified": "",
-      "choose-new-method": "",
-      "passkey": "",
-      "passkey-description": "",
-      "passphrase": "",
-      "passphrase-description": "",
-      "continue": "",
-      "setup-new-passkey": "",
-      "setting-up": "",
-      "create-passkey": "",
-      "back": "",
-      "setup-new-passphrase": "",
-      "new-passphrase": "",
-      "hide": "",
-      "show": "",
-      "copy": "",
-      "use-custom": "",
-      "generate-random": "",
-      "set-passphrase": "",
-      "credentials-updated": "",
-      "generate-new-recovery": "",
-      "generating": "",
-      "download-pdf": "",
-      "confirm-saved": "",
-      "complete": "",
-      "success-title": "",
-      "success-description": "",
-      "go-to-login": "",
-      "error-title": "",
-      "try-again": ""
-    }
+      "title": "Obnovení účtu",
+      "enter-key-description": "Zadejte svůj záchranný klíč pro obnovení přístupu k šifrovaným datům.",
+      "email": "E-mailová adresa",
+      "recovery-key": "Záchranný klíč",
+      "verify-key": "Ověřit záchranný klíč",
+      "help-text": "Váš záchranný klíč je v záchranném dokumentu, který jste stáhli při nastavení.",
+      "verifying": "Ověřování záchranného klíče...",
+      "invalid-key-format": "Neplatný formát záchranného klíče. Zkontrolujte prosím a zkuste znovu.",
+      "verification-failed": "Ověření obnovení selhalo. Zkontrolujte prosím svůj e-mail a záchranný klíč.",
+      "key-verified": "Záchranný klíč úspěšně ověřen!",
+      "choose-new-method": "Vyberte novou metodu odemknutí pro svůj účet.",
+      "passkey": "Přístupový klíč",
+      "passkey-description": "Použijte biometrické ověření (Face ID, Touch ID, Windows Hello)",
+      "passphrase": "Přístupová fráze",
+      "passphrase-description": "Vytvořte novou přístupovou frázi pro ochranu vašich dat",
+      "continue": "Pokračovat",
+      "setup-new-passkey": "Klikněte pro nastavení nového přístupového klíče pro váš účet.",
+      "setting-up": "Nastavování...",
+      "create-passkey": "Vytvořit přístupový klíč",
+      "back": "Zpět",
+      "setup-new-passphrase": "Vytvořte novou přístupovou frázi pro svůj účet.",
+      "new-passphrase": "Nová přístupová fráze",
+      "hide": "Skrýt",
+      "show": "Zobrazit",
+      "copy": "Kopírovat",
+      "use-custom": "Použít vlastní",
+      "generate-random": "Vygenerovat náhodnou",
+      "set-passphrase": "Nastavit přístupovou frázi",
+      "credentials-updated": "Vaše přihlašovací údaje byly aktualizovány!",
+      "generate-new-recovery": "Vygenerujte nový záchranný dokument. Váš starý záchranný klíč přestane fungovat.",
+      "generating": "Generování nového záchranného dokumentu...",
+      "download-pdf": "Stáhnout PDF",
+      "confirm-saved": "Uložil/a jsem nový záchranný dokument",
+      "complete": "Dokončit obnovení",
+      "success-title": "Obnovení dokončeno!",
+      "success-description": "Váš účet byl úspěšně obnoven. Nyní se můžete přihlásit s novými přihlašovacími údaji.",
+      "go-to-login": "Přejít na přihlášení",
+      "error-title": "Obnovení selhalo",
+      "try-again": "Zkusit znovu"
+    },
+    "download": "Stáhnout"
   },
   "charts": {
     "reference-range": {
@@ -887,7 +932,7 @@
       "high": "Vysoká"
     }
   },
-  "click-here": "",
+  "click-here": "klikněte zde",
   "nav": {
     "home": "Domů",
     "families": "Pro rodiny",
@@ -1492,7 +1537,7 @@
       "health-insurance": "Zdravotní pojištění",
       "identification": "Číslo pojistné smlouvy",
       "provider": "Poskytovatel",
-      "selectProvider": ""
+      "selectProvider": "Vyberte poskytovatele"
     },
     "vcard": {
       "city": "Město",
@@ -1512,35 +1557,67 @@
       "suffix": "Tituly",
       "tel": "Telefon",
       "title": "Titul",
-      "willUpdateTo": ""
+      "willUpdateTo": "Bude aktualizováno na"
     }
   },
   "share": {
-    "title": "",
-    "share-with": "",
-    "review-items": "",
-    "privacy": "",
-    "uploading": "",
-    "share-it": "",
-    "sharing-with": "",
-    "description": "",
-    "public-key-info": "",
-    "password-info": "",
-    "password-placeholder": "",
-    "password-label": "",
-    "generate": "",
-    "encrypting-uploading": "",
-    "password-note": "",
-    "url-label": "",
-    "message-label": "",
-    "cancel": "",
-    "back": "",
-    "next": "",
-    "done": "",
-    "create-share": "",
-    "open-email-app": "",
-    "open-sms-app": "",
-    "message-template": ""
+    "title": "Sdílet {title}",
+    "share-with": "Sdílet s {name}",
+    "review-items": "Zkontrolovat položky",
+    "privacy": "Soukromí",
+    "uploading": "Nahrávání šifrovaných dat...",
+    "share-it": "Sdílet!",
+    "sharing-with": "Sdílíte s",
+    "description": "Sdílení vytvoří šifrované úložiště na našem serveru pro vybraný lékařský záznam. K záznamům lze přistupovat přes vygenerovaný odkaz a heslo.",
+    "public-key-info": "Vaše záznamy budou uloženy na našem serveru šifrovaně. {name} má nakonfigurovaný veřejný klíč a my ho použijeme k zašifrování záznamů. K vašim záznamům nebudeme mít přístup.",
+    "password-info": "Vaše záznamy budou uloženy na našem serveru šifrovaně. Musíte vytvořit vlastní heslo, které budete moci sdílet se svým kontaktem. K vašim záznamům nebudeme mít přístup.",
+    "password-placeholder": "Chraňte svůj záznam heslem",
+    "password-label": "Heslo",
+    "generate": "Vygenerovat",
+    "encrypting-uploading": "Šifrování klíčů a nahrávání dat na server",
+    "password-note": "Upozorňujeme, že heslo je uloženo pouze ve vaší aplikaci. Musíte ho sdílet se svým kontaktem.",
+    "url-label": "URL",
+    "message-label": "Zpráva",
+    "cancel": "Zrušit",
+    "back": "Zpět",
+    "next": "Další",
+    "done": "Hotovo",
+    "create-share": "Vytvořit sdílení",
+    "open-email-app": "Otevřít e-mailovou aplikaci",
+    "open-sms-app": "Otevřít SMS aplikaci",
+    "message-template": "Vážený/á {name}, \nrád/a bych s vámi sdílel/a své lékařské záznamy. \nProsím, použijte následující odkaz pro přístup: {url}\n\nHeslo: {password}\n\nS pozdravem,",
+    "accept": {
+      "done-description": "{count, plural, one {1 dokument přidán} few {# dokumenty přidány} other {# dokumentů přidáno}} do vašeho účtu.",
+      "done-title": "Dokumenty přijaty!",
+      "error-generic": "Při přijímání sdílení došlo k chybě.",
+      "error-title": "Sdílení se nepodařilo přijmout",
+      "go-to-app": "Otevřít Mediqom",
+      "no-public-key": "Vaše šifrovací klíče nejsou nastaveny. Nastavte je prosím v nastavení účtu.",
+      "no-token": "Neplatný odkaz pro sdílení. Chybí token.",
+      "processing": "Přijímání sdílených dokumentů…",
+      "setup-keys-button": "Přejít do nastavení účtu",
+      "setup-keys-description": "Než budete moci zobrazit sdílené dokumenty, musíte si nastavit šifrovací klíče v nastavení účtu.",
+      "setup-keys-title": "Nastavte si šifrovací klíče"
+    },
+    "done-description": "Sdíleno s {email}. Pozvánka byla odeslána.",
+    "done-description-invited": "Pozvánka byla odeslána na {email}. Jakmile ji příjemce přijme, dokumenty budou dostupné v jeho aplikaci.",
+    "done-description-shared": "Dokumenty byly sdíleny s {email}. Může si je prohlédnout ve své aplikaci Mediqom.",
+    "done-title": "Sdíleno!",
+    "error-generic": "Došlo k chybě. Zkuste to prosím znovu.",
+    "error-no-keys": "Nepodařilo se získat šifrovací klíče dokumentu.",
+    "invite-warning": "Dokumenty byly sdíleny, ale pozvánku se nepodařilo odeslat. Kontaktujte prosím {email} přímo.",
+    "loading": "Načítání…",
+    "my-shares-title": "Sdílené dokumenty",
+    "no-shares": "Zatím jste nesdíleli žádné dokumenty.",
+    "processing-title": "Sdílení…",
+    "recipient-email-label": "E-mail příjemce",
+    "recipient-email-placeholder": "doktor@example.com",
+    "retry": "Zkusit znovu",
+    "revoke": "Odvolat sdílení",
+    "share-button": "Sdílet",
+    "shared-count": "{count, plural, one {Sdíleno s 1 osobou} other {Sdíleno s # osobami}}",
+    "status-active": "Aktivní",
+    "status-pending": "Čeká na vyřízení"
   },
   "aria": {
     "import": {
@@ -1551,22 +1628,22 @@
       "open-document": "Otevřít dokument: {title}"
     },
     "session": {
-      "dismiss-notification": "",
-      "test-analysis": "",
-      "remove-symptom": "",
-      "pin-diagnosis": "",
-      "remove-diagnosis": "",
-      "clear-approval": "",
-      "clear-rejection": "",
-      "approve-suggestion": "",
-      "reject-suggestion": "",
-      "remove-question": "",
-      "pin-treatment": "",
-      "remove-treatment": "",
-      "pin-follow-up": "",
-      "remove-follow-up": "",
-      "pin-medication": "",
-      "remove-medication": ""
+      "dismiss-notification": "Zavřít oznámení",
+      "test-analysis": "Testovat analýzu s ukázkovými daty",
+      "remove-symptom": "Odebrat příznak",
+      "pin-diagnosis": "Připnout diagnózu",
+      "remove-diagnosis": "Odebrat diagnózu",
+      "clear-approval": "Zrušit schválení",
+      "clear-rejection": "Zrušit zamítnutí",
+      "approve-suggestion": "Schválit návrh",
+      "reject-suggestion": "Zamítnout návrh",
+      "remove-question": "Odebrat otázku",
+      "pin-treatment": "Připnout léčbu",
+      "remove-treatment": "Odebrat léčbu",
+      "pin-follow-up": "Připnout sledování",
+      "remove-follow-up": "Odebrat sledování",
+      "pin-medication": "Připnout lék",
+      "remove-medication": "Odebrat lék"
     },
     "ui": {
       "close-modal": "Zavřít dialog",
@@ -1574,19 +1651,19 @@
       "toggle-menu": "Přepnout menu"
     },
     "anatomy": {
-      "rotate-model": "",
-      "zoom-in": "",
-      "zoom-out": "",
-      "reset-view": ""
+      "rotate-model": "Otočit anatomický model",
+      "zoom-in": "Přiblížit",
+      "zoom-out": "Oddálit",
+      "reset-view": "Obnovit zobrazení"
     },
     "documents": {
       "view-document": "Zobrazit dokument",
-      "remove-document": ""
+      "remove-document": "Odebrat dokument"
     },
     "report": {
-      "print-report": "",
-      "copy-report": "",
-      "download-report": ""
+      "print-report": "Vytisknout zprávu",
+      "copy-report": "Kopírovat text zprávy",
+      "download-report": "Stáhnout zprávu"
     }
   },
   "report": {
@@ -1734,11 +1811,34 @@
       "bilateral": "Oboustranně",
       "central": "Centrální",
       "not_applicable": "Neaplikovatelné"
-    }
+    },
+    "attachments-download": "Stáhnout",
+    "birth-date": "Datum narození",
+    "blood-pressure": "Krevní tlak",
+    "blood-type": "Krevní skupina",
+    "heart-rate": "Tepová frekvence",
+    "height": "Výška",
+    "icd-code": "Kód MKN",
+    "name": "Jméno",
+    "oxygen-saturation": "Saturace kyslíkem",
+    "patient": "Pacient",
+    "reference-range": "Reference",
+    "respiratory-rate": "Dechová frekvence",
+    "sex": "Pohlaví",
+    "summary": "Shrnutí",
+    "temperature": "Teplota",
+    "value": "Hodnota",
+    "vital-signs": "Vitální funkce",
+    "weight": "Hmotnost"
   },
   "session": {
     "diagram": "Diagram",
-    "qom": "QOM Analyzér",
+    "qom": {
+      "cost": "Náklady",
+      "duration": "Délka",
+      "nodes": "Uzly",
+      "status": "Stav"
+    },
     "report": {
       "title": "Zpráva o ambulantním vyšetření",
       "patient": "Pacient:",
@@ -1746,39 +1846,39 @@
       "date": "Datum:"
     },
     "blocks": {
-      "assisted-analysis": "",
-      "finalizing": "",
-      "finalize-report": "",
-      "end-session": "",
-      "end-session-confirm": "",
-      "transcript": "",
-      "report": "",
-      "back": "",
-      "copy": "",
-      "print": "",
-      "save": "",
-      "session-restored": "",
-      "session-restored-description": "",
-      "start-recording": "",
-      "listening": ""
+      "assisted-analysis": "Asistovaná analýza",
+      "finalizing": "Dokončování",
+      "finalize-report": "Dokončit zprávu",
+      "end-session": "Ukončit sezení",
+      "end-session-confirm": "Opravdu chcete ukončit toto sezení? Všechna data budou vymazána.",
+      "transcript": "Přepis",
+      "report": "Zpráva",
+      "back": "Zpět",
+      "copy": "Kopírovat",
+      "print": "Vytisknout",
+      "save": "Uložit",
+      "session-restored": "Sezení obnoveno",
+      "session-restored-description": "Data vašeho předchozího sezení byla obnovena z místního úložiště",
+      "start-recording": "Začněte nahrávat sezení kliknutím na tlačítko mikrofonu.",
+      "listening": "Naslouchání..."
     },
     "diagnosis": {
-      "signals": "",
-      "symptoms": "",
-      "diagnostic-results": "",
-      "clinical-reasoning": "",
-      "supporting-symptoms": "",
-      "clinical-recommendations": "",
-      "clarifying-questions": "",
-      "treatment-plan": "",
-      "targets": "",
-      "follow-up": "",
-      "suggested-medication": "",
-      "purpose": "",
-      "alternatives": "",
-      "approved": "",
-      "rejected": "",
-      "effectiveness": ""
+      "signals": "Signály",
+      "symptoms": "Příznaky",
+      "diagnostic-results": "Diagnostické výsledky",
+      "clinical-reasoning": "Klinické odůvodnění",
+      "supporting-symptoms": "Podpůrné příznaky",
+      "clinical-recommendations": "Klinická doporučení",
+      "clarifying-questions": "Upřesňující otázky",
+      "treatment-plan": "Plán léčby",
+      "targets": "Cíle",
+      "follow-up": "Sledování",
+      "suggested-medication": "Navrhovaný lék",
+      "purpose": "Účel",
+      "alternatives": "Alternativy",
+      "approved": "Schváleno",
+      "rejected": "Zamítnuto",
+      "effectiveness": "účinnost"
     },
     "actions": {
       "accept": "Přijmout",
@@ -1791,20 +1891,32 @@
       "hide": "Skrýt",
       "show": "Zobrazit",
       "show-panel": "Zobrazit panel",
-      "hide-panel": "Skrýt panel"
+      "hide-panel": "Skrýt panel",
+      "cancel": "Zrušit",
+      "discard": "Zahodit",
+      "end": "Ukončit relaci",
+      "save": "Uložit",
+      "saving": "Ukládání..."
     },
     "status": {
       "pending": "čekající",
       "answered": "zodpovězeno",
       "acknowledged": "potvrzeno",
       "skipped": "přeskočeno",
-      "resolved": "vyřešeno"
+      "resolved": "vyřešeno",
+      "continue": "Pokračovat v relaci",
+      "listening": "Naslouchám...",
+      "paused": "Relace pozastavena",
+      "recording": "Nahrávám..."
     },
     "tabs": {
       "questions": "Otázky",
       "transcript": "Přepis",
       "details": "Podrobnosti",
-      "legend": "Legenda"
+      "legend": "Legenda",
+      "diagnosis": "Diagnóza",
+      "symptoms": "Příznaky",
+      "treatments": "Léčba"
     },
     "headers": {
       "symptoms": "Příznaky",
@@ -1822,7 +1934,9 @@
       "side-effects": "Vedlejší účinky",
       "contraindications": "Kontraindikace",
       "relationships": "Vztahy",
-      "related-actions": "Související akce"
+      "related-actions": "Související akce",
+      "related-alerts": "Související upozornění",
+      "related-questions": "Související otázky"
     },
     "priority": {
       "critical": "Kritická",
@@ -1968,7 +2082,8 @@
       "relationship": "Vztah",
       "direction": "Směr",
       "strength": "Síla",
-      "status": "Stav"
+      "status": "Stav",
+      "awaiting-clinical-input": "Čekání na klinický vstup pro další analýzu"
     },
     "empty-states": {
       "no-questions": "Žádné otázky k zobrazení",
@@ -1990,6 +2105,29 @@
       "days": "dny",
       "days-short": "d",
       "percent": "%"
+    },
+    "empty": {
+      "no-alerts": "Žádná upozornění k zobrazení",
+      "no-data": "Žádná data k vizualizaci",
+      "no-diagnoses": "Žádné diagnózy nejsou k dispozici",
+      "no-questions": "Žádné otázky k zobrazení",
+      "no-symptoms": "Žádné příznaky nenalezeny",
+      "no-treatments": "Žádná léčba není k dispozici",
+      "select-node": "Vyberte uzel nebo odkaz pro zobrazení podrobností",
+      "select-node-diagram": "Vyberte uzel nebo odkaz z diagramu pro zobrazení podrobností"
+    },
+    "end": {
+      "description": "Co chcete s touto relací udělat?",
+      "title": "Ukončit relaci"
+    },
+    "filters": {
+      "all-alerts": "Všechna upozornění",
+      "all-questions": "Všechny otázky"
+    },
+    "save": {
+      "error": {
+        "missing_data": "Chybí požadované informace pro uložení relace"
+      }
     }
   },
   "billing": {
@@ -2003,7 +2141,7 @@
     "current-plan": "Aktuální plán",
     "free-tier": "Zdarma",
     "upgrade-to": "Upgradovat na",
-    "downgrade-to": "",
+    "downgrade-to": "Přejít na",
     "profile": "profil",
     "profiles": "profily",
     "unlimited-profiles": "Neomezený počet profilů",
@@ -2055,6 +2193,138 @@
       "base-scans-reset-answer": "Váš základní počet skenů se obnoví v den výročí předplatného. Nevyužité základní skeny se nepřenášejí.",
       "cancel-subscription": "Jak zruším předplatné?",
       "cancel-subscription-answer": "Klikněte na 'Spravovat platby' pro přístup k portálu zákazníka Stripe, kde můžete zrušit předplatné, změnit platební metodu nebo zobrazit faktury."
+    },
+    "back-to-plans": "Zpět na plány",
+    "cancel": "Zrušit",
+    "complete-purchase": "Dokončit nákup",
+    "continue": "Pokračovat",
+    "generic-error": "Něco se pokazilo. Zkuste to prosím znovu.",
+    "loading-checkout": "Načítání platebního formuláře...",
+    "payment-failed": "Platba se nezdařila",
+    "payment-successful": "Platba byla úspěšná!",
+    "preparing-checkout": "Příprava platby...",
+    "subscription-updated": "Vaše předplatné bylo aktualizováno. Děkujeme za váš nákup!",
+    "try-again": "Zkusit znovu"
+  },
+  "medications": {
+    "title": "Léky",
+    "add": "Přidat lék",
+    "edit": "Upravit lék",
+    "add-first": "Přidejte svůj první lék",
+    "no-medications": "Zatím nebyly přidány žádné léky",
+    "medication-info": "Informace o léku",
+    "medication-name": "Název léku",
+    "search-placeholder": "Vyhledat lék...",
+    "generic-name": "Generický název",
+    "dosage": "Dávkování",
+    "strength": "Síla",
+    "route": "Způsob podání",
+    "indication": "Indikace",
+    "notes": "Poznámky",
+    "frequency": "Frekvence",
+    "form": "Forma",
+    "prescriber": "Předepisující lékař",
+    "schedule": "Rozvrh",
+    "start-date": "Datum zahájení",
+    "end-date": "Datum ukončení",
+    "pill-count": "Počet tablet",
+    "times-of-day": "Časy během dne",
+    "add-time": "Přidat čas",
+    "days-of-week": "Dny v týdnu",
+    "days-of-month": "Dny v měsíci",
+    "status": "Stav",
+    "status-active": "Aktivní",
+    "status-paused": "Pozastaveno",
+    "status-completed": "Dokončeno",
+    "status-discontinued": "Ukončeno",
+    "confirm-delete": "Opravdu chcete smazat tento lék?",
+    "not-found": "Lék nenalezen",
+    "view-all": "Zobrazit vše",
+    "your-medications": "Vaše léky",
+    "form-tablet": "Tableta",
+    "form-capsule": "Kapsle",
+    "form-sublingual": "Sublingvální",
+    "form-liquid": "Tekutina",
+    "form-inhaler": "Inhalátor",
+    "form-spray": "Sprej",
+    "form-topical": "Lokální",
+    "form-patch": "Náplast",
+    "form-injection": "Injekce",
+    "form-suppository": "Čípek",
+    "form-cream": "Krém",
+    "form-ointment": "Mast",
+    "form-gel": "Gel",
+    "form-drops": "Kapky",
+    "form-powder": "Prášek",
+    "route-oral": "Perorálně",
+    "route-sublingual": "Sublingválně",
+    "route-nasal": "Nosní",
+    "route-inhalation": "Inhalačně",
+    "route-topical": "Lokálně",
+    "route-transdermal": "Transdermálně",
+    "route-rectal": "Rektálně",
+    "route-intravenous": "Intravenózně",
+    "route-intramuscular": "Intramuskulárně",
+    "route-subcutaneous": "Subkutánně",
+    "route-ophthalmic": "Oční",
+    "route-otic": "Ušní",
+    "route-vaginal": "Vaginálně",
+    "route-buccal": "Bukálně",
+    "frequency-once": "Jednorázově",
+    "frequency-daily": "Denně",
+    "frequency-weekly": "Týdně",
+    "frequency-monthly": "Měsíčně",
+    "frequency-as_needed": "Podle potřeby",
+    "day-mo": "Po",
+    "day-tu": "Út",
+    "day-we": "St",
+    "day-th": "Čt",
+    "day-fr": "Pá",
+    "day-sa": "So",
+    "day-su": "Ne",
+    "week-ahead": "Týden dopředu",
+    "morning": "Ráno",
+    "afternoon": "Odpoledne",
+    "night": "Noc"
+  },
+  "dicom": {
+    "angle": "Měření úhlu",
+    "color-map": "Barevná mapa",
+    "error": "Nepodařilo se načíst DICOM snímek",
+    "flip-h": "Překlopit vodorovně",
+    "flip-v": "Překlopit svisle",
+    "invert": "Invertovat",
+    "length": "Měření délky",
+    "loading": "Načítání DICOM snímku...",
+    "pan": "Posun",
+    "reset": "Obnovit",
+    "rotate-ccw": "Otočit doleva",
+    "rotate-cw": "Otočit doprava",
+    "slice": "Řez",
+    "voi-presets": "Předvolby VOI",
+    "window-level": "Okno/Úroveň",
+    "zoom": "Přiblížení"
+  },
+  "documents": {
+    "session": {
+      "date": "Datum",
+      "duration": "Délka",
+      "loadingAnalysis": "Načítání analýzy...",
+      "noData": "Žádná data relace nejsou k dispozici",
+      "performer": "Vyšetřující",
+      "time": "Čas",
+      "title": "Analýza relace",
+      "version": "Verze"
+    }
+  },
+  "viewer": {
+    "panels": {
+      "anatomy": "Anatomie",
+      "timeline": "Časová osa"
+    },
+    "timeline": {
+      "no-data": "Žádná zdravotní data nejsou k dispozici",
+      "no-signals": "Žádné signály nejsou vybrány"
     }
   }
 }

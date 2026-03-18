@@ -4,6 +4,7 @@
 </script>
 
 <script lang="ts">
+    import { tick } from 'svelte';
     import { page } from '$app/stores';
 
     type DocItem = {
@@ -22,6 +23,28 @@
 
     let popupOpen = $state(false);
     const instanceId = Symbol();
+
+    let popupEl: HTMLDivElement | undefined = $state();
+    let popupTopOffset = $state<number | null>(null);
+
+    async function clampPopupVertically() {
+        await tick();
+        if (!popupEl) return;
+        popupTopOffset = null; // reset before measuring
+
+        await tick();
+        const rect = popupEl.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const margin = 10;
+
+        if (rect.top < margin) {
+            // Shift down: how much to move from current centered position
+            popupTopOffset = margin - rect.top;
+        } else if (rect.bottom > vh - margin) {
+            // Shift up
+            popupTopOffset = (vh - margin - rect.bottom);
+        }
+    }
 
     // Close self when another instance opens
     $effect(() => {
@@ -56,6 +79,7 @@
         const next = !popupOpen;
         popupOpen = next;
         activePopup.set(next ? instanceId : null);
+        if (next) clampPopupVertically();
     }
 
     function handleKeydown(e: KeyboardEvent) {
@@ -64,6 +88,7 @@
             const next = !popupOpen;
             popupOpen = next;
             activePopup.set(next ? instanceId : null);
+            if (next) clampPopupVertically();
         }
     }
 
@@ -115,7 +140,7 @@
     {/if}
 
     {#if popupOpen}
-        <div class="doc-popup" role="menu">
+        <div bind:this={popupEl} class="doc-popup" role="menu" style={popupTopOffset != null ? `transform: translateY(calc(-50% + ${popupTopOffset}px))` : ''}>
             {#each docs as doc}
                 <a
                     class="doc-popup-action"
@@ -241,6 +266,8 @@
         padding: 0.3rem;
         min-width: 9rem;
         max-width: 15rem;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
         background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
         color: var(--color-text-primary);
         backdrop-filter: blur(4px);

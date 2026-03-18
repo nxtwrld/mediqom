@@ -253,7 +253,7 @@ export default {
             },
             frequency: {
               type: "string",
-              description: "How often taken",
+              description: "How often taken. ONLY extract exact text from document. Do NOT infer or guess frequency if not explicitly stated.",
             },
             indication: {
               type: "string",
@@ -273,7 +273,7 @@ export default {
             },
             startDate: {
               type: "string",
-              description: "When medication was started",
+              description: "When medication was started. ONLY populate if explicitly stated in the document. Leave empty if not mentioned.",
             },
             prescriber: {
               type: "string",
@@ -281,19 +281,19 @@ export default {
             },
             lastFilled: {
               type: "string",
-              description: "Date last filled",
+              description: "Date last filled. ONLY populate if explicitly stated in the document. Leave empty if not mentioned.",
             },
             adherence: {
               type: "string",
               enum: ["excellent", "good", "fair", "poor", "unknown"],
-              description: "Patient adherence level",
+              description: "Patient adherence level. ONLY populate if explicitly stated in the document. Do NOT infer adherence from other information. Leave empty if not mentioned.",
             },
             sideEffects: {
               type: "array",
               items: {
                 type: "string",
               },
-              description: "Reported side effects",
+              description: "Reported side effects. ONLY extract if explicitly mentioned in the document. Do NOT list common side effects unless the document states the patient experienced them.",
             },
             notes: {
               type: "string",

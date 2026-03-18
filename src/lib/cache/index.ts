@@ -24,6 +24,8 @@ import { isCapacitorBuild } from '$lib/config/platform';
 
 const DEFAULT_TTL = 10 * 60 * 1000; // 10 minutes
 
+const isOnline = () => (typeof navigator !== 'undefined' ? navigator.onLine : true);
+
 /** Currently authenticated user ID — needed for Preferences namespacing. */
 let _userId: string | null = null;
 
@@ -58,15 +60,18 @@ export async function fetchCached<T>(
 
 	const entry = getMemoryEntry(key);
 	if (entry !== null) {
-		const isStale = Date.now() - entry.fetchedAt > ttl;
-		if (isStale) {
-			// Return stale data immediately; silently refresh in background.
+		if (isOnline()) {
+			// Online: always trigger background refresh (stale-while-revalidate with effective TTL=0)
 			refresh().catch((e) => console.warn('[Cache] Background refresh failed for', key, e));
 		}
+		// Online or offline: return cached data immediately
 		return entry.data as T;
 	}
 
-	// No cache — must await the full fetch.
+	// No cache entry
+	if (!isOnline()) return null; // Offline with no cache — can't fetch
+
+	// Online — await fresh data.
 	try {
 		return await refresh();
 	} catch (e) {

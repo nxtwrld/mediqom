@@ -53,6 +53,27 @@ export async function initMobileAuth(): Promise<void> {
     App.addListener("appStateChange", async ({ isActive }) => {
       if (isActive) {
         await refreshSession();
+        // Invalidate caches so next access triggers fresh fetch
+        try {
+          const { invalidateCachePattern } = await import("$lib/cache");
+          invalidateCachePattern("profiles:");
+          invalidateCachePattern("documents:");
+          // Re-fetch profiles (triggers document enrichment)
+          const { loadProfiles } = await import("$lib/profiles");
+          loadProfiles(true).catch(() => {});
+        } catch {
+          // Cache/profile refresh is non-critical
+        }
+        // Reconnect realtime (may have disconnected in background)
+        try {
+          const { startRealtimeSync } = await import("$lib/cache/realtime");
+          const { getClient } = await import("$lib/supabase");
+          const { default: userModule } = await import("$lib/user");
+          const userId = userModule.getId();
+          if (userId) startRealtimeSync(getClient(), userId);
+        } catch {
+          // Realtime reconnect is non-critical
+        }
         // Check for pending import jobs on app resume
         try {
           const { checkPendingJobs } = await import("$lib/import/job-manager");

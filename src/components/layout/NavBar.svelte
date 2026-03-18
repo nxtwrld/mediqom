@@ -6,6 +6,8 @@
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import ProfileImage from '$components/profile/ProfileImage.svelte';
     import { t } from '$lib/i18n';
+    import { goto } from '$app/navigation';
+    import { pendingJobs, activeJobs } from '$lib/import/job-store';
 
     // ── Other UI state ──────────────────────────────────────────────────────
     let toolsPopupOpen = $state(false);
@@ -23,9 +25,15 @@
     // ── Action handlers ─────────────────────────────────────────────────────
     function handleChatToggle() { ui.emit('chat:toggle'); }
 
+    let importBadge = $derived($pendingJobs.length + $activeJobs.length);
+
     function handleImport(e: MouseEvent) {
         e.stopPropagation();
-        ui.emit('overlay.import', true);
+        if ($uiState.overlay === Overlay.import) {
+            ui.emit('overlay.import', false);
+        } else {
+            ui.emit('overlay.import', true);
+        }
     }
 
     function handleToolsClick(e: MouseEvent) {
@@ -68,6 +76,12 @@
             >
                 {$t('app.nav.documents')}
             </a>
+            <a
+                href="/med/p/{$profile.id}/medications"
+                class:-active={isActive(`/med/p/${$profile.id}/medications`)}
+            >
+                {$t('medications.title')}
+            </a>
         {:else}
             <div class="profile-spacer"></div>
         {/if}
@@ -90,8 +104,11 @@
         <button class:-active={$chatIsOpen} onclick={handleChatToggle} aria-label="AI Chat">
             <svg aria-hidden="true"><use href="/icons.svg#ai-chat"></use></svg>
         </button>
-        <button onclick={handleImport} aria-label="Import">
+        <button class="import-btn" onclick={handleImport} aria-label="Import">
             <svg aria-hidden="true"><use href="/icons.svg#plus"></use></svg>
+            {#if importBadge > 0}
+                <span class="badge">{importBadge}</span>
+            {/if}
         </button>
     </nav>
 </header>
@@ -209,5 +226,27 @@
 
     .tools-popup button:hover {
         background: var(--color-gray-300);
+    }
+
+    /* ── Import button badge ─────────────────────────────────── */
+    .import-btn {
+        position: relative;
+    }
+
+    .badge {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        min-width: 1.1rem;
+        height: 1.1rem;
+        padding: 0 0.3rem;
+        border-radius: 1rem;
+        background: var(--color-negative);
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        line-height: 1.1rem;
+        text-align: center;
+        pointer-events: none;
     }
 </style>
