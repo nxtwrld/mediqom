@@ -22,6 +22,7 @@
     import { groupByTags } from '$lib/documents/tools';
     //import reports from '$lib/report/store';
     import shaders from './shaders';
+    import { createAuraShellMaterials } from './aura.shader';
     import type { IContext } from './context/types.d';
     import contexts from './context/index';
 	import store from './store';
@@ -55,7 +56,7 @@
 */
 
     let FOCUS_COLOR = 0x16d3dd;
-    let HIGHLIGHT_COLOR = 0xe9a642;
+    let HIGHLIGHT_COLOR = 0xffbf40;
         
     //console.log('🧍', 'Body', objects3d);
     //console.log('profile', $profile);
@@ -92,6 +93,12 @@
     // Pre-built list of meshes to update on focus (excludes shade_skin)
     // Avoids expensive scene.traverse() on every highlight call
     let focusableMeshes: THREE.Mesh[] = [];
+
+    // Aura glow effect state (multi-shell, no post-processing)
+    let auraMeshes: THREE.Mesh[] = [];
+    let auraShellMaterials: THREE.ShaderMaterial[] = [];
+    let auraActive = false;
+    const auraClock = new THREE.Clock(false);
 
     const objectToFileMapping = Object.entries(objects3d).reduce((acc, [k,v]) => {
         v.objects.forEach(f => {
@@ -422,6 +429,8 @@
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
             }
+
+            removeAuraMesh();
 
             // clear all three.js objects from the scene
             if (scene) clearObjects(scene);
@@ -875,6 +884,9 @@
         renderer.toneMappingExposure = 1.0;
         container.appendChild( renderer.domElement );
 
+        // Bloom post-processing — lazily initialized when aura activates
+        // (kept off by default to avoid alpha/background issues)
+
         // CSS2DRenderer
 
         labelRenderer = new CSS2DRenderer();
@@ -1102,18 +1114,26 @@
         const hasTweens = TWEEN.getAll().length > 0;
         const hasAnimation = !!(currentContext && currentContext.animation);
 
+        // Update aura shader time uniform on all shell materials
+        if (auraActive && auraShellMaterials.length) {
+            const t = auraClock.getElapsedTime();
+            for (const mat of auraShellMaterials) {
+                mat.uniforms.uTime.value = t;
+            }
+        }
+
         if (hasTweens) TWEEN.update();
         const controlsChanged = controls.update();
         if (hasAnimation) currentContext!.animation!.update();
 
-        if (controlsChanged || hasTweens || hasAnimation) {
+        if (controlsChanged || hasTweens || hasAnimation || auraActive) {
             render();
             idleFrames = 0;
         } else {
             idleFrames++;
         }
 
-        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation) {
+        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive) {
             animationFrameId = requestAnimationFrame(animate);
         } else {
             render(); // final clean frame
@@ -1122,7 +1142,9 @@
     }
 
     function render() {
-        if (renderer) renderer.render( scene, camera );
+        if (renderer) {
+            renderer.render( scene, camera );
+        }
         if (labelRenderer) labelRenderer.render( scene, camera );
     }
 
@@ -1314,6 +1336,50 @@
             }
     }
 
+    /**
+     * Creates 3 concentric glow shells per child mesh for a soft halo effect.
+     * No post-processing needed — shells use BackSide + AdditiveBlending.
+     */
+    function createAuraMesh(object: THREE.Object3D) {
+        removeAuraMesh();
+
+        auraShellMaterials = createAuraShellMaterials(new THREE.Color(HIGHLIGHT_COLOR));
+        auraClock.start();
+        auraActive = true;
+
+        object.traverse((child: any) => {
+            if (!child.isMesh) return;
+            for (let i = 0; i < auraShellMaterials.length; i++) {
+                const clone = child.clone();
+                clone.material = auraShellMaterials[i];
+                clone.renderOrder = 999 + i;
+                clone.raycast = () => {};
+                clone.name = `__aura_${i}__${child.name}`;
+                child.parent!.add(clone);
+                auraMeshes.push(clone);
+            }
+        });
+
+        requestRender();
+    }
+
+    /**
+     * Removes all aura clone meshes and stops the clock.
+     */
+    function removeAuraMesh() {
+        for (const mesh of auraMeshes) {
+            mesh.parent?.remove(mesh);
+            mesh.geometry?.dispose();
+        }
+        auraMeshes = [];
+        for (const mat of auraShellMaterials) {
+            mat.dispose();
+        }
+        auraShellMaterials = [];
+        auraClock.stop();
+        auraActive = false;
+    }
+
     function highlight (object: THREE.Object3D | null) {
         // Restore previously selected object to unfocused state
         if (selected && selected !== object) {
@@ -1345,7 +1411,7 @@
             }
         }
 
-        // Highlight the target object
+        // Highlight the target object + aura glow
         if (object) {
             object.traverse((child: any) => {
                 if (child.isMesh && child.material) {
@@ -1353,6 +1419,9 @@
                     if (cached) child.material = cached.highlighted;
                 }
             });
+            createAuraMesh(object);
+        } else {
+            removeAuraMesh();
         }
     }
 
