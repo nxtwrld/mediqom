@@ -158,22 +158,49 @@
     }
 
     let mobileToolsOpen = $state(false);
+    let mobileDocsOpen = $state(false);
+
+    // Either popup can contribute to the bottom offset
+    let anyPopupOpen = $derived(mobileToolsOpen || mobileDocsOpen);
+    let toolsExtraHeight = $derived(anyPopupOpen && !panelOpen ? 80 : 0);
+
+    function closeMobilePopups() {
+        mobileToolsOpen = false;
+        mobileDocsOpen = false;
+    }
 
     function handleAnatomyMobile(e: MouseEvent) {
         e.stopPropagation();
-        mobileToolsOpen = !mobileToolsOpen;
+        isSnappingPanel = true;
+        mobileDocsOpen = false;
+        const opening = !mobileToolsOpen;
+        mobileToolsOpen = opening;
+        if (opening && panelOpen && panelView !== "anatomy") {
+            closePanel();
+        }
+    }
+
+    function handleDocsMobile(e: MouseEvent) {
+        e.stopPropagation();
+        isSnappingPanel = true;
+        mobileToolsOpen = false;
+        const opening = !mobileDocsOpen;
+        mobileDocsOpen = opening;
+        if (opening && panelOpen && panelView !== "anatomy") {
+            closePanel();
+        }
     }
 
     function handleMobileOpenAnatomy(e: MouseEvent) {
         e.stopPropagation();
-        mobileToolsOpen = false;
+        closeMobilePopups();
         ui.emit("viewer:anatomy", true);
         openPanel("anatomy");
     }
 
     function handleMobileOpenTimeline(e: MouseEvent) {
         e.stopPropagation();
-        mobileToolsOpen = false;
+        closeMobilePopups();
         ui.emit("viewer:timeline", null);
         openPanel("anatomy");
     }
@@ -250,6 +277,7 @@
 
     function openPanel(view?: PanelView) {
         if (view) panelView = view;
+        closeMobilePopups();
         isSnappingPanel = true;
         panelHeight = MAX_PANEL_HEIGHT[panelView]();
     }
@@ -528,7 +556,7 @@
         ];
 
         const handleWindowClick = () => {
-            mobileToolsOpen = false;
+            closeMobilePopups();
         };
         window.addEventListener("click", handleWindowClick);
 
@@ -573,34 +601,9 @@
         class="navbar-outer"
         class:-snapping={isSnappingPanel}
         class:-native={isNativePlatform()}
-        style="height: calc(var(--toolbar-height) + 1.25rem + {panelHeight}px)"
+        style="height: calc(var(--toolbar-height) + 1.25rem + {panelHeight}px); --tools-offset: {toolsExtraHeight}px"
         bind:this={navbarWrapEl}
     >
-        <!-- Mobile tools popup — outside navbar-inner so it escapes overflow:hidden.
-             Panel closed → popup appears above the pill.
-             Panel open   → toolbar is near screen top, so popup flips below the toolbar. -->
-        {#if mobileToolsOpen}
-            <div
-                class="mobile-tools-popup"
-                style={panelHeight > 0
-                    ? "top: calc(var(--toolbar-height) + 0.5rem)"
-                    : "bottom: calc(var(--toolbar-height) + 1.25rem + 0.5rem)"}
-            >
-                <button onclick={handleMobileOpenAnatomy}>
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#anatomy"></use></svg
-                    >
-                    {$t("viewer.panels.anatomy")}
-                </button>
-                <button onclick={handleMobileOpenTimeline}>
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#chart-line"></use></svg
-                    >
-                    {$t("viewer.panels.timeline")}
-                </button>
-            </div>
-        {/if}
-
         <!-- Avatar floats above the pill — outside overflow:hidden boundary -->
         <button
             class="nav-avatar"
@@ -613,32 +616,19 @@
         <!-- Inner pill: clips the panel -->
         <div class="navbar-inner">
             <nav class="navbar-bar toolbar" aria-label="Main navigation" bind:this={navbarBarEl}>
-                <a
+                <button
                     class="nav-icon"
-                    href={$profile?.id
-                        ? `/med/p/${$profile.id}/documents`
-                        : "/med"}
-                    class:-active={!!$profile?.id &&
-                        isActive(`/med/p/${$profile.id}/documents`)}
+                    class:-active={!!$profile?.id && (
+                        isActive(`/med/p/${$profile.id}/documents`) ||
+                        isActive(`/med/p/${$profile.id}/medications`)
+                    )}
+                    onclick={handleDocsMobile}
                     aria-label={$t("app.nav.documents")}
                 >
                     <svg aria-hidden="true"
                         ><use href="/icons.svg#report"></use></svg
                     >
-                </a>
-                <a
-                    class="nav-icon"
-                    href={$profile?.id
-                        ? `/med/p/${$profile.id}/medications`
-                        : "/med"}
-                    class:-active={!!$profile?.id &&
-                        isActive(`/med/p/${$profile.id}/medications`)}
-                    aria-label={$t("medications.title")}
-                >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#medical-tools"></use></svg
-                    >
-                </a>
+                </button>
                 <button
                     class="nav-icon"
                     class:-disabled={!isProfileActive}
@@ -673,6 +663,42 @@
                     {/if}
                 </button>
             </nav>
+            <!-- Mobile tools popup — slides down from toolbar, covers navbar-name -->
+            <div class="mobile-tools-popup" class:-open={mobileToolsOpen}>
+                <button onclick={handleMobileOpenAnatomy}>
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#anatomy"></use></svg
+                    >
+                    {$t("viewer.panels.anatomy")}
+                </button>
+                <button onclick={handleMobileOpenTimeline}>
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#chart-line"></use></svg
+                    >
+                    {$t("viewer.panels.timeline")}
+                </button>
+            </div>
+            <!-- Mobile docs popup — slides down from toolbar, same pattern as tools -->
+            <div class="mobile-tools-popup" class:-open={mobileDocsOpen}>
+                <a
+                    href={$profile?.id ? `/med/p/${$profile.id}/documents` : "/med"}
+                    onclick={() => closeMobilePopups()}
+                >
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#report"></use></svg
+                    >
+                    {$t("app.nav.documents")}
+                </a>
+                <a
+                    href={$profile?.id ? `/med/p/${$profile.id}/medications` : "/med"}
+                    onclick={() => closeMobilePopups()}
+                >
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#pills"></use></svg
+                    >
+                    {$t("medications.title")}
+                </a>
+            </div>
             <div class="navbar-name">{$profile?.fullName ?? ""}</div>
 
             <div class="panel-section" class:-anatomy={anatomyFullscreen} bind:this={panelSectionEl}>
@@ -769,7 +795,7 @@
         position: fixed;
         left: 1rem;
         right: 1rem;
-        bottom: 0.5rem;
+        bottom: calc(0.5rem + var(--tools-offset, 0px));
         /* height is set via inline style (toolbar + panelHeight) */
         max-height: calc(
             100dvh - var(--safe-area-top, 0px) - var(--safe-area-bottom, 0px) -
@@ -784,11 +810,11 @@
 
     /* On native Capacitor: respect safe-area-bottom (home indicator) */
     .navbar-outer.-native {
-        bottom: var(--safe-area-bottom, 0px);
+        bottom: calc(var(--safe-area-bottom, 0px) + var(--tools-offset, 0px));
     }
 
     .navbar-outer.-snapping {
-        transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: height 0.32s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Hide mobile pill on desktop */
@@ -886,7 +912,7 @@
         border-bottom-left-radius: var(--radius-16, 1rem);
         border-bottom-right-radius: var(--radius-16, 1rem);
         text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
-        z-index: 1000;
+        z-index: 999;
     }
 
     /* ── Panel section ───────────────────────────────────────── */
@@ -985,44 +1011,59 @@
     }
 
     /* ── Mobile tools popup ───────────────────────────────── */
-    /* Rendered inside .navbar-outer (overflow:visible), so it escapes
-       .navbar-bar's overflow:hidden. Positioned above the toolbar. */
+    /* Absolutely positioned under the toolbar bar, overlays navbar-name.
+       Slides down via max-height; z-index between bar (1001) and name (999). */
     .mobile-tools-popup {
         position: absolute;
-        /* bottom is set via inline style: toolbar-height + 1.25rem + panelHeight + gap */
-        left: 0.5rem;
-        background: var(--color-white);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-8, 0.5rem);
-        box-shadow: var(--shadow-modal);
-        min-width: 10rem;
-        white-space: nowrap;
-        z-index: 1001;
+        top: var(--toolbar-height);
+        left: 0;
+        right: 0;
+        max-height: 0;
+        overflow: hidden;
+        background-color: var(--color-gray-300);
+        margin: 0 1rem;
+        border-bottom-left-radius: var(--radius-16, 1rem);
+        border-bottom-right-radius: var(--radius-16, 1rem);
+        box-shadow: 0 1px 15px rgba(0, 0, 0, 0.4);
+        transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
     }
 
-    .mobile-tools-popup button {
+    .mobile-tools-popup.-open {
+        max-height: 90vh;
+    }
+
+    .mobile-tools-popup button,
+    .mobile-tools-popup a {
         display: flex;
         align-items: center;
         gap: 0.6rem;
         width: 100%;
-        padding: 0.65rem 1rem;
+        padding: 0.5rem 1rem;
         text-align: left;
+        text-decoration: none;
         background: none;
         border: none;
         cursor: pointer;
         color: var(--color-black);
         font-size: 0.875rem;
     }
+    .mobile-tools-popup button:last-child,
+    .mobile-tools-popup a:last-child {
+        padding-bottom: 1.5rem;
+    }
 
-    .mobile-tools-popup button > svg {
-        width: 1.5rem;
-        height: 1.5rem;
+    .mobile-tools-popup button > svg,
+    .mobile-tools-popup a > svg {
+        width: 1.25rem;
+        height: 1.25rem;
         flex-shrink: 0;
         fill: currentColor;
     }
 
-    .mobile-tools-popup button:hover {
-        background: var(--color-gray-300);
+    .mobile-tools-popup button:active,
+    .mobile-tools-popup a:active {
+        background: rgba(0, 0, 0, 0.05);
     }
 
     /* ── Import button badge ─────────────────────────────────── */
