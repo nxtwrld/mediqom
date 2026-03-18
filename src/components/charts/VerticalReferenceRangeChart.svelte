@@ -188,6 +188,52 @@
             });
     }
 
+    // Reusable interaction handlers for click + tap
+    function handleDotInteraction(d: SignalSeries['values'][number], currentSeries: SignalSeries) {
+        medMenu = { ...medMenu, visible: false };
+        focusedSeriesName = currentSeries.name;
+        applyFocusStyles(focusedSeriesName);
+        if (!svgElement || !yBase) return;
+        const width = svgElement.clientWidth - margin.left - margin.right;
+        const x = scaleLinear<number, number>().domain(xDomain).range([0, width]);
+        // Recompute y from current zoom state
+        const currentTransform = select(svgElement).property('__zoom') ?? zoomIdentity;
+        const y = currentTransform.rescaleY(yBase);
+        const dotX = x(d.normalized) + margin.left;
+        const dotY = y(d.date) + margin.top;
+        const chartWidth = svgElement.clientWidth;
+        const MENU_W = 260;
+        const MENU_H = 210;
+        const ARROW = 10;
+        const edgePad = 8;
+        const placement = (dotY - margin.top) >= (MENU_H + ARROW) ? 'top' as const : 'bottom' as const;
+        const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(dotX, chartWidth - MENU_W / 2 - edgePad));
+        menu = { visible: true, x: clampedX, y: dotY, dotX, placement, point: d, series: currentSeries };
+    }
+
+    function handleMedInteraction(d: PackedMedLane, laneX: number) {
+        menu = { ...menu, visible: false };
+        if (!svgElement || !yBase) return;
+        const currentTransform = select(svgElement).property('__zoom') ?? zoomIdentity;
+        const y = currentTransform.rescaleY(yBase);
+        const barX = laneX + LANE_WIDTH / 2 + margin.left;
+        const barY = y(d.item.startDate) + margin.top;
+        const chartWidth = svgElement.clientWidth;
+        const MENU_W = 260;
+        const MENU_H = 180;
+        const ARROW = 10;
+        const edgePad = 8;
+        const placement: 'top' | 'bottom' = (barY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
+        const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(barX, chartWidth - MENU_W / 2 - edgePad));
+        medMenu = { visible: true, x: clampedX, y: barY, barX, placement, laneData: d };
+    }
+
+    function handleSeriesLineClick(seriesName: string) {
+        focusedSeriesName = focusedSeriesName === seriesName ? null : seriesName;
+        if (!focusedSeriesName) lastAutoFocusedKey = highlightKey(highlightedPoint);
+        applyFocusStyles(focusedSeriesName);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function renderDynamic(y: ScaleTime<number, number>, data: SignalSeries[], highlighted: typeof highlightedPoint, width: number, height: number, x: ScaleLinear<number, number>, axisGroup: Selection<SVGGElement, any, any, any>, zebraGroup: Selection<SVGGElement, any, any, any>, seriesContainer: Selection<SVGGElement, any, any, any>) {
         function isHighlighted(s: SignalSeries, d: SignalSeries['values'][number]): boolean {
@@ -288,13 +334,7 @@
                     .attr('class', 'series-line')
                     .attr('stroke', s.color)
                     .attr('d', valueLine(sorted) ?? '')
-                    .style('cursor', 'pointer')
-                    .on('click', function(event: MouseEvent) {
-                        event.stopPropagation();
-                        focusedSeriesName = focusedSeriesName === s.name ? null : s.name;
-                        if (!focusedSeriesName) lastAutoFocusedKey = highlightKey(highlightedPoint);
-                        applyFocusStyles(focusedSeriesName);
-                    });
+                    .style('cursor', 'pointer');
             } else {
                 g.selectAll('path.series-line').remove();
             }
@@ -322,22 +362,7 @@
                                     .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
                             }
                         })
-                        .on('click', function(event: MouseEvent, d: SignalSeries['values'][number]) {
-                            event.stopPropagation();
-                            medMenu = { ...medMenu, visible: false }; // close med menu
-                            focusedSeriesName = currentSeries.name;
-                            applyFocusStyles(focusedSeriesName);
-                            const dotX = x(d.normalized) + margin.left;
-                            const dotY = y(d.date) + margin.top;
-                            const chartWidth  = svgElement!.clientWidth;
-                            const MENU_W = 260;
-                            const MENU_H = 210;
-                            const ARROW  = 10;
-                            const edgePad = 8;
-                            const placement = (dotY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
-                            const clampedX  = Math.max(MENU_W / 2 + edgePad, Math.min(dotX, chartWidth - MENU_W / 2 - edgePad));
-                            menu = { visible: true, x: clampedX, y: dotY, dotX, placement, point: d, series: currentSeries };
-                        }),
+                        ,
                     update => update,
                     exit => exit.remove()
                 )
@@ -370,22 +395,7 @@
                 const isActive = d.item.status === 'active';
                 const endDate = d.item.endDate ?? now;
 
-                // Click handler for medication popover
-                g.style('cursor', 'pointer')
-                 .on('click', function(event: MouseEvent) {
-                    event.stopPropagation();
-                    menu = { ...menu, visible: false }; // close vitals menu
-                    const barX = laneX + LANE_WIDTH / 2 + margin.left;
-                    const barY = y(d.item.startDate) + margin.top;
-                    const chartWidth = svgElement!.clientWidth;
-                    const MENU_W = 260;
-                    const MENU_H = 180;
-                    const ARROW = 10;
-                    const edgePad = 8;
-                    const placement: 'top' | 'bottom' = (barY - margin.top) >= (MENU_H + ARROW) ? 'top' : 'bottom';
-                    const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(barX, chartWidth - MENU_W / 2 - edgePad));
-                    medMenu = { visible: true, x: clampedX, y: barY, barX, placement, laneData: d };
-                });
+                g.style('cursor', 'pointer');
 
                 if (d.item.isOnce) {
                     // Dot for single-occurrence meds
@@ -637,13 +647,97 @@
         if (!svgElement) return;
 
         // SVG click handler lives here to avoid re-attachment on every render
-        select(svgElement).on('click', () => {
+        function dismissAll() {
             menu = { ...menu, visible: false };
             medMenu = { ...medMenu, visible: false };
             focusedSeriesName = null;
-            lastAutoFocusedKey = highlightKey(highlightedPoint); // prevent re-focus on next render
+            lastAutoFocusedKey = highlightKey(highlightedPoint);
             applyFocusStyles(null);
-        });
+        }
+
+        // Native delegated tap detection — bypasses D3's event system entirely.
+        // Uses capture phase so handlers fire BEFORE D3 zoom's bubble-phase handlers.
+        // This solves mobile touch issues where D3 .on() handlers don't work in WKWebView.
+        let tapStartX = 0, tapStartY = 0, tapStartTime = 0;
+        let tapTarget: Element | null = null;
+        let bgTapStartX = 0, bgTapStartY = 0, bgTapStartTime = 0;
+
+        // After a successful tap on an interactive element, the browser synthesizes a
+        // click event from the pointer pair. That click would bubble to window and
+        // trigger Popover's handleClickOutside, instantly closing the popover we just
+        // opened. This one-shot capture handler eats that synthesized click.
+        function suppressNextClick() {
+            svgElement!.addEventListener('click', (ev) => { ev.stopPropagation(); }, { capture: true, once: true });
+        }
+
+        function onPointerDown(e: PointerEvent) {
+            const target = e.target as Element;
+            // Track background taps (no stopPropagation — D3 zoom can still pan)
+            bgTapStartX = e.clientX;
+            bgTapStartY = e.clientY;
+            bgTapStartTime = Date.now();
+            // Check if tapping an interactive element
+            if (target.classList.contains('dot')
+                || target.classList.contains('series-line')
+                || target.classList.contains('med-bar')
+                || target.classList.contains('med-dot')
+                || target.closest('.med-item')) {
+                tapStartX = e.clientX;
+                tapStartY = e.clientY;
+                tapStartTime = Date.now();
+                tapTarget = target;
+                e.stopPropagation(); // prevent D3 zoom from capturing this
+            }
+        }
+
+        function onPointerUp(e: PointerEvent) {
+            if (tapTarget) {
+                const dx = e.clientX - tapStartX;
+                const dy = e.clientY - tapStartY;
+                const dt = Date.now() - tapStartTime;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const wasTap = dist < 10 && dt < 300;
+                const capturedTarget = tapTarget;
+                tapTarget = null;
+                if (!wasTap) return;
+                e.stopPropagation();
+
+                // Determine what was tapped and dispatch
+                if (capturedTarget.classList.contains('dot')) {
+                    const d = select(capturedTarget).datum() as SignalSeries['values'][number];
+                    const seriesG = capturedTarget.closest('g.series');
+                    const s = seriesG ? select(seriesG).datum() as SignalSeries : null;
+                    if (d && s) { handleDotInteraction(d, s); suppressNextClick(); }
+                } else if (capturedTarget.classList.contains('series-line')) {
+                    const seriesG = capturedTarget.closest('g.series');
+                    const s = seriesG ? select(seriesG).datum() as SignalSeries : null;
+                    if (s) { handleSeriesLineClick(s.name); suppressNextClick(); }
+                } else if (capturedTarget.classList.contains('med-bar')
+                           || capturedTarget.classList.contains('med-dot')
+                           || capturedTarget.closest('.med-item')) {
+                    const medG = capturedTarget.closest('.med-item');
+                    const d = medG ? select(medG).datum() as PackedMedLane : null;
+                    if (d) {
+                        const medBaseX = -margin.left + marginProp.left;
+                        const laneX = medBaseX + d.lane * (LANE_WIDTH + LANE_GAP) + 4;
+                        handleMedInteraction(d, laneX);
+                        suppressNextClick();
+                    }
+                }
+            } else {
+                // Background tap — dismiss popovers
+                const dx = e.clientX - bgTapStartX;
+                const dy = e.clientY - bgTapStartY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const dt = Date.now() - bgTapStartTime;
+                if (dist < 10 && dt < 300) {
+                    dismissAll();
+                }
+            }
+        }
+
+        svgElement.addEventListener('pointerdown', onPointerDown, true);
+        svgElement.addEventListener('pointerup', onPointerUp, true);
 
         // Set up D3 zoom — Y axis only, scaleExtent 1..20
         zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
@@ -652,7 +746,12 @@
                 if (event.type === 'wheel' || event.type === 'dblclick') return true;
                 if (event.touches?.length >= 2) return true;
                 const target = event.target as Element;
-                if (target.classList.contains('dot')) return false;
+                // Don't let zoom capture taps on interactive elements
+                if (target.classList.contains('dot')
+                    || target.classList.contains('series-line')
+                    || target.classList.contains('med-bar')
+                    || target.classList.contains('med-dot')
+                    || target.closest?.('.med-item')) return false;
                 return true;
             })
             .on('zoom', (event) => {
@@ -694,7 +793,9 @@
         return () => {
             clearTimeout(rTimer);
             observer.disconnect();
-            select(svgElement!).on('.zoom', null).on('click', null);
+            select(svgElement!).on('.zoom', null);
+            svgElement!.removeEventListener('pointerdown', onPointerDown, true);
+            svgElement!.removeEventListener('pointerup', onPointerUp, true);
             window.removeEventListener('pointerdown', handleOutsideClick);
         };
     });
@@ -785,6 +886,7 @@
     .chart-wrap svg {
         width: 100%;
         height: 100%;
+        touch-action: none;
     }
 
     .chart-wrap svg :global(.band-low),

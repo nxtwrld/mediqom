@@ -102,6 +102,10 @@ export default defineConfig({
     sveltekit(),
   ],
 
+  worker: {
+    format: "es",
+  },
+
   build: {
     outDir: "mobile/dist",
     // Don't inline WASM files
