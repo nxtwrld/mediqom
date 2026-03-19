@@ -23,6 +23,7 @@
     //import reports from '$lib/report/store';
     import shaders from './shaders';
     import { createAuraShellMaterials } from './aura.shader';
+    import { createParticleSwarm, updateParticleSwarm, removeParticleSwarm } from './particle-swarm';
     import type { IContext } from './context/types.d';
     import contexts from './context/index';
 	import store from './store';
@@ -118,6 +119,7 @@
     $: labels = getLabelsMap($profile);
 
     function getLabelsMap($profile: Profile) {
+        if (!$profile?.id) return [];
 
         return Object.entries(groupByTags($profile.id))
         .filter(([k,v]) => {
@@ -1120,6 +1122,7 @@
             for (const mat of auraShellMaterials) {
                 mat.uniforms.uTime.value = t;
             }
+            // updateParticleSwarm();
         }
 
         if (hasTweens) TWEEN.update();
@@ -1360,6 +1363,7 @@
             }
         });
 
+        // createParticleSwarm(object, scene, new THREE.Color(HIGHLIGHT_COLOR));
         requestRender();
     }
 
@@ -1367,6 +1371,7 @@
      * Removes all aura clone meshes and stops the clock.
      */
     function removeAuraMesh() {
+        // removeParticleSwarm();
         for (const mesh of auraMeshes) {
             mesh.parent?.remove(mesh);
             mesh.geometry?.dispose();

@@ -26,6 +26,7 @@ export function groupByTags(user_id: string | undefined = undefined): {
 } {
   if (!user_id) user_id = get(profile).id;
   const userDocuments = get(byUser(user_id));
+  if (!userDocuments) return {};
   const groups: {
     [key: string]: Document[];
   } = {};

@@ -182,7 +182,7 @@
                          && s.name === highlightedPoint.signalName
                          && Math.abs(d.value - highlightedPoint.value) < 0.001
                          && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
-                     const baseR = isHL ? 7 : 4;
+                     const baseR = isHL ? 10 : 6;
                      return focusedName && isFocused ? baseR * 1.5 : baseR;
                  });
             });
@@ -344,7 +344,7 @@
                 .join('circle')
                 .attr('class', 'dot-highlight-ring')
                 .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', 11).attr('fill', 'none')
+                .attr('r', 16).attr('fill', 'none')
                 .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
 
             g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
@@ -353,12 +353,12 @@
                     enter => enter.append('circle')
                         .attr('class', 'dot')
                         .on('mouseover', function() {
-                            if (isHoverDevice) select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                            if (isHoverDevice) select(this).attr('r', 9).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
                         })
                         .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
                             if (isHoverDevice) {
                                 select(this)
-                                    .attr('r', isHighlighted(currentSeries, d) ? 7 : 4)
+                                    .attr('r', isHighlighted(currentSeries, d) ? 10 : 6)
                                     .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
                             }
                         })
@@ -367,7 +367,7 @@
                     exit => exit.remove()
                 )
                 .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', d => isHighlighted(currentSeries, d) ? 7 : 4)
+                .attr('r', d => isHighlighted(currentSeries, d) ? 10 : 6)
                 .attr('fill', s.color)
                 .attr('stroke', 'white')
                 .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
@@ -404,7 +404,7 @@
                         .attr('class', 'med-dot')
                         .attr('cx', laneX + LANE_WIDTH / 2)
                         .attr('cy', y(d.item.startDate))
-                        .attr('r', 5)
+                        .attr('r', 7)
                         .style('fill', `var(--color-categ1-${d.colorIndex})`)
                         .attr('stroke', 'white')
                         .attr('stroke-width', 1.5)
@@ -434,8 +434,10 @@
                             .attr('class', 'med-ongoing')
                             .attr('x1', centerX).attr('x2', centerX)
                             .attr('y1', yTop).attr('y2', 0)
-                            .style('stroke', `var(--color-categ1-${d.colorIndex})`).attr('stroke-width', 1.5)
-                            .attr('stroke-dasharray', '4 3')
+                            .style('stroke', `var(--color-categ1-${d.colorIndex})`)
+                            .attr('stroke-width', 5.5)
+                            .attr('line-cap', 'round')
+                            .attr('stroke-dasharray', '5 3')
                             .attr('opacity', 0.6);
                     } else {
                         g.selectAll('line.med-ongoing').remove();
@@ -832,7 +834,7 @@
                 showValue={true}
             />
             {/if}
-            <hr class="dot-menu-divider" />
+            <hr class="dot-menu-divider" /><br/>
             {#if menu.point.documentId && profileId}
                 <a
                     class="button"
@@ -995,12 +997,14 @@
     }
 
     .dot-menu-header {
-        padding: 0.4rem 0.5rem 0.2rem;
+        padding: 0 0 .5rem 0;
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
     }
-
+    .dot-menu-header  > .h4 {
+        margin: 0;
+    }
 
     .dot-menu-date {
         font-size: 0.7rem;

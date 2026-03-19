@@ -234,7 +234,7 @@
     .model-tools,
     .model-layers {
         --size: 3.5rem;
-        --radius: 0;
+        --radius: var(--radius-16);
         position: absolute;
         top: 1rem;
         left: 1rem;
