@@ -2326,5 +2326,55 @@
       "no-data": "Keine Gesundheitsdaten verfügbar",
       "no-signals": "Keine Signale ausgewählt"
     }
+  },
+  "www": {
+    "nav": {
+      "get-started": "Loslegen",
+      "login": "Anmelden"
+    },
+    "hero": {
+      "motto": "Alle Ihre Gesundheitsdaten in Ihren Händen",
+      "sub": "Medizinische Erfahrung ins 21. Jahrhundert bringen",
+      "get-started": "Kostenlos starten"
+    },
+    "download": {
+      "cta": "App herunterladen"
+    },
+    "profiles": {
+      "title": "Familien-Gesundheitszentrum",
+      "description": ""
+    },
+    "import": {
+      "title": "Jedes Dokument importieren",
+      "description": ""
+    },
+    "signals": {
+      "title": "Gesundheitssignal-Überwachung",
+      "description": ""
+    },
+    "timeline": {
+      "title": "Ihre Gesundheits-Zeitachse",
+      "description": ""
+    },
+    "weekly-plan": {
+      "title": "Wöchentlicher Gesundheitsplan",
+      "description": ""
+    },
+    "medications": {
+      "title": "Medikamentenverwaltung",
+      "description": ""
+    },
+    "imaging": {
+      "title": "Erweiterte Bildgebung",
+      "description": ""
+    },
+    "ai-chat": {
+      "title": "KI-Gesundheitsassistent",
+      "description": ""
+    },
+    "security": {
+      "title": "Ihre Daten, Ihre Kontrolle",
+      "description": ""
+    }
   }
 }

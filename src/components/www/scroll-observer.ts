@@ -3,60 +3,60 @@ import { writable, type Writable } from 'svelte/store';
 export interface ScrollObserver {
 	activeSection: Writable<number>;
 	progress: Writable<number>;
-	observe(elements: HTMLElement[]): void;
+	observe(elements: HTMLElement[], scrollContainer: HTMLElement): void;
 	destroy(): void;
 }
 
 export function createScrollObserver(): ScrollObserver {
 	const activeSection = writable(0);
 	const progress = writable(0);
-	let observer: IntersectionObserver | null = null;
-	let sectionVisibility = new Map<HTMLElement, number>();
 	let elements: HTMLElement[] = [];
+	let container: HTMLElement | null = null;
+	let rafId = 0;
 
-	function updateActive() {
-		let maxRatio = 0;
-		let maxIndex = 0;
-		for (const [el, ratio] of sectionVisibility) {
-			const idx = elements.indexOf(el);
-			if (ratio > maxRatio) {
-				maxRatio = ratio;
-				maxIndex = idx;
+	function update() {
+		if (!container || elements.length === 0) return;
+
+		const scrollTop = container.scrollTop;
+		const viewportH = container.clientHeight;
+		const center = scrollTop + viewportH / 2;
+
+		let closestIdx = 0;
+		let closestDist = Infinity;
+
+		for (let i = 0; i < elements.length; i++) {
+			const el = elements[i];
+			const elCenter = el.offsetTop + el.offsetHeight / 2;
+			const dist = Math.abs(center - elCenter);
+			if (dist < closestDist) {
+				closestDist = dist;
+				closestIdx = i;
 			}
 		}
-		activeSection.set(maxIndex);
-		progress.set(maxIndex / Math.max(elements.length - 1, 1));
+
+		activeSection.set(closestIdx);
+		progress.set(closestIdx / Math.max(elements.length - 1, 1));
 	}
 
-	function observe(els: HTMLElement[]) {
+	function onScroll() {
+		if (rafId) cancelAnimationFrame(rafId);
+		rafId = requestAnimationFrame(update);
+	}
+
+	function observe(els: HTMLElement[], scrollContainer: HTMLElement) {
 		destroy();
 		elements = els;
-		sectionVisibility = new Map();
-
-		const thresholds: number[] = [];
-		for (let i = 0; i <= 20; i++) thresholds.push(i / 20);
-
-		observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					sectionVisibility.set(entry.target as HTMLElement, entry.intersectionRatio);
-				}
-				updateActive();
-			},
-			{ threshold: thresholds }
-		);
-
-		for (const el of elements) {
-			observer.observe(el);
-		}
+		container = scrollContainer;
+		container.addEventListener('scroll', onScroll, { passive: true });
+		update();
 	}
 
 	function destroy() {
-		if (observer) {
-			observer.disconnect();
-			observer = null;
+		if (container) {
+			container.removeEventListener('scroll', onScroll);
+			container = null;
 		}
-		sectionVisibility.clear();
+		if (rafId) cancelAnimationFrame(rafId);
 		elements = [];
 	}
 

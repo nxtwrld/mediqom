@@ -37,6 +37,7 @@
 		text-align: center;
 		padding: 2rem;
 		position: relative;
+		scroll-snap-align: start;
 	}
 
 	.hero-content {
@@ -48,7 +49,7 @@
 		font-family: 'Baloo Thambi 2', cursive;
 		font-size: clamp(3rem, 8vw, 5.5rem);
 		font-weight: 600;
-		color: #fff;
+		color: var(--www-text, #1a1a2e);
 		margin: 0 0 0.5rem;
 		line-height: 1.1;
 		letter-spacing: -0.02em;
@@ -56,7 +57,7 @@
 
 	.hero-motto {
 		font-size: clamp(1.25rem, 3vw, 1.75rem);
-		color: rgba(255, 255, 255, 0.9);
+		color: var(--www-text, #1a1a2e);
 		margin: 0 0 0.75rem;
 		font-weight: 400;
 		line-height: 1.3;
@@ -64,7 +65,7 @@
 
 	.hero-sub {
 		font-size: clamp(1rem, 2vw, 1.2rem);
-		color: rgba(255, 255, 255, 0.6);
+		color: var(--www-text-secondary, #555);
 		margin: 0 0 2.5rem;
 		line-height: 1.4;
 	}

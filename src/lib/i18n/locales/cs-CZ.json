@@ -2326,5 +2326,55 @@
       "no-data": "Žádná zdravotní data nejsou k dispozici",
       "no-signals": "Žádné signály nejsou vybrány"
     }
+  },
+  "www": {
+    "nav": {
+      "get-started": "Začít",
+      "login": "Přihlášení"
+    },
+    "hero": {
+      "motto": "Všechna vaše zdravotní data ve vašich rukou",
+      "sub": "Přinášíme lékařskou zkušenost do 21. století",
+      "get-started": "Začít zdarma"
+    },
+    "download": {
+      "cta": "Stáhnout aplikaci"
+    },
+    "profiles": {
+      "title": "Centrum zdraví rodiny",
+      "description": ""
+    },
+    "import": {
+      "title": "Importujte jakýkoli dokument",
+      "description": ""
+    },
+    "signals": {
+      "title": "Monitorování zdravotních signálů",
+      "description": ""
+    },
+    "timeline": {
+      "title": "Vaše zdravotní časová osa",
+      "description": ""
+    },
+    "weekly-plan": {
+      "title": "Týdenní zdravotní plán",
+      "description": ""
+    },
+    "medications": {
+      "title": "Správa léků",
+      "description": ""
+    },
+    "imaging": {
+      "title": "Pokročilé zobrazování",
+      "description": ""
+    },
+    "ai-chat": {
+      "title": "AI zdravotní asistent",
+      "description": ""
+    },
+    "security": {
+      "title": "Vaše data, vaše kontrola",
+      "description": ""
+    }
   }
 }

@@ -99,7 +99,8 @@
       "WebFetch(domain:pacient.erecept.sukl.cz)",
       "WebFetch(domain:testapi.sukl.cz)",
       "Bash(jq:*)",
-      "WebFetch(domain:mazehq.com)"
+      "WebFetch(domain:mazehq.com)",
+      "Bash(lsof:*)"
     ],
     "deny": []
   }
