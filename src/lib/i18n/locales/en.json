@@ -1445,6 +1445,8 @@
         "heartRate": "Heart Rate",
         "heart_rate": "Heart Rate",
         "heart_rate_index": "Heart Rate Index",
+        "heart_rate_variability": "Heart Rate Variability",
+        "resting_heart_rate": "Resting Heart Rate",
         "height": "Height",
         "hematocrit": "Hematocrit",
         "hemoglobin": "Hemoglobin",
@@ -1547,6 +1549,28 @@
         "no-chart-data": "Not enough data points for chart",
         "no-entries": "No entries recorded",
         "save": "Save"
+      }
+    },
+    "health-connect": {
+      "title": "Health Data Sync",
+      "description": "Connect to Apple Health or Google Health Connect to automatically sync your health data.",
+      "enable": "Enable Health Sync",
+      "disable": "Disable Health Sync",
+      "sync-now": "Sync Now",
+      "syncing": "Syncing...",
+      "last-sync": "Last synced",
+      "sync-complete": "{count, plural, =0 {No new entries} one {1 entry synced} other {# entries synced}}",
+      "permissions-denied": "Health data permissions were denied. Please enable them in your device settings.",
+      "not-available": "Health data is not available on this device.",
+      "data-types": {
+        "heart-rate": "Heart Rate",
+        "resting-heart-rate": "Resting Heart Rate",
+        "hrv": "Heart Rate Variability",
+        "blood-pressure": "Blood Pressure",
+        "blood-glucose": "Blood Glucose",
+        "weight": "Weight",
+        "height": "Height",
+        "body-fat": "Body Fat Percentage"
       }
     },
     "insurance": {

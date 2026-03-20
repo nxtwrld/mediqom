@@ -20,6 +20,7 @@ const STATIC_FIELDS = [
   "alcoholConsumption",
   "physicalActivity",
   "diet",
+  "deviceSync",
 ];
 const ARRAY_FIELDS = ["vaccinations", "allergies", "chronicConditions"];
 const TIME_SERIES_FIELDS = [

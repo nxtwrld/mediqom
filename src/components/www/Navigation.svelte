@@ -32,7 +32,10 @@
 <nav class="www-nav">
 	<div class="nav-inner">
 		<a href="/www/{lang}" class="nav-brand" onclick={closeMenu}>
-			<span class="brand-name">Mediqom</span>
+			<svg class="brand-logo" viewBox="0 0 500 500" aria-hidden="true">
+				<use href="/logo.svg#icon" />
+			</svg>
+			<span class="brand-name">mediqom</span>
 		</a>
 
 		<div class="nav-right">
@@ -108,10 +111,23 @@
 		text-decoration: none;
 		color: var(--www-text, #1a1a2e);
 		z-index: 101;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.brand-logo {
+		width: 1.75rem;
+		height: 1.75rem;
+		color: gray;
+	}
+
+	.brand-logo :global(*) {
+		fill: gray !important;
 	}
 
 	.brand-name {
-		font-family: 'Baloo Thambi 2', cursive;
+		font-family: 'Baloo Thambi 2';
 		font-size: 1.35rem;
 		font-weight: 600;
 	}

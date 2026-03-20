@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createFeatureRays, getIconsForSide, type FeatureRaysSystem } from './www-feature-rays';
 
 const MALE_URL = '/anatomy_models/male_integumentary_system_obj/integumentary_system.obj';
 const FEMALE_URL = '/anatomy_models/female_integumentary_system_obj/integumentary_system.obj';
@@ -24,11 +25,17 @@ const HERO_SPREAD = 2.1;          // ~25% from viewport edge (visible half-width
 const FEATURE_SPREAD = 0.4;
 const FEATURE_OFFSET_X = 1.8;
 const SPIN_EXTRA = Math.PI * 2;
+const ORBIT_ANGLE = Math.PI * 0.35;      // group orbit swing during transition
+const TRANSIT_SPREAD_EXTRA = 1.4;         // extra split that peaks mid-transition
 const POSITION_DURATION = 0.8;
 
 const FADE_DURATION = 15.0; // seconds before a point fully fades
 const BASE_OPACITY = 0.5;
 const LINE_BASE_COLOR = '#16d3dd';
+
+const RAYS_DESKTOP = 6;
+const RAYS_MOBILE = 3;
+const RAY_FADE_IN_DURATION = 1.0; // seconds to fade in rays after load
 
 const COLOR_PALETTE = ['#16d3dd', '#29cc97', '#a989ee', '#e9a642', '#3571ff'];
 const COLOR_ROTATE_INTERVAL = 8.0;  // seconds between color changes
@@ -358,6 +365,12 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 	const paths: Path[] = [];
 	let _loaded = false;
 
+	// Feature ray state
+	let maleRays: FeatureRaysSystem | null = null;
+	let femaleRays: FeatureRaysSystem | null = null;
+	let rayFadeStart = 0;
+	const rayCount = isMobile ? RAYS_MOBILE : RAYS_DESKTOP;
+
 	// Color auto-rotation state
 	const paletteColors = COLOR_PALETTE.map((hex) => new THREE.Color(hex));
 	let colorIndex = 0;
@@ -392,6 +405,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 	let spinFrom = 0;
 	let spinExtra = 0;
 	let rotationAngle = 0;
+	let orbitDirection = 1; // +1 right, -1 left
 	let currentPosition: 'center' | 'left' | 'right' = 'center';
 
 	async function initBodies() {
@@ -445,6 +459,42 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 				group.add(femalePath.mesh);
 			}
 
+			// Create feature rays (raycasting-based)
+			const [maleRaysResult, femaleRaysResult] = await Promise.all([
+				createFeatureRays({
+					mesh: maleMesh,
+					side: 'left',
+					icons: getIconsForSide('left'),
+					color: LINE_BASE_COLOR,
+					rayCount
+				}),
+				createFeatureRays({
+					mesh: femaleMesh,
+					side: 'right',
+					icons: getIconsForSide('right'),
+					color: LINE_BASE_COLOR,
+					rayCount
+				})
+			]);
+
+			maleRays = maleRaysResult;
+			femaleRays = femaleRaysResult;
+
+			// meshGroup rotates with body (invisible mesh for raycasting)
+			maleRays.meshGroup.position.x = posCurrent.maleX;
+			maleRays.meshGroup.rotation.y = MALE_ROTATION_Y;
+			femaleRays.meshGroup.position.x = posCurrent.femaleX;
+			femaleRays.meshGroup.rotation.y = FEMALE_ROTATION_Y;
+
+			// renderGroup follows position but does NOT rotate (counter-rotates)
+			maleRays.renderGroup.position.x = posCurrent.maleX;
+			femaleRays.renderGroup.position.x = posCurrent.femaleX;
+
+			group.add(maleRays.meshGroup);
+			group.add(maleRays.renderGroup);
+			group.add(femaleRays.meshGroup);
+			group.add(femaleRays.renderGroup);
+
 			// Apply current position to group and paths
 			group.position.x = posCurrent.groupX;
 			for (let i = 0; i < paths.length; i++) {
@@ -452,6 +502,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 				paths[i].mesh.position.x = targetX;
 			}
 
+			rayFadeStart = clock.getElapsedTime();
 			_loaded = true;
 		} catch (err) {
 			console.error('Failed to load body models:', err);
@@ -485,9 +536,22 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 			currentColor.copy(colorFrom).lerp(colorTo, t);
 		}
 
-		// Push current color to all paths
+		// Push current color to all paths and rays
 		for (const path of paths) {
 			path.setActiveColor(currentColor.r, currentColor.g, currentColor.b);
+		}
+		const colorHex = '#' + currentColor.getHexString();
+		if (maleRays) maleRays.setColor(colorHex);
+		if (femaleRays) femaleRays.setColor(colorHex);
+
+		// Fade in rays and run per-frame raycast update
+		if (maleRays && femaleRays) {
+			const rayAge = elapsed - rayFadeStart;
+			const rayOpacity = Math.min(1, rayAge / RAY_FADE_IN_DURATION);
+			maleRays.setOpacity(rayOpacity);
+			femaleRays.setOpacity(rayOpacity);
+			maleRays.update(elapsed);
+			femaleRays.update(elapsed);
 		}
 
 		// Grow lines & recycle finished paths
@@ -506,23 +570,59 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 			posCurrent.maleX = posFrom.maleX + (posTo.maleX - posFrom.maleX) * t;
 			posCurrent.femaleX = posFrom.femaleX + (posTo.femaleX - posFrom.femaleX) * t;
 
+			// Spread overshoot: bell curve peaks mid-transition
+			const spreadBulge = Math.sin(t * Math.PI) * TRANSIT_SPREAD_EXTRA;
+
 			group.position.x = posCurrent.groupX;
 
-			// Rotation during transition: base spin + extra spin
+			// Orbit: rotate the whole group so figures swing around the canvas center
+			group.rotation.y = orbitDirection * ORBIT_ANGLE * Math.sin(t * Math.PI);
+
+			// Self-spin during transition
 			const timeSinceStart = elapsed - posStartTime;
 			rotationAngle = spinFrom + timeSinceStart * ROTATION_SPEED + spinExtra * t;
+
+			// Apply spread + overshoot to each mesh
+			for (let i = 0; i < paths.length; i++) {
+				const isMale = i % 2 === 0;
+				const baseX = isMale ? posCurrent.maleX : posCurrent.femaleX;
+				// Male goes left (negative), female goes right (positive)
+				paths[i].mesh.position.x = baseX + (isMale ? -spreadBulge : spreadBulge);
+				const baseRotY = isMale ? MALE_ROTATION_Y : FEMALE_ROTATION_Y;
+				paths[i].mesh.rotation.y = baseRotY + rotationAngle;
+			}
+
+			// Sync ray groups during transition
+			if (maleRays) {
+				// meshGroup: same transforms as male path meshes (rotates with body)
+				maleRays.meshGroup.position.x = posCurrent.maleX - spreadBulge;
+				maleRays.meshGroup.rotation.y = MALE_ROTATION_Y + rotationAngle;
+				// renderGroup: follows position only, NO rotation (counter-rotates)
+				maleRays.renderGroup.position.x = posCurrent.maleX - spreadBulge;
+			}
+			if (femaleRays) {
+				femaleRays.meshGroup.position.x = posCurrent.femaleX + spreadBulge;
+				femaleRays.meshGroup.rotation.y = FEMALE_ROTATION_Y + rotationAngle;
+				femaleRays.renderGroup.position.x = posCurrent.femaleX + spreadBulge;
+			}
 		} else {
 			rotationAngle += ROTATION_SPEED;
-		}
+			group.rotation.y = 0;
 
-		// Apply rotation and position to each mesh individually
-		// (rotating each mesh keeps them turning in sync without orbiting the group center)
-		for (let i = 0; i < paths.length; i++) {
-			const baseRotY = i % 2 === 0 ? MALE_ROTATION_Y : FEMALE_ROTATION_Y;
-			paths[i].mesh.rotation.y = baseRotY + rotationAngle;
-			if (posProgress < 1) {
-				const targetX = i % 2 === 0 ? posCurrent.maleX : posCurrent.femaleX;
-				paths[i].mesh.position.x = targetX;
+			// Apply rotation to each mesh (no orbiting at rest)
+			for (let i = 0; i < paths.length; i++) {
+				const baseRotY = i % 2 === 0 ? MALE_ROTATION_Y : FEMALE_ROTATION_Y;
+				paths[i].mesh.rotation.y = baseRotY + rotationAngle;
+			}
+
+			// Sync ray groups at rest
+			if (maleRays) {
+				// meshGroup rotates with body for raycasting
+				maleRays.meshGroup.rotation.y = MALE_ROTATION_Y + rotationAngle;
+				// renderGroup stays at rotation 0 (counter-rotates against body spin)
+			}
+			if (femaleRays) {
+				femaleRays.meshGroup.rotation.y = FEMALE_ROTATION_Y + rotationAngle;
 			}
 		}
 	}
@@ -538,6 +638,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 		posStartTime = clock.getElapsedTime();
 		spinFrom = rotationAngle;
 		spinExtra = movingRight ? SPIN_EXTRA : -SPIN_EXTRA;
+		orbitDirection = movingRight ? 1 : -1;
 		currentPosition = position;
 	}
 
@@ -545,6 +646,8 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 		for (const path of paths) {
 			path.dispose();
 		}
+		if (maleRays) maleRays.dispose();
+		if (femaleRays) femaleRays.dispose();
 		sharedMaterial.dispose();
 		clock.stop();
 	}

@@ -1429,6 +1429,8 @@
         "heartRate": "Herzfrequenz",
         "heart_rate": "Herzfrequenz",
         "heart_rate_index": "Herzfrequenzindex",
+        "heart_rate_variability": "",
+        "resting_heart_rate": "",
         "height": "Höhe",
         "hematocrit": "Hämatokrit",
         "hemoglobin": "Hämoglobin",
@@ -1531,6 +1533,28 @@
         "no-chart-data": "Nicht genügend Datenpunkte für Diagramm",
         "no-entries": "Keine Einträge vorhanden",
         "save": "Speichern"
+      }
+    },
+    "health-connect": {
+      "title": "",
+      "description": "",
+      "enable": "",
+      "disable": "",
+      "sync-now": "",
+      "syncing": "",
+      "last-sync": "",
+      "sync-complete": "",
+      "permissions-denied": "",
+      "not-available": "",
+      "data-types": {
+        "heart-rate": "",
+        "resting-heart-rate": "",
+        "hrv": "",
+        "blood-pressure": "",
+        "blood-glucose": "",
+        "weight": "",
+        "height": "",
+        "body-fat": ""
       }
     },
     "insurance": {

@@ -89,7 +89,7 @@
 	}
 
 	.feature-title {
-		font-family: 'Baloo Thambi 2', cursive;
+		font-family: 'Baloo Thambi 2';
 		font-size: clamp(1.75rem, 4vw, 2.5rem);
 		color: var(--www-text, #1a1a2e);
 		margin: 0 0 1rem;

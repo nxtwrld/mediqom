@@ -10,7 +10,10 @@
 
 <section id="hero" class="section-hero">
 	<div class="hero-content">
-		<h1 class="hero-title">Mediqom</h1>
+		<svg class="hero-logo" viewBox="0 0 500 500" aria-label="mediqom">
+			<use href="/logo.svg#icon" />
+		</svg>
+		<h1 class="hero-title">mediqom</h1>
 		<p class="hero-motto">{$_('www.hero.motto')}</p>
 		<p class="hero-sub">{$_('www.hero.sub')}</p>
 
@@ -45,8 +48,19 @@
 		z-index: 1;
 	}
 
+	.hero-logo {
+		width: clamp(4rem, 12vw, 7rem);
+		height: clamp(4rem, 12vw, 7rem);
+		margin-bottom: 1rem;
+		color: gray;
+	}
+
+	.hero-logo :global(*) {
+		fill: gray !important;
+	}
+
 	.hero-title {
-		font-family: 'Baloo Thambi 2', cursive;
+		font-family: 'Baloo Thambi 2';
 		font-size: clamp(3rem, 8vw, 5.5rem);
 		font-weight: 600;
 		color: var(--www-text, #1a1a2e);

@@ -2,8 +2,10 @@
     import InsuranceForm from "./InsuranceForm.svelte";
     import VCardFrom from "./VCardFrom.svelte";
     import HealthForm from "./HealthForm.svelte";
+    import HealthConnect from "./HealthConnect.svelte";
     import Avatar from "$components/onboarding/Avatar.svelte";
     import { profile as profileStore, removeLinkedProfile } from '$lib/profiles';
+    import { isNativePlatform } from '$lib/config/platform';
     import { t } from '$lib/i18n';
 
     interface Props {
@@ -45,6 +47,13 @@
     <InsuranceForm bind:data={profile.insurance} />
     <VCardFrom bind:data={profile.vcard} />
     <HealthForm config={{ data: profile.health }} bind:data={profile.health} />
+
+    {#if isNativePlatform()}
+        <HealthConnect
+            profileId={profile.id}
+            bind:config={profile.health.deviceSync}
+        />
+    {/if}
 
     <div class="danger-zone">
         <button class="button -danger" onclick={handleDelete}>

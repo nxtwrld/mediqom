@@ -252,6 +252,100 @@ export async function deleteSignalEntry(
 }
 
 /**
+ * Add multiple signal entries in a single batch operation.
+ * Loads the health document once, inserts all entries with dedup, saves once.
+ * Critical for sync performance (hundreds of data points).
+ */
+export async function addSignalEntriesBatch(
+  profileId: string,
+  entries: Array<{ signal: string; entry: Omit<Signal, "signal"> }>,
+): Promise<SignalCrudResult & { entriesInserted?: number }> {
+  try {
+    const document = await getHealthDocument(profileId);
+    if (!document) {
+      return { success: false, error: "Health document not found" };
+    }
+
+    if (!document.content.signals) {
+      document.content.signals = {};
+    }
+
+    let inserted = 0;
+
+    for (const { signal, entry } of entries) {
+      // Initialize signal structure if needed
+      if (!document.content.signals[signal]) {
+        document.content.signals[signal] = {
+          log: "full",
+          history: [],
+          values: [],
+        };
+      }
+
+      const fullEntry: Signal = {
+        ...entry,
+        signal,
+        source: entry.source || "input",
+        unit: entry.unit || getFieldUnit(signal),
+      };
+
+      // Dedup: skip if matching (signal, date, source) already exists
+      const existing = document.content.signals[signal].values;
+      const isDuplicate = existing.some(
+        (v: Signal) =>
+          v.date === fullEntry.date &&
+          v.source === fullEntry.source,
+      );
+
+      if (!isDuplicate) {
+        existing.push(fullEntry);
+        inserted++;
+      }
+    }
+
+    // Sort all modified signals by date (newest first)
+    const modifiedSignals = new Set(entries.map((e) => e.signal));
+    for (const signal of modifiedSignals) {
+      if (document.content.signals[signal]?.values) {
+        document.content.signals[signal].values.sort(
+          (a: Signal, b: Signal) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+      }
+    }
+
+    // Save once
+    await updateDocument(document);
+
+    // Update the profile in the store
+    const profile = (await profiles.get(profileId)) as Profile;
+    if (profile) {
+      profile.health = {
+        ...profile.health,
+        signals: document.content.signals,
+      };
+      updateProfile(profile);
+    }
+
+    healthLogger.info("Batch signal entries added", {
+      profileId,
+      total: entries.length,
+      inserted,
+      duplicatesSkipped: entries.length - inserted,
+    });
+
+    return { success: true, entriesInserted: inserted };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    healthLogger.error("Failed to add batch signal entries", {
+      profileId,
+      error: errorMessage,
+    });
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
  * Get all signal values for a specific signal
  */
 export async function getSignalValues(

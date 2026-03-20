@@ -1429,6 +1429,8 @@
         "heartRate": "Srdeční frekvence",
         "heart_rate": "Srdeční frekvence",
         "heart_rate_index": "Index srdečního tepu",
+        "heart_rate_variability": "",
+        "resting_heart_rate": "",
         "height": "Výška",
         "hematocrit": "Hematokrit",
         "hemoglobin": "Hemoglobin",
@@ -1531,6 +1533,28 @@
         "no-chart-data": "Nedostatek dat pro graf",
         "no-entries": "Žádné záznamy",
         "save": "Uložit"
+      }
+    },
+    "health-connect": {
+      "title": "",
+      "description": "",
+      "enable": "",
+      "disable": "",
+      "sync-now": "",
+      "syncing": "",
+      "last-sync": "",
+      "sync-complete": "",
+      "permissions-denied": "",
+      "not-available": "",
+      "data-types": {
+        "heart-rate": "",
+        "resting-heart-rate": "",
+        "hrv": "",
+        "blood-pressure": "",
+        "blood-glucose": "",
+        "weight": "",
+        "height": "",
+        "body-fat": ""
       }
     },
     "insurance": {
