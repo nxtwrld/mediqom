@@ -17,6 +17,10 @@ import {
 	type NormalizedSignalEntry
 } from './health-normalize';
 import { addSignalEntriesBatch } from '$lib/health/signal-crud';
+import { getMockHealthPlugin } from './health-mock-plugin';
+import { profiles, updateProfile } from '$lib/profiles';
+import type { Profile, Signal } from '$lib/types.d';
+import { normalizeSignalEntry } from '$lib/signals/normalize';
 
 const healthLog = log.namespace('Health.Device', '📱');
 
@@ -77,10 +81,20 @@ let initialized = false;
 // =====================================================
 
 function getHealthPlugin(): any {
-	if (typeof navigator !== 'undefined' && (navigator as any).health) {
+	// Real plugin on native
+	if (isNativePlatform() && typeof navigator !== 'undefined' && (navigator as any).health) {
 		return (navigator as any).health;
 	}
+	// Mock plugin in dev mode on web (tree-shaken in production)
+	if (import.meta.env.DEV && !isNativePlatform()) {
+		return getMockHealthPlugin();
+	}
 	return null;
+}
+
+/** Whether health features should be active (native OR dev mock) */
+function isHealthEnabled(): boolean {
+	return isNativePlatform() || import.meta.env.DEV;
 }
 
 // =====================================================
@@ -91,7 +105,7 @@ function getHealthPlugin(): any {
  * Check if health data is available on this device.
  */
 export async function isHealthAvailable(): Promise<boolean> {
-	if (!browser || !isNativePlatform()) return false;
+	if (!browser || !isHealthEnabled()) return false;
 
 	const plugin = getHealthPlugin();
 	if (!plugin) return false;
@@ -110,7 +124,7 @@ export async function isHealthAvailable(): Promise<boolean> {
 export async function requestHealthPermissions(
 	dataTypes: HealthDataType[]
 ): Promise<boolean> {
-	if (!browser || !isNativePlatform()) return false;
+	if (!browser || !isHealthEnabled()) return false;
 
 	const plugin = getHealthPlugin();
 	if (!plugin) return false;
@@ -146,7 +160,7 @@ export async function syncHealthData(
 	profileId: string,
 	config: HealthSyncConfig
 ): Promise<SyncResult> {
-	if (!browser || !isNativePlatform()) {
+	if (!browser || !isHealthEnabled()) {
 		return { success: false, entriesSynced: 0, errors: ['Not a native platform'] };
 	}
 
@@ -162,7 +176,7 @@ export async function syncHealthData(
 		}
 	}
 
-	const platform = getPlatform() as 'ios' | 'android';
+	const platform = (getPlatform() || 'ios') as 'ios' | 'android';
 	const errors: string[] = [];
 	let allEntries: NormalizedSignalEntry[] = [];
 
@@ -221,33 +235,104 @@ export async function syncHealthData(
 		return { success: true, entriesSynced: 0, errors: errors.length > 0 ? errors : undefined };
 	}
 
-	// Batch insert with dedup
-	const batchEntries = allEntries.map((e) => ({
-		signal: e.signal,
-		entry: {
-			value: e.value,
-			unit: e.unit,
-			date: e.date,
-			source: e.source,
-			reference: ''
+	// In dev mode with mock data: inject into in-memory store only (no DB write)
+	const isMockPath = import.meta.env.DEV && !isNativePlatform();
+	let inserted = allEntries.length;
+
+	if (isMockPath) {
+		const profile = (await profiles.get(profileId)) as Profile;
+		if (profile) {
+			// Derive age/sex for reference range lookup
+			const profileAge = profile.health?.signals?.age?.values?.[0]?.value
+				? Number(profile.health.signals.age.values[0].value)
+				: undefined;
+			const profileSex = profile.health?.signals?.biologicalSex?.values?.[0]?.value as string | undefined;
+
+			const signals = { ...(profile.health?.signals || {}) };
+			for (const e of allEntries) {
+				const normalized = normalizeSignalEntry(
+					{ signal: e.signal, value: e.value, unit: e.unit, date: e.date, source: e.source || '', reference: '' },
+					profileAge,
+					profileSex
+				);
+				const key = normalized.signal;
+				if (!signals[key]) {
+					signals[key] = { log: 'full', history: [], values: [] };
+				}
+				const fullEntry: Signal = {
+					signal: key,
+					value: normalized.value,
+					unit: normalized.unit,
+					date: normalized.date,
+					source: normalized.source,
+					reference: normalized.reference
+				};
+				// Dedup
+				const isDuplicate = signals[key].values.some(
+					(v: Signal) => v.date === fullEntry.date && v.source === fullEntry.source
+				);
+				if (!isDuplicate) {
+					signals[key].values.push(fullEntry);
+				}
+			}
+			// Sort newest first
+			for (const key of Object.keys(signals)) {
+				signals[key].values.sort(
+					(a: Signal, b: Signal) =>
+						new Date(b.date).getTime() - new Date(a.date).getTime()
+				);
+			}
+			profile.health = { ...profile.health, signals };
+			updateProfile(profile);
+			healthLog.info('Mock health sync: injected into store (no DB write)', {
+				profileId,
+				entriesSynced: allEntries.length
+			});
 		}
-	}));
+	} else {
+		// Real sync: persist to DB
+		// Derive age/sex for reference range lookup
+		const realProfile = (await profiles.get(profileId)) as Profile;
+		const realAge = realProfile?.health?.signals?.age?.values?.[0]?.value
+			? Number(realProfile.health.signals.age.values[0].value)
+			: undefined;
+		const realSex = realProfile?.health?.signals?.biologicalSex?.values?.[0]?.value as string | undefined;
 
-	const result = await addSignalEntriesBatch(profileId, batchEntries);
+		const batchEntries = allEntries.map((e) => {
+			const normalized = normalizeSignalEntry(
+				{ signal: e.signal, value: e.value, unit: e.unit, date: e.date, source: e.source || '', reference: '' },
+				realAge,
+				realSex
+			);
+			return {
+				signal: normalized.signal,
+				entry: {
+					value: normalized.value,
+					unit: normalized.unit,
+					date: normalized.date,
+					source: normalized.source,
+					reference: normalized.reference
+				}
+			};
+		});
 
-	if (!result.success) {
-		errors.push(result.error || 'Batch insert failed');
+		const result = await addSignalEntriesBatch(profileId, batchEntries);
+
+		if (!result.success) {
+			errors.push(result.error || 'Batch insert failed');
+		}
+		inserted = result.entriesInserted ?? allEntries.length;
 	}
 
 	healthLog.info('Health sync complete', {
 		profileId,
-		entriesSynced: result.entriesInserted ?? allEntries.length,
+		entriesSynced: inserted,
 		errors: errors.length
 	});
 
 	return {
 		success: errors.length === 0,
-		entriesSynced: result.entriesInserted ?? allEntries.length,
+		entriesSynced: inserted,
 		errors: errors.length > 0 ? errors : undefined
 	};
 }

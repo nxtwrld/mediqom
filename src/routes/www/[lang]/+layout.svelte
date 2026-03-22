@@ -2,6 +2,7 @@
 	import type { LayoutData } from './$types';
 	import Navigation from '$components/www/Navigation.svelte';
 	import type { Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		data: LayoutData;
@@ -9,9 +10,32 @@
 	}
 
 	let { data, children }: Props = $props();
+	let assetsReady = $state(false);
+
+	onMount(() => {
+		const timeout = setTimeout(() => {
+			assetsReady = true;
+		}, 3000);
+
+		document.fonts.ready.then(() => {
+			clearTimeout(timeout);
+			assetsReady = true;
+		});
+
+		return () => clearTimeout(timeout);
+	});
 </script>
 
-<div class="www-layout">
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@600&display=swap"
+	/>
+</svelte:head>
+
+<div class="www-layout" class:-ready={assetsReady}>
 	<Navigation lang={data.lang} session={data.session} user={data.user} />
 
 	<main class="www-main">
@@ -20,8 +44,6 @@
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@600&display=swap');
-
 	.www-layout {
 		--color-primary: #16d3dd;
 		--color-primary-dark: #02b8c1;
@@ -38,6 +60,12 @@
 		overflow-y: auto;
 		scroll-snap-type: y mandatory;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		opacity: 0;
+		transition: opacity 0.3s ease-in;
+	}
+
+	.www-layout.-ready {
+		opacity: 1;
 	}
 
 	.www-main {

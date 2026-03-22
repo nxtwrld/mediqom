@@ -62,7 +62,7 @@
 		max-width: 1100px;
 		width: 100%;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr;
 		gap: 4rem;
 		align-items: center;
 		opacity: 0;
@@ -75,17 +75,14 @@
 		transform: translateY(0);
 	}
 
-	.-right .feature-inner {
-		direction: rtl;
-	}
-
-	.-right .feature-text,
-	.-right .feature-screenshot {
-		direction: ltr;
-	}
-
 	.feature-text {
 		z-index: 1;
+		max-width: 480px;
+	}
+
+	/* Position text on the side opposite the 3D bodies */
+	.-right .feature-text {
+		margin-left: auto;
 	}
 
 	.feature-title {
@@ -103,8 +100,9 @@
 		margin: 0;
 	}
 
+	/* Desktop: hide static screenshots (ray screenshots replace them) */
 	.feature-screenshot {
-		display: flex;
+		display: none;
 		justify-content: center;
 	}
 
@@ -141,7 +139,9 @@
 			direction: ltr;
 		}
 
+		/* Show static screenshots on mobile (ray screenshots disabled) */
 		.feature-screenshot {
+			display: flex;
 			order: -1;
 		}
 

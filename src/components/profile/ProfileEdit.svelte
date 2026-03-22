@@ -48,7 +48,7 @@
     <VCardFrom bind:data={profile.vcard} />
     <HealthForm config={{ data: profile.health }} bind:data={profile.health} />
 
-    {#if isNativePlatform()}
+    {#if isNativePlatform() || import.meta.env.DEV}
         <HealthConnect
             profileId={profile.id}
             bind:config={profile.health.deviceSync}

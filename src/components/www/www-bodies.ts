@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createFeatureRays, getIconsForSide, type FeatureRaysSystem } from './www-feature-rays';
+import { sections, type SectionRayMapping } from './sections';
 
 const MALE_URL = '/anatomy_models/male_integumentary_system_obj/integumentary_system.obj';
 const FEMALE_URL = '/anatomy_models/female_integumentary_system_obj/integumentary_system.obj';
@@ -13,16 +14,16 @@ const FEMALE_ROTATION_Y = -Math.PI * 0.15; // face slightly left
 
 const PATHS_DESKTOP = 6;
 const PATHS_MOBILE = 4;
-const MAX_POINTS_DESKTOP = 3333;
-const MAX_POINTS_MOBILE = 2000;
+const MAX_POINTS_DESKTOP = 12000;
+const MAX_POINTS_MOBILE = 8000;
 const DISTANCE_THRESHOLD = 0.12;
 const MIN_NORMAL_DOT = 0.3; // reject if normals diverge too much (cos ~73°)
 const MAX_SAMPLE_ATTEMPTS = 150;
 const POINTS_PER_FRAME = 3;
 const ROTATION_SPEED = 0.004;
 
-const HERO_SPREAD = 2.1;          // ~25% from viewport edge (visible half-width ≈ 2.8)
-const FEATURE_SPREAD = 0.4;
+const HERO_SPREAD = 2.6;          // ~25% from viewport edge (visible half-width ≈ 2.8)
+const FEATURE_SPREAD = 0.6;
 const FEATURE_OFFSET_X = 1.8;
 const SPIN_EXTRA = Math.PI * 2;
 const ORBIT_ANGLE = Math.PI * 0.35;      // group orbit swing during transition
@@ -70,8 +71,9 @@ void main() {
 
 export interface WwwBodiesSystem {
 	group: THREE.Group;
-	update(): void;
+	update(camera?: THREE.Camera): void;
 	setPosition(position: 'center' | 'left' | 'right', duration?: number): void;
+	setActiveSection(sectionIndex: number): void;
 	dispose(): void;
 	readonly loaded: boolean;
 }
@@ -432,10 +434,14 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 			const initColor = { r: paletteColors[0].r, g: paletteColors[0].g, b: paletteColors[0].b };
 
 			for (let i = 0; i < pathCount; i++) {
+				// Stagger maxPoints so paths finish at different times (40%–100% of base)
+				const fraction = 0.4 + 0.6 * (i / Math.max(pathCount - 1, 1));
+				const pathMaxPoints = Math.round(maxPoints * fraction);
+
 				const malePath = new Path(
 					maleSampler,
 					sharedMaterial,
-					maxPoints,
+					pathMaxPoints,
 					DISTANCE_THRESHOLD,
 					maleOffset,
 					MALE_ROTATION_Y,
@@ -448,7 +454,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 				const femalePath = new Path(
 					femaleSampler,
 					sharedMaterial,
-					maxPoints,
+					pathMaxPoints,
 					DISTANCE_THRESHOLD,
 					femaleOffset,
 					FEMALE_ROTATION_Y,
@@ -512,7 +518,50 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 	// Start loading immediately
 	initBodies();
 
-	function update() {
+	// Body half-width margin so the model doesn't touch the edge
+	const BODY_HALF_WIDTH = 0.6;
+
+	function getVisibleHalfWidth(cam: THREE.Camera): number {
+		if (cam instanceof THREE.PerspectiveCamera) {
+			const vFov = cam.fov * Math.PI / 180;
+			return Math.tan(vFov / 2) * cam.position.z * cam.aspect;
+		}
+		return Infinity;
+	}
+
+	function clampToViewport(cam: THREE.Camera) {
+		const maxX = getVisibleHalfWidth(cam) - BODY_HALF_WIDTH;
+		if (maxX <= 0) return;
+
+		const groupX = group.position.x;
+
+		for (let i = 0; i < paths.length; i++) {
+			const effectiveX = groupX + paths[i].mesh.position.x;
+			if (Math.abs(effectiveX) > maxX) {
+				paths[i].mesh.position.x = Math.sign(effectiveX) * maxX - groupX;
+			}
+		}
+
+		// Clamp ray groups too
+		if (maleRays) {
+			const maleEffX = groupX + maleRays.meshGroup.position.x;
+			if (Math.abs(maleEffX) > maxX) {
+				const clamped = Math.sign(maleEffX) * maxX - groupX;
+				maleRays.meshGroup.position.x = clamped;
+				maleRays.renderGroup.position.x = clamped;
+			}
+		}
+		if (femaleRays) {
+			const femEffX = groupX + femaleRays.meshGroup.position.x;
+			if (Math.abs(femEffX) > maxX) {
+				const clamped = Math.sign(femEffX) * maxX - groupX;
+				femaleRays.meshGroup.position.x = clamped;
+				femaleRays.renderGroup.position.x = clamped;
+			}
+		}
+	}
+
+	function update(camera?: THREE.Camera) {
 		if (!_loaded) return;
 
 		const elapsed = clock.getElapsedTime();
@@ -550,8 +599,8 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 			const rayOpacity = Math.min(1, rayAge / RAY_FADE_IN_DURATION);
 			maleRays.setOpacity(rayOpacity);
 			femaleRays.setOpacity(rayOpacity);
-			maleRays.update(elapsed);
-			femaleRays.update(elapsed);
+			maleRays.update(elapsed, camera);
+			femaleRays.update(elapsed, camera);
 		}
 
 		// Grow lines & recycle finished paths
@@ -625,6 +674,46 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 				femaleRays.meshGroup.rotation.y = FEMALE_ROTATION_Y + rotationAngle;
 			}
 		}
+
+		// Promote rays once position has settled AND enough time has passed
+		if (pendingPromotion && maleRays && femaleRays
+			&& posProgress >= 1
+			&& (elapsed - promotionRequestTime) >= SETTLE_DELAY) {
+			maleRays.promoteRay(pendingPromotion.maleIcon, pendingPromotion.maleScreenshot);
+			femaleRays.promoteRay(pendingPromotion.femaleIcon, pendingPromotion.femaleScreenshot);
+			pendingPromotion = null;
+		}
+
+		// Clamp all positions to stay within viewport bounds
+		if (camera) {
+			clampToViewport(camera);
+		}
+	}
+
+	// Ray promotion state — frame-driven, waits for position to settle
+	let pendingPromotion: SectionRayMapping | null = null;
+	let promotionRequestTime = 0;
+	const SETTLE_DELAY = 0.2; // seconds after section change before promoting
+	let activeSectionIndex = -1;
+
+	function setActiveSection(sectionIndex: number) {
+		if (sectionIndex === activeSectionIndex) return;
+		activeSectionIndex = sectionIndex;
+
+		pendingPromotion = null;
+
+		if (!maleRays || !femaleRays) return;
+
+		const section = sections[sectionIndex];
+		// Demote current rays immediately
+		maleRays.demoteAll();
+		femaleRays.demoteAll();
+
+		if (!section?.rayMapping) return;
+
+		// Store mapping + timestamp — will be promoted in update() after settle delay
+		pendingPromotion = section.rayMapping;
+		promotionRequestTime = clock.getElapsedTime();
 	}
 
 	function setPosition(position: 'center' | 'left' | 'right', duration = POSITION_DURATION) {
@@ -643,6 +732,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 	}
 
 	function dispose() {
+		pendingPromotion = null;
 		for (const path of paths) {
 			path.dispose();
 		}
@@ -656,6 +746,7 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 		group,
 		update,
 		setPosition,
+		setActiveSection,
 		dispose,
 		get loaded() {
 			return _loaded;

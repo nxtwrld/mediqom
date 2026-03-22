@@ -22,8 +22,8 @@
 	let syncing = $state(false);
 	let syncResult = $state<{ count: number; errors?: string[] } | null>(null);
 
-	// Check availability on mount
-	if (isNativePlatform()) {
+	// Check availability on mount (works on native + dev mock)
+	if (isNativePlatform() || import.meta.env.DEV) {
 		isHealthAvailable().then((v) => {
 			available = v;
 		});
@@ -88,7 +88,7 @@
 	}
 </script>
 
-{#if isNativePlatform() && available !== false}
+{#if (isNativePlatform() || import.meta.env.DEV) && available !== false}
 	<div class="health-connect">
 		<h3 class="h3 heading">{$t('profile.health-connect.title')}</h3>
 		<p class="description">{$t('profile.health-connect.description')}</p>

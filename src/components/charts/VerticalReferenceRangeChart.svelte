@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { select, scaleTime, scaleLinear, axisLeft, line, zoom as d3Zoom, zoomIdentity, type Selection, type ScaleTime, type ScaleLinear } from 'd3';
+    import { select, scaleTime, scaleLinear, axisLeft, line, area, curveNatural, curveMonotoneY, zoom as d3Zoom, zoomIdentity, type Selection, type ScaleTime, type ScaleLinear } from 'd3';
     import { onMount } from 'svelte';
     import { get } from 'svelte/store';
     import { t } from '$lib/i18n';
@@ -110,14 +110,8 @@
         });
     }
 
-    $effect(() => {
-        // recompute packed lanes whenever medications change — stored in module var for render use
-        _packedLanes = packMedLanes(medications);
-        _numMedLanes = _packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0;
-    });
-
-    let _packedLanes: PackedMedLane[] = [];
-    let _numMedLanes = 0;
+    const _packedLanes = $derived(packMedLanes(medications));
+    const _numMedLanes = $derived(_packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0);
 
     // Dynamic margin based on medication lanes (left) and document zone (right)
     const margin = $derived({
@@ -158,6 +152,75 @@
         return h ? `${h.signalName}:${h.value}:${h.documentId ?? ''}` : null;
     }
 
+    function isContinuousSource(point: SignalSeries['values'][number]): boolean {
+        const src = point.rawData?.source;
+        return src === 'healthkit' || src === 'health_connect';
+    }
+
+    interface BucketedPoint {
+        bucketMid: Date;
+        minNormalized: number;
+        maxNormalized: number;
+        meanNormalized: number;
+        count: number;
+        representative: SignalSeries['values'][number];
+    }
+
+    function getBucketSizeMs(visibleSpanMs: number): number | null {
+        if (visibleSpanMs > 2 * 365 * 86400000) return 30 * 86400000;   // month
+        if (visibleSpanMs > 180 * 86400000)      return 7 * 86400000;    // week
+        if (visibleSpanMs > 60 * 86400000)       return 86400000;        // day
+        if (visibleSpanMs > 14 * 86400000)       return 6 * 3600000;     // 6 hours
+        if (visibleSpanMs > 3 * 86400000)        return 3600000;         // 1 hour
+        return null; // individual points mode
+    }
+
+    function bucketContinuousPoints(
+        points: SignalSeries['values'],
+        bucketMs: number,
+        domainStartMs: number
+    ): BucketedPoint[] {
+        if (points.length === 0) return [];
+        const bucketMap = new Map<number, { sum: number; min: number; max: number; count: number; timeSum: number; points: SignalSeries['values'] }>();
+
+        for (const p of points) {
+            const t = p.date.getTime();
+            const idx = Math.floor((t - domainStartMs) / bucketMs);
+            const existing = bucketMap.get(idx);
+            if (existing) {
+                existing.sum += p.normalized;
+                existing.timeSum += t;
+                existing.count++;
+                existing.points.push(p);
+                if (p.normalized < existing.min) existing.min = p.normalized;
+                if (p.normalized > existing.max) existing.max = p.normalized;
+            } else {
+                bucketMap.set(idx, { sum: p.normalized, min: p.normalized, max: p.normalized, count: 1, timeSum: t, points: [p] });
+            }
+        }
+
+        const result: BucketedPoint[] = [];
+        for (const [idx, b] of bucketMap) {
+            const mean = b.sum / b.count;
+            let closest = b.points[0];
+            let closestDist = Math.abs(closest.normalized - mean);
+            for (let i = 1; i < b.points.length; i++) {
+                const dist = Math.abs(b.points[i].normalized - mean);
+                if (dist < closestDist) { closest = b.points[i]; closestDist = dist; }
+            }
+            result.push({
+                bucketMid: new Date(b.timeSum / b.count),
+                minNormalized: b.min,
+                maxNormalized: b.max,
+                meanNormalized: mean,
+                count: b.count,
+                representative: closest,
+            });
+        }
+        result.sort((a, b) => a.bucketMid.getTime() - b.bucketMid.getTime());
+        return result;
+    }
+
     function applyFocusStyles(focusedName: string | null) {
         if (!svgElement) return;
         const container = select(svgElement)
@@ -176,14 +239,25 @@
                 g.select<SVGPathElement>('path.series-line')
                  .style('stroke-width', focusedName && isFocused ? '6px' : null);
 
+                g.select<SVGPathElement>('path.series-band')
+                 .attr('opacity', isFocused ? 0.2 : 0.05);
+
                 g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
                  .attr('r', (d) => {
                      const isHL = highlightedPoint
                          && s.name === highlightedPoint.signalName
                          && Math.abs(d.value - highlightedPoint.value) < 0.001
                          && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
-                     const baseR = isHL ? 10 : 6;
+                     const baseR = isHL ? 10 : isContinuousSource(d) ? 4 : 6;
                      return focusedName && isFocused ? baseR * 1.5 : baseR;
+                 })
+                 .attr('opacity', (d) => {
+                     const isHL = highlightedPoint
+                         && s.name === highlightedPoint.signalName
+                         && Math.abs(d.value - highlightedPoint.value) < 0.001
+                         && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
+                     if (isHL) return 1;
+                     return isContinuousSource(d) ? 0 : 1;
                  });
             });
     }
@@ -310,6 +384,7 @@
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
+            .curve(curveNatural)
             .x(d => x(d.normalized))
             .y(d => y(d.date));
 
@@ -329,16 +404,164 @@
             const sorted = [...s.values].sort((a, b) => a.date.getTime() - b.date.getTime());
             const currentSeries = s;
 
-            if (sorted.length > 1) {
-                g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
-                    .attr('class', 'series-line')
-                    .attr('stroke', s.color)
-                    .attr('d', valueLine(sorted) ?? '')
-                    .style('cursor', 'pointer');
+            // Split by source type
+            const continuousPoints = sorted.filter(d => isContinuousSource(d));
+            const documentPoints = sorted.filter(d => !isContinuousSource(d));
+
+            // Determine banding mode from visible time span
+            const yDomain = y.domain() as Date[];
+            const visibleSpanMs = Math.abs(yDomain[0].getTime() - yDomain[1].getTime());
+            const bucketMs = continuousPoints.length > 10 ? getBucketSizeMs(visibleSpanMs) : null;
+            const useBanding = bucketMs !== null && continuousPoints.length > 0;
+
+            if (useBanding) {
+                // === BAND MODE ===
+                const domainStartMs = Math.min(yDomain[0].getTime(), yDomain[1].getTime());
+                const buckets = bucketContinuousPoints(continuousPoints, bucketMs, domainStartMs);
+
+                // Confidence band: area(min→max) with curveMonotoneY
+                const bandGenerator = area<BucketedPoint>()
+                    .curve(curveMonotoneY)
+                    .x0(d => x(d.minNormalized))
+                    .x1(d => x(d.maxNormalized))
+                    .y(d => y(d.bucketMid));
+
+                g.selectAll<SVGPathElement, null>('path.series-band').data([null]).join('path')
+                    .attr('class', 'series-band')
+                    .attr('fill', s.color)
+                    .attr('opacity', 0.15)
+                    .attr('d', bandGenerator(buckets) ?? '');
+
+                // Mean line with curveMonotoneY
+                const meanLine = line<BucketedPoint>()
+                    .curve(curveMonotoneY)
+                    .x(d => x(d.meanNormalized))
+                    .y(d => y(d.bucketMid));
+
+                if (buckets.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                        .attr('class', 'series-line')
+                        .attr('stroke', s.color)
+                        .attr('d', meanLine(buckets) ?? '')
+                        .style('cursor', 'pointer');
+                } else {
+                    g.selectAll('path.series-line').remove();
+                }
+
+                // Dots: document-source + highlighted continuous + one per bucket
+                const highlightedContinuous = continuousPoints.filter(d => isHighlighted(currentSeries, d));
+                const highlightedSet = new Set(highlightedContinuous);
+                const bucketDots = buckets
+                    .map(b => b.representative)
+                    .filter(d => !highlightedSet.has(d));
+                const visibleDots = [...documentPoints, ...highlightedContinuous, ...bucketDots];
+
+                function dotRadius(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 10;
+                    return isContinuousSource(d) ? 4 : 6;
+                }
+
+                function dotOpacity(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 1;
+                    return isContinuousSource(d) ? 0.5 : 1;
+                }
+
+                g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                    .data(visibleDots, d => `${d.date.getTime()}-${d.value}`)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'dot')
+                            .on('mouseover', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', 9)
+                                        .attr('opacity', 1)
+                                        .style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                                }
+                            })
+                            .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', dotRadius(d))
+                                        .attr('opacity', dotOpacity(d))
+                                        .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                }
+                            }),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                    .attr('r', d => dotRadius(d))
+                    .attr('fill', s.color)
+                    .attr('opacity', d => dotOpacity(d))
+                    .attr('stroke', d => isContinuousSource(d) ? 'none' : 'white')
+                    .attr('stroke-width', d => {
+                        if (isHighlighted(currentSeries, d)) return 2;
+                        return isContinuousSource(d) ? 0 : 1.5;
+                    })
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+
             } else {
-                g.selectAll('path.series-line').remove();
+                // === INDIVIDUAL MODE (current behavior) ===
+                g.selectAll('path.series-band').remove();
+
+                if (sorted.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                        .attr('class', 'series-line')
+                        .attr('stroke', s.color)
+                        .attr('d', valueLine(sorted) ?? '')
+                        .style('cursor', 'pointer');
+                } else {
+                    g.selectAll('path.series-line').remove();
+                }
+
+                function dotRadius(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 10;
+                    return isContinuousSource(d) ? 4 : 6;
+                }
+
+                function dotOpacity(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 1;
+                    return isContinuousSource(d) ? 0 : 1;
+                }
+
+                g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                    .data(sorted, d => `${d.date.getTime()}-${d.value}`)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'dot')
+                            .on('mouseover', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', 9)
+                                        .attr('opacity', 1)
+                                        .style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                                }
+                            })
+                            .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', dotRadius(d))
+                                        .attr('opacity', dotOpacity(d))
+                                        .style('filter', isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                }
+                            }),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                    .attr('r', d => dotRadius(d))
+                    .attr('fill', s.color)
+                    .attr('opacity', d => dotOpacity(d))
+                    .attr('stroke', d => isContinuousSource(d) ? 'none' : 'white')
+                    .attr('stroke-width', d => {
+                        if (isHighlighted(currentSeries, d)) return 2;
+                        return isContinuousSource(d) ? 0 : 1.5;
+                    })
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
             }
 
+            // Highlight rings — always individual, unchanged
             g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot-highlight-ring')
                 .data(sorted.filter(d => isHighlighted(currentSeries, d)), d => `${d.date.getTime()}-${d.value}`)
                 .join('circle')
@@ -346,31 +569,6 @@
                 .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
                 .attr('r', 16).attr('fill', 'none')
                 .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
-
-            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
-                .data(sorted, d => `${d.date.getTime()}-${d.value}`)
-                .join(
-                    enter => enter.append('circle')
-                        .attr('class', 'dot')
-                        .on('mouseover', function() {
-                            if (isHoverDevice) select(this).attr('r', 9).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
-                        })
-                        .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
-                            if (isHoverDevice) {
-                                select(this)
-                                    .attr('r', isHighlighted(currentSeries, d) ? 10 : 6)
-                                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
-                            }
-                        })
-                        ,
-                    update => update,
-                    exit => exit.remove()
-                )
-                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', d => isHighlighted(currentSeries, d) ? 10 : 6)
-                .attr('fill', s.color)
-                .attr('stroke', 'white')
-                .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
         });
 
         // Medication lanes — rendered in the left margin area
@@ -819,6 +1017,7 @@
         <div class="dot-menu-content">
             <div class="dot-menu-header">
                 <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
+                <div class="dot-menu-value">{menu.point.value}{menu.point.unit ? ` ${menu.point.unit}` : ''}</div>
                 <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
             </div>
             <hr class="dot-menu-divider" />
@@ -844,6 +1043,10 @@
                 >
                     {$t('app.documents.view-document')}
                 </a>
+            {:else if menu.point.rawData?.source}
+                <div class="dot-menu-source">
+                    <span class="source-label">{menu.point.rawData.source === 'healthkit' ? 'Apple Health' : menu.point.rawData.source === 'health_connect' ? 'Health Connect' : menu.point.rawData.source}</span>
+                </div>
             {/if}
             <AskButton
                 className="button"
@@ -921,10 +1124,15 @@
         cursor: pointer;
     }
 
+    .chart-wrap svg :global(.series-band) {
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
     .chart-wrap svg :global(.dot) {
         filter: drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2));
         cursor: pointer;
-        transition: r 0.15s ease;
+        transition: r 0.15s ease, opacity 0.15s ease;
     }
 
     .chart-wrap svg :global(.dot-highlight-ring) {
@@ -1006,6 +1214,12 @@
         margin: 0;
     }
 
+    .dot-menu-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
     .dot-menu-date {
         font-size: 0.7rem;
         color: var(--color-text-secondary);
@@ -1024,6 +1238,16 @@
 
     .dot-menu-content :global(.range.-value) {
         padding-top: 1.6rem;
+    }
+
+    .dot-menu-source {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        padding: 0.2rem 0;
+    }
+
+    .dot-menu-source .source-label {
+        font-weight: 600;
     }
 
     .dot-menu-content a.button {

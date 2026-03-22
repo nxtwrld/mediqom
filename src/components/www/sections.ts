@@ -1,3 +1,10 @@
+export interface SectionRayMapping {
+	maleIcon: string;
+	femaleIcon: string;
+	maleScreenshot: string;
+	femaleScreenshot: string;
+}
+
 export interface Section {
 	id: string;
 	titleKey: string;
@@ -5,6 +12,7 @@ export interface Section {
 	canvasColor: string;
 	screenshotUrl?: string;
 	alignment: 'left' | 'right';
+	rayMapping?: SectionRayMapping;
 }
 
 export const sections: Section[] = [
@@ -21,7 +29,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.profiles.description',
 		canvasColor: '#16d3dd',
 		screenshotUrl: '/www/screenshots/profiles.webp',
-		alignment: 'right'
+		alignment: 'right',
+		rayMapping: {
+			maleIcon: 'anatomy',
+			femaleIcon: 'doctor',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'import',
@@ -29,7 +43,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.import.description',
 		canvasColor: '#29cc97',
 		screenshotUrl: '/www/screenshots/import.webp',
-		alignment: 'left'
+		alignment: 'left',
+		rayMapping: {
+			maleIcon: 'report',
+			femaleIcon: 'search',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'signals',
@@ -37,7 +57,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.signals.description',
 		canvasColor: '#a989ee',
 		screenshotUrl: '/www/screenshots/signals.webp',
-		alignment: 'right'
+		alignment: 'right',
+		rayMapping: {
+			maleIcon: 'chart-line',
+			femaleIcon: 'prop-laboratory',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'timeline',
@@ -45,7 +71,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.timeline.description',
 		canvasColor: '#16d3dd',
 		screenshotUrl: '/www/screenshots/timeline.webp',
-		alignment: 'left'
+		alignment: 'left',
+		rayMapping: {
+			maleIcon: 'form-tablet',
+			femaleIcon: 'form-patch',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'weekly-plan',
@@ -53,7 +85,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.weekly-plan.description',
 		canvasColor: '#e9a642',
 		screenshotUrl: '/www/screenshots/weekly-plan.webp',
-		alignment: 'right'
+		alignment: 'right',
+		rayMapping: {
+			maleIcon: 'form-capsule',
+			femaleIcon: 'form-spray',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'medications',
@@ -61,7 +99,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.medications.description',
 		canvasColor: '#29cc97',
 		screenshotUrl: '/www/screenshots/medications.webp',
-		alignment: 'left'
+		alignment: 'left',
+		rayMapping: {
+			maleIcon: 'pills',
+			femaleIcon: 'form-spray',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'imaging',
@@ -69,7 +113,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.imaging.description',
 		canvasColor: '#3571ff',
 		screenshotUrl: '/www/screenshots/imaging.webp',
-		alignment: 'right'
+		alignment: 'right',
+		rayMapping: {
+			maleIcon: 'anatomy',
+			femaleIcon: 'search',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'ai-chat',
@@ -77,7 +127,13 @@ export const sections: Section[] = [
 		descriptionKey: 'www.ai-chat.description',
 		canvasColor: '#a989ee',
 		screenshotUrl: '/www/screenshots/ai-chat.webp',
-		alignment: 'left'
+		alignment: 'left',
+		rayMapping: {
+			maleIcon: 'report',
+			femaleIcon: 'ai-chat',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	},
 	{
 		id: 'security',
@@ -85,6 +141,12 @@ export const sections: Section[] = [
 		descriptionKey: 'www.security.description',
 		canvasColor: '#16d3dd',
 		screenshotUrl: '/www/screenshots/security.webp',
-		alignment: 'right'
+		alignment: 'right',
+		rayMapping: {
+			maleIcon: 'form-tablet',
+			femaleIcon: 'doctor',
+			maleScreenshot: '/www/screenshots/anatomy.png',
+			femaleScreenshot: '/www/screenshots/anatomy.png'
+		}
 	}
 ];

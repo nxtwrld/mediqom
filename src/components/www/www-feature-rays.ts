@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 const RAY_LENGTH = 0.6;
+const RAY_LENGTH_PROMOTED = 0.9;
+const PROMOTION_SPEED = 3.0; // promotionProgress units per second
+const PROMOTED_RENDER_ORDER = 100;
 
 interface RayIcon {
 	name: string;
@@ -36,9 +39,11 @@ export interface FeatureRaysConfig {
 export interface FeatureRaysSystem {
 	renderGroup: THREE.Group;  // lines + CSS2D — does NOT rotate with body
 	meshGroup: THREE.Group;    // invisible mesh — DOES rotate with body
-	update(elapsed: number): void;
+	update(elapsed: number, camera?: THREE.Camera): void;
 	setOpacity(opacity: number): void;
 	setColor(hex: string): void;
+	promoteRay(iconName: string, screenshotUrl: string): void;
+	demoteAll(): void;
 	dispose(): void;
 }
 
@@ -51,6 +56,13 @@ interface FeatureRay {
 	icon: RayIcon;
 	css2d: InstanceType<typeof import('three/addons/renderers/CSS2DRenderer.js').CSS2DObject>;
 	visible: boolean;
+	// Promotion state
+	promoted: boolean;
+	promotionProgress: number;  // 0 = normal icon, 1 = full screenshot card
+	frozen: boolean;            // true once fully promoted — stop all position updates
+	lockedScanCenter: number;
+	lockedAzimuth: number;
+	screenshotEl: HTMLDivElement;
 }
 
 export function getIconsForSide(side: 'left' | 'right'): RayIcon[] {
@@ -72,7 +84,7 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 	// but use an invisible material so it doesn't render
 	const raycastMesh = mesh.clone();
 	raycastMesh.material = new THREE.MeshBasicMaterial({
-		visible: false // Material.visible=false prevents rendering, but Object3D.visible=true allows raycasting
+		visible: false
 	});
 	meshGroup.add(raycastMesh);
 
@@ -84,6 +96,8 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 	// Cast distance — far enough to be outside any body mesh
 	const CAST_RADIUS = 2.5;
 
+	let lastElapsed = 0;
+
 	// Build per-ray state — distribute azimuth evenly around the body
 	const rays: FeatureRay[] = [];
 	for (let i = 0; i < rayCount; i++) {
@@ -92,6 +106,11 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 		const div = document.createElement('div');
 		div.className = 'feature-ray-icon';
 		div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><use href="${icon.sprite}#${icon.name}"></use></svg>`;
+
+		// Add screenshot container (hidden by default, uses background-image)
+		const screenshotEl = document.createElement('div');
+		screenshotEl.className = 'feature-ray-screenshot';
+		div.appendChild(screenshotEl);
 
 		const css2d = new CSS2DObjectClass(div);
 		css2d.visible = false;
@@ -102,19 +121,24 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 		const jitter = (Math.random() - 0.5) * (Math.PI * 2 / rayCount) * 0.5;
 
 		// Distribute scanCenter across full body height (~3 units, centered at 0)
-		// Spread evenly from -1.3 to 1.3 with slight random offset
 		const baseY = -1.3 + (i / (rayCount - 1 || 1)) * 2.6;
 		const yJitter = (Math.random() - 0.5) * 0.4;
 
 		rays.push({
 			scanSpeed: 0.15 + Math.random() * 0.25,
 			scanPhase: Math.random() * Math.PI * 2,
-			scanAmplitude: 0.1 + Math.random() * 0.15,   // small vertical wobble
-			scanCenter: baseY + yJitter,                   // spread head to heels
+			scanAmplitude: 0.1 + Math.random() * 0.15,
+			scanCenter: baseY + yJitter,
 			azimuth: baseAzimuth + jitter,
 			icon,
 			css2d,
-			visible: false
+			visible: false,
+			promoted: false,
+			promotionProgress: 0,
+			frozen: false,
+			lockedScanCenter: 0,
+			lockedAzimuth: 0,
+			screenshotEl
 		});
 	}
 
@@ -143,10 +167,31 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 	const worldQuat = new THREE.Quaternion();
 	const invMatrix = new THREE.Matrix4();
 	const tempVec = new THREE.Vector3();
+	const ndcVec = new THREE.Vector3();
 	let currentOpacity = 0;
 
-	function update(elapsed: number) {
+	// Viewport margin in NDC units
+	const NDC_MARGIN = 0.92;
+
+	function update(elapsed: number, camera?: THREE.Camera) {
+		const dt = elapsed - lastElapsed;
+		lastElapsed = elapsed;
+
 		let needsUpdate = false;
+
+		// Update promotion progress for all rays
+		for (const ray of rays) {
+			if (ray.promoted) {
+				if (ray.promotionProgress < 1) {
+					ray.promotionProgress = Math.min(1, ray.promotionProgress + dt * PROMOTION_SPEED);
+				}
+			} else {
+				ray.frozen = false;
+				if (ray.promotionProgress > 0) {
+					ray.promotionProgress = Math.max(0, ray.promotionProgress - dt * PROMOTION_SPEED);
+				}
+			}
+		}
 
 		// Update world matrices once per frame
 		meshGroup.updateMatrixWorld(true);
@@ -154,38 +199,37 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 		meshGroup.getWorldQuaternion(worldQuat);
 		invMatrix.copy(renderGroup.matrixWorld).invert();
 
-		// Get the mesh rotation around Y so we can cast from the camera-facing side
-		// The mesh rotates via meshGroup.rotation.y (plus parent group transforms)
-		// We need the effective Y rotation to know which local azimuth faces camera (world +Z)
 		const meshWorldRotY = Math.atan2(
-			meshGroup.matrixWorld.elements[8],  // m31
-			meshGroup.matrixWorld.elements[10]  // m33
+			meshGroup.matrixWorld.elements[8],
+			meshGroup.matrixWorld.elements[10]
 		);
 
 		for (let i = 0; i < rays.length; i++) {
 			const ray = rays[i];
 
-			// Compute scanning Y position
-			const scanY =
-				ray.scanCenter + ray.scanAmplitude * Math.sin(elapsed * ray.scanSpeed + ray.scanPhase);
+			// Frozen rays are fully promoted — skip all position updates
+			if (ray.frozen) continue;
 
-			// Effective azimuth: ray's base azimuth, but we offset by mesh rotation
-			// so rays always distribute around the camera-facing hemisphere.
-			// The camera looks down -Z, so "front" in world space is +Z direction.
-			// In mesh-local space, the front-facing azimuth = -meshWorldRotY
-			// We offset each ray's azimuth relative to this front direction,
-			// clamping to the front semicircle so endpoints always face the camera.
+			const pp = ray.promotionProgress; // 0-1
+
+			// Compute scanning Y position — snap to locked when promoted (no lerp)
+			const scanningY = ray.scanCenter + ray.scanAmplitude * Math.sin(elapsed * ray.scanSpeed + ray.scanPhase);
+			const scanY = ray.promoted ? ray.lockedScanCenter : scanningY;
+
+			// Effective azimuth — snap to locked when promoted
 			const frontAz = -meshWorldRotY;
-			// Map ray azimuth into front hemisphere: spread across [-π/2, π/2] around front
 			const spreadAngle = ((ray.azimuth % (Math.PI * 2)) / (Math.PI * 2)) * Math.PI - Math.PI / 2;
-			const az = frontAz + spreadAngle;
+			const normalAz = frontAz + spreadAngle;
+			const az = ray.promoted ? frontAz + ray.lockedAzimuth : normalAz;
+
+			// Interpolate ray length based on promotion
+			const currentRayLength = lerp(RAY_LENGTH, RAY_LENGTH_PROMOTED, pp);
 
 			const originX = Math.sin(az) * CAST_RADIUS;
 			const originZ = Math.cos(az) * CAST_RADIUS;
 			rayOrigin.set(originX, scanY, originZ);
 			rayOrigin.applyMatrix4(meshGroup.matrixWorld);
 
-			// Direction: inward toward body center
 			rayDirection.set(-Math.sin(az), 0, -Math.cos(az)).normalize();
 			rayDirection.applyQuaternion(worldQuat);
 
@@ -194,47 +238,96 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 
 			const idx = i * 6;
 
+			const isPromoted = ray.promoted || pp > 0;
+
 			if (intersections.length > 0) {
 				hitPoint.copy(intersections[0].point);
 
-				// Outward direction: from body center outward at this azimuth
 				outwardDir.set(Math.sin(az), 0, Math.cos(az)).normalize();
 				outwardDir.applyQuaternion(worldQuat);
 
-				// Endpoint in world space
-				tempVec.copy(hitPoint).addScaledVector(outwardDir, RAY_LENGTH);
+				tempVec.copy(hitPoint).addScaledVector(outwardDir, currentRayLength);
 
-				// Convert hit + endpoint to renderGroup local space
+				// Promoted rays: clamp endpoint to stay within viewport with margin
+				// Non-promoted rays: cull if outside viewport
+				let inViewport = true;
+				if (camera) {
+					ndcVec.copy(tempVec).project(camera);
+					if (isPromoted) {
+						// Clamp center so the full circle (up to 280px) + 20px margin stays on-screen
+						// NDC spans -1 to 1 = viewport width, so half-viewport = 1.0 NDC
+						const halfWidth = 160; // 280/2 + 20px margin
+						const halfHeight = 160;
+						const marginX = halfWidth / (window.innerWidth / 2);
+						const marginY = halfHeight / (window.innerHeight / 2);
+						const maxX = 1.0 - marginX;
+						const maxY = 1.0 - marginY;
+						const clampedX = Math.max(-maxX, Math.min(maxX, ndcVec.x));
+						const clampedY = Math.max(-maxY, Math.min(maxY, ndcVec.y));
+						if (clampedX !== ndcVec.x || clampedY !== ndcVec.y) {
+							ndcVec.x = clampedX;
+							ndcVec.y = clampedY;
+							// Unproject clamped NDC back to world space at same depth
+							tempVec.copy(ndcVec).unproject(camera);
+						}
+					} else {
+						if (
+							Math.abs(ndcVec.x) > NDC_MARGIN ||
+							Math.abs(ndcVec.y) > NDC_MARGIN ||
+							ndcVec.z < 0 || ndcVec.z > 1
+						) {
+							inViewport = false;
+						}
+					}
+				}
+
 				const localHit = hitPoint.clone().applyMatrix4(invMatrix);
 				const localEnd = tempVec.clone().applyMatrix4(invMatrix);
 
-				linePositions[idx] = localHit.x;
-				linePositions[idx + 1] = localHit.y;
-				linePositions[idx + 2] = localHit.z;
-				linePositions[idx + 3] = localEnd.x;
-				linePositions[idx + 4] = localEnd.y;
-				linePositions[idx + 5] = localEnd.z;
+				if (inViewport) {
+					linePositions[idx] = localHit.x;
+					linePositions[idx + 1] = localHit.y;
+					linePositions[idx + 2] = localHit.z;
+					linePositions[idx + 3] = localEnd.x;
+					linePositions[idx + 4] = localEnd.y;
+					linePositions[idx + 5] = localEnd.z;
 
-				// CSS2D position in renderGroup local space
-				ray.css2d.position.copy(localEnd);
+					ray.css2d.position.copy(localEnd);
 
-				if (!ray.visible) {
-					ray.css2d.visible = true;
-					ray.visible = true;
+					if (!ray.visible) {
+						ray.css2d.visible = true;
+						ray.visible = true;
+					}
+
+					(ray.css2d.element as HTMLElement).style.opacity = String(currentOpacity);
+
+					// Freeze promoted ray after first successful position set
+					if (ray.promoted && !ray.frozen) {
+						ray.frozen = true;
+					}
+				} else {
+					zeroLineSegment(linePositions, idx);
+					if (ray.visible) {
+						ray.css2d.visible = false;
+						(ray.css2d.element as HTMLElement).style.opacity = '0';
+						ray.visible = false;
+					}
 				}
-				(ray.css2d.element as HTMLElement).style.opacity = String(currentOpacity);
 
 				needsUpdate = true;
 			} else {
-				// Miss — hide this ray
-				if (ray.visible) {
-					linePositions[idx] = 0;
-					linePositions[idx + 1] = 0;
-					linePositions[idx + 2] = 0;
-					linePositions[idx + 3] = 0;
-					linePositions[idx + 4] = 0;
-					linePositions[idx + 5] = 0;
-
+				// Raycast miss — promoted rays keep last known position, others hide
+				if (isPromoted) {
+					// Keep visible at last known css2d position, just zero the line
+					zeroLineSegment(linePositions, idx);
+					if (!ray.visible) {
+						ray.css2d.visible = true;
+						ray.visible = true;
+					}
+					(ray.css2d.element as HTMLElement).style.opacity = String(currentOpacity);
+					needsUpdate = true;
+				} else if (ray.visible) {
+					zeroLineSegment(linePositions, idx);
 					ray.css2d.visible = false;
 					(ray.css2d.element as HTMLElement).style.opacity = '0';
 					ray.visible = false;
@@ -245,6 +338,41 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 
 		if (needsUpdate) {
 			posAttr.needsUpdate = true;
+		}
+	}
+
+	function promoteRay(iconName: string, screenshotUrl: string) {
+		for (const ray of rays) {
+			if (ray.icon.name === iconName && !ray.promoted) {
+				ray.promoted = true;
+				// Lock height with random jitter for variety across transitions
+				const baseY = side === 'left' ? -0.7 : 0.2;
+				ray.lockedScanCenter = baseY + (Math.random() - 0.5) * 0.6;
+				// Lock azimuth with jitter
+				const baseAz = side === 'left' ? 0.4 : 0.3;
+				ray.lockedAzimuth = baseAz + (Math.random() - 0.5) * 0.4;
+				// Set screenshot
+				ray.screenshotEl.style.backgroundImage = `url(${screenshotUrl})`;
+				// Add promoted CSS class — right side gets smaller variant
+				const el = ray.css2d.element as HTMLElement;
+				el.classList.add('-promoted');
+				if (side === 'right') el.classList.add('-promoted-small');
+				// Use renderOrder so CSS2DRenderer sorts promoted above normal labels
+				ray.css2d.renderOrder = PROMOTED_RENDER_ORDER;
+				break;
+			}
+		}
+	}
+
+	function demoteAll() {
+		for (const ray of rays) {
+			if (ray.promoted || ray.frozen) {
+				ray.promoted = false;
+				ray.frozen = false;
+				const el = ray.css2d.element as HTMLElement;
+				el.classList.remove('-promoted', '-promoted-small');
+				ray.css2d.renderOrder = 0;
+			}
 		}
 	}
 
@@ -273,5 +401,18 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 
 	setOpacity(0);
 
-	return { renderGroup, meshGroup, update, setOpacity, setColor, dispose };
+	return { renderGroup, meshGroup, update, setOpacity, setColor, promoteRay, demoteAll, dispose };
+}
+
+function lerp(a: number, b: number, t: number): number {
+	return a + (b - a) * t;
+}
+
+function zeroLineSegment(positions: Float32Array, idx: number) {
+	positions[idx] = 0;
+	positions[idx + 1] = 0;
+	positions[idx + 2] = 0;
+	positions[idx + 3] = 0;
+	positions[idx + 4] = 0;
+	positions[idx + 5] = 0;
 }

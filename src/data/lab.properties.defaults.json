@@ -246,7 +246,7 @@
       {
         "sex": "any",
         "ageRange": { "min": 2, "max": 12 },
-        "low": 870,
+        "low": 80,
         "high": 120
       },
       {
