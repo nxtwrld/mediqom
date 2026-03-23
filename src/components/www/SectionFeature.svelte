@@ -55,7 +55,6 @@
 		justify-content: center;
 		padding: 4rem 2rem;
 		position: relative;
-		scroll-snap-align: start;
 	}
 
 	.feature-inner {

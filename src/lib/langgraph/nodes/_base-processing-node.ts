@@ -9,7 +9,7 @@ import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import anatomyObjects from "$data/objects.json";
-import propertiesDefinition from "$data/lab.properties.defaults.json";
+import { getCatalog } from "$data/signal-catalog";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import {
@@ -296,7 +296,7 @@ export abstract class BaseProcessingNode {
         Array.isArray(signalSchema.enum) &&
         signalSchema.enum.length === 0
       ) {
-        const signalKeys = Object.keys(propertiesDefinition).filter(
+        const signalKeys = Object.keys(getCatalog()).filter(
           (key) => !STATIC_PROPERTIES.includes(key),
         );
         signalSchema.enum.push(...signalKeys);

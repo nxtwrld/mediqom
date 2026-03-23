@@ -384,7 +384,7 @@
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
-            .curve(curveNatural)
+            .curve(curveMonotoneY)
             .x(d => x(d.normalized))
             .y(d => y(d.date));
 
@@ -501,6 +501,9 @@
                     })
                     .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
 
+                // Ensure dots render above the line
+                g.selectAll('.dot').raise();
+
             } else {
                 // === INDIVIDUAL MODE (current behavior) ===
                 g.selectAll('path.series-band').remove();
@@ -559,6 +562,9 @@
                         return isContinuousSource(d) ? 0 : 1.5;
                     })
                     .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+
+                // Ensure dots render above the line
+                g.selectAll('.dot').raise();
             }
 
             // Highlight rings — always individual, unchanged

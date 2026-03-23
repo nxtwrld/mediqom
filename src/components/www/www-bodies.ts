@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createFeatureRays, getIconsForSide, type FeatureRaysSystem } from './www-feature-rays';
+import { createFeatureRays, getIconsForSide, type FeatureRaysSystem, LEFT_SIDE_SETS, RIGHT_SIDE_SETS } from './www-feature-rays';
 import { sections, type SectionRayMapping } from './sections';
 
 const MALE_URL = '/anatomy_models/male_integumentary_system_obj/integumentary_system.obj';
@@ -679,8 +679,12 @@ export function createWwwBodies(isMobile: boolean): WwwBodiesSystem {
 		if (pendingPromotion && maleRays && femaleRays
 			&& posProgress >= 1
 			&& (elapsed - promotionRequestTime) >= SETTLE_DELAY) {
-			maleRays.promoteRay(pendingPromotion.maleIcon, pendingPromotion.maleScreenshot);
-			femaleRays.promoteRay(pendingPromotion.femaleIcon, pendingPromotion.femaleScreenshot);
+			// Pick a coordinated screenshot set based on body side
+			const section = sections[activeSectionIndex];
+			const sets = section?.alignment === 'right' ? LEFT_SIDE_SETS : RIGHT_SIDE_SETS;
+			const set = sets[Math.floor(Math.random() * sets.length)];
+			maleRays.promoteRay(pendingPromotion.maleIcon, pendingPromotion.maleScreenshot, set.male.position, set.male.size);
+			femaleRays.promoteRay(pendingPromotion.femaleIcon, pendingPromotion.femaleScreenshot, set.female.position, set.female.size);
 			pendingPromotion = null;
 		}
 

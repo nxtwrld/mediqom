@@ -100,7 +100,8 @@
       "WebFetch(domain:testapi.sukl.cz)",
       "Bash(jq:*)",
       "WebFetch(domain:mazehq.com)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": []
   }

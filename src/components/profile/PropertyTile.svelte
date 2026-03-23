@@ -3,7 +3,8 @@
 
     import { t } from '$lib/i18n';
     //import { properties } from '$lib/health/dataTypes';
-    import properties from '$data/lab.properties.defaults.json'
+    import { getCatalog } from '$data/signal-catalog';
+    const properties = getCatalog();
     import { computeOutputForRereference } from '$data/properties';
     import { createEventDispatcher } from 'svelte';
     import { durationFrom, durationFromFormatted } from '$lib/datetime';

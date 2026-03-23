@@ -186,8 +186,8 @@
 
 	/* Promoted state — icon grows into round screenshot (slower scale-up) */
 	:global(.feature-ray-icon.-promoted) {
-		width: 280px;
-		height: 280px;
+		width: var(--promoted-size, 280px);
+		height: var(--promoted-size, 280px);
 		border-radius: 50%;
 		background: #fff;
 		border: 2px solid rgba(255, 255, 255, 0.9);
@@ -202,11 +202,6 @@
 			background 0.3s ease,
 			box-shadow 0.5s ease,
 			border-color 0.3s ease;
-	}
-	:global(.feature-ray-icon.-promoted.-promoted-small) {
-		width: 200px;
-		height: 200px;
-		padding: 3px;
 	}
 	:global(.feature-ray-icon.-promoted svg) {
 		display: none;

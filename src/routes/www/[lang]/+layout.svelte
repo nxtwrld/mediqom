@@ -58,7 +58,7 @@
 		height: 100vh;
 		overflow-x: hidden;
 		overflow-y: auto;
-		scroll-snap-type: y mandatory;
+		scroll-snap-type: none;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		opacity: 0;
 		transition: opacity 0.3s ease-in;

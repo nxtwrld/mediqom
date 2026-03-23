@@ -6,7 +6,8 @@
 	//import Consult from "$components/contact/Consult.svelte";
 	import LabResultInfo from "./SignalInfo.svelte";
     import { Tabs, TabHeads, TabHead, TabPanel } from "$components/ui/tabs";
-    import defaults from '$data/lab.properties.defaults.json';
+    import { getCatalog } from '$data/signal-catalog';
+    const defaults = getCatalog();
 
 
 

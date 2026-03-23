@@ -1,7 +1,4 @@
-import lab from "./lab.properties.json";
-import defaults from "./lab.properties.defaults.json";
-//import vital from './vital.properties.json';
-//import type { SelectOptions } from '$components/forms/Select.svelte';
+import { getCatalog } from "./signal-catalog";
 import type { Profile } from "$lib/types.d";
 
 export type Property = {
@@ -18,34 +15,41 @@ export type Property = {
   links?: string[];
 };
 
-//export const properties: Property[] = [...lab, ...vital].sort((a, b) => a.term.localeCompare(b.term));
-
-//export default properties;
-
-//export const propertyOptions: SelectOptions = properties.map(p => ({ key: p.key, value: p.term }));
-/*
-export let propertyByKeys: { [key: string]: Property } = properties.reduce((acc, p) => {
-    acc[p.key] = p;
-    return acc;
-}, {} as { [key: string]: Property });
-
-// list all properties keyed by loinc code or key if no loinc code is defined
-export const propertyByLoinc:  { [key: string]: Property } = properties.reduce((acc, p) => {
-    if (p.loinc_code && p.loinc_code != 'unknown') acc[p.loinc_code] = p;
-    else acc[p.key] = p;
-    return acc;
-}, {} as { [key: string]: Property });
-
-*/
 export const getRangeByProfile = (
   property: string,
   profile: Profile,
 ): [number, number] => {
-  const p = (defaults as Record<string, any>)[property];
-  if (!p) return [0, 0];
+  const catalog = getCatalog();
+  const entry = catalog[property];
+  if (!entry?.referenceRange?.length) return [0, 0];
 
-  //const range = p.referenceRange.find(r => {});
-  return [0, 0];
+  // Profile stores age/sex in the health object or via signals
+  const age = profile.health?.signals?.age?.[0]?.value as number | undefined;
+  const sex = (profile.health?.signals?.biologicalSex?.[0]?.value as string)?.toLowerCase() ?? 'any';
+
+  // Find matching range
+  let match = entry.referenceRange.find(
+    (r) =>
+      (r.sex === sex || r.sex === 'any') &&
+      age != null &&
+      age >= r.ageRange.min &&
+      age < r.ageRange.max
+  );
+
+  if (!match) {
+    match = entry.referenceRange.find(
+      (r) => r.sex === 'any' && r.ageRange.min >= 18
+    );
+  }
+
+  if (!match) {
+    match = entry.referenceRange[0];
+  }
+
+  if (!match) return [0, 0];
+  const low = typeof match.low === 'number' ? match.low : 0;
+  const high = typeof match.high === 'number' ? match.high : 0;
+  return [low, high];
 };
 
 export function computeOutputForRereference(
@@ -56,8 +60,6 @@ export function computeOutputForRereference(
   const halfRange = (refMax - refMin) / 2;
   const lowerBound = refMin - halfRange;
   const upperBound = refMax + halfRange;
-
-  //console.log('value', value, 'refMin', refMin, 'refMax', refMax, 'outMin', outMin, 'outMax', outMax)
 
   if (value >= refMin && value <= refMax) {
     // Value is within the reference range

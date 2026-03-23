@@ -1,5 +1,5 @@
 import objects from "$data/objects.json";
-import labs from "$data/lab.synonyms.json";
+import { getAllKeys } from "$data/signal-catalog";
 
 const anatomy: string[] = Object.keys(objects)
   .reduce((acc, key) => {
@@ -7,15 +7,14 @@ const anatomy: string[] = Object.keys(objects)
   }, [] as string[])
   .map((obj) => obj.toLowerCase());
 
-const labKeys: string[] = labs.map((lab) => lab[0].toLowerCase());
+const labKeys: string[] = getAllKeys().map((k) => k.toLowerCase());
 
 let allObjects = [...anatomy, ...labKeys];
 
 export default objects;
 
 export function isObject(id: string, type: string | undefined = undefined) {
-  const str = id.toLowerCase(); //.replace(/ /ig, '_');
-  //console.log('id', id);
+  const str = id.toLowerCase();
   switch (type) {
     case "lab":
       return labKeys.includes(str);

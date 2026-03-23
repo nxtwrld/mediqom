@@ -1,29 +1,22 @@
-import synonyms from "$data/lab.synonyms.json";
+import { resolveSignalName, CANONICAL_KEYS } from './signal-catalog';
 
 /**
+ * Normalize a lab term to its canonical signal key.
+ * Returns the canonical key (e.g., "hemoglobin") or null if not found.
  *
- * @param term Local lab term to be checked and normalized
- * @returns
+ * Note: Previously returned display names (e.g., "Hemoglobin").
+ * Now returns canonical snake_case keys via the signal catalog.
  */
-export default function (term: string) {
-  if (!term) return null;
+export default function (term: string): string | null {
+	if (!term) return null;
 
-  // remove extra spaces, and convert to lower case
-  const lower = term.toString().replace(/\s+/g, " ").toLowerCase();
+	const resolved = resolveSignalName(term);
 
-  const result = synonyms.find((s) => s.includes(term));
-  if (result) {
-    return result[0];
-  } else {
-    const result = synonyms.find((s) => {
-      const match = s.find((t) => lower.includes(t.toLowerCase()));
-      if (match) {
-        return s[0];
-      }
-    });
-    if (result) {
-      return result[0];
-    }
-    return null;
-  }
+	// resolveSignalName returns the input as-is for unknowns,
+	// so check if it actually resolved to a known key
+	if (CANONICAL_KEYS.has(resolved)) {
+		return resolved;
+	}
+
+	return null;
 }

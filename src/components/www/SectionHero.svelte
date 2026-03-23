@@ -40,7 +40,6 @@
 		text-align: center;
 		padding: 2rem;
 		position: relative;
-		scroll-snap-align: start;
 	}
 
 	.hero-content {
