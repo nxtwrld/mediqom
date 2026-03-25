@@ -2,9 +2,8 @@ import * as THREE from 'three';
 
 const RAY_LENGTH = 0.6;
 const RAY_LENGTH_PROMOTED = 0.9;
-const PROMOTION_SPEED = 3.0; // promotionProgress units per second (CSS scale)
+const PROMOTION_SPEED = 1.0; // promotionProgress units per second (CSS scale) — 1s transition
 const PROMOTED_RENDER_ORDER = 100;
-const PROMOTE_TRANSITION = 0.5; // seconds to animate position to target
 
 interface RayIcon {
 	name: string;
@@ -102,17 +101,16 @@ interface FeatureRay {
 	scanCenter: number;
 	azimuth: number;
 	icon: RayIcon;
+	// Label CSS2DObject (scanning icon)
 	css2d: InstanceType<typeof import('three/addons/renderers/CSS2DRenderer.js').CSS2DObject>;
 	visible: boolean;
+	// Screenshot CSS2DObject (independent, placed at target)
+	screenshotCss2d: InstanceType<typeof import('three/addons/renderers/CSS2DRenderer.js').CSS2DObject>;
+	screenshotBubble: HTMLDivElement;
 	screenshotEl: HTMLDivElement;
 	// Promotion state
 	promoted: boolean;
 	promotionProgress: number;  // 0-1, drives CSS scale
-	frozen: boolean;            // true once position transition complete
-	// Hardcoded target position (renderGroup local space)
-	targetLocalPos: THREE.Vector3 | null;
-	startLocalPos: THREE.Vector3 | null;
-	transitionStart: number;
 }
 
 export function getIconsForSide(side: 'left' | 'right'): RayIcon[] {
@@ -145,17 +143,32 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 	for (let i = 0; i < rayCount; i++) {
 		const icon = icons[i % icons.length];
 
+		// Label element (scanning icon)
 		const div = document.createElement('div');
 		div.className = 'feature-ray-icon';
 		div.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"><use href="${icon.sprite}#${icon.name}"></use></svg>`;
 
-		const screenshotEl = document.createElement('div');
-		screenshotEl.className = 'feature-ray-screenshot';
-		div.appendChild(screenshotEl);
-
 		const css2d = new CSS2DObjectClass(div);
 		css2d.visible = false;
 		renderGroup.add(css2d);
+
+		// Screenshot element (independent CSS2DObject)
+		// Structure: anchor (CSS2DRenderer controls transform) > bubble (we control scale) > screenshot
+		const anchor = document.createElement('div');
+		anchor.className = 'feature-ray-screenshot-anchor';
+
+		const bubble = document.createElement('div');
+		bubble.className = 'feature-ray-screenshot-bubble';
+		anchor.appendChild(bubble);
+
+		const screenshotEl = document.createElement('div');
+		screenshotEl.className = 'feature-ray-screenshot';
+		bubble.appendChild(screenshotEl);
+
+		const screenshotCss2d = new CSS2DObjectClass(anchor);
+		screenshotCss2d.visible = false;
+		screenshotCss2d.renderOrder = PROMOTED_RENDER_ORDER;
+		renderGroup.add(screenshotCss2d);
 
 		const baseAzimuth = (i / rayCount) * Math.PI * 2;
 		const jitter = (Math.random() - 0.5) * (Math.PI * 2 / rayCount) * 0.5;
@@ -171,13 +184,11 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 			icon,
 			css2d,
 			visible: false,
+			screenshotCss2d,
+			screenshotBubble: bubble,
 			screenshotEl,
 			promoted: false,
-			promotionProgress: 0,
-			frozen: false,
-			targetLocalPos: null,
-			startLocalPos: null,
-			transitionStart: -1
+			promotionProgress: 0
 		});
 	}
 
@@ -216,14 +227,13 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 
 		let needsUpdate = false;
 
-		// Update promotion progress (CSS scale)
+		// Update promotion progress (drives label fade-out timing)
 		for (const ray of rays) {
 			if (ray.promoted) {
 				if (ray.promotionProgress < 1) {
 					ray.promotionProgress = Math.min(1, ray.promotionProgress + dt * PROMOTION_SPEED);
 				}
 			} else {
-				ray.frozen = false;
 				if (ray.promotionProgress > 0) {
 					ray.promotionProgress = Math.max(0, ray.promotionProgress - dt * PROMOTION_SPEED);
 				}
@@ -245,36 +255,19 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 			const ray = rays[i];
 			const idx = i * 6;
 
-			// ── State 1: Frozen — arrived at target, skip ──
-			if (ray.frozen) continue;
-
-			// ── State 2: Promoted — animate position to hardcoded target ──
+			// When promoted, hide label — screenshot is independent
 			if (ray.promoted) {
-				if (ray.transitionStart < 0) {
-					ray.transitionStart = elapsed;
-				}
-
-				const t = Math.min(1, (elapsed - ray.transitionStart) / PROMOTE_TRANSITION);
-				const st = smoothStep(t);
-				ray.css2d.position.lerpVectors(ray.startLocalPos!, ray.targetLocalPos!, st);
-
-				if (t >= 1) {
-					ray.frozen = true;
-				}
-
-				// Zero line during promotion
 				zeroLineSegment(linePositions, idx);
-
-				if (!ray.visible) {
-					ray.css2d.visible = true;
-					ray.visible = true;
+				if (ray.visible) {
+					ray.css2d.visible = false;
+					(ray.css2d.element as HTMLElement).style.opacity = '0';
+					ray.visible = false;
 				}
-				(ray.css2d.element as HTMLElement).style.opacity = String(currentOpacity);
 				needsUpdate = true;
 				continue;
 			}
 
-			// ── State 3: Normal scanning ──
+			// ── Normal scanning ──
 			const pp = ray.promotionProgress;
 			const scanningY = ray.scanCenter + ray.scanAmplitude * Math.sin(elapsed * ray.scanSpeed + ray.scanPhase);
 			const frontAz = -meshWorldRotY;
@@ -384,16 +377,22 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 		for (const ray of rays) {
 			if (ray.icon.name === iconName && !ray.promoted) {
 				ray.promoted = true;
-				ray.frozen = false;
-				ray.targetLocalPos = targetPos.clone();
-				ray.startLocalPos = ray.css2d.position.clone();
-				ray.transitionStart = -1; // set on first update frame
 
+				// Position the independent screenshot at target
+				ray.screenshotCss2d.position.copy(targetPos);
+
+				// Set up screenshot content
 				ray.screenshotEl.style.backgroundImage = `url(${screenshotUrl})`;
-				const el = ray.css2d.element as HTMLElement;
-				el.style.setProperty('--promoted-size', `${targetSize}px`);
-				el.classList.add('-promoted');
-				ray.css2d.renderOrder = PROMOTED_RENDER_ORDER;
+				ray.screenshotBubble.style.setProperty('--promoted-size', `${targetSize}px`);
+
+				// Show the CSS2DObject — CSS2DRenderer will remove display:none on next render
+				ray.screenshotCss2d.visible = true;
+
+				// Wait for renderer to make element visible, then trigger scale transition
+				requestAnimationFrame(() => {
+					void ray.screenshotBubble.offsetHeight; // force layout at scale(0)
+					ray.screenshotBubble.classList.add('-active');
+				});
 				break;
 			}
 		}
@@ -401,16 +400,10 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 
 	function demoteAll() {
 		for (const ray of rays) {
-			if (ray.promoted || ray.frozen) {
+			if (ray.promoted) {
 				ray.promoted = false;
-				ray.frozen = false;
-				ray.targetLocalPos = null;
-				ray.startLocalPos = null;
-				ray.transitionStart = -1;
-				const el = ray.css2d.element as HTMLElement;
-				el.classList.remove('-promoted');
-				el.style.removeProperty('--promoted-size');
-				ray.css2d.renderOrder = 0;
+				ray.screenshotBubble.classList.remove('-active');
+				ray.screenshotCss2d.visible = false;
 			}
 		}
 	}
@@ -435,16 +428,14 @@ export async function createFeatureRays(config: FeatureRaysConfig): Promise<Feat
 		for (const ray of rays) {
 			ray.css2d.element.remove();
 			renderGroup.remove(ray.css2d);
+			ray.screenshotCss2d.element.remove();
+			renderGroup.remove(ray.screenshotCss2d);
 		}
 	}
 
 	setOpacity(0);
 
 	return { renderGroup, meshGroup, update, setOpacity, setColor, promoteRay, demoteAll, dispose };
-}
-
-function smoothStep(t: number): number {
-	return t * t * (3 - 2 * t);
 }
 
 function lerp(a: number, b: number, t: number): number {

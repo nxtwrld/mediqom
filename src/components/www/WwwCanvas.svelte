@@ -141,6 +141,7 @@
 		width: 100%;
 		height: 100%;
 	}
+	/* ── Scanning label icons ── */
 	:global(.feature-ray-icon) {
 		width: 32px;
 		height: 32px;
@@ -151,15 +152,7 @@
 		align-items: center;
 		justify-content: center;
 		pointer-events: none;
-		/* Fast scale-out when demoting (0.2s), slow scale-up when promoting (0.5s) */
-		transition:
-			opacity 0.2s ease,
-			width 0.2s ease,
-			height 0.2s ease,
-			border-radius 0.2s ease,
-			background 0.2s ease,
-			box-shadow 0.2s ease,
-			border-color 0.2s ease;
+		transition: opacity 0.2s ease;
 		opacity: 0;
 		overflow: hidden;
 		position: relative;
@@ -169,23 +162,13 @@
 		height: 16px;
 		fill: var(--www-ray-color, #16d3dd);
 		flex-shrink: 0;
-		transition: opacity 0.3s ease, transform 0.3s ease;
-	}
-	:global(.feature-ray-screenshot) {
-		display: none;
-		opacity: 0;
-		transition: opacity 0.4s ease 0.15s;
-		width: 100%;
-		height: 100%;
-		border-radius: 50%;
-		overflow: hidden;
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
 	}
 
-	/* Promoted state — icon grows into round screenshot (slower scale-up) */
-	:global(.feature-ray-icon.-promoted) {
+	/* ── Screenshot bubbles (independent from labels) ── */
+	:global(.feature-ray-screenshot-anchor) {
+		pointer-events: none;
+	}
+	:global(.feature-ray-screenshot-bubble) {
 		width: var(--promoted-size, 280px);
 		height: var(--promoted-size, 280px);
 		border-radius: 50%;
@@ -193,22 +176,22 @@
 		border: 2px solid rgba(255, 255, 255, 0.9);
 		box-shadow: 0 4px 32px rgba(0, 0, 0, 0.15);
 		padding: 4px;
-		z-index: 10;
-		transition:
-			opacity 0.5s ease,
-			width 0.5s ease-out,
-			height 0.5s ease-out,
-			border-radius 0.5s ease,
-			background 0.3s ease,
-			box-shadow 0.5s ease,
-			border-color 0.3s ease;
+		overflow: hidden;
+		pointer-events: none;
+		transform: scale(0);
+		transition: transform .5s ease-out, box-shadow 1s ease;
 	}
-	:global(.feature-ray-icon.-promoted svg) {
-		display: none;
+	:global(.feature-ray-screenshot-bubble.-active) {
+		transform: scale(1);
 	}
-	:global(.feature-ray-icon.-promoted .feature-ray-screenshot) {
-		display: block;
-		opacity: 1;
+	:global(.feature-ray-screenshot) {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		overflow: hidden;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
 	}
 
 	@media (max-width: 767px) {
@@ -220,24 +203,7 @@
 			width: 12px;
 			height: 12px;
 		}
-		/* No promotion on mobile */
-		:global(.feature-ray-icon.-promoted) {
-			width: 24px;
-			height: 24px;
-			border-radius: 50%;
-			background: rgba(255, 255, 255, 0.9);
-			border: 2px solid var(--www-ray-color, #16d3dd);
-			box-shadow: none;
-			padding: 0;
-			min-height: unset;
-		}
-		:global(.feature-ray-icon.-promoted svg) {
-			position: static;
-			width: 12px;
-			height: 12px;
-			opacity: 1;
-		}
-		:global(.feature-ray-icon.-promoted .feature-ray-screenshot) {
+		:global(.feature-ray-screenshot-bubble) {
 			display: none;
 		}
 	}

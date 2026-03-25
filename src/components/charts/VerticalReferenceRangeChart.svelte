@@ -133,6 +133,10 @@
     let menu = $state<MenuState>({ visible: false, x: 0, y: 0, dotX: 0, placement: 'top', point: null, series: null });
     let medMenu = $state<MedMenuState>({ visible: false, x: 0, y: 0, barX: 0, placement: 'top', laneData: null });
 
+    $effect(() => {
+        console.log($state.snapshot(menu))
+    });
+
     // Module-level zoom state — persists between renders
     let yBase: ScaleTime<number, number> | null = null;
     let xDomain: [number, number] = [-0.5, 1.5];
@@ -1023,7 +1027,6 @@
         <div class="dot-menu-content">
             <div class="dot-menu-header">
                 <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
-                <div class="dot-menu-value">{menu.point.value}{menu.point.unit ? ` ${menu.point.unit}` : ''}</div>
                 <div class="dot-menu-date">{dateTime(menu.point.date)}</div>
             </div>
             <hr class="dot-menu-divider" />
@@ -1038,6 +1041,8 @@
                 labels={false}
                 showValue={true}
             />
+            {:else}
+                <div class="dot-menu-value">{menu.point.value}{menu.point.unit ? ` ${menu.point.unit}` : ''}</div>
             {/if}
             <hr class="dot-menu-divider" /><br/>
             {#if menu.point.documentId && profileId}
@@ -1221,7 +1226,7 @@
     }
 
     .dot-menu-value {
-        font-size: 1.25rem;
+        font-size: 2rem;
         font-weight: 600;
         color: var(--color-text-primary);
     }
@@ -1242,9 +1247,6 @@
         margin: 0.1rem 0;
     }
 
-    .dot-menu-content :global(.range.-value) {
-        padding-top: 1.6rem;
-    }
 
     .dot-menu-source {
         font-size: 0.75rem;
