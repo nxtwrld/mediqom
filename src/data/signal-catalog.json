@@ -85,7 +85,7 @@
     "synonyms": [
       "Body Mass Index"
     ],
-    "unit": "kg/m²",
+    "unit": "kg/m\u00b2",
     "valueExpirationInDays": 30,
     "loincCodes": [
       "39156-5"
@@ -125,7 +125,7 @@
       }
     ],
     "synonyms": [],
-    "unit": "°C",
+    "unit": "\u00b0C",
     "valueExpirationInDays": 0.5,
     "loincCodes": [
       "8310-5"
@@ -379,19 +379,44 @@
       {
         "sex": "any",
         "ageRange": {
+          "min": 0,
+          "max": 2
+        },
+        "low": 100,
+        "high": 160
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 2,
+          "max": 12
+        },
+        "low": 80,
+        "high": 120
+      },
+      {
+        "sex": "any",
+        "ageRange": {
           "min": 18,
           "max": 100
         },
-        "low": 40,
+        "low": 60,
         "high": 100
       }
     ],
     "synonyms": [
-      "resting pulse"
+      "resting pulse",
+      "pulse",
+      "hr",
+      "heartrate",
+      "heart rate"
     ],
-    "unit": "bpm",
+    "unit": "beats/min",
     "valueExpirationInDays": 7,
-    "healthKitType": "heart_rate.resting"
+    "healthKitType": "heart_rate.resting",
+    "loincCodes": [
+      "8867-4"
+    ]
   },
   "heart_rate_variability": {
     "displayName": "Heart Rate Variability",
@@ -405,7 +430,7 @@
           "max": 40
         },
         "low": 20,
-        "high": 200
+        "high": 100
       },
       {
         "sex": "any",
@@ -414,7 +439,7 @@
           "max": 100
         },
         "low": 10,
-        "high": 150
+        "high": 80
       }
     ],
     "synonyms": [
@@ -457,16 +482,9 @@
         "high": 100
       }
     ],
-    "synonyms": [
-      "pulse",
-      "hr",
-      "heartrate"
-    ],
+    "synonyms": [],
     "unit": "beats/min",
-    "healthKitType": "heart_rate",
-    "loincCodes": [
-      "8867-4"
-    ]
+    "healthKitType": "heart_rate"
   },
   "waist_circumference": {
     "displayName": "Waist Circumference",
@@ -560,7 +578,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "L/min/m²",
+    "unit": "L/min/m\u00b2",
     "valueExpirationInDays": 360
   },
   "ejection_fraction": {
@@ -587,7 +605,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "g/m²",
+    "unit": "g/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_end_diastolic_volume": {
@@ -632,7 +650,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "mL/m²",
+    "unit": "mL/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_end_systolic_volume_index": {
@@ -641,7 +659,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "mL/m²",
+    "unit": "mL/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_end_diastolic_diameter_index": {
@@ -650,7 +668,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "cm/m²",
+    "unit": "cm/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_end_systolic_diameter_index": {
@@ -659,7 +677,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "cm/m²",
+    "unit": "cm/m\u00b2",
     "valueExpirationInDays": 360
   },
   "right_ventricular_end_diastolic_volume": {
@@ -704,7 +722,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "mL/m²",
+    "unit": "mL/m\u00b2",
     "valueExpirationInDays": 360
   },
   "right_ventricular_end_systolic_volume_index": {
@@ -713,7 +731,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "mL/m²",
+    "unit": "mL/m\u00b2",
     "valueExpirationInDays": 360
   },
   "right_ventricular_end_diastolic_diameter_index": {
@@ -722,7 +740,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "cm/m²",
+    "unit": "cm/m\u00b2",
     "valueExpirationInDays": 360
   },
   "right_ventricular_end_systolic_diameter_index": {
@@ -731,7 +749,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "cm/m²",
+    "unit": "cm/m\u00b2",
     "valueExpirationInDays": 360
   },
   "pulmonary_artery_systolic_pressure": {
@@ -776,7 +794,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "dyn·s/cm⁵",
+    "unit": "dyn\u00b7s/cm\u2075",
     "valueExpirationInDays": 360
   },
   "systemic_vascular_resistance": {
@@ -785,7 +803,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "dyn·s/cm⁵",
+    "unit": "dyn\u00b7s/cm\u2075",
     "valueExpirationInDays": 360
   },
   "cardiac_output_index": {
@@ -794,7 +812,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "L/min/m²",
+    "unit": "L/min/m\u00b2",
     "valueExpirationInDays": 360
   },
   "stroke_volume_index": {
@@ -803,7 +821,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "mL/beat/m²",
+    "unit": "mL/beat/m\u00b2",
     "valueExpirationInDays": 360
   },
   "heart_rate_index": {
@@ -812,7 +830,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "beats/min/m²",
+    "unit": "beats/min/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_ejection_time": {
@@ -830,7 +848,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "ms/m²",
+    "unit": "ms/m\u00b2",
     "valueExpirationInDays": 360
   },
   "left_ventricular_ejection_fraction": {
@@ -848,7 +866,7 @@
     "type": "number",
     "referenceRange": [],
     "synonyms": [],
-    "unit": "%/m²",
+    "unit": "%/m\u00b2",
     "valueExpirationInDays": 360
   },
   "right_ventricular_ejection_time": {
@@ -945,7 +963,7 @@
     "synonyms": [
       "Kreatinin"
     ],
-    "unit": "µmol/L",
+    "unit": "\u00b5mol/L",
     "valueExpirationInDays": 360,
     "description": "A waste product produced by muscles from the breakdown of a compound called creatine. The kidneys filter out most of the creatinine and dispose of it in the urine.",
     "lowInterpretation": "Low levels can be seen in conditions that result in decreased muscle mass.",
@@ -982,9 +1000,9 @@
       }
     ],
     "synonyms": [
-      "Kyselina močová"
+      "Kyselina mo\u010dov\u00e1"
     ],
-    "unit": "µmol/L",
+    "unit": "\u00b5mol/L",
     "valueExpirationInDays": 360,
     "description": "A product of the metabolic breakdown of purine nucleotides. High levels of uric acid in the blood can lead to a type of arthritis known as gout.",
     "lowInterpretation": "Low levels can result from kidney disease or might be due to certain medications.",
@@ -1018,7 +1036,7 @@
       "gfr",
       "glomerular filtration rate"
     ],
-    "unit": "mL/min/1.73m²",
+    "unit": "mL/min/1.73m\u00b2",
     "valueExpirationInDays": 360,
     "description": "Estimated Glomerular Filtration Rate measures kidney function and determines how well the kidneys are filtering blood.",
     "lowInterpretation": "A low eGFR indicates impaired kidney function.",
@@ -1048,7 +1066,7 @@
     "synonyms": [
       "Na",
       "Na - natrium",
-      "Sodík"
+      "Sod\u00edk"
     ],
     "unit": "mmol/L",
     "valueExpirationInDays": 360,
@@ -1080,7 +1098,7 @@
     "synonyms": [
       "K",
       "K - kalium",
-      "Draslík",
+      "Drasl\u00edk",
       "Kalium"
     ],
     "unit": "mmol/L",
@@ -1144,8 +1162,8 @@
     ],
     "synonyms": [
       "Mg",
-      "Mg - hořčík",
-      "Hořčík"
+      "Mg - ho\u0159\u010d\u00edk",
+      "Ho\u0159\u010d\u00edk"
     ],
     "unit": "mmol/L",
     "valueExpirationInDays": 360,
@@ -1185,9 +1203,9 @@
     ],
     "synonyms": [
       "Fe",
-      "Železo"
+      "\u017delezo"
     ],
-    "unit": "µmol/L",
+    "unit": "\u00b5mol/L",
     "valueExpirationInDays": 360,
     "description": "A mineral essential for making hemoglobin, a protein in red blood cells that carries oxygen.",
     "lowInterpretation": "Low iron levels can lead to anemia, fatigue, and an increased risk of infections.",
@@ -1224,7 +1242,7 @@
       }
     ],
     "synonyms": [],
-    "unit": "µg/L",
+    "unit": "\u00b5g/L",
     "valueExpirationInDays": 360,
     "description": "A protein that stores iron inside cells. Serum ferritin levels indirectly measure the amount of iron stored in your body.",
     "lowInterpretation": "Low levels can indicate an iron deficiency which might lead to anemia.",
@@ -1254,9 +1272,9 @@
     "synonyms": [
       "Total Bilirubin",
       "Bilirubin celk.",
-      "Bilirubín celk."
+      "Bilirub\u00edn celk."
     ],
-    "unit": "µmol/L",
+    "unit": "\u00b5mol/L",
     "valueExpirationInDays": 360,
     "description": "A yellow compound that occurs in the normal catabolic pathway that breaks down heme from hemoglobin. It's processed by the liver and excreted in feces.",
     "lowInterpretation": "Generally, low levels aren't concerning and may be normal for many people.",
@@ -1424,9 +1442,9 @@
       }
     ],
     "synonyms": [
-      "Celk.bílkovina",
+      "Celk.b\u00edlkovina",
       "Protein",
-      "Bílkovina"
+      "B\u00edlkovina"
     ],
     "unit": "g/L",
     "valueExpirationInDays": 360,
@@ -1587,7 +1605,7 @@
     ],
     "unit": "mmol/L",
     "valueExpirationInDays": 360,
-    "description": "A type of fat (lipid) found in your blood. When you eat, your body converts calories it doesn’t need into triglycerides, which are stored in fat cells.",
+    "description": "A type of fat (lipid) found in your blood. When you eat, your body converts calories it doesn\u2019t need into triglycerides, which are stored in fat cells.",
     "lowInterpretation": "Low levels are generally not a concern and can be seen in people who are very fit or who are on specific diets or medications.",
     "highInterpretation": "High levels, especially in combination with low HDL or high LDL, can increase the risk of heart disease and may indicate metabolic syndrome.",
     "links": [
@@ -1613,7 +1631,7 @@
       }
     ],
     "synonyms": [
-      "Vitamín D",
+      "Vitam\u00edn D",
       "25-hydroxyvitamin d"
     ],
     "unit": "nmol/L",
@@ -1645,7 +1663,7 @@
     ],
     "synonyms": [
       "Blood Sugar",
-      "Glukóza"
+      "Gluk\u00f3za"
     ],
     "unit": "mmol/L",
     "valueExpirationInDays": 360,
@@ -2439,7 +2457,7 @@
       }
     ],
     "synonyms": [],
-    "unit": "µmol/L",
+    "unit": "\u00b5mol/L",
     "valueExpirationInDays": 360,
     "description": "A chemical that's produced when the liver breaks down hemoglobin. Small amounts are normally present in urine.",
     "lowInterpretation": "Low or absent levels might indicate reduced bile flow to the intestines.",
@@ -2464,7 +2482,7 @@
       }
     ],
     "synonyms": [
-      "Ketolátky"
+      "Ketol\u00e1tky"
     ],
     "unit": "mmol/L",
     "valueExpirationInDays": 360,
@@ -2527,7 +2545,7 @@
       }
     ],
     "synonyms": [
-      "Specifická hustota"
+      "Specifick\u00e1 hustota"
     ],
     "unit": "kg/m^3",
     "valueExpirationInDays": 360,
@@ -2554,7 +2572,7 @@
       }
     ],
     "synonyms": [
-      "Amyláza celk."
+      "Amyl\u00e1za celk."
     ],
     "unit": "U/L",
     "valueExpirationInDays": 360,
@@ -2695,7 +2713,7 @@
     "synonyms": [
       "Bakterie"
     ],
-    "unit": "elem/µL",
+    "unit": "elem/\u00b5L",
     "valueExpirationInDays": 360,
     "description": "Refers to the presence of bacteria, typically in a urine sample.",
     "lowInterpretation": "Not typically measured as 'low'; it's the presence that is often of clinical interest.",
@@ -2720,7 +2738,7 @@
       }
     ],
     "synonyms": [],
-    "unit": "mL/min/1.73m²",
+    "unit": "mL/min/1.73m\u00b2",
     "valueExpirationInDays": 360,
     "description": "Modification of Diet in Renal Disease (MDRD) formula including urea and albumin. It's used to estimate kidney function, specifically the glomerular filtration rate (GFR).",
     "lowInterpretation": "Lower values can indicate decreased kidney function, suggesting chronic kidney disease or acute kidney injury.",

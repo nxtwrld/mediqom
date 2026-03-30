@@ -47,10 +47,10 @@ const synonymArrays: string[][] = JSON.parse(
 // =====================================================
 
 const SIGNAL_ALIASES: Record<string, string> = {
-	pulse: 'heart_rate',
-	hr: 'heart_rate',
-	'heart rate': 'heart_rate',
-	heartrate: 'heart_rate',
+	pulse: 'resting_heart_rate',
+	hr: 'resting_heart_rate',
+	'heart rate': 'resting_heart_rate',
+	heartrate: 'resting_heart_rate',
 	'resting heart rate': 'resting_heart_rate',
 	'resting pulse': 'resting_heart_rate',
 	hrv: 'heart_rate_variability',
@@ -124,7 +124,7 @@ for (const [hkType, signal] of Object.entries(HEALTHKIT_MAP)) {
 // =====================================================
 
 const LOINC_CODES: Record<string, string[]> = {
-	heart_rate: ['8867-4'],
+	resting_heart_rate: ['8867-4'],
 	systolic: ['8480-6'],
 	diastolic: ['8462-4'],
 	temperature: ['8310-5'],
@@ -275,7 +275,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 	'uric acid': 'uric_acid',
 	'temperature': 'temperature',
 	'preassure': 'systolic',
-	'pulse': 'heart_rate',
+	'pulse': 'resting_heart_rate',
 	'respiratory rate': 'respiratory_rate',
 	'oxygen saturation': 'oxygen_saturation',
 	'weight': 'weight',
@@ -291,7 +291,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 	'fat mass': 'fat_mass',
 	'systolic blood pressure': 'systolic',
 	'diastolic blood pressure': 'diastolic',
-	'heart rate': 'heart_rate',
+	'heart rate': 'resting_heart_rate',
 	'cardiac output': 'cardiac_output',
 	'stroke volume': 'stroke_volume',
 	'cardiac index': 'cardiac_index',
