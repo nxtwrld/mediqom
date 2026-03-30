@@ -28,6 +28,7 @@
     import contexts from './context/index';
 	import store from './store';
     import { createMuscleMaterial, createMuscleMatcapMaterial, isMuscularSystem } from './muscle-materials';
+    import { injectTransporterEffect, animateTransporterMeshes, updateTransporterTime } from './transporter.shader';
 	//import { linkPage } from '$lib/app';
     //import { addExperience } from '$lib/xp/store';
 	import { sounds } from '$components/ui/Sounds.svelte';
@@ -100,6 +101,10 @@
     let auraShellMaterials: THREE.ShaderMaterial[] = [];
     let auraActive = false;
     const auraClock = new THREE.Clock(false);
+
+    // Transporter beam materialization effect state
+    let transporterActive = 0; // count of active transporter animations
+    let transporterMeshes: THREE.Mesh[] = []; // meshes with active transporter effect
 
     const objectToFileMapping = Object.entries(objects3d).reduce((acc, [k,v]) => {
         v.objects.forEach(f => {
@@ -498,6 +503,46 @@
     async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
         try {
             //console.log('updateModel', filesToLoad, objectsToShow);
+
+            // Collect visible meshes that are about to be hidden (for dematerialization)
+            const meshesToDematerialize: THREE.Mesh[] = [];
+            objects.forEach((object: any) => {
+                object.traverse((child: any) => {
+                    if (child.isMesh && child.visible && !objectsToShow.includes(child.name) && child.parent?.name !== 'shade_skin') {
+                        meshesToDematerialize.push(child);
+                    }
+                });
+            });
+
+            // Start dematerialization animation (meshes stay visible during animation)
+            if (meshesToDematerialize.length > 0) {
+                // Ensure all meshes have shader injected (they should from initial load)
+                for (const mesh of meshesToDematerialize) {
+                    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                    for (const mat of mats) injectTransporterEffect(mat as THREE.Material);
+                }
+                transporterActive++;
+                transporterMeshes = [...transporterMeshes, ...meshesToDematerialize];
+                requestRender();
+                animateTransporterMeshes(meshesToDematerialize, 'dematerialize', 3000, () => {
+                    for (const mesh of meshesToDematerialize) mesh.visible = false;
+                    transporterActive--;
+                    transporterMeshes = transporterMeshes.filter(m => !meshesToDematerialize.includes(m));
+                    precacheMaterials();
+                    requestRender();
+                });
+            }
+
+            // Collect currently hidden meshes that will become visible (re-shown)
+            const meshesToRematerialize: THREE.Mesh[] = [];
+            objects.forEach((object: any) => {
+                object.traverse((child: any) => {
+                    if (child.isMesh && !child.visible && objectsToShow.includes(child.name) && child.parent?.name !== 'shade_skin') {
+                        meshesToRematerialize.push(child);
+                    }
+                });
+            });
+
             let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
                 id: f,
                 name: f
@@ -508,13 +553,48 @@
 
             insertObject(newObjects, objectsToShow, labelIds, group);
 
-
+            // Update visibility for all objects, but skip meshes being dematerialized
+            const dematerializeSet = new Set(meshesToDematerialize.map(m => m.uuid));
             objects.forEach(object => {
                 object.traverse( function ( child: any ) {
-                    // mark labeled objects
+                    if (dematerializeSet.has(child.uuid)) return;
                     checkObject(child, objectsToShow, labelIds);
                 } );
             })
+
+            // Animate re-shown meshes (already have shader injected from initial load)
+            if (meshesToRematerialize.length > 0) {
+                transporterActive++;
+                transporterMeshes = [...transporterMeshes, ...meshesToRematerialize];
+                requestRender();
+                animateTransporterMeshes(meshesToRematerialize, 'materialize', 3000, () => {
+                    transporterActive--;
+                    transporterMeshes = transporterMeshes.filter(m => !meshesToRematerialize.includes(m));
+                });
+            }
+
+            // Inject transporter beam effect on newly loaded meshes and animate
+            if (newObjects.length > 0) {
+                const newMeshes: THREE.Mesh[] = [];
+                for (const obj of newObjects as any[]) {
+                    obj.traverse((child: any) => {
+                        if (child.isMesh && child.material && child.parent?.name !== 'shade_skin') {
+                            const mats = Array.isArray(child.material) ? child.material : [child.material];
+                            for (const mat of mats) injectTransporterEffect(mat);
+                            newMeshes.push(child);
+                        }
+                    });
+                }
+                if (newMeshes.length > 0) {
+                    transporterActive++;
+                    transporterMeshes = [...transporterMeshes, ...newMeshes];
+                    animateTransporterMeshes(newMeshes, 'materialize', 3000, () => {
+                        transporterActive--;
+                        transporterMeshes = transporterMeshes.filter(m => !newMeshes.includes(m));
+                    });
+                }
+            }
+
             objects = [...objects, ...newObjects];
 
             // Pre-cache materials and build focusable mesh list for fast highlight()
@@ -1125,18 +1205,23 @@
             // updateParticleSwarm();
         }
 
+        // Update transporter beam time for sparkle animation
+        if (transporterActive > 0 && transporterMeshes.length > 0) {
+            updateTransporterTime(transporterMeshes);
+        }
+
         if (hasTweens) TWEEN.update();
         const controlsChanged = controls.update();
         if (hasAnimation) currentContext!.animation!.update();
 
-        if (controlsChanged || hasTweens || hasAnimation || auraActive) {
+        if (controlsChanged || hasTweens || hasAnimation || auraActive || transporterActive > 0) {
             render();
             idleFrames = 0;
         } else {
             idleFrames++;
         }
 
-        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive) {
+        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive || transporterActive > 0) {
             animationFrameId = requestAnimationFrame(animate);
         } else {
             render(); // final clean frame
