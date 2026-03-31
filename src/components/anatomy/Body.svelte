@@ -29,6 +29,7 @@
 	import store from './store';
     import { createMuscleMaterial, createMuscleMatcapMaterial, isMuscularSystem } from './muscle-materials';
     import { injectTransporterEffect, animateTransporterMeshes, updateTransporterTime } from './transporter.shader';
+    import { createTransporterRing, updateTransporterRing, removeTransporterRing, type TransporterRing } from './transporter-ring';
 	//import { linkPage } from '$lib/app';
     //import { addExperience } from '$lib/xp/store';
 	import { sounds } from '$components/ui/Sounds.svelte';
@@ -105,6 +106,7 @@
     // Transporter beam materialization effect state
     let transporterActive = 0; // count of active transporter animations
     let transporterMeshes: THREE.Mesh[] = []; // meshes with active transporter effect
+    let idleRings: TransporterRing[] = []; // rings waiting for objects to load
 
     const objectToFileMapping = Object.entries(objects3d).reduce((acc, [k,v]) => {
         v.objects.forEach(f => {
@@ -523,14 +525,16 @@
                 }
                 transporterActive++;
                 transporterMeshes = [...transporterMeshes, ...meshesToDematerialize];
+                const dRing = createTransporterRing(meshesToDematerialize, scene, shade);
                 requestRender();
                 animateTransporterMeshes(meshesToDematerialize, 'dematerialize', 3000, () => {
                     for (const mesh of meshesToDematerialize) mesh.visible = false;
                     transporterActive--;
                     transporterMeshes = transporterMeshes.filter(m => !meshesToDematerialize.includes(m));
+                    removeTransporterRing(dRing);
                     precacheMaterials();
                     requestRender();
-                });
+                }, (y, bw, p) => updateTransporterRing(dRing, y, bw, p));
             }
 
             // Collect currently hidden meshes that will become visible (re-shown)
@@ -542,6 +546,16 @@
                     }
                 });
             });
+
+            // Create ring immediately as loading feedback (before await)
+            let preloadRing: TransporterRing | null = null;
+            if (filesToLoad.length > 0 && shade) {
+                preloadRing = createTransporterRing([], scene, shade);
+                // Position at bottom of body, fade in
+                preloadRing.material.uniforms.uFade.value = 1.0;
+                idleRings.push(preloadRing);
+                requestRender();
+            }
 
             let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
                 id: f,
@@ -566,11 +580,13 @@
             if (meshesToRematerialize.length > 0) {
                 transporterActive++;
                 transporterMeshes = [...transporterMeshes, ...meshesToRematerialize];
+                const reRing = createTransporterRing(meshesToRematerialize, scene, shade);
                 requestRender();
                 animateTransporterMeshes(meshesToRematerialize, 'materialize', 3000, () => {
                     transporterActive--;
                     transporterMeshes = transporterMeshes.filter(m => !meshesToRematerialize.includes(m));
-                });
+                    removeTransporterRing(reRing);
+                }, (y, bw, p) => updateTransporterRing(reRing, y, bw, p));
             }
 
             // Inject transporter beam effect on newly loaded meshes and animate
@@ -586,13 +602,26 @@
                     });
                 }
                 if (newMeshes.length > 0) {
+                    // Reuse preload ring or create new one
+                    const newRing = preloadRing || createTransporterRing(newMeshes, scene, shade);
+                    if (preloadRing) {
+                        idleRings = idleRings.filter(r => r !== preloadRing);
+                        preloadRing = null;
+                    }
                     transporterActive++;
                     transporterMeshes = [...transporterMeshes, ...newMeshes];
                     animateTransporterMeshes(newMeshes, 'materialize', 3000, () => {
                         transporterActive--;
                         transporterMeshes = transporterMeshes.filter(m => !newMeshes.includes(m));
-                    });
+                        removeTransporterRing(newRing);
+                    }, (y, bw, p) => updateTransporterRing(newRing, y, bw, p));
                 }
+            }
+
+            // Clean up preload ring if no new meshes ended up needing it
+            if (preloadRing) {
+                idleRings = idleRings.filter(r => r !== preloadRing);
+                removeTransporterRing(preloadRing);
             }
 
             objects = [...objects, ...newObjects];
@@ -1210,18 +1239,23 @@
             updateTransporterTime(transporterMeshes);
         }
 
+        // Update idle rings (waiting for objects to load)
+        for (const ring of idleRings) {
+            ring.material.uniforms.uTime.value = performance.now() / 1000;
+        }
+
         if (hasTweens) TWEEN.update();
         const controlsChanged = controls.update();
         if (hasAnimation) currentContext!.animation!.update();
 
-        if (controlsChanged || hasTweens || hasAnimation || auraActive || transporterActive > 0) {
+        if (controlsChanged || hasTweens || hasAnimation || auraActive || transporterActive > 0 || idleRings.length > 0) {
             render();
             idleFrames = 0;
         } else {
             idleFrames++;
         }
 
-        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive || transporterActive > 0) {
+        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive || transporterActive > 0 || idleRings.length > 0) {
             animationFrameId = requestAnimationFrame(animate);
         } else {
             render(); // final clean frame

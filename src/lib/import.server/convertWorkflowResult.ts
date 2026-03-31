@@ -1,4 +1,43 @@
 import type { ReportAnalysis } from "$lib/import/types";
+import anatomyObjects from "$data/objects.json";
+
+// Build a flat set of valid 3D object names
+const validObjects = new Set(
+  Object.values(anatomyObjects).flatMap((cat: any) => cat.objects || []),
+);
+
+// Common anatomical synonyms → valid 3D objects
+const ANATOMY_ALIASES: Record<string, string> = {
+  mandible: "jaw_bone",
+  maxilla: "jaw_bone",
+  jaw: "jaw_bone",
+  cranium: "skull",
+  cerebrum: "brain",
+  cerebellum: "brain",
+  pulmo: "lungs",
+  lung: "lungs",
+  hepar: "liver",
+  ren: "kidney_left",
+  kidney: "kidney_left",
+  cor: "heart",
+  vesica: "bladder",
+  colon: "large_intestine",
+  intestinum: "small_intestine",
+  femur: "femur_left",
+  humerus: "humerus_left",
+  tibia: "tibia_left",
+  fibula: "fibula_left",
+  scapula: "scapula_left",
+  patella: "patella_left",
+  clavicle: "clavicle_left",
+  radius: "radius_left",
+  ulna: "ulna_left",
+};
+
+function normalizeBodyPartId(id: string): string {
+  if (validObjects.has(id)) return id;
+  return ANATOMY_ALIASES[id.toLowerCase()] || id;
+}
 
 /**
  * Strip processing metadata properties that leak from node result wrappers.
@@ -59,6 +98,7 @@ export function convertWorkflowResult(
           radiology_report: "imaging",
           prescription: "prescription",
           immunization_record: "immunization",
+          dental_record: "dental",
         };
         return (
           workflowResult.report?.category ||
@@ -149,6 +189,12 @@ export function convertWorkflowResult(
   let tags: string[] = actualContent.tags || [];
 
   if (reportObject.bodyParts && Array.isArray(reportObject.bodyParts)) {
+    // Normalize body part identifications to valid 3D object names
+    for (const bp of reportObject.bodyParts) {
+      if (typeof bp.identification === "string" && bp.identification.length > 0) {
+        bp.identification = normalizeBodyPartId(bp.identification);
+      }
+    }
     const bodyPartTags = reportObject.bodyParts
       .map((bp: any) => bp.identification)
       .filter((id: any) => typeof id === "string" && id.length > 0);

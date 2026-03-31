@@ -81,6 +81,12 @@ export function injectTransporterEffect(material: THREE.Material): TransporterUn
 	const existing = injectedMaterials.get(material);
 	if (existing) return existing;
 
+	// Only inject on built-in materials that have `transformed` in their vertex shader
+	const m = material as any;
+	if (!(m.isMeshStandardMaterial || m.isMeshPhysicalMaterial || m.isMeshMatcapMaterial || m.isMeshPhongMaterial || m.isMeshLambertMaterial)) {
+		return createTransporterUniforms();
+	}
+
 	const uniforms = createTransporterUniforms();
 	injectedMaterials.set(material, uniforms);
 
@@ -167,7 +173,8 @@ export function animateTransporterMeshes(
 	meshes: THREE.Mesh[],
 	direction: 'materialize' | 'dematerialize',
 	duration = 3000,
-	onComplete?: () => void
+	onComplete?: () => void,
+	onUpdate?: (cutoffY: number, bandWidth: number, progress: number) => void
 ): void {
 	const allUniforms = collectUniforms(meshes);
 	if (allUniforms.length === 0) {
@@ -182,9 +189,11 @@ export function animateTransporterMeshes(
 		box.expandByObject(mesh);
 	}
 
-	const bandWidth = allUniforms[0].uBandWidth.value;
 	const minY = box.min.y;
 	const maxY = box.max.y;
+	const modelHeight = maxY - minY;
+	// Scale bandWidth to ~8% of model height (works for both female ~200u and male ~2400u)
+	const bandWidth = Math.max(modelHeight * 0.08, 5);
 	const dir = direction === 'materialize' ? 1.0 : -1.0;
 
 	// Both directions sweep bottom-to-top; the GLSL branch controls which side is discarded
@@ -193,11 +202,12 @@ export function animateTransporterMeshes(
 
 	const proxy = { y: startY };
 
-	// Activate all uniforms
+	// Activate all uniforms with scaled bandWidth
 	for (const u of allUniforms) {
 		u.uTransDirection.value = dir;
 		u.uTransActive.value = 1.0;
 		u.uCutoffY.value = startY;
+		u.uBandWidth.value = bandWidth;
 	}
 
 	new TWEEN.Tween(proxy)
@@ -207,6 +217,8 @@ export function animateTransporterMeshes(
 			for (const u of allUniforms) {
 				u.uCutoffY.value = proxy.y;
 			}
+			const progress = (proxy.y - startY) / (endY - startY);
+			onUpdate?.(proxy.y, bandWidth, progress);
 		})
 		.onComplete(() => {
 			for (const u of allUniforms) {
