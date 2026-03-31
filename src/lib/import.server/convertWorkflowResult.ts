@@ -100,9 +100,11 @@ export function convertWorkflowResult(
           immunization_record: "immunization",
           dental_record: "dental",
         };
+        // Prefer feature-detection-derived category when available (more specific)
+        const featureCategory = featureDocumentType ? documentTypeToCategory[featureDocumentType] : undefined;
         return (
+          featureCategory ||
           workflowResult.report?.category ||
-          (featureDocumentType ? documentTypeToCategory[featureDocumentType] : undefined) ||
           "report"
         );
       })(),
