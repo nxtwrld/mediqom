@@ -576,7 +576,13 @@
                 } );
             })
 
-            // Animate re-shown meshes (already have shader injected from initial load)
+            // Re-inject transporter on meshes whose materials were cloned by checkObject
+            for (const mesh of meshesToRematerialize) {
+                const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                for (const mat of mats) injectTransporterEffect(mat as THREE.Material);
+            }
+
+            // Animate re-shown meshes
             if (meshesToRematerialize.length > 0) {
                 transporterActive++;
                 transporterMeshes = [...transporterMeshes, ...meshesToRematerialize];
@@ -590,6 +596,7 @@
             }
 
             // Inject transporter beam effect on newly loaded meshes and animate
+            // (Re-inject after checkObject which may have cloned materials for labeled objects)
             if (newObjects.length > 0) {
                 const newMeshes: THREE.Mesh[] = [];
                 for (const obj of newObjects as any[]) {
