@@ -1429,6 +1429,8 @@
         "heartRate": "Herzfrequenz",
         "heart_rate": "Herzfrequenz",
         "heart_rate_index": "Herzfrequenzindex",
+        "heart_rate_variability": "",
+        "resting_heart_rate": "",
         "height": "Höhe",
         "hematocrit": "Hämatokrit",
         "hemoglobin": "Hämoglobin",
@@ -1531,6 +1533,28 @@
         "no-chart-data": "Nicht genügend Datenpunkte für Diagramm",
         "no-entries": "Keine Einträge vorhanden",
         "save": "Speichern"
+      }
+    },
+    "health-connect": {
+      "title": "",
+      "description": "",
+      "enable": "",
+      "disable": "",
+      "sync-now": "",
+      "syncing": "",
+      "last-sync": "",
+      "sync-complete": "",
+      "permissions-denied": "",
+      "not-available": "",
+      "data-types": {
+        "heart-rate": "",
+        "resting-heart-rate": "",
+        "hrv": "",
+        "blood-pressure": "",
+        "blood-glucose": "",
+        "weight": "",
+        "height": "",
+        "body-fat": ""
       }
     },
     "insurance": {
@@ -2325,6 +2349,56 @@
     "timeline": {
       "no-data": "Keine Gesundheitsdaten verfügbar",
       "no-signals": "Keine Signale ausgewählt"
+    }
+  },
+  "www": {
+    "nav": {
+      "get-started": "Loslegen",
+      "login": "Anmelden"
+    },
+    "hero": {
+      "motto": "Alle Ihre Gesundheitsdaten in Ihren Händen",
+      "sub": "Medizinische Erfahrung ins 21. Jahrhundert bringen",
+      "get-started": "Kostenlos starten"
+    },
+    "download": {
+      "cta": "App herunterladen"
+    },
+    "profiles": {
+      "title": "Familien-Gesundheitszentrum",
+      "description": ""
+    },
+    "import": {
+      "title": "Jedes Dokument importieren",
+      "description": ""
+    },
+    "signals": {
+      "title": "Gesundheitssignal-Überwachung",
+      "description": ""
+    },
+    "timeline": {
+      "title": "Ihre Gesundheits-Zeitachse",
+      "description": ""
+    },
+    "weekly-plan": {
+      "title": "Wöchentlicher Gesundheitsplan",
+      "description": ""
+    },
+    "medications": {
+      "title": "Medikamentenverwaltung",
+      "description": ""
+    },
+    "imaging": {
+      "title": "Erweiterte Bildgebung",
+      "description": ""
+    },
+    "ai-chat": {
+      "title": "KI-Gesundheitsassistent",
+      "description": ""
+    },
+    "security": {
+      "title": "Ihre Daten, Ihre Kontrolle",
+      "description": ""
     }
   }
 }

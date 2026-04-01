@@ -8,8 +8,9 @@
 import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
+import { updateLanguage } from "$lib/ai/schema";
 import anatomyObjects from "$data/objects.json";
-import propertiesDefinition from "$data/lab.properties.defaults.json";
+import { getCatalog } from "$data/signal-catalog";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import {
@@ -277,8 +278,12 @@ export abstract class BaseProcessingNode {
       }
 
       // Populate empty bodyParts identification enum with valid 3D model objects
-      const schemaItems = (this.schema as any)?.items?.properties
+      // Check both direct array schema (core.bodyParts.ts) and FunctionDefinition wrapper (bodyparts.extraction.ts)
+      const directSchemaItems = (this.schema as any)?.items?.properties
         ?.identification;
+      const wrappedSchemaItems = (this.schema as any)?.parameters?.properties
+        ?.bodyParts?.items?.properties?.identification;
+      const schemaItems = directSchemaItems || wrappedSchemaItems;
       if (schemaItems?.enum && schemaItems.enum.length === 0) {
         // Extract all objects from anatomy object categories (these are valid 3D model objects)
         const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
@@ -296,7 +301,7 @@ export abstract class BaseProcessingNode {
         Array.isArray(signalSchema.enum) &&
         signalSchema.enum.length === 0
       ) {
-        const signalKeys = Object.keys(propertiesDefinition).filter(
+        const signalKeys = Object.keys(getCatalog()).filter(
           (key) => !STATIC_PROPERTIES.includes(key),
         );
         signalSchema.enum.push(...signalKeys);
@@ -344,9 +349,16 @@ export abstract class BaseProcessingNode {
     // Fallback to state.content if no text/images found
     const finalContent = content.length > 0 ? content : state.content || [];
 
+    // Replace [LANGUAGE] placeholders in schema descriptions with actual language
+    const language = state.language || "English";
+    const localizedSchema = updateLanguage(
+      JSON.parse(JSON.stringify(this.schema)),
+      language,
+    ) as FunctionDefinition;
+
     const result = await fetchGptEnhanced(
       finalContent,
-      this.schema,
+      localizedSchema,
       tokenUsage,
       state.language || "English",
       "extraction",

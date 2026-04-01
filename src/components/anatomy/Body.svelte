@@ -8,6 +8,8 @@
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
     import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
     import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
     import ui, { state } from '$lib/ui';
     import objects3d, { isObject } from '$lib/context/objects';
     import Label from '$components/documents/Label.svelte';
@@ -20,12 +22,17 @@
     //import type { Figure } from '$lib/user/profile';
     import type { Profile, SexEnum } from '$lib/types.d';
     import { groupByTags } from '$lib/documents/tools';
+    import { documents } from '$lib/documents';
     //import reports from '$lib/report/store';
     import shaders from './shaders';
+    import { createAuraShellMaterials } from './aura.shader';
+    import { createParticleSwarm, updateParticleSwarm, removeParticleSwarm } from './particle-swarm';
     import type { IContext } from './context/types.d';
     import contexts from './context/index';
 	import store from './store';
     import { createMuscleMaterial, createMuscleMatcapMaterial, isMuscularSystem } from './muscle-materials';
+    import { injectTransporterEffect, animateTransporterMeshes, updateTransporterTime } from './transporter.shader';
+    import { createTransporterRing, updateTransporterRing, removeTransporterRing, type TransporterRing } from './transporter-ring';
 	//import { linkPage } from '$lib/app';
     //import { addExperience } from '$lib/xp/store';
 	import { sounds } from '$components/ui/Sounds.svelte';
@@ -55,7 +62,22 @@
 */
 
     let FOCUS_COLOR = 0x16d3dd;
-    let HIGHLIGHT_COLOR = 0xe9a642;
+    let HIGHLIGHT_COLOR = 0xffbf40;
+
+    // Model version: 'v2' uses BodyParts3D GLB with Draco, 'v1' uses legacy OBJ/MTL
+    const MODEL_VERSION: 'v1' | 'v2' = 'v2';
+
+    // Shared GLTFLoader with Draco decoder (initialized once)
+    let gltfLoader: GLTFLoader | null = null;
+    function getGltfLoader(): GLTFLoader {
+        if (!gltfLoader) {
+            const dracoLoader = new DRACOLoader();
+            dracoLoader.setDecoderPath('/draco/');
+            gltfLoader = new GLTFLoader();
+            gltfLoader.setDRACOLoader(dracoLoader);
+        }
+        return gltfLoader;
+    }
         
     //console.log('🧍', 'Body', objects3d);
     //console.log('profile', $profile);
@@ -93,6 +115,17 @@
     // Avoids expensive scene.traverse() on every highlight call
     let focusableMeshes: THREE.Mesh[] = [];
 
+    // Aura glow effect state (multi-shell, no post-processing)
+    let auraMeshes: THREE.Mesh[] = [];
+    let auraShellMaterials: THREE.ShaderMaterial[] = [];
+    let auraActive = false;
+    const auraClock = new THREE.Clock(false);
+
+    // Transporter beam materialization effect state
+    let transporterActive = 0; // count of active transporter animations
+    let transporterMeshes: THREE.Mesh[] = []; // meshes with active transporter effect
+    let idleRings: TransporterRing[] = []; // rings waiting for objects to load
+
     const objectToFileMapping = Object.entries(objects3d).reduce((acc, [k,v]) => {
         v.objects.forEach(f => {
             acc[f] = k;
@@ -108,9 +141,10 @@
         //'cholesterol': 'heart',
     }
 //  TODO: switch offf
-    $: labels = getLabelsMap($profile);
+    $: labels = (void $documents, getLabelsMap($profile));
 
     function getLabelsMap($profile: Profile) {
+        if (!$profile?.id) return [];
 
         return Object.entries(groupByTags($profile.id))
         .filter(([k,v]) => {
@@ -404,6 +438,9 @@
 
         const unsubscribeProfileSwitch = ui.listen("chat:profile_switch", () => {
             if (!ready) return;
+            cleanupLabels(labels);
+            loadedLayers = [];
+            loadedFiles = [];
             resetFocus();
         });
 
@@ -422,6 +459,8 @@
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
             }
+
+            removeAuraMesh();
 
             // clear all three.js objects from the scene
             if (scene) clearObjects(scene);
@@ -487,23 +526,133 @@
     async function updateModel(filesToLoad: string[], objectsToShow: string[]) {
         try {
             //console.log('updateModel', filesToLoad, objectsToShow);
-            let newObjects = await Promise.all(filesToLoad.map((f: string) => loadObj({
-                id: f,
-                name: f
-            })));
+
+            // Collect visible meshes that are about to be hidden (for dematerialization)
+            const meshesToDematerialize: THREE.Mesh[] = [];
+            objects.forEach((object: any) => {
+                object.traverse((child: any) => {
+                    if (child.isMesh && child.visible && !objectsToShow.includes(child.name) && child.parent?.name !== 'shade_skin') {
+                        meshesToDematerialize.push(child);
+                    }
+                });
+            });
+
+            // Start dematerialization animation (meshes stay visible during animation)
+            if (meshesToDematerialize.length > 0) {
+                // Ensure all meshes have shader injected (they should from initial load)
+                for (const mesh of meshesToDematerialize) {
+                    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                    for (const mat of mats) injectTransporterEffect(mat as THREE.Material);
+                }
+                transporterActive++;
+                transporterMeshes = [...transporterMeshes, ...meshesToDematerialize];
+                const dRing = createTransporterRing(meshesToDematerialize, scene, shade);
+                requestRender();
+                animateTransporterMeshes(meshesToDematerialize, 'dematerialize', 3000, () => {
+                    for (const mesh of meshesToDematerialize) mesh.visible = false;
+                    transporterActive--;
+                    transporterMeshes = transporterMeshes.filter(m => !meshesToDematerialize.includes(m));
+                    removeTransporterRing(dRing);
+                    precacheMaterials();
+                    requestRender();
+                }, (y, bw, p) => updateTransporterRing(dRing, y, bw, p));
+            }
+
+            // Collect currently hidden meshes that will become visible (re-shown)
+            const meshesToRematerialize: THREE.Mesh[] = [];
+            objects.forEach((object: any) => {
+                object.traverse((child: any) => {
+                    if (child.isMesh && !child.visible && objectsToShow.includes(child.name) && child.parent?.name !== 'shade_skin') {
+                        meshesToRematerialize.push(child);
+                    }
+                });
+            });
+
+            // Create ring immediately as loading feedback (before await)
+            let preloadRing: TransporterRing | null = null;
+            if (filesToLoad.length > 0 && shade) {
+                preloadRing = createTransporterRing([], scene, shade);
+                // Position at bottom of body, fade in
+                preloadRing.material.uniforms.uFade.value = 1.0;
+                idleRings.push(preloadRing);
+                requestRender();
+            }
+
+            let newObjects = await Promise.all(filesToLoad.map((f: string) =>
+                MODEL_VERSION === 'v2'
+                    ? loadGlb({ id: f, name: f })
+                    : loadObj({ id: f, name: f })
+            ));
 
 
             let labelIds = [... new Set(labels.map(l => l.id))];
 
             insertObject(newObjects, objectsToShow, labelIds, group);
 
-
+            // Update visibility for all objects, but skip meshes being dematerialized
+            const dematerializeSet = new Set(meshesToDematerialize.map(m => m.uuid));
             objects.forEach(object => {
                 object.traverse( function ( child: any ) {
-                    // mark labeled objects
+                    if (dematerializeSet.has(child.uuid)) return;
                     checkObject(child, objectsToShow, labelIds);
                 } );
             })
+
+            // Re-inject transporter on meshes whose materials were cloned by checkObject
+            for (const mesh of meshesToRematerialize) {
+                const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                for (const mat of mats) injectTransporterEffect(mat as THREE.Material);
+            }
+
+            // Animate re-shown meshes
+            if (meshesToRematerialize.length > 0) {
+                transporterActive++;
+                transporterMeshes = [...transporterMeshes, ...meshesToRematerialize];
+                const reRing = createTransporterRing(meshesToRematerialize, scene, shade);
+                requestRender();
+                animateTransporterMeshes(meshesToRematerialize, 'materialize', 3000, () => {
+                    transporterActive--;
+                    transporterMeshes = transporterMeshes.filter(m => !meshesToRematerialize.includes(m));
+                    removeTransporterRing(reRing);
+                }, (y, bw, p) => updateTransporterRing(reRing, y, bw, p));
+            }
+
+            // Inject transporter beam effect on newly loaded meshes and animate
+            // (Re-inject after checkObject which may have cloned materials for labeled objects)
+            if (newObjects.length > 0) {
+                const newMeshes: THREE.Mesh[] = [];
+                for (const obj of newObjects as any[]) {
+                    obj.traverse((child: any) => {
+                        if (child.isMesh && child.material && child.parent?.name !== 'shade_skin') {
+                            const mats = Array.isArray(child.material) ? child.material : [child.material];
+                            for (const mat of mats) injectTransporterEffect(mat);
+                            newMeshes.push(child);
+                        }
+                    });
+                }
+                if (newMeshes.length > 0) {
+                    // Reuse preload ring or create new one
+                    const newRing = preloadRing || createTransporterRing(newMeshes, scene, shade);
+                    if (preloadRing) {
+                        idleRings = idleRings.filter(r => r !== preloadRing);
+                        preloadRing = null;
+                    }
+                    transporterActive++;
+                    transporterMeshes = [...transporterMeshes, ...newMeshes];
+                    animateTransporterMeshes(newMeshes, 'materialize', 3000, () => {
+                        transporterActive--;
+                        transporterMeshes = transporterMeshes.filter(m => !newMeshes.includes(m));
+                        removeTransporterRing(newRing);
+                    }, (y, bw, p) => updateTransporterRing(newRing, y, bw, p));
+                }
+            }
+
+            // Clean up preload ring if no new meshes ended up needing it
+            if (preloadRing) {
+                idleRings = idleRings.filter(r => r !== preloadRing);
+                removeTransporterRing(preloadRing);
+            }
+
             objects = [...objects, ...newObjects];
 
             // Pre-cache materials and build focusable mesh list for fast highlight()
@@ -765,6 +914,75 @@
         });
     }
 
+    /**
+     * Load a GLB system file (v2 BodyParts3D models with Draco compression).
+     * Returns a THREE.Group containing all meshes from the GLB, with mesh names
+     * matching the objects.json entries.
+     */
+    function loadGlb(setup: {
+            id: string,
+            name: string,
+            opacity?: number,
+        }): Promise<THREE.Group> {
+
+        return new Promise((resolve, reject) => {
+            setup = Object.assign({ opacity: DEFAULT_OPACITY }, setup);
+
+            const loader = getGltfLoader();
+            const url = `/anatomy_models_v2/${setup.id}.glb`;
+
+            loader.load(url, (gltf) => {
+                const wrapper = new THREE.Group();
+                wrapper.name = setup.name;
+
+                // GLB scene may have nested nodes; flatten all meshes into wrapper
+                gltf.scene.traverse((child: any) => {
+                    if (!child.isMesh) return;
+
+                    child.geometry.computeVertexNormals();
+
+                    // Apply muscle materials if this is the muscular system
+                    const useMuscle = isMuscularSystem(setup.id);
+                    if (useMuscle) {
+                        if (isTouchDevice() && muscleMatcapTexture) {
+                            child.material = createMuscleMatcapMaterial(child.name, muscleMatcapTexture);
+                        } else {
+                            child.material = createMuscleMaterial(child.name);
+                        }
+                    } else {
+                        // Ensure materials are transparent-capable
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach((m: THREE.Material) => {
+                                m.transparent = true;
+                                m.opacity = setup.opacity!;
+                            });
+                        } else if (child.material) {
+                            child.material.transparent = true;
+                            child.material.opacity = setup.opacity!;
+                        }
+                    }
+                });
+
+                // Re-parent meshes directly under wrapper
+                const meshes: THREE.Mesh[] = [];
+                gltf.scene.traverse((child: any) => {
+                    if (child.isMesh) meshes.push(child);
+                });
+                for (const mesh of meshes) {
+                    wrapper.add(mesh);
+                }
+
+                loadedFiles.push(setup.id);
+                resolve(wrapper);
+            },
+            undefined, // progress
+            (error) => {
+                console.error('🧍', 'GLB load error', setup.id, error);
+                reject(error);
+            });
+        });
+    }
+
 
     function cleanupLabels(labelsToClean: typeof labels) {
         for (const label of labelsToClean) {
@@ -874,6 +1092,9 @@
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.0;
         container.appendChild( renderer.domElement );
+
+        // Bloom post-processing — lazily initialized when aura activates
+        // (kept off by default to avoid alpha/background issues)
 
         // CSS2DRenderer
 
@@ -1102,18 +1323,37 @@
         const hasTweens = TWEEN.getAll().length > 0;
         const hasAnimation = !!(currentContext && currentContext.animation);
 
+        // Update aura shader time uniform on all shell materials
+        if (auraActive && auraShellMaterials.length) {
+            const t = auraClock.getElapsedTime();
+            for (const mat of auraShellMaterials) {
+                mat.uniforms.uTime.value = t;
+            }
+            // updateParticleSwarm();
+        }
+
+        // Update transporter beam time for sparkle animation
+        if (transporterActive > 0 && transporterMeshes.length > 0) {
+            updateTransporterTime(transporterMeshes);
+        }
+
+        // Update idle rings (waiting for objects to load)
+        for (const ring of idleRings) {
+            ring.material.uniforms.uTime.value = performance.now() / 1000;
+        }
+
         if (hasTweens) TWEEN.update();
         const controlsChanged = controls.update();
         if (hasAnimation) currentContext!.animation!.update();
 
-        if (controlsChanged || hasTweens || hasAnimation) {
+        if (controlsChanged || hasTweens || hasAnimation || auraActive || transporterActive > 0 || idleRings.length > 0) {
             render();
             idleFrames = 0;
         } else {
             idleFrames++;
         }
 
-        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation) {
+        if (idleFrames < MAX_IDLE_FRAMES || hasTweens || hasAnimation || auraActive || transporterActive > 0 || idleRings.length > 0) {
             animationFrameId = requestAnimationFrame(animate);
         } else {
             render(); // final clean frame
@@ -1122,7 +1362,9 @@
     }
 
     function render() {
-        if (renderer) renderer.render( scene, camera );
+        if (renderer) {
+            renderer.render( scene, camera );
+        }
         if (labelRenderer) labelRenderer.render( scene, camera );
     }
 
@@ -1314,6 +1556,52 @@
             }
     }
 
+    /**
+     * Creates 3 concentric glow shells per child mesh for a soft halo effect.
+     * No post-processing needed — shells use BackSide + AdditiveBlending.
+     */
+    function createAuraMesh(object: THREE.Object3D) {
+        removeAuraMesh();
+
+        auraShellMaterials = createAuraShellMaterials(new THREE.Color(HIGHLIGHT_COLOR));
+        auraClock.start();
+        auraActive = true;
+
+        object.traverse((child: any) => {
+            if (!child.isMesh) return;
+            for (let i = 0; i < auraShellMaterials.length; i++) {
+                const clone = child.clone();
+                clone.material = auraShellMaterials[i];
+                clone.renderOrder = 999 + i;
+                clone.raycast = () => {};
+                clone.name = `__aura_${i}__${child.name}`;
+                child.parent!.add(clone);
+                auraMeshes.push(clone);
+            }
+        });
+
+        // createParticleSwarm(object, scene, new THREE.Color(HIGHLIGHT_COLOR));
+        requestRender();
+    }
+
+    /**
+     * Removes all aura clone meshes and stops the clock.
+     */
+    function removeAuraMesh() {
+        // removeParticleSwarm();
+        for (const mesh of auraMeshes) {
+            mesh.parent?.remove(mesh);
+            mesh.geometry?.dispose();
+        }
+        auraMeshes = [];
+        for (const mat of auraShellMaterials) {
+            mat.dispose();
+        }
+        auraShellMaterials = [];
+        auraClock.stop();
+        auraActive = false;
+    }
+
     function highlight (object: THREE.Object3D | null) {
         // Restore previously selected object to unfocused state
         if (selected && selected !== object) {
@@ -1345,7 +1633,7 @@
             }
         }
 
-        // Highlight the target object
+        // Highlight the target object + aura glow
         if (object) {
             object.traverse((child: any) => {
                 if (child.isMesh && child.material) {
@@ -1353,6 +1641,9 @@
                     if (cached) child.material = cached.highlighted;
                 }
             });
+            createAuraMesh(object);
+        } else {
+            removeAuraMesh();
         }
     }
 

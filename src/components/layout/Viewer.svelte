@@ -3,7 +3,7 @@
 <script lang="ts">
     import Body from '$components/anatomy/Body.svelte';
     import { profile } from '$lib/profiles';
-    import objects from '$components/anatomy/objects.json';
+    import objects from '$lib/context/objects';
 	import { onDestroy, onMount } from 'svelte';
 	import Loading from '$components/ui/Loading.svelte';
     import { fade } from 'svelte/transition';
@@ -33,6 +33,14 @@
     
     let showShade: boolean = true;
     let modelLoaded: boolean = false;
+
+    // Reset layers and loading state when switching to a different profile
+    let lastProfileId: string | undefined = undefined;
+    $: if ($profile?.id && $profile.id !== lastProfileId) {
+        lastProfileId = $profile.id;
+        activeLayers = ['skeleton'];
+        modelLoaded = false;
+    }
 
     const layers: string[] = ['shade',...Object.keys(objects)];
     const tools: string[] = [
@@ -234,7 +242,7 @@
     .model-tools,
     .model-layers {
         --size: 3.5rem;
-        --radius: 0;
+        --radius: var(--radius-16);
         position: absolute;
         top: 1rem;
         left: 1rem;

@@ -31,6 +31,7 @@
       "lymphatic": "Lymphatic",
       "muscular": "Muscular",
       "nervous": "Nervous",
+      "organs": "Organs",
       "respiratory": "Respiratory",
       "shade": "Shade",
       "skeleton": "Skeleton",
@@ -946,7 +947,8 @@
       "low": "Low",
       "normal": "Normal",
       "high": "High"
-    }
+    },
+    "measurements": "measurements"
   },
   "click-here": "click here",
   "nav": {
@@ -1445,6 +1447,8 @@
         "heartRate": "Heart Rate",
         "heart_rate": "Heart Rate",
         "heart_rate_index": "Heart Rate Index",
+        "heart_rate_variability": "Heart Rate Variability",
+        "resting_heart_rate": "Resting Heart Rate",
         "height": "Height",
         "hematocrit": "Hematocrit",
         "hemoglobin": "Hemoglobin",
@@ -1547,6 +1551,28 @@
         "no-chart-data": "Not enough data points for chart",
         "no-entries": "No entries recorded",
         "save": "Save"
+      }
+    },
+    "health-connect": {
+      "title": "Health Data Sync",
+      "description": "Connect to Apple Health or Google Health Connect to automatically sync your health data.",
+      "enable": "Enable Health Sync",
+      "disable": "Disable Health Sync",
+      "sync-now": "Sync Now",
+      "syncing": "Syncing...",
+      "last-sync": "Last synced",
+      "sync-complete": "{count, plural, =0 {No new entries} one {1 entry synced} other {# entries synced}}",
+      "permissions-denied": "Health data permissions were denied. Please enable them in your device settings.",
+      "not-available": "Health data is not available on this device.",
+      "data-types": {
+        "heart-rate": "Heart Rate",
+        "resting-heart-rate": "Resting Heart Rate",
+        "hrv": "Heart Rate Variability",
+        "blood-pressure": "Blood Pressure",
+        "blood-glucose": "Blood Glucose",
+        "weight": "Weight",
+        "height": "Height",
+        "body-fat": "Body Fat Percentage"
       }
     },
     "insurance": {
@@ -2332,5 +2358,55 @@
     "night": "Night",
     "from-document": "From document",
     "extracted-medications": "From Documents"
+  },
+  "www": {
+    "nav": {
+      "get-started": "Get Started",
+      "login": "Login"
+    },
+    "hero": {
+      "motto": "All your health data in your hands",
+      "sub": "Bringing medical experience to the 21st century",
+      "get-started": "Get Started Free"
+    },
+    "download": {
+      "cta": "Get the App"
+    },
+    "profiles": {
+      "title": "Family Health Hub",
+      "description": "Manage health records for your entire family. Create individual profiles for each member — from children to elderly parents — and keep everything organized in one secure place."
+    },
+    "import": {
+      "title": "Import Any Document",
+      "description": "Upload lab results, prescriptions, discharge summaries, and imaging reports. Our AI automatically extracts structured data from PDFs, photos, and scanned documents — no manual entry needed."
+    },
+    "signals": {
+      "title": "Health Signal Monitoring",
+      "description": "Track vital signs, lab values, and health metrics over time. Spot trends and anomalies with intelligent alerts that highlight what matters most for your health."
+    },
+    "timeline": {
+      "title": "Your Health Timeline",
+      "description": "See your complete medical history on a single timeline. Reference ranges, trends, and correlations between different health markers — all visualized for easy understanding."
+    },
+    "weekly-plan": {
+      "title": "Weekly Health Plan",
+      "description": "Stay on top of medications, appointments, and health routines with a personalized weekly plan that adapts to your schedule and medical needs."
+    },
+    "medications": {
+      "title": "Medication Management",
+      "description": "Keep track of all your medications, dosages, and schedules. Get reminders and see potential interactions — all automatically extracted from your medical documents."
+    },
+    "imaging": {
+      "title": "Advanced Imaging",
+      "description": "View and annotate medical imaging results with our interactive 3D body model. Map findings directly to anatomical structures for intuitive understanding."
+    },
+    "ai-chat": {
+      "title": "AI Health Assistant",
+      "description": "Ask questions about your health data and get intelligent answers grounded in your actual medical records. Our AI understands your complete health context."
+    },
+    "security": {
+      "title": "Your Data, Your Control",
+      "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records."
+    }
   }
 }

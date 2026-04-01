@@ -308,10 +308,11 @@
         border-radius: var(--ui-radius-small);
         border: none;
         text-decoration: none;
-        font-size: 0.72rem;
+        font-size: 1rem;
         overflow: hidden;
         transition: background 0.15s;
         white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     @media (hover: hover) {

@@ -63,6 +63,7 @@
     // Import overlay state
     let importJobId: string | undefined = $state(undefined);
     let importAutoOpen = $state(false);
+    let importHasFiles = $state(false);
 
     // Chat state
     let currentProfile: Profile | null = $state(null);
@@ -497,6 +498,11 @@
                         typeof state === "object" &&
                         state.autoOpen
                     );
+                    importHasFiles = !!(
+                        state &&
+                        typeof state === "object" &&
+                        state.hasFiles
+                    );
                 }
                 if (state) {
                     location.hash = "#overlay-import";
@@ -504,6 +510,7 @@
                 } else {
                     importJobId = undefined;
                     importAutoOpen = false;
+                    importHasFiles = false;
                     $uiState.overlay = Overlay.none;
                     if (location.hash.indexOf("#overlay-") == 0) {
                         history.back();
@@ -748,7 +755,7 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            {#if importJobId || importAutoOpen}
+            {#if importJobId || importAutoOpen || importHasFiles}
                 <Import
                     jobId={importJobId}
                     autoOpen={importAutoOpen}

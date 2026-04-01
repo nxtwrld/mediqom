@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { select, scaleTime, scaleLinear, axisLeft, line, zoom as d3Zoom, zoomIdentity, type Selection, type ScaleTime, type ScaleLinear } from 'd3';
+    import { select, scaleTime, scaleLinear, axisLeft, line, area, curveNatural, curveMonotoneY, zoom as d3Zoom, zoomIdentity, type Selection, type ScaleTime, type ScaleLinear } from 'd3';
     import { onMount } from 'svelte';
     import { get } from 'svelte/store';
     import { t } from '$lib/i18n';
@@ -9,6 +9,7 @@
     import MedicationCard from '$components/medications/MedicationCard.svelte';
     import type { MedicationDocument, Medication } from '$lib/medications/types';
     import { dateTime } from '$lib/datetime';
+    import { computeQuantileBuckets, type QuantileBucket, type OutlierPoint } from '$lib/signals/quantile-bands';
 
     const LABEL_HEIGHT = 20;
 
@@ -46,6 +47,13 @@
         color: string;
     }
 
+    interface BucketSummary {
+        rawP10: number; rawP25: number; rawP50: number; rawP75: number; rawP90: number;
+        sampleCount: number;
+        bucketStart: Date; bucketEnd: Date;
+        unit: string;
+    }
+
     interface MenuState {
         visible: boolean;
         x: number;
@@ -54,6 +62,7 @@
         placement: 'top' | 'bottom';
         point: SignalSeries['values'][number] | null;
         series: SignalSeries | null;
+        bucketSummary?: BucketSummary | null;
     }
 
     interface Props {
@@ -110,14 +119,8 @@
         });
     }
 
-    $effect(() => {
-        // recompute packed lanes whenever medications change — stored in module var for render use
-        _packedLanes = packMedLanes(medications);
-        _numMedLanes = _packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0;
-    });
-
-    let _packedLanes: PackedMedLane[] = [];
-    let _numMedLanes = 0;
+    const _packedLanes = $derived(packMedLanes(medications));
+    const _numMedLanes = $derived(_packedLanes.length > 0 ? Math.max(..._packedLanes.map(p => p.lane)) + 1 : 0);
 
     // Dynamic margin based on medication lanes (left) and document zone (right)
     const margin = $derived({
@@ -146,8 +149,17 @@
     let focusedSeriesName: string | null = null;
     let lastAutoFocusedKey: string | null = null;
 
+    /** Stored quantile buckets per series name (populated during banding render) */
+    const seriesBucketsMap = new Map<string, QuantileBucket[]>();
+
+    function removeInspectDot() {
+        if (!svgElement) return;
+        select(svgElement).selectAll('.dot-bucket-inspect').remove();
+    }
+
     function closeMenu() {
         menu = { ...menu, visible: false };
+        removeInspectDot();
     }
 
     function closeMedMenu() {
@@ -156,6 +168,48 @@
 
     function highlightKey(h: typeof highlightedPoint): string | null {
         return h ? `${h.signalName}:${h.value}:${h.documentId ?? ''}` : null;
+    }
+
+    function isContinuousSource(point: SignalSeries['values'][number]): boolean {
+        const src = point.rawData?.source;
+        return src === 'healthkit' || src === 'health_connect';
+    }
+
+    function getBucketSizeMs(visibleSpanMs: number, pointCount: number): number | null {
+        if (visibleSpanMs <= 3 * 86400000) return null; // < 3 days → individual mode
+
+        const candidates = [
+            30 * 86400000,  // month
+            14 * 86400000,  // 2 weeks
+            7 * 86400000,   // week
+            86400000,       // day
+            6 * 3600000,    // 6 hours
+            3600000,        // 1 hour
+        ];
+
+        const MIN_SAMPLES = 3;
+        const MIN_BUCKETS = 3;
+
+        // Pick smallest bucket size that still gives enough samples per bucket
+        let chosen: number | null = null;
+        for (let i = candidates.length - 1; i >= 0; i--) {
+            const size = candidates[i];
+            const expectedBuckets = visibleSpanMs / size;
+            const avgSamples = pointCount / expectedBuckets;
+            if (avgSamples >= MIN_SAMPLES && expectedBuckets >= MIN_BUCKETS) {
+                chosen = size;
+                break;
+            }
+        }
+
+        // Fallback: if no candidate works, try largest bucket
+        if (!chosen && pointCount > 10) {
+            const largest = candidates[0];
+            const expectedBuckets = visibleSpanMs / largest;
+            if (expectedBuckets >= 2) chosen = largest;
+        }
+
+        return chosen;
     }
 
     function applyFocusStyles(focusedName: string | null) {
@@ -176,15 +230,35 @@
                 g.select<SVGPathElement>('path.series-line')
                  .style('stroke-width', focusedName && isFocused ? '6px' : null);
 
+                g.select<SVGPathElement>('path.series-band')
+                 .attr('opacity', isFocused ? 0.15 : 0.04);
+
+                g.select<SVGPathElement>('path.series-band-inner')
+                 .attr('opacity', isFocused ? 0.22 : 0.06);
+
                 g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
                  .attr('r', (d) => {
                      const isHL = highlightedPoint
                          && s.name === highlightedPoint.signalName
                          && Math.abs(d.value - highlightedPoint.value) < 0.001
                          && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
-                     const baseR = isHL ? 7 : 4;
+                     const baseR = isHL ? 10 : isContinuousSource(d) ? 4 : 6;
                      return focusedName && isFocused ? baseR * 1.5 : baseR;
+                 })
+                 .attr('opacity', (d) => {
+                     const isHL = highlightedPoint
+                         && s.name === highlightedPoint.signalName
+                         && Math.abs(d.value - highlightedPoint.value) < 0.001
+                         && (!highlightedPoint.documentId || d.documentId === highlightedPoint.documentId);
+                     if (isHL) return 1;
+                     return isContinuousSource(d) ? 0 : 1;
                  });
+
+                g.selectAll<SVGCircleElement, any>('.dot-outlier')
+                 .attr('opacity', isFocused ? 0.9 : 0.3);
+
+                g.selectAll<SVGCircleElement, any>('.dot-sparse')
+                 .attr('opacity', isFocused ? 0.4 : 0.1);
             });
     }
 
@@ -234,8 +308,101 @@
         applyFocusStyles(focusedSeriesName);
     }
 
+    function handleSeriesLineClickWithBucket(seriesName: string, clientY: number) {
+        const buckets = seriesBucketsMap.get(seriesName);
+        if (!buckets || buckets.length === 0 || !svgElement || !yBase) {
+            handleSeriesLineClick(seriesName);
+            return;
+        }
+
+        // Focus the series
+        focusedSeriesName = seriesName;
+        applyFocusStyles(focusedSeriesName);
+
+        // Convert clientY to timestamp
+        const svgRect = svgElement.getBoundingClientRect();
+        const currentTransform = select(svgElement).property('__zoom') ?? zoomIdentity;
+        const y = currentTransform.rescaleY(yBase);
+        const localY = clientY - svgRect.top - margin.top;
+        const clickDate = y.invert(localY);
+        const clickMs = clickDate.getTime();
+
+        // Find nearest bucket
+        let nearest = buckets[0];
+        let minDist = Math.abs(nearest.bucketMid - clickMs);
+        for (const b of buckets) {
+            const dist = Math.abs(b.bucketMid - clickMs);
+            if (dist < minDist) { nearest = b; minDist = dist; }
+        }
+
+        if (nearest.sampleCount === 0) {
+            handleSeriesLineClick(seriesName);
+            return;
+        }
+
+        // Find the series for label/unit info
+        const currentSeries = series.find(s => s.name === seriesName);
+        if (!currentSeries) return;
+
+        const unit = currentSeries.values[0]?.unit ?? '';
+
+        // Compute screen position
+        const width = svgElement.clientWidth - margin.left - margin.right;
+        const x = scaleLinear<number, number>().domain(xDomain).range([0, width]);
+        const dotScreenX = x(nearest.p50) + margin.left;
+        const dotScreenY = y(new Date(nearest.bucketMid)) + margin.top;
+
+        // Draw temporary inspect dot
+        removeInspectDot();
+        const chartMain = select(svgElement).select<SVGGElement>('g.chart-main');
+        chartMain.append('circle')
+            .attr('class', 'dot-bucket-inspect')
+            .attr('cx', x(nearest.p50))
+            .attr('cy', y(new Date(nearest.bucketMid)))
+            .attr('r', 7)
+            .attr('fill', currentSeries.color)
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.3))');
+
+        // Build a synthetic point for the menu
+        const syntheticPoint: SignalSeries['values'][number] = {
+            date: new Date(nearest.bucketMid),
+            value: nearest.rawP50,
+            normalized: nearest.p50,
+            unit,
+        };
+
+        const bucketSummary: BucketSummary = {
+            rawP10: nearest.rawP10,
+            rawP25: nearest.rawP25,
+            rawP50: nearest.rawP50,
+            rawP75: nearest.rawP75,
+            rawP90: nearest.rawP90,
+            sampleCount: nearest.sampleCount,
+            bucketStart: new Date(nearest.bucketStart),
+            bucketEnd: new Date(nearest.bucketEnd),
+            unit,
+        };
+
+        // Position popover
+        const chartWidth = svgElement.clientWidth;
+        const MENU_W = 260;
+        const MENU_H = 210;
+        const ARROW = 10;
+        const edgePad = 8;
+        const placement = (dotScreenY - margin.top) >= (MENU_H + ARROW) ? 'top' as const : 'bottom' as const;
+        const clampedX = Math.max(MENU_W / 2 + edgePad, Math.min(dotScreenX, chartWidth - MENU_W / 2 - edgePad));
+
+        medMenu = { ...medMenu, visible: false };
+        menu = { visible: true, x: clampedX, y: dotScreenY, dotX: dotScreenX, placement, point: syntheticPoint, series: currentSeries, bucketSummary };
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function renderDynamic(y: ScaleTime<number, number>, data: SignalSeries[], highlighted: typeof highlightedPoint, width: number, height: number, x: ScaleLinear<number, number>, axisGroup: Selection<SVGGElement, any, any, any>, zebraGroup: Selection<SVGGElement, any, any, any>, seriesContainer: Selection<SVGGElement, any, any, any>) {
+        // Remove inspect dot on re-render (zoom/pan clears it)
+        removeInspectDot();
+
         function isHighlighted(s: SignalSeries, d: SignalSeries['values'][number]): boolean {
             if (!highlighted) return false;
             if (s.name !== highlighted.signalName) return false;
@@ -310,6 +477,7 @@
 
         // Series lines + dots
         const valueLine = line<{ date: Date; normalized: number }>()
+            .curve(curveMonotoneY)
             .x(d => x(d.normalized))
             .y(d => y(d.date));
 
@@ -329,48 +497,293 @@
             const sorted = [...s.values].sort((a, b) => a.date.getTime() - b.date.getTime());
             const currentSeries = s;
 
-            if (sorted.length > 1) {
-                g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
-                    .attr('class', 'series-line')
-                    .attr('stroke', s.color)
-                    .attr('d', valueLine(sorted) ?? '')
-                    .style('cursor', 'pointer');
-            } else {
-                g.selectAll('path.series-line').remove();
+            // Split by source type
+            const continuousPoints = sorted.filter(d => isContinuousSource(d));
+            const documentPoints = sorted.filter(d => !isContinuousSource(d));
+
+            // Determine banding mode from visible time span
+            const yDomain = y.domain() as Date[];
+            const visibleSpanMs = Math.abs(yDomain[0].getTime() - yDomain[1].getTime());
+            const bucketMs = continuousPoints.length > 10 ? getBucketSizeMs(visibleSpanMs, continuousPoints.length) : null;
+            let useBanding = bucketMs !== null && continuousPoints.length > 0;
+
+            if (useBanding) {
+                // === QUANTILE BAND MODE ===
+                const domainStartMs = Math.min(yDomain[0].getTime(), yDomain[1].getTime());
+
+                // Build input for quantile computation
+                const qInput = continuousPoints.map(p => ({
+                    timestamp: p.date.getTime(),
+                    value: p.value,
+                    normalizedValue: p.normalized,
+                    original: p,
+                }));
+
+                const { buckets: qBuckets, outliers: qOutliers, sparseOriginals } = computeQuantileBuckets(
+                    qInput, bucketMs!, domainStartMs, s.name
+                );
+
+                // Store buckets for click-to-inspect
+                seriesBucketsMap.set(s.name, qBuckets);
+
+                // Split buckets: median line from all with data, bands only from statistically meaningful
+                const medianBuckets = qBuckets.filter(b => b.sampleCount >= 1);
+                const bandBuckets = qBuckets.filter(b => b.sampleCount >= 3);
+
+                // Fallback: if not enough buckets for even a median line, drop to individual mode
+                if (medianBuckets.length < 2) {
+                    // Clean up band elements and fall through to individual mode
+                    g.selectAll('path.series-band').remove();
+                    g.selectAll('path.series-band-inner').remove();
+                    g.selectAll('.dot-outlier').remove();
+                    g.selectAll('.dot-sparse').remove();
+                    useBanding = false;
+                }
+
+                if (useBanding) {
+
+                // Band opacity based on average sample count
+                const avgSamples = bandBuckets.length > 0
+                    ? bandBuckets.reduce((acc, b) => acc + b.sampleCount, 0) / bandBuckets.length
+                    : 0;
+                const outerOpacity = avgSamples >= 8 ? 0.12 : 0.08;
+                const innerOpacity = avgSamples >= 8 ? 0.18 : 0.12;
+
+                // Outer band: p10→p90 (only from buckets with >= 3 samples)
+                const outerBandGen = area<QuantileBucket>()
+                    .curve(curveMonotoneY)
+                    .x0(d => x(d.p10))
+                    .x1(d => x(d.p90))
+                    .y(d => y(new Date(d.bucketMid)));
+
+                if (bandBuckets.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-band').data([null]).join('path')
+                        .attr('class', 'series-band')
+                        .attr('fill', s.color)
+                        .attr('opacity', outerOpacity)
+                        .attr('d', outerBandGen(bandBuckets) ?? '');
+                } else {
+                    g.selectAll('path.series-band').remove();
+                }
+
+                // Inner band: p25→p75 (only from buckets with >= 3 samples)
+                const innerBandGen = area<QuantileBucket>()
+                    .curve(curveMonotoneY)
+                    .x0(d => x(d.p25))
+                    .x1(d => x(d.p75))
+                    .y(d => y(new Date(d.bucketMid)));
+
+                if (bandBuckets.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-band-inner').data([null]).join('path')
+                        .attr('class', 'series-band-inner')
+                        .attr('fill', s.color)
+                        .attr('opacity', innerOpacity)
+                        .attr('d', innerBandGen(bandBuckets) ?? '');
+                } else {
+                    g.selectAll('path.series-band-inner').remove();
+                }
+
+                // Remove old sparse dots rendering (replaced by sparseOriginals in visibleDots)
+                g.selectAll('.dot-sparse').remove();
+
+                // Median line from ALL buckets with data (>= 1 sample)
+                const medianLine = line<QuantileBucket>()
+                    .curve(curveMonotoneY)
+                    .x(d => x(d.p50))
+                    .y(d => y(new Date(d.bucketMid)));
+
+                if (medianBuckets.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                        .attr('class', 'series-line')
+                        .attr('stroke', s.color)
+                        .attr('d', medianLine(medianBuckets) ?? '')
+                        .style('cursor', 'pointer');
+                } else {
+                    g.selectAll('path.series-line').remove();
+                }
+
+                // Outlier dots — always visible, severity-based size
+                const outlierDotData = qOutliers.map(o => ({
+                    ...(o.original as SignalSeries['values'][number]),
+                    _severity: o.severity,
+                    _outlierKind: o.kind,
+                }));
+
+                // Document-source dots + highlighted continuous + sparse originals
+                const highlightedContinuous = continuousPoints.filter(d => isHighlighted(currentSeries, d));
+                const outlierOriginals = new Set(qOutliers.map(o => o.original));
+                const sparseSet = new Set(sparseOriginals);
+                const highlightedNonOutlier = highlightedContinuous.filter(d => !outlierOriginals.has(d) && !sparseSet.has(d));
+                const sparseDotPoints = sparseOriginals as SignalSeries['values'][number][];
+                const visibleDots = [...documentPoints, ...highlightedNonOutlier, ...sparseDotPoints];
+
+                function dotRadius(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 10;
+                    return isContinuousSource(d) ? 4 : 6;
+                }
+
+                function dotOpacity(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 1;
+                    return isContinuousSource(d) ? 0.5 : 1;
+                }
+
+                // Regular dots (document-source + highlighted)
+                g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                    .data(visibleDots, d => `${d.date.getTime()}-${d.value}`)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'dot')
+                            .on('mouseover', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', 9)
+                                        .attr('opacity', 1)
+                                        .style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                                }
+                            })
+                            .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', dotRadius(d))
+                                        .attr('opacity', dotOpacity(d))
+                                        .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                }
+                            }),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                    .attr('r', d => dotRadius(d))
+                    .attr('fill', s.color)
+                    .attr('opacity', d => dotOpacity(d))
+                    .attr('stroke', d => isContinuousSource(d) ? 'none' : 'white')
+                    .attr('stroke-width', d => {
+                        if (isHighlighted(currentSeries, d)) return 2;
+                        return isContinuousSource(d) ? 0 : 1.5;
+                    })
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+
+                // Outlier dots — distinct styling, severity-based size
+                function outlierRadius(d: typeof outlierDotData[number]): number {
+                    if (isHighlighted(currentSeries, d)) return 10;
+                    // Severity 1.5 → 5px, severity 3+ → 9px
+                    return Math.min(9, Math.max(5, 3 + d._severity * 2));
+                }
+
+                g.selectAll<SVGCircleElement, typeof outlierDotData[number]>('.dot-outlier')
+                    .data(outlierDotData, d => `${d.date.getTime()}-${d.value}`)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'dot dot-outlier')
+                            .on('mouseover', function(_event: MouseEvent, d: typeof outlierDotData[number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', 9)
+                                        .attr('opacity', 1)
+                                        .style('filter', 'drop-shadow(0 0 6px rgba(0,0,0,0.4))');
+                                }
+                            })
+                            .on('mouseout', function(_event: MouseEvent, d: typeof outlierDotData[number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', outlierRadius(d))
+                                        .attr('opacity', 0.9)
+                                        .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.3))');
+                                }
+                            }),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                    .attr('r', d => outlierRadius(d))
+                    .attr('fill', s.color)
+                    .attr('opacity', 0.9)
+                    .attr('stroke', 'white')
+                    .attr('stroke-width', 1.5)
+                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.3))');
+
+                // Ensure dots render above bands/lines
+                g.selectAll('.dot').raise();
+                g.selectAll('.dot-outlier').raise();
+
+                } // end if (useBanding) — inner block
+            } // end if (useBanding) — outer block
+
+            if (!useBanding) {
+                // === INDIVIDUAL MODE (current behavior) ===
+                seriesBucketsMap.delete(s.name);
+                g.selectAll('path.series-band').remove();
+                g.selectAll('path.series-band-inner').remove();
+                g.selectAll('.dot-outlier').remove();
+                g.selectAll('.dot-sparse').remove();
+
+                if (sorted.length > 1) {
+                    g.selectAll<SVGPathElement, null>('path.series-line').data([null]).join('path')
+                        .attr('class', 'series-line')
+                        .attr('stroke', s.color)
+                        .attr('d', valueLine(sorted) ?? '')
+                        .style('cursor', 'pointer');
+                } else {
+                    g.selectAll('path.series-line').remove();
+                }
+
+                function dotRadius(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 10;
+                    return isContinuousSource(d) ? 4 : 6;
+                }
+
+                function dotOpacity(d: SignalSeries['values'][number]): number {
+                    if (isHighlighted(currentSeries, d)) return 1;
+                    return isContinuousSource(d) ? 0 : 1;
+                }
+
+                g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
+                    .data(sorted, d => `${d.date.getTime()}-${d.value}`)
+                    .join(
+                        enter => enter.append('circle')
+                            .attr('class', 'dot')
+                            .on('mouseover', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', 9)
+                                        .attr('opacity', 1)
+                                        .style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
+                                }
+                            })
+                            .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
+                                if (isHoverDevice) {
+                                    select(this)
+                                        .attr('r', dotRadius(d))
+                                        .attr('opacity', dotOpacity(d))
+                                        .style('filter', isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                }
+                            }),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
+                    .attr('r', d => dotRadius(d))
+                    .attr('fill', s.color)
+                    .attr('opacity', d => dotOpacity(d))
+                    .attr('stroke', d => isContinuousSource(d) ? 'none' : 'white')
+                    .attr('stroke-width', d => {
+                        if (isHighlighted(currentSeries, d)) return 2;
+                        return isContinuousSource(d) ? 0 : 1.5;
+                    })
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+
+                // Ensure dots render above the line
+                g.selectAll('.dot').raise();
             }
 
+            // Highlight rings — always individual, unchanged
             g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot-highlight-ring')
                 .data(sorted.filter(d => isHighlighted(currentSeries, d)), d => `${d.date.getTime()}-${d.value}`)
                 .join('circle')
                 .attr('class', 'dot-highlight-ring')
                 .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', 11).attr('fill', 'none')
+                .attr('r', 16).attr('fill', 'none')
                 .attr('stroke', s.color).attr('stroke-width', 2).attr('opacity', 0.5);
-
-            g.selectAll<SVGCircleElement, SignalSeries['values'][number]>('.dot')
-                .data(sorted, d => `${d.date.getTime()}-${d.value}`)
-                .join(
-                    enter => enter.append('circle')
-                        .attr('class', 'dot')
-                        .on('mouseover', function() {
-                            if (isHoverDevice) select(this).attr('r', 6).style('filter', 'drop-shadow(0 0 4px rgba(0,0,0,0.35))');
-                        })
-                        .on('mouseout', function(_event: MouseEvent, d: SignalSeries['values'][number]) {
-                            if (isHoverDevice) {
-                                select(this)
-                                    .attr('r', isHighlighted(currentSeries, d) ? 7 : 4)
-                                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
-                            }
-                        })
-                        ,
-                    update => update,
-                    exit => exit.remove()
-                )
-                .attr('cx', d => x(d.normalized)).attr('cy', d => y(d.date))
-                .attr('r', d => isHighlighted(currentSeries, d) ? 7 : 4)
-                .attr('fill', s.color)
-                .attr('stroke', 'white')
-                .attr('stroke-width', d => isHighlighted(currentSeries, d) ? 2 : 1.5);
         });
 
         // Medication lanes — rendered in the left margin area
@@ -404,7 +817,7 @@
                         .attr('class', 'med-dot')
                         .attr('cx', laneX + LANE_WIDTH / 2)
                         .attr('cy', y(d.item.startDate))
-                        .attr('r', 5)
+                        .attr('r', 7)
                         .style('fill', `var(--color-categ1-${d.colorIndex})`)
                         .attr('stroke', 'white')
                         .attr('stroke-width', 1.5)
@@ -434,8 +847,10 @@
                             .attr('class', 'med-ongoing')
                             .attr('x1', centerX).attr('x2', centerX)
                             .attr('y1', yTop).attr('y2', 0)
-                            .style('stroke', `var(--color-categ1-${d.colorIndex})`).attr('stroke-width', 1.5)
-                            .attr('stroke-dasharray', '4 3')
+                            .style('stroke', `var(--color-categ1-${d.colorIndex})`)
+                            .attr('stroke-width', 5.5)
+                            .attr('line-cap', 'round')
+                            .attr('stroke-dasharray', '5 3')
                             .attr('opacity', 0.6);
                     } else {
                         g.selectAll('line.med-ongoing').remove();
@@ -650,6 +1065,7 @@
         function dismissAll() {
             menu = { ...menu, visible: false };
             medMenu = { ...medMenu, visible: false };
+            removeInspectDot();
             focusedSeriesName = null;
             lastAutoFocusedKey = highlightKey(highlightedPoint);
             applyFocusStyles(null);
@@ -711,7 +1127,14 @@
                 } else if (capturedTarget.classList.contains('series-line')) {
                     const seriesG = capturedTarget.closest('g.series');
                     const s = seriesG ? select(seriesG).datum() as SignalSeries : null;
-                    if (s) { handleSeriesLineClick(s.name); suppressNextClick(); }
+                    if (s) {
+                        if (seriesBucketsMap.has(s.name)) {
+                            handleSeriesLineClickWithBucket(s.name, e.clientY);
+                        } else {
+                            handleSeriesLineClick(s.name);
+                        }
+                        suppressNextClick();
+                    }
                 } else if (capturedTarget.classList.contains('med-bar')
                            || capturedTarget.classList.contains('med-dot')
                            || capturedTarget.closest('.med-item')) {
@@ -814,6 +1237,29 @@
         arrowOffset={menu.dotX - menu.x}
         onclose={closeMenu}
     >
+        {#if menu.bucketSummary}
+            {@const bs = menu.bucketSummary}
+            <div class="dot-menu-content">
+                <div class="dot-menu-header">
+                    <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
+                    <div class="dot-menu-date">
+                        {bs.bucketStart.toLocaleDateString('default', { month: 'short', day: 'numeric' })}–{bs.bucketEnd.toLocaleDateString('default', { month: 'short', day: 'numeric' })}
+                    </div>
+                </div>
+                <hr class="dot-menu-divider" />
+                <div class="bucket-summary">
+                    <div class="bucket-median">
+                        <span class="bucket-median-value">{Math.round(bs.rawP50 * 10) / 10}</span>
+                        {#if bs.unit}<span class="bucket-median-unit">{bs.unit}</span>{/if}
+                    </div>
+                    <div class="bucket-range">
+                        {Math.round(bs.rawP10 * 10) / 10}–{Math.round(bs.rawP90 * 10) / 10}
+                        {#if bs.unit}<span class="bucket-range-unit">{bs.unit}</span>{/if}
+                    </div>
+                    <div class="bucket-count">{bs.sampleCount} {$t('charts.measurements')}</div>
+                </div>
+            </div>
+        {:else}
         <div class="dot-menu-content">
             <div class="dot-menu-header">
                 <h4 class="h4 dot-menu-title">{menu.series.label}</h4>
@@ -831,8 +1277,10 @@
                 labels={false}
                 showValue={true}
             />
+            {:else}
+                <div class="dot-menu-value">{menu.point.value}{menu.point.unit ? ` ${menu.point.unit}` : ''}</div>
             {/if}
-            <hr class="dot-menu-divider" />
+            <hr class="dot-menu-divider" /><br/>
             {#if menu.point.documentId && profileId}
                 <a
                     class="button"
@@ -842,6 +1290,10 @@
                 >
                     {$t('app.documents.view-document')}
                 </a>
+            {:else if menu.point.rawData?.source}
+                <div class="dot-menu-source">
+                    <span class="source-label">{menu.point.rawData.source === 'healthkit' ? 'Apple Health' : menu.point.rawData.source === 'health_connect' ? 'Health Connect' : menu.point.rawData.source}</span>
+                </div>
             {/if}
             <AskButton
                 className="button"
@@ -852,6 +1304,7 @@
                 documentTitle={menu.point.documentTitle}
             />
         </div>
+        {/if}
     </Popover>
     {/if}
 
@@ -914,15 +1367,41 @@
 
     .chart-wrap svg :global(.series-line) {
         fill: none;
-        stroke-width: 4px;
+        stroke-width: 2px;
         opacity: 0.8;
         cursor: pointer;
+    }
+
+    .chart-wrap svg :global(.series-band),
+    .chart-wrap svg :global(.series-band-inner) {
+        pointer-events: none;
+        transition: opacity 0.3s ease;
     }
 
     .chart-wrap svg :global(.dot) {
         filter: drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2));
         cursor: pointer;
-        transition: r 0.15s ease;
+        transition: r 0.15s ease, opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.dot-outlier) {
+        cursor: pointer;
+        transition: r 0.15s ease, opacity 0.15s ease;
+    }
+
+    .chart-wrap svg :global(.dot-sparse) {
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .chart-wrap svg :global(.dot-bucket-inspect) {
+        pointer-events: none;
+        animation: inspect-pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes inspect-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
     }
 
     .chart-wrap svg :global(.dot-highlight-ring) {
@@ -995,12 +1474,20 @@
     }
 
     .dot-menu-header {
-        padding: 0.4rem 0.5rem 0.2rem;
+        padding: 0 0 .5rem 0;
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
     }
+    .dot-menu-header  > .h4 {
+        margin: 0;
+    }
 
+    .dot-menu-value {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
 
     .dot-menu-date {
         font-size: 0.7rem;
@@ -1018,12 +1505,59 @@
         margin: 0.1rem 0;
     }
 
-    .dot-menu-content :global(.range.-value) {
-        padding-top: 1.6rem;
+
+    .dot-menu-source {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        padding: 0.2rem 0;
+    }
+
+    .dot-menu-source .source-label {
+        font-weight: 600;
     }
 
     .dot-menu-content a.button {
         text-decoration: none;
+    }
+
+    /* Bucket summary popover */
+    .bucket-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.25rem 0;
+    }
+
+    .bucket-median {
+        display: flex;
+        align-items: baseline;
+        gap: 0.3rem;
+    }
+
+    .bucket-median-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+
+    .bucket-median-unit {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+    }
+
+    .bucket-range {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+    }
+
+    .bucket-range-unit {
+        font-size: 0.7rem;
+    }
+
+    .bucket-count {
+        font-size: 0.7rem;
+        color: var(--color-text-secondary);
+        margin-top: 0.15rem;
     }
 
     /* Medication zone */

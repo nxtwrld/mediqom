@@ -1,0 +1,42 @@
+{
+  "totalMeshFiles": 2234,
+  "assignedFiles": 2190,
+  "unassignedFiles": 44,
+  "systems": {
+    "skeleton": {
+      "label": "Skeletal System",
+      "concepts": 413,
+      "meshFiles": 262
+    },
+    "muscular": {
+      "label": "Muscular System",
+      "concepts": 721,
+      "meshFiles": 459
+    },
+    "vascular": {
+      "label": "Vascular System",
+      "concepts": 1132,
+      "meshFiles": 1037
+    },
+    "nervous": {
+      "label": "Nervous System",
+      "concepts": 156,
+      "meshFiles": 95
+    },
+    "organs": {
+      "label": "Internal Organs",
+      "concepts": 2792,
+      "meshFiles": 2106
+    },
+    "skin": {
+      "label": "Integumentary",
+      "concepts": 3,
+      "meshFiles": 1
+    },
+    "lymphatic": {
+      "label": "Lymphatic System",
+      "concepts": 7,
+      "meshFiles": 2
+    }
+  }
+}

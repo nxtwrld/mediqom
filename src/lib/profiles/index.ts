@@ -132,7 +132,7 @@ async function enrichProfilesWithDocuments(
               const roots = (await decryptDocumentsNoStore(
                 rootsEncrypted,
               )) as Document[];
-              return mapProfileData(d, roots);
+              return await mapProfileData(d, roots);
             },
           );
           return (
@@ -257,7 +257,7 @@ export function updateProfile(p: Profile) {
   }
 }
 
-export function mapProfileData(core: ProfileCore, roots: Document[]): Profile {
+export async function mapProfileData(core: ProfileCore, roots: Document[]): Promise<Profile> {
   let profileDoc: any = null,
     health: any = null,
     profileDocumentId: string | null = null,
@@ -298,6 +298,21 @@ export function mapProfileData(core: ProfileCore, roots: Document[]): Profile {
 
   if (health) {
     profileData.health = health;
+  }
+
+  if (import.meta.env.DEV) {
+    try {
+      const { generateMockSignals } = await import('$lib/capacitor/health-mock-plugin');
+      profileData.health = {
+        ...profileData.health,
+        signals: {
+          ...generateMockSignals(),
+          ...(profileData.health?.signals || {})
+        }
+      };
+    } catch {
+      // Mock signals not critical — skip silently
+    }
   }
 
   if (profileData.vcard?.fn) {

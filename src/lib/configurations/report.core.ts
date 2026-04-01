@@ -16,12 +16,13 @@ export default {
       category: {
         type: "string",
         description:
-          "Select proper classification of the nature of the report. If the report is not in the list, use general. Laboratory is for lab results, vital-signs for vital signs reports, imaging for medical imaging reports, exam for medical examination reports (probably most GP reports), procedure for medical procedure reports like surgery etc., medication for medication reports, social-history for social history reports, survey for survey reports, therapy for physio therapy and rehabilitation reports, activity for activity reports, other for other reports.",
+          "Select proper classification of the nature of the report. If the report is not in the list, use general. Laboratory is for lab results, vital-signs for vital signs reports, imaging for medical imaging reports, dental for dental records and dental X-rays, exam for medical examination reports (probably most GP reports), procedure for medical procedure reports like surgery etc., medication for medication reports, social-history for social history reports, survey for survey reports, therapy for physio therapy and rehabilitation reports, activity for activity reports, other for other reports.",
         enum: [
           "general",
           "laboratory",
           "vital-signs",
           "imaging",
+          "dental",
           "exam",
           "procedure",
           "medication",

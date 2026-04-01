@@ -8,7 +8,7 @@ export default {
       identification: {
         type: "string",
         description:
-          "Main body part from 3D model. MUST use lateralized names for paired structures (L_humerus, R_femur, L_patella, etc.). Only select from provided enum items - these are valid 3D model objects. For bilateral findings, create separate entries with L_ and R_ prefixes. Do not create new identification outside the provided list.",
+          "Main body part from 3D model. MUST use lateralized names for paired structures (e.g. left_humerus, right_femur, left_patella). Only select from provided enum items - these are valid 3D model objects. For bilateral findings, create separate entries with left_ and right_ prefixes. Do not create new identification outside the provided list.",
         enum: [],
       },
       part: {

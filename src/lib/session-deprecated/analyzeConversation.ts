@@ -3,7 +3,7 @@ import { error } from "@sveltejs/kit";
 import transcript from "./session.transcript";
 import { DIAGNOSIS_CONFIGS } from "$lib/configurations/session.diagnosis";
 import tags from "$lib/configurations/tags";
-import propertiesDefition from "$data/lab.properties.defaults.json";
+import { getAllKeys } from "$data/signal-catalog";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import { type Content, type TokenUsage } from "$lib/ai/types.d";
 import signals from "$lib/configurations/core.signals";
@@ -122,7 +122,7 @@ interface ExtendedFunctionDefinition extends FunctionDefinition {
 
 // @ts-expect-error - Deprecated code, type workaround for legacy signal enum
 ((signals as ExtendedFunctionDefinition).items!.properties.signal
-  .enum as string[]) = Object.keys(propertiesDefition);
+  .enum as string[]) = getAllKeys();
 // Only add signals to diagnosis schema if it has the signals property
 if (
   (diagnosis as ExtendedFunctionDefinition).parameters?.properties &&

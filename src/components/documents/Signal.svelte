@@ -1,6 +1,7 @@
 <script lang="ts">
     import SignalDetail from "./SignalDetail.svelte";
-    import defaults from '$data/lab.properties.defaults.json';
+    import { getCatalog } from '$data/signal-catalog';
+    const defaults = getCatalog();
     import ui from '$lib/ui';
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';

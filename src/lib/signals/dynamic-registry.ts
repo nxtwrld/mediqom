@@ -3,7 +3,7 @@
 
 import type { SignalContext, SignalValidation } from "$lib/langgraph/state";
 import type { SignalDefinition } from "./migration";
-import propertiesDefinition from "$data/lab.properties.defaults.json";
+import { getCatalog, type SignalCatalogEntry } from "$data/signal-catalog";
 
 export interface DynamicSignalCandidate {
   name: string;
@@ -99,36 +99,41 @@ export class DynamicSignalRegistry {
    * Load existing static catalog as base knowledge
    */
   private loadStaticCatalog(): void {
-    console.log("🔄 Loading static signal catalog...");
+    const catalog = getCatalog();
 
-    for (const [signalName, definition] of Object.entries(
-      propertiesDefinition as any,
-    )) {
-      const def = definition as any;
+    for (const [signalName, entry] of Object.entries(catalog)) {
+      const catalogEntry = entry as SignalCatalogEntry;
+      // Extract reference range min/max from first adult "any" range
+      let min: number | undefined;
+      let max: number | undefined;
+      let reference = "";
+      if (catalogEntry.referenceRange?.length) {
+        const adultRange = catalogEntry.referenceRange.find(
+          (r: any) => r.sex === "any" && r.ageRange?.min >= 18,
+        ) ?? catalogEntry.referenceRange[0];
+        if (adultRange) {
+          if (typeof adultRange.low === "number") min = adultRange.low;
+          if (typeof adultRange.high === "number") max = adultRange.high;
+          reference = min != null ? (max != null ? `${min}-${max}` : `${min}-`) : "";
+        }
+      }
+
       const signalDef: SignalDefinition = {
         name: signalName,
-        description: def.description || signalName,
-        unit: def.unit || "",
-        normalRange: {
-          min: def.min,
-          max: def.max,
-          reference: def.reference || "",
-        },
-        category: def.category || "laboratory",
-        synonyms: def.synonyms || [],
+        description: catalogEntry.description || signalName,
+        unit: catalogEntry.unit || "",
+        normalRange: { min, max, reference },
+        category: catalogEntry.category || "laboratory",
+        synonyms: catalogEntry.synonyms || [],
       };
 
       this.knownSignals.set(this.normalizeSignalName(signalName), signalDef);
 
-      // Index synonyms
-      if (def.synonyms) {
-        def.synonyms.forEach((synonym: string) => {
-          this.knownSignals.set(this.normalizeSignalName(synonym), signalDef);
-        });
+      // Index synonyms from catalog
+      for (const synonym of catalogEntry.synonyms) {
+        this.knownSignals.set(this.normalizeSignalName(synonym), signalDef);
       }
     }
-
-    console.log(`✅ Loaded ${this.knownSignals.size} known signals`);
   }
 
   /**

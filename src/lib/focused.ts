@@ -21,6 +21,7 @@ ui.listen(
           object: string;
         },
   ) => {
+    console.log("[focused] viewer:anatomy event:", object);
     if (typeof object == "object") focused.set(object);
   },
 );
