@@ -20,6 +20,7 @@
     //import type { Figure } from '$lib/user/profile';
     import type { Profile, SexEnum } from '$lib/types.d';
     import { groupByTags } from '$lib/documents/tools';
+    import { documents } from '$lib/documents';
     //import reports from '$lib/report/store';
     import shaders from './shaders';
     import { createAuraShellMaterials } from './aura.shader';
@@ -123,7 +124,7 @@
         //'cholesterol': 'heart',
     }
 //  TODO: switch offf
-    $: labels = getLabelsMap($profile);
+    $: labels = (void $documents, getLabelsMap($profile));
 
     function getLabelsMap($profile: Profile) {
         if (!$profile?.id) return [];
@@ -420,6 +421,9 @@
 
         const unsubscribeProfileSwitch = ui.listen("chat:profile_switch", () => {
             if (!ready) return;
+            cleanupLabels(labels);
+            loadedLayers = [];
+            loadedFiles = [];
             resetFocus();
         });
 
