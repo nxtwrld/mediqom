@@ -180,6 +180,11 @@ export default {
         description:
           "Does the document contain treatment response assessment (RECIST, etc.)?",
       },
+      isMedicalImaging: {
+        type: "boolean",
+        description:
+          "Is this document a medical IMAGE itself (not a text report about imaging)? True for actual X-ray photos, CT scan images, MRI images, ultrasound images, dental panoramic X-ray photos. False for written radiology reports that describe imaging findings in text.",
+      },
       hasImagingFindings: {
         type: "boolean",
         description:
@@ -290,6 +295,7 @@ export default {
       "hasTumorCharacteristics",
       "hasTreatmentPlan",
       "hasTreatmentResponse",
+      "isMedicalImaging",
       "hasImagingFindings",
       "hasGrossFindings",
       "hasSpecialStains",

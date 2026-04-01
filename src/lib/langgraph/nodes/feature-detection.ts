@@ -308,6 +308,19 @@ export const featureDetectionNode = async (
       aiFeatureDetectionResults.hasDental = true;
     }
 
+    // dental_record with actual image → ensure imaging is flagged
+    if (
+      aiFeatureDetectionResults.documentType === "dental_record" &&
+      aiFeatureDetectionResults.isMedicalImaging
+    ) {
+      if (!aiFeatureDetectionResults.hasImaging) {
+        console.warn(
+          "⚠️ Feature detection: dental_record + isMedicalImaging but hasImaging=false — forcing true",
+        );
+        aiFeatureDetectionResults.hasImaging = true;
+      }
+    }
+
     // genetic_analysis → must have molecular content
     if (
       aiFeatureDetectionResults.documentType === "genetic_analysis" &&
@@ -366,6 +379,7 @@ export const featureDetectionNode = async (
     const outputState = {
       featureDetection: featureDetectionResult,
       featureDetectionResults: aiFeatureDetectionResults,
+      language: aiFeatureDetectionResults.language,
       tokenUsage,
     };
 

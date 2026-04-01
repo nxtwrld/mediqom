@@ -13,7 +13,7 @@
     import { goto } from '$app/navigation';
     import { getPropertyCategory } from '$lib/health/property-categories';
     import PlanWeek from '$components/medications/PlanWeek.svelte';
-    import MedicationWidget from '$components/medications/MedicationWidget.svelte';
+    //import MedicationWidget from '$components/medications/MedicationWidget.svelte';
     
     // Local state for ProfileEdit modal
     let showProfileEdit = $state(false);
@@ -298,7 +298,7 @@
     </div>
 
     <PlanWeek profileId={$profile.id} />
-    <MedicationWidget profileId={$profile.id} />
+    <!--MedicationWidget profileId={$profile.id} /-->
 
     <h3 class="h3 heading">{ $t('app.headings.documents') }</h3>
     <Documents user={$profile.id} />

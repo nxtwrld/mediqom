@@ -20,7 +20,7 @@ import bodyParts from "$lib/configurations/core.bodyParts";
 import jcard from "$lib/configurations/jcard.reduced";
 //import { extractText } from "./gemini";
 //import testPropserties from '$data/lab.synonyms.json';
-import propertiesDefition from "$data/lab.properties.defaults.json";
+import { getAllKeys } from "$data/signal-catalog";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import { type Content, type TokenUsage } from "$lib/ai/types.d";
 import { sleep } from "$lib/utils";
@@ -86,7 +86,7 @@ let localizedSchemas = updateLanguage(JSON.parse(JSON.stringify(schemas)));
 // extend common schemas
 
 ((signals as any as ExtendedFunctionDefinition).items!.properties.signal
-  .enum as string[]) = Object.keys(propertiesDefition); //testPropserties.map((item: any) => item[0]);
+  .enum as string[]) = getAllKeys();
 ((featureDetection as ExtendedFunctionDefinition).parameters.properties.tags
   .items.enum as string[]) = [
   ...tags,

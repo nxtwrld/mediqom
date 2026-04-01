@@ -10,6 +10,7 @@
 import type { MedicalImagingState } from "../state-medical-imaging";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
+import anatomyObjects from "$data/objects.json";
 import { log } from "$lib/logging/logger";
 import { recordWorkflowStep } from "$lib/debug/workflow-recorder";
 
@@ -94,6 +95,27 @@ function validateOverallAssessment(assessment: any): any {
 }
 
 /**
+ * Calculate deterministic confidence based on data quality
+ */
+function calculateImagingConfidence(data: any): number {
+  if (!data || Object.keys(data).length === 0) return 0;
+
+  const hasModality = !!data.modality && data.modality !== "Unknown";
+  const hasRegion =
+    !!data.anatomicalRegion && data.anatomicalRegion !== "Unknown";
+  const hasBodyParts =
+    Array.isArray(data.bodyParts) && data.bodyParts.length > 0;
+  const hasAssessment = !!data.overallAssessment?.summary;
+
+  const count = [hasModality, hasRegion, hasBodyParts, hasAssessment].filter(
+    Boolean,
+  ).length;
+  if (count >= 3) return 0.9;
+  if (count >= 1) return 0.7;
+  return 0.5;
+}
+
+/**
  * Export the node function for use in the workflow - unified workflow pattern
  */
 export const medicalImagingAnalysisNode = async (
@@ -101,19 +123,13 @@ export const medicalImagingAnalysisNode = async (
 ): Promise<Partial<MedicalImagingState>> => {
   const stepStartTime = Date.now();
 
-  console.log("🚀 MEDICAL IMAGING ANALYSIS NODE - Starting execution", {
-    hasFeatureDetectionResults: !!state.featureDetectionResults,
-    featureDetectionResults: state.featureDetectionResults,
-    hasPatientInfo: !!state.patientInfo,
-    performersCount: state.medicalPerformers?.length || 0,
+  log.analysis.debug("Medical imaging analysis starting", {
     hasImages: !!state.images?.length,
     imageCount: state.images?.length || 0,
+    hasPatientInfo: !!state.patientInfo,
   });
 
   try {
-    console.log(
-      "✅ Medical imaging analysis executing - in dedicated medical imaging workflow",
-    );
 
     // Progress tracking
     const emitProgress = (stage: string, progress: number, message: string) => {
@@ -146,9 +162,22 @@ export const medicalImagingAnalysisNode = async (
       if (!schema) {
         throw new Error("Schema module does not export a default export");
       }
-      console.log("✅ Successfully loaded medical-imaging-analysis schema");
+      log.analysis.debug("Loaded medical-imaging-analysis schema");
+
+      // Populate empty bodyParts identification enum with valid 3D model objects
+      const schemaItems = (schema as any)?.parameters?.properties?.bodyParts
+        ?.items?.properties?.identification;
+      if (schemaItems?.enum && schemaItems.enum.length === 0) {
+        const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
+          (category: any) => category.objects || [],
+        );
+        schemaItems.enum = [...new Set(validAnatomyObjects)];
+        log.analysis.debug("Populated bodyParts enum", {
+          count: schemaItems.enum.length,
+        });
+      }
     } catch (error) {
-      console.error("❌ Failed to load schema:", error);
+      log.analysis.error("Failed to load medical imaging schema:", error);
       throw new Error(`Failed to load schema: ${error}`);
     }
 
@@ -271,6 +300,9 @@ export const medicalImagingAnalysisNode = async (
       technicalQuality: aiResult.technicalQuality || {},
     };
 
+    // Calculate confidence from validated data before building result
+    const confidence = calculateImagingConfidence(validatedData);
+
     // Create comprehensive analysis result
     const analysisResult = {
       // Basic imaging information
@@ -297,10 +329,10 @@ export const medicalImagingAnalysisNode = async (
 
       // Processing metadata
       processingTimestamp: new Date().toISOString(),
-      confidence: Math.min(Math.random() * 0.3 + 0.7, 1.0), // Generate realistic confidence
+      confidence,
     };
 
-    console.log("✅ MEDICAL IMAGING ANALYSIS NODE - Completed execution", {
+    log.analysis.debug("Medical imaging analysis completed", {
       modality: analysisResult.modality,
       anatomicalRegion: analysisResult.anatomicalRegion,
       bodyPartsCount: analysisResult.bodyParts?.length || 0,
@@ -396,6 +428,12 @@ export const medicalImagingAnalysisNode = async (
         ...(analysisResult.overallAssessment?.hasUrgentFindings
           ? ["urgent"]
           : []),
+        // Add body part identifications as tags for anatomy model linking
+        ...(Array.isArray(analysisResult.bodyParts)
+          ? analysisResult.bodyParts
+              .map((bp: any) => bp.identification)
+              .filter((id: any) => typeof id === "string" && id.length > 0)
+          : []),
       ],
 
       hasPrescription: false,
@@ -417,9 +455,8 @@ export const medicalImagingAnalysisNode = async (
       schemaUsed: "medical_imaging_v1",
     };
 
-    console.log("🏥 Medical imaging unified result created:", {
-      hasUnifiedResult: !!unifiedResult,
-      unifiedResultType: unifiedResult.type,
+    log.analysis.debug("Medical imaging unified result created", {
+      type: unifiedResult.type,
       reportKeys: Object.keys(unifiedResult.report),
       confidence: unifiedResult.confidence,
     });
@@ -486,7 +523,6 @@ export const medicalImagingAnalysisNode = async (
     };
   } catch (error) {
     log.analysis.error("Medical imaging analysis error:", error);
-    console.error("❌ MEDICAL IMAGING ANALYSIS NODE - Error:", error);
 
     // Record failed step
     const stepDuration = Date.now() - stepStartTime;

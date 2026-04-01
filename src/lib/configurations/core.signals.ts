@@ -12,7 +12,9 @@ export default {
       signal: {
         type: "string",
         description:
-          "Name of the lab test. If the test is a combination of multiple tests, list them all. If the test is a general. Select a property from the provided enum.",
+          "Name of the lab test. If the test is a combination of multiple tests, list them all. If the test is a general. Select a property from the provided enum. " +
+          "IMPORTANT: For heart rate / pulse measurements from medical documents, use 'resting_heart_rate' (not 'heart_rate'). " +
+          "'heart_rate' is reserved for continuous wearable monitoring data.",
         enum: [],
       },
       value: {

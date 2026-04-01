@@ -1,0 +1,2768 @@
+{
+  "birthDate": {
+    "displayName": "BirthDate",
+    "category": "demographic",
+    "type": "date",
+    "referenceRange": [],
+    "synonyms": [],
+    "valueExpirationInDays": -1,
+    "signal": "birthDate"
+  },
+  "age": {
+    "displayName": "Age",
+    "category": "demographic",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "valueExpirationInDays": -1,
+    "signal": "age"
+  },
+  "biologicalSex": {
+    "displayName": "BiologicalSex",
+    "category": "demographic",
+    "type": "enum",
+    "referenceRange": [],
+    "synonyms": [],
+    "valueExpirationInDays": -1,
+    "localize": true,
+    "options": [
+      "male",
+      "female",
+      "intersex"
+    ],
+    "signal": "biologicalSex"
+  },
+  "bloodType": {
+    "displayName": "BloodType",
+    "category": "demographic",
+    "type": "enum",
+    "referenceRange": [],
+    "synonyms": [],
+    "valueExpirationInDays": -1,
+    "options": [
+      "A+",
+      "A-",
+      "B+",
+      "B-",
+      "AB+",
+      "AB-",
+      "O+",
+      "O-"
+    ],
+    "signal": "bloodType"
+  },
+  "height": {
+    "displayName": "Height",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 365,
+    "healthKitType": "height",
+    "loincCodes": [
+      "8302-2"
+    ]
+  },
+  "weight": {
+    "displayName": "Weight",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "kg",
+    "valueExpirationInDays": 30,
+    "healthKitType": "weight",
+    "loincCodes": [
+      "29463-7"
+    ]
+  },
+  "bmi": {
+    "displayName": "Bmi",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [
+      "Body Mass Index"
+    ],
+    "unit": "kg/m\u00b2",
+    "valueExpirationInDays": 30,
+    "loincCodes": [
+      "39156-5"
+    ]
+  },
+  "temperature": {
+    "displayName": "Temperature",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 2
+        },
+        "low": 36.4,
+        "high": 38
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 3,
+          "max": 10
+        },
+        "low": 36.1,
+        "high": 37.8
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 11,
+          "max": 100
+        },
+        "low": 35.9,
+        "high": 37.6
+      }
+    ],
+    "synonyms": [],
+    "unit": "\u00b0C",
+    "valueExpirationInDays": 0.5,
+    "loincCodes": [
+      "8310-5"
+    ]
+  },
+  "systolic": {
+    "displayName": "Systolic",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 1
+        },
+        "low": 75,
+        "high": 100
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 1,
+          "max": 13
+        },
+        "low": 80,
+        "high": 115
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 13,
+          "max": 18
+        },
+        "low": 95,
+        "high": 140
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 30
+        },
+        "low": 110,
+        "high": 140
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 30,
+          "max": 50
+        },
+        "low": 115,
+        "high": 150
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 50,
+          "max": 100
+        },
+        "low": 120,
+        "high": 160
+      }
+    ],
+    "synonyms": [
+      "preassure",
+      "systolic blood pressure",
+      "bp systolic",
+      "systolic bp"
+    ],
+    "unit": "mmHg",
+    "valueExpirationInDays": 1,
+    "healthKitType": "blood_pressure_systolic",
+    "loincCodes": [
+      "8480-6"
+    ]
+  },
+  "diastolic": {
+    "displayName": "Diastolic",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 13
+        },
+        "low": 50,
+        "high": 80
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 13,
+          "max": 18
+        },
+        "low": 60,
+        "high": 90
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 30
+        },
+        "low": 70,
+        "high": 90
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 30,
+          "max": 50
+        },
+        "low": 75,
+        "high": 100
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 50,
+          "max": 100
+        },
+        "low": 75,
+        "high": 110
+      }
+    ],
+    "synonyms": [
+      "diastolic blood pressure",
+      "bp diastolic",
+      "diastolic bp"
+    ],
+    "unit": "mmHg",
+    "valueExpirationInDays": 1,
+    "healthKitType": "blood_pressure_diastolic",
+    "loincCodes": [
+      "8462-4"
+    ]
+  },
+  "oxygen_saturation": {
+    "displayName": "Oxygen Saturation",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 95,
+        "high": 100
+      }
+    ],
+    "synonyms": [
+      "spo2",
+      "o2 saturation",
+      "blood oxygen"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 10,
+    "loincCodes": [
+      "2708-6"
+    ]
+  },
+  "blood_sugar": {
+    "displayName": "Blood Sugar",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 70,
+        "high": 100
+      }
+    ],
+    "synonyms": [
+      "blood glucose",
+      "fasting glucose",
+      "fasting blood sugar"
+    ],
+    "unit": "mg/dL",
+    "valueExpirationInDays": 10,
+    "healthKitType": "blood_glucose",
+    "loincCodes": [
+      "2339-0"
+    ]
+  },
+  "respiratory_rate": {
+    "displayName": "Respiratory Rate",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 2
+        },
+        "low": 24,
+        "high": 60
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 2,
+          "max": 12
+        },
+        "low": 18,
+        "high": 34
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 12,
+          "max": 18
+        },
+        "low": 12,
+        "high": 16
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 12,
+        "high": 20
+      }
+    ],
+    "synonyms": [
+      "breathing rate",
+      "resp rate"
+    ],
+    "unit": "breaths/min",
+    "loincCodes": [
+      "9279-1"
+    ]
+  },
+  "resting_heart_rate": {
+    "displayName": "Resting Heart Rate",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 2
+        },
+        "low": 100,
+        "high": 160
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 2,
+          "max": 12
+        },
+        "low": 80,
+        "high": 120
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 60,
+        "high": 100
+      }
+    ],
+    "synonyms": [
+      "resting pulse",
+      "pulse",
+      "hr",
+      "heartrate",
+      "heart rate"
+    ],
+    "unit": "beats/min",
+    "valueExpirationInDays": 7,
+    "healthKitType": "heart_rate.resting",
+    "loincCodes": [
+      "8867-4"
+    ]
+  },
+  "heart_rate_variability": {
+    "displayName": "Heart Rate Variability",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 40
+        },
+        "low": 20,
+        "high": 100
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 40,
+          "max": 100
+        },
+        "low": 10,
+        "high": 80
+      }
+    ],
+    "synonyms": [
+      "hrv"
+    ],
+    "unit": "ms",
+    "valueExpirationInDays": 7,
+    "healthKitType": "heart_rate.variability"
+  },
+  "heart_rate": {
+    "displayName": "Heart Rate",
+    "category": "vital",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 2
+        },
+        "low": 100,
+        "high": 160
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 2,
+          "max": 12
+        },
+        "low": 80,
+        "high": 120
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 12,
+          "max": 100
+        },
+        "low": 60,
+        "high": 100
+      }
+    ],
+    "synonyms": [],
+    "unit": "beats/min",
+    "healthKitType": "heart_rate"
+  },
+  "waist_circumference": {
+    "displayName": "Waist Circumference",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 30
+  },
+  "hip_circumference": {
+    "displayName": "Hip Circumference",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 360
+  },
+  "waist_to_hip_ratio": {
+    "displayName": "Waist To Hip Ratio",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [
+      "waist-to-hip ratio"
+    ],
+    "valueExpirationInDays": 360
+  },
+  "waist_to_height_ratio": {
+    "displayName": "Waist To Height Ratio",
+    "category": "body_measurement",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [
+      "waist-to-height ratio"
+    ],
+    "valueExpirationInDays": 360
+  },
+  "body_fat_percentage": {
+    "displayName": "Body Fat Percentage",
+    "category": "body_composition",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [
+      "body fat"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "healthKitType": "fat_percentage"
+  },
+  "lean_body_mass": {
+    "displayName": "Lean Body Mass",
+    "category": "body_composition",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "kg",
+    "valueExpirationInDays": 360
+  },
+  "fat_mass": {
+    "displayName": "Fat Mass",
+    "category": "body_composition",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "kg",
+    "valueExpirationInDays": 360
+  },
+  "cardiac_output": {
+    "displayName": "Cardiac Output",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "L/min",
+    "valueExpirationInDays": 360
+  },
+  "stroke_volume": {
+    "displayName": "Stroke Volume",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/beat",
+    "valueExpirationInDays": 360
+  },
+  "cardiac_index": {
+    "displayName": "Cardiac Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "L/min/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "ejection_fraction": {
+    "displayName": "Ejection Fraction",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "%",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_mass": {
+    "displayName": "Left Ventricular Mass",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "g",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_mass_index": {
+    "displayName": "Left Ventricular Mass Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "g/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_diastolic_volume": {
+    "displayName": "Left Ventricular End Diastolic Volume",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_systolic_volume": {
+    "displayName": "Left Ventricular End Systolic Volume",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_diastolic_diameter": {
+    "displayName": "Left Ventricular End Diastolic Diameter",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_systolic_diameter": {
+    "displayName": "Left Ventricular End Systolic Diameter",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_diastolic_volume_index": {
+    "displayName": "Left Ventricular End Diastolic Volume Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_systolic_volume_index": {
+    "displayName": "Left Ventricular End Systolic Volume Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_diastolic_diameter_index": {
+    "displayName": "Left Ventricular End Diastolic Diameter Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_end_systolic_diameter_index": {
+    "displayName": "Left Ventricular End Systolic Diameter Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_diastolic_volume": {
+    "displayName": "Right Ventricular End Diastolic Volume",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_systolic_volume": {
+    "displayName": "Right Ventricular End Systolic Volume",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_diastolic_diameter": {
+    "displayName": "Right Ventricular End Diastolic Diameter",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_systolic_diameter": {
+    "displayName": "Right Ventricular End Systolic Diameter",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_diastolic_volume_index": {
+    "displayName": "Right Ventricular End Diastolic Volume Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_systolic_volume_index": {
+    "displayName": "Right Ventricular End Systolic Volume Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_diastolic_diameter_index": {
+    "displayName": "Right Ventricular End Diastolic Diameter Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_end_systolic_diameter_index": {
+    "displayName": "Right Ventricular End Systolic Diameter Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "cm/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "pulmonary_artery_systolic_pressure": {
+    "displayName": "Pulmonary Artery Systolic Pressure",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mmHg",
+    "valueExpirationInDays": 360
+  },
+  "pulmonary_artery_diastolic_pressure": {
+    "displayName": "Pulmonary Artery Diastolic Pressure",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mmHg",
+    "valueExpirationInDays": 360
+  },
+  "pulmonary_artery_mean_pressure": {
+    "displayName": "Pulmonary Artery Mean Pressure",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mmHg",
+    "valueExpirationInDays": 360
+  },
+  "pulmonary_capillary_wedge_pressure": {
+    "displayName": "Pulmonary Capillary Wedge Pressure",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mmHg",
+    "valueExpirationInDays": 360
+  },
+  "pulmonary_vascular_resistance": {
+    "displayName": "Pulmonary Vascular Resistance",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "dyn\u00b7s/cm\u2075",
+    "valueExpirationInDays": 360
+  },
+  "systemic_vascular_resistance": {
+    "displayName": "Systemic Vascular Resistance",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "dyn\u00b7s/cm\u2075",
+    "valueExpirationInDays": 360
+  },
+  "cardiac_output_index": {
+    "displayName": "Cardiac Output Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "L/min/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "stroke_volume_index": {
+    "displayName": "Stroke Volume Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "mL/beat/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "heart_rate_index": {
+    "displayName": "Heart Rate Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "beats/min/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_ejection_time": {
+    "displayName": "Left Ventricular Ejection Time",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "ms",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_ejection_time_index": {
+    "displayName": "Left Ventricular Ejection Time Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "ms/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_ejection_fraction": {
+    "displayName": "Left Ventricular Ejection Fraction",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "%",
+    "valueExpirationInDays": 360
+  },
+  "left_ventricular_ejection_fraction_index": {
+    "displayName": "Left Ventricular Ejection Fraction Index",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "%/m\u00b2",
+    "valueExpirationInDays": 360
+  },
+  "right_ventricular_ejection_time": {
+    "displayName": "Right Ventricular Ejection Time",
+    "category": "other",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "ms",
+    "valueExpirationInDays": 360
+  },
+  "urea": {
+    "displayName": "Urea",
+    "category": "kidney",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 60
+        },
+        "low": 2.5,
+        "high": 7.8
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 60,
+          "max": 100
+        },
+        "low": 2.9,
+        "high": 8.2
+      }
+    ],
+    "synonyms": [
+      "BUN",
+      "Blood Urea Nitrogen"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A waste product formed in the liver from ammonia produced during protein breakdown. It's excreted in the urine by the kidneys.",
+    "lowInterpretation": "Low urea levels might be seen in liver disease or malnutrition.",
+    "highInterpretation": "Elevated levels can indicate kidney dysfunction or dehydration, among other conditions.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/blood-urea-nitrogen/about/pac-20384821"
+    ],
+    "loincCodes": [
+      "3094-0"
+    ]
+  },
+  "creatinine": {
+    "displayName": "Creatinine",
+    "category": "kidney",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 59
+        },
+        "low": 64,
+        "high": 104
+      },
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 60,
+          "max": 100
+        },
+        "low": 64,
+        "high": 111
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 59
+        },
+        "low": 49,
+        "high": 90
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 60,
+          "max": 100
+        },
+        "low": 49,
+        "high": 96
+      }
+    ],
+    "synonyms": [
+      "Kreatinin"
+    ],
+    "unit": "\u00b5mol/L",
+    "valueExpirationInDays": 360,
+    "description": "A waste product produced by muscles from the breakdown of a compound called creatine. The kidneys filter out most of the creatinine and dispose of it in the urine.",
+    "lowInterpretation": "Low levels can be seen in conditions that result in decreased muscle mass.",
+    "highInterpretation": "Elevated levels suggest impaired kidney function or kidney disease.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/creatinine-test/about/pac-20384646"
+    ],
+    "loincCodes": [
+      "2160-0"
+    ]
+  },
+  "uric_acid": {
+    "displayName": "Uric Acid",
+    "category": "kidney",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 202,
+        "high": 416
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 143,
+        "high": 357
+      }
+    ],
+    "synonyms": [
+      "Kyselina mo\u010dov\u00e1"
+    ],
+    "unit": "\u00b5mol/L",
+    "valueExpirationInDays": 360,
+    "description": "A product of the metabolic breakdown of purine nucleotides. High levels of uric acid in the blood can lead to a type of arthritis known as gout.",
+    "lowInterpretation": "Low levels can result from kidney disease or might be due to certain medications.",
+    "highInterpretation": "High levels can cause gout and have been associated with kidney stones and kidney failure.",
+    "links": [
+      "https://www.mayoclinic.org/symptoms/high-uric-acid-level/basics/definition/sym-20050607"
+    ],
+    "loincCodes": [
+      "3084-1"
+    ]
+  },
+  "egfr": {
+    "displayName": "eGFR",
+    "category": "kidney",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 90,
+        "high": null
+      }
+    ],
+    "synonyms": [
+      "Estimated Glomerular Filtration Rate",
+      "GF CKD-EPI",
+      "GFR CKD-EPI",
+      "gfr",
+      "glomerular filtration rate"
+    ],
+    "unit": "mL/min/1.73m\u00b2",
+    "valueExpirationInDays": 360,
+    "description": "Estimated Glomerular Filtration Rate measures kidney function and determines how well the kidneys are filtering blood.",
+    "lowInterpretation": "A low eGFR indicates impaired kidney function.",
+    "highInterpretation": "Usually, a high eGFR is not a concern. It indicates good kidney function, but interpretation can vary based on other factors.",
+    "links": [
+      "https://www.kidney.org/atoz/content/gfr"
+    ],
+    "loincCodes": [
+      "48642-3"
+    ]
+  },
+  "sodium": {
+    "displayName": "Sodium",
+    "category": "electrolyte",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 135,
+        "high": 145
+      }
+    ],
+    "synonyms": [
+      "Na",
+      "Na - natrium",
+      "Sod\u00edk"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "An essential electrolyte that helps maintain the balance of water in and around your cells, among other functions.",
+    "lowInterpretation": "Low levels, or hyponatremia, can result from conditions like dehydration or certain diseases.",
+    "highInterpretation": "High levels, or hypernatremia, might indicate dehydration or other medical conditions.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/hyponatremia/symptoms-causes/syc-20373711"
+    ],
+    "loincCodes": [
+      "2951-2"
+    ]
+  },
+  "potassium": {
+    "displayName": "Potassium",
+    "category": "electrolyte",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 3.5,
+        "high": 5.1
+      }
+    ],
+    "synonyms": [
+      "K",
+      "K - kalium",
+      "Drasl\u00edk",
+      "Kalium"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A crucial mineral and electrolyte that's essential for the proper function of nerve and muscle cells, especially heart muscle cells.",
+    "lowInterpretation": "Low levels, or hypokalemia, can result in muscle weakness and heart rhythm disturbances.",
+    "highInterpretation": "High levels, or hyperkalemia, can be life-threatening, affecting the rhythm of the heart.",
+    "links": [
+      "https://www.mayoclinic.org/symptoms/low-potassium/symptoms-causes/syc-20350632"
+    ],
+    "loincCodes": [
+      "2823-3"
+    ]
+  },
+  "chloride": {
+    "displayName": "Chloride",
+    "category": "electrolyte",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 98,
+        "high": 107
+      }
+    ],
+    "synonyms": [
+      "Cl",
+      "Cl - chloridy",
+      "Chloridy"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "An electrolyte that helps maintain proper fluid and acid-base balance in the body.",
+    "lowInterpretation": "Low levels, or hypochloremia, might be seen in excessive hydration, heart failure, or certain kidney diseases.",
+    "highInterpretation": "High levels, or hyperchloremia, might result from dehydration or other conditions.",
+    "links": [
+      "https://www.mountsinai.org/health-library/tests/chloride-cl"
+    ],
+    "loincCodes": [
+      "2075-0"
+    ]
+  },
+  "magnesium": {
+    "displayName": "Magnesium",
+    "category": "electrolyte",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0.7,
+        "high": 1
+      }
+    ],
+    "synonyms": [
+      "Mg",
+      "Mg - ho\u0159\u010d\u00edk",
+      "Ho\u0159\u010d\u00edk"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A mineral crucial for nerve transmission, bone formation, and energy metabolism.",
+    "lowInterpretation": "Low levels can cause symptoms like muscle cramps, heart arrhythmias, and seizures.",
+    "highInterpretation": "High levels might result in symptoms like muscle weakness, difficulty breathing, and irregular heartbeat.",
+    "links": [
+      "https://ods.od.nih.gov/factsheets/Magnesium-Consumer/"
+    ],
+    "loincCodes": [
+      "19123-9"
+    ]
+  },
+  "iron": {
+    "displayName": "Iron",
+    "category": "mineral",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 11.6,
+        "high": 31.3
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 9,
+        "high": 30.4
+      }
+    ],
+    "synonyms": [
+      "Fe",
+      "\u017delezo"
+    ],
+    "unit": "\u00b5mol/L",
+    "valueExpirationInDays": 360,
+    "description": "A mineral essential for making hemoglobin, a protein in red blood cells that carries oxygen.",
+    "lowInterpretation": "Low iron levels can lead to anemia, fatigue, and an increased risk of infections.",
+    "highInterpretation": "High levels can result in damage to organs such as the heart, liver, and pancreas.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/iron-deficiency-anemia/symptoms-causes/syc-20355034"
+    ],
+    "loincCodes": [
+      "2498-4"
+    ]
+  },
+  "ferritin": {
+    "displayName": "Ferritin",
+    "category": "mineral",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 30,
+        "high": 400
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 13,
+        "high": 150
+      }
+    ],
+    "synonyms": [],
+    "unit": "\u00b5g/L",
+    "valueExpirationInDays": 360,
+    "description": "A protein that stores iron inside cells. Serum ferritin levels indirectly measure the amount of iron stored in your body.",
+    "lowInterpretation": "Low levels can indicate an iron deficiency which might lead to anemia.",
+    "highInterpretation": "High levels might be indicative of an iron overload or various chronic diseases.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/ferritin-test/about/pac-20384928"
+    ],
+    "loincCodes": [
+      "2276-4"
+    ]
+  },
+  "bilirubin": {
+    "displayName": "Bilirubin",
+    "category": "liver",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 21
+      }
+    ],
+    "synonyms": [
+      "Total Bilirubin",
+      "Bilirubin celk.",
+      "Bilirub\u00edn celk."
+    ],
+    "unit": "\u00b5mol/L",
+    "valueExpirationInDays": 360,
+    "description": "A yellow compound that occurs in the normal catabolic pathway that breaks down heme from hemoglobin. It's processed by the liver and excreted in feces.",
+    "lowInterpretation": "Generally, low levels aren't concerning and may be normal for many people.",
+    "highInterpretation": "Elevated levels can indicate liver dysfunction, bile duct obstruction, or other liver-related conditions. Jaundice can occur with high bilirubin.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/bilirubin/about/pac-20393041"
+    ],
+    "loincCodes": [
+      "1975-2"
+    ]
+  },
+  "alt": {
+    "displayName": "ALT",
+    "category": "liver",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 45
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 34
+      }
+    ],
+    "synonyms": [
+      "Alanine Transaminase",
+      "alanine aminotransferase"
+    ],
+    "unit": "U/L",
+    "valueExpirationInDays": 360,
+    "description": "Alanine Transaminase, an enzyme found primarily in the liver. It's used to assess liver function.",
+    "lowInterpretation": "Low levels are generally not concerning and don't indicate a specific condition.",
+    "highInterpretation": "Elevated levels may indicate liver damage or inflammation.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/liver-function-tests/about/pac-20394595"
+    ],
+    "loincCodes": [
+      "1742-6"
+    ]
+  },
+  "ast": {
+    "displayName": "AST",
+    "category": "liver",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 40
+      }
+    ],
+    "synonyms": [
+      "Aspartate Transaminase",
+      "aspartate aminotransferase"
+    ],
+    "unit": "U/L",
+    "valueExpirationInDays": 360,
+    "description": "Aspartate Transaminase, an enzyme found in the liver and other tissues. Used as a marker for liver health.",
+    "lowInterpretation": "Lower than normal levels are not typically a concern.",
+    "highInterpretation": "Elevated levels can suggest liver injury or other diseases.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/liver-function-tests/about/pac-20394595"
+    ],
+    "loincCodes": [
+      "1920-8"
+    ]
+  },
+  "ggt": {
+    "displayName": "GGT",
+    "category": "liver",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 55
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 38
+      }
+    ],
+    "synonyms": [
+      "Gamma-glutamyl transferase"
+    ],
+    "unit": "U/L",
+    "valueExpirationInDays": 360,
+    "description": "Gamma-glutamyl transferase, an enzyme in the blood. Elevated GGT helps to diagnose liver disease.",
+    "lowInterpretation": "Low levels are not typically indicative of a specific condition.",
+    "highInterpretation": "High levels can indicate liver damage, but it is especially sensitive to detect bile duct problems.",
+    "links": [
+      "https://www.mountsinai.org/health-library/tests/gamma-glutamyl-transferase-ggt"
+    ],
+    "loincCodes": [
+      "2324-2"
+    ]
+  },
+  "alp": {
+    "displayName": "ALP",
+    "category": "liver",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 30,
+        "high": 120
+      }
+    ],
+    "synonyms": [
+      "Alkaline Phosphatase"
+    ],
+    "unit": "U/L",
+    "valueExpirationInDays": 360,
+    "description": "Alkaline Phosphatase, an enzyme in the liver, bile ducts, and bone.",
+    "lowInterpretation": "Low levels can be seen in malnutrition, certain genetic mutations, and other conditions.",
+    "highInterpretation": "Elevated levels might suggest liver disease or bone disorders.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/liver-function-tests/about/pac-20394595"
+    ],
+    "loincCodes": [
+      "6768-6"
+    ]
+  },
+  "total_protein": {
+    "displayName": "Total Protein",
+    "category": "protein",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 60,
+        "high": 80
+      }
+    ],
+    "synonyms": [
+      "Celk.b\u00edlkovina",
+      "Protein",
+      "B\u00edlkovina"
+    ],
+    "unit": "g/L",
+    "valueExpirationInDays": 360,
+    "description": "Measures the total amount of two classes of proteins in the blood: albumin and globulin.",
+    "lowInterpretation": "Low levels can suggest liver disease, kidney disease, or other conditions.",
+    "highInterpretation": "High levels can be seen in chronic inflammation or infections, among other conditions.",
+    "links": [
+      "https://www.urmc.rochester.edu/encyclopedia/content.aspx?contenttypeid=167&contentid=total_protein"
+    ],
+    "loincCodes": [
+      "2885-2"
+    ]
+  },
+  "albumin": {
+    "displayName": "Albumin",
+    "category": "protein",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 35,
+        "high": 50
+      }
+    ],
+    "synonyms": [],
+    "unit": "g/L",
+    "valueExpirationInDays": 360,
+    "description": "A protein made by the liver. Albumin helps prevent fluid from leaking out of blood vessels, nourishes tissues, and transports hormones, vitamins, drugs, and other substances throughout the body.",
+    "lowInterpretation": "Low levels can suggest liver disease or malnutrition.",
+    "highInterpretation": "Typically not a direct concern; can be caused by dehydration.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/albumin-test/about/pac-20394831"
+    ],
+    "loincCodes": [
+      "1751-7"
+    ]
+  },
+  "cholesterol": {
+    "displayName": "Cholesterol",
+    "category": "lipid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 5.2
+      }
+    ],
+    "synonyms": [
+      "total cholesterol"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A waxy, fat-like substance that's found in all the cells in your body. It's used to make hormones, vitamin D, and substances that help digest foods.",
+    "lowInterpretation": "Low levels can be due to a genetic condition, liver disease, or malabsorption.",
+    "highInterpretation": "High cholesterol can lead to atherosclerosis and risk of heart disease and stroke.",
+    "links": [
+      "https://www.heart.org/en/health-topics/cholesterol/about-cholesterol"
+    ],
+    "loincCodes": [
+      "2093-3"
+    ]
+  },
+  "hdl_cholesterol": {
+    "displayName": "HDL Cholesterol",
+    "category": "lipid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0.9,
+        "high": null
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 1.2,
+        "high": null
+      }
+    ],
+    "synonyms": [
+      "HDL"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "High-density lipoprotein cholesterol, often called the 'good' cholesterol. It absorbs cholesterol and carries it back to the liver.",
+    "lowInterpretation": "Low HDL can increase the risk of heart disease.",
+    "highInterpretation": "High levels are protective against heart disease.",
+    "links": [
+      "https://www.heart.org/en/health-topics/cholesterol/hdl-good-ldl-bad-cholesterol-and-triglycerides"
+    ],
+    "loincCodes": [
+      "2085-9"
+    ]
+  },
+  "ldl_cholesterol": {
+    "displayName": "LDL Cholesterol",
+    "category": "lipid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 3.4
+      }
+    ],
+    "synonyms": [
+      "LDL"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "Low-density lipoprotein cholesterol, often called the 'bad' cholesterol. It contributes to fatty buildups in arteries (atherosclerosis), which can lead to heart attacks and strokes.",
+    "lowInterpretation": "Generally, lower LDL levels are better for heart health. Extremely low levels might have potential risks and should be discussed with a healthcare provider.",
+    "highInterpretation": "Elevated LDL levels increase the risk of heart disease, stroke, and peripheral artery disease.",
+    "links": [
+      "https://www.heart.org/en/health-topics/cholesterol/hdl-good-ldl-bad-cholesterol-and-triglycerides"
+    ],
+    "loincCodes": [
+      "13457-7"
+    ]
+  },
+  "triglycerides": {
+    "displayName": "Triglycerides",
+    "category": "lipid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 0,
+        "high": 1.7
+      }
+    ],
+    "synonyms": [
+      "Triglyceridy"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A type of fat (lipid) found in your blood. When you eat, your body converts calories it doesn\u2019t need into triglycerides, which are stored in fat cells.",
+    "lowInterpretation": "Low levels are generally not a concern and can be seen in people who are very fit or who are on specific diets or medications.",
+    "highInterpretation": "High levels, especially in combination with low HDL or high LDL, can increase the risk of heart disease and may indicate metabolic syndrome.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/high-blood-cholesterol/in-depth/triglycerides/art-20048186"
+    ],
+    "loincCodes": [
+      "2571-8"
+    ]
+  },
+  "vitamin_d": {
+    "displayName": "Vitamin D",
+    "category": "vitamin",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 50,
+        "high": null
+      }
+    ],
+    "synonyms": [
+      "Vitam\u00edn D",
+      "25-hydroxyvitamin d"
+    ],
+    "unit": "nmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A fat-soluble vitamin that helps regulate the amount of calcium and phosphate in the body. Important for bone health.",
+    "lowInterpretation": "Deficiency can lead to bone pain, muscle weakness, increased risk of bone fractures, and in severe cases, rickets in children and osteomalacia in adults.",
+    "highInterpretation": "Excessively high levels can lead to hypercalcemia (high calcium levels in the blood) which can cause various symptoms and complications like kidney stones, bone pain, and fatigue.",
+    "links": [
+      "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/"
+    ],
+    "loincCodes": [
+      "1989-3"
+    ]
+  },
+  "glucose": {
+    "displayName": "Glucose",
+    "category": "metabolic",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 3.9,
+        "high": 5.5
+      }
+    ],
+    "synonyms": [
+      "Blood Sugar",
+      "Gluk\u00f3za"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "A type of sugar you get from foods you eat, and it's also formed and stored inside the body. It's the main source of energy for the cells of our body.",
+    "lowInterpretation": "Low levels, known as hypoglycemia, can lead to symptoms like confusion, tremors, palpitations, and in severe cases, loss of consciousness.",
+    "highInterpretation": "High levels, known as hyperglycemia, can be indicative of diabetes or other glucose metabolism disorders. Persistent high glucose can cause complications like nerve damage, kidney damage, and cardiovascular diseases.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/diabetes/symptoms-causes/syc-20371444"
+    ],
+    "loincCodes": [
+      "2345-7"
+    ]
+  },
+  "glucose_urine": {
+    "displayName": "Glucose Urine",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "arb.j.",
+    "valueExpirationInDays": 360
+  },
+  "blood_urine": {
+    "displayName": "Blood Urine",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [
+      "Blood",
+      "Krev"
+    ],
+    "unit": "arb.j.",
+    "valueExpirationInDays": 360
+  },
+  "white_blood_cells": {
+    "displayName": "White Blood Cells",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 4,
+        "high": 11
+      }
+    ],
+    "synonyms": [
+      "WBC",
+      "WBC - leukocyty",
+      "Leukocyty",
+      "DIFF"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "Cells of the immune system that are involved in defending the body against both infectious disease and foreign invaders.",
+    "lowInterpretation": "Low counts (leukopenia) can increase the risk of infections.",
+    "highInterpretation": "High counts (leukocytosis) can indicate an infection, inflammation, an allergic reaction, or a form of leukemia.",
+    "links": [
+      "https://www.mayoclinic.org/symptoms/low-white-blood-cell-count/basics/causes/sym-20050615"
+    ],
+    "loincCodes": [
+      "6690-2"
+    ]
+  },
+  "red_blood_cells": {
+    "displayName": "Red Blood Cells",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 4.5,
+        "high": 5.9
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 4,
+        "high": 5.2
+      }
+    ],
+    "synonyms": [
+      "RBC",
+      "RBC - erytrocyty",
+      "Erytrocyty",
+      "Erythrocytes"
+    ],
+    "unit": "10^12/L",
+    "valueExpirationInDays": 360,
+    "description": "Cells that carry oxygen from the lungs to the rest of the body.",
+    "lowInterpretation": "Low counts (anemia) can result in fatigue, pallor, and shortness of breath.",
+    "highInterpretation": "High counts (polycythemia) can increase the risk of clots and lead to conditions like polycythemia vera.",
+    "links": [
+      "https://www.mayoclinic.org/symptoms/low-hemoglobin/basics/when-to-see-doctor/sym-20050760"
+    ],
+    "loincCodes": [
+      "789-8"
+    ]
+  },
+  "hemoglobin": {
+    "displayName": "Hemoglobin",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 13.5,
+        "high": 17.5
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 12,
+        "high": 16
+      }
+    ],
+    "synonyms": [
+      "HB",
+      "HB - hemoglobin",
+      "hgb"
+    ],
+    "unit": "g/dL",
+    "valueExpirationInDays": 360,
+    "description": "A protein within red blood cells that carries oxygen. It gives blood its red color.",
+    "lowInterpretation": "Low levels lead to anemia and its associated symptoms.",
+    "highInterpretation": "High levels could indicate conditions such as chronic obstructive pulmonary disease (COPD), polycythemia vera, or other conditions that increase blood production.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/hemoglobin-test/about/pac-20385075"
+    ],
+    "loincCodes": [
+      "718-7"
+    ]
+  },
+  "hematocrit": {
+    "displayName": "Hematocrit",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 41,
+        "high": 53
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 36,
+        "high": 46
+      }
+    ],
+    "synonyms": [
+      "HCT",
+      "HCT - hematokrit"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "The proportion of the blood that consists of packed red blood cells. It's expressed as a percentage.",
+    "lowInterpretation": "Low hematocrit can be a sign of anemia, blood loss, or other conditions.",
+    "highInterpretation": "High hematocrit can be seen in conditions like dehydration, polycythemia vera, or chronic lung diseases.",
+    "links": [
+      "https://www.healthline.com/health/hematocrit-blood-test"
+    ],
+    "loincCodes": [
+      "4544-3"
+    ]
+  },
+  "mcv": {
+    "displayName": "MCV",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 80,
+        "high": 100
+      }
+    ],
+    "synonyms": [
+      "Mean Corpuscular Volume",
+      "MCV-st.obj.ery",
+      "MCV-st. ery"
+    ],
+    "unit": "fL",
+    "valueExpirationInDays": 360,
+    "description": "Mean corpuscular volume. It measures the average size of red blood cells.",
+    "lowInterpretation": "Low MCV indicates that cells are smaller than average, seen in conditions like iron-deficiency anemia.",
+    "highInterpretation": "High MCV indicates that cells are larger than average, seen in conditions like vitamin B12 or folic acid deficiency.",
+    "links": [
+      "https://www.verywellhealth.com/mcv-blood-test-4842275"
+    ],
+    "loincCodes": [
+      "787-2"
+    ]
+  },
+  "mchc": {
+    "displayName": "MCHC",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 32,
+        "high": 36
+      }
+    ],
+    "synonyms": [
+      "Mean Corpuscular Hemoglobin Concentration",
+      "MCHC - st.bar.k."
+    ],
+    "unit": "g/dL",
+    "valueExpirationInDays": 360,
+    "description": "Mean corpuscular hemoglobin concentration. It measures the average concentration of hemoglobin in red blood cells.",
+    "lowInterpretation": "Low MCHC indicates hypochromic cells, often seen in iron-deficiency anemia.",
+    "highInterpretation": "High MCHC is rare but can be seen in hereditary spherocytosis or other conditions with smaller than average red blood cells.",
+    "links": [
+      "https://www.verywellhealth.com/mchc-blood-test-4842277"
+    ],
+    "loincCodes": [
+      "786-4"
+    ]
+  },
+  "mch": {
+    "displayName": "MCH",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 27,
+        "high": 33
+      }
+    ],
+    "synonyms": [
+      "Mean Corpuscular Hemoglobin",
+      "MCH - bar.k.ery",
+      "MCH - bar.k ery"
+    ],
+    "unit": "pg",
+    "valueExpirationInDays": 360,
+    "description": "Mean corpuscular hemoglobin. It measures the average amount of hemoglobin per red blood cell.",
+    "lowInterpretation": "Low levels can suggest conditions like iron-deficiency anemia.",
+    "highInterpretation": "High levels can be seen in vitamin B12 or folic acid deficiency.",
+    "links": [
+      "https://www.verywellhealth.com/understanding-the-mch-blood-test-4842278"
+    ],
+    "loincCodes": [
+      "785-6"
+    ]
+  },
+  "platelets": {
+    "displayName": "Platelets",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 150,
+        "high": 400
+      }
+    ],
+    "synonyms": [
+      "PLT",
+      "PLT - trombocyty"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "Tiny blood cells that help the body form clots to stop bleeding.",
+    "lowInterpretation": "Low counts (thrombocytopenia) can increase the risk of bleeding and bruising.",
+    "highInterpretation": "High counts (thrombocytosis) can increase the risk of clot formation.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/thrombocytosis/symptoms-causes/syc-20378315"
+    ],
+    "loincCodes": [
+      "777-3"
+    ]
+  },
+  "rdw": {
+    "displayName": "RDW",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 11.5,
+        "high": 14.5
+      }
+    ],
+    "synonyms": [
+      "Red Cell Distribution Width"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "Red cell distribution width. It measures the variation in red blood cell size or volume.",
+    "lowInterpretation": "A lower than normal RDW is not typically a concern and is rarely noted. It's the higher RDW that usually gets attention.",
+    "highInterpretation": "A high RDW can indicate a vitamin B12 or folic acid deficiency, iron deficiency anemia, or chronic liver disease, among other conditions.",
+    "links": [
+      "https://www.verywellhealth.com/red-cell-distribution-width-697382"
+    ],
+    "loincCodes": [
+      "788-0"
+    ]
+  },
+  "neutrophils": {
+    "displayName": "Neutrophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 40,
+        "high": 70
+      }
+    ],
+    "synonyms": [
+      "Neutrofily",
+      "Neutrofil",
+      "Neutrofil. segmenty"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "A type of white blood cell that is often the first cell type to travel to the site of an infection. They help fight infections by ingesting bacteria and debris.",
+    "lowInterpretation": "Low levels (neutropenia) increase the risk of infections.",
+    "highInterpretation": "High levels (neutrophilia) can indicate an acute bacterial infection, inflammation, stress, or certain leukemias.",
+    "links": [
+      "https://www.verywellhealth.com/neutrophils-what-they-are-and-how-they-help-with-infection-5185414"
+    ],
+    "loincCodes": [
+      "770-8"
+    ]
+  },
+  "lymphocytes": {
+    "displayName": "Lymphocytes",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 20,
+        "high": 40
+      }
+    ],
+    "synonyms": [
+      "Lymfocyty"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "A type of white blood cell that is part of the immune system. There are two main types: B lymphocytes and T lymphocytes.",
+    "lowInterpretation": "Low levels can result from conditions like viral infections, corticosteroid use, or certain types of cancers.",
+    "highInterpretation": "High levels (lymphocytosis) can indicate conditions such as chronic viral infections, certain types of cancers (like lymphomas and chronic lymphocytic leukemia), or autoimmune disorders.",
+    "links": [
+      "https://www.medicalnewstoday.com/articles/320987"
+    ],
+    "loincCodes": [
+      "736-9"
+    ]
+  },
+  "monocytes": {
+    "displayName": "Monocytes",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 2,
+        "high": 8
+      }
+    ],
+    "synonyms": [
+      "Monocyty"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "A type of white blood cell that fights off bacteria, viruses, and fungi. They are the largest type of white blood cell and can differentiate into macrophages and dendritic cells.",
+    "lowInterpretation": "Low levels might suggest a suppressed bone marrow function, certain types of leukemia, or other specific conditions.",
+    "highInterpretation": "High levels (monocytosis) can be seen in chronic inflammation, chronic infections, and various types of leukemia.",
+    "links": [
+      "https://www.verywellhealth.com/monocytes-definition-function-and-related-conditions-4177209"
+    ],
+    "loincCodes": [
+      "5905-5"
+    ]
+  },
+  "eosinophils": {
+    "displayName": "Eosinophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 1,
+        "high": 4
+      }
+    ],
+    "synonyms": [
+      "Eosinofily",
+      "Eozinofily"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "A type of white blood cell that plays a role in combating multicellular parasites and certain infections in vertebrates. They also help mediate inflammation and allergic reactions.",
+    "lowInterpretation": "Low levels are not typically a concern and can result from the use of certain drugs, like corticosteroids.",
+    "highInterpretation": "High levels (eosinophilia) can be seen in allergic disorders, certain skin diseases, parasitic infections, autoimmune diseases, and certain cancers.",
+    "links": [
+      "https://www.verywellhealth.com/eosinophils-5185918"
+    ],
+    "loincCodes": [
+      "713-8"
+    ]
+  },
+  "basophils": {
+    "displayName": "Basophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 1
+      }
+    ],
+    "synonyms": [
+      "Basofily",
+      "Bazofily"
+    ],
+    "unit": "%",
+    "valueExpirationInDays": 360,
+    "description": "A type of white blood cell that plays a role in allergic reactions in the body. They release histamine, a chemical that helps widen blood vessels and makes the vessel walls abnormally permeable.",
+    "lowInterpretation": "Low levels are not usually clinically significant and may be seen after severe injury.",
+    "highInterpretation": "High levels (basophilia) are rare but can be seen in certain types of leukemia, chronic inflammation, and certain allergic reactions.",
+    "links": [
+      "https://www.verywellhealth.com/basophils-5185919"
+    ],
+    "loincCodes": [
+      "706-2"
+    ]
+  },
+  "absolute_neutrophils": {
+    "displayName": "Absolute Neutrophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 2,
+        "high": 7.5
+      }
+    ],
+    "synonyms": [
+      "Neutrophils Absolute",
+      "Neutrofily abs"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "The total number of neutrophils in the blood, used to diagnose and monitor various conditions.",
+    "lowInterpretation": "Low counts, known as neutropenia, increase the risk of infections.",
+    "highInterpretation": "High counts can indicate an acute infection, inflammation, stress, or certain leukemias.",
+    "links": [
+      "https://www.verywellhealth.com/absolute-neutrophil-count-5184355"
+    ],
+    "loincCodes": [
+      "751-8"
+    ]
+  },
+  "absolute_lymphocytes": {
+    "displayName": "Absolute Lymphocytes",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 1,
+        "high": 4
+      }
+    ],
+    "synonyms": [
+      "Lymphocytes Absolute",
+      "Lymfocyty abs"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "The total number of lymphocytes in the blood. Lymphocytes are important for immune system function.",
+    "lowInterpretation": "Low levels can indicate viral infections, corticosteroid use, or certain types of cancers.",
+    "highInterpretation": "High levels can suggest chronic viral infections, certain types of cancers, or autoimmune disorders.",
+    "links": [
+      "https://www.medicalnewstoday.com/articles/320987"
+    ],
+    "loincCodes": [
+      "731-0"
+    ]
+  },
+  "absolute_monocytes": {
+    "displayName": "Absolute Monocytes",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0.2,
+        "high": 0.8
+      }
+    ],
+    "synonyms": [
+      "Monocytes Absolute",
+      "Monocyty abs"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "The total number of monocytes in the blood. Monocytes play a role in fighting off certain infections and other diseases.",
+    "lowInterpretation": "Low levels might indicate bone marrow suppression or certain types of leukemia.",
+    "highInterpretation": "High levels can be seen in chronic inflammation, chronic infections, and various types of leukemia.",
+    "links": [
+      "https://www.verywellhealth.com/monocytes-definition-function-and-related-conditions-4177209"
+    ],
+    "loincCodes": [
+      "742-7"
+    ]
+  },
+  "absolute_eosinophils": {
+    "displayName": "Absolute Eosinophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0.02,
+        "high": 0.5
+      }
+    ],
+    "synonyms": [
+      "Eosinophils Absolute",
+      "Eozinofily abs",
+      "Eosinofily abs",
+      "Eozinofily-abs",
+      "Eosinofily-abs"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "The total number of eosinophils in the blood, which play a role in allergic reactions and combating parasitic infections.",
+    "lowInterpretation": "Low levels are typically not of concern and can be due to the use of certain drugs.",
+    "highInterpretation": "High levels can be seen in allergic disorders, certain skin diseases, parasitic infections, autoimmune diseases, and certain cancers.",
+    "links": [
+      "https://www.verywellhealth.com/eosinophils-5185918"
+    ],
+    "loincCodes": [
+      "711-2"
+    ]
+  },
+  "absolute_basophils": {
+    "displayName": "Absolute Basophils",
+    "category": "hematology",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 0.1
+      }
+    ],
+    "synonyms": [
+      "Basophils Absolute",
+      "Bazofily abs.",
+      "Bazofily -abs",
+      "Bazofily-abs"
+    ],
+    "unit": "10^9/L",
+    "valueExpirationInDays": 360,
+    "description": "The total number of basophils in the blood. Basophils play a role in allergic reactions.",
+    "lowInterpretation": "Low levels are not typically significant.",
+    "highInterpretation": "High levels can be seen in certain types of leukemia, chronic inflammation, and certain allergic reactions.",
+    "links": [
+      "https://www.verywellhealth.com/basophils-5185919"
+    ],
+    "loincCodes": [
+      "704-7"
+    ]
+  },
+  "crp": {
+    "displayName": "CRP",
+    "category": "inflammation",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 5
+      }
+    ],
+    "synonyms": [
+      "C-reactive protein"
+    ],
+    "unit": "mg/L",
+    "valueExpirationInDays": 360,
+    "description": "C-reactive protein, produced by the liver in response to inflammation.",
+    "lowInterpretation": "Typically not a concern when it's low.",
+    "highInterpretation": "Can indicate inflammation from various causes including infections, chronic diseases, and certain cancers.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/c-reactive-protein-test/about/pac-20385228"
+    ],
+    "loincCodes": [
+      "1988-5"
+    ]
+  },
+  "tsh": {
+    "displayName": "TSH",
+    "category": "thyroid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0.4,
+        "high": 4
+      }
+    ],
+    "synonyms": [
+      "Thyroid-stimulating hormone",
+      "thyroid stimulating hormone"
+    ],
+    "unit": "mIU/L",
+    "valueExpirationInDays": 360,
+    "description": "Thyroid-stimulating hormone. It's produced by the pituitary gland and stimulates the thyroid gland to produce thyroid hormones.",
+    "lowInterpretation": "Low levels can indicate hyperthyroidism or a pituitary gland disorder.",
+    "highInterpretation": "High levels can indicate hypothyroidism or a pituitary gland tumor.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/tsh-test/about/pac-20384665"
+    ],
+    "loincCodes": [
+      "3016-3"
+    ]
+  },
+  "ft4": {
+    "displayName": "fT4",
+    "category": "thyroid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 9,
+        "high": 21
+      }
+    ],
+    "synonyms": [
+      "Free T4",
+      "thyroxine"
+    ],
+    "unit": "pmol/L",
+    "valueExpirationInDays": 360,
+    "description": "Free thyroxine. It's one of the main hormones produced by the thyroid gland and is crucial for various body functions.",
+    "lowInterpretation": "Low levels can suggest hypothyroidism.",
+    "highInterpretation": "High levels can suggest hyperthyroidism.",
+    "links": [
+      "https://www.endocrineweb.com/conditions/thyroid/thyroid-function-tests"
+    ],
+    "loincCodes": [
+      "3024-7"
+    ]
+  },
+  "protein": {
+    "displayName": "Protein",
+    "category": "protein",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 60,
+        "high": 80
+      }
+    ],
+    "synonyms": [],
+    "unit": "g/L",
+    "valueExpirationInDays": 360,
+    "description": "Refers to the total protein in the blood, which includes albumin and globulin. It plays a crucial role in bodily functions such as maintaining osmotic pressure and transporting molecules.",
+    "lowInterpretation": "Low levels can be due to malnutrition, liver disease, kidney disease, or other conditions.",
+    "highInterpretation": "High levels can be seen in chronic inflammation, certain infections, and some bone marrow disorders.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/total-protein-and-albumin-globulin-ag-ratio/about/pac-20384724"
+    ]
+  },
+  "urobilinogen": {
+    "displayName": "Urobilinogen",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 17
+      }
+    ],
+    "synonyms": [],
+    "unit": "\u00b5mol/L",
+    "valueExpirationInDays": 360,
+    "description": "A chemical that's produced when the liver breaks down hemoglobin. Small amounts are normally present in urine.",
+    "lowInterpretation": "Low or absent levels might indicate reduced bile flow to the intestines.",
+    "highInterpretation": "Increased levels can suggest liver disease or hemolytic anemia.",
+    "links": [
+      "https://www.medicalnewstoday.com/articles/326202"
+    ]
+  },
+  "ketones": {
+    "displayName": "Ketones",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 0.6
+      }
+    ],
+    "synonyms": [
+      "Ketol\u00e1tky"
+    ],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "Chemicals produced when the body burns fat for energy. They can be detected in blood or urine.",
+    "lowInterpretation": "Not typically measured as 'low'; it's the presence that is often of clinical interest.",
+    "highInterpretation": "Presence in the urine can indicate uncontrolled diabetes, starvation, or a very low carbohydrate diet.",
+    "links": [
+      "https://www.webmd.com/diabetes/qa/what-is-ketones"
+    ]
+  },
+  "ketones_urine": {
+    "displayName": "Ketones Urine",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [],
+    "synonyms": [],
+    "unit": "arb.j.",
+    "valueExpirationInDays": 360
+  },
+  "nitrites": {
+    "displayName": "Nitrites",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": "Negative",
+        "high": "Negative"
+      }
+    ],
+    "synonyms": [
+      "Nitrity"
+    ],
+    "unit": "arb.j.",
+    "valueExpirationInDays": 360,
+    "description": "Chemicals that may be found in urine and are most commonly a result of a urinary tract infection (UTI).",
+    "lowInterpretation": "Not typically measured as 'low'; it's the presence that is often of clinical interest.",
+    "highInterpretation": "Presence can indicate a bacterial urinary tract infection.",
+    "links": [
+      "https://www.medicalnewstoday.com/articles/323821"
+    ]
+  },
+  "specific_gravity": {
+    "displayName": "Specific Gravity",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 1.005,
+        "high": 1.03
+      }
+    ],
+    "synonyms": [
+      "Specifick\u00e1 hustota"
+    ],
+    "unit": "kg/m^3",
+    "valueExpirationInDays": 360,
+    "description": "A test that measures the concentration of urine. It can help evaluate the body's water balance and kidney function.",
+    "lowInterpretation": "Low values can be seen with excessive fluid intake, certain kidney diseases, or conditions that decrease the ability of the kidney to concentrate urine.",
+    "highInterpretation": "High values can suggest dehydration, adrenal gland problems, or other conditions that cause reduced fluid intake or increased fluid loss.",
+    "links": [
+      "https://www.mountsinai.org/health-library/tests/urine-specific-gravity"
+    ]
+  },
+  "total_amylase": {
+    "displayName": "Total Amylase",
+    "category": "pancreatic",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 30,
+        "high": 110
+      }
+    ],
+    "synonyms": [
+      "Amyl\u00e1za celk."
+    ],
+    "unit": "U/L",
+    "valueExpirationInDays": 360,
+    "description": "An enzyme that helps digest carbohydrates. Its main sources are the pancreas and salivary glands.",
+    "lowInterpretation": "Lower than normal levels are not typically a concern.",
+    "highInterpretation": "Elevated levels can indicate pancreatitis, salivary gland inflammation, or other conditions.",
+    "links": [
+      "https://www.mountsinai.org/health-library/tests/amylase-blood-test"
+    ]
+  },
+  "non_hdl_cholesterol": {
+    "displayName": "non-HDL Cholesterol",
+    "category": "lipid",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 0,
+        "high": 3.9
+      }
+    ],
+    "synonyms": [],
+    "unit": "mmol/L",
+    "valueExpirationInDays": 360,
+    "description": "Calculated by subtracting HDL cholesterol from total cholesterol. It includes LDL and other types of cholesterol.",
+    "lowInterpretation": "Not typically focused on being 'low'; it's the higher values that are of more clinical concern.",
+    "highInterpretation": "High levels can increase the risk of cardiovascular diseases.",
+    "links": [
+      "https://www.heart.org/en/health-topics/cholesterol/about-cholesterol/non-hdl"
+    ]
+  },
+  "esr": {
+    "displayName": "ESR",
+    "category": "inflammation",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 50
+        },
+        "low": 0,
+        "high": 15
+      },
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 51,
+          "max": 100
+        },
+        "low": 0,
+        "high": 20
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 50
+        },
+        "low": 0,
+        "high": 20
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 51,
+          "max": 100
+        },
+        "low": 0,
+        "high": 30
+      }
+    ],
+    "synonyms": [
+      "Erythrocyte Sedimentation Rate",
+      "ESR sedimentace",
+      "sed rate",
+      "sedimentation rate"
+    ],
+    "unit": "mm/hr",
+    "valueExpirationInDays": 360,
+    "description": "Erythrocyte sedimentation rate. It measures the rate at which red blood cells settle in a test tube and can indicate the presence of inflammation.",
+    "lowInterpretation": "Low values are generally not clinically significant.",
+    "highInterpretation": "Elevated ESR can be seen with inflammation, certain cancers, chronic kidney disease, and other conditions.",
+    "links": [
+      "https://www.mayoclinic.org/tests-procedures/sed-rate/about/pac-20384797"
+    ],
+    "loincCodes": [
+      "4537-7"
+    ]
+  },
+  "bacteria": {
+    "displayName": "Bacteria",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 18
+        },
+        "low": 30,
+        "high": 100
+      },
+      {
+        "sex": "male",
+        "ageRange": {
+          "min": 18,
+          "max": 65
+        },
+        "low": 15,
+        "high": 80
+      },
+      {
+        "sex": "female",
+        "ageRange": {
+          "min": 18,
+          "max": 65
+        },
+        "low": 10,
+        "high": 70
+      },
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 65,
+          "max": 100
+        },
+        "low": 20,
+        "high": 100
+      }
+    ],
+    "synonyms": [
+      "Bakterie"
+    ],
+    "unit": "elem/\u00b5L",
+    "valueExpirationInDays": 360,
+    "description": "Refers to the presence of bacteria, typically in a urine sample.",
+    "lowInterpretation": "Not typically measured as 'low'; it's the presence that is often of clinical interest.",
+    "highInterpretation": "Presence in the urine can indicate a urinary tract infection or contamination of the sample.",
+    "links": [
+      "https://www.mayoclinic.org/diseases-conditions/urinary-tract-infection/symptoms-causes/syc-20353447"
+    ]
+  },
+  "mdrd_ureaalb": {
+    "displayName": "MDRD-UreaAlb",
+    "category": "kidney",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 18,
+          "max": 100
+        },
+        "low": 90,
+        "high": null
+      }
+    ],
+    "synonyms": [],
+    "unit": "mL/min/1.73m\u00b2",
+    "valueExpirationInDays": 360,
+    "description": "Modification of Diet in Renal Disease (MDRD) formula including urea and albumin. It's used to estimate kidney function, specifically the glomerular filtration rate (GFR).",
+    "lowInterpretation": "Lower values can indicate decreased kidney function, suggesting chronic kidney disease or acute kidney injury.",
+    "highInterpretation": "Higher values usually mean better kidney function.",
+    "links": [
+      "https://www.kidney.org/content/mdrd-study-equation"
+    ]
+  },
+  "ph": {
+    "displayName": "Ph",
+    "category": "urinalysis",
+    "type": "number",
+    "referenceRange": [
+      {
+        "sex": "any",
+        "ageRange": {
+          "min": 0,
+          "max": 100
+        },
+        "low": 7.35,
+        "high": 7.45
+      }
+    ],
+    "synonyms": [],
+    "valueExpirationInDays": 360
+  }
+}

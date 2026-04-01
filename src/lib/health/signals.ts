@@ -4,6 +4,7 @@ import { type Document } from "$lib/documents/types.d";
 import { profiles, updateProfile } from "$lib/profiles";
 import { type Profile } from "$lib/types.d";
 import { SignalDataMigration } from "$lib/signals/migration";
+import { normalizeSignalEntry } from "$lib/signals/normalize";
 import {
   type MetaHistoryEntry,
   MetaHistoryEntryType,
@@ -42,23 +43,32 @@ export async function processHealthData(
   let document = await getHealthDocument(user_id);
   let contentSignals = document.content.signals || {};
 
+  // Derive profile age/sex for reference range lookup
+  const profileData = (await profiles.get(user_id)) as Profile;
+  const profileAge = profileData?.health?.signals?.age?.values?.[0]?.value
+    ? Number(profileData.health.signals.age.values[0].value)
+    : undefined;
+  const profileSex = profileData?.health?.signals?.biologicalSex?.values?.[0]?.value as string | undefined;
+
   // Check if this is legacy Signal[] format or new extracted data
   if (Array.isArray(data) && data.length > 0 && "signal" in data[0]) {
     // Legacy Signal[] format - maintain backward compatibility
     const signals = data as Signal[];
     signals.forEach((signal) => {
-      signal.refId = signal.refId || refId;
-      if (!contentSignals[signal.signal]) {
-        contentSignals[signal.signal] = {
+      const normalized = normalizeSignalEntry(signal, profileAge, profileSex);
+      normalized.refId = normalized.refId || refId;
+      const key = normalized.signal;
+      if (!contentSignals[key]) {
+        contentSignals[key] = {
           log: "full",
           history: [],
           values: [],
         };
       }
-      contentSignals[signal.signal].values = [
-        ...contentSignals[signal.signal].values,
+      contentSignals[key].values = [
+        ...contentSignals[key].values,
         {
-          ...signal,
+          ...normalized,
         },
       ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     });
@@ -97,18 +107,20 @@ export async function processHealthData(
       }
 
       legacySignals.forEach((signal) => {
-        signal.refId = signal.refId || refId;
-        if (!contentSignals[signal.signal]) {
-          contentSignals[signal.signal] = {
+        const normalized = normalizeSignalEntry(signal, profileAge, profileSex);
+        normalized.refId = normalized.refId || refId;
+        const key = normalized.signal;
+        if (!contentSignals[key]) {
+          contentSignals[key] = {
             log: "full",
             history: [],
             values: [],
           };
         }
-        contentSignals[signal.signal].values = [
-          ...contentSignals[signal.signal].values,
+        contentSignals[key].values = [
+          ...contentSignals[key].values,
           {
-            ...signal,
+            ...normalized,
           },
         ].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),

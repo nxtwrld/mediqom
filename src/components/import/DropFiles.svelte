@@ -34,7 +34,7 @@
         const newFiles = await fromEvent(event) as File[];
         if (newFiles.length >  0) {
             files.set([ ...$files,  ...newFiles ]);
-            ui.emit('overlay.import');
+            ui.emit('overlay.import', { hasFiles: true });
         }
     }
 

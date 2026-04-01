@@ -407,26 +407,30 @@ export class SignalDataMigration {
     signalName: string,
   ): Promise<SignalDefinition | undefined> {
     try {
-      // Import the existing lab properties catalog
-      const propertiesDefinition = await import(
-        "$data/lab.properties.defaults.json"
-      );
-
-      const definition = (propertiesDefinition.default as any)[
-        signalName.toLowerCase()
-      ];
-      if (definition) {
+      const { getSignal } = await import("$data/signal-catalog");
+      const entry = getSignal(signalName.toLowerCase());
+      if (entry) {
+        // Extract reference range min/max from first adult "any" range
+        let min: number | undefined;
+        let max: number | undefined;
+        let reference = "";
+        if (entry.referenceRange?.length) {
+          const adultRange = entry.referenceRange.find(
+            (r: any) => r.sex === "any" && r.ageRange?.min >= 18,
+          ) ?? entry.referenceRange[0];
+          if (adultRange) {
+            if (typeof adultRange.low === "number") min = adultRange.low;
+            if (typeof adultRange.high === "number") max = adultRange.high;
+            reference = min != null ? (max != null ? `${min}-${max}` : `${min}-`) : "";
+          }
+        }
         return {
           name: signalName,
-          description: definition.description || signalName,
-          unit: definition.unit || "",
-          normalRange: {
-            min: definition.min,
-            max: definition.max,
-            reference: definition.reference || "",
-          },
-          category: definition.category || "laboratory",
-          synonyms: definition.synonyms || [],
+          description: entry.description || signalName,
+          unit: entry.unit || "",
+          normalRange: { min, max, reference },
+          category: entry.category || "laboratory",
+          synonyms: entry.synonyms || [],
         };
       }
     } catch (error) {

@@ -98,7 +98,13 @@
       "WebFetch(domain:api.sukl.cz)",
       "WebFetch(domain:pacient.erecept.sukl.cz)",
       "WebFetch(domain:testapi.sukl.cz)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "WebFetch(domain:mazehq.com)",
+      "Bash(lsof:*)",
+      "Bash(npx tsx:*)",
+      "Bash(find /Users/nxtwrld/Documents/GitHub/Models-of-human-anatomy -type f \\\\\\(-name *.json -o -name *.yaml -o -name *.yml -o -name *.xml -o -name *.txt \\\\\\))",
+      "Bash(git -C /Users/nxtwrld/Documents/GitHub/Models-of-human-anatomy log --oneline)",
+      "WebFetch(domain:dbarchive.biosciencedbc.jp)"
     ],
     "deny": []
   }

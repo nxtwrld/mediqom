@@ -11,9 +11,15 @@
     import type { SignalSeries, MedicationLane } from '$components/charts/VerticalReferenceRangeChart.svelte';
     import DocLabel from '$components/documents/DocLabel.svelte';
     import { t } from '$lib/i18n';
+    import { fade } from 'svelte/transition';
+    import Loading from '$components/ui/Loading.svelte';
     import { medicationsByProfile, loadMedicationContent, extractedMedicationsByProfile, loadExtractedMedicationContent } from '$lib/medications/store';
     import type { MedicationDocument, Medication } from '$lib/medications/types';
     import { getSignalColor } from '$lib/signals/colors';
+    import { DEFAULT_SIGNAL_REFERENCES } from '$lib/signals/references';
+    import { normalizeSignalName } from '$lib/signals/normalize';
+
+    let dataReady = $state(false);
 
     function parseReference(ref: string): [number, number] | null {
         if (!ref) return null;
@@ -31,16 +37,31 @@
         return (value - min) / (max - min);
     }
 
-    // All signals that have usable data
-    const signalData = $derived(
-        (($profile as any)?.health?.signals ?? {}) as Record<string, { values: any[] }>
-    );
+    // All signals that have usable data — merge variant keys to canonical names
+    const signalData = $derived.by(() => {
+        const raw = (($profile as any)?.health?.signals ?? {}) as Record<string, { values: any[]; log?: string; history?: any[] }>;
+        const merged: Record<string, { values: any[]; log?: string; history?: any[] }> = {};
+        for (const [key, data] of Object.entries(raw)) {
+            const canonical = normalizeSignalName(key);
+            if (!merged[canonical]) {
+                merged[canonical] = { ...data, values: [...(data.values || [])] };
+            } else {
+                // Merge values from variant key into canonical bucket
+                merged[canonical].values = [...merged[canonical].values, ...(data.values || [])];
+            }
+        }
+        // Sort merged values by date (newest first)
+        for (const data of Object.values(merged)) {
+            data.values.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        }
+        return merged;
+    });
 
     const availableSignals = $derived(
         Object.keys(signalData).filter(k => {
             const data = signalData[k];
             return data?.values?.some(
-                (v: any) => v.value != null && v.date && v.reference && parseReference(v.reference)
+                (v: any) => v.value != null && v.date && parseReference(v.reference || DEFAULT_SIGNAL_REFERENCES[k] || '')
             );
         })
     );
@@ -100,9 +121,9 @@
                 if (!data?.values) return null;
 
                 const values = data.values
-                    .filter((v: any) => v.value != null && v.date && v.reference)
+                    .filter((v: any) => v.value != null && v.date)
                     .map((v: any) => {
-                        const ref = parseReference(v.reference);
+                        const ref = parseReference(v.reference || DEFAULT_SIGNAL_REFERENCES[name] || '');
                         if (!ref) return null;
                         const doc = v.refId ? docById[v.refId] : undefined;
                         return {
@@ -133,9 +154,14 @@
     $effect(() => {
         const id = $profile?.id;
         if (!id) return;
+        dataReady = false;
         loadDocuments(id).then(() => {
-            loadMedicationContent(id);
-            loadExtractedMedicationContent(id);
+            return Promise.all([
+                loadMedicationContent(id),
+                loadExtractedMedicationContent(id),
+            ]);
+        }).then(() => {
+            dataReady = true;
         });
     });
 
@@ -326,7 +352,12 @@
 
     <div class="timeline-body">
         <div class="chart-area">
-            {#if chartSeries.length > 0 || userDocs.length > 0 || medLanes.length > 0}
+            {#if !dataReady}
+                <div class="loading-shade" out:fade>
+                    <Loading />
+                </div>
+            {/if}
+            {#if dataReady && (chartSeries.length > 0 || userDocs.length > 0 || medLanes.length > 0)}
                 <VerticalReferenceRangeChart
                     series={chartSeries}
                     medications={medLanes}
@@ -344,7 +375,7 @@
                         </div>
                     {/each}
                 </div>
-            {:else}
+            {:else if dataReady}
                 <div class="empty-state">
                     {$t('viewer.timeline.no-signals')}
                 </div>
@@ -468,6 +499,18 @@
         height: 100%;
         padding: 0.5rem;
         box-sizing: border-box;
+    }
+
+    .loading-shade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
     }
 
     .empty-state {

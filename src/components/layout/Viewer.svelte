@@ -34,6 +34,14 @@
     let showShade: boolean = true;
     let modelLoaded: boolean = false;
 
+    // Reset layers and loading state when switching to a different profile
+    let lastProfileId: string | undefined = undefined;
+    $: if ($profile?.id && $profile.id !== lastProfileId) {
+        lastProfileId = $profile.id;
+        activeLayers = ['skeleton'];
+        modelLoaded = false;
+    }
+
     const layers: string[] = ['shade',...Object.keys(objects)];
     const tools: string[] = [
         'selection',
@@ -234,7 +242,7 @@
     .model-tools,
     .model-layers {
         --size: 3.5rem;
-        --radius: 0;
+        --radius: var(--radius-16);
         position: absolute;
         top: 1rem;
         left: 1rem;

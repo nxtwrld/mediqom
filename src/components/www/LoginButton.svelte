@@ -1,61 +1,27 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { Session, User } from '@supabase/supabase-js';
-	
-	export let session: Session | null = null;
-	export let user: User | null = null;
-	export let lang: string;
-	
-	// Static translations to avoid reactive locale changes
-	const translations = {
-		en: {
-			'auth.login': 'Login',
-			'auth.dashboard': 'Dashboard',
-			'auth.profile': 'Profile'
-		},
-		cs: {
-			'auth.login': 'Přihlášení',
-			'auth.dashboard': 'Dashboard',
-			'auth.profile': 'Profil'
-		},
-		de: {
-			'auth.login': 'Anmelden',
-			'auth.dashboard': 'Dashboard',
-			'auth.profile': 'Profil'
-		}
-	};
-	
-	function t(key: string): string {
-		const currentTranslations = translations[lang as keyof typeof translations] || translations.en;
-		return currentTranslations[key as keyof typeof currentTranslations] || key;
+
+	interface Props {
+		session: Session | null;
+		user: User | null;
+		lang: string;
 	}
-	
-	// Get display name from user data
-	function getDisplayName(user: User | null): string {
-		if (!user) return '';
-		
-		// Try user metadata first
-		if (user.user_metadata?.full_name) {
-			return user.user_metadata.full_name;
-		}
-		
-		// Try email username
-		if (user.email) {
-			const emailParts = user.email.split('@');
-			if (emailParts.length > 0) {
-				return emailParts[0];
-			}
-		}
-		
-		// Fallback to user ID (first 8 chars)
-		return user.id.substring(0, 8);
+
+	let { session = null, user = null, lang }: Props = $props();
+
+	function getDisplayName(u: User | null): string {
+		if (!u) return '';
+		if (u.user_metadata?.full_name) return u.user_metadata.full_name;
+		if (u.email) return u.email.split('@')[0];
+		return u.id.substring(0, 8);
 	}
-	
-	$: isAuthenticated = !!session && !!user;
-	$: displayName = getDisplayName(user);
+
+	let isAuthenticated = $derived(!!session && !!user);
+	let displayName = $derived(getDisplayName(user));
 </script>
 
 {#if isAuthenticated}
-	<!-- Authenticated user - show user info and link to dashboard -->
 	<div class="user-menu">
 		<a href="/med" class="user-link">
 			<div class="user-avatar">
@@ -65,35 +31,35 @@
 		</a>
 	</div>
 {:else}
-	<!-- Not authenticated - show login button -->
 	<a href="/auth" class="login-button">
-		{t('auth.login')}
+		{$_('www.nav.login', { default: 'Login' })}
 	</a>
 {/if}
 
 <style>
 	.login-button {
-		padding: 0.5rem 1.25rem;
+		padding: 0.45rem 1rem;
 		border-radius: 0.375rem;
 		text-decoration: none;
 		font-weight: 500;
+		font-size: 0.85rem;
 		transition: all 0.2s;
 		white-space: nowrap;
 		background: transparent;
-		color: var(--color-text, #333);
-		border: 1px solid var(--color-border, #e0e0e0);
+		color: var(--www-text, #1a1a2e);
+		border: 1px solid rgba(0, 0, 0, 0.15);
 	}
-	
+
 	.login-button:hover {
-		background: var(--color-bg-secondary, #f8f9fa);
-		border-color: var(--color-text, #333);
-		transform: translateY(-1px);
+		color: var(--www-text, #1a1a2e);
+		border-color: rgba(0, 0, 0, 0.3);
+		background: rgba(0, 0, 0, 0.03);
 	}
-	
+
 	.user-menu {
 		position: relative;
 	}
-	
+
 	.user-link {
 		display: flex;
 		align-items: center;
@@ -101,48 +67,44 @@
 		padding: 0.25rem 0.75rem;
 		border-radius: 0.375rem;
 		text-decoration: none;
-		color: var(--color-text, #333);
+		color: var(--www-text, #1a1a2e);
 		transition: all 0.2s;
 		border: 1px solid transparent;
 	}
-	
+
 	.user-link:hover {
-		background: var(--color-bg-secondary, #f8f9fa);
-		border-color: var(--color-border, #e0e0e0);
+		color: var(--www-text, #1a1a2e);
+		background: rgba(0, 0, 0, 0.04);
 	}
-	
+
 	.user-avatar {
-		width: 2rem;
-		height: 2rem;
+		width: 1.75rem;
+		height: 1.75rem;
 		border-radius: 50%;
-		background: var(--color-primary, #007bff);
-		color: white;
+		background: var(--color-primary, #16d3dd);
+		color: #0a0e1a;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-weight: 600;
-		font-size: 0.875rem;
+		font-size: 0.8rem;
 	}
-	
+
 	.user-name {
 		font-weight: 500;
+		font-size: 0.85rem;
 		max-width: 120px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	
-	/* Mobile styles */
+
 	@media (max-width: 768px) {
 		.login-button,
 		.user-link {
 			width: 100%;
 			text-align: center;
 			padding: 0.75rem 1.25rem;
-		}
-		
-		.user-name {
-			max-width: none;
 		}
 	}
 </style>
