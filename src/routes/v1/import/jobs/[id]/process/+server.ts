@@ -262,19 +262,30 @@ export const POST: RequestHandler = async ({
               tokenUsage: { total: 0 },
             };
 
+            let lastDicomDbProgress = fileProgress;
             const workflowResult = await processMedicalImaging(
               imagingState,
               undefined,
               (event) => {
+                const mappedProgress = Math.round(
+                  5 + ((i + (event.progress || 0) / 100) / fileManifest.length) * 25,
+                );
                 sendEvent({
                   type: "progress",
                   stage: `dicom_${event.stage}`,
-                  progress: Math.round(
-                    5 + ((i + (event.progress || 0) / 100) / fileManifest.length) * 25,
-                  ),
+                  progress: mappedProgress,
                   message: event.message || `Processing DICOM ${file.name}...`,
                   timestamp: Date.now(),
                 });
+
+                // Persist to DB for polling clients (throttled: >= 2% change)
+                if (mappedProgress - lastDicomDbProgress >= 2) {
+                  lastDicomDbProgress = mappedProgress;
+                  updateJob(supabase, job.id, {
+                    progress: mappedProgress,
+                    message: event.message || `Processing DICOM ${file.name}...`,
+                  } as any);
+                }
               },
             );
 
@@ -302,18 +313,29 @@ export const POST: RequestHandler = async ({
             extractionResults.push(assessResult);
           } else {
             // Existing generic extraction path for PDFs and images
+            let lastExtractDbProgress = fileProgress;
             const assessResult = await assess(
-              { images: file.processedImages },
+              { images: file.processedImages, layoutDetections: file.layoutDetections },
               (stage, progress, message) => {
+                const mappedProgress = Math.round(
+                  5 + ((i + progress / 100) / fileManifest.length) * 25,
+                );
                 sendEvent({
                   type: "progress",
                   stage: `extraction_${stage}`,
-                  progress: Math.round(
-                    5 + ((i + progress / 100) / fileManifest.length) * 25,
-                  ),
+                  progress: mappedProgress,
                   message,
                   timestamp: Date.now(),
                 });
+
+                // Persist to DB for polling clients (throttled: >= 2% change)
+                if (mappedProgress - lastExtractDbProgress >= 2) {
+                  lastExtractDbProgress = mappedProgress;
+                  updateJob(supabase, job.id, {
+                    progress: mappedProgress,
+                    message,
+                  } as any);
+                }
               },
             );
 
@@ -378,6 +400,7 @@ export const POST: RequestHandler = async ({
           text: string;
           title: string;
           isPreAnalyzed: boolean;
+          embeddedImages?: string[];
         }[] = [];
         for (let ai = 0; ai < extractionResults.length; ai++) {
           const assessment = extractionResults[ai];
@@ -396,93 +419,153 @@ export const POST: RequestHandler = async ({
 
           for (let di = 0; di < assessment.documents.length; di++) {
             const doc = assessment.documents[di];
-            const documentText = assessment.pages
-              .filter((p: any) => doc.pages.includes(p.page))
+            const docPages = assessment.pages.filter((p: any) =>
+              doc.pages.includes(p.page),
+            );
+            const documentText = docPages
               .map((p: any) => p.text)
               .join("\n");
+
+            // Collect embedded images from the document's pages
+            const embeddedImages: string[] = [];
+            for (const p of docPages) {
+              if (p.images && Array.isArray(p.images)) {
+                for (const img of p.images) {
+                  if (img.data) {
+                    embeddedImages.push(img.data);
+                  }
+                }
+              }
+            }
+
             allDocuments.push({
               assessmentIndex: ai,
               docIndex: di,
               text: documentText,
               title: doc.title || `Document ${ai + 1}-${di + 1}`,
               isPreAnalyzed: false,
+              embeddedImages,
             });
           }
         }
 
-        for (let i = 0; i < allDocuments.length; i++) {
-          const doc = allDocuments[i];
-          const docProgress = Math.round(30 + (i / allDocuments.length) * 65);
+        // Send document detection event
+        sendEvent({
+          type: "progress",
+          stage: "documents_detected",
+          progress: 30,
+          message: `Detected ${allDocuments.length} document${allDocuments.length !== 1 ? "s" : ""}`,
+          data: {
+            documentCount: allDocuments.length,
+            titles: allDocuments.map((d) => d.title),
+          },
+          timestamp: Date.now(),
+        });
+
+        // Parallel document analysis — all documents processed concurrently
+        const progressPerDoc = 65 / allDocuments.length;
+
+        const analysisPromises = allDocuments.map((doc, i) => {
+          const docProgressBase = 30 + i * progressPerDoc;
 
           sendEvent({
             type: "progress",
-            stage: "analysis",
-            progress: docProgress,
+            stage: `analysis_doc_${i + 1}`,
+            progress: Math.round(docProgressBase),
             message: `Analyzing document ${i + 1} of ${allDocuments.length}: ${doc.title}`,
             timestamp: Date.now(),
           });
 
-          await updateJob(supabase, job.id, {
-            stage: "analysis",
-            progress: docProgress,
-            message: `Analyzing ${doc.title}`,
-          } as any);
-
           // DICOM: assessment already contains full analysis from medical imaging workflow
           if (doc.isPreAnalyzed) {
-            console.log(`✅ [Import] Using pre-analyzed DICOM result for: ${doc.title}`);
-            analysisResults.push(extractionResults[doc.assessmentIndex] as any);
-          } else {
-            // Run LangGraph workflow for regular documents
-            const workflowResult = await runDocumentProcessingWorkflow(
-              [], // images not needed for text analysis
-              doc.text,
-              job.language,
-              {
-                useEnhancedSignals: true,
-                enableExternalValidation: false,
-                streamResults: true,
-                jobId: job.id, // Add jobId for debug output
-              },
-              (event: any) => {
-                sendEvent({
-                  type: "progress",
-                  stage: `analysis_${event.stage || "processing"}`,
-                  progress: Math.round(
-                    30 +
-                      ((i + (event.progress || 0) / 100) / allDocuments.length) *
-                        65,
-                  ),
-                  message: event.message || `Processing ${doc.title}...`,
-                  timestamp: Date.now(),
-                });
-              },
-            );
+            console.log(`[Import] Using pre-analyzed DICOM result for: ${doc.title}`);
+            return Promise.resolve({
+              index: i,
+              result: extractionResults[doc.assessmentIndex] as ReportAnalysis,
+            });
+          }
 
-            const result = convertWorkflowResult(workflowResult, doc.text);
-            analysisResults.push(result);
+          // Run LangGraph workflow for regular documents
+          let lastDocDbProgress = Math.round(docProgressBase);
+          return runDocumentProcessingWorkflow(
+            doc.embeddedImages || [], // pass embedded images from page crops
+            doc.text,
+            job.language,
+            {
+              useEnhancedSignals: true,
+              enableExternalValidation: false,
+              streamResults: true,
+              jobId: job.id,
+            },
+            (event: any) => {
+              const mappedProgress = Math.round(
+                docProgressBase +
+                  ((event.progress || 0) / 100) * progressPerDoc,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `analysis_doc_${i + 1}`,
+                progress: mappedProgress,
+                message: `[${doc.title}] ${event.message || "Processing..."}`,
+                timestamp: Date.now(),
+              });
 
+              // Persist to DB for polling clients (throttled: >= 2% change)
+              if (mappedProgress - lastDocDbProgress >= 2) {
+                lastDocDbProgress = mappedProgress;
+                updateJob(supabase, job.id, {
+                  progress: mappedProgress,
+                  message: `Analyzing ${doc.title}`,
+                } as any);
+              }
+            },
+          ).then((workflowResult) => {
             // Save individual document workflow for debugging
             saveDocumentWorkflow(job.id, i, workflowResult);
-          }
 
-          // Persist after each document (with encryption if available)
-          if (useEncryption && jobKey) {
-            const encryptedAnalysis = await encryptAES(
-              jobKey,
-              JSON.stringify(analysisResults),
-            );
-            await updateJob(supabase, job.id, {
-              encrypted_analysis_results: encryptedAnalysis,
-              progress: Math.round(30 + ((i + 1) / allDocuments.length) * 65),
-            } as any);
-          } else {
-            // Fallback to plaintext for users without encryption keys
-            await updateJob(supabase, job.id, {
-              analysis_results: analysisResults,
-              progress: Math.round(30 + ((i + 1) / allDocuments.length) * 65),
-            } as any);
-          }
+            const result = convertWorkflowResult(workflowResult, doc.text);
+
+            // Warn about workflow errors (e.g. context length exceeded)
+            if (result.errors && result.errors.length > 0) {
+              console.warn(
+                `[Import] Document "${doc.title}" had workflow errors:`,
+                result.errors,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `analysis_doc_${i + 1}`,
+                progress: Math.round(docProgressBase + progressPerDoc),
+                message: `Document "${doc.title}" analysis incomplete: ${result.errors.map((e: any) => e.error).join("; ")}`,
+                timestamp: Date.now(),
+              });
+            }
+
+            return { index: i, result };
+          });
+        });
+
+        const analysisSettled = await Promise.all(analysisPromises);
+
+        // Sort by original index and extract results
+        analysisResults = analysisSettled
+          .sort((a, b) => a.index - b.index)
+          .map((r) => r.result);
+
+        // Persist all results at once (with encryption if available)
+        if (useEncryption && jobKey) {
+          const encryptedAnalysis = await encryptAES(
+            jobKey,
+            JSON.stringify(analysisResults),
+          );
+          await updateJob(supabase, job.id, {
+            encrypted_analysis_results: encryptedAnalysis,
+            progress: 95,
+          } as any);
+        } else {
+          await updateJob(supabase, job.id, {
+            analysis_results: analysisResults,
+            progress: 95,
+          } as any);
         }
 
         // Save analysis results for debugging

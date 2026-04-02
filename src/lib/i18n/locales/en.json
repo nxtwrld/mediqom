@@ -659,6 +659,13 @@
         "error": {
           "update-failed": "Failed to update",
           "network": "Network error"
+        },
+        "appearance": {
+          "title": "Appearance",
+          "description": "Choose how the app looks. System follows your device settings.",
+          "system": "System",
+          "light": "Light",
+          "dark": "Dark"
         }
       },
       "profile": {

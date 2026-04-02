@@ -518,12 +518,14 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
       path: attachmentsUrls[i].path,
       type: a.type,
       thumbnail: a.thumbnail, // Preserve thumbnail from original attachment
+      ...(a.embedded && { embedded: a.embedded, imageId: a.imageId }),
     })),
     ...attachmentsWithoutFiles.map((a: Attachment) => ({
       url: a.url,
       path: a.path,
       type: a.type,
       thumbnail: a.thumbnail, // Preserve thumbnail from existing attachment
+      ...(a.embedded && { embedded: a.embedded, imageId: a.imageId }),
     })),
   ];
   logger.documents.info("Add document", { document });

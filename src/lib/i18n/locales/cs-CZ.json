@@ -642,6 +642,13 @@
         "error": {
           "update-failed": "Aktualizace selhala",
           "network": "Chyba sítě"
+        },
+        "appearance": {
+          "title": "Vzhled",
+          "description": "Zvolte vzhled aplikace. Systém sleduje nastavení vašeho zařízení.",
+          "system": "Systém",
+          "light": "Světlý",
+          "dark": "Tmavý"
         }
       },
       "profile": {

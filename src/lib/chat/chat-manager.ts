@@ -13,6 +13,7 @@ import type {
   ContextPrompt,
   AskAboutEvent,
 } from "./types.d";
+import type { WidgetInteraction } from "./widgets/types";
 import { generateId } from "$lib/utils/id";
 import ui from "$lib/ui";
 import { t } from "$lib/i18n";
@@ -488,6 +489,53 @@ export class ChatManager {
       await this.sendMessage(displayMessage, aiMessage, prefetchedToolKey);
     } catch (error) {
       logger.namespace('Chat').error('handleAskAbout: sendMessage failed', { error });
+    }
+  }
+
+  /**
+   * Handle interaction from a Generative UI widget.
+   * Converts the interaction into a conversation message so the AI can respond.
+   */
+  async handleWidgetInteraction(interaction: WidgetInteraction): Promise<void> {
+    const state = get(chatStore);
+    if (!state.context) return;
+
+    // For anatomy_highlight focus action, delegate to the existing focusAnatomy method
+    if (interaction.widgetType === 'anatomy_highlight' && interaction.action === 'focus_anatomy') {
+      await this.focusAnatomy(interaction.payload.bodyPart);
+      return;
+    }
+
+    // Build a human-readable message from the interaction
+    const displayMessage = this.buildWidgetInteractionMessage(interaction);
+
+    // Build an AI-facing message with structured context
+    const contextBlock = `[Widget interaction context:]\n\`\`\`json\n${JSON.stringify(interaction, null, 2)}\n\`\`\``;
+    const aiMessage = `${displayMessage}\n\n${contextBlock}`;
+
+    try {
+      await this.sendMessage(displayMessage, aiMessage);
+    } catch (error) {
+      logger.namespace('Chat').error('handleWidgetInteraction: sendMessage failed', { error });
+    }
+  }
+
+  private buildWidgetInteractionMessage(interaction: WidgetInteraction): string {
+    const { widgetType, action, payload } = interaction;
+
+    switch (widgetType) {
+      case 'diagnosis_card':
+        return `Tell me more about ${payload.name || 'this diagnosis'}${payload.icd10 ? ` (${payload.icd10})` : ''}`;
+      case 'symptom_summary':
+        return `Tell me more about the symptom: ${payload.text || 'this symptom'}`;
+      case 'treatment_plan':
+        return `Tell me more about ${payload.name || 'this treatment'}`;
+      case 'lab_trend_chart':
+        return `Tell me more about the ${payload.code || 'lab'} trend`;
+      case 'data_table':
+        return `Tell me more about this data`;
+      default:
+        return `Tell me more about this`;
     }
   }
 
@@ -1173,6 +1221,7 @@ export class ChatManager {
                 documentsReferenced: event.data.documentReferences,
                 toolsUsed: [],
                 sources: event.data.sources || [],
+                widgets: event.data.widgets || [],
               };
 
               // Update the message with metadata

@@ -57,13 +57,14 @@ export const inputValidationNode = async (
   }
 
   if (state.images && state.images.length > 0) {
-    // For now, we only support single image (backwards compatibility)
-    content.push({
-      type: "image_url" as const,
-      image_url: {
-        url: state.images[0],
-      },
-    });
+    for (const image of state.images) {
+      content.push({
+        type: "image_url" as const,
+        image_url: {
+          url: image,
+        },
+      });
+    }
   }
 
   // Emit completion or error

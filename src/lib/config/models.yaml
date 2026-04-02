@@ -82,6 +82,13 @@ flows:
     description: "Extract raw text from document images with maximum OCR accuracy"
     fallback_models: ["gpt4"]
 
+  # Image analysis (dedicated vision call for precise bounding box extraction)
+  image_analysis:
+    provider: "openai"
+    model: "gpt4"
+    description: "Detect and locate embedded images in document pages with precise bounding boxes"
+    fallback_models: ["gpt4_turbo"]
+
   # Document extraction (OCR + initial assessment - legacy single-pass)
   extraction:
     provider: "openai"
@@ -115,7 +122,7 @@ flows:
   # Document type routing
   document_type_routing:
     provider: "openai" # Using OpenAI for development
-    model: "gpt3_5" # Use cheaper model for simple routing task
+    model: "gpt4" # GPT-4o has 128k context — handles large OCR text
     description: "Route documents to appropriate processing pipelines"
     fallback_models: ["gpt4_turbo", "gpt4"]
     # Alternative: provider: "google", model: "gemini_pro"
@@ -161,15 +168,15 @@ performance:
 # Cost optimization
 cost_optimization:
   # Use cheaper models for simple tasks
-  enable_cost_optimization: true
+  enable_cost_optimization: false
   simple_task_model: "gpt3_5"
   complex_task_model: "gpt4"
 
   # Task complexity classification
   simple_tasks:
-    - "document_type_routing"
     - "feature_detection"
   complex_tasks:
+    - "document_type_routing"
     - "extraction"
     - "medical_analysis"
     - "signal_processing"

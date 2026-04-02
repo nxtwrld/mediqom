@@ -24,6 +24,7 @@
     import type { Profile } from "$lib/types.d";
     import { isOpen as chatIsOpen } from "$lib/chat/store";
     import { device } from "$lib/device";
+    import { initTheme } from "$lib/theme/store";
     import { saveHealthProfile } from "$lib/health/save";
     import user from "$lib/user";
     import { pendingJobs, activeJobs } from "$lib/import/job-store";
@@ -452,6 +453,7 @@
     onMount(() => {
         logger.ui.info("UI mounted");
         device.init();
+        initTheme();
 
         // Android hardware back button: close overlay instead of exiting app
         let backButtonHandle: Promise<{ remove: () => void }> | null = null;

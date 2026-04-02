@@ -6,6 +6,7 @@
   import ui from '$lib/ui';
   import { t } from '$lib/i18n';
   import ContextPrompt from './ContextPrompt.svelte';
+  import ChatWidget from './widgets/ChatWidget.svelte';
   import Markdown from '$components/ui/Markdown.svelte';
 
   /**
@@ -309,6 +310,18 @@
               {/if}
             </div>
             
+            <!-- Generative UI Widgets -->
+            {#if message.metadata?.widgets && message.metadata.widgets.length > 0}
+              <div class="message-widgets">
+                {#each message.metadata.widgets as widgetSpec (widgetSpec.id)}
+                  <ChatWidget
+                    spec={widgetSpec}
+                    onInteraction={(interaction) => chatManager.handleWidgetInteraction(interaction)}
+                  />
+                {/each}
+              </div>
+            {/if}
+
             <!-- Anatomy Focus Buttons -->
             {#if message.metadata?.anatomyFocus && message.metadata.anatomyFocus.length > 0}
               <div class="anatomy-actions">
@@ -689,6 +702,15 @@
   .message-text :global(.markdown ul),
   .message-text :global(.markdown ol) {
     margin: 0.5em 0;
+  }
+
+  .message-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .message-time {

@@ -12,7 +12,7 @@
     import SelectProfile from './SelectProfile.svelte';
     import { play } from '$components/ui/Sounds.svelte';
     import type { Profile } from '$lib/types.d';
-    import { mergeNamesOnReports } from '$lib/profiles/tools';
+    import { mergeNamesOnReports, PROFILE_NEW_ID } from '$lib/profiles/tools';
     import ImportDocument from './ImportDocument.svelte';
     import ImportProfile from './ImportProfile.svelte';
     import ScreenOverlay from '$components/ui/ScreenOverlay.svelte';
@@ -165,7 +165,7 @@
                 await processJob(id, (event) => {
                     if (event.stage.includes('extract') || event.stage === 'initialization') {
                         currentStage = 'extract';
-                    } else if (event.stage.includes('analyz')) {
+                    } else if (event.stage === 'documents_detected' || event.stage.includes('analyz') || event.stage.startsWith('analysis_doc_')) {
                         currentStage = 'analyze';
                     }
                     stageProgress = event.progress;
@@ -225,21 +225,24 @@
 
             // Create persistent job — use task files (possibly decrypted clones) for caching
             const filesToCache = newTasks.flatMap(t => t.files as File[]);
-            const id = await createJob(newTasks, filesToCache, language);
-            currentJobId = id;
+            const job = await createJob(newTasks, filesToCache, language);
+            currentJobId = job.id;
 
             // Process with SSE + polling fallback
-            const completedJob = await processJob(id, (event) => {
+            const completedJob = await processJob(job.id, (event) => {
                 if (event.stage.includes('extract') || event.stage === 'initialization') {
                     currentStage = 'extract';
-                } else if (event.stage.includes('analyz')) {
+                } else if (event.stage === 'documents_detected') {
+                    // Document count detected — could update UI in the future
+                    currentStage = 'analyze';
+                } else if (event.stage.includes('analyz') || event.stage.startsWith('analysis_doc_')) {
                     currentStage = 'analyze';
                 }
                 stageProgress = event.progress;
             });
 
             // Assemble documents from results
-            const cachedFiles = await getCachedFiles(id);
+            const cachedFiles = await getCachedFiles(job.id);
 
             // Use decryptJobResults to handle both encrypted and plaintext jobs
             const { extraction, analysis } = await decryptJobResults(
@@ -316,6 +319,24 @@
         processingFiles = [...processingFiles.filter(file => !files.includes(file))];
     }
 
+    function reassignDocumentProfile(doc: Document, newProfile: Profile) {
+        // Remove doc from its current group
+        let sourceGroup = byProfileDetected.find(g => g.reports.includes(doc));
+        if (!sourceGroup) return;
+        sourceGroup.reports = sourceGroup.reports.filter(d => d !== doc);
+
+        // Find or create the target profile group
+        let targetGroup = byProfileDetected.find(g => g.profile.id === newProfile.id);
+        if (!targetGroup) {
+            targetGroup = { profile: newProfile, reports: [] };
+            byProfileDetected.push(targetGroup);
+        }
+        targetGroup.reports.push(doc);
+
+        // Remove empty groups
+        byProfileDetected = byProfileDetected.filter(g => g.reports.length > 0);
+    }
+
     let savingDocumentsInProgress: boolean = $state(false);
 
     async function add() {
@@ -388,7 +409,7 @@
                     <div class="report-import">
                         <ImportDocument {doc} onclick={() => previewReport = doc} onremove={() => removeItem('results', doc)} />
                         {#key JSON.stringify(profileDetected.profile)}
-                        <SelectProfile contact={profileDetected.profile} bind:selected={profileDetected.profile}  />
+                        <SelectProfile contact={profileDetected.profile} selected={profileDetected.profile} onchange={(newProfile) => reassignDocumentProfile(doc, newProfile)} />
                         {/key}
                     </div>
                 {/each}

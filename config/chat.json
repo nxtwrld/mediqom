@@ -93,6 +93,13 @@
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
           "Example: If asked 'What medications am I taking?', use the queryMedicalHistory tool with category: 'medications'",
           "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
       },
       "responseSchema": {
@@ -219,6 +226,13 @@
           "When asked about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
           "Never answer questions about {profileName}'s specific conditions, medications, procedures, or history from general knowledge alone — always verify against their records using the available tools."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
       },
       "responseSchema": {
@@ -343,6 +357,13 @@
           "Do not state 'no data available' without first attempting to use the relevant tools.",
           "Example: For medication review, use queryMedicalHistory with category: 'medications'",
           "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when presenting: lab trends (lab_trend_chart), differential diagnoses (diagnosis_card), reported symptoms (symptom_summary), treatment plans (treatment_plan), comparative data (data_table), anatomical regions (anatomy_highlight), or clinical metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with clinical explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Clinicians can click them to drill down into details."
         ]
       },
       "responseSchema": {
@@ -627,6 +648,45 @@
               "required": ["name", "parameters", "reason"]
             },
             "description": "MCP tools to call ONLY when the needed data was NOT available in the provided context or pre-fetched data. If the user message already contained medical data (e.g., in a pre-fetched JSON block), or the assembled context contained the answer, do NOT include tool calls. Only include tools when your response genuinely requires data you do not have."
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique widget instance ID (e.g. 'w_hba1c_trend')"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "lab_trend_chart",
+                    "diagnosis_card",
+                    "symptom_summary",
+                    "treatment_plan",
+                    "data_table",
+                    "anatomy_highlight",
+                    "progress_indicator"
+                  ],
+                  "description": "Widget type from the registry"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Short display title shown above the widget"
+                },
+                "interactive": {
+                  "type": "boolean",
+                  "description": "Whether the widget supports user interaction (click to drill down)"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Widget-specific data. For lab_trend_chart: {code, unit, series: [{date, value, referenceRange?}], ranges?: [{name, min, max}], status}. For diagnosis_card: {name, probability (0-1), priority (1-10), icd10?, reasoning, confidence (0-1), redFlags?: string[], requiresInvestigation?}. For symptom_summary: {text, severity (1-10), confidence (0-1), source ('transcript'|'medical_history'|'suspected'), duration?, characteristics?: string[]}. For treatment_plan: {type ('medication'|'procedure'|'therapy'|'lifestyle'|'investigation'|'referral'), name, dosage?, priority (1-10), confidence (0-1), effectiveness? (0-1), description?, urgency? ('immediate'|'urgent'|'routine'), duration?}. For data_table: {headers: string[], rows: any[][], caption?}. For anatomy_highlight: {bodyParts: string[] (use exact anatomy IDs), description?}. For progress_indicator: {value (0-100), label, unit?}."
+                }
+              },
+              "required": ["id", "type", "data"]
+            },
+            "description": "Visual widgets to render inline in the chat message. Use when discussing quantitative data (lab trends as charts), diagnoses (as cards), treatments (as cards), or structured comparisons (as tables). Always accompany widgets with explanatory text. Maximum 3 widgets per response. Only generate widgets when the data is available in context."
           }
         },
         "required": ["response"]

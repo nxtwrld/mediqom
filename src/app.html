@@ -67,6 +67,13 @@
       crossorigin
     />
 
+    <script>
+      (function() {
+        var s = localStorage.getItem('theme');
+        var dark = s === 'dark' || (!s && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      })();
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">

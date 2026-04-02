@@ -1,5 +1,5 @@
 .toolbar {
-  --button-color: var(--color-gray-300);
+  --button-color: var(--color-background);
   --radius: 0;
   display: flex;
   justify-content: stretch;

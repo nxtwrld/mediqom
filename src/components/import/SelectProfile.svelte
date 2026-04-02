@@ -17,9 +17,10 @@
         contact: DetectedProfileData;
         linkFrom?: 'top' | 'bottom';
         selected?: Profile;
+        onchange?: (profile: Profile) => void;
     }
 
-    let { contact, linkFrom = 'top', selected = $bindable() }: Props = $props();
+    let { contact, linkFrom = 'top', selected = $bindable(), onchange }: Props = $props();
 
     let profilesFound = $derived(contact ? findInProfiles(contact) : []);
 
@@ -34,6 +35,7 @@
     function selectProfile(profile: Profile) {
         selected = profile;
         showSelectProfileModal = false;
+        onchange?.(profile);
     }
 </script>
 

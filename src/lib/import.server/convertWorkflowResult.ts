@@ -240,5 +240,7 @@ export function convertWorkflowResult(
     confidence: actualContent.confidence,
     processingComplexity: actualContent.processingComplexity,
     enhancedFields: actualContent.enhancedFields,
+    // Propagate workflow errors so callers can detect failed analysis
+    errors: workflowResult.errors?.length > 0 ? workflowResult.errors : undefined,
   } as ReportAnalysis;
 }

@@ -3,18 +3,36 @@
     import Markdown from "$components/ui/Markdown.svelte";
     import { t } from '$lib/i18n';
     import user from '$lib/user';
-    
+    import type { Document } from '$lib/documents/types.d';
+
     interface Props {
         data: {
         text: string;
         original: string;
         language: string;
     };
+        document?: Document;
     }
 
-    let { data }: Props = $props();
+    let { data, document: doc }: Props = $props();
 
     let viewOriginal: boolean = $state(false);
+
+    function resolveEmbedded(markdown: string): string {
+        if (!markdown || !doc?.content?.attachments) return markdown;
+        const map = new Map(
+            (doc.content.attachments as any[] || [])
+                .filter((a: any) => a.embedded && a.imageId && a.thumbnail)
+                .map((a: any) => [a.imageId, a.thumbnail] as [string, string])
+        );
+        return markdown.replace(
+            /!\[([^\]]*)\]\(embedded:(img-\d+)\)/g,
+            (_, alt, id) => {
+                const src = map.get(id);
+                return src ? `![${alt}](${src})` : '';
+            }
+        );
+    }
 
 </script>
 
@@ -31,13 +49,13 @@
             <button class="a" onclick={() => viewOriginal = !viewOriginal}>{ $t('report.toggle-original-contents') }</button>
         </div>
         <div class="panel">
-            <Markdown text={viewOriginal ? data.original : data.text} />
+            <Markdown text={resolveEmbedded(viewOriginal ? data.original : data.text)} />
         </div>
-    {:else}   
+    {:else}
         <div class="panel">
-            <Markdown text={data.original} />
+            <Markdown text={resolveEmbedded(data.original)} />
         </div>
-    {/if}  
+    {/if}
 {/if}
 
 <style>

@@ -29,6 +29,7 @@ import { checkPassword } from "./pdf";
 import { resizeImage } from "$lib/images";
 import { THUMBNAIL_SIZE, PROCESS_SIZE } from "./CONFIG";
 import { browser } from "$app/environment";
+import { detectLayoutForPages } from "$lib/layout-detection";
 
 export const files: Writable<File[]> = writable([]);
 
@@ -345,6 +346,29 @@ export async function createTasks(files: File[]): Promise<Task[]> {
       files: groupped.images,
     });
   }
+
+  // Run client-side layout detection on all page images (DocLayout-YOLO via ONNX)
+  if (browser) {
+    await Promise.all(
+      tasks.map(async (task) => {
+        if (task.type === "application/dicom") return; // DICOM handled separately
+        const images = Array.isArray(task.data) ? (task.data as string[]) : [];
+        if (images.length === 0) return;
+        try {
+          const results = await detectLayoutForPages(images);
+          if (results.length > 0) {
+            task.layoutDetections = results;
+            console.log(
+              `[LayoutDetection] ${task.title}: detected layout on ${results.length} page(s)`,
+            );
+          }
+        } catch (err) {
+          console.warn(`[LayoutDetection] Failed for ${task.title}:`, err);
+        }
+      }),
+    );
+  }
+
   return tasks;
 }
 

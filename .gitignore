@@ -24,3 +24,5 @@ vite.config.ts.timestamp-*
 mobile/dist
 
 gen-lang-client-0453401472-eb964eee450b.json
+
+tmp/

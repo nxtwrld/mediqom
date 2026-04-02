@@ -328,6 +328,7 @@ async function processAIRequest(
         consentRequests: structuredData.consentRequests || [],
         toolCalls: structuredData.toolCalls || [],
         clarifyingQuestions: structuredData.clarifyingQuestions || [],
+        widgets: structuredData.widgets || [],
         sources: validatedSources,
         tokenUsage: tokenUsage.total,
         mode,

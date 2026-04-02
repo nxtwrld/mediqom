@@ -642,6 +642,13 @@
         "error": {
           "update-failed": "Aktualisierung fehlgeschlagen",
           "network": "Netzwerkfehler"
+        },
+        "appearance": {
+          "title": "Erscheinungsbild",
+          "description": "Wählen Sie das Aussehen der App. System folgt Ihren Geräteeinstellungen.",
+          "system": "System",
+          "light": "Hell",
+          "dark": "Dunkel"
         }
       },
       "profile": {

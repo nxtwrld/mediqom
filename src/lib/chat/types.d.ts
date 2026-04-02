@@ -1,4 +1,6 @@
 // AI Chat Types
+import type { WidgetSpec } from "./widgets/types";
+
 export type ChatMode = "patient" | "caregiver" | "clinical";
 export type ChatMessageRole = "user" | "assistant" | "system";
 
@@ -53,6 +55,8 @@ export interface ChatMessage {
     // Tool execution result
     toolResult?: ToolCallResult;
     sources?: SourceCitation[];
+    // Generative UI widgets
+    widgets?: WidgetSpec[];
     // Keep legacy support temporarily
     documentPrompt?: {
       documentId: string;
@@ -185,6 +189,7 @@ export interface ChatResponse {
   consentRequests?: ConsentRequest[];
   clarifyingQuestions?: ClarifyingQuestion[];
   sources?: SourceCitation[];
+  widgets?: WidgetSpec[];
 }
 
 export interface AskAboutEvent {

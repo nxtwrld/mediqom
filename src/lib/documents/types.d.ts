@@ -113,4 +113,6 @@ export interface Attachment {
   type?: string;
   thumbnail?: string;
   file?: string; // Base64 encoded file data
+  embedded?: boolean; // true for cropped embedded images (photos, diagrams, charts)
+  imageId?: string; // stable reference ID e.g. "img-0" for markdown references
 }

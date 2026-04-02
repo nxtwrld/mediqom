@@ -335,6 +335,41 @@ export async function assembleDocuments(
         }
       }
 
+      // Collect embedded images from assessment pages for this document
+      const embeddedAttachments: {
+        thumbnail: string;
+        type: string;
+        file: string;
+        path: string;
+        url: string;
+        embedded: boolean;
+        imageId: string;
+      }[] = [];
+      const docPages = assessment.pages.filter((p) =>
+        doc.pages.includes(p.page),
+      );
+      let imgIdx = 0;
+      for (const page of docPages) {
+        if (page.images?.length) {
+          for (const img of page.images) {
+            if (img.data) {
+              embeddedAttachments.push({
+                thumbnail: img.data,
+                type: "image/jpeg",
+                file: img.data.includes(",")
+                  ? img.data.split(",")[1]
+                  : img.data,
+                path: "",
+                url: "",
+                embedded: true,
+                imageId: `img-${imgIdx}`,
+              });
+              imgIdx++;
+            }
+          }
+        }
+      }
+
       const content: any = {
         tags: analysis?.tags || [],
         title: reportData.title || doc.title,
@@ -348,6 +383,16 @@ export async function assembleDocuments(
         ...reportData,
       };
 
+      // Insert embedded image references into report content
+      if (embeddedAttachments.length > 0) {
+        const imgMarkdown = embeddedAttachments
+          .map((img) => `\n![Embedded image](embedded:${img.imageId})`)
+          .join("\n");
+        const section = "\n\n---\n\n### Embedded Images\n" + imgMarkdown;
+        if (content.content) content.content += section;
+        if (content.localizedContent) content.localizedContent += section;
+      }
+
       const importDoc = {
         title: reportData.title || doc.title || `Document ${ai + 1}-${di + 1}`,
         date: reportData.date || doc.date || new Date().toISOString(),
@@ -358,7 +403,10 @@ export async function assembleDocuments(
         state: DocumentState.PROCESSED,
         pages: assessment.pages.filter((p) => doc.pages.includes(p.page)),
         content,
-        attachments: attachment ? [attachment] : [],
+        attachments: [
+          ...(attachment ? [attachment] : []),
+          ...embeddedAttachments,
+        ],
         type: (originalFile?.type || "application/pdf") as any,
         files: originalFile ? [originalFile] : ([] as any),
         task: undefined as any,

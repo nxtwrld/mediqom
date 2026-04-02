@@ -127,6 +127,7 @@
     "pdfmake": "^0.3.5",
     "qrcode": "^1.5.4",
     "remark-mermaid": "^0.2.0",
+    "sharp": "^0.34.5",
     "stripe": "^20.3.1",
     "svelte-easy-crop": "^5.0.0",
     "svelte-file-dropzone": "^2.0.9",

@@ -71,20 +71,20 @@ If the page contains non-text content (photos, schemas, DICOM images, diagrams),
                       x: {
                         type: "integer",
                         description:
-                          "X coordinate of the image in the page. The top left corner is 0.",
+                          "X coordinate of the top-left corner as percentage of page width (0-100).",
                       },
                       y: {
                         type: "integer",
                         description:
-                          "Y coordinate of the image in the page. The top left corner is 0.",
+                          "Y coordinate of the top-left corner as percentage of page height (0-100).",
                       },
                       width: {
                         type: "integer",
-                        description: "Width of the image in pixels.",
+                        description: "Width as percentage of page width (0-100).",
                       },
                       height: {
                         type: "integer",
-                        description: "Height of the image in pixels.",
+                        description: "Height as percentage of page height (0-100).",
                       },
                     },
                   },
@@ -161,17 +161,16 @@ If the page contains non-text content (photos, schemas, DICOM images, diagrams),
  */
 export const ocrExtractionSchema = {
   name: "ocr_extractor",
-  description: `You are a precision OCR system for medical documents. Your ONLY task is to extract text from page images with maximum accuracy. This text will be used for clinical decision-making — errors can have medical consequences.
+  description: `You are a precision OCR system for medical documents. Your task is to extract text from page images with maximum accuracy. Also flag whether each page contains non-text visual content (photos, diagrams, charts, medical images). This text will be used for clinical decision-making — errors can have medical consequences.
 
-CRITICAL RULES:
+CRITICAL OCR RULES:
 - Transcribe EXACTLY what you see on each page. Never substitute similar-looking characters.
 - Preserve ALL diacritical marks precisely. Czech diacritics are critical: ě, š, č, ř, ž, ý, á, í, é, ú, ů, ď, ť, ň (and their uppercase variants: Ě, Š, Č, Ř, Ž, Ý, Á, Í, É, Ú, Ď, Ť, Ň).
 - Do NOT "correct" or normalize anything — transcribe medical terms, drug names, abbreviations, and proper nouns exactly as printed.
 - For tables and lab results: use markdown table format with columns aligned. Preserve exact numbers, decimal separators (comma or period as shown), units, and reference ranges.
 - For numbers and units: transcribe exactly as printed (e.g., "0,31" not "0.31" if comma is used; "µkat/l" not "ukat/l" if µ is shown).
 - Preserve document structure: headings, paragraphs, line breaks, headers, footers.
-- If text is unclear or partially obscured, transcribe your best reading and mark uncertain portions with [?].
-- Do NOT classify documents or detect images — only extract text.`,
+- If text is unclear or partially obscured, transcribe your best reading and mark uncertain portions with [?].`,
   parameters: {
     type: "object",
     properties: {
@@ -191,6 +190,11 @@ CRITICAL RULES:
               type: "string",
               description: `Full text content of this page in markdown format. Use markdown tables for tabular data. Preserve exact characters, diacritics, numbers, units, and formatting as printed on the page.`,
             },
+            hasImages: {
+              type: "boolean",
+              description:
+                "True if the page contains non-text visual content (photos, diagrams, charts, medical images, body schemas). False if text-only.",
+            },
           },
           required: ["page", "text"],
         },
@@ -206,10 +210,27 @@ CRITICAL RULES:
  */
 export const documentAssessmentSchema = {
   name: "document_assessor",
-  description: `You are a document classification system. You receive extracted text from medical document pages. Your task is to:
-1. Determine whether the pages belong to one document or multiple documents.
-2. Classify each document (title, date, language, medical/non-medical, imaging/non-imaging).
-3. Detect any references to embedded images, schemas, or photos mentioned in the text.
+  description: `You are a medical document classification and segmentation system. You receive extracted text from medical document pages. Your task is to split the text into individual medical documents.
+
+CRITICAL — WHAT COUNTS AS A SEPARATE DOCUMENT:
+Each of these is a SEPARATE document, even when printed continuously on the same pages:
+- Each clinic/ambulance visit ("Návštěva ambulance / ordinace", "Vyšetření", consultation) with its own date and doctor
+- Each laboratory result set ("Laboratorní vyšetření") with its own date
+- Each imaging study or sonography ("Sonografické vyšetření", "RTG", "MRI", "CT")
+- Each preventive examination ("Preventivní prohlídka")
+- Each bacteriology/microbiology result ("Bakteriologické vyšetření")
+- Each specialist consultation (orthopedics, ophthalmology, dermatology, etc.)
+- Each standalone procedure or surgery report
+
+COMMON PATTERN — CLINIC PRINTOUTS:
+Medical clinics often print a patient's entire visit history as one continuous PDF. This is NOT one document — it contains many separate encounters that MUST be split. Look for date+doctor+department changes as document boundaries. Headers/footers with patient info and page numbers (e.g., "strana 3/12") are shared across the printout and do NOT indicate a single document.
+
+PAGE SHARING:
+A single page frequently contains parts of multiple documents (e.g., one visit ends and another begins mid-page). When this happens, list that page number in BOTH documents. Pages can appear in multiple document entries.
+
+TITLE AND DATE:
+- Title: Use the visit/exam type and specialty (e.g., "Ortopedie - vyšetření", "Sonografie abdomen", "Laboratorní výsledky"), NOT the clinic name or patient name
+- Date: Use the specific encounter date, NOT the print date or the date from the header
 
 Do NOT re-extract or modify the text — it has already been extracted with high precision.`,
   parameters: {
@@ -218,7 +239,7 @@ Do NOT re-extract or modify the text — it has already been extracted with high
       documents: {
         type: "array",
         description:
-          "List of documents detected across the pages. Split pages into document groups.",
+          "List of individual medical documents/encounters detected. Each visit, lab result, imaging study, or examination with its own date is a separate entry. A 12-page clinic printout may contain 10+ separate documents.",
         items: {
           type: "object",
           properties: {
@@ -273,5 +294,78 @@ Do NOT re-extract or modify the text — it has already been extracted with high
       },
     },
     required: ["documents"],
+  },
+} as FunctionDefinition;
+
+/**
+ * Image analysis schema — precise bounding box extraction for pages flagged with images.
+ * Runs as a separate vision call with a prompt focused entirely on spatial accuracy.
+ */
+export const imageAnalysisSchema = {
+  name: "image_region_detector",
+  description: `You are a precise image region detector. Given a page image from a medical document, identify all non-text visual content (photos, diagrams, body schemas, charts, medical images) and return their exact bounding boxes.
+
+COORDINATE SYSTEM:
+- Origin (0, 0) is the TOP-LEFT corner of the page
+- X axis goes RIGHT, Y axis goes DOWN
+- All values are PERCENTAGES of page dimensions (0-100)
+- x=0, y=0, width=100, height=100 means the ENTIRE page
+
+BOUNDING BOX RULES:
+- The box must FULLY CONTAIN the image including any labels, legends, or annotations that are part of it
+- Include a small margin around the image (2-3%)
+- If an image spans most of the page (>70% area), return x=0, y=0, width=100, height=100
+- For body diagrams/schemas with multiple views, return ONE box covering ALL views together
+
+Return an empty array if there are no visual elements.`,
+  parameters: {
+    type: "object",
+    properties: {
+      images: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            type: {
+              type: "string",
+              enum: ["dicom", "photo", "schema", "chart"],
+              description: "Type of visual content.",
+            },
+            description: {
+              type: "string",
+              description: "Brief description of the image content.",
+            },
+            position: {
+              type: "object",
+              properties: {
+                x: {
+                  type: "integer",
+                  description:
+                    "Left edge as % of page width (0-100).",
+                },
+                y: {
+                  type: "integer",
+                  description:
+                    "Top edge as % of page height (0-100).",
+                },
+                width: {
+                  type: "integer",
+                  description:
+                    "Width as % of page width (0-100).",
+                },
+                height: {
+                  type: "integer",
+                  description:
+                    "Height as % of page height (0-100).",
+                },
+              },
+              required: ["x", "y", "width", "height"],
+            },
+          },
+          required: ["type", "description", "position"],
+        },
+      },
+    },
+    required: ["images"],
   },
 } as FunctionDefinition;

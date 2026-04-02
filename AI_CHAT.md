@@ -1522,3 +1522,67 @@ The enhanced AI Medical Chat system with 3rd party integration creates a revolut
 6. **Delivers Real Value**: Users receive tangible benefits in exchange for their data contributions
 
 This architecture transforms the chat system from a single-source information provider into an intelligent orchestrator of the entire healthcare AI ecosystem, while maintaining the highest standards of user control, privacy, and medical safety.
+
+## Generative UI — Widget System
+
+The chat supports **Generative UI**: the AI generates structured widget specifications alongside text responses, which render as interactive Svelte components inline within chat messages.
+
+### Architecture
+
+```
+AI Response (Phase 2 structured output)
+  └─ widgets: WidgetSpec[]  ← new field in response schema
+       │
+Server (SSE metadata event)
+  └─ passes widgets through to client
+       │
+ChatManager (metadata handler)
+  └─ attaches widgets to ChatMessage.metadata
+       │
+AIChatSidebar.svelte
+  └─ renders each WidgetSpec via ChatWidget.svelte
+       │
+ChatWidget.svelte (Shadow DOM container)
+  └─ looks up component in registry → mounts into shadow root
+       │
+Widget Adapter (e.g., DiagnosisWidget.svelte)
+  └─ wraps existing component (e.g., DiagnosisCard) with spec.data
+```
+
+### Key Principles
+
+1. **No arbitrary HTML** — AI generates structured JSON data, never raw HTML/JS. Only pre-registered Svelte components render.
+2. **Shadow DOM sandboxing** — Widget content renders inside a Shadow DOM for style encapsulation. CSS custom properties pierce through, so design tokens are inherited.
+3. **Compile-time allowlist** — Widget registry (`src/lib/chat/widgets/registry.ts`) maps type strings to Svelte components. Unknown types show a fallback.
+4. **Double validation** — Server schema enum + client registry both reject unknown widget types.
+5. **Bidirectional interaction** — Widgets emit `WidgetInteraction` events that become new conversation messages.
+
+### Widget Types
+
+| Type | Component | Use Case |
+|------|-----------|----------|
+| `lab_trend_chart` | SignalHistory | Lab value trends over time |
+| `diagnosis_card` | DiagnosisCard | Diagnosis summary with probability |
+| `symptom_summary` | SymptomCard | Symptom details with severity |
+| `treatment_plan` | TreatmentCard | Treatment info with dosage |
+| `data_table` | DataTableWidget | Structured comparisons |
+| `anatomy_highlight` | AnatomyHighlightWidget | 3D body focus buttons |
+| `progress_indicator` | ProgressRound | Health metric progress |
+
+### Adding a New Widget Type
+
+1. Add the type string to `WidgetType` union in `src/lib/chat/widgets/types.ts`
+2. Add it to `WIDGET_TYPES` array in the same file
+3. Create adapter component in `src/components/chat/widgets/`
+4. Register it in `src/lib/chat/widgets/registry.ts`
+5. Add type to the `enum` in `config/chat.json` responseSchema widgets property
+6. Update the `data` description in the schema with the new type's data shape
+
+### File Locations
+
+- **Types**: `src/lib/chat/widgets/types.ts`
+- **Registry**: `src/lib/chat/widgets/registry.ts`
+- **Dispatcher**: `src/components/chat/widgets/ChatWidget.svelte`
+- **Adapters**: `src/components/chat/widgets/{Type}Widget.svelte`
+- **Schema**: `config/chat.json` → `responseSchema.base.parameters.properties.widgets`
+- **Prompts**: `config/chat.json` → `prompts.{mode}.systemPrompt.widgetInstructions`

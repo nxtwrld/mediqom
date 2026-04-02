@@ -30,6 +30,13 @@ export const GET: RequestHandler = async ({
     error(404, { message: "Import job not found" });
   }
 
+  // Strip processedImages from response (client doesn't need them, server reads from DB)
+  if (job.file_manifest) {
+    job.file_manifest = job.file_manifest.map(
+      ({ processedImages, ...rest }: any) => rest,
+    );
+  }
+
   return json({ job });
 };
 

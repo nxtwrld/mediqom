@@ -323,7 +323,7 @@ export class EnhancedAIProvider {
     });
 
     const systemMessage = new SystemMessage({
-      content: this.createSystemMessage(language),
+      content: this.createSystemMessage(language, options.flowType),
     });
 
     const humanMessage = new HumanMessage({
@@ -464,7 +464,7 @@ export class EnhancedAIProvider {
     ];
 
     const systemMessage = new SystemMessage({
-      content: this.createSystemMessage(language),
+      content: this.createSystemMessage(language, options.flowType),
     });
 
     const humanMessage = new HumanMessage({
@@ -534,7 +534,7 @@ export class EnhancedAIProvider {
     // Claude uses schema-in-prompt approach (function name is less critical)
     const systemMessage = new SystemMessage({
       content:
-        this.createSystemMessage(language) +
+        this.createSystemMessage(language, options.flowType) +
         this.createClaudeSchemaInstructions(schema, functionName),
     });
 
@@ -550,7 +550,10 @@ export class EnhancedAIProvider {
   /**
    * Create system message for all providers
    */
-  private createSystemMessage(language: string): string {
+  private createSystemMessage(language: string, flowType?: string): string {
+    if (flowType === "ocr_extraction") {
+      return "You are a precision OCR system. Transcribe text exactly as it appears in the document, preserving the original language, diacritics, and formatting. Do not translate or normalize any text.";
+    }
     return `You are a medical AI assistant. You MUST respond in ${language} language ONLY. All free-text fields in your response must be in ${language}. Do not use any other language for free-text content. This is critical - strictly follow the language requirement. IMPORTANT EXCEPTION: When the JSON schema defines an "enum" array for a field, you MUST use the exact enum values as provided - never translate enum values.`;
   }
 

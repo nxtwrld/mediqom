@@ -84,5 +84,13 @@ export const GET: RequestHandler = async ({
     error(500, { message: "Failed to list import jobs" });
   }
 
-  return json({ jobs: jobs || [] });
+  // Strip processedImages from response (client doesn't need them, server reads from DB)
+  const sanitized = (jobs || []).map((job: any) => ({
+    ...job,
+    file_manifest: job.file_manifest?.map(
+      ({ processedImages, ...rest }: any) => rest,
+    ),
+  }));
+
+  return json({ jobs: sanitized });
 };

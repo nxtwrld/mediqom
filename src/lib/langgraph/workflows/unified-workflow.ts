@@ -39,9 +39,33 @@ import { resultsAggregatorNode } from "../nodes/results-aggregator";
 
 // Simplified conditional edge functions
 const shouldProcessMedical = (state: DocumentProcessingState): string => {
-  if (state.errors && state.errors.length > 0) {
-    console.log("🚫 Errors detected - skipping processing");
+  // Only block on critical errors (not feature detection failures)
+  const criticalErrors = (state.errors || []).filter(
+    (e: any) => {
+      const msg = typeof e === 'string' ? e : e?.message || '';
+      const node = typeof e === 'string' ? '' : e?.node || '';
+      // Feature detection errors are non-fatal — we default to processing anyway
+      return !msg.toLowerCase().includes('feature') && node !== 'feature_detection';
+    }
+  );
+
+  if (criticalErrors.length > 0) {
+    console.log("🚫 Critical errors detected - skipping processing:", criticalErrors);
     return "error";
+  }
+
+  // If feature detection failed, default to medical=true (better to try than skip)
+  const featureDetectionFailed = (state.errors || []).some(
+    (e: any) => {
+      const msg = typeof e === 'string' ? e : e?.message || '';
+      const node = typeof e === 'string' ? '' : e?.node || '';
+      return msg.toLowerCase().includes('feature') || node === 'feature_detection';
+    }
+  );
+
+  if (featureDetectionFailed) {
+    console.log("⚠️ Feature detection failed - defaulting to medical processing");
+    return "medical";
   }
 
   // Check if medical processing is needed

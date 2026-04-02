@@ -56,6 +56,7 @@ export interface PromptConfig {
     boundaries?: string[];
     focus?: string[];
     toolInstructions?: string[];
+    widgetInstructions?: string[];
   };
   responseSchema: {
     additionalProperties: Record<string, any>;
@@ -288,6 +289,16 @@ Use this date to calculate time since procedures, estimate healing progress, and
     if (modeConfig.systemPrompt.toolInstructions) {
       systemPrompt += "\nMEDICAL DATA TOOLS:\n";
       modeConfig.systemPrompt.toolInstructions.forEach(
+        (instruction: string) => {
+          systemPrompt += `- ${instruction}\n`;
+        },
+      );
+    }
+
+    // Add widget instructions if available
+    if (modeConfig.systemPrompt.widgetInstructions) {
+      systemPrompt += "\nVISUAL WIDGETS:\n";
+      modeConfig.systemPrompt.widgetInstructions.forEach(
         (instruction: string) => {
           systemPrompt += `- ${instruction}\n`;
         },

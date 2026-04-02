@@ -5,6 +5,7 @@
 	import Select from '$components/forms/Select.svelte';
 	import SUPPORTED_LANGUAGES from '$lib/languages';
 	import { apiFetch } from '$lib/api/client';
+	import { themePreference, initTheme, type ThemePreference } from '$lib/theme/store';
 
 	// Read language from $user store
 	let selectedLanguage = $state($user?.language || 'en');
@@ -26,6 +27,21 @@
 		{ key: 'individual', value: $t('app.settings.general.role.individual') },
 		{ key: 'medical', value: $t('app.settings.general.role.medical') }
 	]);
+
+	// Theme
+	initTheme();
+	let selectedTheme = $state<ThemePreference>('system');
+	const unsubTheme = themePreference.subscribe((v) => (selectedTheme = v));
+
+	const themeOptions = $derived([
+		{ key: 'system', value: $t('app.settings.general.appearance.system') },
+		{ key: 'light', value: $t('app.settings.general.appearance.light') },
+		{ key: 'dark', value: $t('app.settings.general.appearance.dark') }
+	]);
+
+	$effect(() => {
+		themePreference.set(selectedTheme as ThemePreference);
+	});
 
 	async function saveLanguage() {
 		saving = true;
@@ -133,6 +149,21 @@
 		{#if roleMessage}
 			<p class="message -{roleMessage.type}">{roleMessage.text}</p>
 		{/if}
+	</section>
+
+	<div class="section-divider"></div>
+
+	<section>
+		<h3 class="h3">{$t('app.settings.general.appearance.title')}</h3>
+		<p class="description">{$t('app.settings.general.appearance.description')}</p>
+
+		<form class="form">
+			<Select
+				bind:value={selectedTheme}
+				options={themeOptions}
+				label={$t('app.settings.general.appearance.title')}
+			/>
+		</form>
 	</section>
 </div>
 

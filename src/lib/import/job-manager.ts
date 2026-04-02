@@ -36,6 +36,7 @@ export async function createJob(
         : [],
     dicomMetadata: task.dicomMetadata,
     thumbnail: task.thumbnail,
+    layoutDetections: task.layoutDetections || [],
   }));
 
   // Create job on server

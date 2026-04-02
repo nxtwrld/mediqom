@@ -16,6 +16,7 @@ export interface AssessmentDocument {
   language: string;
   isMedical: boolean;
   isMedicalImaging?: boolean; // Flag for post-extraction routing to medical imaging analysis
+  hasImages?: boolean; // Whether any pages in this document contain embedded images
   pages: number[];
 }
 
@@ -25,6 +26,7 @@ export interface AssessmentPage {
   text: string;
   images: {
     type: string;
+    description?: string;
     position: {
       x: number;
       y: number;
@@ -77,6 +79,8 @@ export interface ReportAnalysis {
   // Add missing properties that are being accessed in the code
   title?: string;
   summary?: string;
+  /** Workflow processing errors (e.g. context length exceeded, API failures) */
+  errors?: { node: string; error: string; timestamp: string }[];
 }
 
 // ---- Import Job types for resilient import flow ----
@@ -91,6 +95,16 @@ export type ImportJobStatus =
   | "error"
   | "expired";
 
+/** Layout detection result for a single page (from client-side DocLayout-YOLO) */
+export interface PageLayoutDetection {
+  page: number; // 1-indexed
+  detections: {
+    class: string; // "figure", "table", "text", "title", etc.
+    confidence: number; // 0-1
+    position: { x: number; y: number; width: number; height: number }; // % of page (0-100)
+  }[];
+}
+
 export interface FileManifestEntry {
   name: string;
   type: string;
@@ -99,6 +113,8 @@ export interface FileManifestEntry {
   processedImages: string[]; // base64 strings of resized images for OCR
   dicomMetadata?: any;
   thumbnail?: string;
+  /** Client-side layout detections from DocLayout-YOLO */
+  layoutDetections?: PageLayoutDetection[];
 }
 
 export interface ImportJob {
