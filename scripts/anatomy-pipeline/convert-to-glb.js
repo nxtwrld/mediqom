@@ -71,6 +71,20 @@ function transformNormals(normArray) {
     }
 }
 
+// ─── System-specific material colors (BodyParts3D has no materials) ───────────
+const SYSTEM_COLORS = {
+    skeleton:    [0.91, 0.84, 0.72, 1],  // bone ivory
+    muscular:    [0.55, 0.15, 0.00, 1],  // deep red (overridden by muscle-materials.ts at runtime)
+    vascular:    [0.80, 0.00, 0.00, 1],  // red
+    nervous:     [1.00, 0.84, 0.00, 1],  // gold
+    respiratory: [0.94, 0.73, 0.73, 1],  // pink
+    digestive:   [0.80, 0.52, 0.25, 1],  // tan
+    urogenital:  [0.82, 0.71, 0.55, 1],  // khaki
+    lymphatic:   [0.56, 0.93, 0.56, 1],  // green
+    skin:        [1.00, 0.89, 0.77, 1],  // peach
+    other:       [0.70, 0.70, 0.70, 1],  // gray
+};
+
 // Parse args
 const args = process.argv.slice(2);
 const targetSystem = args.includes('--system') ? args[args.indexOf('--system') + 1] : null;
@@ -195,15 +209,14 @@ async function mergeAndOptimize(fjIds, systemName) {
                         }
 
                         // Create a simple material
-                        const srcMat = prim.getMaterial();
-                        if (srcMat) {
-                            const newMat = mergedDoc.createMaterial(srcMat.getName())
-                                .setBaseColorFactor(srcMat.getBaseColorFactor())
-                                .setRoughnessFactor(srcMat.getRoughnessFactor())
-                                .setMetallicFactor(srcMat.getMetallicFactor());
-                            if (srcMat.getAlphaMode() !== 'OPAQUE') {
-                                newMat.setAlphaMode(srcMat.getAlphaMode());
-                                newMat.setAlphaCutoff(srcMat.getAlphaCutoff());
+                        // Apply system-specific color (BodyParts3D has no materials)
+                        {
+                            const color = SYSTEM_COLORS[systemName] || SYSTEM_COLORS.other;
+                            const newMat = mergedDoc.createMaterial(meshName)
+                                .setBaseColorFactor(color)
+                                .setRoughnessFactor(0.7)
+                                .setMetallicFactor(0.0);
+                            if (false) { // keep block structure for future alpha support
                             }
                             newPrim.setMaterial(newMat);
                         }

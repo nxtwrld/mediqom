@@ -1,7 +1,7 @@
 {
   "totalMeshFiles": 2234,
-  "assignedFiles": 2190,
-  "unassignedFiles": 44,
+  "assignedFiles": 2073,
+  "unassignedFiles": 161,
   "systems": {
     "skeleton": {
       "label": "Skeletal System",
@@ -23,10 +23,20 @@
       "concepts": 156,
       "meshFiles": 95
     },
-    "organs": {
-      "label": "Internal Organs",
-      "concepts": 2792,
-      "meshFiles": 2106
+    "respiratory": {
+      "label": "Respiratory System",
+      "concepts": 92,
+      "meshFiles": 284
+    },
+    "digestive": {
+      "label": "Digestive System",
+      "concepts": 197,
+      "meshFiles": 175
+    },
+    "urogenital": {
+      "label": "Urogenital System",
+      "concepts": 20,
+      "meshFiles": 11
     },
     "skin": {
       "label": "Integumentary",

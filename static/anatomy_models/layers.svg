@@ -92,10 +92,6 @@
 		c0-4.6,3.8-8.4,8.4-8.4h5.2c-0.5,4.2-1.7,8.5-3.7,12.6C275.4,374.9,274.9,377,274.9,379.3L274.9,379.3z"/>
 </symbol>
 
-<symbol viewBox="0 0 500 500" id="organs">
-<use href="#digestive" />
-</symbol>
-
 <symbol viewBox="0 0 500 500" id="skin">
 <use href="#figure" />
 </symbol>

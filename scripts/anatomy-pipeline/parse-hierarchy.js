@@ -148,13 +148,32 @@ const SYSTEMS = [
         opacity: 0.9
     },
     {
-        name: 'organs',
-        label: 'Internal Organs',
-        // IS-A: membrane organ, organ gland, viscus, cardinal organ part, organ zone
-        isaRoots: ['FMA7145', 'FMA7146', 'FMA67498', 'FMA82472', 'FMA55268'],
-        // PART-OF: alimentary, respiratory, urinary, genital, endocrine
-        partofRoots: ['FMA7152', 'FMA7158', 'FMA7159', 'FMA7160', 'FMA9668'],
+        name: 'respiratory',
+        label: 'Respiratory System',
+        isaRoots: [],
+        // PART-OF: respiratory system
+        partofRoots: ['FMA7158'],
+        color: '#F0BABA',
+        opacity: 0.9
+    },
+    {
+        name: 'digestive',
+        label: 'Digestive System',
+        // IS-A: tooth (includes all 32 teeth)
+        isaRoots: ['FMA12516'],
+        // PART-OF: alimentary system
+        partofRoots: ['FMA7152'],
         color: '#CD853F',
+        opacity: 0.9
+    },
+    {
+        name: 'urogenital',
+        label: 'Urogenital System',
+        // IS-A: kidney, testis, prostate, adrenal gland, ureter, urinary bladder
+        isaRoots: ['FMA7203', 'FMA7210', 'FMA9600', 'FMA9604', 'FMA9704', 'FMA15900'],
+        // PART-OF: urinary system + genital system
+        partofRoots: ['FMA7159', 'FMA7160'],
+        color: '#D1B58C',
         opacity: 0.9
     },
     {
