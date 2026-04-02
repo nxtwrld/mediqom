@@ -88,6 +88,13 @@ export default async function assess(
     progressCallback,
   )) as OcrResult;
 
+  if (!ocrData?.pages || !Array.isArray(ocrData.pages)) {
+    throw new Error(
+      `OCR extraction returned invalid data — the AI response may have been truncated. ` +
+      `Expected { pages: [...] } but got: ${typeof ocrData}`
+    );
+  }
+
   // === PASS 2: Document assessment (text-only call — cheaper/faster) ===
   progressCallback?.("ai_processing", 70, `Pass 2: Classifying documents...`);
 
@@ -109,6 +116,13 @@ export default async function assess(
     "document_type_routing", // text-only, use cheaper model
     progressCallback,
   )) as DocumentAssessmentResult;
+
+  if (!assessmentData?.documents || !Array.isArray(assessmentData.documents)) {
+    throw new Error(
+      `Document assessment returned invalid data — the AI response may have been truncated. ` +
+      `Expected { documents: [...] } but got: ${typeof assessmentData}`
+    );
+  }
 
   // === Merge results into Assessment format ===
   const pages: AssessmentPage[] = ocrData.pages.map((p) => ({

@@ -6,8 +6,7 @@
     import Modal from "$components/ui/Modal.svelte";
     import HealthForm from "../profile/HealthForm.svelte";
     import HealthProperty from "../healthProperty/Overview.svelte";
-    import Import from "$components/import/Index.svelte";
-    import JobsList from "$components/import/JobsList.svelte";
+    import ImportView from "$components/import/ImportView.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
     import { onMount } from "svelte";
@@ -63,7 +62,7 @@
     // Import overlay state
     let importJobId: string | undefined = $state(undefined);
     let importAutoOpen = $state(false);
-    let importHasFiles = $state(false);
+    // importHasFiles removed — ImportView handles file state internally
 
     // Chat state
     let currentProfile: Profile | null = $state(null);
@@ -498,11 +497,6 @@
                         typeof state === "object" &&
                         state.autoOpen
                     );
-                    importHasFiles = !!(
-                        state &&
-                        typeof state === "object" &&
-                        state.hasFiles
-                    );
                 }
                 if (state) {
                     location.hash = "#overlay-import";
@@ -510,7 +504,6 @@
                 } else {
                     importJobId = undefined;
                     importAutoOpen = false;
-                    importHasFiles = false;
                     $uiState.overlay = Overlay.none;
                     if (location.hash.indexOf("#overlay-") == 0) {
                         history.back();
@@ -722,7 +715,7 @@
                         <Viewer signalHighlight={viewerSignalHighlight} fullscreen={anatomyFullscreen} viewportRect={anatomyViewportRect} />
                     {/if}
                 {:else if panelView === "import"}
-                    <Import oncomplete={closePanel} />
+                    <ImportView oncomplete={closePanel} />
                 {/if}
             </div>
         </div>
@@ -755,17 +748,13 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            {#if importJobId || importAutoOpen || importHasFiles}
-                <Import
-                    jobId={importJobId}
-                    autoOpen={importAutoOpen}
-                    oncomplete={() => {
-                        importJobId = undefined;
-                    }}
-                />
-            {:else}
-                <JobsList />
-            {/if}
+            <ImportView
+                expandedJobId={importJobId}
+                autoOpen={importAutoOpen}
+                oncomplete={() => {
+                    importJobId = undefined;
+                }}
+            />
         </div>
     {/if}
 

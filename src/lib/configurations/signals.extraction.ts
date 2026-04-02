@@ -25,7 +25,7 @@ export default {
       processingNotes: {
         type: "string",
         description:
-          "Any notes about the signal extraction process or ambiguities encountered",
+          "Any notes about the signal extraction process or ambiguities encountered. Translate result to the [LANGUAGE] language if the source is in a different language.",
       },
     },
     required: ["signals", "processingConfidence"],

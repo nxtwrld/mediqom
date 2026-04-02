@@ -363,12 +363,14 @@
       "preview-disabled": "All interactions are disabled in preview mode.",
       "save": "Save",
       "you-still-have-scans-in-your-yearly-subscription": "You still have {scans} imports in your yearly subscription.",
+      "status-preparing": "Preparing...",
       "status-pending": "Pending",
       "status-extracting": "Extracting...",
       "status-analyzing": "Analyzing...",
       "status-ready": "Ready",
       "status-complete": "Complete",
       "status-error": "Error",
+      "status-loading": "Loading documents...",
       "status-processing": "Processing",
       "status-new": "New",
       "processing-failed": "Processing failed",
@@ -400,7 +402,12 @@
       "new-import": "New Import",
       "section-processing": "Processing",
       "section-ready": "Ready for Review",
-      "section-errors": "Errors"
+      "section-errors": "Errors",
+      "error-rate-limit": "Server is busy. Please retry in a moment.",
+      "error-network": "Network error. Check your connection and try again.",
+      "error-timeout": "Request timed out. Please try again.",
+      "error-unauthorized": "Session expired. Please sign in again.",
+      "error-generic": "Something went wrong while processing your documents. Please try again."
     },
     "buttons": {
       "retry": "Retry",

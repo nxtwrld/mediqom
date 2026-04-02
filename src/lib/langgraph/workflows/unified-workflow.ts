@@ -22,6 +22,7 @@ import {
 import { createWorkflowReplay } from "$lib/debug/workflow-replay";
 import { saveNodeResult } from "$lib/import.server/debug-output";
 import { DEBUG_IMPORT } from "$env/static/private";
+import { getLanguageEnglishName } from "$lib/languages";
 
 // Import essential workflow nodes only
 import { inputValidationNode } from "../nodes/input-validation";
@@ -581,7 +582,7 @@ export async function runUnifiedDocumentProcessingWorkflow(
     const initialState: DocumentProcessingState = {
       images,
       text,
-      language: language || "English",
+      language: getLanguageEnglishName(language) || "English",
       content: text ? [{ type: "text" as const, text }] : [], // Fix content to be proper array
       metadata: {},
       tokenUsage: { total: 0 },

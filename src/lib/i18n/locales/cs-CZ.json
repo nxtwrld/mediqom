@@ -357,12 +357,14 @@
       "preview-disabled": "Interakce nejsou v režimu náhledu povoleny.",
       "save": "Uložit",
       "you-still-have-scans-in-your-yearly-subscription": "Ve svém ročním předplatném stále máte {scans} importů.",
+      "status-preparing": "Příprava...",
       "status-pending": "Čeká",
       "status-extracting": "Extrahování...",
       "status-analyzing": "Analyzování...",
       "status-ready": "Připraveno",
       "status-complete": "Hotovo",
       "status-error": "Chyba",
+      "status-loading": "Načítání dokumentů...",
       "status-processing": "Zpracování",
       "status-new": "Nový",
       "processing-failed": "Zpracování selhalo",
@@ -394,7 +396,12 @@
       "new-import": "Nový import",
       "section-processing": "Zpracovávání",
       "section-ready": "Připraveno ke kontrole",
-      "section-errors": "Chyby"
+      "section-errors": "Chyby",
+      "error-rate-limit": "Server je zaneprázdněn. Zkuste to za chvíli znovu.",
+      "error-network": "Chyba sítě. Zkontrolujte připojení a zkuste to znovu.",
+      "error-timeout": "Časový limit vypršel. Zkuste to znovu.",
+      "error-unauthorized": "Relace vypršela. Přihlaste se znovu.",
+      "error-generic": "Při zpracování dokumentů došlo k chybě. Zkuste to znovu."
     },
     "buttons": {
       "retry": "Opakovat",

@@ -357,12 +357,14 @@
       "preview-disabled": "Im Vorschaumodus sind alle Interaktionen deaktiviert.",
       "save": "Speichern",
       "you-still-have-scans-in-your-yearly-subscription": "Ihr Jahresabonnement enthält noch {scans}-Importe.",
+      "status-preparing": "Vorbereitung...",
       "status-pending": "Ausstehend",
       "status-extracting": "Extrahieren...",
       "status-analyzing": "Analysieren...",
       "status-ready": "Bereit",
       "status-complete": "Abgeschlossen",
       "status-error": "Fehler",
+      "status-loading": "Dokumente laden...",
       "status-processing": "Verarbeitung",
       "status-new": "Neu",
       "processing-failed": "Verarbeitung fehlgeschlagen",
@@ -394,7 +396,12 @@
       "new-import": "Neuer Import",
       "section-processing": "Verarbeitung",
       "section-ready": "Bereit zur Überprüfung",
-      "section-errors": "Fehler"
+      "section-errors": "Fehler",
+      "error-rate-limit": "Server ist ausgelastet. Bitte versuchen Sie es in einem Moment erneut.",
+      "error-network": "Netzwerkfehler. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "error-timeout": "Zeitüberschreitung. Bitte versuchen Sie es erneut.",
+      "error-unauthorized": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+      "error-generic": "Bei der Verarbeitung Ihrer Dokumente ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
     },
     "buttons": {
       "retry": "Wiederholen",

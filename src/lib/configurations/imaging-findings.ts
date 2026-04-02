@@ -145,11 +145,11 @@ export default {
             },
             finding: {
               type: "string",
-              description: "Detailed description of finding",
+              description: "Detailed description of finding. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             location: {
               type: "string",
-              description: "Specific anatomical location within organ/region",
+              description: "Specific anatomical location within organ/region. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             characteristics: {
               type: "object",

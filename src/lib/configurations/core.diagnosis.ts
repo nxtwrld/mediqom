@@ -38,7 +38,7 @@ export default {
       },
       notes: {
         type: "string",
-        description: "Additional notes or context about the diagnosis",
+        description: "Additional notes or context about the diagnosis. Translate result to the [LANGUAGE] language if the source is in a different language.",
       },
       searchKeywords: {
         type: "array",

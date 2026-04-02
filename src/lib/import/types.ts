@@ -82,9 +82,11 @@ export interface ReportAnalysis {
 // ---- Import Job types for resilient import flow ----
 
 export type ImportJobStatus =
+  | "preparing"
   | "created"
   | "extracting"
   | "analyzing"
+  | "loading"
   | "completed"
   | "error"
   | "expired";

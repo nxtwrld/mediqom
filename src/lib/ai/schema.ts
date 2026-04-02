@@ -23,18 +23,16 @@ export function updateLanguage(
 
 export function updateString(
   schema: { [key: string]: any },
-  string: string,
+  placeholder: string,
   value: string,
 ) {
-  const regexp = new RegExp(`\\[${string.toUpperCase()}\\]`, "ig");
   for (const key in schema) {
     if (schema[key] instanceof Object) {
-      schema[key] = updateString(schema[key], string, value);
+      schema[key] = updateString(schema[key], placeholder, value);
     } else {
       if (key === "description" && typeof schema[key] == "string") {
-        if (schema[key].includes("[LANGUAGE]")) {
-          schema[key] = schema[key].replace(regexp, value);
-          //  console.log('Updated', key, schema[key]);
+        if (schema[key].includes(placeholder)) {
+          schema[key] = schema[key].replaceAll(placeholder, value);
         }
       }
     }

@@ -189,9 +189,11 @@ export async function assembleDocuments(
             let thumbnail = docPages[0]?.thumbnail || "";
             if (!thumbnail) {
               try {
-                const { processPDF } = await import("$lib/files/pdf");
-                const processedPdf = await processPDF(pdfBuffer);
-                thumbnail = processedPdf.pages[0]?.thumbnail || "";
+                const { loadPdfDocument, makeThumb } = await import("$lib/files/pdf");
+                const pdfDoc = await loadPdfDocument({ data: pdfBuffer.slice(0) });
+                const firstDocPage = doc.pages[0] || 1;
+                const page = await pdfDoc.getPage(firstDocPage);
+                thumbnail = await makeThumb(page);
               } catch {
                 /* skip thumbnail generation */
               }

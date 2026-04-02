@@ -1,6 +1,14 @@
 import type { ImportJob, FileManifestEntry } from "./types";
 import type { Task } from "./index";
-import { addJob, updateJob, removeJob, importJobs } from "./job-store";
+import {
+  addJob,
+  replaceJob,
+  updateJob,
+  removeJob,
+  importJobs,
+  addError,
+  formatImportError,
+} from "./job-store";
 import { cacheFiles, clearFiles, hasFiles } from "./file-cache";
 import type { SSEProgressEvent } from "./sse-client";
 import { apiFetch } from "$lib/api/client";
@@ -13,7 +21,8 @@ export async function createJob(
   tasks: Task[],
   originalFiles: File[],
   language: string,
-): Promise<string> {
+  placeholderId?: string,
+): Promise<ImportJob> {
   // Build file manifest from tasks
   const files: FileManifestEntry[] = tasks.map((task) => ({
     name: task.title,
@@ -69,8 +78,11 @@ export async function createJob(
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
 
-  addJob(job);
-  return jobId;
+  if (!placeholderId) {
+    addJob(job);
+  }
+  // When placeholderId provided, caller handles store update (for stable key mapping)
+  return job;
 }
 
 /** Process a job via SSE with polling fallback (web), or polling-only (Capacitor) */
@@ -185,6 +197,10 @@ export async function processJob(
                   }
 
                   if (eventData.type === "error") {
+                    addError(
+                      formatImportError(eventData.message),
+                      jobId,
+                    );
                     if (!resolved) {
                       resolved = true;
                       reject(new Error(eventData.message));
@@ -256,6 +272,10 @@ async function pollUntilDone(
           return;
         }
         if (job.status === "error") {
+          addError(
+            formatImportError(job.error || "Processing failed"),
+            jobId,
+          );
           reject(new Error(job.error || "Processing failed"));
           return;
         }
@@ -263,6 +283,7 @@ async function pollUntilDone(
         // Continue polling
         setTimeout(poll, POLL_INTERVAL_MS);
       } catch (err) {
+        addError(formatImportError(err as Error), jobId);
         reject(err);
       }
     };
@@ -296,8 +317,12 @@ export async function checkPendingJobs(): Promise<ImportJob[]> {
       }),
     );
 
-    // Update store
-    importJobs.set(enrichedJobs);
+    // Merge with existing store (preserve current-session jobs not on server)
+    importJobs.update((current) => {
+      const serverIds = new Set(enrichedJobs.map((j: ImportJob) => j.id));
+      const kept = current.filter((j) => !serverIds.has(j.id));
+      return [...kept, ...enrichedJobs];
+    });
     return enrichedJobs;
   } catch {
     return [];
@@ -306,9 +331,11 @@ export async function checkPendingJobs(): Promise<ImportJob[]> {
 
 /** Delete a job and clean up cached files */
 export async function deleteJob(jobId: string): Promise<void> {
-  await apiFetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" });
-  await clearFiles(jobId);
   removeJob(jobId);
+  await clearFiles(jobId);
+  await apiFetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" }).catch(
+    (e) => console.warn('[Import] Failed to delete job from server:', e)
+  );
 }
 
 /** Retry a failed job */

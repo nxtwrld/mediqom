@@ -18,7 +18,7 @@ export default {
           properties: {
             name: {
               type: "string",
-              description: "Name of the procedure performed",
+              description: "Name of the procedure performed. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             cptCode: {
               type: "string",
@@ -30,7 +30,7 @@ export default {
             },
             technique: {
               type: "string",
-              description: "Surgical technique or approach used",
+              description: "Surgical technique or approach used. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             startTime: {
               type: "string",
@@ -48,7 +48,7 @@ export default {
             complications: {
               type: "array",
               items: { type: "string" },
-              description: "Any complications that occurred",
+              description: "Any complications that occurred. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             outcome: {
               type: "string",
@@ -111,7 +111,7 @@ export default {
       location: {
         type: "string",
         description:
-          "Location where procedures were performed (OR, procedure room, etc.)",
+          "Location where procedures were performed (OR, procedure room, etc.). Translate result to the [LANGUAGE] language if the source is in a different language.",
       },
     },
     required: ["hasProcedures"],

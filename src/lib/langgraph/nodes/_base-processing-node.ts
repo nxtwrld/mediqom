@@ -356,6 +356,8 @@ export abstract class BaseProcessingNode {
       language,
     ) as FunctionDefinition;
 
+    console.log(`🌍 ${this.config.nodeName} language: "${language}"`);
+
     const result = await fetchGptEnhanced(
       finalContent,
       localizedSchema,

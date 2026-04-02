@@ -75,7 +75,7 @@ export default {
             },
             clinicalHistory: {
               type: "string",
-              description: "Relevant clinical history provided with specimen",
+              description: "Relevant clinical history provided with specimen. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             previousBiopsy: {
               type: "boolean",

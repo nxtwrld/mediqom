@@ -92,7 +92,7 @@ export default {
     },
     specialty: {
       type: "string",
-      description: "Medical specialty or subspecialty",
+      description: "Medical specialty or subspecialty. Translate result to the [LANGUAGE] language if the source is in a different language.",
     },
     licenseNumber: {
       type: "string",
@@ -107,7 +107,7 @@ export default {
         },
         department: {
           type: "string",
-          description: "Department or service",
+          description: "Department or service. Translate result to the [LANGUAGE] language if the source is in a different language.",
         },
         address: {
           type: "string",

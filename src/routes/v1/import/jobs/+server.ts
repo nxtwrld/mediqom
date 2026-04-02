@@ -76,7 +76,7 @@ export const GET: RequestHandler = async ({
       "id, status, stage, progress, message, error, file_count, file_manifest, language, created_at, updated_at, expires_at",
     )
     .eq("user_id", user.id)
-    .in("status", ["created", "extracting", "analyzing", "completed", "error"])
+    .in("status", ["created", "extracting", "analyzing", "error"])
     .order("created_at", { ascending: false });
 
   if (dbError) {

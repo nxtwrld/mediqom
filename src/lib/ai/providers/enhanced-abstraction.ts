@@ -369,6 +369,21 @@ export class EnhancedAIProvider {
       );
     }
 
+    // Detect truncation: if the model hit its output token limit, the response is incomplete
+    const finishReason = result.response_metadata?.finish_reason;
+    if (finishReason === "length") {
+      aiLogger.error("AI response truncated (finish_reason=length)", {
+        functionName,
+        model: options.modelId,
+        maxTokens: options.maxTokens,
+      });
+      throw new Error(
+        `AI response was truncated (ran out of output tokens). ` +
+        `Model: ${options.modelId}, max_tokens: ${options.maxTokens}. ` +
+        `Consider increasing max_tokens for this flow.`
+      );
+    }
+
     // Extract function call data from raw response (matching legacy behavior)
     let parsedResult = result;
     if (result?.additional_kwargs?.function_call) {

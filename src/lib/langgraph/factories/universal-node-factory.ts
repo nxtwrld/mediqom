@@ -48,7 +48,7 @@ export const NODE_CONFIGURATIONS: NodeRegistry = {
     triggers: ["isMedical"], // Always run for medical documents
     priority: 1,
     outputMapping: {
-      reportField: "medical-analysis",
+      reportField: "report",
       isMainReport: true,
     },
   },
