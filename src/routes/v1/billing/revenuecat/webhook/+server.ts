@@ -80,6 +80,18 @@ const PACK_PRODUCT_MAP: Record<string, { packId: string; scans: number }> = {
 	scans_50: { packId: 'pack_50', scans: 50 }
 };
 
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ * Both strings must be the same length (caller checks before calling).
+ */
+function timingSafeCompare(a: string, b: string): boolean {
+	let mismatch = 0;
+	for (let i = 0; i < a.length; i++) {
+		mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	}
+	return mismatch === 0;
+}
+
 function getPaymentSource(store: RCWebhookEvent['store']): PaymentSource {
 	if (store === 'APP_STORE') return 'apple';
 	if (store === 'PLAY_STORE') return 'google';
@@ -98,7 +110,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
 
 	const secret = (env as Record<string, string | undefined>).REVENUECAT_WEBHOOK_SECRET;
-	if (!secret || token !== secret) {
+	if (!secret || token.length !== secret.length || !timingSafeCompare(token, secret)) {
 		console.error('[RC Webhook] Invalid authorization');
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}

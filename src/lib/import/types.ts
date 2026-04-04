@@ -81,6 +81,8 @@ export interface ReportAnalysis {
   summary?: string;
   /** Workflow processing errors (e.g. context length exceeded, API failures) */
   errors?: { node: string; error: string; timestamp: string }[];
+  documentType?: string;
+  schemaUsed?: string;
 }
 
 // ---- Import Job types for resilient import flow ----

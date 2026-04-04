@@ -4,6 +4,9 @@
  */
 import { Buffer } from "node:buffer";
 import sharp from "sharp";
+import { DEBUG_IMPORT } from "$env/static/private";
+
+const VERBOSE = DEBUG_IMPORT === "true";
 
 export interface DetectedImage {
   type: string;
@@ -67,6 +70,8 @@ export async function cropDetectedImages(
 
   const results: CroppedImage[] = [];
 
+  if (VERBOSE) console.log(`[cropImages] ${imgWidth}x${imgHeight}, ${detectedImages.length} regions`);
+
   for (const detected of detectedImages) {
     const { position } = detected;
 
@@ -84,8 +89,13 @@ export async function cropDetectedImages(
     width = Math.min(imgWidth - left, width + 2 * padX);
     height = Math.min(imgHeight - top, height + 2 * padY);
 
+    if (VERBOSE) {
+      console.log(`[cropImages] ${detected.type}: (${left},${top} ${width}x${height})`);
+    }
+
     // Skip crops smaller than minimum size
     if (width < MIN_CROP_PX || height < MIN_CROP_PX) {
+      if (VERBOSE) console.log(`[cropImages]   SKIPPED: too small (min ${MIN_CROP_PX}px)`);
       continue;
     }
 

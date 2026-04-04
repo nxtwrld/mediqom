@@ -2,6 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
 import type { ShareCreateBody } from "$lib/share/types.d";
 
 function getServiceClient() {
@@ -21,11 +22,26 @@ export const POST: RequestHandler = async ({
     return error(401, { message: "Unauthorized" });
   }
 
+  // Rate limit: 20 requests/min per user
+  const rl = checkRateLimit("share-create", user.id, 20, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: "Too many requests" }), {
+      status: 429,
+      headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs! / 1000)) },
+    });
+  }
+
   const body: ShareCreateBody = await request.json();
   const { recipient_email, share_secret, shares } = body;
 
   if (!recipient_email || !shares || shares.length === 0) {
     return error(400, { message: "recipient_email and shares are required" });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(recipient_email) || recipient_email.length > 254) {
+    return error(400, { message: "Invalid email address" });
   }
 
   const supabase = getServiceClient();

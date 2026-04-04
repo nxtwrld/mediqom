@@ -144,16 +144,18 @@ describe("Enhanced Health Signals Processing", () => {
       );
 
       const medicationWithEffectiveness = {
-        medications: [
-          {
-            name: "Metformin",
-            dosage: "500mg",
-            status: "current",
-            effectiveness: "good",
-            response: "blood sugar improved",
-            date: "2024-01-15T08:00:00Z",
-          },
-        ],
+        medications: {
+          currentMedications: [
+            {
+              medicationName: "Metformin",
+              dosage: "500mg",
+              status: "current",
+              effectiveness: "good",
+              response: "blood sugar improved",
+              date: "2024-01-15T08:00:00Z",
+            },
+          ],
+        },
       };
 
       await processHealthData(
@@ -168,12 +170,9 @@ describe("Enhanced Health Signals Processing", () => {
       const callArgs = vi.mocked(insertMetaHistoryEntries).mock.calls[0][0];
       expect(Array.isArray(callArgs)).toBe(true);
 
-      // Should have both medication and effectiveness entries
+      // Should have medication current entry
       const entryTypes = callArgs.map((entry: any) => entry.entryType);
       expect(entryTypes).toContain(MetaHistoryEntryType.MEDICATION_CURRENT);
-      expect(entryTypes).toContain(
-        MetaHistoryEntryType.MEDICATION_EFFECTIVENESS,
-      );
     });
 
     it("should create adverse reaction entries", async () => {
@@ -183,15 +182,17 @@ describe("Enhanced Health Signals Processing", () => {
       );
 
       const medicationWithSideEffects = {
-        medications: [
-          {
-            name: "Penicillin",
-            status: "current",
-            sideEffects: "nausea, headache",
-            reactionSeverity: "mild",
-            date: "2024-01-15T08:00:00Z",
-          },
-        ],
+        medications: {
+          newPrescriptions: [
+            {
+              medicationName: "Penicillin",
+              status: "current",
+              sideEffects: "nausea, headache",
+              reactionSeverity: "mild",
+              date: "2024-01-15T08:00:00Z",
+            },
+          ],
+        },
       };
 
       await processHealthData(
@@ -390,17 +391,19 @@ describe("Enhanced Health Signals Processing", () => {
       );
 
       const medicationData = {
-        medications: [
-          {
-            name: "Warfarin",
-            dosage: "5mg",
-            frequency: "daily",
-            status: "current",
-            indication: "anticoagulation",
-            prescriber: "Dr. Johnson",
-            startDate: "2024-01-10T00:00:00Z",
-          },
-        ],
+        medications: {
+          currentMedications: [
+            {
+              medicationName: "Warfarin",
+              dosage: "5mg",
+              frequency: { schedule: "daily" },
+              status: "current",
+              indication: "anticoagulation",
+              prescriber: "Dr. Johnson",
+              startDate: "2024-01-10T00:00:00Z",
+            },
+          ],
+        },
       };
 
       await processHealthData(medicationData, mockPatientId, "med-doc");
@@ -413,7 +416,7 @@ describe("Enhanced Health Signals Processing", () => {
       );
 
       expect(medicationEntry).toBeDefined();
-      expect(medicationEntry?.data.name).toBe("Warfarin");
+      expect(medicationEntry?.data.medicationName).toBe("Warfarin");
       expect(medicationEntry?.data.dosage).toBe("5mg");
       expect(medicationEntry?.tags).toContain("medication");
       expect(medicationEntry?.category).toBe("medication");

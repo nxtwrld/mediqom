@@ -110,6 +110,19 @@ export const DELETE: RequestHandler = async ({
     return error(401, { message: "Unauthorized" });
   }
 
+  // Verify the user owns the document key before allowing delete
+  const { data: documentKeys, error: documentKeysError } = await supabase
+    .from("keys")
+    .select("id")
+    .eq("document_id", params.did)
+    .eq("owner_id", params.pid)
+    .eq("user_id", user.id)
+    .single();
+
+  if (documentKeysError || !documentKeys) {
+    return error(403, { message: "Forbidden" });
+  }
+
   const { data: documentDelete, error: documentDeleteError } = await supabase
     .from("documents")
     .delete()

@@ -94,12 +94,12 @@ export const DELETE: RequestHandler = async ({
   let parent_id = user.id;
 
   // we are deleting a profile link from a parent
-  if (url.searchParams.get("link_type") == "parent") {
+  if (url.searchParams.get("link_type") === "parent") {
     profile_id = user.id;
     parent_id = params.pid || "";
   }
 
-  if (profile_id != user.id) {
+  if (profile_id !== user.id) {
     // let's check if the profile is a virtual profile and you are the owner of it and if so, delete the whole profile
     const { data: profile, error: errorProfile } = await supabase
       .from("profiles")
@@ -111,7 +111,7 @@ export const DELETE: RequestHandler = async ({
       return error(500, { message: "Database error" });
     }
 
-    if (profile.auth_id == null && profile.owner_id == user.id) {
+    if (profile.auth_id === null && profile.owner_id === user.id) {
       // delete the profile if it has not auth_id (virutal profile) and you are the owner of it
       const { error: errorDelete } = await supabase
         .from("profiles")

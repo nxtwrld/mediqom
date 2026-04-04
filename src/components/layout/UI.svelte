@@ -144,6 +144,7 @@
     type PanelView = "profiles" | "anatomy" | "import";
     let panelView = $state<PanelView>("profiles");
     let panelHeight = $state(0);
+    let panelOpen = $derived(panelHeight > 0);
     let isSnappingPanel = $state(false);
     let navbarWrapEl = $state<HTMLElement | undefined>(undefined);
     let navbarBarEl = $state<HTMLElement | undefined>(undefined);
@@ -221,8 +222,6 @@
         anatomy: () => Math.round(window.innerHeight * 0.82),
         import: () => Math.round(window.innerHeight * 0.88),
     };
-
-    let panelOpen = $derived(panelHeight > 0);
 
     // Fullscreen anatomy canvas
     let panelSectionEl = $state<HTMLElement | undefined>(undefined);

@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import { files, createTasks } from '$lib/files';
+    import { files, createTasks, detectPagesLayout } from '$lib/files';
     import { DocumentState, type Task, TaskState, type Document  } from '$lib/import';
     import { DocumentType, type Document as SavedDocument } from '$lib/documents/types.d';
     import  user, { type User } from '$lib/user';
@@ -21,7 +21,7 @@
     import DualStageProgress from './DualStageProgress.svelte';
 
     // Job-based import
-    import { createJob, processJob, fetchJob, deleteJob } from '$lib/import/job-manager';
+    import { createJob, processJob, fetchJob, deleteJob, updateLayoutDetections } from '$lib/import/job-manager';
     import { assembleDocuments, saveDocuments, decryptJobResults } from '$lib/import/finalizer';
     import { getFiles as getCachedFiles, clearFiles } from '$lib/import/file-cache';
     import type { ImportJob } from '$lib/import/types';
@@ -229,11 +229,31 @@
             currentJobId = job.id;
 
             // Process with SSE + polling fallback
+            // Layout detection is triggered reactively by the server's ocr_complete SSE event
             const completedJob = await processJob(job.id, (event) => {
+                if (event.stage === 'ocr_complete') {
+                    const pages = event.data?.pagesWithImages;
+                    console.log(`[Import] ocr_complete: fileIndex=${event.data?.fileIndex}, pagesWithImages=[${pages?.join(', ') ?? 'none'}]`);
+
+                    if (pages?.length > 0) {
+                        const { fileIndex, pagesWithImages } = event.data;
+                        const task = newTasks[fileIndex];
+                        if (task) {
+                            detectPagesLayout(task, pagesWithImages).then((detections) => {
+                                console.log(`[LayoutDetection] Got ${detections.length} detection(s) for fileIndex=${fileIndex}`);
+                                if (detections.length > 0) {
+                                    updateLayoutDetections(job.id, newTasks);
+                                }
+                            }).catch((err) => console.warn('[LayoutDetection] Detection failed:', err));
+                        } else {
+                            console.warn(`[Import] ocr_complete: no task at fileIndex=${fileIndex} (have ${newTasks.length} tasks)`);
+                        }
+                    }
+                }
+
                 if (event.stage.includes('extract') || event.stage === 'initialization') {
                     currentStage = 'extract';
                 } else if (event.stage === 'documents_detected') {
-                    // Document count detected — could update UI in the future
                     currentStage = 'analyze';
                 } else if (event.stage.includes('analyz') || event.stage.startsWith('analysis_doc_')) {
                     currentStage = 'analyze';
@@ -249,11 +269,6 @@
                 completedJob,
                 user.keyPair?.privateKey ?? undefined,
             );
-
-            console.log('Normal flow - extraction:', extraction);
-            console.log('Normal flow - analysis:', analysis);
-            console.log('Normal flow - extraction type:', Array.isArray(extraction));
-            console.log('Normal flow - analysis type:', Array.isArray(analysis));
 
             const documents = await assembleDocuments(
                 extraction,

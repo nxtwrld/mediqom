@@ -2,7 +2,7 @@ import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { DEBUG_IMPORT } from "$env/static/private";
 
-const DEBUG_ENABLED = DEBUG_IMPORT === "true";
+const DEBUG_ENABLED = DEBUG_IMPORT === "true" && process.env.NODE_ENV !== "production";
 const DEBUG_DIR = join(process.cwd(), "test-data");
 
 export interface DebugConfig {
@@ -189,6 +189,36 @@ export function saveDocumentWorkflow(
     );
   } catch (error) {
     console.error(`❌ [Debug] Failed to save document workflow:`, error);
+  }
+}
+
+/**
+ * Save per-phase import log to tmp/import-debug/{jobId}/
+ * Used for debugging the phased OCR → ONNX → crop → classify pipeline.
+ */
+export function saveImportPhaseLog(
+  jobId: string,
+  fileIndex: number,
+  phase: string,
+  data: any,
+  config: DebugConfig = { enabled: DEBUG_ENABLED, prettyPrint: true },
+): void {
+  if (!config.enabled) return;
+
+  try {
+    const dir = join("tmp", "import-debug", jobId);
+    mkdirSync(dir, { recursive: true });
+
+    const filename = `file${fileIndex}_${phase}.json`;
+    const filepath = join(dir, filename);
+
+    const json = config.prettyPrint
+      ? JSON.stringify(data, null, 2)
+      : JSON.stringify(data);
+
+    writeFileSync(filepath, json, "utf-8");
+  } catch {
+    // Silently ignore — debug logging should never break the pipeline
   }
 }
 

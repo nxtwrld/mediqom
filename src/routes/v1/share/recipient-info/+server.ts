@@ -25,6 +25,12 @@ export const GET: RequestHandler = async ({
     return error(400, { message: "email parameter required" });
   }
 
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(recipientEmail) || recipientEmail.length > 254) {
+    return error(400, { message: "Invalid email address" });
+  }
+
   const supabase = getServiceClient();
   const { data, error: rpcError } = await supabase.rpc("find_profile_by_email", {
     lookup_email: recipientEmail.toLowerCase().trim(),
@@ -43,7 +49,6 @@ export const GET: RequestHandler = async ({
   return json({
     exists: true,
     profile_id: profile.id,
-    auth_id: profile.auth_id,
     publicKey: profile.publicKey ?? null,
   });
 };

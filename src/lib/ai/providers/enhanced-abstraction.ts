@@ -4,7 +4,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
-import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import type { Content, TokenUsage } from "$lib/ai/types.d";
@@ -269,7 +268,6 @@ export class EnhancedAIProvider {
       maxTokens: number;
     },
   ): Promise<any> {
-    const parser = new JsonOutputFunctionsParser();
     const language = options.language || "English";
     const functionName = schema.name; // Use dynamic function name
 
@@ -316,10 +314,9 @@ export class EnhancedAIProvider {
       ],
     });
 
-    // Skip parser to match legacy behavior and manually parse function calls
-    const modelWithoutParser = model.bind({
-      functions: [schema],
-      function_call: { name: functionName }, // 🔧 Dynamic function name!
+    // Use withStructuredOutput for type-safe structured extraction
+    const structuredModel = model.withStructuredOutput(schema.parameters, {
+      name: functionName,
     });
 
     const systemMessage = new SystemMessage({
@@ -327,7 +324,7 @@ export class EnhancedAIProvider {
     });
 
     const humanMessage = new HumanMessage({
-      content,
+      content: content as any,
     });
 
     // Log the AI request
@@ -338,13 +335,11 @@ export class EnhancedAIProvider {
       schema: schema,
       model: options.modelId,
       language: language,
-      functions: [schema],
-      function_call: { name: functionName },
+      structuredOutput: { name: functionName, schema: schema.parameters },
     };
-    //console.log("AI REQUEST:", JSON.stringify(requestData, null, 2));
 
     const requestStartTime = Date.now();
-    const result = await modelWithoutParser.invoke([
+    const result = await structuredModel.invoke([
       systemMessage,
       humanMessage,
     ]);
@@ -359,7 +354,7 @@ export class EnhancedAIProvider {
 
     // Record AI request for debugging if recording is enabled
     if (workflowRecorder.isRecordingEnabled()) {
-      const aiRequest = workflowRecorder.recordAIRequest(
+      workflowRecorder.recordAIRequest(
         "enhanced-openai",
         options.modelId,
         requestData,
@@ -369,39 +364,7 @@ export class EnhancedAIProvider {
       );
     }
 
-    // Detect truncation: if the model hit its output token limit, the response is incomplete
-    const finishReason = result.response_metadata?.finish_reason;
-    if (finishReason === "length") {
-      aiLogger.error("AI response truncated (finish_reason=length)", {
-        functionName,
-        model: options.modelId,
-        maxTokens: options.maxTokens,
-      });
-      throw new Error(
-        `AI response was truncated (ran out of output tokens). ` +
-        `Model: ${options.modelId}, max_tokens: ${options.maxTokens}. ` +
-        `Consider increasing max_tokens for this flow.`
-      );
-    }
-
-    // Extract function call data from raw response (matching legacy behavior)
-    let parsedResult = result;
-    if (result?.additional_kwargs?.function_call) {
-      const functionCallData = result.additional_kwargs.function_call;
-
-      try {
-        parsedResult = JSON.parse(functionCallData.arguments);
-      } catch (parseError) {
-        aiLogger.error("Failed to parse function call arguments:", {
-          error:
-            parseError instanceof Error ? parseError.message : "Unknown error",
-          functionName: functionCallData.name,
-        });
-        parsedResult = result;
-      }
-    }
-
-    return parsedResult;
+    return result;
   }
 
   /**
@@ -450,34 +413,20 @@ export class EnhancedAIProvider {
       ],
     });
 
-    // Use Gemini's native function declaration format
-    const tools = [
-      {
-        functionDeclarations: [
-          {
-            name: functionName, // 🔧 Dynamic function name!
-            description: schema.description,
-            parameters: schema.parameters,
-          },
-        ],
-      },
-    ];
+    // Use withStructuredOutput for provider-agnostic structured extraction
+    const structuredModel = model.withStructuredOutput(schema.parameters, {
+      name: functionName,
+    });
 
     const systemMessage = new SystemMessage({
       content: this.createSystemMessage(language, options.flowType),
     });
 
     const humanMessage = new HumanMessage({
-      content,
+      content: content as any,
     });
 
-    // Gemini function calling approach
-    const result = await model.invoke([systemMessage, humanMessage], {
-      tools,
-      tool_choice: { type: "function", function: { name: functionName } },
-    });
-
-    return this.parseGeminiResult(result, schema);
+    return await structuredModel.invoke([systemMessage, humanMessage]);
   }
 
   /**
@@ -531,20 +480,20 @@ export class EnhancedAIProvider {
       ],
     });
 
-    // Claude uses schema-in-prompt approach (function name is less critical)
+    // Use withStructuredOutput for provider-agnostic structured extraction
+    const structuredModel = model.withStructuredOutput(schema.parameters, {
+      name: functionName,
+    });
+
     const systemMessage = new SystemMessage({
-      content:
-        this.createSystemMessage(language, options.flowType) +
-        this.createClaudeSchemaInstructions(schema, functionName),
+      content: this.createSystemMessage(language, options.flowType),
     });
 
     const humanMessage = new HumanMessage({
-      content,
+      content: content as any,
     });
 
-    const result = await model.invoke([systemMessage, humanMessage]);
-
-    return this.parseClaudeResult(result, schema);
+    return await structuredModel.invoke([systemMessage, humanMessage]);
   }
 
   /**
@@ -555,78 +504,6 @@ export class EnhancedAIProvider {
       return "You are a precision OCR system. Transcribe text exactly as it appears in the document, preserving the original language, diacritics, and formatting. Do not translate or normalize any text.";
     }
     return `You are a medical AI assistant. You MUST respond in ${language} language ONLY. All free-text fields in your response must be in ${language}. Do not use any other language for free-text content. This is critical - strictly follow the language requirement. IMPORTANT EXCEPTION: When the JSON schema defines an "enum" array for a field, you MUST use the exact enum values as provided - never translate enum values.`;
-  }
-
-  /**
-   * Create Claude-specific schema instructions
-   */
-  private createClaudeSchemaInstructions(
-    schema: FunctionDefinition,
-    functionName: string,
-  ): string {
-    return `\n\nYou must analyze the medical content and respond with a JSON object that follows this schema for the "${functionName}" function:\n\n${JSON.stringify(schema.parameters, null, 2)}\n\nRespond ONLY with the JSON object, no additional text.`;
-  }
-
-  /**
-   * Parse Gemini result to match expected format
-   */
-  private parseGeminiResult(result: any, schema: FunctionDefinition): any {
-    try {
-      // Try to extract function call result
-      if (result.content && typeof result.content === "string") {
-        const parsed = JSON.parse(result.content);
-        return parsed;
-      }
-
-      // Fallback: try to extract from tool calls
-      if (result.additional_kwargs?.tool_calls) {
-        const toolCall = result.additional_kwargs.tool_calls[0];
-        if (toolCall?.function?.arguments) {
-          return JSON.parse(toolCall.function.arguments);
-        }
-      }
-
-      // Legacy fallback for function_call format
-      if (result.additional_kwargs?.function_call) {
-        return JSON.parse(result.additional_kwargs.function_call.arguments);
-      }
-
-      throw new Error(
-        "Unable to parse Gemini result - no valid function call found",
-      );
-    } catch (error) {
-      aiLogger.error("Failed to parse Gemini result:", {
-        error,
-        rawResult: JSON.stringify(result, null, 2),
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Parse Claude result to match expected format
-   */
-  private parseClaudeResult(result: any, schema: FunctionDefinition): any {
-    try {
-      if (result.content && typeof result.content === "string") {
-        // Claude returns JSON directly in content
-        const jsonMatch = result.content.match(/\{.*\}/s);
-        if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
-        }
-
-        // Try parsing the entire content as JSON
-        return JSON.parse(result.content);
-      }
-
-      throw new Error("Unable to parse Claude result - no valid JSON found");
-    } catch (error) {
-      aiLogger.error("Failed to parse Claude result:", {
-        error,
-        rawResult: JSON.stringify(result, null, 2),
-      });
-      throw error;
-    }
   }
 
   /**

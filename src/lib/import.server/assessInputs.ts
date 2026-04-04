@@ -8,7 +8,7 @@ import assessSchemaImage, {
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import { type Content, type TokenUsage } from "$lib/ai/types.d";
 import { sleep } from "$lib/utils";
-import { DEBUG_ASSESSER } from "$env/static/private";
+import { DEBUG_ASSESSER, DEBUG_IMPORT } from "$env/static/private";
 import {
   type Assessment,
   type AssessmentDocument,
@@ -20,8 +20,10 @@ import {
   type DetectedImage,
   type CroppedImage,
 } from "./cropImages";
+import { saveImportPhaseLog } from "./debug-output";
 
 const DEBUG = DEBUG_ASSESSER === "true";
+const VERBOSE = DEBUG_IMPORT === "true";
 
 /** Chunked assessment constants */
 const ASSESSMENT_CHUNK_SIZE = 8;
@@ -74,36 +76,35 @@ interface DocumentAssessmentResult {
   documents: (AssessmentDocument & { hasImages?: boolean })[];
 }
 
-export default async function assess(
-  input: Input,
-  progressCallback?: (stage: string, progress: number, message: string) => void,
-): Promise<Assessment> {
-  const tokenUsage: TokenUsage = {
-    total: 0,
-  };
+// ── Exported types for phased assessment ──────────────────────────
 
-  if (DEBUG) {
-    await sleep(1500);
-    return Promise.resolve(TEST_DATA);
-  }
+export { type OcrResult };
 
-  // === PASS 1: OCR extraction (parallel vision calls) ===
-  const totalPages = input.images.length;
+export type ProgressCallback = (stage: string, progress: number, message: string) => void;
+
+// ── Phase 1: OCR extraction ───────────────────────────────────────
+
+/**
+ * Run OCR on every page image (parallel vision calls).
+ * Returns structured text + hasImages flag per page.
+ */
+export async function assessOCR(
+  images: string[],
+  progressCallback?: ProgressCallback,
+): Promise<{ ocrData: OcrResult; tokenUsage: TokenUsage }> {
+  const tokenUsage: TokenUsage = { total: 0 };
+  const totalPages = images.length;
   const allPages: OcrResult["pages"] = [];
 
   let ocrPagesCompleted = 0;
-  const ocrPromises = input.images.map((image, i) => {
+  const ocrPromises = images.map((image, i) => {
     const singleImageContent: Content[] = [
       {
         type: "image_url",
-        image_url: {
-          url: image,
-          detail: "high",
-        },
+        image_url: { url: image, detail: "high" },
       },
     ];
 
-    // Each parallel call gets its own tokenUsage to avoid overwriting schema keys
     const pageTokenUsage: TokenUsage = { total: 0 };
 
     return fetchGptEnhanced(
@@ -114,7 +115,6 @@ export default async function assess(
       "ocr_extraction",
     ).then((pageResult) => {
       ocrPagesCompleted++;
-      // Accumulate token usage safely
       tokenUsage.total += pageTokenUsage.total;
 
       progressCallback?.(
@@ -129,7 +129,6 @@ export default async function assess(
 
   const ocrResults = await Promise.all(ocrPromises);
 
-  // Map results to allPages array (sorted by page index)
   for (const { index, result: pageResult } of ocrResults.sort((a, b) => a.index - b.index)) {
     if (pageResult?.pages && Array.isArray(pageResult.pages)) {
       for (const p of pageResult.pages) {
@@ -146,10 +145,38 @@ export default async function assess(
 
   const ocrData: OcrResult = { pages: allPages };
 
-  // === IMAGE ANALYSIS PASS: Precise bounding boxes for pages with images ===
+  if (!ocrData?.pages || !Array.isArray(ocrData.pages)) {
+    throw new Error(
+      `OCR extraction returned invalid data — the AI response may have been truncated. ` +
+      `Expected { pages: [...] } but got: ${typeof ocrData}`
+    );
+  }
+
+  return { ocrData, tokenUsage };
+}
+
+// ── Phase 2: Image cropping ───────────────────────────────────────
+
+/**
+ * Crop embedded images from pages using YOLO detections (preferred)
+ * or LLM-based bounding-box detection as fallback.
+ */
+export async function assessImages(
+  images: string[],
+  ocrData: OcrResult,
+  layoutDetections: PageLayoutDetection[] | undefined,
+  progressCallback?: ProgressCallback,
+): Promise<{ croppedImagesByPage: Map<number, CroppedImage[]>; tokenUsage: TokenUsage }> {
+  const tokenUsage: TokenUsage = { total: 0 };
   const croppedImagesByPage = new Map<number, CroppedImage[]>();
 
-  if (input.layoutDetections && input.layoutDetections.length > 0) {
+  if (VERBOSE) {
+    console.log(
+      `[assess] layoutDetections: ${!!layoutDetections} (${layoutDetections?.length ?? 0}), pages: ${images.length}`,
+    );
+  }
+
+  if (layoutDetections && layoutDetections.length > 0) {
     // Use client-provided DocLayout-YOLO bounding boxes (no LLM call needed)
     progressCallback?.(
       "ai_processing",
@@ -157,14 +184,14 @@ export default async function assess(
       `Using client-side layout detection for image extraction...`,
     );
 
-    for (const pageLayout of input.layoutDetections) {
+    for (const pageLayout of layoutDetections) {
       const figures = pageLayout.detections.filter(
         (d) => ["figure", "picture"].includes(d.class) && d.confidence >= 0.3,
       );
       if (figures.length === 0) continue;
 
       const pageIndex = pageLayout.page - 1;
-      if (pageIndex < 0 || pageIndex >= input.images.length) continue;
+      if (pageIndex < 0 || pageIndex >= images.length) continue;
 
       const detectedImages: DetectedImage[] = figures.map((f) => ({
         type: f.class,
@@ -172,7 +199,7 @@ export default async function assess(
       }));
 
       const cropped = await cropDetectedImages(
-        input.images[pageIndex],
+        images[pageIndex],
         detectedImages,
       );
       if (cropped.length > 0) {
@@ -180,13 +207,17 @@ export default async function assess(
       }
     }
 
+    const totalCropped = Array.from(croppedImagesByPage.values()).reduce((n, imgs) => n + imgs.length, 0);
+    if (VERBOSE) {
+      console.log(`[assess] YOLO: ${totalCropped} cropped images across ${croppedImagesByPage.size} pages`);
+    }
     progressCallback?.(
       "ai_processing",
       65,
-      `Extracted ${Array.from(croppedImagesByPage.values()).reduce((n, imgs) => n + imgs.length, 0)} embedded images (YOLO)`,
+      `Extracted ${totalCropped} embedded images (YOLO)`,
     );
   } else {
-    // Fallback: LLM-based image analysis for pages flagged with hasImages
+    if (VERBOSE) console.log("[assess] No layout detections — LLM fallback");
     const pagesWithImages = ocrData.pages.filter((p) => p.hasImages);
 
     if (pagesWithImages.length > 0) {
@@ -198,12 +229,12 @@ export default async function assess(
 
       const imageAnalysisPromises = pagesWithImages.map(async (page) => {
         const pageIndex = page.page - 1;
-        if (pageIndex < 0 || pageIndex >= input.images.length) return;
+        if (pageIndex < 0 || pageIndex >= images.length) return;
 
         const imageContent: Content[] = [
           {
             type: "image_url",
-            image_url: { url: input.images[pageIndex], detail: "high" },
+            image_url: { url: images[pageIndex], detail: "high" },
           },
         ];
 
@@ -226,7 +257,7 @@ export default async function assess(
           }));
 
           const cropped = await cropDetectedImages(
-            input.images[pageIndex],
+            images[pageIndex],
             detectedImages,
           );
           if (cropped.length > 0) {
@@ -245,20 +276,25 @@ export default async function assess(
     }
   }
 
-  if (!ocrData?.pages || !Array.isArray(ocrData.pages)) {
-    throw new Error(
-      `OCR extraction returned invalid data — the AI response may have been truncated. ` +
-      `Expected { pages: [...] } but got: ${typeof ocrData}`
-    );
-  }
+  return { croppedImagesByPage, tokenUsage };
+}
 
-  // === PASS 2: Document assessment (text-only, chunked for large documents) ===
+// ── Phase 3: Document classification ──────────────────────────────
+
+/**
+ * Classify OCR text into logical documents (chunked for large inputs).
+ */
+export async function assessDocuments(
+  ocrData: OcrResult,
+  progressCallback?: ProgressCallback,
+): Promise<{ documents: DocumentAssessmentResult["documents"]; tokenUsage: TokenUsage }> {
+  const tokenUsage: TokenUsage = { total: 0 };
+
   progressCallback?.("ai_processing", 70, `Pass 2: Classifying documents...`);
 
   let assessmentDocuments: DocumentAssessmentResult["documents"];
 
   if (ocrData.pages.length <= ASSESSMENT_CHUNK_SIZE) {
-    // Small document — single assessment call (no chunking)
     const textContent: Content[] = [
       {
         type: "text",
@@ -285,7 +321,6 @@ export default async function assess(
 
     assessmentDocuments = assessmentData.documents;
   } else {
-    // Large document — split into overlapping chunks and assess in parallel
     const chunks: { startIdx: number; endIdx: number; pages: typeof ocrData.pages }[] = [];
     let start = 0;
     while (start < ocrData.pages.length) {
@@ -296,7 +331,7 @@ export default async function assess(
         pages: ocrData.pages.slice(start, end),
       });
       if (end >= ocrData.pages.length) break;
-      start = end - ASSESSMENT_OVERLAP; // overlap for boundary detection
+      start = end - ASSESSMENT_OVERLAP;
     }
 
     progressCallback?.(
@@ -338,7 +373,6 @@ export default async function assess(
 
     const chunkResults = await Promise.all(chunkPromises);
 
-    // Validate chunk results
     for (const cr of chunkResults) {
       if (!Array.isArray(cr.documents)) {
         throw new Error(
@@ -347,15 +381,28 @@ export default async function assess(
       }
     }
 
-    // Merge overlapping chunk assessments
     assessmentDocuments = mergeChunkAssessments(chunkResults);
   }
 
-  // === Merge results into Assessment format ===
+  return { documents: assessmentDocuments, tokenUsage };
+}
+
+// ── Phase 4: Assemble final Assessment ────────────────────────────
+
+/**
+ * Combine OCR data, cropped images, and document classification
+ * into the final Assessment structure.
+ */
+export function assembleAssessment(
+  ocrData: OcrResult,
+  croppedImagesByPage: Map<number, CroppedImage[]>,
+  assessmentDocuments: DocumentAssessmentResult["documents"],
+  tokenUsage: TokenUsage,
+): Assessment {
   const pages: AssessmentPage[] = ocrData.pages.map((p) => ({
     page: p.page,
     text: p.text,
-    language: "", // will be set from document assessment
+    language: "",
     images: (croppedImagesByPage.get(p.page) || []).map((img) => ({
       type: img.type,
       description: img.description,
@@ -364,7 +411,6 @@ export default async function assess(
     })),
   }));
 
-  // Set page language from document assessment
   for (const doc of assessmentDocuments) {
     for (const pageNum of doc.pages) {
       const page = pages.find((p) => p.page === pageNum);
@@ -374,7 +420,6 @@ export default async function assess(
     }
   }
 
-  // Propagate hasImages flag — true if any page in the document has cropped images
   const documents: AssessmentDocument[] = assessmentDocuments.map(
     ({ hasImages: aiHasImages, ...doc }) => ({
       ...doc,
@@ -388,8 +433,47 @@ export default async function assess(
     tokenUsage,
   };
 
-  console.log("All done...", data.tokenUsage.total);
+  if (VERBOSE) console.log(`[assess] Assembly complete, tokens: ${data.tokenUsage.total}`);
   return data;
+}
+
+// ── Backward-compatible wrapper ───────────────────────────────────
+
+export default async function assess(
+  input: Input,
+  progressCallback?: ProgressCallback,
+): Promise<Assessment> {
+  if (DEBUG) {
+    await sleep(1500);
+    return Promise.resolve(TEST_DATA);
+  }
+
+  // Phase 1: OCR
+  const { ocrData, tokenUsage: ocrTokens } = await assessOCR(
+    input.images,
+    progressCallback,
+  );
+
+  // Phase 2: Image cropping
+  const { croppedImagesByPage, tokenUsage: imgTokens } = await assessImages(
+    input.images,
+    ocrData,
+    input.layoutDetections,
+    progressCallback,
+  );
+
+  // Phase 3: Document classification
+  const { documents: assessmentDocuments, tokenUsage: docTokens } = await assessDocuments(
+    ocrData,
+    progressCallback,
+  );
+
+  // Phase 4: Assemble
+  const totalTokenUsage: TokenUsage = {
+    total: ocrTokens.total + imgTokens.total + docTokens.total,
+  };
+
+  return assembleAssessment(ocrData, croppedImagesByPage, assessmentDocuments, totalTokenUsage);
 }
 
 /**

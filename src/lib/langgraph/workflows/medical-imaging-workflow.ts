@@ -5,7 +5,7 @@
  * Follows the unified-workflow patterns with dedicated medical imaging nodes.
  */
 
-import { StateGraph, END } from "@langchain/langgraph";
+import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
 import type {
   MedicalImagingState,
   MedicalImagingWorkflowConfig as WorkflowConfig,
@@ -65,69 +65,49 @@ export const createMedicalImagingWorkflow = (
     };
   };
 
-  // Create state graph with medical imaging state interface
-  const workflow = new StateGraph<MedicalImagingState>({
-    channels: {
-      // Input channels
-      images: { reducer: (current: any, update: any) => update ?? current },
-      text: { reducer: (current: any, update: any) => update ?? current },
-      language: { reducer: (current: any, update: any) => update ?? current },
-      metadata: { reducer: (current: any, update: any) => update ?? current },
-      content: { reducer: (current: any, update: any) => update ?? current },
+  // Helper: last-write-wins reducer
+  const lastValue = <T>() =>
+    Annotation<T>({
+      reducer: (current: any, update: any) => update ?? current,
+      default: () => undefined as any,
+    });
 
-      // Medical imaging specific channels
-      imagingMetadata: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      imageAnalysis: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      detectedBodyParts: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      detectedAnomalies: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      measurements: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      primaryAnatomicalRegion: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      urgentFindings: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
+  // Define state graph using Annotation API
+  const ImagingGraphState = Annotation.Root({
+    // Input channels
+    images: lastValue<any>(),
+    text: lastValue<any>(),
+    language: lastValue<any>(),
+    metadata: lastValue<any>(),
+    content: lastValue<any>(),
 
-      // Patient and performer channels
-      patientInfo: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      medicalPerformers: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      patientPerformerDetection: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
+    // Medical imaging specific channels
+    imagingMetadata: lastValue<any>(),
+    imageAnalysis: lastValue<any>(),
+    detectedBodyParts: lastValue<any>(),
+    detectedAnomalies: lastValue<any>(),
+    measurements: lastValue<any>(),
+    primaryAnatomicalRegion: lastValue<any>(),
+    urgentFindings: lastValue<any>(),
 
-      // Unified result structure (following unified workflow pattern)
-      medicalImagingAnalysis: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
+    // Patient and performer channels
+    patientInfo: lastValue<any>(),
+    medicalPerformers: lastValue<any>(),
+    patientPerformerDetection: lastValue<any>(),
 
-      // Workflow control channels
-      tokenUsage: { reducer: (current: any, update: any) => update ?? current },
-      errors: { reducer: (current: any, update: any) => update ?? current },
-      progressCallback: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      emitProgress: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      selectedProvider: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-    },
+    // Unified result structure
+    medicalImagingAnalysis: lastValue<any>(),
+
+    // Workflow control channels
+    tokenUsage: lastValue<any>(),
+    errors: lastValue<any>(),
+    progressCallback: lastValue<any>(),
+    emitProgress: lastValue<any>(),
+    selectedProvider: lastValue<any>(),
   });
+
+  // Create state graph using Annotation
+  const workflow = new StateGraph(ImagingGraphState) as any;
 
   // Add patient/performer detection node (metadata-only processing)
   workflow.addNode(
@@ -142,13 +122,9 @@ export const createMedicalImagingWorkflow = (
   );
 
   // Define 2-node sequential workflow
-  workflow
-    .addEdge("__start__", "patient_performer_detection" as any)
-    .addEdge(
-      "patient_performer_detection" as any,
-      "medical_imaging_analysis" as any,
-    )
-    .addEdge("medical_imaging_analysis" as any, END);
+  workflow.addEdge(START, "patient_performer_detection");
+  workflow.addEdge("patient_performer_detection", "medical_imaging_analysis");
+  workflow.addEdge("medical_imaging_analysis", END);
 
   return workflow.compile();
 };

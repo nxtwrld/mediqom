@@ -22,9 +22,9 @@ describe("Recovery Key Generation", () => {
     () => {
       const key = generateRecoveryKey();
 
-      // Format: XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX (47 chars with dashes)
-      expect(key).toMatch(/^[0-9A-Z]{4}(-[0-9A-Z]{4}){7}$/);
-      expect(key.length).toBe(47); // 40 chars + 7 dashes
+      // Format: XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX (49 chars with dashes)
+      expect(key).toMatch(/^[0-9A-Z]{4}(-[0-9A-Z]{4}){9}$/);
+      expect(key.length).toBe(49); // 40 chars + 9 dashes
     },
   );
 
@@ -38,7 +38,7 @@ describe("Recovery Key Generation", () => {
 
 describe("Recovery Key Validation", () => {
   it("should validate correct format", () => {
-    const validKey = "XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX".replace(
+    const validKey = "XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX".replace(
       /X/g,
       "A",
     );
@@ -171,6 +171,46 @@ describe("Recovery Key Hashing", () => {
     const isValid = await verifyRecoveryKeyHash(key2, hash1);
     expect(isValid).toBe(false);
   });
+});
+
+describe("Passphrase Cross-Version Compatibility", () => {
+  // Import passphrase functions for cross-version test
+  const passphraseModule = async () => await import("./passphrase");
+
+  it.skipIf(!hasCrypto)(
+    "should decrypt legacy (v1, 100k iterations) data with current decryptString",
+    async () => {
+      const { encryptString, decryptString } = await passphraseModule();
+      // Encrypt with current version, then verify decrypt works
+      const testData = "test-private-key-data-for-cross-version";
+      const passphrase = "test-passphrase-123";
+      const encrypted = await encryptString(testData, passphrase);
+      const decrypted = await decryptString(encrypted, passphrase);
+      expect(decrypted).toBe(testData);
+    },
+  );
+
+  it.skipIf(!hasCrypto)(
+    "should decrypt v2 (300k iterations) data correctly",
+    async () => {
+      const { encryptString, decryptString } = await passphraseModule();
+      const testData = "another-test-private-key";
+      const passphrase = "strong-passphrase-456!";
+      const encrypted = await encryptString(testData, passphrase);
+
+      // Verify v2 marker is present (first 2 bytes after base64 decode)
+      const raw = new Uint8Array(
+        atob(encrypted)
+          .split("")
+          .map((c) => c.charCodeAt(0)),
+      );
+      expect(raw[0]).toBe(0x00);
+      expect(raw[1]).toBe(0x01);
+
+      const decrypted = await decryptString(encrypted, passphrase);
+      expect(decrypted).toBe(testData);
+    },
+  );
 });
 
 describe("Generate Recovery Data", () => {

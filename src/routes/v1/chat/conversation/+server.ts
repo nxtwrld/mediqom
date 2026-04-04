@@ -1,4 +1,5 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
 import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
 import type { Content } from "$lib/ai/types.d";
 import { generateId } from "$lib/utils/id";
@@ -15,6 +16,15 @@ export const POST: RequestHandler = async ({
   const { session } = await safeGetSession();
   if (!session) {
     error(401, { message: "Unauthorized" });
+  }
+
+  // Rate limit: 30 requests/min per user
+  const rl = checkRateLimit("chat-conversation", session.user.id, 30, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: "Too many requests" }), {
+      status: 429,
+      headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs! / 1000)) },
+    });
   }
 
   try {
@@ -75,8 +85,6 @@ export const POST: RequestHandler = async ({
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Cache-Control",
       },
     });
   } catch (err) {
@@ -156,9 +164,9 @@ async function processAIRequest(
     const messages = [
       new SystemMessage(systemPrompt),
       // Add conversation history based on configuration
-      ...conversationHistory
+      ...(conversationHistory
         .slice(-conversationConfig.maxMessages)
-        .flatMap((msg) => {
+        .flatMap((msg: any) => {
           if (msg.role === "user") return [new HumanMessage(msg.content)];
           if (
             msg.role === "assistant" &&
@@ -167,7 +175,7 @@ async function processAIRequest(
             return [new SystemMessage(msg.content)];
           }
           return [];
-        }),
+        }) as any[]),
       new HumanMessage(userMessage),
     ];
 

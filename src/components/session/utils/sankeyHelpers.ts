@@ -77,10 +77,15 @@ export function createNodeComponent(
 
     default:
       // Fallback for action nodes or unknown types
+      const escapedName = truncateText(node.name, isMobile ? 20 : 25)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
       nodeContainer.innerHTML = `
                 <div class="sankey-node" style="background-color: ${node.color};">
                     <div class="node-content">
-                        <div class="node-title">${truncateText(node.name, isMobile ? 20 : 25)}</div>
+                        <div class="node-title">${escapedName}</div>
                     </div>
                 </div>
             `;

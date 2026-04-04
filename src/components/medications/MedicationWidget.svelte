@@ -68,7 +68,7 @@
 </section>
 
 {#if showAddModal}
-    <Modal onclose={() => showAddModal = false}>
+    <Modal onclose={() => { showAddModal = false; }}>
         <MedicationForm
             onSave={handleSave}
             onCancel={() => showAddModal = false}

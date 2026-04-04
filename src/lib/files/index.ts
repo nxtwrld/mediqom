@@ -94,7 +94,46 @@ interface AssessmentClient extends Assessment {
   pages: AssessmentPagesClient[];
 }
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_FILE_COUNT = 50;
+const ALLOWED_EXTENSIONS = new Set([
+  ".pdf",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".tiff",
+  ".tif",
+  ".dcm",
+  ".dicom",
+]);
+
+function validateFiles(files: File[]): void {
+  if (files.length > MAX_FILE_COUNT) {
+    throw new Error(
+      `Too many files: ${files.length}. Maximum ${MAX_FILE_COUNT} files per batch.`,
+    );
+  }
+
+  for (const file of files) {
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error(
+        `File "${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum file size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+      );
+    }
+
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(ext) && !file.type.startsWith("image/") && file.type !== "application/pdf") {
+      throw new Error(
+        `Unsupported file type: "${file.name}". Allowed: PDF, images (JPG, PNG, WebP, TIFF), DICOM.`,
+      );
+    }
+  }
+}
+
 export async function createTasks(files: File[]): Promise<Task[]> {
+  validateFiles(files);
+
   const tasks: Task[] = [];
 
   console.log(
@@ -347,29 +386,83 @@ export async function createTasks(files: File[]): Promise<Task[]> {
     });
   }
 
-  // Run client-side layout detection on all page images (DocLayout-YOLO via ONNX)
-  if (browser) {
-    await Promise.all(
-      tasks.map(async (task) => {
-        if (task.type === "application/dicom") return; // DICOM handled separately
-        const images = Array.isArray(task.data) ? (task.data as string[]) : [];
-        if (images.length === 0) return;
-        try {
-          const results = await detectLayoutForPages(images);
-          if (results.length > 0) {
-            task.layoutDetections = results;
-            console.log(
-              `[LayoutDetection] ${task.title}: detected layout on ${results.length} page(s)`,
-            );
-          }
-        } catch (err) {
-          console.warn(`[LayoutDetection] Failed for ${task.title}:`, err);
-        }
-      }),
-    );
-  }
-
   return tasks;
+}
+
+/**
+ * Start layout detection in background for all non-DICOM tasks.
+ * Returns a promise that resolves when all detections are complete.
+ * Results are written into each task's `layoutDetections` property.
+ *
+ * @deprecated Prefer `detectPagesLayout()` triggered by the server's `ocr_complete` SSE event.
+ */
+export async function startLayoutDetection(tasks: Task[]): Promise<void> {
+  if (!browser) return;
+
+  await Promise.all(
+    tasks.map(async (task) => {
+      if (task.type === "application/dicom") return;
+      const images = Array.isArray(task.data) ? (task.data as string[]) : [];
+      if (images.length === 0) return;
+      try {
+        const results = await detectLayoutForPages(images);
+        if (results.length > 0) {
+          task.layoutDetections = results;
+          console.log(
+            `[LayoutDetection] ${task.title}: detected layout on ${results.length} page(s)`,
+          );
+        }
+      } catch (err) {
+        console.warn(`[LayoutDetection] Failed for ${task.title}:`, err);
+      }
+    }),
+  );
+}
+
+/**
+ * Run layout detection on specific pages of a task (server-driven).
+ *
+ * Called when the server's `ocr_complete` SSE event reports which pages
+ * contain embedded images. Only those pages are run through ONNX, saving
+ * inference time on text-only pages.
+ *
+ * @param task - The import task whose images to process
+ * @param pageNumbers - 1-indexed page numbers flagged by the server as having images
+ * @returns The layout detection results (also written to `task.layoutDetections`)
+ */
+export async function detectPagesLayout(
+  task: Task,
+  pageNumbers: number[],
+): Promise<import("$lib/layout-detection").PageLayoutResult[]> {
+  if (!browser) return [];
+
+  const images = Array.isArray(task.data) ? (task.data as string[]) : [];
+  if (images.length === 0) return [];
+
+  try {
+    console.log(
+      `[LayoutDetection] Running on pages [${pageNumbers.join(", ")}] only for "${task.title}"`,
+    );
+    const results = await detectLayoutForPages(images, pageNumbers);
+    if (results.length > 0) {
+      // Merge with any existing detections (different pages)
+      const existingPages = new Set(
+        (task.layoutDetections || []).map(d => d.page),
+      );
+      const merged = [
+        ...(task.layoutDetections || []).filter(d => !results.some(r => r.page === d.page)),
+        ...results,
+      ].sort((a, b) => a.page - b.page);
+      task.layoutDetections = merged;
+      console.log(
+        `[LayoutDetection] ${task.title}: detected layout on ${results.length} page(s) (total ${merged.length})`,
+      );
+    }
+    return results;
+  } catch (err) {
+    console.warn(`[LayoutDetection] Failed for ${task.title}:`, err);
+    return [];
+  }
 }
 
 export async function processTask(task: Task): Promise<DocumentNew[]> {

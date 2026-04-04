@@ -4,24 +4,27 @@
  * Detects figures, tables, text regions etc. in scanned document pages.
  * Used to provide accurate bounding boxes for image cropping, replacing
  * unreliable LLM-based image detection.
+ *
+ * Model: DocLayout-YOLO (YOLOv10-based, NMS-free)
+ * Output: [N, 6] where each row is [x1, y1, x2, y2, confidence, class_id]
  */
 
 import { preprocessImage, MODEL_SIZE, type LetterboxInfo } from "./preprocess";
-import { nms, type BBox } from "./nms";
 
-// DocLayout-YOLO class names (10 classes)
-const CLASS_NAMES = [
-  "text",
-  "title",
-  "list",
-  "table",
-  "figure",
-  "formula",
-  "caption",
-  "header",
-  "footer",
-  "footnote",
-];
+// DocLayout-YOLO DocStructBench class names (10 classes)
+// Source: https://github.com/opendatalab/DocLayout-YOLO/issues/84
+const CLASS_NAMES: Record<number, string> = {
+  0: "title",
+  1: "plain_text",
+  2: "abandon",
+  3: "figure",
+  4: "figure_caption",
+  5: "table",
+  6: "table_caption",
+  7: "table_footnote",
+  8: "isolate_formula",
+  9: "formula_caption",
+};
 
 export interface LayoutDetection {
   class: string;
@@ -37,18 +40,15 @@ export interface PageLayoutResult {
 
 /** Confidence threshold for keeping detections */
 const CONFIDENCE_THRESHOLD = 0.25;
-/** IoU threshold for NMS */
-const NMS_IOU_THRESHOLD = 0.45;
 
 // Cached ONNX session (lazy-loaded)
 let sessionPromise: Promise<any> | null = null;
 
 /**
- * Load ONNX Runtime scripts (same as VAD uses).
+ * Load a script tag and wait for it to execute.
  */
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    // Check if already loaded
     if (document.querySelector(`script[src="${src}"]`)) {
       resolve();
       return;
@@ -63,12 +63,11 @@ function loadScript(src: string): Promise<void> {
 
 /**
  * Get or create the ONNX inference session.
- * Lazily loads the model on first call and caches it.
+ * Loads ORT v1.22 from static/onnx/ (supports IR version 9).
  */
 async function getSession(): Promise<any> {
   if (!sessionPromise) {
     sessionPromise = (async () => {
-      // Load ONNX Runtime (shared with VAD)
       await loadScript("/onnx/ort.js");
 
       const ort = (window as any).ort;
@@ -76,7 +75,7 @@ async function getSession(): Promise<any> {
         throw new Error("ONNX Runtime not available");
       }
 
-      // Configure WASM paths
+      // Point WASM backend to the same directory
       ort.env.wasm.wasmPaths = "/onnx/";
 
       const session = await ort.InferenceSession.create(
@@ -94,93 +93,106 @@ async function getSession(): Promise<any> {
 }
 
 /**
- * Parse raw YOLO output tensor into bounding boxes.
+ * Scale bounding boxes from padded/resized image space back to original image space.
+ * Matches the reference implementation's scale_boxes function.
+ */
+function scaleBox(
+  x1: number, y1: number, x2: number, y2: number,
+  letterbox: LetterboxInfo,
+): { x1: number; y1: number; x2: number; y2: number } {
+  // Remove letterbox padding and scale back
+  const origX1 = (x1 - letterbox.padX) / letterbox.scale;
+  const origY1 = (y1 - letterbox.padY) / letterbox.scale;
+  const origX2 = (x2 - letterbox.padX) / letterbox.scale;
+  const origY2 = (y2 - letterbox.padY) / letterbox.scale;
+
+  // Clamp to image bounds
+  return {
+    x1: Math.max(0, origX1),
+    y1: Math.max(0, origY1),
+    x2: Math.min(letterbox.originalWidth, origX2),
+    y2: Math.min(letterbox.originalHeight, origY2),
+  };
+}
+
+/**
+ * Parse YOLOv10 output tensor into layout detections.
  *
- * YOLO output shape: [1, numClasses + 4, numDetections]
- * - First 4 rows: cx, cy, w, h (in model pixel coords)
- * - Remaining rows: class scores
+ * YOLOv10 is NMS-free. Output shape: [N, 6]
+ * Each detection: [x1, y1, x2, y2, confidence, class_id]
+ * Coordinates are in the padded/resized image pixel space.
  */
 function parseYoloOutput(
   output: Float32Array,
-  numDetections: number,
+  dims: number[],
   letterbox: LetterboxInfo,
 ): LayoutDetection[] {
-  const numClasses = CLASS_NAMES.length;
-  const stride = numDetections; // columns per row
+  // Output shape: [N, 6] or [1, N, 6]
+  // Flatten to handle both cases
+  const cols = dims[dims.length - 1]; // 6
+  const rows = dims.length === 3 ? dims[1] : dims[0]; // N
 
-  const boxes: BBox[] = [];
-
-  for (let d = 0; d < numDetections; d++) {
-    // Extract center coords and dimensions (model pixel space)
-    const cx = output[0 * stride + d];
-    const cy = output[1 * stride + d];
-    const w = output[2 * stride + d];
-    const h = output[3 * stride + d];
-
-    // Find best class
-    let maxScore = 0;
-    let bestClass = 0;
-    for (let c = 0; c < numClasses; c++) {
-      const score = output[(4 + c) * stride + d];
-      if (score > maxScore) {
-        maxScore = score;
-        bestClass = c;
-      }
-    }
-
-    if (maxScore < CONFIDENCE_THRESHOLD) continue;
-
-    // Convert from center coords to corner coords
-    const x1 = cx - w / 2;
-    const y1 = cy - h / 2;
-    const x2 = cx + w / 2;
-    const y2 = cy + h / 2;
-
-    boxes.push({ x1, y1, x2, y2, confidence: maxScore, classIndex: bestClass });
+  if (typeof window !== "undefined" && (window as any).__LAYOUT_DEBUG) {
+    console.log(
+      `[LayoutDetection] parseYoloOutput: dims=[${dims}], rows=${rows}, cols=${cols}, ` +
+      `dataLen=${output.length}, first6=[${Array.from(output.slice(0, 6)).map(v => v.toFixed(2))}]`,
+    );
   }
 
-  // Apply NMS
-  const filtered = nms(boxes, NMS_IOU_THRESHOLD);
+  const detections: LayoutDetection[] = [];
 
-  // Convert from model pixel coords to percentage of original image
-  return filtered.map((box) => {
-    // Remove letterbox padding and scale back to original image coords
-    const origX1 = (box.x1 - letterbox.padX) / letterbox.scale;
-    const origY1 = (box.y1 - letterbox.padY) / letterbox.scale;
-    const origX2 = (box.x2 - letterbox.padX) / letterbox.scale;
-    const origY2 = (box.y2 - letterbox.padY) / letterbox.scale;
+  for (let i = 0; i < rows; i++) {
+    const offset = i * cols;
+    const confidence = output[offset + 4];
 
-    // Clamp to image bounds
-    const clampedX1 = Math.max(0, origX1);
-    const clampedY1 = Math.max(0, origY1);
-    const clampedX2 = Math.min(letterbox.originalWidth, origX2);
-    const clampedY2 = Math.min(letterbox.originalHeight, origY2);
+    if (confidence < CONFIDENCE_THRESHOLD) continue;
 
-    // Convert to percentage
-    const xPct = (clampedX1 / letterbox.originalWidth) * 100;
-    const yPct = (clampedY1 / letterbox.originalHeight) * 100;
-    const wPct =
-      ((clampedX2 - clampedX1) / letterbox.originalWidth) * 100;
-    const hPct =
-      ((clampedY2 - clampedY1) / letterbox.originalHeight) * 100;
+    const x1 = output[offset + 0];
+    const y1 = output[offset + 1];
+    const x2 = output[offset + 2];
+    const y2 = output[offset + 3];
+    const classId = Math.round(output[offset + 5]);
 
-    return {
-      class: CLASS_NAMES[box.classIndex],
-      confidence: box.confidence,
+    const className = CLASS_NAMES[classId];
+    if (!className) continue;
+
+    // Scale from padded image space to original image space
+    const box = scaleBox(x1, y1, x2, y2, letterbox);
+
+    // Convert to percentage of original image
+    const xPct = (box.x1 / letterbox.originalWidth) * 100;
+    const yPct = (box.y1 / letterbox.originalHeight) * 100;
+    const wPct = ((box.x2 - box.x1) / letterbox.originalWidth) * 100;
+    const hPct = ((box.y2 - box.y1) / letterbox.originalHeight) * 100;
+
+    // Skip tiny detections
+    if (wPct < 0.5 || hPct < 0.5) continue;
+
+    detections.push({
+      class: className,
+      confidence: Math.round(confidence * 1000) / 1000,
       position: {
         x: Math.round(xPct * 100) / 100,
         y: Math.round(yPct * 100) / 100,
         width: Math.round(wPct * 100) / 100,
         height: Math.round(hPct * 100) / 100,
       },
-    };
-  });
+    });
+  }
+
+  // Sort by confidence descending
+  detections.sort((a, b) => b.confidence - a.confidence);
+
+  return detections;
 }
 
 /**
- * Run DocLayout-YOLO layout detection on all provided page images.
+ * Run DocLayout-YOLO layout detection on provided page images.
  *
  * @param images - Array of base64 data URL page images
+ * @param pageFilter - Optional 1-indexed page numbers to process. When set, only
+ *   these pages are run through ONNX; others are skipped. This avoids running
+ *   inference on pages that don't contain embedded images.
  * @returns Layout detections per page (1-indexed)
  *
  * If ONNX fails (model missing, WASM not supported, etc.),
@@ -188,19 +200,28 @@ function parseYoloOutput(
  */
 export async function detectLayoutForPages(
   images: string[],
+  pageFilter?: number[],
 ): Promise<PageLayoutResult[]> {
   if (!images || images.length === 0) return [];
 
+  // Build set of pages to process (0-indexed internally)
+  const filterSet = pageFilter
+    ? new Set(pageFilter.map(p => p - 1))
+    : null;
+
   try {
     const session = await getSession();
-    const ort = (window as any).ort;
 
     const results: PageLayoutResult[] = [];
 
     for (let i = 0; i < images.length; i++) {
+      // Skip pages not in the filter
+      if (filterSet && !filterSet.has(i)) continue;
+
       const { tensor, letterbox } = await preprocessImage(images[i]);
 
       // Create input tensor [1, 3, MODEL_SIZE, MODEL_SIZE]
+      const ort = (window as any).ort;
       const inputTensor = new ort.Tensor("float32", tensor, [
         1,
         3,
@@ -208,27 +229,51 @@ export async function detectLayoutForPages(
         MODEL_SIZE,
       ]);
 
-      // Run inference
-      const inputName = session.inputNames[0];
+      // Run inference — input name is "images"
       const feeds: Record<string, any> = {};
-      feeds[inputName] = inputTensor;
+      feeds[session.inputNames[0]] = inputTensor;
 
       const outputMap = await session.run(feeds);
-      const outputName = session.outputNames[0];
-      const outputTensor = outputMap[outputName];
+      const outputTensor = outputMap[session.outputNames[0]];
 
-      // Output shape: [1, numClasses+4, numDetections]
+      // YOLOv10 output: [N, 6] or [1, N, 6] — NMS-free
       const outputData = outputTensor.data as Float32Array;
-      const numDetections = outputTensor.dims[2];
+      const dims = outputTensor.dims as number[];
 
-      const detections = parseYoloOutput(outputData, numDetections, letterbox);
+      const detections = parseYoloOutput(outputData, dims, letterbox);
+
+      const isDebug = typeof window !== "undefined" && (window as any).__LAYOUT_DEBUG;
+
+      if (isDebug) {
+        console.log(
+          `[LayoutDetection] Page ${i + 1}: dims=${dims.join("x")}, ` +
+          `originalSize=${letterbox.originalWidth}x${letterbox.originalHeight}, ` +
+          `scale=${letterbox.scale.toFixed(3)}, pad=(${letterbox.padX},${letterbox.padY}), ` +
+          `rawRows=${dims.length === 3 ? dims[1] : dims[0]}, ` +
+          `detections=${detections.length}`,
+        );
+      }
 
       if (detections.length > 0) {
+        if (isDebug) {
+          for (const d of detections) {
+            console.log(
+              `  [LayoutDetection]   ${d.class} conf=${d.confidence} ` +
+              `pos=(${d.position.x.toFixed(1)}%, ${d.position.y.toFixed(1)}%, ` +
+              `${d.position.width.toFixed(1)}%x${d.position.height.toFixed(1)}%)`,
+            );
+          }
+        }
         results.push({
           page: i + 1,
           detections,
         });
       }
+    }
+
+    if (results.length > 0) {
+      const totalDetections = results.reduce((sum, r) => sum + r.detections.length, 0);
+      console.log(`[LayoutDetection] ${totalDetections} detection(s) across ${results.length} page(s)`);
     }
 
     return results;

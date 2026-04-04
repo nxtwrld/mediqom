@@ -63,7 +63,16 @@ export default defineConfig({
           src: normalizePath(
             path.join(__dirname, "node_modules/onnxruntime-web/dist/*.wasm"),
           ),
-          dest: normalizePath(path.join(__dirname, "static")),
+          dest: normalizePath(path.join(__dirname, "static/onnx")),
+        },
+        {
+          src: normalizePath(
+            path.join(
+              __dirname,
+              "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded*.mjs",
+            ),
+          ),
+          dest: normalizePath(path.join(__dirname, "static/onnx")),
         },
         {
           src: normalizePath(
@@ -177,7 +186,8 @@ export default defineConfig({
   },
   define: {
     global: "globalThis",
-    Buffer: ["buffer", "Buffer"],
+    // Only polyfill Buffer for browser builds — Node.js (vitest) has native Buffer
+    ...(process.env.VITEST ? {} : { Buffer: ["buffer", "Buffer"] }),
     "process.env": {},
   },
   ssr: {

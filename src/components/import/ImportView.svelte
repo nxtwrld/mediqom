@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { files, createTasks } from '$lib/files';
+    import { files, createTasks, detectPagesLayout } from '$lib/files';
     import { DocumentState, type Task, TaskState, type Document } from '$lib/import';
     import { DocumentType, type Document as SavedDocument } from '$lib/documents/types.d';
     import user, { type User } from '$lib/user';
@@ -20,7 +20,7 @@
     import JobProgressCard from './JobProgressCard.svelte';
 
     // Job-based import
-    import { createJob, processJob, fetchJob, deleteJob, retryJob, checkPendingJobs } from '$lib/import/job-manager';
+    import { createJob, processJob, fetchJob, deleteJob, retryJob, checkPendingJobs, updateLayoutDetections } from '$lib/import/job-manager';
     import { assembleDocuments, saveDocuments, decryptJobResults } from '$lib/import/finalizer';
     import { getFiles as getCachedFiles, clearFiles, hasFiles } from '$lib/import/file-cache';
     import type { ImportJob } from '$lib/import/types';
@@ -164,13 +164,21 @@
     /** Process a job (SSE/polling) and load its documents when complete */
     async function processAndResolveJob(jobId: string) {
         try {
-            const completedJob = await processJob(jobId);
+            const completedJob = await processJob(jobId, (event) => {
+                // Log ocr_complete for diagnostics (no ONNX for resumed jobs — no task refs)
+                if (event.stage === 'ocr_complete') {
+                    const pages = event.data?.pagesWithImages;
+                    console.log(`[Import] ocr_complete (resumed): fileIndex=${event.data?.fileIndex}, pagesWithImages=[${pages?.join(', ') ?? 'none'}]`);
+                }
+            });
             updateJob(jobId, { status: 'loading', message: null } as any);
             await loadCompletedJobDocuments(completedJob);
             removeJob(jobId);
             jobKeyMap.delete(jobId);
             play('focus');
         } catch (error) {
+            // Silently ignore abort errors (job was deleted/cancelled)
+            if (error instanceof DOMException && error.name === 'AbortError') return;
             console.error('Job processing failed:', error);
             updateJob(jobId, { status: 'error', error: String(error) } as any);
             play('error');
@@ -237,7 +245,28 @@
             jobKeyMap.set(jobId, placeholderId);
             replaceJob(placeholderId, newJob);
 
-            const completedJob = await processJob(jobId);
+            // Layout detection is now triggered reactively by the server's ocr_complete SSE event
+            const completedJob = await processJob(jobId, (event) => {
+                if (event.stage === 'ocr_complete') {
+                    const pages = event.data?.pagesWithImages;
+                    console.log(`[Import] ocr_complete: fileIndex=${event.data?.fileIndex}, pagesWithImages=[${pages?.join(', ') ?? 'none'}]`);
+
+                    if (pages?.length > 0) {
+                        const { fileIndex, pagesWithImages } = event.data;
+                        const task = newTasks[fileIndex];
+                        if (task) {
+                            detectPagesLayout(task, pagesWithImages).then((detections) => {
+                                console.log(`[LayoutDetection] Got ${detections.length} detection(s) for fileIndex=${fileIndex}`);
+                                if (detections.length > 0) {
+                                    updateLayoutDetections(jobId, newTasks);
+                                }
+                            }).catch((err) => console.warn('[LayoutDetection] Detection failed:', err));
+                        } else {
+                            console.warn(`[Import] ocr_complete: no task at fileIndex=${fileIndex} (have ${newTasks.length} tasks)`);
+                        }
+                    }
+                }
+            });
 
             // Show loading state while assembling documents
             updateJob(jobId, { status: 'loading', message: null } as any);
@@ -254,6 +283,11 @@
                 removeFiles(filesToProcess);
             }
         } catch (error) {
+            // Silently ignore abort errors (job was deleted/cancelled)
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                removeFiles(filesToProcess);
+                return;
+            }
             console.error('Import job failed:', error);
             updateJob(placeholderId, { status: 'error', error: String(error) } as any);
             play('error');

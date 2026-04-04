@@ -1,8 +1,15 @@
 import { error, type RequestHandler } from "@sveltejs/kit";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
-import assess from "$lib/import.server/assessInputs";
+import assess, {
+  assessOCR,
+  assessImages,
+  assessDocuments,
+  assembleAssessment,
+  type OcrResult,
+} from "$lib/import.server/assessInputs";
 import { runDocumentProcessingWorkflow } from "$lib/langgraph/workflows/document-processing";
 import { convertWorkflowResult } from "$lib/import.server/convertWorkflowResult";
 import { processMedicalImaging } from "$lib/langgraph/workflows/medical-imaging-workflow";
@@ -24,6 +31,7 @@ import {
   saveAnalysisResults,
   saveDocumentWorkflow,
   saveCompleteWorkflow,
+  saveImportPhaseLog,
 } from "$lib/import.server/debug-output";
 
 interface ProgressEvent {
@@ -83,56 +91,43 @@ async function getUserPublicKey(
 
 export const POST: RequestHandler = async ({
   params,
+  request,
   locals: { safeGetSession, user },
 }) => {
-  // Debug: Check if DEBUG_IMPORT is loaded
-  console.log(
-    "🔍 [Import] DEBUG_IMPORT environment variable:",
-    process.env.DEBUG_IMPORT,
-  );
-
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
   }
 
+  // Rate limit: 10 requests/min per user
+  const rl = checkRateLimit("import-process", user.id, 10, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: "Too many requests" }), {
+      status: 429,
+      headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs! / 1000)) },
+    });
+  }
+
   const supabase = getServiceClient();
 
-  // Fetch the job
-  const { data: job, error: fetchError } = await supabase
-    .from("import_jobs")
-    .select("*")
-    .eq("id", params.id)
-    .eq("user_id", user.id)
+  // Atomic claim: fetch + concurrency guard + mark started in one DB call (TOCTOU-safe)
+  const { data: claimedJob, error: claimError } = await supabase
+    .rpc('claim_import_job', {
+      p_job_id: params.id,
+      p_user_id: user.id,
+      p_window_ms: CONCURRENCY_WINDOW_MS,
+    })
     .single();
 
-  if (fetchError || !job) {
-    error(404, { message: "Import job not found" });
+  if (claimError || !claimedJob) {
+    error(409, { message: "Job not found, already completed, or being processed" });
   }
 
-  if (job.status === "completed") {
-    error(400, { message: "Job already completed" });
-  }
+  const job = claimedJob as unknown as ImportJob;
 
-  // Concurrency guard: reject if another process call is active
-  if (job.processing_started_at) {
-    const startedAt = new Date(job.processing_started_at).getTime();
-    if (
-      Date.now() - startedAt < CONCURRENCY_WINDOW_MS &&
-      job.status !== "error"
-    ) {
-      error(409, { message: "Job is already being processed" });
-    }
-  }
-
-  // Mark processing started
-  await updateJob(supabase, job.id, {
-    processing_started_at: new Date().toISOString(),
-    status: "extracting",
-    stage: "initialization",
-    progress: 0,
-    error: null,
-  } as any);
+  // Check if client will handle layout detection (ONNX)
+  // Mobile/Capacitor clients don't read SSE, so they can't run client-side ONNX
+  const clientHandlesLayout = request.headers.get("X-Layout-Detection") === "client";
 
   // Create SSE stream - processing continues even if stream disconnects
   const stream = new ReadableStream({
@@ -187,7 +182,7 @@ export const POST: RequestHandler = async ({
           await updateJob(supabase, job.id, {
             result_encryption_key: wrappedKey,
           } as any);
-          console.log("Import job encryption enabled for job:", job.id);
+          console.log(`[Import] Encryption enabled for job ${job.id}`);
         } else {
           console.warn(
             "Import job encryption disabled - user has no encryption keys",
@@ -233,7 +228,7 @@ export const POST: RequestHandler = async ({
 
           if (file.taskType === "application/dicom" && file.dicomMetadata) {
             // Route DICOM files to specialized medical imaging workflow
-            console.log(`🏥 [Import] Routing DICOM file to medical imaging workflow: ${file.name}`);
+            console.log(`[Import] DICOM routing: ${file.name}`);
 
             const imagingState: MedicalImagingState = {
               images: file.processedImages,
@@ -312,31 +307,134 @@ export const POST: RequestHandler = async ({
             };
             extractionResults.push(assessResult);
           } else {
-            // Existing generic extraction path for PDFs and images
+            // ── Phased extraction: OCR → signal client → wait for ONNX → crop → classify ──
+
             let lastExtractDbProgress = fileProgress;
-            const assessResult = await assess(
-              { images: file.processedImages, layoutDetections: file.layoutDetections },
-              (stage, progress, message) => {
-                const mappedProgress = Math.round(
-                  5 + ((i + progress / 100) / fileManifest.length) * 25,
-                );
-                sendEvent({
-                  type: "progress",
-                  stage: `extraction_${stage}`,
+            const phaseProgress = (stage: string, progress: number, message: string) => {
+              const mappedProgress = Math.round(
+                5 + ((i + progress / 100) / fileManifest.length) * 25,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `extraction_${stage}`,
+                progress: mappedProgress,
+                message,
+                timestamp: Date.now(),
+              });
+              if (mappedProgress - lastExtractDbProgress >= 2) {
+                lastExtractDbProgress = mappedProgress;
+                updateJob(supabase, job.id, {
                   progress: mappedProgress,
                   message,
-                  timestamp: Date.now(),
-                });
+                } as any);
+              }
+            };
 
-                // Persist to DB for polling clients (throttled: >= 2% change)
-                if (mappedProgress - lastExtractDbProgress >= 2) {
-                  lastExtractDbProgress = mappedProgress;
-                  updateJob(supabase, job.id, {
-                    progress: mappedProgress,
-                    message,
-                  } as any);
-                }
+            // Phase 1: OCR
+            const { ocrData, tokenUsage: ocrTokens } = await assessOCR(
+              file.processedImages,
+              phaseProgress,
+            );
+
+            // Identify pages with images
+            const pagesWithImages = ocrData.pages
+              .filter(p => p.hasImages)
+              .map(p => p.page);
+
+            console.log(
+              `[Import] File ${i + 1}: OCR done, pagesWithImages=[${pagesWithImages.join(", ")}]`,
+            );
+
+            // Debug dump: OCR phase
+            saveImportPhaseLog(job.id, i, "ocr", {
+              pageCount: ocrData.pages.length,
+              pagesWithImages,
+              textLengths: ocrData.pages.map(p => ({ page: p.page, len: p.text.length })),
+            });
+
+            // Send ocr_complete SSE event so the client can run targeted ONNX
+            sendEvent({
+              type: "progress",
+              stage: "ocr_complete",
+              progress: Math.round(5 + ((i + 0.6) / fileManifest.length) * 25),
+              message: "OCR complete, analyzing images...",
+              data: {
+                fileIndex: i,
+                pagesWithImages,
               },
+              timestamp: Date.now(),
+            });
+
+            // Phase 2: Wait for client ONNX detections if pages have images
+            let layoutDetections = file.layoutDetections || [];
+
+            if (pagesWithImages.length > 0 && layoutDetections.length === 0 && !clientHandlesLayout) {
+              console.log(`[Import] File ${i + 1}: client does not handle layout detection — skipping wait, using LLM fallback`);
+            }
+
+            if (pagesWithImages.length > 0 && layoutDetections.length === 0 && clientHandlesLayout) {
+              const MAX_WAIT_MS = 15_000;
+              const POLL_MS = 2_000;
+              const waitStart = Date.now();
+
+              while (Date.now() - waitStart < MAX_WAIT_MS) {
+                await new Promise(r => setTimeout(r, POLL_MS));
+
+                try {
+                  const { data: freshJob } = await supabase
+                    .from("import_jobs")
+                    .select("file_manifest")
+                    .eq("id", job.id)
+                    .single();
+
+                  const fileDetections = freshJob?.file_manifest?.[i]?.layoutDetections;
+                  if (fileDetections && fileDetections.length > 0) {
+                    layoutDetections = fileDetections;
+                    console.log(
+                      `[Import] File ${i + 1}: ${layoutDetections.length} layout detection(s) after ${Math.round(Date.now() - waitStart)}ms`,
+                    );
+                    break;
+                  }
+                } catch {
+                  // DB read failed — continue waiting
+                }
+              }
+
+              if (layoutDetections.length === 0) {
+                console.log(`[Import] File ${i + 1}: no layout detections after ${MAX_WAIT_MS}ms — LLM fallback`);
+              }
+
+              // Debug dump: layout wait result
+              saveImportPhaseLog(job.id, i, "layout_wait", {
+                pagesWithImages,
+                received: layoutDetections.length,
+                waitMs: Date.now() - waitStart,
+              });
+            }
+
+            // Phase 2b: Image cropping (YOLO detections or LLM fallback)
+            const { croppedImagesByPage, tokenUsage: imgTokens } = await assessImages(
+              file.processedImages,
+              ocrData,
+              layoutDetections.length > 0 ? layoutDetections : undefined,
+              phaseProgress,
+            );
+
+            // Phase 3: Document classification
+            const { documents: assessmentDocuments, tokenUsage: docTokens } = await assessDocuments(
+              ocrData,
+              phaseProgress,
+            );
+
+            // Phase 4: Assemble
+            const totalTokens = {
+              total: ocrTokens.total + imgTokens.total + docTokens.total,
+            };
+            const assessResult = assembleAssessment(
+              ocrData,
+              croppedImagesByPage,
+              assessmentDocuments,
+              totalTokens,
             );
 
             extractionResults.push(assessResult);
@@ -478,7 +576,7 @@ export const POST: RequestHandler = async ({
 
           // DICOM: assessment already contains full analysis from medical imaging workflow
           if (doc.isPreAnalyzed) {
-            console.log(`[Import] Using pre-analyzed DICOM result for: ${doc.title}`);
+            console.log(`[Import] Pre-analyzed DICOM: ${doc.title}`);
             return Promise.resolve({
               index: i,
               result: extractionResults[doc.assessmentIndex] as ReportAnalysis,

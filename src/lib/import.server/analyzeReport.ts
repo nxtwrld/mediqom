@@ -27,11 +27,6 @@ import { sleep } from "$lib/utils";
 import { DEBUG_ANALYZER } from "$env/static/private";
 import { Types, type ReportAnalysis } from "$lib/import/types";
 
-// Extend global interface to include our custom properties
-declare global {
-  var reportSchemaLogged: boolean;
-}
-
 /**
  * TODO:
  * - Add support for multiple images
@@ -184,20 +179,9 @@ export async function analyze(input: Input): Promise<ReportAnalysis> {
   const content: Content[] = getContentDefinition(input);
   const currentLanguage = getLanguageEnglishName(input.language || "en");
 
-  console.log("🔍 About to update schemas for language:", currentLanguage);
-  console.log(
-    "🔍 Original report schema description preview:",
-    schemas.report.description?.substring(0, 100) + "...",
-  );
-
   localizedSchemas = updateLanguage(
     JSON.parse(JSON.stringify(schemas)),
     currentLanguage,
-  );
-
-  console.log(
-    "🔍 After language update - report schema description preview:",
-    localizedSchemas.report.description.substring(0, 100) + "...",
   );
 
   log.analysis.info("Schema updated for language:", {
@@ -256,44 +240,22 @@ export async function analyze(input: Input): Promise<ReportAnalysis> {
     }
   }
 
-  console.log("📊 Report Analysis - Processing type:", {
+  log.analysis.info("Report analysis processing", {
     type: data.type,
-    isMedical: data.isMedical,
     hasLabOrVitals: data.hasLabOrVitals,
     hasPrescription: data.hasPrescription,
-    textLength: data.text.length,
-    language: currentLanguage,
   });
 
   switch (data.type) {
     case Types.report:
-      console.log("🏥 Processing medical report...");
-      // FIXED: Use the same content (text + images) as feature detection
-      console.log(
-        "🔧 FIXED: Using same content structure for report extraction as feature detection",
-      );
-      console.log("📋 Content structure:", {
-        contentItems: content.length,
-        hasText: content.some((c) => c.type === "text"),
-        hasImages: content.some((c) => c.type === "image_url"),
-        textLength: data.text?.length || 0,
-      });
-
       data.report = await evaluate(
-        content, // Use original content (text + images) instead of just text
+        content,
         Types.report,
         tokenUsage,
       );
 
-      console.log("🏥 Report analysis completed:", {
-        hasReport: !!data.report,
-        reportKeys: data.report ? Object.keys(data.report) : [],
-        reportEmpty: Object.keys(data.report || {}).length === 0,
-      });
-
       // extract lab or vitals from the report
       if (data.hasLabOrVitals) {
-        console.log("🧪 Processing lab/vitals data...");
         const laboratory = await evaluate(
           [
             {
@@ -306,9 +268,6 @@ export async function analyze(input: Input): Promise<ReportAnalysis> {
         );
 
         data.report.signals = laboratory.signals;
-        console.log("🧪 Lab analysis completed:", {
-          signalsCount: laboratory.signals?.length || 0,
-        });
       }
       break;
     case Types.laboratory:
@@ -405,41 +364,11 @@ export async function evaluate(
 
   if (!schema) error(500, { message: "Invalid type" });
 
-  console.log(`🤖 AI Evaluation - Calling ${type} with schema:`, {
+  log.analysis.info(`AI Evaluation - Calling ${type}`, {
     schemaName: schema.name,
-    hasSchema: !!schema,
     contentLength: content[0]?.text?.length || 0,
-    schemaRequired: schema.parameters?.required || [],
     schemaProperties: Object.keys(schema.parameters?.properties || {}),
-    schemaSize: JSON.stringify(schema).length,
   });
-
-  // For report schema, log the actual structure being sent to OpenAI
-  if (type === "report") {
-    console.log("📋 Report Schema Analysis:", {
-      propertiesCount: Object.keys(schema.parameters?.properties || {}).length,
-      requiredCount: schema.parameters?.required?.length || 0,
-      hasPerformer: !!schema.parameters?.properties?.performer,
-      hasPatient: !!schema.parameters?.properties?.patient,
-      hasBodyParts: !!schema.parameters?.properties?.bodyParts,
-      hasDiagnosis: !!schema.parameters?.properties?.diagnosis,
-      performerComplexity: schema.parameters?.properties?.performer
-        ? Object.keys(schema.parameters.properties.performer.properties || {})
-            .length
-        : 0,
-      patientComplexity: schema.parameters?.properties?.patient
-        ? Object.keys(schema.parameters.properties.patient.properties || {})
-            .length
-        : 0,
-    });
-
-    // Log the complete schema for debugging (only first time)
-    if (!global.reportSchemaLogged) {
-      console.log("🔍 Complete Report Schema being sent to OpenAI:");
-      console.log(JSON.stringify(schema, null, 2));
-      global.reportSchemaLogged = true;
-    }
-  }
 
   const result = (await fetchGptEnhanced(
     content,
@@ -447,15 +376,9 @@ export async function evaluate(
     tokenUsage,
   )) as ReportAnalysis;
 
-  console.log(`🤖 AI Evaluation - ${type} result:`, {
+  log.analysis.info(`AI Evaluation - ${type} result`, {
     resultKeys: Object.keys(result || {}),
     isEmpty: Object.keys(result || {}).length === 0,
-    hasExpectedFields:
-      type === "report" ? !!result?.title || !!result?.summary : true,
-    fullResult: result, // Log the complete result for debugging
-    resultType: typeof result,
-    isNull: result === null,
-    isUndefined: result === undefined,
   });
 
   if (!result) {
