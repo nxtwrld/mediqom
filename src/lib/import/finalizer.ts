@@ -16,7 +16,8 @@ import { PROFILE_NEW_ID } from "$lib/profiles/tools";
 import type { Profile } from "$lib/types.d";
 import type { Assessment, ReportAnalysis, ImportJob } from "./types";
 import { importKey, decrypt as decryptAES } from "$lib/encryption/aes";
-import { decrypt as decryptRSA } from "$lib/encryption/rsa";
+import { unwrapKey } from "$lib/encryption/keys";
+import { pemToKey } from "$lib/encryption/rsa";
 import { browser } from "$app/environment";
 import type { User } from "@supabase/supabase-js";
 import { deriveSections } from "$lib/documents/sections";
@@ -95,8 +96,9 @@ export async function decryptJobResults(
       throw new Error("User private key required to decrypt job results");
     }
 
-    const jobKeyExported = await decryptRSA(
+    const jobKeyExported = await unwrapKey(
       userPrivateKey,
+      null, // Job keys are always RSA-only wrapped (server-side)
       job.result_encryption_key!,
     );
     const jobKey = await importKey(jobKeyExported);

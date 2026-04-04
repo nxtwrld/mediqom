@@ -12,7 +12,7 @@ import type { Document } from "$lib/documents/types.d";
 import type { ProfileNew, Profile } from "$lib/types.d";
 import type { ProfileCore, ProfileLoadResult } from "./types";
 import user from "$lib/user";
-import { prepareKeys } from "$lib/encryption/rsa";
+import { generateKeys } from "$lib/encryption/keys";
 import { createHash } from "$lib/encryption/hash";
 import { generatePassphrase } from "$lib/encryption/passphrase";
 import { apiFetch } from "$lib/api/client";
@@ -328,15 +328,16 @@ export async function mapProfileData(core: ProfileCore, roots: Document[]): Prom
 export async function createVirtualProfile(profile: ProfileNew) {
   const key_pass = generatePassphrase();
   const key_hash = await createHash(key_pass);
-  const keys = await prepareKeys(key_pass);
+  const keys = await generateKeys(key_pass, "hybrid");
 
   console.log("Saving profile", {
     fullName: profile.fullName,
     language: profile.language || user.get()?.language || "en",
-    publicKey: keys.publicKeyPEM,
-    privateKey: keys.encryptedPrivateKey,
+    publicKey: keys.rsaPublicKeyPEM,
+    privateKey: keys.encryptedRsaPrivateKey,
     key_hash: key_hash,
     key_pass: key_pass,
+    key_mode: keys.mode,
   });
 
   const response = await apiFetch("/v1/med/profiles", {
@@ -347,10 +348,13 @@ export async function createVirtualProfile(profile: ProfileNew) {
     body: JSON.stringify({
       fullName: profile.fullName,
       language: profile.language || user.get()?.language || "en",
-      publicKey: keys.publicKeyPEM,
-      privateKey: keys.encryptedPrivateKey,
+      publicKey: keys.rsaPublicKeyPEM,
+      privateKey: keys.encryptedRsaPrivateKey,
       key_hash: key_hash,
       key_pass: key_pass,
+      kem_public_key: keys.kemPublicKey,
+      kem_secret_key: keys.encryptedKemSecretKey,
+      key_mode: keys.mode,
     }),
   }).catch((e) => {
     console.error("Error saving profile", e);

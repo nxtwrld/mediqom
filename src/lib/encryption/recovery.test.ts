@@ -8,6 +8,8 @@ import {
   hashRecoveryKey,
   verifyRecoveryKeyHash,
   generateRecoveryData,
+  packRecoveryPayload,
+  unpackRecoveryPayload,
 } from "./recovery";
 
 // Check if Web Crypto API is available
@@ -213,12 +215,41 @@ describe("Passphrase Cross-Version Compatibility", () => {
   );
 });
 
+describe("packRecoveryPayload / unpackRecoveryPayload", () => {
+  const rsaPEM = "-----BEGIN PRIVATE KEY-----\nSampleRSA\n-----END PRIVATE KEY-----";
+  const kemKey = "mlkem768:AAAA";
+
+  it("packs RSA-only (no KEM)", () => {
+    const packed = packRecoveryPayload(rsaPEM);
+    expect(packed).toBe(rsaPEM);
+    const unpacked = unpackRecoveryPayload(packed);
+    expect(unpacked.rsaPrivateKeyPEM).toBe(rsaPEM);
+    expect(unpacked.kemSecretKeySerialized).toBeNull();
+  });
+
+  it("packs RSA-only (null KEM)", () => {
+    const packed = packRecoveryPayload(rsaPEM, null);
+    expect(packed).toBe(rsaPEM);
+    const unpacked = unpackRecoveryPayload(packed);
+    expect(unpacked.rsaPrivateKeyPEM).toBe(rsaPEM);
+    expect(unpacked.kemSecretKeySerialized).toBeNull();
+  });
+
+  it("packs hybrid (RSA + KEM)", () => {
+    const packed = packRecoveryPayload(rsaPEM, kemKey);
+    expect(packed).toContain("|||");
+    const unpacked = unpackRecoveryPayload(packed);
+    expect(unpacked.rsaPrivateKeyPEM).toBe(rsaPEM);
+    expect(unpacked.kemSecretKeySerialized).toBe(kemKey);
+  });
+});
+
 describe("Generate Recovery Data", () => {
   const testPrivateKeyPEM = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxSampleKey
 -----END PRIVATE KEY-----`;
 
-  it.skipIf(!hasCrypto)("should generate complete recovery data", async () => {
+  it.skipIf(!hasCrypto)("should generate complete recovery data (RSA-only)", async () => {
     const data = await generateRecoveryData(testPrivateKeyPEM);
 
     expect(data.recoveryKey).toBeDefined();
@@ -241,5 +272,21 @@ MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxSampleKey
       data.recoveryKeyHash,
     );
     expect(isValid).toBe(true);
+  });
+
+  it.skipIf(!hasCrypto)("should generate recovery data with KEM key (hybrid)", async () => {
+    const kemSecret = "mlkem768:TestKemSecretKeyBase64Data";
+    const data = await generateRecoveryData(testPrivateKeyPEM, kemSecret);
+
+    expect(validateRecoveryKeyFormat(data.recoveryKey)).toBe(true);
+
+    // Decrypt and unpack
+    const decrypted = await recoverPrivateKey(
+      data.recoveryEncryptedKey,
+      data.recoveryKey,
+    );
+    const unpacked = unpackRecoveryPayload(decrypted);
+    expect(unpacked.rsaPrivateKeyPEM).toBe(testPrivateKeyPEM);
+    expect(unpacked.kemSecretKeySerialized).toBe(kemSecret);
   });
 });

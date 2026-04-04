@@ -50,5 +50,6 @@ export const GET: RequestHandler = async ({
     exists: true,
     profile_id: profile.id,
     publicKey: profile.publicKey ?? null,
+    kem_public_key: profile.kem_public_key ?? null,
   });
 };

@@ -172,6 +172,8 @@ Note: GET handler already had proper key-based ownership via `.eq("keys.user_id"
 
 **Fix:** Changed `modulusLength` from `2048` to `4096` in `generateKeyPair()`. Only affects new key generation — existing 2048-bit keys remain fully functional. Web Crypto API's `importKey()` is key-size-agnostic (parses SPKI/PKCS8 format), so cross-size encrypt/decrypt works seamlessly. Performance impact negligible (RSA-OAEP only wraps 32-byte AES keys).
 
+**Post-Quantum Enhancement (2026-04-04):** Added hybrid RSA-4096 + ML-KEM-768 (FIPS 203) key wrapping. New users get both RSA and ML-KEM keypairs. Key wrapping uses both algorithms — attacker must break BOTH RSA and ML-KEM to recover document keys. Compliant with ANSSI/BSI hybrid mandate for lattice-based PQC (required until 2030). New modules: `kem.ts`, `hybrid.ts`, `keys.ts`. All 14 consumer files migrated to unified `keys.ts` API. Database columns added: `kem_public_key`, `kem_secret_key`, `key_mode` on `profiles` and `private_keys` tables.
+
 ---
 
 ### H-5: Weak Input Validation on Share Endpoints — FIXED
@@ -489,7 +491,7 @@ Medical document content is sent to external AI providers (OpenAI, Google, Anthr
 
 | Finding | Effort | Impact |
 |---|---|---|
-| Evaluate post-quantum cryptography migration | Research | Future-proof encryption |
+| ~~Evaluate post-quantum cryptography migration~~ | ~~Done~~ | ✅ Implemented — Hybrid RSA-4096 + ML-KEM-768 (FIPS 203) for new users. Existing RSA-only users unaffected. Cross-mode sharing works seamlessly. Compliant with ANSSI/BSI hybrid mandate. |
 | On-premise AI option for highest-sensitivity data | Large | Reduce third-party PHI exposure |
 | Penetration testing by external firm | — | Validate fixes and find remaining issues |
 

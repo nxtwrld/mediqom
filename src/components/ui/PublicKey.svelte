@@ -2,7 +2,7 @@
     import { run } from 'svelte/legacy';
 
     import Prop from "$components/forms/Prop.svelte";
-    import { importPublicKeySpki } from '$lib/encryption/rsa';
+    import { importPublicKeySpki } from '$lib/encryption/keys';
     interface Props {
         value?: string;
     }

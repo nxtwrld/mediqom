@@ -30,6 +30,10 @@ export const POST: RequestHandler = async ({
     privateKey,
     key_hash,
     documents,
+    // Post-quantum (ML-KEM) fields
+    kemPublicKey,
+    encryptedKemSecretKey,
+    keyMode,
   } = body;
 
   if (!fullName || !publicKey || !privateKey || !key_hash) {
@@ -40,18 +44,24 @@ export const POST: RequestHandler = async ({
     return json({ error: "Invalid passphrase" }, { status: 400 });
   }
 
-  // Update profile
+  // Update profile (including optional KEM public key)
+  const profileUpdate: Record<string, any> = {
+    fullName,
+    avatarUrl,
+    subscription,
+    language,
+    publicKey,
+    user_role: role ?? 'individual',
+    updated_at: new Date(),
+  };
+  if (kemPublicKey) {
+    profileUpdate.kem_public_key = kemPublicKey;
+    profileUpdate.key_mode = keyMode || 'hybrid';
+  }
+
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({
-      fullName,
-      avatarUrl,
-      subscription,
-      language,
-      publicKey,
-      user_role: role ?? 'individual',
-      updated_at: new Date(),
-    })
+    .update(profileUpdate)
     .eq("owner_id", user.id)
     .eq("auth_id", user.id);
 
@@ -63,13 +73,21 @@ export const POST: RequestHandler = async ({
   // Store private key
   log.api.debug("update private key");
 
-  const { error: keyError } = await supabase.from("private_keys").upsert({
+  const privateKeyRecord: Record<string, any> = {
     id: user.id,
     privateKey,
     key_hash,
     key_pass: passphrase ?? null,
     updated_at: new Date(),
-  });
+  };
+  if (encryptedKemSecretKey) {
+    privateKeyRecord.kem_secret_key = encryptedKemSecretKey;
+    privateKeyRecord.key_mode = keyMode || 'hybrid';
+  }
+
+  const { error: keyError } = await supabase
+    .from("private_keys")
+    .upsert(privateKeyRecord);
 
   if (keyError) {
     log.api.error("key error", keyError);

@@ -6,7 +6,7 @@
     import { date } from '$lib/datetime';
     import { apiGet, apiPost } from '$lib/api/client';
     import { decrypt } from '$lib/user';
-    import { encrypt as rsaEncrypt, pemToKey } from '$lib/encryption/rsa';
+    import { wrapKey } from '$lib/encryption/keys';
     import { encryptString } from '$lib/encryption/passphrase';
     import type { RecipientInfo } from '$lib/share/types.d';
     import { decryptDocumentsNoStore } from '$lib/documents/index';
@@ -140,8 +140,11 @@
                 }
 
                 if (recipient.exists && recipient.publicKey) {
-                    const recipientPubKey = await pemToKey(recipient.publicKey, false);
-                    const encryptedForRecipient = await rsaEncrypt(recipientPubKey, rawAesKey);
+                    const encryptedForRecipient = await wrapKey(
+                        recipient.publicKey,
+                        (recipient as any).kem_public_key ?? null,
+                        rawAesKey,
+                    );
                     shares.push({
                         document_id: docId,
                         owner_id: docOwnerId,

@@ -7,7 +7,7 @@
     import { apiGet, apiPost } from '$lib/api/client';
     import userStore, { type User } from '$lib/user';
     import { decryptString } from '$lib/encryption/passphrase';
-    import { encrypt as rsaEncrypt, pemToKey } from '$lib/encryption/rsa';
+    import { wrapKey } from '$lib/encryption/keys';
 
     type Status = 'loading' | 'processing' | 'done' | 'error' | 'needs-keys';
     let status: Status = $state('loading');
@@ -62,15 +62,17 @@
                 return;
             }
 
-            const recipientPubKey = await pemToKey(currentUser.publicKey, false);
-
             for (const share of pendingShares) {
                 try {
                     // Decrypt the AES key using the share token (which is the share_secret)
                     const rawAesKey = await decryptString(share.pending_encrypted_key, shareToken);
 
-                    // Re-encrypt with recipient's RSA public key
-                    const encryptedKeyForMe = await rsaEncrypt(recipientPubKey, rawAesKey);
+                    // Re-encrypt with recipient's keys (hybrid if KEM available)
+                    const encryptedKeyForMe = await wrapKey(
+                        currentUser.publicKey,
+                        (currentUser as any).kem_public_key ?? null,
+                        rawAesKey,
+                    );
 
                     // Accept the share
                     await apiPost('/v1/share/accept', {

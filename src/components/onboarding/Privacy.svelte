@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createBubbler, preventDefault } from 'svelte/legacy';
     import { passwordStrength } from 'check-password-strength';
-    import { prepareKeys, keyToPEM } from '$lib/encryption/rsa';
+    import { generateKeys, keyToPEM } from '$lib/encryption/keys';
     import { createHash } from '$lib/encryption/hash';
     import { generatePassphrase, encryptString } from '$lib/encryption/passphrase';
     import { generateRecoveryData, type RecoveryKeyData } from '$lib/encryption/recovery';
@@ -36,6 +36,9 @@
                 passkey_credential_id?: string;
                 passkey_prf_salt?: string;
                 recovery_encrypted_key?: string;
+                kemPublicKey?: string;
+                encryptedKemSecretKey?: string;
+                keyMode?: string;
             };
         };
         profileForm: HTMLFormElement;
@@ -84,6 +87,7 @@
     // Generated keys (stored temporarily during setup)
     let generatedPrivateKeyPEM: string | null = null;
     let generatedPublicKeyPEM: string | null = null;
+    let generatedKemSecretKeySerialized: string | null = null;
 
     onMount(async () => {
         // Check passkey PRF support
@@ -97,13 +101,13 @@
     });
 
     /**
-     * Generate new RSA keypair and store PEM strings
+     * Generate new RSA keypair and store PEM strings (for passkey flow)
      */
-    async function generateKeys(): Promise<{ publicKeyPEM: string; privateKeyPEM: string }> {
+    async function generateRsaKeyPairForPasskey(): Promise<{ publicKeyPEM: string; privateKeyPEM: string }> {
         const keyPair = await crypto.subtle.generateKey(
             {
                 name: 'RSA-OAEP',
-                modulusLength: 2048,
+                modulusLength: 4096,
                 publicExponent: new Uint8Array([1, 0, 1]),
                 hash: 'SHA-256'
             },
@@ -124,15 +128,18 @@
         isSettingUp = true;
         try {
             passphrase = generatePassphrase();
-            const keys = await prepareKeys(passphrase);
+            const keys = await generateKeys(passphrase, 'hybrid');
             const keyHash = await createHash(passphrase);
 
             data.privacy.enabled = false; // Not zero-knowledge
             data.privacy.key_hash = keyHash;
-            data.privacy.privateKey = keys.encryptedPrivateKey;
-            data.privacy.publicKey = keys.publicKeyPEM;
+            data.privacy.privateKey = keys.encryptedRsaPrivateKey;
+            data.privacy.publicKey = keys.rsaPublicKeyPEM;
             data.privacy.passphrase = passphrase; // Server stores this
             data.privacy.key_derivation_method = 'passphrase';
+            data.privacy.kemPublicKey = keys.kemPublicKey ?? undefined;
+            data.privacy.encryptedKemSecretKey = keys.encryptedKemSecretKey ?? undefined;
+            data.privacy.keyMode = keys.mode;
 
             currentStep = 'success';
         } catch (error) {
@@ -160,12 +167,21 @@
             passkeyCredential = result.credential;
 
             // Generate RSA keypair
-            const { publicKeyPEM, privateKeyPEM } = await generateKeys();
+            const { publicKeyPEM, privateKeyPEM } = await generateRsaKeyPairForPasskey();
             generatedPrivateKeyPEM = privateKeyPEM;
             generatedPublicKeyPEM = publicKeyPEM;
 
+            // Generate ML-KEM-768 keypair
+            const { generateKemKeyPair, serializeKemKey } = await import('$lib/encryption/kem');
+            const { publicKey: kemPub, secretKey: kemSec } = await generateKemKeyPair();
+            const kemPublicKeySerialized = serializeKemKey(kemPub);
+            const kemSecretKeySerialized = serializeKemKey(kemSec);
+            generatedKemSecretKeySerialized = kemSecretKeySerialized;
+
             // Encrypt private key with PRF-derived key
             const encryptedPrivateKey = await encryptWithPRFKey(privateKeyPEM, result.derivedKey);
+            // Encrypt KEM secret key with PRF-derived key
+            const encryptedKemSecretKey = await encryptWithPRFKey(kemSecretKeySerialized, result.derivedKey);
             const keyHash = await createHash(result.credential.credentialId); // Use credential ID as identifier
 
             // Store in data
@@ -177,6 +193,9 @@
             data.privacy.key_derivation_method = 'passkey_prf';
             data.privacy.passkey_credential_id = result.credential.credentialId;
             data.privacy.passkey_prf_salt = result.credential.prfSalt;
+            data.privacy.kemPublicKey = kemPublicKeySerialized;
+            data.privacy.encryptedKemSecretKey = encryptedKemSecretKey;
+            data.privacy.keyMode = 'hybrid';
 
             currentStep = 'recovery-document';
         } catch (error) {
@@ -194,25 +213,33 @@
         isSettingUp = true;
 
         try {
-            const keys = await prepareKeys(passphrase);
+            const keys = await generateKeys(passphrase, 'hybrid');
             const keyHash = await createHash(passphrase);
 
             // Store the unencrypted PEM temporarily for recovery document
-            generatedPrivateKeyPEM = null; // We don't have access to the raw PEM in this flow
-            generatedPublicKeyPEM = keys.publicKeyPEM;
+            generatedPublicKeyPEM = keys.rsaPublicKeyPEM;
 
-            // For recovery document, we need to decrypt and re-encrypt
-            // Since prepareKeys already encrypts, we need to use the passphrase to get the raw key
+            // For recovery document, we need to decrypt to get the raw key
             const { decryptString } = await import('$lib/encryption/passphrase');
-            const rawPrivateKeyPEM = await decryptString(keys.encryptedPrivateKey, passphrase);
+            const rawPrivateKeyPEM = await decryptString(keys.encryptedRsaPrivateKey, passphrase);
             generatedPrivateKeyPEM = rawPrivateKeyPEM;
+
+            // Also store raw KEM secret key for recovery document
+            if (keys.encryptedKemSecretKey) {
+                generatedKemSecretKeySerialized = await decryptString(keys.encryptedKemSecretKey, passphrase);
+            } else {
+                generatedKemSecretKeySerialized = null;
+            }
 
             data.privacy.enabled = true;
             data.privacy.key_hash = keyHash;
-            data.privacy.privateKey = keys.encryptedPrivateKey;
-            data.privacy.publicKey = keys.publicKeyPEM;
+            data.privacy.privateKey = keys.encryptedRsaPrivateKey;
+            data.privacy.publicKey = keys.rsaPublicKeyPEM;
             data.privacy.passphrase = undefined; // Zero-knowledge - no server storage
             data.privacy.key_derivation_method = 'passphrase';
+            data.privacy.kemPublicKey = keys.kemPublicKey ?? undefined;
+            data.privacy.encryptedKemSecretKey = keys.encryptedKemSecretKey ?? undefined;
+            data.privacy.keyMode = keys.mode;
 
             currentStep = 'recovery-document';
         } catch (error) {
@@ -234,7 +261,7 @@
         isGeneratingRecovery = true;
 
         try {
-            recoveryData = await generateRecoveryData(generatedPrivateKeyPEM);
+            recoveryData = await generateRecoveryData(generatedPrivateKeyPEM, generatedKemSecretKeySerialized);
 
             // Store the recovery encrypted key
             data.privacy.recovery_encrypted_key = recoveryData.recoveryEncryptedKey;
@@ -282,6 +309,7 @@
         // Clear sensitive data from memory
         generatedPrivateKeyPEM = null;
         generatedPublicKeyPEM = null;
+        generatedKemSecretKeySerialized = null;
         recoveryData = null;
 
         currentStep = 'success';
@@ -301,6 +329,7 @@
         recoveryUnderstand = false;
         generatedPrivateKeyPEM = null;
         generatedPublicKeyPEM = null;
+        generatedKemSecretKeySerialized = null;
 
         // Reset privacy data
         data.privacy = {
@@ -312,7 +341,10 @@
             key_derivation_method: undefined,
             passkey_credential_id: undefined,
             passkey_prf_salt: undefined,
-            recovery_encrypted_key: undefined
+            recovery_encrypted_key: undefined,
+            kemPublicKey: undefined,
+            encryptedKemSecretKey: undefined,
+            keyMode: undefined,
         };
     }
 

@@ -25,7 +25,7 @@ import {
   exportKey,
   encrypt as encryptAES,
 } from "$lib/encryption/aes";
-import { encrypt as encryptRSA, pemToKey } from "$lib/encryption/rsa";
+import { wrapKey } from "$lib/encryption/keys";
 import {
   saveExtractionResults,
   saveAnalysisResults,
@@ -65,20 +65,28 @@ async function updateJob(
 }
 
 /**
- * Retrieve user's RSA public key for wrapping job encryption key
- * Returns null if user doesn't have encryption keys set up yet
+ * Retrieve user's public keys (RSA + optional KEM) for wrapping job encryption key.
+ * Returns null if user doesn't have encryption keys set up yet.
  */
-async function getUserPublicKey(
+async function getUserPublicKeys(
   supabase: any,
   userId: string,
-): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("private_keys")
-    .select("public_key")
-    .eq("user_id", userId)
-    .single();
+): Promise<{ publicKey: string; kemPublicKey: string | null } | null> {
+  // Fetch RSA public key from private_keys, KEM public key from profiles
+  const [pkResult, profileResult] = await Promise.all([
+    supabase
+      .from("private_keys")
+      .select("public_key")
+      .eq("user_id", userId)
+      .single(),
+    supabase
+      .from("profiles")
+      .select("kem_public_key")
+      .eq("auth_id", userId)
+      .single(),
+  ]);
 
-  if (error || !data) {
+  if (pkResult.error || !pkResult.data) {
     console.warn(
       "User public key not found - encryption will be skipped:",
       userId,
@@ -86,7 +94,10 @@ async function getUserPublicKey(
     return null;
   }
 
-  return data.public_key;
+  return {
+    publicKey: pkResult.data.public_key,
+    kemPublicKey: profileResult.data?.kem_public_key ?? null,
+  };
 }
 
 export const POST: RequestHandler = async ({
@@ -162,19 +173,19 @@ export const POST: RequestHandler = async ({
 
       try {
         // Check if user has encryption keys set up
-        const userPublicKey = await getUserPublicKey(supabase, user.id);
-        const useEncryption = userPublicKey !== null;
+        const userKeys = await getUserPublicKeys(supabase, user.id);
+        const useEncryption = userKeys !== null;
 
         // Generate job-specific encryption key if encryption is available
         // Note: With encryption enabled, job resume is not supported (would require
         // client-side decryption). Jobs are processed in one session with 1-hour TTL.
         let jobKey: CryptoKey | null = null;
         if (useEncryption) {
-          const userPublicKeyCrypto = await pemToKey(userPublicKey!);
           jobKey = await prepareKey();
           const jobKeyExported = await exportKey(jobKey);
-          const wrappedKey = await encryptRSA(
-            userPublicKeyCrypto,
+          const wrappedKey = await wrapKey(
+            userKeys!.publicKey,
+            userKeys!.kemPublicKey,
             jobKeyExported,
           );
 
