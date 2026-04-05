@@ -7,9 +7,11 @@
 		descriptionKey: string;
 		screenshotUrl?: string;
 		alignment: 'left' | 'right';
+		linkKey?: string;
+		linkUrl?: string;
 	}
 
-	let { id, titleKey, descriptionKey, screenshotUrl, alignment }: Props = $props();
+	let { id, titleKey, descriptionKey, screenshotUrl, alignment, linkKey, linkUrl }: Props = $props();
 
 	let visible = $state(false);
 	let sectionEl: HTMLElement | undefined = $state();
@@ -36,6 +38,9 @@
 		<div class="feature-text">
 			<h2 class="feature-title">{$_(titleKey)}</h2>
 			<p class="feature-description">{$_(descriptionKey)}</p>
+			{#if linkKey && linkUrl}
+				<a href={linkUrl} class="feature-link">{$_(linkKey)}</a>
+			{/if}
 		</div>
 		{#if screenshotUrl}
 			<div class="feature-screenshot">
@@ -97,6 +102,19 @@
 		color: var(--www-text-secondary, #555);
 		line-height: 1.7;
 		margin: 0;
+	}
+
+	.feature-link {
+		display: inline-block;
+		margin-top: 1rem;
+		font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+		color: var(--www-accent, #16d3dd);
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	.feature-link:hover {
+		text-decoration: underline;
 	}
 
 	/* Desktop: hide static screenshots (ray screenshots replace them) */

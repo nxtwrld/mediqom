@@ -1,5 +1,6 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent } from "$lib/audit/index.server";
 import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
 import type { Content } from "$lib/ai/types.d";
 import { generateId } from "$lib/utils/id";
@@ -8,10 +9,11 @@ import { chatConfigManager } from "$lib/config/chat-config";
 import { serverChatContextService } from "$lib/context/integration/server/chat-context-server";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
 
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession },
+  } = event;
   // Check authentication
   const { session } = await safeGetSession();
   if (!session) {
@@ -39,6 +41,8 @@ export const POST: RequestHandler = async ({
       assembledContext, // Context from ChatManager
       availableTools, // MCP tools from ChatManager
     } = await request.json();
+
+    auditFromEvent(event, { action: "create", resource_type: "chat", metadata: { profile_id: profileId, mode } });
 
     // Validate required fields
     if (!message || !mode || !profileId) {

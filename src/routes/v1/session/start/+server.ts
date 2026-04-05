@@ -1,5 +1,6 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { generateSessionId, createSession } from "$lib/session/manager";
+import { auditFromEvent } from "$lib/audit/index.server";
 import OpenAI from "openai";
 import { OPENAI_API_KEY } from "$env/static/private";
 
@@ -8,10 +9,11 @@ const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-export const POST: RequestHandler = async ({
-  request,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
@@ -101,6 +103,8 @@ Please analyze each new statement incrementally and provide updated medical insi
         hasOpenAIThread: !!openaiThreadId,
       },
     };
+
+    auditFromEvent(event, { action: "create", resource_type: "session", resource_id: sessionId });
 
     console.log("✅ Session created successfully:", {
       sessionId,

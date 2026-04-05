@@ -202,6 +202,9 @@ export default defineConfig({
       "dicom-parser",
     ],
   },
+  build: {
+    sourcemap: process.env.NODE_ENV !== 'production',
+  },
   worker: {
     format: 'es',
   },

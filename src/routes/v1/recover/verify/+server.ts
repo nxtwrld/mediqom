@@ -5,6 +5,7 @@ import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { verifyRecoveryKeyHash } from "$lib/encryption/recovery";
 import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 const GENERIC_ERROR = "Recovery verification failed";
 
@@ -12,7 +13,8 @@ const GENERIC_ERROR = "Recovery verification failed";
  * Verify recovery key and return encrypted data
  * POST /v1/recover/verify
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
+  const { request } = event;
   // Rate limit: 5 requests per 5 min per IP
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const rl = checkRateLimit("recover-verify", ip, 5, 5 * 60_000);
@@ -48,7 +50,7 @@ export const POST: RequestHandler = async ({ request }) => {
     // Get private key data
     const { data: privateKeys, error: keysError } = await supabase
       .from("private_keys")
-      .select("recovery_encrypted_key, recovery_key_hash")
+      .select("recovery_encrypted_key, recovery_key_hash, recovery_created_at")
       .eq("id", profile.id)
       .single();
 
@@ -62,6 +64,12 @@ export const POST: RequestHandler = async ({ request }) => {
       error(400, { message: GENERIC_ERROR });
     }
 
+    // Log key age for observability (no expiry enforced — zero-knowledge keys may be dormant for years)
+    if (privateKeys.recovery_created_at) {
+      const ageDays = Math.floor((Date.now() - new Date(privateKeys.recovery_created_at).getTime()) / (24 * 60 * 60 * 1000));
+      console.info(`[Recovery] Key age: ${ageDays} days`);
+    }
+
     // Verify the recovery key hash if available
     if (privateKeys.recovery_key_hash) {
       const isValid = await verifyRecoveryKeyHash(
@@ -73,6 +81,15 @@ export const POST: RequestHandler = async ({ request }) => {
         error(400, { message: GENERIC_ERROR });
       }
     }
+
+    auditFromEvent(event, {
+      action: "recover",
+      resource_type: "auth",
+      user_id: null,
+      actor_type: "anonymous",
+      actor_email: email,
+      metadata: { step: "verify" },
+    });
 
     // Return the encrypted data - client will decrypt
     return json({

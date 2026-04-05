@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { checkScansAvailable } from "$lib/billing/subscription.server";
+import { auditFromEvent } from "$lib/audit/index.server";
 import type { ImportJobCreateInput } from "$lib/import/types";
 
 function getServiceClient() {
@@ -10,10 +11,11 @@ function getServiceClient() {
 }
 
 /** POST - Create a new import job */
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -47,6 +49,8 @@ export const POST: RequestHandler = async ({
     console.error("Failed to create import job:", dbError);
     error(500, { message: "Failed to create import job" });
   }
+
+  auditFromEvent(event, { action: "create", resource_type: "import_job", resource_id: job.id, metadata: { file_count: body.files.length } });
 
   return json({ id: job.id });
 };

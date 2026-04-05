@@ -1,5 +1,6 @@
 import { error, type RequestHandler } from "@sveltejs/kit";
 import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent } from "$lib/audit/index.server";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
@@ -100,11 +101,12 @@ async function getUserPublicKeys(
   };
 }
 
-export const POST: RequestHandler = async ({
-  params,
-  request,
-  locals: { safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    params,
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -135,6 +137,8 @@ export const POST: RequestHandler = async ({
   }
 
   const job = claimedJob as unknown as ImportJob;
+
+  auditFromEvent(event, { action: "process", resource_type: "import_job", resource_id: params.id, metadata: { file_count: (job.file_manifest || []).length } });
 
   // Check if client will handle layout detection (ONNX)
   // Mobile/Capacitor clients don't read SSE, so they can't run client-side ONNX

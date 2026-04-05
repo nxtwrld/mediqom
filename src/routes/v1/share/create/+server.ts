@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent } from "$lib/audit/index.server";
 import type { ShareCreateBody } from "$lib/share/types.d";
 
 function getServiceClient() {
@@ -13,10 +14,11 @@ function getServiceClient() {
  * POST /v1/share/create
  * Creates document shares, inserting keys for existing users or pending records for new users.
  */
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     return error(401, { message: "Unauthorized" });
@@ -111,6 +113,8 @@ export const POST: RequestHandler = async ({
       return error(500, { message: "Error creating share records" });
     }
 
+    auditFromEvent(event, { action: "share", resource_type: "share", metadata: { recipient_email, document_count: shares.length, recipient_exists: true } });
+
     return json({ status: "active", recipient_exists: true });
   } else {
     // Case B: recipient does not have an account yet
@@ -156,6 +160,8 @@ export const POST: RequestHandler = async ({
         invite_error: inviteError.message,
       });
     }
+
+    auditFromEvent(event, { action: "share", resource_type: "share", metadata: { recipient_email, document_count: shares.length, recipient_exists: false } });
 
     return json({ status: "pending", recipient_exists: false });
   }

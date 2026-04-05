@@ -2419,7 +2419,8 @@
     },
     "security": {
       "title": "Your Data, Your Control",
-      "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records."
+      "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records.",
+      "link": "Learn more about our security"
     }
   }
 }

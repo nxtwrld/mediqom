@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 export const GET: RequestHandler = async ({
   request,
@@ -30,11 +31,12 @@ export const GET: RequestHandler = async ({
   return json(data);
 };
 
-export const PATCH: RequestHandler = async ({
-  params,
-  request,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const PATCH: RequestHandler = async (event) => {
+  const {
+    params,
+    request,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     return error(401, { message: "Unauthorized" });
@@ -74,14 +76,17 @@ export const PATCH: RequestHandler = async ({
     return error(500, { message: "Failed to update profile" });
   }
 
+  auditFromEvent(event, { action: "update", resource_type: "profile", resource_id: pid });
+
   return json(updatedProfile);
 };
 
-export const DELETE: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const DELETE: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
@@ -136,6 +141,8 @@ export const DELETE: RequestHandler = async ({
   if (errorDelete) {
     return error(500, { message: "Database error" });
   }
+
+  auditFromEvent(event, { action: "delete", resource_type: "profile", resource_id: params.pid });
 
   return json({ message: "Profile link removed" });
 };

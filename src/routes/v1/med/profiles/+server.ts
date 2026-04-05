@@ -1,5 +1,6 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { checkProfileLimit } from "$lib/billing/subscription.server";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 export const GET: RequestHandler = async ({
   request,
@@ -32,10 +33,11 @@ export const GET: RequestHandler = async ({
   }
 };
 
-export const POST: RequestHandler = async ({
-  request,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   try {
     const { session } = await safeGetSession();
 
@@ -107,6 +109,8 @@ export const POST: RequestHandler = async ({
 
     // Profile count is tracked via database query on profiles table
     // No need to manually decrement - checkProfileLimit counts actual profiles
+
+    auditFromEvent(event, { action: "create", resource_type: "profile", resource_id: profileData[0].id });
 
     return json(profileData);
   } catch (authError) {

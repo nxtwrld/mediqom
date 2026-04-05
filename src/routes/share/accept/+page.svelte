@@ -23,7 +23,8 @@
         }
 
         // Persist token across redirects (onboarding, key setup, etc.)
-        sessionStorage.setItem('pending_share_token', shareToken);
+        // Include timestamp so the account page can reject stale tokens (10 min TTL)
+        sessionStorage.setItem('pending_share_token', JSON.stringify({ token: shareToken, ts: Date.now() }));
 
         // Check if the user is logged in
         const currentUser = userStore.get() as User | null;

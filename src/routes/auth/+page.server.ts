@@ -3,6 +3,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { env } from "$env/dynamic/private";
 import { sanitizeRedirect } from "$lib/auth/sanitize-redirect";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
 
 const getURL = (redirectPath: string = "/", currentUrl: URL) => {
   const baseUrl = env?.SITE_URL
@@ -28,9 +29,6 @@ export const load: PageServerLoad = async ({
   return { url: url.origin };
 };
 
-// Simple in-memory rate limiting (for production, use Redis or database)
-const emailRateLimit = new Map<string, number>();
-
 export const actions: Actions = {
   default: async ({ request, locals: { supabase }, cookies }) => {
     let email: string = "";
@@ -40,12 +38,10 @@ export const actions: Actions = {
       email = formData.get("email") as string;
       const redirectPath = sanitizeRedirect((formData.get("redirectPath") as string) ?? "/med");
 
-      // Rate limiting: Allow only 1 request per email per 60 seconds
-      const now = Date.now();
-      const lastRequest = emailRateLimit.get(email);
-
-      if (lastRequest && now - lastRequest < 60000) {
-        const remainingTime = Math.ceil((60000 - (now - lastRequest)) / 1000);
+      // Rate limiting: 1 request per email per 60 seconds
+      const rl = checkRateLimit("auth-magic-link", email, 1, 60_000);
+      if (!rl.allowed) {
+        const remainingTime = Math.ceil((rl.retryAfterMs ?? 60_000) / 1000);
         return fail(429, {
           errors: {
             email: `Please wait ${remainingTime} seconds before requesting another magic link.`,
@@ -53,8 +49,6 @@ export const actions: Actions = {
           email: email,
         });
       }
-
-      emailRateLimit.set(email, now);
 
       if (!email) {
         return fail(400, {

@@ -357,6 +357,13 @@ export const POST: RequestHandler = async ({
 - **Client-side guards**: Route protection with redirect handling
 - **Session persistence**: Secure session storage with automatic refresh
 
+### HIPAA Audit Logging
+
+- **Utility**: `src/lib/audit/index.server.ts` — `auditFromEvent(event, details)` fire-and-forget
+- **Database**: `audit_logs` table with RLS (users SELECT own; service_role INSERT+SELECT; no UPDATE/DELETE)
+- **Zero-knowledge**: Logs contain IDs, types, actions — never plaintext medical data
+- **Coverage**: 16 endpoints — documents, profiles, shares, imports, chat, sessions, encryption, recovery, account deletion
+
 ## Performance & Optimization
 
 ### Build Configuration
@@ -582,7 +589,9 @@ When reviewing or creating styled components:
 | `docs/README.md`                    | Documentation index                                                  |
 | `src/routes/med/FEATURES.md`        | Medical features documentation                                       |
 | `src/components/apps/README.md`     | Apps component documentation                                         |
+| `CRYPTOGRAPHY.md`                   | Cryptographic architecture: algorithms, key hierarchy, wire formats |
 | `3D_TEXTURES.md`                    | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
+| `SECURITY_REPORT.md`                | Security audit findings and HIPAA compliance status                  |
 
 ## Important Notes
 

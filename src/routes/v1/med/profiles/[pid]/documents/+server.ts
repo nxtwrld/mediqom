@@ -1,12 +1,14 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { auditFromEvent } from "$lib/audit/index.server";
 const DOCUMENT_TYPES = ["document", "profile", "health", "internal"];
 const UNIQUE_TYPES = ["profile", "health"];
 
-export const GET: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const GET: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   const url = new URL(request.url);
@@ -31,14 +33,17 @@ export const GET: RequestHandler = async ({
     return error(500, { message: "Error loading documents" });
   }
 
+  auditFromEvent(event, { action: "read", resource_type: "document", metadata: { profile_id: params.pid, count: documentsLoad?.length } });
+
   return json(documentsLoad);
 };
 
-export const POST: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
@@ -139,6 +144,8 @@ export const POST: RequestHandler = async ({
     await supabase.from("documents").delete().eq("id", document_id);
     return error(500, { message: "Error inserting keys" });
   }
+
+  auditFromEvent(event, { action: "create", resource_type: "document", resource_id: document_id, metadata: { profile_id: params.pid, document_type: type } });
 
   return json({ id: document_id });
 };

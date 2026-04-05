@@ -173,13 +173,21 @@
 
 			if (response.ok && result.success) {
 				log.ui.info('should go to /med');
-				const pendingShare = sessionStorage.getItem('pending_share_token');
-				if (pendingShare) {
+				const pendingShareRaw = sessionStorage.getItem('pending_share_token');
+				if (pendingShareRaw) {
 					sessionStorage.removeItem('pending_share_token');
-					goto(`/share/accept?t=${pendingShare}`);
-				} else {
-					goto('/med');
+					try {
+						const parsed = JSON.parse(pendingShareRaw);
+						const SHARE_TOKEN_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+						if (parsed.token && parsed.ts && Date.now() - parsed.ts < SHARE_TOKEN_MAX_AGE_MS) {
+							goto(`/share/accept?t=${parsed.token}`);
+							return;
+						}
+					} catch {
+						// Legacy plain-string format — treat as expired
+					}
 				}
+				goto('/med');
 				return;
 			}
 
