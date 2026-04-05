@@ -43,6 +43,13 @@ providers:
         temperature: 0
         supports_vision: false
         cost_per_1k_tokens: 0.002
+      gpt4o_mini:
+        model_id: "gpt-4o-mini"
+        description: "GPT-4o Mini - Fast classification"
+        max_tokens: 512
+        temperature: 0
+        supports_vision: false
+        cost_per_1k_tokens: 0.00015
 
   # Google provider - configured to use OpenAI for now
   google:
@@ -150,6 +157,13 @@ flows:
     description: "Clinical consultation chat with professional insights"
     fallback_models: ["gpt4_turbo", "gpt3_5"]
     # Alternative: provider: "google", model: "gemini_pro"
+
+  # Multilingual output safety classification
+  safety_check:
+    provider: "openai"
+    model: "gpt4o_mini"
+    description: "Multilingual output safety classification"
+    fallback_models: ["gpt3_5"]
 
   # SERENITY Form Analysis - Therapeutic observation extraction
   serenity_form_analysis:

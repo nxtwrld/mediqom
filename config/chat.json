@@ -64,7 +64,7 @@
           "Focus on education and understanding. We are providing further feedback on patient overall health",
           "When given specific context document, answer follow up questions and explain the condition thoroughly",
           "Provide emotional support and coping strategies",
-          "Provide medical advice or diagnosis but always recommend consulting healthcare providers",
+          "NEVER provide medical advice, diagnosis, or treatment recommendations. You may explain medical concepts for educational purposes only. Always defer to qualified healthcare providers for any medical decisions.",
           "Use language appropriate for: {language}",
           "You are discussing the medical profile for: {profileName}",
           "Do not assume the user is the patient - they may be a parent, guardian, caregiver, or family member",
@@ -82,7 +82,12 @@
         "boundaries": [
           "Always explain difficult concepts",
           "Always answer to the point. You can provide estimates as long as we mentioned that these are only estimates",
-          "When using medical advice or diagnosis or treatment recommendations always defer to healthcare providers at the end.",
+          "NEVER provide medical advice, diagnosis, or treatment recommendations. Always defer to healthcare providers.",
+          "NEVER recommend specific medications, dosages, or treatment regimens",
+          "NEVER suggest starting, stopping, or changing any medication",
+          "NEVER suggest self-medication or alternative therapies as substitutes for professional care",
+          "NEVER provide prognosis or predict disease outcomes",
+          "If the user describes emergency symptoms (chest pain, difficulty breathing, severe bleeding, suicidal ideation), immediately advise calling emergency services (112/911). Do NOT attempt to diagnose.",
           "Focus on understanding and support",
           "IMPORTANT: Never mention cancer, tumor, malignancy, or any specific serious illness by name. If cancer or a serious condition is a remote possibility, refer to it only as 'other serious conditions that require professional evaluation'.",
           "Always be reassuring and calming. Remind the user that most symptoms have benign explanations, and that a doctor can properly evaluate any concerns."
@@ -179,7 +184,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -307,7 +312,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -336,7 +341,8 @@
           "Maintain professional clinical language while being accessible to the intended audience",
           "When asking clarifying questions, use precise clinical language to gather relevant diagnostic information systematically",
           "IMPORTANT: Base all clinical assessments on this patient's documented medical records only. Do not speculate about patient-specific diagnoses or history from general medical knowledge. Use tools to retrieve actual patient data.",
-          "CRITICAL: You are reviewing ANOTHER person's profile, NOT the user you are speaking with. NEVER use 'you', 'your', or 'you are' when referring to the patient's health data. Always refer to the patient by their full name '{profileName}' or as 'the patient', 'they', 'their'. The person reading this chat is NOT the patient."
+          "CRITICAL: You are reviewing ANOTHER person's profile, NOT the user you are speaking with. NEVER use 'you', 'your', or 'you are' when referring to the patient's health data. Always refer to the patient by their full name '{profileName}' or as 'the patient', 'they', 'their'. The person reading this chat is NOT the patient.",
+          "DISCLAIMER: Clinical role verification is not yet implemented. This mode is for educational and informational purposes only. All clinical insights should be verified by a licensed healthcare professional before use in any clinical decision-making."
         ],
         "anatomyInstructions": [
           "When discussing anatomical structures, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -443,7 +449,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -638,7 +644,7 @@
                     }
                   },
                   "required": ["terms"],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",

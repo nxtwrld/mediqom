@@ -13,6 +13,11 @@
    * Inject source citation links into message text.
    * Replaces [N] markers with clickable source links.
    */
+  /** Escape HTML special chars to prevent XSS in injected attributes/content */
+  function escapeHtml(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function injectSourceLinks(text: string, sources?: SourceCitation[]): string {
     if (!sources || sources.length === 0) return text;
 
@@ -21,12 +26,18 @@
       const source = sources.find(s => s.id === num);
       if (!source) return match;
 
+      // H4: Validate URL protocol — reject javascript: and data: URIs
+      if (!source.url || !/^https?:\/\//i.test(source.url)) return match;
+
+      const safeTitle = escapeHtml(source.title || '');
+      const safeUrl = escapeHtml(source.url);
+
       const truncatedUrl = source.url.replace(/^https?:\/\//, '').substring(0, 25);
       const display = truncatedUrl.length < source.url.replace(/^https?:\/\//, '').length
-        ? truncatedUrl + '...'
-        : truncatedUrl;
+        ? escapeHtml(truncatedUrl) + '...'
+        : escapeHtml(truncatedUrl);
 
-      return `<sup>[${num}]</sup> <a href="${source.url}" target="_blank" rel="noopener noreferrer" class="source-link" title="${source.title}">${display}</a>`;
+      return `<sup>[${num}]</sup> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="source-link" title="${safeTitle}">${display}</a>`;
     });
   }
   

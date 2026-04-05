@@ -60,7 +60,8 @@ export type FlowType =
   | "feature_detection"
   | "signal_processing"
   | "document_type_routing"
-  | "quality_validation";
+  | "quality_validation"
+  | "safety_check";
 
 // Global configuration cache
 let cachedConfig: ModelConfiguration | null = null;

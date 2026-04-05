@@ -3,6 +3,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { getWidgetComponent } from '$lib/chat/widgets/registry';
 	import UnknownWidget from './UnknownWidget.svelte';
+	import { isValidWidgetType } from '$lib/chat/widgets/types';
 	import type { WidgetSpec, WidgetInteraction } from '$lib/chat/widgets/types';
 	import type { WidgetComponentProps } from '$lib/chat/widgets/registry';
 
@@ -15,9 +16,26 @@
 
 	let shadowHost: HTMLDivElement | undefined = $state();
 	let mountedComponent: Record<string, any> | undefined;
+	let validationError = $state('');
+
+	/** M3: Validate widget spec before mounting */
+	function validateWidgetSpec(s: WidgetSpec): string | null {
+		if (!s || typeof s !== 'object') return 'Invalid widget spec';
+		if (!s.id || typeof s.id !== 'string') return 'Missing widget id';
+		if (!isValidWidgetType(s.type)) return `Unknown widget type: ${s.type}`;
+		if (!s.data || typeof s.data !== 'object' || Array.isArray(s.data)) return 'Invalid widget data';
+		return null;
+	}
 
 	onMount(() => {
 		if (!shadowHost) return;
+
+		// M3: Validate before mounting
+		const error = validateWidgetSpec(spec);
+		if (error) {
+			validationError = error;
+			// Fall through to render UnknownWidget
+		}
 
 		const shadow = shadowHost.attachShadow({ mode: 'open' });
 
@@ -38,7 +56,9 @@
 		const target = document.createElement('div');
 		shadow.appendChild(target);
 
-		const Component = getWidgetComponent(spec.type) ?? (UnknownWidget as unknown as import('svelte').Component<WidgetComponentProps>);
+		const Component = validationError
+			? (UnknownWidget as unknown as import('svelte').Component<WidgetComponentProps>)
+			: getWidgetComponent(spec.type) ?? (UnknownWidget as unknown as import('svelte').Component<WidgetComponentProps>);
 
 		mountedComponent = mount(Component, {
 			target,

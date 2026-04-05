@@ -36,7 +36,7 @@ export class ChatAIService {
       );
 
       // Create schema based on mode using ChatConfigManager
-      const schema = chatConfigManager.createResponseSchema(context.mode === 'clinical' ? 'clinical' : 'patient');
+      const schema = chatConfigManager.createResponseSchema(context.mode === "clinical" ? "clinical" : "patient");
 
       // Choose flow type based on mode
       const flowType =
@@ -146,7 +146,7 @@ export class ChatAIService {
         confidence: context.assembledContext?.confidence || 0,
         tokenUsage: context.assembledContext?.tokenCount || 0,
       },
-      context.mode === "patient" ? "patient" : "clinical",
+      context.mode === "clinical" ? "clinical" : context.mode === "caregiver" ? "patient" : "patient",
     );
 
     return basePrompt;
