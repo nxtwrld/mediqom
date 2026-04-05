@@ -13,7 +13,7 @@ import coreDiagnosis from "./core.diagnosis";
 export default {
   name: "extract_imaging_findings_information",
   description:
-    "Extract detailed imaging findings, measurements, observations, and radiological interpretations from medical imaging reports including X-ray, CT, MRI, ultrasound, nuclear medicine, and other studies.",
+    "Extract detailed imaging findings, measurements, observations, and radiological interpretations from medical imaging reports including X-ray, CT, MRI, ultrasound, nuclear medicine, and other studies.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -156,7 +156,7 @@ export default {
               properties: {
                 size: {
                   type: "string",
-                  description: "Size measurements (include units)",
+                  description: "Size measurements (include units). ONLY populate if explicitly stated in the document.",
                 },
                 shape: {
                   type: "string",
@@ -203,7 +203,7 @@ export default {
                   },
                   value: {
                     type: "number",
-                    description: "Numerical value",
+                    description: "Numerical value. ONLY populate if explicitly stated in the document.",
                   },
                   unit: {
                     type: "string",
@@ -265,7 +265,7 @@ export default {
             },
             value: {
               type: "number",
-              description: "Measurement value",
+              description: "Measurement value. ONLY populate if explicitly stated in the document.",
             },
             unit: {
               type: "string",

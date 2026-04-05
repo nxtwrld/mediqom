@@ -13,7 +13,7 @@ import corePatient from "./core.patient";
 export default {
   name: "extract_medical_report",
   description:
-    "Extract core medical information from any medical document including summary, diagnosis, performer, patient, and body parts. This is the primary medical analysis that runs for all medical documents.",
+    "Extract core medical information from any medical document including summary, diagnosis, performer, patient, and body parts. This is the primary medical analysis that runs for all medical documents.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

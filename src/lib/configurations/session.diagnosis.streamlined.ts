@@ -5,7 +5,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 const STREAMLINED_SCHEMA = {
   name: "diagnosis_analyzer",
   description:
-    "You are a professional medical assistant specializing in diagnosis analysis. Your input is a JSON with doctor/patient conversation and extracted symptoms. Your task is to: 1) Extract any diagnosis mentioned by the doctor, 2) Suggest relevant alternative diagnoses based on symptoms, 3) Generate clarifying questions to help confirm or reject diagnoses, 4) Provide treatment recommendations. All information mentioned by the doctor should have origin set to DOCTOR. Suggestions based on context should set origin as SUGGESTION. Provide all answers in [LANGUAGE] language.",
+    "You are a professional medical assistant specializing in diagnosis analysis. Your input is a JSON with doctor/patient conversation and extracted symptoms. Your task is to: 1) Extract any diagnosis mentioned by the doctor, 2) Suggest relevant alternative diagnoses based on symptoms, 3) Generate clarifying questions to help confirm or reject diagnoses, 4) Provide treatment recommendations. All information mentioned by the doctor should have origin set to DOCTOR. Suggestions based on context should set origin as SUGGESTION. Provide all answers in [LANGUAGE] language.\n\nCRITICAL: ONLY extract diagnoses and clinical values explicitly stated in the conversation. Do NOT fabricate clinical values or infer diagnoses not discussed.",
   parameters: {
     type: "object",
     properties: {

@@ -11,7 +11,7 @@ import coreBodyParts from "./core.bodyParts";
 export default {
   name: "extract_microscopic_findings",
   description:
-    "Extract all microscopic examination, histological findings, and cellular descriptions from pathology reports.",
+    "Extract all microscopic examination, histological findings, and cellular descriptions from pathology reports.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -54,11 +54,11 @@ export default {
                 },
                 score: {
                   type: "string",
-                  description: "Grade score or category",
+                  description: "Grade score or category. ONLY populate if explicitly stated in the document.",
                 },
                 components: {
                   type: "array",
-                  description: "Component scores if applicable",
+                  description: "Component scores if applicable. ONLY populate if explicitly stated in the document.",
                   items: {
                     type: "string",
                   },
@@ -116,7 +116,7 @@ export default {
               properties: {
                 count: {
                   type: "number",
-                  description: "Mitotic count",
+                  description: "Mitotic count. ONLY populate if explicitly stated in the document.",
                 },
                 per: {
                   type: "string",
@@ -138,7 +138,7 @@ export default {
                 },
                 percentage: {
                   type: "number",
-                  description: "Percentage of necrosis if quantified",
+                  description: "Percentage of necrosis if quantified. ONLY populate if explicitly stated in the document.",
                 },
                 type: {
                   type: "string",

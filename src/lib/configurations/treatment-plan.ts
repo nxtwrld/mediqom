@@ -13,7 +13,7 @@ import coreBodyParts from "./core.bodyParts";
 export default {
   name: "extract_treatment_plan",
   description:
-    "Extract comprehensive structured treatment plans including chemotherapy protocols, radiation therapy, surgical plans, and multimodal treatment approaches.",
+    "Extract comprehensive structured treatment plans including chemotherapy protocols, radiation therapy, surgical plans, and multimodal treatment approaches.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

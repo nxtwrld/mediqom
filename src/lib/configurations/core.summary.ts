@@ -12,7 +12,7 @@ import coreSignals from "./core.signals";
 export default {
   name: "extract_medical_summary",
   description:
-    "Extract the summary, key findings, clinical impressions, and main conclusions from the medical document. Focus on the primary findings and overall assessment.",
+    "Extract the summary, key findings, clinical impressions, and main conclusions from the medical document. Focus on the primary findings and overall assessment.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

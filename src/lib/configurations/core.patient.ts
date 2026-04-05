@@ -1,5 +1,7 @@
 export default {
   type: "object",
+  description:
+    "Patient demographic and identification information.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   properties: {
     fullName: {
       type: "string",

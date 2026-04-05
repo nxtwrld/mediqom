@@ -9,7 +9,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "extract_social_history",
   description:
-    "Extract comprehensive social history and lifestyle factors that impact health including substance use, occupational exposures, social determinants, and behavioral risk factors.",
+    "Extract comprehensive social history and lifestyle factors that impact health including substance use, occupational exposures, social determinants, and behavioral risk factors.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

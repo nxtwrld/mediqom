@@ -12,7 +12,7 @@ import coreSignals from "./core.signals";
 export default {
   name: "extract_medical_recommendations",
   description:
-    "Extract all clinical recommendations, follow-up instructions, care plans, and suggested next steps from the medical document.",
+    "Extract all clinical recommendations, follow-up instructions, care plans, and suggested next steps from the medical document.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

@@ -12,7 +12,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_specimen_information",
   description:
-    "Extract all specimen collection, handling, and examination information from pathology reports or surgical documents.",
+    "Extract all specimen collection, handling, and examination information from pathology reports or surgical documents.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -86,7 +86,7 @@ export default {
               properties: {
                 count: {
                   type: "number",
-                  description: "Number of specimens/fragments",
+                  description: "Number of specimens/fragments. ONLY populate if explicitly stated in the document.",
                 },
                 size: {
                   type: "string",
@@ -94,11 +94,11 @@ export default {
                 },
                 weight: {
                   type: "string",
-                  description: "Weight if specified (e.g., '15.2 g')",
+                  description: "Weight if specified (e.g., '15.2 g'). ONLY populate if explicitly stated in the document.",
                 },
                 volume: {
                   type: "string",
-                  description: "Volume for fluids (e.g., '50 ml')",
+                  description: "Volume for fluids (e.g., '50 ml'). ONLY populate if explicitly stated in the document.",
                 },
               },
             },

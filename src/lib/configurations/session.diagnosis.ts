@@ -4,7 +4,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 const ENHANCED_SCHEMA = {
   name: "extractor",
   description:
-    "You are a professional medical assistant with deep knowledge like Doctor House. Your input is a JSON with doctor/patient conversation and extracted symptoms. Your task is to: 1) Extract any diagnosis, treatment, medication mentioned by the doctor and suggest relevant alternatives, 2) Generate clarifying questions that could help confirm or reject diagnoses, refine treatment plans, and optimize medication choices, 3) Provide actionable recommendations for the doctor's next steps. All information mentioned by the doctor should have origin set to DOCTOR. Suggestions and alternatives based on context should set origin as SUGGESTION. Provide all answers in [LANGUAGE] language.",
+    "You are a professional medical assistant with deep knowledge like Doctor House. Your input is a JSON with doctor/patient conversation and extracted symptoms. Your task is to: 1) Extract any diagnosis, treatment, medication mentioned by the doctor and suggest relevant alternatives, 2) Generate clarifying questions that could help confirm or reject diagnoses, refine treatment plans, and optimize medication choices, 3) Provide actionable recommendations for the doctor's next steps. All information mentioned by the doctor should have origin set to DOCTOR. Suggestions and alternatives based on context should set origin as SUGGESTION. Provide all answers in [LANGUAGE] language.\n\nCRITICAL: ONLY extract diagnoses and clinical values explicitly stated in the conversation. Do NOT fabricate clinical values or infer diagnoses not discussed.",
   parameters: {
     type: "object",
     properties: {

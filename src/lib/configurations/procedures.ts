@@ -3,7 +3,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "procedures_extractor",
   description:
-    "Extract surgical and medical procedures from medical documents. Identify procedure details, techniques, team members, and outcomes.",
+    "Extract surgical and medical procedures from medical documents. Identify procedure details, techniques, team members, and outcomes.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

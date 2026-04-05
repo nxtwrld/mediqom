@@ -7,7 +7,7 @@
 export default {
   type: "object",
   description:
-    "Medical professional or healthcare provider information with standardized roles for multi-language support",
+    "Medical professional or healthcare provider information with standardized roles for multi-language support.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   properties: {
     role: {
       type: "string",

@@ -10,7 +10,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_special_stains",
   description:
-    "Extract comprehensive special stains and immunohistochemistry results including staining patterns, interpretations, and diagnostic significance.",
+    "Extract comprehensive special stains and immunohistochemistry results including staining patterns, interpretations, and diagnostic significance.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -72,7 +72,7 @@ export default {
                 percentage: {
                   type: "string",
                   description:
-                    "Percentage of cells staining (e.g., '80%', '10-20%')",
+                    "Percentage of cells staining (e.g., '80%', '10-20%'). ONLY populate if explicitly stated in the document.",
                 },
                 subcellularLocation: {
                   type: "string",
@@ -247,7 +247,7 @@ export default {
             },
             percentage: {
               type: "string",
-              description: "Percentage of positive cells",
+              description: "Percentage of positive cells. ONLY populate if explicitly stated in the document.",
             },
             interpretation: {
               type: "string",

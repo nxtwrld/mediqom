@@ -11,7 +11,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_anesthesia_information",
   description:
-    "Extract all anesthesia-related information including type, monitoring data, medications administered, and anesthetic events from operative reports or anesthesia records.",
+    "Extract all anesthesia-related information including type, monitoring data, medications administered, and anesthetic events from operative reports or anesthesia records.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -59,7 +59,7 @@ export default {
           },
           duration: {
             type: "number",
-            description: "Total duration of anesthesia in minutes",
+            description: "Total duration of anesthesia in minutes. ONLY populate if explicitly stated in the document.",
           },
           airwayManagement: {
             type: "object",
@@ -82,7 +82,7 @@ export default {
               },
               attempts: {
                 type: "number",
-                description: "Number of intubation attempts",
+                description: "Number of intubation attempts. ONLY populate if explicitly stated in the document.",
               },
               difficulty: {
                 type: "string",
@@ -196,7 +196,7 @@ export default {
           },
           estimatedBloodLoss: {
             type: "string",
-            description: "Estimated blood loss (e.g., '250 ml')",
+            description: "Estimated blood loss (e.g., '250 ml'). ONLY populate if explicitly stated in the document.",
           },
           urineOutput: {
             type: "string",
@@ -264,11 +264,11 @@ export default {
         properties: {
           recoveryTime: {
             type: "number",
-            description: "Time in recovery room (minutes)",
+            description: "Time in recovery room (minutes). ONLY populate if explicitly stated in the document.",
           },
           painScore: {
             type: "number",
-            description: "Pain score on emergence (0-10)",
+            description: "Pain score on emergence (0-10). ONLY populate if explicitly stated in the document.",
             minimum: 0,
             maximum: 10,
           },

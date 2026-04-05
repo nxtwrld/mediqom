@@ -1,7 +1,7 @@
 export default {
   type: "array",
   description:
-    "Array of diagnoses for the patient. Include primary, secondary, and differential diagnoses. Leave empty if no diagnoses are available in the document.",
+    "Array of diagnoses for the patient. Include primary, secondary, and differential diagnoses. Leave empty if no diagnoses are available in the document. Do NOT infer diagnoses not explicitly stated in the document.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   items: {
     type: "object",
     properties: {

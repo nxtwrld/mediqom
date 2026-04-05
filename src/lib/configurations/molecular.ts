@@ -11,7 +11,7 @@ import coreDiagnosis from "./core.diagnosis";
 export default {
   name: "extract_molecular",
   description:
-    "Extract comprehensive molecular, genetic, and biomarker analysis including genomic testing, tumor molecular profiling, and hereditary genetic testing.",
+    "Extract comprehensive molecular, genetic, and biomarker analysis including genomic testing, tumor molecular profiling, and hereditary genetic testing.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -56,7 +56,7 @@ export default {
           },
           coverage: {
             type: "string",
-            description: "Genomic coverage or number of genes analyzed",
+            description: "Genomic coverage or number of genes analyzed. ONLY populate if explicitly stated in the document.",
           },
           qualityMetrics: {
             type: "object",
@@ -110,11 +110,11 @@ export default {
             },
             alleleFrequency: {
               type: "string",
-              description: "Variant allele frequency",
+              description: "Variant allele frequency. ONLY populate if explicitly stated in the document.",
             },
             tumorMutationalBurden: {
               type: "string",
-              description: "Tumor mutational burden if applicable",
+              description: "Tumor mutational burden if applicable. ONLY populate if explicitly stated in the document.",
             },
             clinicalSignificance: {
               type: "string",
@@ -306,15 +306,15 @@ export default {
             properties: {
               loh: {
                 type: "string",
-                description: "Loss of heterozygosity score",
+                description: "Loss of heterozygosity score. ONLY populate if explicitly stated in the document.",
               },
               tai: {
                 type: "string",
-                description: "Telomeric allelic imbalance score",
+                description: "Telomeric allelic imbalance score. ONLY populate if explicitly stated in the document.",
               },
               lst: {
                 type: "string",
-                description: "Large-scale state transitions score",
+                description: "Large-scale state transitions score. ONLY populate if explicitly stated in the document.",
               },
             },
           },
@@ -447,7 +447,7 @@ export default {
                 },
                 alleleFrequency: {
                   type: "string",
-                  description: "Circulating allele frequency",
+                  description: "Circulating allele frequency. ONLY populate if explicitly stated in the document.",
                 },
               },
             },

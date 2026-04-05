@@ -2,7 +2,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "extractor",
   description:
-    "Proceed ste by step. From the medication record, extract the following information. If it contains an immunization record, mark isImmunization as true/false.",
+    "Proceed ste by step. From the medication record, extract the following information. If it contains an immunization record, mark isImmunization as true/false.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

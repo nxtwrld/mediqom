@@ -12,7 +12,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_tumor_characteristics",
   description:
-    "Extract comprehensive tumor staging, grading, and cancer characteristics from oncology reports and pathology documents.",
+    "Extract comprehensive tumor staging, grading, and cancer characteristics from oncology reports and pathology documents.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

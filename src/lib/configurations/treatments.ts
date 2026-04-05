@@ -12,7 +12,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_treatments",
   description:
-    "Extract comprehensive treatment protocols and therapeutic interventions including current treatments, past treatments, and treatment responses.",
+    "Extract comprehensive treatment protocols and therapeutic interventions including current treatments, past treatments, and treatment responses.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

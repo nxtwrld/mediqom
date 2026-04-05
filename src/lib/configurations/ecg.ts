@@ -12,7 +12,7 @@ import coreDiagnosis from "./core.diagnosis";
 export default {
   name: "extract_ecg_information",
   description:
-    "Extract all ECG (electrocardiogram) findings, measurements, rhythm analysis, and interpretations from medical documents.",
+    "Extract all ECG (electrocardiogram) findings, measurements, rhythm analysis, and interpretations from medical documents.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -29,27 +29,27 @@ export default {
         properties: {
           heartRate: {
             type: "number",
-            description: "Heart rate in beats per minute",
+            description: "Heart rate in beats per minute. ONLY populate if explicitly stated in the document.",
           },
           prInterval: {
             type: "number",
-            description: "PR interval in milliseconds",
+            description: "PR interval in milliseconds. ONLY populate if explicitly stated in the document.",
           },
           qrsWidth: {
             type: "number",
-            description: "QRS width in milliseconds",
+            description: "QRS width in milliseconds. ONLY populate if explicitly stated in the document.",
           },
           qtInterval: {
             type: "number",
-            description: "QT interval in milliseconds",
+            description: "QT interval in milliseconds. ONLY populate if explicitly stated in the document.",
           },
           qtCorrected: {
             type: "number",
-            description: "QTc (corrected QT) in milliseconds",
+            description: "QTc (corrected QT) in milliseconds. ONLY populate if explicitly stated in the document.",
           },
           axis: {
             type: "number",
-            description: "QRS axis in degrees",
+            description: "QRS axis in degrees. ONLY populate if explicitly stated in the document.",
           },
         },
       },

@@ -16,6 +16,8 @@ Focus on identifying:
 8. Any other pathological findings
 
 For each finding, describe its location, characteristics, and potential significance.
+
+CRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.
 `,
   parameters: {
     type: "object",
