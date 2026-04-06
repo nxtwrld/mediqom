@@ -219,6 +219,52 @@ export function removeAuraMesh(state: SceneState): void {
 }
 
 /**
+ * Camera zoom to an arbitrary area defined by center + radius.
+ * Used by label clustering to zoom into a group of labels.
+ */
+export function focusArea(
+    state: SceneState,
+    center: THREE.Vector3,
+    radius: number
+): void {
+    // Save current view for back-zoom
+    if (!state.previousViewState) {
+        state.previousViewState = {
+            position: state.camera.position.clone(),
+            rotation: state.camera.rotation.clone(),
+            target: state.controls.target.clone()
+        };
+    }
+
+    const fovInRadians = (state.camera.fov * Math.PI) / 180;
+    const distance = radius / Math.sin(fovInRadians / 2);
+
+    const targetPosition = new THREE.Vector3(
+        center.x,
+        center.y,
+        center.z + distance * 2
+    );
+
+    state.camera.lookAt(center);
+    state.camera.updateProjectionMatrix();
+
+    new TWEEN.Tween(state.camera.position)
+        .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 2000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+
+    new TWEEN.Tween(state.controls.target)
+        .to({ x: center.x, y: center.y, z: center.z }, 2000)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .onUpdate(() => {
+            state.controls.update();
+        })
+        .start();
+
+    state.requestRender();
+}
+
+/**
  * Tweens the camera to a saved position/target.
  */
 export function setViewState(state: SceneState, viewState: ViewState): void {

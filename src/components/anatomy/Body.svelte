@@ -28,6 +28,7 @@
     import {
         setHighlight as doSetHighlight,
         focusObject,
+        focusArea,
         highlight,
         removeAuraMesh,
         setViewState,
@@ -54,6 +55,13 @@
         clearContext as doClearContext
     } from './context-manager';
     import type { IContext } from './context/types.d';
+    import {
+        createClusterState,
+        updateClusters,
+        suppressCluster,
+        disposeClusterState
+    } from './label-clustering';
+    import type { LabelCluster } from './label-clustering';
 
     const dispatch = createEventDispatcher();
 
@@ -68,6 +76,13 @@
 
     // ─── Shared State ─────────────────────────────────────────────
     const ss = createSceneState();
+    const clusterState = createClusterState();
+
+    function handleClusterClick(cluster: LabelCluster) {
+        sounds.focus.play();
+        suppressCluster(clusterState, cluster, ss);
+        focusArea(ss, cluster.worldCenter, cluster.radius);
+    }
 
     // ─── Svelte-reactive variables ────────────────────────────────
     let loadedLayers: string[] = [];
@@ -155,6 +170,10 @@
         event.stopPropagation();
         sounds.focus.play();
         ($state as any).focusView = true;
+        // Close previously opened label
+        if (ss.openedLabel) {
+            ss.openedLabel.classList.remove('-open');
+        }
         ss.openedLabel = (event.target as HTMLElement)?.closest('.label');
         if (ss.openedLabel) ss.openedLabel.classList.add('-open');
     }
@@ -295,6 +314,7 @@
             ss.renderer.render(ss.scene, ss.camera);
         }
         if (ss.labelRenderer) ss.labelRenderer.render(ss.scene, ss.camera);
+        updateClusters(labels, ss, clusterState, handleClusterClick);
     }
 
     // ─── Reactive blocks ──────────────────────────────────────────
@@ -333,6 +353,7 @@
                 dispatch
             ).then((result) => {
                 modelLoaded = result.modelLoaded;
+                clusterState.dirty = true;
                 if (pendingFocus) {
                     setHighlight(pendingFocus);
                     pendingFocus = null;
@@ -358,6 +379,7 @@
             previousLabels = labels;
             if (oldLabels.length > 0 && labelsContentChanged(labels, oldLabels)) {
                 cleanupLabels(oldLabels);
+                clusterState.dirty = true;
                 if (activeLayers === loadedLayers) {
                     doRefreshLabels(ss, labels, activeLayers, labelContainer, labelHandlers);
                 }
@@ -501,6 +523,7 @@
             }
 
             removeAuraMesh(ss);
+            disposeClusterState(clusterState, ss);
 
             if (ss.scene) clearObjects(ss.scene);
 
@@ -542,6 +565,7 @@
                 <svg>
                     <use href="/icons-o.svg#report-{label.type}" />
                 </svg>
+                <span class="label-name">{translateAnatomy(label.id, $t)}</span>
                 <div class="label-menu">
                     <AskButton
                         className="action"
@@ -564,7 +588,6 @@
                     {/if}
                 </div>
             </div>
-
         </div>
     </div>
     {/each}
@@ -687,6 +710,19 @@
 
     .model :global(.label.-open) {
         z-index: 100;
+    }
+
+    .model :global(.label-name) {
+        display: none;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #FFF;
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+        text-transform: uppercase;
+    }
+    .model :global(.label.-open .label-name) {
+        display: block;
     }
 
     .model :global(.label.-open .highlight) {
@@ -836,5 +872,37 @@
         padding: 1rem;
         margin: 0;
         text-align: justify;
+    }
+
+    /* Cluster badge styles */
+    .model :global(.cluster-label) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        border: 1px solid #FFF;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+        transition: transform .2s ease-in-out, background .2s ease-in-out;
+        z-index: 10;
+        box-shadow:
+            2px 2px 0 rgba(255, 255, 255, 0.15),
+            4px 4px 0 rgba(255, 255, 255, 0.1),
+            6px 6px 0 rgba(255, 255, 255, 0.05);
+    }
+    .model :global(.cluster-label:hover) {
+        transform: translate(-50%, -50%) scale(1.15);
+        background: rgba(0, 0, 0, 0.5);
+    }
+    .model :global(.cluster-count) {
+        color: #FFF;
+        font-size: 1.1rem;
+        font-weight: 600;
+        pointer-events: none;
     }
 </style>
