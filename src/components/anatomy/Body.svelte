@@ -124,12 +124,32 @@
         //'cholesterol': 'heart',
     }
 //  TODO: switch offf
-    $: labels = (void $documents, getLabelsMap($profile));
+    let labels: ReturnType<typeof getLabelsMap> = [];
+    $: void $documents, void $profile, (() => {
+        const newLabels = getLabelsMap($profile);
+        // No labels yet — just assign
+        if (labels.length === 0) {
+            labels = newLabels;
+            return;
+        }
+        // Content unchanged — skip entirely
+        if (!labelsContentChanged(newLabels, labels)) return;
+        // Content changed — merge, preserving CSS2DObject references for unchanged entries
+        labels = newLabels.map(nl => {
+            const existing = labels.find(l => l.id === nl.id);
+            if (existing && existing.tag === nl.tag && existing.count === nl.count) {
+                // Preserve the existing entry (keeps .label, .geometry, .object refs)
+                existing.documents = nl.documents;
+                return existing;
+            }
+            return nl;
+        });
+    })();
 
     function getLabelsMap($profile: Profile) {
         if (!$profile?.id) return [];
 
-        return Object.entries(groupByTags($profile.id))
+        const entries = Object.entries(groupByTags($profile.id))
         .filter(([k,v]) => {
             if (mapped[k]) {
                 return isObject(mapped[k], 'anatomy')
@@ -154,6 +174,21 @@
                 label: undefined as any
             }
         });
+
+        // Merge labels that map to the same anatomy object (e.g. liver + kidney both mapping to same id)
+        const merged = new Map<string, typeof entries[0]>();
+        for (const entry of entries) {
+            const existing = merged.get(entry.id);
+            if (existing) {
+                const existingIds = new Set(existing.documents.map((d: any) => d.id));
+                const newDocs = entry.documents.filter((d: any) => !existingIds.has(d.id));
+                existing.documents = [...existing.documents, ...newDocs];
+                existing.count = existing.documents.length;
+            } else {
+                merged.set(entry.id, entry);
+            }
+        }
+        return [...merged.values()];
     }
 
 
@@ -251,7 +286,6 @@
     }
 
     $: {
-
         if (ready && activeLayers != loadedLayers) {
             let toLoad = activeLayers.filter(l => l && !loadedLayers.includes(l));
             //console.log('toLoad', toLoad);
@@ -288,8 +322,13 @@
         if (ready && labels !== previousLabels) {
             const oldLabels = previousLabels;
             previousLabels = labels;
-            if (oldLabels.length > 0 && labelsContentChanged(labels, oldLabels)) {
-                cleanupLabels(oldLabels);
+            // Clean up only entries that were removed (not preserved by merge)
+            const removedLabels = oldLabels.filter(ol => !labels.some(nl => nl === ol));
+            if (removedLabels.length > 0) {
+                cleanupLabels(removedLabels);
+            }
+            // Load CSS2DObjects for any new entries (those with label: undefined)
+            if (labels.some(l => !l.label && l.geometry)) {
                 if (activeLayers === loadedLayers) {
                     refreshLabels();
                 }
@@ -900,6 +939,7 @@
     function cleanupLabels(labelsToClean: typeof labels) {
         for (const label of labelsToClean) {
             if (label.label) {
+                label.label.element?.remove();
                 label.label.removeFromParent();
                 label.label = undefined;
             }
@@ -925,40 +965,51 @@
 
     function loadLabels() {
         if (!labelContainer) return;
-//        console.log(labelContainer.children);
-        for (const [index, labelEl] of [...labelContainer.children].entries()) {
-            if(labels[index].geometry) {
-                const geom = labels[index].geometry as THREE.BufferGeometry;
-                if (!geom.boundingSphere) geom.computeBoundingSphere();
-                const label = new CSS2DObject( labelEl as HTMLElement );
-                const position = geom.boundingSphere!.center.toArray() as [number, number, number];
-                label.position.set( ...position );
-                label.center.set( 0, 1 );
-                (labels[index].object as any)?.add( label );
-                label.layers.set( 0 );
-                (labelEl as HTMLElement).addEventListener('mousedown', handleLabelMouseDown, false);
-                (labelEl as HTMLElement).addEventListener('mouseup', handleLabelMouseUp, false);
-                for (const actionEl of (labelEl as HTMLElement).querySelectorAll<HTMLAnchorElement>('.action[href]')) {
-                    actionEl.addEventListener('pointerdown', handleActionPointerDown, false);
-                    actionEl.addEventListener('pointerup', handleActionPointerUp, false);
-                }
-                for (const btnEl of (labelEl as HTMLElement).querySelectorAll<HTMLButtonElement>('.ask-btn')) {
-                    btnEl.addEventListener('pointerdown', handleButtonPointerDown, false);
-                    btnEl.addEventListener('pointerup', handleButtonPointerUp, false);
-                }
-                labels[index].label = label;
-            }
-        };
 
-        labels.forEach(label => {
-            if (label.label){
-                if (label.geometry) {
-                    label.label.visible = true;
-                } else {
-                    label.label.visible = false;
-                }
+        // Remove orphan duplicates that Svelte may recreate after CSS2DRenderer
+        // reparents the original elements. Keep only the first element per id.
+        const seenIds = new Set<string>();
+        for (const child of [...labelContainer.children] as HTMLElement[]) {
+            const id = child.id;
+            if (seenIds.has(id)) {
+                child.remove();
+            } else {
+                seenIds.add(id);
             }
-        });
+        }
+
+        for (const entry of labels) {
+            // Already has a CSS2DObject — just toggle visibility
+            if (entry.label) {
+                entry.label.visible = !!entry.geometry;
+                continue;
+            }
+            if (!entry.geometry) continue;
+
+            // Find the Svelte-rendered element by id
+            const labelEl = labelContainer.querySelector(`#label-id-${CSS.escape(entry.id)}`) as HTMLElement | null;
+            if (!labelEl) continue;
+
+            const geom = entry.geometry as THREE.BufferGeometry;
+            if (!geom.boundingSphere) geom.computeBoundingSphere();
+            const css2dObj = new CSS2DObject( labelEl );
+            const position = geom.boundingSphere!.center.toArray() as [number, number, number];
+            css2dObj.position.set( ...position );
+            css2dObj.center.set( 0, 1 );
+            (entry.object as any)?.add( css2dObj );
+            css2dObj.layers.set( 0 );
+            labelEl.addEventListener('mousedown', handleLabelMouseDown, false);
+            labelEl.addEventListener('mouseup', handleLabelMouseUp, false);
+            for (const actionEl of labelEl.querySelectorAll<HTMLAnchorElement>('.action[href]')) {
+                actionEl.addEventListener('pointerdown', handleActionPointerDown, false);
+                actionEl.addEventListener('pointerup', handleActionPointerUp, false);
+            }
+            for (const btnEl of labelEl.querySelectorAll<HTMLButtonElement>('.ask-btn')) {
+                btnEl.addEventListener('pointerdown', handleButtonPointerDown, false);
+                btnEl.addEventListener('pointerup', handleButtonPointerUp, false);
+            }
+            entry.label = css2dObj;
+        }
     }
 
 
@@ -1484,6 +1535,10 @@
             if (!child.isMesh) return;
             for (let i = 0; i < auraShellMaterials.length; i++) {
                 const clone = child.clone();
+                // Remove cloned CSS2DObject children (labels) to prevent duplicate DOM elements
+                const css2dChildren: any[] = [];
+                clone.traverse((c: any) => { if (c.isCSS2DObject) css2dChildren.push(c); });
+                for (const c of css2dChildren) c.removeFromParent();
                 clone.material = auraShellMaterials[i];
                 clone.renderOrder = 999 + i;
                 clone.raycast = () => {};
@@ -1584,7 +1639,7 @@
 </script>
 
 <div class="labels" bind:this={labelContainer}>
-    {#each labels as label}
+    {#each labels as label (label.id)}
 
     <div class="label" id="label-id-{label.id}">
         <div class="highlight"  data-id={label.id}>
