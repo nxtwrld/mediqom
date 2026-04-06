@@ -278,7 +278,7 @@ export async function downloadRecoveryPDF(
   const pdfBytes = await generateRecoveryPDF(options);
 
   // Create blob and trigger download
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
@@ -301,7 +301,7 @@ export async function printRecoveryPDF(
   const pdfBytes = await generateRecoveryPDF(options);
 
   // Create blob and open in new window for printing
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
 
   const printWindow = window.open(url, "_blank");

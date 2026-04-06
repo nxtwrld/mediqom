@@ -90,7 +90,7 @@ async function transcribeChunk(
   instructions: { lang?: string; translate?: boolean; prompt?: string },
 ) {
   const wav = float32ToWav(audio, SAMPLE_RATE);
-  const file = new File([wav], "chunk.wav", { type: "audio/wav" }) as any;
+  const file = new File([wav as Uint8Array<ArrayBuffer>], "chunk.wav", { type: "audio/wav" }) as any;
   await transcriptionProvider.initialize();
   const result = await transcriptionProvider.transcribeAudioCompatible(file, {
     lang: instructions.lang || "en",

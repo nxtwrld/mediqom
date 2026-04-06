@@ -67,7 +67,7 @@ class ImportPage {
     });
   }
 
-  /** Mock POST /v1/import/jobs/*/process to return SSE events */
+  /** Mock POST /v1/import/jobs/{id}/process to return SSE events */
   async mockProcessJobSSE(jobId: string, events: SSEEvent[]) {
     await this.page.route(
       `**/v1/import/jobs/${jobId}/process`,

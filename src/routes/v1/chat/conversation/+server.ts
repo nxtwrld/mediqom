@@ -194,7 +194,7 @@ async function processAIRequest(
       // Add conversation history based on configuration
       ...(conversationHistory
         .slice(-conversationConfig.maxMessages)
-        .flatMap((msg: any) => {
+        .flatMap((msg: any): any[] => {
           if (msg.role === "user") return [new HumanMessage(msg.content)];
           if (
             msg.role === "assistant" &&

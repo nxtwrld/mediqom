@@ -1,5 +1,7 @@
 //import EventEmmiter from 'events';
 import Meyda from "meyda";
+import type { MeydaFeaturesObject } from "meyda";
+type MeydaAnalyzer = ReturnType<typeof Meyda.createMeydaAnalyzer>;
 import { Mp3Encoder } from "lamejs";
 import MPEGMode from "lamejs/src/js/MPEGMode";
 import Lame from "lamejs/src/js/Lame";
@@ -32,7 +34,7 @@ export interface AudioControls {
   stop: () => void;
   start: () => void;
   state: AudioState;
-  onFeatures?: (d: Meyda.MeydaFeaturesObject) => void;
+  onFeatures?: (d: MeydaFeaturesObject) => void;
   onData?: (d: AudioData) => void;
   mediaRecorder?: MediaRecorder;
   audioContext?: AudioContext;
@@ -170,7 +172,7 @@ export async function getAudio(
       // Proceed with audio processing
 
       const mediaRecorder = new MediaRecorder(stream);
-      let analyzer: Meyda.MeydaAnalyzer | undefined;
+      let analyzer: MeydaAnalyzer | undefined;
       let audioContext: AudioContext | undefined;
       let source: MediaStreamAudioSourceNode | undefined;
 
@@ -231,7 +233,7 @@ export async function getAudio(
           source,
           bufferSize: options.bufferSize,
           featureExtractors: ["rms", "energy"], // 'zcr', 'amplitudeSpectrum', 'chroma', 'mfcc', 'loudness'],
-          callback: (features: Meyda.MeydaFeaturesObject) => {
+          callback: (features: MeydaFeaturesObject) => {
             //console.log(features);
             if (controls.onFeatures) controls.onFeatures(features);
           },
@@ -269,7 +271,7 @@ export async function convertFloat32ToMp3(
   if (endBuf.length > 0) {
     mp3Data.push(endBuf);
   }
-  return new Blob(mp3Data, { type: "audio/mp3" });
+  return new Blob(mp3Data as BlobPart[], { type: "audio/mp3" });
 }
 
 export async function convertBlobToMp3(audioBlob: Blob): Promise<Blob> {
@@ -332,7 +334,7 @@ export async function convertBlobToMp3(audioBlob: Blob): Promise<Blob> {
   }
 
   // Create a Blob from MP3 data
-  const mp3Blob = new Blob(mp3Data, { type: "audio/mp3" });
+  const mp3Blob = new Blob(mp3Data as BlobPart[], { type: "audio/mp3" });
 
   return mp3Blob;
 }

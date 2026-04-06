@@ -138,7 +138,7 @@ export async function exportUserData(
   // Generate and trigger download
   onProgress?.("Generating ZIP...");
   const zipped = zipSync(files, { level: 6 });
-  const blob = new Blob([zipped], { type: "application/zip" });
+  const blob = new Blob([zipped as BlobPart], { type: "application/zip" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
