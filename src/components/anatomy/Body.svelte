@@ -135,6 +135,7 @@
         const target = event.target as HTMLElement;
         if (ss.openedLabel.contains(target)) return;
         ss.openedLabel.classList.remove('-open');
+        ss.openedLabel.style.zIndex = '';
         ss.openedLabel = null;
     }
 
@@ -147,7 +148,11 @@
         event.stopPropagation();
         event.preventDefault();
         const action = event.currentTarget as HTMLAnchorElement;
-        action.closest<HTMLElement>('.label')?.classList.remove('-open');
+        const labelEl = action.closest<HTMLElement>('.label');
+        if (labelEl) {
+            labelEl.classList.remove('-open');
+            labelEl.style.zIndex = '';
+        }
         ss.openedLabel = null;
         ui.emit('viewer:close');
         goto(action.getAttribute('href')!);
@@ -162,7 +167,11 @@
         event.stopPropagation();
         event.preventDefault();
         (event.currentTarget as HTMLButtonElement).click();
-        (event.currentTarget as HTMLElement).closest<HTMLElement>('.label')?.classList.remove('-open');
+        const labelEl = (event.currentTarget as HTMLElement).closest<HTMLElement>('.label');
+        if (labelEl) {
+            labelEl.classList.remove('-open');
+            labelEl.style.zIndex = '';
+        }
         ss.openedLabel = null;
     }
 
@@ -173,9 +182,14 @@
         // Close previously opened label
         if (ss.openedLabel) {
             ss.openedLabel.classList.remove('-open');
+            ss.openedLabel.style.zIndex = '';
         }
         ss.openedLabel = (event.target as HTMLElement)?.closest('.label');
-        if (ss.openedLabel) ss.openedLabel.classList.add('-open');
+        if (ss.openedLabel) {
+            ss.openedLabel.classList.add('-open');
+            // Override CSS2DRenderer's depth-based zIndex
+            ss.openedLabel.style.zIndex = '10000';
+        }
     }
 
     function handleLabelMouseUp(event: MouseEvent) {
@@ -314,6 +328,10 @@
             ss.renderer.render(ss.scene, ss.camera);
         }
         if (ss.labelRenderer) ss.labelRenderer.render(ss.scene, ss.camera);
+        // Re-apply z-index after CSS2DRenderer overwrites it each frame
+        if (ss.openedLabel) {
+            ss.openedLabel.style.zIndex = '10000';
+        }
         updateClusters(labels, ss, clusterState, handleClusterClick);
     }
 
