@@ -64,7 +64,7 @@
           "Focus on education and understanding. We are providing further feedback on patient overall health",
           "When given specific context document, answer follow up questions and explain the condition thoroughly",
           "Provide emotional support and coping strategies",
-          "Provide medical advice or diagnosis but always recommend consulting healthcare providers",
+          "NEVER provide medical advice, diagnosis, or treatment recommendations. You may explain medical concepts for educational purposes only. Always defer to qualified healthcare providers for any medical decisions.",
           "Use language appropriate for: {language}",
           "You are discussing the medical profile for: {profileName}",
           "Do not assume the user is the patient - they may be a parent, guardian, caregiver, or family member",
@@ -82,7 +82,12 @@
         "boundaries": [
           "Always explain difficult concepts",
           "Always answer to the point. You can provide estimates as long as we mentioned that these are only estimates",
-          "When using medical advice or diagnosis or treatment recommendations always defer to healthcare providers at the end.",
+          "NEVER provide medical advice, diagnosis, or treatment recommendations. Always defer to healthcare providers.",
+          "NEVER recommend specific medications, dosages, or treatment regimens",
+          "NEVER suggest starting, stopping, or changing any medication",
+          "NEVER suggest self-medication or alternative therapies as substitutes for professional care",
+          "NEVER provide prognosis or predict disease outcomes",
+          "If the user describes emergency symptoms (chest pain, difficulty breathing, severe bleeding, suicidal ideation), immediately advise calling emergency services (112/911). Do NOT attempt to diagnose.",
           "Focus on understanding and support",
           "IMPORTANT: Never mention cancer, tumor, malignancy, or any specific serious illness by name. If cancer or a serious condition is a remote possibility, refer to it only as 'other serious conditions that require professional evaluation'.",
           "Always be reassuring and calming. Remind the user that most symptoms have benign explanations, and that a doctor can properly evaluate any concerns."
@@ -92,7 +97,18 @@
           "When a user asks about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
           "Example: If asked 'What medications am I taking?', use the queryMedicalHistory tool with category: 'medications'",
-          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools.",
+          "When discussing a specific medical item (diagnosis, medication, etc.), check if related information from other documents might be relevant. If the user asks about other conditions or problems, use searchDocuments to find relevant records.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If the user asks about a different type of medical data (e.g. asking about medications while you only have diagnosis data), use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When the conversation suggests the user has additional medical concerns or when you identify that related medical data could improve your response, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
       },
       "responseSchema": {
@@ -172,7 +188,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -218,7 +234,18 @@
           "You have access to medical data tools. USE THESE TOOLS when asked about {profileName}'s medical information.",
           "When asked about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
-          "Never answer questions about {profileName}'s specific conditions, medications, procedures, or history from general knowledge alone — always verify against their records using the available tools."
+          "Never answer questions about {profileName}'s specific conditions, medications, procedures, or history from general knowledge alone — always verify against their records using the available tools.",
+          "When discussing a specific medical item, check if related information from other documents might be relevant. If asked about other conditions or problems, use searchDocuments to find relevant records.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If asked about a different type of medical data, use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When the conversation suggests additional medical concerns or when related medical data could improve your response, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
       },
       "responseSchema": {
@@ -293,7 +320,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -322,7 +349,8 @@
           "Maintain professional clinical language while being accessible to the intended audience",
           "When asking clarifying questions, use precise clinical language to gather relevant diagnostic information systematically",
           "IMPORTANT: Base all clinical assessments on this patient's documented medical records only. Do not speculate about patient-specific diagnoses or history from general medical knowledge. Use tools to retrieve actual patient data.",
-          "CRITICAL: You are reviewing ANOTHER person's profile, NOT the user you are speaking with. NEVER use 'you', 'your', or 'you are' when referring to the patient's health data. Always refer to the patient by their full name '{profileName}' or as 'the patient', 'they', 'their'. The person reading this chat is NOT the patient."
+          "CRITICAL: You are reviewing ANOTHER person's profile, NOT the user you are speaking with. NEVER use 'you', 'your', or 'you are' when referring to the patient's health data. Always refer to the patient by their full name '{profileName}' or as 'the patient', 'they', 'their'. The person reading this chat is NOT the patient.",
+          "DISCLAIMER: Clinical role verification is not yet implemented. This mode is for educational and informational purposes only. All clinical insights should be verified by a licensed healthcare professional before use in any clinical decision-making."
         ],
         "anatomyInstructions": [
           "When discussing anatomical structures, include relevant anatomy references in the anatomyReferences field using EXACT IDs from the enum list.",
@@ -342,7 +370,18 @@
           "When analyzing patient data, medications, conditions, or test results, you MUST request the appropriate tool.",
           "Do not state 'no data available' without first attempting to use the relevant tools.",
           "Example: For medication review, use queryMedicalHistory with category: 'medications'",
-          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools.",
+          "When discussing a specific medical item, check if related information from other documents might be relevant. Use searchDocuments to find related records when the clinical picture would benefit from additional context.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If clinical analysis requires a different type of medical data, use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When clinical context suggests additional medical data could improve your analysis, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
+        ],
+        "widgetInstructions": [
+          "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
+          "Use widgets when presenting: lab trends (lab_trend_chart), differential diagnoses (diagnosis_card), reported symptoms (symptom_summary), treatment plans (treatment_plan), comparative data (data_table), anatomical regions (anatomy_highlight), or clinical metrics (progress_indicator).",
+          "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "Maximum 3 widgets per response. Always accompany widgets with clinical explanatory text.",
+          "Widgets appear inline in the chat message as interactive cards. Clinicians can click them to drill down into details."
         ]
       },
       "responseSchema": {
@@ -422,7 +461,7 @@
                     }
                   },
                   "required": [],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -617,7 +656,7 @@
                     }
                   },
                   "required": ["terms"],
-                  "additionalProperties": true
+                  "additionalProperties": false
                 },
                 "reason": {
                   "type": "string",
@@ -627,6 +666,45 @@
               "required": ["name", "parameters", "reason"]
             },
             "description": "MCP tools to call ONLY when the needed data was NOT available in the provided context or pre-fetched data. If the user message already contained medical data (e.g., in a pre-fetched JSON block), or the assembled context contained the answer, do NOT include tool calls. Only include tools when your response genuinely requires data you do not have."
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique widget instance ID (e.g. 'w_hba1c_trend')"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "lab_trend_chart",
+                    "diagnosis_card",
+                    "symptom_summary",
+                    "treatment_plan",
+                    "data_table",
+                    "anatomy_highlight",
+                    "progress_indicator"
+                  ],
+                  "description": "Widget type from the registry"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Short display title shown above the widget"
+                },
+                "interactive": {
+                  "type": "boolean",
+                  "description": "Whether the widget supports user interaction (click to drill down)"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Widget-specific data. For lab_trend_chart: {code, unit, series: [{date, value, referenceRange?}], ranges?: [{name, min, max}], status}. For diagnosis_card: {name, probability (0-1), priority (1-10), icd10?, reasoning, confidence (0-1), redFlags?: string[], requiresInvestigation?}. For symptom_summary: {text, severity (1-10), confidence (0-1), source ('transcript'|'medical_history'|'suspected'), duration?, characteristics?: string[]}. For treatment_plan: {type ('medication'|'procedure'|'therapy'|'lifestyle'|'investigation'|'referral'), name, dosage?, priority (1-10), confidence (0-1), effectiveness? (0-1), description?, urgency? ('immediate'|'urgent'|'routine'), duration?}. For data_table: {headers: string[], rows: any[][], caption?}. For anatomy_highlight: {bodyParts: string[] (use exact anatomy IDs), description?}. For progress_indicator: {value (0-100), label, unit?}."
+                }
+              },
+              "required": ["id", "type", "data"]
+            },
+            "description": "Visual widgets to render inline in the chat message. Use when discussing quantitative data (lab trends as charts), diagnoses (as cards), treatments (as cards), or structured comparisons (as tables). Always accompany widgets with explanatory text. Maximum 3 widgets per response. Only generate widgets when the data is available in context."
           }
         },
         "required": ["response"]

@@ -1,5 +1,5 @@
 import { prepareKey, encrypt as aesEncrypt, exportKey } from '$lib/encryption/aes';
-import { pemToKey, encrypt as rsaEncrypt } from '$lib/encryption/rsa';
+import { wrapKey } from '$lib/encryption/keys';
 
 export interface BackupFile {
     version: 'mediqom-backup-v1';
@@ -11,7 +11,7 @@ export interface BackupFile {
     };
 }
 
-export async function createEncryptedBackup(item: any, publicKeyPem: string): Promise<BackupFile> {
+export async function createEncryptedBackup(item: any, publicKeyPem: string, kemPublicKey?: string | null): Promise<BackupFile> {
     // 1. Generate ephemeral AES-256-GCM key
     const aesKey = await prepareKey();
 
@@ -19,10 +19,9 @@ export async function createEncryptedBackup(item: any, publicKeyPem: string): Pr
     const json = JSON.stringify(item, null, 2);
     const encrypted = await aesEncrypt(aesKey, json);
 
-    // 3. Export AES key bytes, then encrypt them with RSA public key
+    // 3. Export AES key bytes, then wrap with recipient's keys (hybrid if KEM available)
     const aesKeyB64 = await exportKey(aesKey);
-    const rsaPublicKey = await pemToKey(publicKeyPem, false);
-    const encryptedKey = await rsaEncrypt(rsaPublicKey, aesKeyB64);
+    const encryptedKey = await wrapKey(publicKeyPem, kemPublicKey ?? null, aesKeyB64);
 
     const meta = item.metadata ?? {};
     return {

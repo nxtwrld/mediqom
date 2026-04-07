@@ -107,6 +107,7 @@ export default defineConfig({
   },
 
   build: {
+    sourcemap: process.env.NODE_ENV !== 'production',
     outDir: "mobile/dist",
     // Don't inline WASM files
     assetsInlineLimit: 0,

@@ -2,7 +2,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "extractor",
   description:
-    "Proceed step by step. From the dental record, extract the following information. If it is not a dental record, mark it as isDental as false.",
+    "Proceed step by step. From the dental record, extract the following information. If it is not a dental record, mark it as isDental as false.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

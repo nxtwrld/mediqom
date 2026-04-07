@@ -14,6 +14,8 @@ export interface Task {
   originalDicom?: ArrayBuffer; // Original DICOM file for attachment
   originalPdf?: ArrayBuffer; // Original PDF file for attachment (when data contains base64 images)
   thumbnail?: string; // Thumbnail for task preview (especially useful for DICOM images)
+  /** Client-side layout detections from DocLayout-YOLO */
+  layoutDetections?: import("./types").PageLayoutDetection[];
   state: TaskState;
   files: File[];
 }

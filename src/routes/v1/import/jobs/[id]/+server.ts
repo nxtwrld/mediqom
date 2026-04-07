@@ -2,16 +2,18 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 function getServiceClient() {
   return createClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 }
 
 /** GET - Get full job details including results */
-export const GET: RequestHandler = async ({
-  params,
-  locals: { safeGetSession, user },
-}) => {
+export const GET: RequestHandler = async (event) => {
+  const {
+    params,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -30,14 +32,24 @@ export const GET: RequestHandler = async ({
     error(404, { message: "Import job not found" });
   }
 
+  // Strip processedImages from response (client doesn't need them, server reads from DB)
+  if (job.file_manifest) {
+    job.file_manifest = job.file_manifest.map(
+      ({ processedImages, ...rest }: any) => rest,
+    );
+  }
+
+  auditFromEvent(event, { action: "read", resource_type: "import_job", resource_id: params.id });
+
   return json({ job });
 };
 
 /** DELETE - Remove a job after finalization */
-export const DELETE: RequestHandler = async ({
-  params,
-  locals: { safeGetSession, user },
-}) => {
+export const DELETE: RequestHandler = async (event) => {
+  const {
+    params,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -55,6 +67,8 @@ export const DELETE: RequestHandler = async ({
     console.error("Failed to delete import job:", dbError);
     error(500, { message: "Failed to delete import job" });
   }
+
+  auditFromEvent(event, { action: "delete", resource_type: "import_job", resource_id: params.id });
 
   return json({ success: true });
 };

@@ -1,9 +1,9 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { t } from '$lib/i18n';
-    import { validateRecoveryKeyFormat, recoverPrivateKey } from '$lib/encryption/recovery';
+    import { validateRecoveryKeyFormat, recoverPrivateKey, unpackRecoveryPayload } from '$lib/encryption/recovery';
     import { generateRecoveryQR } from '$lib/encryption/recovery-document';
-    import { prepareKeys } from '$lib/encryption/rsa';
+    import { generateKeys } from '$lib/encryption/keys';
     import { createHash } from '$lib/encryption/hash';
     import { encryptString, generatePassphrase } from '$lib/encryption/passphrase';
     import {
@@ -34,6 +34,7 @@
 
     // Recovered data
     let recoveredPrivateKeyPEM: string | null = null;
+    let recoveredKemSecretKeySerialized: string | null = null;
     let userEmail = $state('');
     let userPublicKey: string | null = null;
 
@@ -119,11 +120,14 @@
 
             const data = await response.json();
 
-            // Decrypt the private key with the recovery key
-            recoveredPrivateKeyPEM = await recoverPrivateKey(
+            // Decrypt the private key(s) with the recovery key
+            const recoveredPayload = await recoverPrivateKey(
                 data.recovery_encrypted_key,
                 recoveryKeyInput
             );
+            const unpacked = unpackRecoveryPayload(recoveredPayload);
+            recoveredPrivateKeyPEM = unpacked.rsaPrivateKeyPEM;
+            recoveredKemSecretKeySerialized = unpacked.kemSecretKeySerialized;
 
             userPublicKey = data.public_key;
 
@@ -162,6 +166,11 @@
                 result.derivedKey
             );
 
+            // Encrypt KEM secret key if available
+            const encryptedKemSecretKey = recoveredKemSecretKeySerialized
+                ? await encryptWithPRFKey(recoveredKemSecretKeySerialized, result.derivedKey)
+                : undefined;
+
             // Save to server
             const response = await apiFetch('/v1/recover/update', {
                 method: 'POST',
@@ -171,6 +180,7 @@
                     newCredentials: {
                         key_derivation_method: 'passkey_prf',
                         privateKey: encryptedPrivateKey,
+                        kem_secret_key: encryptedKemSecretKey,
                         key_hash: await createHash(result.credential.credentialId),
                         passkey_credential_id: result.credential.credentialId,
                         passkey_prf_salt: result.credential.prfSalt
@@ -207,6 +217,11 @@
                 newPassphrase
             );
 
+            // Encrypt KEM secret key if available
+            const encryptedKemSecretKey = recoveredKemSecretKeySerialized
+                ? await encryptString(recoveredKemSecretKeySerialized, newPassphrase)
+                : undefined;
+
             const keyHash = await createHash(newPassphrase);
 
             // Save to server
@@ -218,6 +233,7 @@
                     newCredentials: {
                         key_derivation_method: 'passphrase',
                         privateKey: encryptedPrivateKey,
+                        kem_secret_key: encryptedKemSecretKey,
                         key_hash: keyHash,
                         passkey_credential_id: null,
                         passkey_prf_salt: null
@@ -247,7 +263,7 @@
         isSettingUp = true;
 
         try {
-            const recoveryData = await generateRecoveryData(recoveredPrivateKeyPEM);
+            const recoveryData = await generateRecoveryData(recoveredPrivateKeyPEM, recoveredKemSecretKeySerialized);
             newRecoveryKey = recoveryData.recoveryKey;
 
             // Update server with new recovery key

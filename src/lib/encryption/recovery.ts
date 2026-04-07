@@ -214,16 +214,57 @@ export type RecoveryKeyData = {
   recoveryKeyHash: string;
 };
 
+/** Separator used to pack RSA PEM + KEM secret key into a single string for recovery encryption */
+const RECOVERY_KEY_SEPARATOR = "|||";
+
 /**
- * Generate complete recovery key data for a private key
- * Returns the recovery key (to show user), encrypted private key, and hash
+ * Pack RSA private key PEM and optional KEM secret key into a single string.
+ * Format: just the PEM for RSA-only, or `rsaPEM + "|||" + kemSerialized` for hybrid.
+ */
+export function packRecoveryPayload(
+  rsaPrivateKeyPEM: string,
+  kemSecretKeySerialized?: string | null,
+): string {
+  if (kemSecretKeySerialized) {
+    return rsaPrivateKeyPEM + RECOVERY_KEY_SEPARATOR + kemSecretKeySerialized;
+  }
+  return rsaPrivateKeyPEM;
+}
+
+/**
+ * Unpack a recovery payload into RSA PEM and optional KEM secret key.
+ */
+export function unpackRecoveryPayload(payload: string): {
+  rsaPrivateKeyPEM: string;
+  kemSecretKeySerialized: string | null;
+} {
+  const sepIndex = payload.indexOf(RECOVERY_KEY_SEPARATOR);
+  if (sepIndex === -1) {
+    return { rsaPrivateKeyPEM: payload, kemSecretKeySerialized: null };
+  }
+  return {
+    rsaPrivateKeyPEM: payload.substring(0, sepIndex),
+    kemSecretKeySerialized: payload.substring(
+      sepIndex + RECOVERY_KEY_SEPARATOR.length,
+    ),
+  };
+}
+
+/**
+ * Generate complete recovery key data for a private key (+ optional KEM secret key).
+ * Returns the recovery key (to show user), encrypted private key(s), and hash.
+ *
+ * For hybrid users, pass the serialized KEM secret key — it will be packed alongside
+ * the RSA PEM and encrypted together under a single recovery key.
  */
 export async function generateRecoveryData(
   privateKeyPEM: string,
+  kemSecretKeySerialized?: string | null,
 ): Promise<RecoveryKeyData> {
   const recoveryKey = generateRecoveryKey();
+  const payload = packRecoveryPayload(privateKeyPEM, kemSecretKeySerialized);
   const recoveryEncryptedKey = await encryptWithRecoveryKey(
-    privateKeyPEM,
+    payload,
     recoveryKey,
   );
   const recoveryKeyHash = await hashRecoveryKey(recoveryKey);

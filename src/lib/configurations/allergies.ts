@@ -11,7 +11,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_allergy_information",
   description:
-    "Extract all allergy and adverse reaction information including drug allergies, food allergies, environmental allergies, and other sensitivities with detailed reaction descriptions and severity levels.",
+    "Extract all allergy and adverse reaction information including drug allergies, food allergies, environmental allergies, and other sensitivities with detailed reaction descriptions and severity levels.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

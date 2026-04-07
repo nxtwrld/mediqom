@@ -5,6 +5,8 @@ export default {
     Step 1: Extract all medical measurements from the text. 
     Step 2: Extract all lab tests from the text.
     Step 3: Evaluate the values and units of the lab tests and match them to proper signals and sources.
+
+CRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.
     `,
   items: {
     type: "object",
@@ -20,7 +22,7 @@ export default {
       value: {
         type: "string",
         description:
-          "Value of the lab test. If the it contains a numeric value, convert the decimals to a dot. If the value is a range, use a dash to separate the values. If the value is a text, leave it as is.",
+          "Value of the lab test. If the it contains a numeric value, convert the decimals to a dot. If the value is a range, use a dash to separate the values. If the value is a text, leave it as is. ONLY extract values explicitly present in the document. Do NOT estimate or calculate missing values.",
       },
       valueType: {
         type: "string",
@@ -30,12 +32,12 @@ export default {
       },
       unit: {
         type: "string",
-        description: "Unit of the lab test.",
+        description: "Unit of the lab test. ONLY extract values explicitly present in the document. Do NOT estimate or calculate missing values.",
       },
       reference: {
         type: "string",
         description:
-          "Reference range of the lab test NUMBER - NUMBER or an appropriate alternative. Convert the decimals to a dot. If not reference is available, leave empty.",
+          "Reference range of the lab test NUMBER - NUMBER or an appropriate alternative. Convert the decimals to a dot. If not reference is available, leave empty. ONLY extract values explicitly present in the document. Do NOT estimate or calculate missing values.",
       },
       source: {
         type: "string",

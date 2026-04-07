@@ -7,7 +7,7 @@
 export default {
   type: "object",
   description:
-    "Medical professional or healthcare provider information with standardized roles for multi-language support",
+    "Medical professional or healthcare provider information with standardized roles for multi-language support.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   properties: {
     role: {
       type: "string",
@@ -92,7 +92,7 @@ export default {
     },
     specialty: {
       type: "string",
-      description: "Medical specialty or subspecialty",
+      description: "Medical specialty or subspecialty. Translate result to the [LANGUAGE] language if the source is in a different language.",
     },
     licenseNumber: {
       type: "string",
@@ -107,7 +107,7 @@ export default {
         },
         department: {
           type: "string",
-          description: "Department or service",
+          description: "Department or service. Translate result to the [LANGUAGE] language if the source is in a different language.",
         },
         address: {
           type: "string",

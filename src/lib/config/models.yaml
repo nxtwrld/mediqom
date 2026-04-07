@@ -22,6 +22,13 @@ providers:
         temperature: 0
         supports_vision: true
         cost_per_1k_tokens: 0.03
+      gpt4_high_output:
+        model_id: "gpt-4o-2024-08-06"
+        description: "GPT-4 Omni - High output token limit for OCR extraction"
+        max_tokens: 16384
+        temperature: 0
+        supports_vision: true
+        cost_per_1k_tokens: 0.03
       gpt4_turbo:
         model_id: "gpt-4-turbo-preview"
         description: "GPT-4 Turbo - Fast and capable"
@@ -36,6 +43,13 @@ providers:
         temperature: 0
         supports_vision: false
         cost_per_1k_tokens: 0.002
+      gpt4o_mini:
+        model_id: "gpt-4o-mini"
+        description: "GPT-4o Mini - Fast classification"
+        max_tokens: 512
+        temperature: 0
+        supports_vision: false
+        cost_per_1k_tokens: 0.00015
 
   # Google provider - configured to use OpenAI for now
   google:
@@ -71,8 +85,15 @@ flows:
   # OCR text extraction (Pass 1 - vision call, focused on text fidelity)
   ocr_extraction:
     provider: "openai"
-    model: "gpt4"
+    model: "gpt4_high_output"
     description: "Extract raw text from document images with maximum OCR accuracy"
+    fallback_models: ["gpt4"]
+
+  # Image analysis (dedicated vision call for precise bounding box extraction)
+  image_analysis:
+    provider: "openai"
+    model: "gpt4"
+    description: "Detect and locate embedded images in document pages with precise bounding boxes"
     fallback_models: ["gpt4_turbo"]
 
   # Document extraction (OCR + initial assessment - legacy single-pass)
@@ -108,7 +129,7 @@ flows:
   # Document type routing
   document_type_routing:
     provider: "openai" # Using OpenAI for development
-    model: "gpt3_5" # Use cheaper model for simple routing task
+    model: "gpt4" # GPT-4o has 128k context — handles large OCR text
     description: "Route documents to appropriate processing pipelines"
     fallback_models: ["gpt4_turbo", "gpt4"]
     # Alternative: provider: "google", model: "gemini_pro"
@@ -137,6 +158,13 @@ flows:
     fallback_models: ["gpt4_turbo", "gpt3_5"]
     # Alternative: provider: "google", model: "gemini_pro"
 
+  # Multilingual output safety classification
+  safety_check:
+    provider: "openai"
+    model: "gpt4o_mini"
+    description: "Multilingual output safety classification"
+    fallback_models: ["gpt3_5"]
+
   # SERENITY Form Analysis - Therapeutic observation extraction
   serenity_form_analysis:
     provider: "openai"
@@ -154,16 +182,15 @@ performance:
 # Cost optimization
 cost_optimization:
   # Use cheaper models for simple tasks
-  enable_cost_optimization: true
+  enable_cost_optimization: false
   simple_task_model: "gpt3_5"
   complex_task_model: "gpt4"
 
   # Task complexity classification
   simple_tasks:
-    - "document_type_routing"
     - "feature_detection"
   complex_tasks:
-    - "ocr_extraction"
+    - "document_type_routing"
     - "extraction"
     - "medical_analysis"
     - "signal_processing"

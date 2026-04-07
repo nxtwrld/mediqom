@@ -171,6 +171,68 @@
   --color-positive-light: #d4edda;
   --color-negative-light: #f8d7da;
   --color-warning-light: #fff3cd;
+
+  /* Color scheme hint for native controls */
+  color-scheme: light;
+}
+
+/* ============ Dark Theme ============ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Gray scale — inverted with blue tint */
+  --color-black: #e0e2ec;
+  --color-gray-900: #b8bcc8;
+  --color-gray-800: #8b8fa0;
+  --color-gray-600: #555869;
+  --color-gray-500: #1e2130;
+  --color-gray-400: #151722;
+  --color-gray-300: #0f1117;
+  --color-white: #0a0c12;
+
+  /* Alpha variants */
+  --color-gray-800-alpha: rgba(200, 205, 220, 0.30);
+  --color-gray-500-alpha: rgba(58, 61, 78, 0.48);
+  --color-gray-400-alpha: rgba(42, 45, 61, 0.48);
+  --color-gray-300-alpha: rgba(30, 33, 48, 0.48);
+  --color-gray-50: #1a1d2b;
+
+  /* Accent colors — brightened for dark bg */
+  --color-blue: #4d8aff;
+  --color-purple: #b9a0f5;
+  --color-red: #ff4d6d;
+  --color-redlight: #ff8aa5;
+  --color-yellow: #ffd233;
+  --color-green: #3de0ab;
+
+  /* Semantic surfaces — background must be darkest, then color-background, then surface */
+  --color-background: var(--color-gray-400);  /* #151722 — element backgrounds */
+  --color-border: var(--color-gray-500);
+  --color-surface: var(--color-gray-50);       /* #1a1d2b — lightest panels */
+  --color-text-primary: var(--color-black);
+  --color-text-secondary: var(--color-gray-800);
+
+  /* Status */
+  --color-positive-light: #1a3a2a;
+  --color-negative-light: #3a1a1e;
+  --color-warning-light: #3a3018;
+
+  /* Buttons */
+  --button-color: transparent;
+  --button-border-color: var(--color-gray-600);
+  --button-border-color-hover: var(--color-gray-800);
+  --button-text-color: inherit;
+
+  /* Input */
+  --input-color: var(--color-gray-400);
+
+  /* Background / text — page body is the darkest value */
+  --background: var(--color-gray-300);  /* #0f1117 — darkest, page body */
+  --text: var(--color-black);
+
+  /* Shadows — stronger for depth on dark bg */
+  --shadow-interactivity: 0 0.3rem 0.4rem -0.2rem rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 2rem 3rem -0.75rem rgba(0, 0, 0, 0.5);
 }
 
 html,

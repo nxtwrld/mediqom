@@ -135,7 +135,7 @@ export default {
                 schedule: {
                   type: "string",
                   description:
-                    "Human-readable frequency (e.g., 'twice daily', 'every 6 hours')",
+                    "Human-readable frequency (e.g., 'twice daily', 'every 6 hours'). Translate result to the [LANGUAGE] language if the source is in a different language.",
                 },
               },
             },
@@ -180,7 +180,7 @@ export default {
                 },
                 prnIndication: {
                   type: "string",
-                  description: "Condition for PRN use",
+                  description: "Condition for PRN use. Translate result to the [LANGUAGE] language if the source is in a different language.",
                 },
                 notes: {
                   type: "string",
@@ -293,7 +293,7 @@ export default {
               items: {
                 type: "string",
               },
-              description: "Reported side effects. ONLY extract if explicitly mentioned in the document. Do NOT list common side effects unless the document states the patient experienced them.",
+              description: "Reported side effects. ONLY extract if explicitly mentioned in the document. Do NOT list common side effects unless the document states the patient experienced them. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             notes: {
               type: "string",

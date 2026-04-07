@@ -1,6 +1,14 @@
 import type { ImportJob, FileManifestEntry } from "./types";
 import type { Task } from "./index";
-import { addJob, updateJob, removeJob, importJobs } from "./job-store";
+import {
+  addJob,
+  replaceJob,
+  updateJob,
+  removeJob,
+  importJobs,
+  addError,
+  formatImportError,
+} from "./job-store";
 import { cacheFiles, clearFiles, hasFiles } from "./file-cache";
 import type { SSEProgressEvent } from "./sse-client";
 import { apiFetch } from "$lib/api/client";
@@ -8,12 +16,16 @@ import { isNativePlatform } from "$lib/config/platform";
 
 const POLL_INTERVAL_MS = 3000;
 
+/** Track active AbortControllers so deleteJob() can cancel in-flight processing */
+const activeControllers = new Map<string, AbortController>();
+
 /** Create a new import job from preprocessed tasks */
 export async function createJob(
   tasks: Task[],
   originalFiles: File[],
   language: string,
-): Promise<string> {
+  placeholderId?: string,
+): Promise<ImportJob> {
   // Build file manifest from tasks
   const files: FileManifestEntry[] = tasks.map((task) => ({
     name: task.title,
@@ -27,6 +39,7 @@ export async function createJob(
         : [],
     dicomMetadata: task.dicomMetadata,
     thumbnail: task.thumbnail,
+    layoutDetections: task.layoutDetections || [],
   }));
 
   // Create job on server
@@ -69,8 +82,49 @@ export async function createJob(
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
 
-  addJob(job);
-  return jobId;
+  if (!placeholderId) {
+    addJob(job);
+  }
+  // When placeholderId provided, caller handles store update (for stable key mapping)
+  return job;
+}
+
+/** Update layout detections for a job after async detection completes */
+export async function updateLayoutDetections(
+  jobId: string,
+  tasks: Task[],
+): Promise<void> {
+  const layoutDetections: {
+    fileIndex: number;
+    detections: any[];
+  }[] = [];
+
+  tasks.forEach((task, i) => {
+    if (task.layoutDetections && task.layoutDetections.length > 0) {
+      layoutDetections.push({
+        fileIndex: i,
+        detections: task.layoutDetections,
+      });
+    }
+  });
+
+  if (layoutDetections.length === 0) return;
+
+  try {
+    const response = await apiFetch(`/v1/import/jobs/${jobId}/layout`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ layoutDetections }),
+    });
+
+    if (!response.ok) {
+      console.warn("[LayoutDetection] Failed to update job layout detections:", response.statusText);
+    } else {
+      console.log(`[LayoutDetection] Updated ${layoutDetections.length} file(s) for job ${jobId}`);
+    }
+  } catch (err) {
+    console.warn("[LayoutDetection] Failed to send layout detections:", err);
+  }
 }
 
 /** Process a job via SSE with polling fallback (web), or polling-only (Capacitor) */
@@ -78,160 +132,221 @@ export async function processJob(
   jobId: string,
   onProgress?: (event: SSEProgressEvent) => void,
 ): Promise<ImportJob> {
-  // On Capacitor: fire-and-forget the process endpoint, then poll
-  if (isNativePlatform()) {
-    // Trigger server processing — server continues even if we don't read the body
-    await apiFetch(`/v1/import/jobs/${jobId}/process`, {
-      method: "POST",
-      timeout: 0,
-      headers: { "Content-Type": "application/json" },
-    }).catch(() => null);
+  const controller = new AbortController();
+  activeControllers.set(jobId, controller);
+  const { signal } = controller;
 
-    // 409 = already processing (server concurrency guard) — just poll
-    // Any other error we still poll; polling will surface the real status
-    return pollUntilDone(jobId, onProgress);
-  }
+  const cleanup = () => { activeControllers.delete(jobId); };
 
-  // Web: SSE with polling fallback
-  return new Promise((resolve, reject) => {
-    let resolved = false;
+  try {
+    // On Capacitor: fire-and-forget the process endpoint, then poll
+    if (isNativePlatform()) {
+      // Trigger server processing — server continues even if we don't read the body
+      await apiFetch(`/v1/import/jobs/${jobId}/process`, {
+        method: "POST",
+        timeout: 0,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Layout-Detection": "server",
+        },
+      }).catch(() => null);
 
-    const finishWithPoll = async () => {
-      try {
-        const job = await pollUntilDone(jobId, onProgress);
-        if (!resolved) {
-          resolved = true;
-          resolve(job);
-        }
-      } catch (err) {
-        if (!resolved) {
-          resolved = true;
-          reject(err);
-        }
+      // 409 = already processing (server concurrency guard) — just poll
+      // Any other error we still poll; polling will surface the real status
+      const job = await pollUntilDone(jobId, onProgress, signal);
+      cleanup();
+      return job;
+    }
+
+    // Web: SSE with polling fallback
+    const job = await new Promise<ImportJob>((resolve, reject) => {
+      let resolved = false;
+
+      // If already aborted, bail immediately
+      if (signal.aborted) {
+        resolved = true;
+        reject(signal.reason || new DOMException("Aborted", "AbortError"));
+        return;
       }
-    };
 
-    // Start SSE request
-    apiFetch(`/v1/import/jobs/${jobId}/process`, {
-      method: "POST",
-      timeout: 0,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "text/event-stream",
-      },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          // If 409 (already processing), fall back to polling
-          if (response.status === 409) {
-            return finishWithPoll();
-          }
-          const err = await response
-            .json()
-            .catch(() => ({ message: response.statusText }));
-          throw new Error(err.message || "Failed to start processing");
-        }
-
-        if (!response.body) {
-          return finishWithPoll();
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        const readStream = async (): Promise<void> => {
-          try {
-            const { done, value } = await reader.read();
-            if (done) return;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                try {
-                  const eventData: SSEProgressEvent = JSON.parse(line.slice(6));
-
-                  // Update store
-                  updateJob(jobId, {
-                    stage: eventData.stage,
-                    progress: eventData.progress,
-                    message: eventData.message,
-                    status:
-                      eventData.type === "complete"
-                        ? "completed"
-                        : eventData.type === "error"
-                          ? "error"
-                          : undefined,
-                  } as any);
-
-                  onProgress?.(eventData);
-
-                  if (eventData.type === "complete") {
-                    if (!resolved) {
-                      resolved = true;
-                      // Fetch final job from server
-                      const job = await fetchJob(jobId);
-                      if (job) {
-                        addJob(job);
-                        resolve(job);
-                      } else {
-                        resolve(eventData.data);
-                      }
-                    }
-                    return;
-                  }
-
-                  if (eventData.type === "error") {
-                    if (!resolved) {
-                      resolved = true;
-                      reject(new Error(eventData.message));
-                    }
-                    return;
-                  }
-                } catch {
-                  // Skip unparseable lines
-                }
-              }
-            }
-
-            await readStream();
-          } catch {
-            // Stream error - fall back to polling
-            if (!resolved) {
-              await finishWithPoll();
-            }
-          }
-        };
-
-        await readStream();
-
-        // Stream ended without complete/error event (e.g. network drop, app backgrounded)
+      signal.addEventListener("abort", () => {
         if (!resolved) {
-          await finishWithPoll();
-        }
-      })
-      .catch(async () => {
-        // Fetch/network error - fall back to polling
-        if (!resolved) {
-          await finishWithPoll();
+          resolved = true;
+          reject(signal.reason || new DOMException("Aborted", "AbortError"));
         }
       });
-  });
+
+      const finishWithPoll = async () => {
+        try {
+          const job = await pollUntilDone(jobId, onProgress, signal);
+          if (!resolved) {
+            resolved = true;
+            resolve(job);
+          }
+        } catch (err) {
+          if (!resolved) {
+            resolved = true;
+            reject(err);
+          }
+        }
+      };
+
+      // Start SSE request
+      apiFetch(`/v1/import/jobs/${jobId}/process`, {
+        method: "POST",
+        timeout: 0,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          "X-Layout-Detection": "client",
+        },
+      })
+        .then(async (response) => {
+          if (signal.aborted) return;
+
+          if (!response.ok) {
+            // If 409 (already processing), fall back to polling
+            if (response.status === 409) {
+              return finishWithPoll();
+            }
+            const err = await response
+              .json()
+              .catch(() => ({ message: response.statusText }));
+            throw new Error(err.message || "Failed to start processing");
+          }
+
+          if (!response.body) {
+            return finishWithPoll();
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          const readStream = async (): Promise<void> => {
+            try {
+              if (signal.aborted) {
+                await reader.cancel();
+                return;
+              }
+
+              const { done, value } = await reader.read();
+              if (done) return;
+
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split("\n");
+              buffer = lines.pop() || "";
+
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  try {
+                    const eventData: SSEProgressEvent = JSON.parse(line.slice(6));
+
+                    // Update store
+                    updateJob(jobId, {
+                      stage: eventData.stage,
+                      progress: eventData.progress,
+                      message: eventData.message,
+                      status:
+                        eventData.type === "complete"
+                          ? "completed"
+                          : eventData.type === "error"
+                            ? "error"
+                            : undefined,
+                    } as any);
+
+                    onProgress?.(eventData);
+
+                    if (eventData.type === "complete") {
+                      if (!resolved) {
+                        resolved = true;
+                        // Fetch final job from server
+                        const job = await fetchJob(jobId);
+                        if (job) {
+                          addJob(job);
+                          resolve(job);
+                        } else {
+                          resolve(eventData.data);
+                        }
+                      }
+                      return;
+                    }
+
+                    if (eventData.type === "error") {
+                      addError(
+                        formatImportError(eventData.message),
+                        jobId,
+                      );
+                      if (!resolved) {
+                        resolved = true;
+                        reject(new Error(eventData.message));
+                      }
+                      return;
+                    }
+                  } catch {
+                    // Skip unparseable lines
+                  }
+                }
+              }
+
+              await readStream();
+            } catch {
+              // Stream error - fall back to polling
+              if (!resolved) {
+                await finishWithPoll();
+              }
+            }
+          };
+
+          await readStream();
+
+          // Stream ended without complete/error event (e.g. network drop, app backgrounded)
+          if (!resolved) {
+            await finishWithPoll();
+          }
+        })
+        .catch(async () => {
+          // Fetch/network error - fall back to polling
+          if (!resolved) {
+            await finishWithPoll();
+          }
+        });
+    });
+
+    cleanup();
+    return job;
+  } catch (err) {
+    cleanup();
+    throw err;
+  }
 }
 
 /** Poll job status until completion */
 async function pollUntilDone(
   jobId: string,
   onProgress?: (event: SSEProgressEvent) => void,
+  signal?: AbortSignal,
 ): Promise<ImportJob> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+
+    // Listen for abort to stop polling
+    signal?.addEventListener("abort", () => {
+      if (!settled) {
+        settled = true;
+        reject(signal.reason || new DOMException("Aborted", "AbortError"));
+      }
+    });
+
     const poll = async () => {
+      if (settled || signal?.aborted) return;
+
       try {
         const job = await fetchJob(jobId);
+        if (settled || signal?.aborted) return;
+
         if (!job) {
+          settled = true;
           reject(new Error("Job not found"));
           return;
         }
@@ -252,10 +367,16 @@ async function pollUntilDone(
         });
 
         if (job.status === "completed") {
+          settled = true;
           resolve(job);
           return;
         }
         if (job.status === "error") {
+          addError(
+            formatImportError(job.error || "Processing failed"),
+            jobId,
+          );
+          settled = true;
           reject(new Error(job.error || "Processing failed"));
           return;
         }
@@ -263,6 +384,9 @@ async function pollUntilDone(
         // Continue polling
         setTimeout(poll, POLL_INTERVAL_MS);
       } catch (err) {
+        if (settled || signal?.aborted) return;
+        addError(formatImportError(err as Error), jobId);
+        settled = true;
         reject(err);
       }
     };
@@ -296,8 +420,12 @@ export async function checkPendingJobs(): Promise<ImportJob[]> {
       }),
     );
 
-    // Update store
-    importJobs.set(enrichedJobs);
+    // Merge with existing store (preserve current-session jobs not on server)
+    importJobs.update((current) => {
+      const serverIds = new Set(enrichedJobs.map((j: ImportJob) => j.id));
+      const kept = current.filter((j) => !serverIds.has(j.id));
+      return [...kept, ...enrichedJobs];
+    });
     return enrichedJobs;
   } catch {
     return [];
@@ -306,9 +434,15 @@ export async function checkPendingJobs(): Promise<ImportJob[]> {
 
 /** Delete a job and clean up cached files */
 export async function deleteJob(jobId: string): Promise<void> {
-  await apiFetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" });
-  await clearFiles(jobId);
+  // Abort any in-flight processing before removing
+  activeControllers.get(jobId)?.abort();
+  activeControllers.delete(jobId);
+
   removeJob(jobId);
+  await clearFiles(jobId);
+  await apiFetch(`/v1/import/jobs/${jobId}`, { method: "DELETE" }).catch(
+    (e) => console.warn('[Import] Failed to delete job from server:', e)
+  );
 }
 
 /** Retry a failed job */

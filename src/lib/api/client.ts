@@ -102,9 +102,11 @@ export async function apiFetch(
     headers.set("Content-Type", "application/json");
   }
 
-  // Create abort controller for timeout
+  // Create abort controller for timeout (timeout: 0 means no timeout)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = timeout > 0
+    ? setTimeout(() => controller.abort(), timeout)
+    : null;
 
   const method = fetchOptions.method ?? "GET";
   if (isNativePlatform()) {
@@ -131,7 +133,7 @@ export async function apiFetch(
 
     return response;
   } finally {
-    clearTimeout(timeoutId);
+    if (timeoutId !== null) clearTimeout(timeoutId);
   }
 }
 

@@ -4,7 +4,8 @@ import { getClient } from "$lib/supabase";
 import auth from "$lib/auth";
 import { decryptString } from "../encryption/passphrase";
 import { verifyHash } from "../encryption/hash";
-import { KeyPair, pemToKey } from "../encryption/rsa";
+import { HybridKeyPair, pemToKey, importKemPublicKey, type KeyMode } from "../encryption/keys";
+import { deserializeKemKey, isKemKey } from "../encryption/kem";
 import {
   authenticateWithPasskeyPRF,
   decryptWithPRFKey,
@@ -47,6 +48,10 @@ export type User = {
   passkey_credential_id?: string;
   passkey_prf_salt?: string;
   recovery_encrypted_key?: string;
+  // Post-quantum (ML-KEM) fields
+  kem_public_key?: string;
+  kem_secret_key?: string;
+  key_mode?: KeyMode;
 };
 
 const keys: {
@@ -54,7 +59,7 @@ const keys: {
   publicKey?: CryptoKey;
 } = {};
 
-let keyPair: KeyPair = new KeyPair();
+let keyPair: HybridKeyPair = new HybridKeyPair();
 
 const user: Writable<User | UserFirstTime | null> = writable(null);
 
@@ -109,6 +114,10 @@ export async function setUser(
     userProfile.passkey_prf_salt = userProfile.private_keys?.passkey_prf_salt;
     userProfile.recovery_encrypted_key =
       userProfile.private_keys?.recovery_encrypted_key;
+    // Post-quantum (ML-KEM) fields
+    userProfile.kem_secret_key = userProfile.private_keys?.kem_secret_key;
+    userProfile.key_mode = userProfile.private_keys?.key_mode || userProfile.key_mode || "rsa-only";
+    // kem_public_key comes from the profiles table (already on userProfile)
 
     delete userProfile.private_keys;
 
@@ -142,7 +151,25 @@ export async function setUser(
         ) {
           const privateKey = await pemToKey(privateKeyString, true);
           const publicKey = await pemToKey(userProfile.publicKey, false);
-          keyPair.set(publicKey, privateKey);
+
+          // Decrypt KEM secret key if available (hybrid mode)
+          let kemPub: Uint8Array | null = null;
+          let kemSec: Uint8Array | null = null;
+          if (userProfile.kem_public_key && isKemKey(userProfile.kem_public_key)) {
+            kemPub = deserializeKemKey(userProfile.kem_public_key);
+          }
+          if (userProfile.kem_secret_key) {
+            try {
+              const kemSecStr = await decryptString(userProfile.kem_secret_key, key_pass);
+              if (kemSecStr && isKemKey(kemSecStr)) {
+                kemSec = deserializeKemKey(kemSecStr);
+              }
+            } catch (e) {
+              console.error("[User] Error decrypting KEM secret key:", e);
+            }
+          }
+
+          keyPair.set(publicKey, privateKey, kemPub, kemSec);
         }
       } catch (e) {
         console.error("[User] Error setting up keys:", e);
@@ -219,7 +246,25 @@ async function unlock(passphrase: string | null): Promise<boolean> {
 
       const privateKey = await pemToKey(privateKeyString, true);
       const publicKey = await pemToKey(fullUser.publicKey, false);
-      keyPair.set(publicKey, privateKey);
+
+      // Decrypt KEM secret key if available
+      let kemPub: Uint8Array | null = null;
+      let kemSec: Uint8Array | null = null;
+      if (fullUser.kem_public_key && isKemKey(fullUser.kem_public_key)) {
+        kemPub = deserializeKemKey(fullUser.kem_public_key);
+      }
+      if (fullUser.kem_secret_key) {
+        try {
+          const kemSecStr = await decryptString(fullUser.kem_secret_key, passphrase);
+          if (kemSecStr && isKemKey(kemSecStr)) {
+            kemSec = deserializeKemKey(kemSecStr);
+          }
+        } catch (e) {
+          console.error("[User] Error decrypting KEM secret key:", e);
+        }
+      }
+
+      keyPair.set(publicKey, privateKey, kemPub, kemSec);
       update((user) => {
         if (user) {
           user.unlocked = unlocked;
@@ -304,7 +349,13 @@ async function unlockWithPasskey(): Promise<boolean> {
     // Import keys
     const privateKey = await pemToKey(privateKeyString, true);
     const publicKey = await pemToKey(fullUser.publicKey, false);
-    keyPair.set(publicKey, privateKey);
+
+    // KEM keys for passkey mode (PRF-derived key doesn't encrypt KEM key separately yet)
+    const kemPub = fullUser.kem_public_key && isKemKey(fullUser.kem_public_key)
+      ? deserializeKemKey(fullUser.kem_public_key)
+      : null;
+
+    keyPair.set(publicKey, privateKey, kemPub, null);
 
     update((user) => {
       if (user) {
@@ -366,7 +417,13 @@ async function unlockWithRecoveryKey(recoveryKey: string): Promise<boolean> {
     // Import keys
     const privateKey = await pemToKey(privateKeyString, true);
     const publicKey = await pemToKey(fullUser.publicKey, false);
-    keyPair.set(publicKey, privateKey);
+
+    // KEM keys for recovery (recovery key doesn't protect KEM key separately yet)
+    const kemPub = fullUser.kem_public_key && isKemKey(fullUser.kem_public_key)
+      ? deserializeKemKey(fullUser.kem_public_key)
+      : null;
+
+    keyPair.set(publicKey, privateKey, kemPub, null);
 
     update((user) => {
       if (user) {
@@ -477,10 +534,28 @@ export async function getPrivateKeyPEM(): Promise<string | null> {
 
   try {
     // Import keyToPEM dynamically to avoid circular imports
-    const { keyToPEM } = await import("../encryption/rsa");
+    const { keyToPEM } = await import("../encryption/keys");
     return await keyToPEM(keyPair.privateKey, true);
   } catch (error) {
     console.error("[User] Error exporting private key:", error);
+    return null;
+  }
+}
+
+/**
+ * Get the current KEM secret key as serialized string (if unlocked and available)
+ * Used for recovery document generation
+ */
+export async function getKemSecretKeySerialized(): Promise<string | null> {
+  if (!keyPair.isReady() || !keyPair.kemSecretKey) {
+    return null;
+  }
+
+  try {
+    const { serializeKemKey } = await import("../encryption/kem");
+    return serializeKemKey(keyPair.kemSecretKey);
+  } catch (error) {
+    console.error("[User] Error serializing KEM secret key:", error);
     return null;
   }
 }
@@ -501,4 +576,5 @@ export default {
   hasRecoveryKey,
   hasPasskey,
   getPrivateKeyPEM,
+  getKemSecretKeySerialized,
 };

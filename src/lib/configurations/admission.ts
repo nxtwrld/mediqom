@@ -3,7 +3,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "admission_extractor",
   description:
-    "Extract hospital admission and discharge information from medical documents. Identify admission details, length of stay, and discharge planning information.",
+    "Extract hospital admission and discharge information from medical documents. Identify admission details, length of stay, and discharge planning information.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

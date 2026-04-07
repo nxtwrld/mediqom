@@ -39,7 +39,7 @@ export function tooltip(node: HTMLElement, options: string | Options) {
     } else if (event instanceof TouchEvent) {
       left = event.touches[0].clientX;
     }
-    div.innerHTML = opts.text;
+    div.textContent = opts.text;
 
     // place left to the middle of the element
     left = left - div.offsetWidth / 2;

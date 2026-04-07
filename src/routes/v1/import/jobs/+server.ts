@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { checkScansAvailable } from "$lib/billing/subscription.server";
+import { auditFromEvent } from "$lib/audit/index.server";
 import type { ImportJobCreateInput } from "$lib/import/types";
 
 function getServiceClient() {
@@ -10,10 +11,11 @@ function getServiceClient() {
 }
 
 /** POST - Create a new import job */
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
@@ -48,6 +50,8 @@ export const POST: RequestHandler = async ({
     error(500, { message: "Failed to create import job" });
   }
 
+  auditFromEvent(event, { action: "create", resource_type: "import_job", resource_id: job.id, metadata: { file_count: body.files.length } });
+
   return json({ id: job.id });
 };
 
@@ -76,7 +80,7 @@ export const GET: RequestHandler = async ({
       "id, status, stage, progress, message, error, file_count, file_manifest, language, created_at, updated_at, expires_at",
     )
     .eq("user_id", user.id)
-    .in("status", ["created", "extracting", "analyzing", "completed", "error"])
+    .in("status", ["created", "extracting", "analyzing", "error"])
     .order("created_at", { ascending: false });
 
   if (dbError) {
@@ -84,5 +88,13 @@ export const GET: RequestHandler = async ({
     error(500, { message: "Failed to list import jobs" });
   }
 
-  return json({ jobs: jobs || [] });
+  // Strip processedImages from response (client doesn't need them, server reads from DB)
+  const sanitized = (jobs || []).map((job: any) => ({
+    ...job,
+    file_manifest: job.file_manifest?.map(
+      ({ processedImages, ...rest }: any) => rest,
+    ),
+  }));
+
+  return json({ jobs: sanitized });
 };

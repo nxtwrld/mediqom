@@ -13,7 +13,7 @@ import coreBodyParts from "./core.bodyParts";
 export default {
   name: "extract_treatment_response",
   description:
-    "Extract comprehensive treatment response assessment including RECIST criteria, tumor measurements, and clinical response evaluation.",
+    "Extract comprehensive treatment response assessment including RECIST criteria, tumor measurements, and clinical response evaluation.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -68,7 +68,7 @@ export default {
                   properties: {
                     measurement: {
                       type: "string",
-                      description: "Baseline measurement (mm or cm)",
+                      description: "Baseline measurement (mm or cm). ONLY populate if explicitly stated in the document.",
                     },
                     date: {
                       type: "string",
@@ -81,11 +81,11 @@ export default {
                   properties: {
                     measurement: {
                       type: "string",
-                      description: "Current measurement (mm or cm)",
+                      description: "Current measurement (mm or cm). ONLY populate if explicitly stated in the document.",
                     },
                     percentChange: {
                       type: "number",
-                      description: "Percent change from baseline",
+                      description: "Percent change from baseline. ONLY populate if explicitly stated in the document.",
                     },
                   },
                 },
@@ -131,15 +131,15 @@ export default {
             properties: {
               baseline: {
                 type: "number",
-                description: "Baseline sum of target lesion diameters (mm)",
+                description: "Baseline sum of target lesion diameters (mm). ONLY populate if explicitly stated in the document.",
               },
               current: {
                 type: "number",
-                description: "Current sum of target lesion diameters (mm)",
+                description: "Current sum of target lesion diameters (mm). ONLY populate if explicitly stated in the document.",
               },
               percentChange: {
                 type: "number",
-                description: "Percent change from baseline",
+                description: "Percent change from baseline. ONLY populate if explicitly stated in the document.",
               },
             },
           },
@@ -189,13 +189,13 @@ export default {
                     type: "number",
                     minimum: 0,
                     maximum: 5,
-                    description: "Baseline ECOG performance status",
+                    description: "Baseline ECOG performance status. ONLY populate if explicitly stated in the document.",
                   },
                   karnofsky: {
                     type: "number",
                     minimum: 0,
                     maximum: 100,
-                    description: "Baseline Karnofsky performance status",
+                    description: "Baseline Karnofsky performance status. ONLY populate if explicitly stated in the document.",
                   },
                 },
               },
@@ -206,13 +206,13 @@ export default {
                     type: "number",
                     minimum: 0,
                     maximum: 5,
-                    description: "Current ECOG performance status",
+                    description: "Current ECOG performance status. ONLY populate if explicitly stated in the document.",
                   },
                   karnofsky: {
                     type: "number",
                     minimum: 0,
                     maximum: 100,
-                    description: "Current Karnofsky performance status",
+                    description: "Current Karnofsky performance status. ONLY populate if explicitly stated in the document.",
                   },
                 },
               },

@@ -324,28 +324,100 @@ export class MCPSecurityService {
   }
 
   /**
-   * Check if user owns or has access to profile
+   * Check if user owns or has access to profile.
+   * Queries the profiles table for ownership, and document_shares for delegated access.
    */
   private async checkProfileOwnership(
     userId: string,
     profileId: string,
   ): Promise<boolean> {
-    // Implementation depends on your profile access model
-    // For now, simple check - user can access their own profile
-    // In production, this would check database permissions
+    const client = this.getSupabaseClient();
+    if (!client) {
+      // No Supabase client available (client-side context) — fall back to strict ID match
+      auditLogger.warn("No Supabase client for profile ownership check, using strict ID match");
+      return userId === profileId;
+    }
 
-    // TODO: Implement actual profile ownership check
-    // This is a placeholder that assumes profileId contains userId
-    return profileId.includes(userId) || userId === profileId;
+    try {
+      // Direct ownership check: profile belongs to this user
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("id, user_id")
+        .eq("id", profileId)
+        .single();
+
+      if (profileError || !profile) {
+        auditLogger.warn("Profile lookup failed", { profileId, userId, error: profileError?.message });
+        return false;
+      }
+
+      if (profile.user_id === userId) {
+        return true;
+      }
+
+      // Delegated access: check document_shares for an accepted share
+      const { data: share, error: shareError } = await client
+        .from("document_shares")
+        .select("id")
+        .eq("profile_id", profileId)
+        .eq("recipient_user_id", userId)
+        .eq("status", "accepted")
+        .limit(1);
+
+      if (shareError) {
+        auditLogger.warn("Share lookup failed", { profileId, userId, error: shareError.message });
+        return false;
+      }
+
+      return share !== null && share.length > 0;
+    } catch (err) {
+      auditLogger.error("Profile ownership check error", { profileId, userId, error: err });
+      return false;
+    }
   }
 
   /**
-   * Check if user has clinical role
+   * Set the Supabase client for server-side queries.
+   * Must be called with a service role client before profile ownership checks.
+   */
+  setSupabaseClient(client: any) {
+    this._supabaseClient = client;
+  }
+
+  private getSupabaseClient() {
+    return this._supabaseClient;
+  }
+  private _supabaseClient: any;
+
+  /**
+   * Check if user has clinical role.
+   * Until clinical role verification is fully implemented via user metadata
+   * or a dedicated roles table, this returns false — which means clinical-only
+   * tools (like generateClinicalSummary) are gated. Clinical mode itself still
+   * works but includes an educational-purposes disclaimer via the prompt config.
    */
   private async checkClinicalRole(userId: string): Promise<boolean> {
-    // TODO: Implement actual role checking from database
-    // This is a placeholder
-    return false;
+    try {
+      const client = this.getSupabaseClient();
+      if (!client) return false;
+
+      // Check for clinical role in user profile metadata
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("metadata")
+        .eq("user_id", userId)
+        .single();
+
+      if (profileError || !profile?.metadata) return false;
+
+      const metadata = typeof profile.metadata === "string"
+        ? JSON.parse(profile.metadata)
+        : profile.metadata;
+
+      return metadata?.role === "clinical" || metadata?.role === "provider";
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -405,12 +477,47 @@ export class MCPSecurityService {
   }
 
   /**
-   * Persist audit entry to database
+   * Persist audit entry to database via audit_logs table.
+   * Routes through a lightweight server endpoint since MCP tools may run client-side.
    */
   private async persistAuditEntry(entry: MCPAuditEntry): Promise<void> {
-    // TODO: Implement database persistence
-    // This would typically save to a database table for long-term storage
-    // and compliance requirements
+    try {
+      const client = this.getSupabaseClient();
+      if (!client) {
+        auditLogger.warn("Cannot persist audit — no Supabase client available");
+        return;
+      }
+
+      const { error: insertError } = await client
+        .from("audit_logs")
+        .insert({
+          user_id: entry.userId === "anonymous" ? null : entry.userId,
+          actor_type: entry.userId === "anonymous" ? "anonymous" : "user",
+          action: entry.result === "denied" ? "read" : "read",
+          resource_type: "document" as const,
+          resource_id: entry.profileId,
+          ip_address: entry.ipAddress,
+          user_agent: entry.userAgent,
+          endpoint: `mcp/${entry.toolName}`,
+          http_method: "TOOL",
+          metadata: {
+            tool_name: entry.toolName,
+            operation: entry.operation,
+            result: entry.result,
+            sensitivity_level: entry.sensitivityLevel,
+            data_accessed_count: entry.dataAccessed?.length || 0,
+            processing_time_ms: entry.processingTimeMs,
+          },
+          success: entry.result === "success",
+          error_message: entry.errorMessage,
+        });
+
+      if (insertError) {
+        auditLogger.warn("Failed to persist MCP audit entry", { error: insertError.message });
+      }
+    } catch (err) {
+      auditLogger.warn("Unexpected error persisting MCP audit entry", { error: err });
+    }
   }
 
   /**

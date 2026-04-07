@@ -3,24 +3,24 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { t } from '$lib/i18n';
-	
+
+	/** Only allow relative paths starting with `/` (prevent open redirects) */
+	function sanitizeRedirect(value: string | null | undefined): string {
+		if (!value) return '/med';
+		if (!value.startsWith('/')) return '/med';
+		if (value.startsWith('//')) return '/med';
+		if (value.includes('://')) return '/med';
+		return value;
+	}
+
 	let loading = true;
 	let error = '';
-	
+
 	onMount(async () => {
-		console.log('[Client Code Confirm] Starting OAuth code confirmation');
-		console.log('[Client Code Confirm] Page URL:', $page.url.toString());
-		
 		const code = $page.url.searchParams.get('code');
-		const next = $page.url.searchParams.get('next') || '/med';
-		
-		console.log('[Client Code Confirm] Parameters:', { 
-			code: code ? `${code.substring(0, 20)}...` : 'null', 
-			next 
-		});
-		
+		const next = sanitizeRedirect($page.url.searchParams.get('next'));
+
 		if (!code) {
-			console.error('[Client Code Confirm] No code parameter found');
 			error = $t('app.auth.no-auth-code');
 			loading = false;
 			return;
@@ -30,14 +30,8 @@
 			// Check if we already have a session (this is safe during auth flow)
 			// Note: We use getUser() for validation instead of relying on session cookies
 			const { data: validUser, error: userError } = await $page.data.supabase.auth.getUser();
-			console.log('[Client Code Confirm] Initial auth check:', {
-				hasUser: !!validUser.user,
-				userId: validUser.user?.id,
-				userError: userError?.message
-			});
-			
+
 			if (validUser.user && !userError) {
-				console.log('[Client Code Confirm] Already authenticated, redirecting to:', next);
 				await invalidateAll();
 				goto(next, { replaceState: true });
 				return;
@@ -45,18 +39,15 @@
 			
 			// Try exchangeCodeForSession if available (newer versions)
 			if (typeof $page.data.supabase.auth.exchangeCodeForSession === 'function') {
-				console.log('[Client Code Confirm] Using exchangeCodeForSession');
 				const { data, error: exchangeError } = await $page.data.supabase.auth.exchangeCodeForSession(code);
 				
 				if (exchangeError) {
-					console.error('[Client Code Confirm] Code exchange failed:', exchangeError);
 					error = exchangeError.message;
 					loading = false;
 					return;
 				}
 				
 				if (data.session) {
-					console.log('[Client Code Confirm] Code exchange success, redirecting to:', next);
 					await invalidateAll();
 					goto(next, { replaceState: true });
 					return;
@@ -64,9 +55,6 @@
 			}
 			
 			// For older versions, the session might be set asynchronously
-			// Wait a bit and check again
-			console.log('[Client Code Confirm] Waiting for session to be established...');
-			
 			let attempts = 0;
 			const maxAttempts = 10;
 			
@@ -75,14 +63,8 @@
 				
 				// Use getUser() for validated authentication check
 				const { data: delayedUser, error: delayedError } = await $page.data.supabase.auth.getUser();
-				console.log(`[Client Code Confirm] Auth check attempt ${attempts + 1}:`, {
-					hasUser: !!delayedUser.user,
-					userId: delayedUser.user?.id,
-					error: delayedError?.message
-				});
-				
+
 				if (delayedUser.user && !delayedError) {
-					console.log('[Client Code Confirm] Authentication confirmed, redirecting to:', next);
 					await invalidateAll();
 					goto(next, { replaceState: true });
 					return;
@@ -91,13 +73,10 @@
 				attempts++;
 			}
 			
-			// If we get here, authentication failed
-			console.error('[Client Code Confirm] Authentication timed out - no session established');
 			error = $t('app.auth.auth-timed-out');
 			loading = false;
 
 		} catch (err) {
-			console.error('[Client Code Confirm] Unexpected error:', err);
 			error = $t('app.auth.unexpected-error');
 			loading = false;
 		}

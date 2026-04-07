@@ -12,7 +12,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_treatments",
   description:
-    "Extract comprehensive treatment protocols and therapeutic interventions including current treatments, past treatments, and treatment responses.",
+    "Extract comprehensive treatment protocols and therapeutic interventions including current treatments, past treatments, and treatment responses.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -90,7 +90,7 @@ export default {
                   },
                   duration: {
                     type: "string",
-                    description: "Treatment duration",
+                    description: "Treatment duration. Translate result to the [LANGUAGE] language if the source is in a different language.",
                   },
                 },
                 required: ["name"],
@@ -113,7 +113,7 @@ export default {
                   },
                   settings: {
                     type: "string",
-                    description: "Procedure settings or parameters",
+                    description: "Procedure settings or parameters. Translate result to the [LANGUAGE] language if the source is in a different language.",
                   },
                 },
               },
@@ -302,7 +302,7 @@ export default {
           properties: {
             treatmentName: {
               type: "string",
-              description: "Name or description of planned treatment",
+              description: "Name or description of planned treatment. Translate result to the [LANGUAGE] language if the source is in a different language.",
             },
             category: {
               type: "string",
@@ -340,7 +340,7 @@ export default {
             },
             prerequisites: {
               type: "array",
-              description: "Prerequisites before starting treatment",
+              description: "Prerequisites before starting treatment. Translate result to the [LANGUAGE] language if the source is in a different language.",
               items: {
                 type: "string",
               },
@@ -459,7 +459,7 @@ export default {
           },
           communicationPlan: {
             type: "string",
-            description: "Plan for team communication",
+            description: "Plan for team communication. Translate result to the [LANGUAGE] language if the source is in a different language.",
           },
         },
       },

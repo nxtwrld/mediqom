@@ -202,7 +202,7 @@
                 return enrichAttachmentsWithPaths(
                     document.content.attachments || [],
                     document.attachments || []
-                );
+                ).filter((a: any) => !a.embedded);
             // Enhanced sections - will be rendered when AI populates them
             case 'imaging': {
                 const imaging = document.content.imaging;

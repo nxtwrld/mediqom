@@ -14,17 +14,17 @@ export default {
       part: {
         type: "string",
         description:
-          "Specific sub-region or anatomical part of the body part (e.g., cardia, pylorus, fundus for stomach; left lobe, right lobe for liver). Leave empty if the entire organ/body part is referenced without specifying a particular region.",
+          "Specific sub-region or anatomical part of the body part (e.g., cardia, pylorus, fundus for stomach; left lobe, right lobe for liver). Leave empty if the entire organ/body part is referenced without specifying a particular region. Translate result to the [LANGUAGE] language if the source is in a different language.",
       },
       status: {
         type: "string",
         description:
-          "Observed status of the body part. Translate result to the [LANGUAGE] language if the source is in a different language. Leave is empty if the status is not available in the original report.",
+          "Observed status of the body part. MUST be written in [LANGUAGE]. Translate ALL medical terminology from the source language — do not leave any words in the original document language. Keep standard Latin medical terms (e.g., fractura, luxatio) but translate descriptive words. Leave empty if the status is not available in the original report.",
       },
       treatment: {
         type: "string",
         description:
-          "Performed or suggested treatment of the body part. Translate result to the [LANGUAGE] language if the source is in a different language. Leave empty if the treatment is not available.",
+          "Performed or suggested treatment of the body part. MUST be written in [LANGUAGE]. Translate ALL text from the source language including procedure descriptions. Keep only product/brand names (e.g., SYNTHES, Gamma3, Variax2) untranslated — translate everything else. Leave empty if the treatment is not available.",
       },
       urgency: {
         type: "number",

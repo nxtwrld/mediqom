@@ -1,9 +1,9 @@
 /**
  * Ephemeral key management for import jobs
  *
- * This module manages temporary encryption keys for import jobs stored in sessionStorage.
- * Keys are automatically cleared on logout or browser close, ensuring medical files
- * cached in IndexedDB remain encrypted and inaccessible without the ephemeral key.
+ * This module manages temporary encryption keys for import jobs in an in-memory Map.
+ * Keys are automatically pruned after 30 minutes of inactivity. Keys are lost on
+ * page reload (acceptable — job-manager regenerates on retry).
  */
 
 import {
@@ -14,37 +14,24 @@ import {
   decrypt,
 } from "$lib/encryption/aes";
 
-const STORAGE_KEY = "mediqom_import_job_keys";
+const KEY_EXPIRY_MS = 30 * 60 * 1000; // 30 min inactivity
 
-/**
- * Storage structure for job keys in sessionStorage
- */
-interface JobKeysStore {
-  [jobId: string]: string; // base64-encoded AES key
+interface KeyEntry {
+  key: string;
+  lastAccessed: number;
 }
 
-/**
- * Get all job keys from sessionStorage
- */
-function getJobKeysStore(): JobKeysStore {
-  try {
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (error) {
-    console.error("Failed to parse job keys from sessionStorage:", error);
-    return {};
-  }
-}
+const keyStore = new Map<string, KeyEntry>();
 
 /**
- * Save job keys to sessionStorage
+ * Remove expired keys (lazy pruning)
  */
-function setJobKeysStore(store: JobKeysStore): void {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-  } catch (error) {
-    console.error("Failed to save job keys to sessionStorage:", error);
-    throw new Error("Failed to store encryption key");
+function pruneExpiredKeys(): void {
+  const now = Date.now();
+  for (const [id, entry] of keyStore) {
+    if (now - entry.lastAccessed > KEY_EXPIRY_MS) {
+      keyStore.delete(id);
+    }
   }
 }
 
@@ -60,46 +47,42 @@ export async function generateJobKey(jobId: string): Promise<string> {
 }
 
 /**
- * Store a job encryption key in sessionStorage
+ * Store a job encryption key in memory
  * @param jobId - Unique job identifier
  * @param key - Base64-encoded encryption key
  */
 export async function storeJobKey(jobId: string, key: string): Promise<void> {
-  const store = getJobKeysStore();
-  store[jobId] = key;
-  setJobKeysStore(store);
+  pruneExpiredKeys();
+  keyStore.set(jobId, { key, lastAccessed: Date.now() });
 }
 
 /**
- * Retrieve a job encryption key from sessionStorage
+ * Retrieve a job encryption key from memory
  * @param jobId - Unique job identifier
  * @returns Base64-encoded encryption key or null if not found
  */
 export async function getJobKey(jobId: string): Promise<string | null> {
-  const store = getJobKeysStore();
-  return store[jobId] || null;
+  pruneExpiredKeys();
+  const entry = keyStore.get(jobId);
+  if (!entry) return null;
+  entry.lastAccessed = Date.now();
+  return entry.key;
 }
 
 /**
- * Clear a specific job encryption key from sessionStorage
+ * Clear a specific job encryption key from memory
  * @param jobId - Unique job identifier
  */
 export async function clearJobKey(jobId: string): Promise<void> {
-  const store = getJobKeysStore();
-  delete store[jobId];
-  setJobKeysStore(store);
+  keyStore.delete(jobId);
 }
 
 /**
- * Clear all job encryption keys from sessionStorage
+ * Clear all job encryption keys from memory
  * Should be called on logout or when clearing all import data
  */
 export async function clearAllJobKeys(): Promise<void> {
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-  } catch (error) {
-    console.error("Failed to clear job keys from sessionStorage:", error);
-  }
+  keyStore.clear();
 }
 
 /**

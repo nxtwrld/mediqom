@@ -42,7 +42,10 @@
 
 </script>
 
-<h3 class="h3 heading -sticky">{ $t('app.headings.profiles') }</h3>
+<div class="heading -sticky">
+    <h3 class="h3">{ $t('app.headings.profiles') }</h3>
+    <a href="/med/settings" class="button -small">{$t('app.nav.settings')}</a>
+</div>
 
 
 <div class="list-items list-items-{view}">
@@ -86,7 +89,13 @@
 
 <!--button on:click={addProfileData}>Add Profile</button-->
 
-<style> 
+<style>
+
+    .heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
     /* Grid */
 

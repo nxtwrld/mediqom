@@ -6,8 +6,7 @@
     import Modal from "$components/ui/Modal.svelte";
     import HealthForm from "../profile/HealthForm.svelte";
     import HealthProperty from "../healthProperty/Overview.svelte";
-    import Import from "$components/import/Index.svelte";
-    import JobsList from "$components/import/JobsList.svelte";
+    import ImportView from "$components/import/ImportView.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
     import { onMount } from "svelte";
@@ -25,6 +24,7 @@
     import type { Profile } from "$lib/types.d";
     import { isOpen as chatIsOpen } from "$lib/chat/store";
     import { device } from "$lib/device";
+    import { initTheme } from "$lib/theme/store";
     import { saveHealthProfile } from "$lib/health/save";
     import user from "$lib/user";
     import { pendingJobs, activeJobs } from "$lib/import/job-store";
@@ -63,7 +63,7 @@
     // Import overlay state
     let importJobId: string | undefined = $state(undefined);
     let importAutoOpen = $state(false);
-    let importHasFiles = $state(false);
+    // importHasFiles removed — ImportView handles file state internally
 
     // Chat state
     let currentProfile: Profile | null = $state(null);
@@ -144,6 +144,7 @@
     type PanelView = "profiles" | "anatomy" | "import";
     let panelView = $state<PanelView>("profiles");
     let panelHeight = $state(0);
+    let panelOpen = $derived(panelHeight > 0);
     let isSnappingPanel = $state(false);
     let navbarWrapEl = $state<HTMLElement | undefined>(undefined);
     let navbarBarEl = $state<HTMLElement | undefined>(undefined);
@@ -221,8 +222,6 @@
         anatomy: () => Math.round(window.innerHeight * 0.82),
         import: () => Math.round(window.innerHeight * 0.88),
     };
-
-    let panelOpen = $derived(panelHeight > 0);
 
     // Fullscreen anatomy canvas
     let panelSectionEl = $state<HTMLElement | undefined>(undefined);
@@ -453,6 +452,7 @@
     onMount(() => {
         logger.ui.info("UI mounted");
         device.init();
+        initTheme();
 
         // Android hardware back button: close overlay instead of exiting app
         let backButtonHandle: Promise<{ remove: () => void }> | null = null;
@@ -498,11 +498,6 @@
                         typeof state === "object" &&
                         state.autoOpen
                     );
-                    importHasFiles = !!(
-                        state &&
-                        typeof state === "object" &&
-                        state.hasFiles
-                    );
                 }
                 if (state) {
                     location.hash = "#overlay-import";
@@ -510,7 +505,6 @@
                 } else {
                     importJobId = undefined;
                     importAutoOpen = false;
-                    importHasFiles = false;
                     $uiState.overlay = Overlay.none;
                     if (location.hash.indexOf("#overlay-") == 0) {
                         history.back();
@@ -722,7 +716,7 @@
                         <Viewer signalHighlight={viewerSignalHighlight} fullscreen={anatomyFullscreen} viewportRect={anatomyViewportRect} />
                     {/if}
                 {:else if panelView === "import"}
-                    <Import oncomplete={closePanel} />
+                    <ImportView oncomplete={closePanel} />
                 {/if}
             </div>
         </div>
@@ -755,17 +749,13 @@
 
     {#if $uiState.overlay == Overlay.import}
         <div class="virtual-page" transition:fade>
-            {#if importJobId || importAutoOpen || importHasFiles}
-                <Import
-                    jobId={importJobId}
-                    autoOpen={importAutoOpen}
-                    oncomplete={() => {
-                        importJobId = undefined;
-                    }}
-                />
-            {:else}
-                <JobsList />
-            {/if}
+            <ImportView
+                expandedJobId={importJobId}
+                autoOpen={importAutoOpen}
+                oncomplete={() => {
+                    importJobId = undefined;
+                }}
+            />
         </div>
     {/if}
 

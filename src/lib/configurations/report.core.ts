@@ -9,7 +9,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 export default {
   name: "extract_medical_report_core",
   description:
-    "Extract core medical report information including summary, content, and recommendations. Diagnosis, performer, patient, and body parts are handled by separate specialized nodes.",
+    "Extract core medical report information including summary, content, and recommendations. Diagnosis, performer, patient, and body parts are handled by separate specialized nodes.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

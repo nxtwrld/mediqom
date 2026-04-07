@@ -9,7 +9,7 @@ import coreDiagnosis from "./core.diagnosis";
 export default {
   name: "extract_diagnosis",
   description:
-    "Extract diagnosis information from medical documents including primary, secondary, and differential diagnoses. Focus on accurate ICD-10 coding and confidence assessment.",
+    "Extract diagnosis information from medical documents including primary, secondary, and differential diagnoses. Focus on accurate ICD-10 coding and confidence assessment.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

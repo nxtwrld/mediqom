@@ -1,8 +1,16 @@
 import { error, type RequestHandler } from "@sveltejs/kit";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent } from "$lib/audit/index.server";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
-import assess from "$lib/import.server/assessInputs";
+import assess, {
+  assessOCR,
+  assessImages,
+  assessDocuments,
+  assembleAssessment,
+  type OcrResult,
+} from "$lib/import.server/assessInputs";
 import { runDocumentProcessingWorkflow } from "$lib/langgraph/workflows/document-processing";
 import { convertWorkflowResult } from "$lib/import.server/convertWorkflowResult";
 import { processMedicalImaging } from "$lib/langgraph/workflows/medical-imaging-workflow";
@@ -18,12 +26,13 @@ import {
   exportKey,
   encrypt as encryptAES,
 } from "$lib/encryption/aes";
-import { encrypt as encryptRSA, pemToKey } from "$lib/encryption/rsa";
+import { wrapKey } from "$lib/encryption/keys";
 import {
   saveExtractionResults,
   saveAnalysisResults,
   saveDocumentWorkflow,
   saveCompleteWorkflow,
+  saveImportPhaseLog,
 } from "$lib/import.server/debug-output";
 
 interface ProgressEvent {
@@ -57,20 +66,28 @@ async function updateJob(
 }
 
 /**
- * Retrieve user's RSA public key for wrapping job encryption key
- * Returns null if user doesn't have encryption keys set up yet
+ * Retrieve user's public keys (RSA + optional KEM) for wrapping job encryption key.
+ * Returns null if user doesn't have encryption keys set up yet.
  */
-async function getUserPublicKey(
+async function getUserPublicKeys(
   supabase: any,
   userId: string,
-): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("private_keys")
-    .select("public_key")
-    .eq("user_id", userId)
-    .single();
+): Promise<{ publicKey: string; kemPublicKey: string | null } | null> {
+  // Fetch RSA public key from private_keys, KEM public key from profiles
+  const [pkResult, profileResult] = await Promise.all([
+    supabase
+      .from("private_keys")
+      .select("public_key")
+      .eq("user_id", userId)
+      .single(),
+    supabase
+      .from("profiles")
+      .select("kem_public_key")
+      .eq("auth_id", userId)
+      .single(),
+  ]);
 
-  if (error || !data) {
+  if (pkResult.error || !pkResult.data) {
     console.warn(
       "User public key not found - encryption will be skipped:",
       userId,
@@ -78,61 +95,54 @@ async function getUserPublicKey(
     return null;
   }
 
-  return data.public_key;
+  return {
+    publicKey: pkResult.data.public_key,
+    kemPublicKey: profileResult.data?.kem_public_key ?? null,
+  };
 }
 
-export const POST: RequestHandler = async ({
-  params,
-  locals: { safeGetSession, user },
-}) => {
-  // Debug: Check if DEBUG_IMPORT is loaded
-  console.log(
-    "🔍 [Import] DEBUG_IMPORT environment variable:",
-    process.env.DEBUG_IMPORT,
-  );
-
+export const POST: RequestHandler = async (event) => {
+  const {
+    params,
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     error(401, { message: "Unauthorized" });
   }
 
+  // Rate limit: 10 requests/min per user
+  const rl = checkRateLimit("import-process", user.id, 10, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: "Too many requests" }), {
+      status: 429,
+      headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs! / 1000)) },
+    });
+  }
+
   const supabase = getServiceClient();
 
-  // Fetch the job
-  const { data: job, error: fetchError } = await supabase
-    .from("import_jobs")
-    .select("*")
-    .eq("id", params.id)
-    .eq("user_id", user.id)
+  // Atomic claim: fetch + concurrency guard + mark started in one DB call (TOCTOU-safe)
+  const { data: claimedJob, error: claimError } = await supabase
+    .rpc('claim_import_job', {
+      p_job_id: params.id,
+      p_user_id: user.id,
+      p_window_ms: CONCURRENCY_WINDOW_MS,
+    })
     .single();
 
-  if (fetchError || !job) {
-    error(404, { message: "Import job not found" });
+  if (claimError || !claimedJob) {
+    error(409, { message: "Job not found, already completed, or being processed" });
   }
 
-  if (job.status === "completed") {
-    error(400, { message: "Job already completed" });
-  }
+  const job = claimedJob as unknown as ImportJob;
 
-  // Concurrency guard: reject if another process call is active
-  if (job.processing_started_at) {
-    const startedAt = new Date(job.processing_started_at).getTime();
-    if (
-      Date.now() - startedAt < CONCURRENCY_WINDOW_MS &&
-      job.status !== "error"
-    ) {
-      error(409, { message: "Job is already being processed" });
-    }
-  }
+  auditFromEvent(event, { action: "process", resource_type: "import_job", resource_id: params.id, metadata: { file_count: (job.file_manifest || []).length } });
 
-  // Mark processing started
-  await updateJob(supabase, job.id, {
-    processing_started_at: new Date().toISOString(),
-    status: "extracting",
-    stage: "initialization",
-    progress: 0,
-    error: null,
-  } as any);
+  // Check if client will handle layout detection (ONNX)
+  // Mobile/Capacitor clients don't read SSE, so they can't run client-side ONNX
+  const clientHandlesLayout = request.headers.get("X-Layout-Detection") === "client";
 
   // Create SSE stream - processing continues even if stream disconnects
   const stream = new ReadableStream({
@@ -167,19 +177,19 @@ export const POST: RequestHandler = async ({
 
       try {
         // Check if user has encryption keys set up
-        const userPublicKey = await getUserPublicKey(supabase, user.id);
-        const useEncryption = userPublicKey !== null;
+        const userKeys = await getUserPublicKeys(supabase, user.id);
+        const useEncryption = userKeys !== null;
 
         // Generate job-specific encryption key if encryption is available
         // Note: With encryption enabled, job resume is not supported (would require
         // client-side decryption). Jobs are processed in one session with 1-hour TTL.
         let jobKey: CryptoKey | null = null;
         if (useEncryption) {
-          const userPublicKeyCrypto = await pemToKey(userPublicKey!);
           jobKey = await prepareKey();
           const jobKeyExported = await exportKey(jobKey);
-          const wrappedKey = await encryptRSA(
-            userPublicKeyCrypto,
+          const wrappedKey = await wrapKey(
+            userKeys!.publicKey,
+            userKeys!.kemPublicKey,
             jobKeyExported,
           );
 
@@ -187,7 +197,7 @@ export const POST: RequestHandler = async ({
           await updateJob(supabase, job.id, {
             result_encryption_key: wrappedKey,
           } as any);
-          console.log("Import job encryption enabled for job:", job.id);
+          console.log(`[Import] Encryption enabled for job ${job.id}`);
         } else {
           console.warn(
             "Import job encryption disabled - user has no encryption keys",
@@ -233,7 +243,7 @@ export const POST: RequestHandler = async ({
 
           if (file.taskType === "application/dicom" && file.dicomMetadata) {
             // Route DICOM files to specialized medical imaging workflow
-            console.log(`🏥 [Import] Routing DICOM file to medical imaging workflow: ${file.name}`);
+            console.log(`[Import] DICOM routing: ${file.name}`);
 
             const imagingState: MedicalImagingState = {
               images: file.processedImages,
@@ -262,19 +272,30 @@ export const POST: RequestHandler = async ({
               tokenUsage: { total: 0 },
             };
 
+            let lastDicomDbProgress = fileProgress;
             const workflowResult = await processMedicalImaging(
               imagingState,
               undefined,
               (event) => {
+                const mappedProgress = Math.round(
+                  5 + ((i + (event.progress || 0) / 100) / fileManifest.length) * 25,
+                );
                 sendEvent({
                   type: "progress",
                   stage: `dicom_${event.stage}`,
-                  progress: Math.round(
-                    5 + ((i + (event.progress || 0) / 100) / fileManifest.length) * 25,
-                  ),
+                  progress: mappedProgress,
                   message: event.message || `Processing DICOM ${file.name}...`,
                   timestamp: Date.now(),
                 });
+
+                // Persist to DB for polling clients (throttled: >= 2% change)
+                if (mappedProgress - lastDicomDbProgress >= 2) {
+                  lastDicomDbProgress = mappedProgress;
+                  updateJob(supabase, job.id, {
+                    progress: mappedProgress,
+                    message: event.message || `Processing DICOM ${file.name}...`,
+                  } as any);
+                }
               },
             );
 
@@ -301,20 +322,134 @@ export const POST: RequestHandler = async ({
             };
             extractionResults.push(assessResult);
           } else {
-            // Existing generic extraction path for PDFs and images
-            const assessResult = await assess(
-              { images: file.processedImages },
-              (stage, progress, message) => {
-                sendEvent({
-                  type: "progress",
-                  stage: `extraction_${stage}`,
-                  progress: Math.round(
-                    5 + ((i + progress / 100) / fileManifest.length) * 25,
-                  ),
+            // ── Phased extraction: OCR → signal client → wait for ONNX → crop → classify ──
+
+            let lastExtractDbProgress = fileProgress;
+            const phaseProgress = (stage: string, progress: number, message: string) => {
+              const mappedProgress = Math.round(
+                5 + ((i + progress / 100) / fileManifest.length) * 25,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `extraction_${stage}`,
+                progress: mappedProgress,
+                message,
+                timestamp: Date.now(),
+              });
+              if (mappedProgress - lastExtractDbProgress >= 2) {
+                lastExtractDbProgress = mappedProgress;
+                updateJob(supabase, job.id, {
+                  progress: mappedProgress,
                   message,
-                  timestamp: Date.now(),
-                });
+                } as any);
+              }
+            };
+
+            // Phase 1: OCR
+            const { ocrData, tokenUsage: ocrTokens } = await assessOCR(
+              file.processedImages,
+              phaseProgress,
+            );
+
+            // Identify pages with images
+            const pagesWithImages = ocrData.pages
+              .filter(p => p.hasImages)
+              .map(p => p.page);
+
+            console.log(
+              `[Import] File ${i + 1}: OCR done, pagesWithImages=[${pagesWithImages.join(", ")}]`,
+            );
+
+            // Debug dump: OCR phase
+            saveImportPhaseLog(job.id, i, "ocr", {
+              pageCount: ocrData.pages.length,
+              pagesWithImages,
+              textLengths: ocrData.pages.map(p => ({ page: p.page, len: p.text.length })),
+            });
+
+            // Send ocr_complete SSE event so the client can run targeted ONNX
+            sendEvent({
+              type: "progress",
+              stage: "ocr_complete",
+              progress: Math.round(5 + ((i + 0.6) / fileManifest.length) * 25),
+              message: "OCR complete, analyzing images...",
+              data: {
+                fileIndex: i,
+                pagesWithImages,
               },
+              timestamp: Date.now(),
+            });
+
+            // Phase 2: Wait for client ONNX detections if pages have images
+            let layoutDetections = file.layoutDetections || [];
+
+            if (pagesWithImages.length > 0 && layoutDetections.length === 0 && !clientHandlesLayout) {
+              console.log(`[Import] File ${i + 1}: client does not handle layout detection — skipping wait, using LLM fallback`);
+            }
+
+            if (pagesWithImages.length > 0 && layoutDetections.length === 0 && clientHandlesLayout) {
+              const MAX_WAIT_MS = 15_000;
+              const POLL_MS = 2_000;
+              const waitStart = Date.now();
+
+              while (Date.now() - waitStart < MAX_WAIT_MS) {
+                await new Promise(r => setTimeout(r, POLL_MS));
+
+                try {
+                  const { data: freshJob } = await supabase
+                    .from("import_jobs")
+                    .select("file_manifest")
+                    .eq("id", job.id)
+                    .single();
+
+                  const fileDetections = freshJob?.file_manifest?.[i]?.layoutDetections;
+                  if (fileDetections && fileDetections.length > 0) {
+                    layoutDetections = fileDetections;
+                    console.log(
+                      `[Import] File ${i + 1}: ${layoutDetections.length} layout detection(s) after ${Math.round(Date.now() - waitStart)}ms`,
+                    );
+                    break;
+                  }
+                } catch {
+                  // DB read failed — continue waiting
+                }
+              }
+
+              if (layoutDetections.length === 0) {
+                console.log(`[Import] File ${i + 1}: no layout detections after ${MAX_WAIT_MS}ms — LLM fallback`);
+              }
+
+              // Debug dump: layout wait result
+              saveImportPhaseLog(job.id, i, "layout_wait", {
+                pagesWithImages,
+                received: layoutDetections.length,
+                waitMs: Date.now() - waitStart,
+              });
+            }
+
+            // Phase 2b: Image cropping (YOLO detections or LLM fallback)
+            const { croppedImagesByPage, tokenUsage: imgTokens } = await assessImages(
+              file.processedImages,
+              ocrData,
+              layoutDetections.length > 0 ? layoutDetections : undefined,
+              phaseProgress,
+            );
+
+            // Phase 3: Document classification
+            const { documents: assessmentDocuments, tokenUsage: docTokens } = await assessDocuments(
+              ocrData,
+              phaseProgress,
+            );
+
+            // Phase 4: Assemble
+            const totalTokens = {
+              total: ocrTokens.total + imgTokens.total + docTokens.total,
+            };
+            const assessResult = assembleAssessment(
+              ocrData,
+              croppedImagesByPage,
+              assessmentDocuments,
+              totalTokens,
             );
 
             extractionResults.push(assessResult);
@@ -378,6 +513,7 @@ export const POST: RequestHandler = async ({
           text: string;
           title: string;
           isPreAnalyzed: boolean;
+          embeddedImages?: string[];
         }[] = [];
         for (let ai = 0; ai < extractionResults.length; ai++) {
           const assessment = extractionResults[ai];
@@ -396,93 +532,153 @@ export const POST: RequestHandler = async ({
 
           for (let di = 0; di < assessment.documents.length; di++) {
             const doc = assessment.documents[di];
-            const documentText = assessment.pages
-              .filter((p: any) => doc.pages.includes(p.page))
+            const docPages = assessment.pages.filter((p: any) =>
+              doc.pages.includes(p.page),
+            );
+            const documentText = docPages
               .map((p: any) => p.text)
               .join("\n");
+
+            // Collect embedded images from the document's pages
+            const embeddedImages: string[] = [];
+            for (const p of docPages) {
+              if (p.images && Array.isArray(p.images)) {
+                for (const img of p.images) {
+                  if (img.data) {
+                    embeddedImages.push(img.data);
+                  }
+                }
+              }
+            }
+
             allDocuments.push({
               assessmentIndex: ai,
               docIndex: di,
               text: documentText,
               title: doc.title || `Document ${ai + 1}-${di + 1}`,
               isPreAnalyzed: false,
+              embeddedImages,
             });
           }
         }
 
-        for (let i = 0; i < allDocuments.length; i++) {
-          const doc = allDocuments[i];
-          const docProgress = Math.round(30 + (i / allDocuments.length) * 65);
+        // Send document detection event
+        sendEvent({
+          type: "progress",
+          stage: "documents_detected",
+          progress: 30,
+          message: `Detected ${allDocuments.length} document${allDocuments.length !== 1 ? "s" : ""}`,
+          data: {
+            documentCount: allDocuments.length,
+            titles: allDocuments.map((d) => d.title),
+          },
+          timestamp: Date.now(),
+        });
+
+        // Parallel document analysis — all documents processed concurrently
+        const progressPerDoc = 65 / allDocuments.length;
+
+        const analysisPromises = allDocuments.map((doc, i) => {
+          const docProgressBase = 30 + i * progressPerDoc;
 
           sendEvent({
             type: "progress",
-            stage: "analysis",
-            progress: docProgress,
+            stage: `analysis_doc_${i + 1}`,
+            progress: Math.round(docProgressBase),
             message: `Analyzing document ${i + 1} of ${allDocuments.length}: ${doc.title}`,
             timestamp: Date.now(),
           });
 
-          await updateJob(supabase, job.id, {
-            stage: "analysis",
-            progress: docProgress,
-            message: `Analyzing ${doc.title}`,
-          } as any);
-
           // DICOM: assessment already contains full analysis from medical imaging workflow
           if (doc.isPreAnalyzed) {
-            console.log(`✅ [Import] Using pre-analyzed DICOM result for: ${doc.title}`);
-            analysisResults.push(extractionResults[doc.assessmentIndex] as any);
-          } else {
-            // Run LangGraph workflow for regular documents
-            const workflowResult = await runDocumentProcessingWorkflow(
-              [], // images not needed for text analysis
-              doc.text,
-              job.language,
-              {
-                useEnhancedSignals: true,
-                enableExternalValidation: false,
-                streamResults: true,
-                jobId: job.id, // Add jobId for debug output
-              },
-              (event: any) => {
-                sendEvent({
-                  type: "progress",
-                  stage: `analysis_${event.stage || "processing"}`,
-                  progress: Math.round(
-                    30 +
-                      ((i + (event.progress || 0) / 100) / allDocuments.length) *
-                        65,
-                  ),
-                  message: event.message || `Processing ${doc.title}...`,
-                  timestamp: Date.now(),
-                });
-              },
-            );
+            console.log(`[Import] Pre-analyzed DICOM: ${doc.title}`);
+            return Promise.resolve({
+              index: i,
+              result: extractionResults[doc.assessmentIndex] as ReportAnalysis,
+            });
+          }
 
-            const result = convertWorkflowResult(workflowResult, doc.text);
-            analysisResults.push(result);
+          // Run LangGraph workflow for regular documents
+          let lastDocDbProgress = Math.round(docProgressBase);
+          return runDocumentProcessingWorkflow(
+            doc.embeddedImages || [], // pass embedded images from page crops
+            doc.text,
+            job.language,
+            {
+              useEnhancedSignals: true,
+              enableExternalValidation: false,
+              streamResults: true,
+              jobId: job.id,
+            },
+            (event: any) => {
+              const mappedProgress = Math.round(
+                docProgressBase +
+                  ((event.progress || 0) / 100) * progressPerDoc,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `analysis_doc_${i + 1}`,
+                progress: mappedProgress,
+                message: `[${doc.title}] ${event.message || "Processing..."}`,
+                timestamp: Date.now(),
+              });
 
+              // Persist to DB for polling clients (throttled: >= 2% change)
+              if (mappedProgress - lastDocDbProgress >= 2) {
+                lastDocDbProgress = mappedProgress;
+                updateJob(supabase, job.id, {
+                  progress: mappedProgress,
+                  message: `Analyzing ${doc.title}`,
+                } as any);
+              }
+            },
+          ).then((workflowResult) => {
             // Save individual document workflow for debugging
             saveDocumentWorkflow(job.id, i, workflowResult);
-          }
 
-          // Persist after each document (with encryption if available)
-          if (useEncryption && jobKey) {
-            const encryptedAnalysis = await encryptAES(
-              jobKey,
-              JSON.stringify(analysisResults),
-            );
-            await updateJob(supabase, job.id, {
-              encrypted_analysis_results: encryptedAnalysis,
-              progress: Math.round(30 + ((i + 1) / allDocuments.length) * 65),
-            } as any);
-          } else {
-            // Fallback to plaintext for users without encryption keys
-            await updateJob(supabase, job.id, {
-              analysis_results: analysisResults,
-              progress: Math.round(30 + ((i + 1) / allDocuments.length) * 65),
-            } as any);
-          }
+            const result = convertWorkflowResult(workflowResult, doc.text);
+
+            // Warn about workflow errors (e.g. context length exceeded)
+            if (result.errors && result.errors.length > 0) {
+              console.warn(
+                `[Import] Document "${doc.title}" had workflow errors:`,
+                result.errors,
+              );
+              sendEvent({
+                type: "progress",
+                stage: `analysis_doc_${i + 1}`,
+                progress: Math.round(docProgressBase + progressPerDoc),
+                message: `Document "${doc.title}" analysis incomplete: ${result.errors.map((e: any) => e.error).join("; ")}`,
+                timestamp: Date.now(),
+              });
+            }
+
+            return { index: i, result };
+          });
+        });
+
+        const analysisSettled = await Promise.all(analysisPromises);
+
+        // Sort by original index and extract results
+        analysisResults = analysisSettled
+          .sort((a, b) => a.index - b.index)
+          .map((r) => r.result);
+
+        // Persist all results at once (with encryption if available)
+        if (useEncryption && jobKey) {
+          const encryptedAnalysis = await encryptAES(
+            jobKey,
+            JSON.stringify(analysisResults),
+          );
+          await updateJob(supabase, job.id, {
+            encrypted_analysis_results: encryptedAnalysis,
+            progress: 95,
+          } as any);
+        } else {
+          await updateJob(supabase, job.id, {
+            analysis_results: analysisResults,
+            progress: 95,
+          } as any);
         }
 
         // Save analysis results for debugging

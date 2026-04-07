@@ -79,32 +79,8 @@ export async function cacheFiles(jobId: string, files: File[]): Promise<void> {
       tx.oncomplete = () => db.close();
     });
   } catch (error) {
-    // Fallback to plaintext if encryption fails
-    console.warn("File cache encryption failed, storing plaintext:", error);
-    const db = await openDB();
-    const cachedFiles: CachedFile[] = await Promise.all(
-      files.map(async (file) => ({
-        name: file.name,
-        type: file.type,
-        data: btoa(
-          String.fromCharCode(...new Uint8Array(await file.arrayBuffer())),
-        ), // base64 encode for storage
-      })),
-    );
-
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, "readwrite");
-      const store = tx.objectStore(STORE_NAME);
-      const entry: CachedEntry = {
-        jobId,
-        files: cachedFiles,
-        createdAt: Date.now(),
-      };
-      const request = store.put(entry);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-      tx.oncomplete = () => db.close();
-    });
+    console.error("File cache encryption failed — refusing to store plaintext:", error);
+    throw error;
   }
 }
 

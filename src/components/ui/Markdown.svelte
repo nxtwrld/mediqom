@@ -1,17 +1,18 @@
 <script lang="ts">
     import markdown from 'nano-markdown';
+    import DOMPurify from 'dompurify';
     interface Props {
-        text: any; //console.log(text);
+        text: any;
     }
 
     let { text }: Props = $props();
 
-    
+
 </script>
 
 
     <div class="markdown">
-        {@html markdown(text).replace(/\n/gm, '<br/>' )}
+        {@html DOMPurify.sanitize(markdown(text).replace(/\n/gm, '<br/>' ))}
     </div>
 
 

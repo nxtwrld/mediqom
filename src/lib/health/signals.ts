@@ -1,5 +1,5 @@
 import { type Signal } from "$lib/types.d";
-import { getDocument, updateDocument } from "$lib/documents";
+import { getDocument, loadDocument, updateDocument } from "$lib/documents";
 import { type Document } from "$lib/documents/types.d";
 import { profiles, updateProfile } from "$lib/profiles";
 import { type Profile } from "$lib/types.d";
@@ -18,7 +18,13 @@ export async function getHealthDocument(profileId: string): Promise<Document> {
   if (!profile.healthDocumentId) {
     throw new Error(`Profile ${profileId} has no health document ID`);
   }
-  let document = (await getDocument(profile.healthDocumentId)) as Document;
+  let document: Document;
+  try {
+    document = (await getDocument(profile.healthDocumentId)) as Document;
+  } catch {
+    // Health document not in client-side index — fetch it from the API
+    document = await loadDocument(profile.healthDocumentId, profileId);
+  }
 
   // Check and perform signal migration if needed
   document = await SignalDataMigration.checkAndMigrate(document);

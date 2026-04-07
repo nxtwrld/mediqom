@@ -1,4 +1,6 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
+import { checkRateLimit } from "$lib/auth/rate-limiter";
+import { auditFromEvent, auditLog } from "$lib/audit/index.server";
 import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
 import type { Content } from "$lib/ai/types.d";
 import { generateId } from "$lib/utils/id";
@@ -6,15 +8,33 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { chatConfigManager } from "$lib/config/chat-config";
 import { serverChatContextService } from "$lib/context/integration/server/chat-context-server";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
+import { sanitizeInput } from "$lib/chat/input-sanitizer";
+import { guardOutput } from "$lib/chat/output-guard";
+import { detectEmergency } from "$lib/chat/emergency-detector";
+import { checkOutputSafety } from "$lib/chat/safety/llm-output-guard";
+import { safetyText } from "$lib/chat/safety/i18n-server";
+import { logger } from "$lib/logging/logger";
 
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession },
-}) => {
+const log = logger.namespace("ChatConversation");
+
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession },
+  } = event;
   // Check authentication
   const { session } = await safeGetSession();
   if (!session) {
     error(401, { message: "Unauthorized" });
+  }
+
+  // Rate limit: 30 requests/min per user
+  const rl = checkRateLimit("chat-conversation", session.user.id, 30, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: "Too many requests" }), {
+      status: 429,
+      headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs! / 1000)) },
+    });
   }
 
   try {
@@ -30,12 +50,32 @@ export const POST: RequestHandler = async ({
       availableTools, // MCP tools from ChatManager
     } = await request.json();
 
+    auditFromEvent(event, { action: "create", resource_type: "chat", metadata: { profile_id: profileId, mode } });
+
     // Validate required fields
     if (!message || !mode || !profileId) {
       error(400, {
         message: "Missing required fields: message, mode, profileId",
       });
     }
+
+    // H3: Validate mode and provider
+    const VALID_MODES = new Set(["patient", "caregiver", "clinical"]);
+    if (!VALID_MODES.has(mode)) {
+      error(400, { message: "Invalid mode" });
+    }
+    if (provider && !chatConfigManager.getAvailableProviders().includes(provider)) {
+      error(400, { message: "Invalid provider" });
+    }
+
+    // H1B: Sanitize input (with multilingual patterns)
+    const sanitized = sanitizeInput(message, language);
+    if (sanitized.flagged) {
+      log.warn("Prompt injection pattern detected", { mode, profileId, originalLength: sanitized.originalLength });
+    }
+
+    // M2: Emergency detection (with multilingual patterns)
+    const emergency = detectEmergency(message, language);
 
     // Create SSE stream
     const stream = new ReadableStream({
@@ -44,7 +84,7 @@ export const POST: RequestHandler = async ({
 
         // Process AI request with context
         processAIRequest(
-          message,
+          sanitized.message,
           mode,
           profileId,
           conversationHistory || [],
@@ -55,8 +95,9 @@ export const POST: RequestHandler = async ({
           encoder,
           assembledContext,
           availableTools,
+          emergency.banner,
         ).catch((err) => {
-          console.error("AI processing error:", err);
+          log.error("AI processing error:", err);
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
@@ -75,19 +116,17 @@ export const POST: RequestHandler = async ({
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Cache-Control",
       },
     });
   } catch (err) {
-    console.error("Chat conversation error:", err);
+    log.error("Chat conversation error:", err);
     error(500, { message: "Internal server error" });
   }
 };
 
 async function processAIRequest(
   userMessage: string,
-  mode: "patient" | "clinical",
+  mode: "patient" | "caregiver" | "clinical",
   profileId: string,
   conversationHistory: any[],
   language: string,
@@ -97,6 +136,7 @@ async function processAIRequest(
   encoder: TextEncoder,
   assembledContext?: any,
   availableTools?: string[],
+  emergencyBanner?: string | null,
 ) {
   const tokenUsage = { total: 0 };
 
@@ -122,11 +162,9 @@ async function processAIRequest(
           },
         );
 
-        console.log(
-          `API context prepared: ${contextResult?.documentCount} documents, confidence: ${contextResult?.confidence}`,
-        );
+        log.info("API context prepared", { documents: contextResult?.documentCount, confidence: contextResult?.confidence });
       } catch (error) {
-        console.warn("Failed to prepare context in API route:", error);
+        log.warn("Failed to prepare context in API route:", error);
         contextResult = null;
       }
     }
@@ -135,9 +173,7 @@ async function processAIRequest(
     const finalContext = assembledContext || contextResult?.assembledContext;
     const finalTools = availableTools || contextResult?.availableTools || [];
 
-    // Debug logging
-    console.log("[MCP Debug] Available tools:", finalTools);
-    console.log("[MCP Debug] Has assembled context:", !!finalContext);
+    log.debug("MCP context", { tools: finalTools, hasContext: !!finalContext });
 
     // Build system prompt with both document context (signals) and assembled context
     const systemPrompt = chatConfigManager.buildSystemPrompt(
@@ -156,9 +192,9 @@ async function processAIRequest(
     const messages = [
       new SystemMessage(systemPrompt),
       // Add conversation history based on configuration
-      ...conversationHistory
+      ...(conversationHistory
         .slice(-conversationConfig.maxMessages)
-        .flatMap((msg) => {
+        .flatMap((msg: any): any[] => {
           if (msg.role === "user") return [new HumanMessage(msg.content)];
           if (
             msg.role === "assistant" &&
@@ -167,7 +203,7 @@ async function processAIRequest(
             return [new SystemMessage(msg.content)];
           }
           return [];
-        }),
+        }) as any[]),
       new HumanMessage(userMessage),
     ];
 
@@ -189,6 +225,47 @@ async function processAIRequest(
         ),
       );
     }
+
+    // M2: Prepend emergency banner if detected
+    if (emergencyBanner) {
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({ type: "emergency_banner", content: emergencyBanner })}\n\n`,
+        ),
+      );
+    }
+
+    // H1C: Output safety guard for patient/caregiver mode (regex, localized)
+    const guardResult = guardOutput(fullResponse, mode, language);
+    if (guardResult.disclaimerAdded) {
+      log.info("Output guard triggered", { flags: guardResult.flags, mode });
+      // Send the disclaimer as an additional chunk
+      const disclaimerText = guardResult.response.slice(fullResponse.length);
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({ type: "chunk", content: disclaimerText })}\n\n`,
+        ),
+      );
+    }
+
+    // Start LLM output guard in parallel with Phase 2 (non-English, non-clinical only)
+    const llmGuardPromise = (language !== "en" && mode !== "clinical")
+      ? checkOutputSafety(fullResponse, mode, language).catch(() => null)
+      : Promise.resolve(null);
+
+    // M5: Audit data-sent metadata (not content)
+    auditLog({
+      action: "create",
+      resource_type: "chat",
+      resource_id: profileId,
+      metadata: {
+        token_count: tokenUsage.total,
+        mode,
+        provider: provider || chatConfigManager.getConfig().defaultProvider,
+        has_context: !!finalContext,
+        tool_count: finalTools.length,
+      },
+    });
 
     // Phase 2: Get structured data using the full response
     const content: Content[] = [{ type: "text", text: systemPrompt }];
@@ -212,11 +289,7 @@ async function processAIRequest(
         type: "text",
         text: formatAvailableTools(finalTools, documentsInContext),
       });
-      console.log("[MCP Debug] Tool instructions added to content");
-      console.log(
-        "[MCP Debug] Documents already in context:",
-        documentsInContext,
-      );
+      log.debug("Tool instructions added", { documentsInContext });
     }
 
     // Add conversation history
@@ -249,14 +322,10 @@ async function processAIRequest(
       },
     );
 
-    // Debug: Log what we got back from the AI
-    console.log("🔍 [Tool Debug] Structured data from AI:", {
-      hasToolCalls: !!structuredData.toolCalls,
-      toolCallsLength: structuredData.toolCalls?.length || 0,
-      toolCalls: structuredData.toolCalls,
-      anatomyReferences: structuredData.anatomyReferences?.length || 0,
-      documentReferences: structuredData.documentReferences?.length || 0,
-      response: structuredData.response?.substring(0, 100) + "...",
+    log.debug("Structured data from AI", {
+      toolCalls: structuredData.toolCalls?.length || 0,
+      anatomyRefs: structuredData.anatomyReferences?.length || 0,
+      documentRefs: structuredData.documentReferences?.length || 0,
     });
 
     // Validate that AI is using tools when it should
@@ -285,25 +354,27 @@ async function processAIRequest(
       structuredData.toolCalls && structuredData.toolCalls.length > 0;
     const hasAvailableTools = finalTools && finalTools.length > 0;
 
-    // Log validation results
-    console.log("🔍 [Tool Validation] Analysis:", {
-      mentionsTools,
-      hasToolCalls,
-      hasAvailableTools,
-      responseLength: fullResponse.length,
-      responseStart: fullResponse.substring(0, 150) + "...",
-    });
+    log.debug("Tool validation", { mentionsTools, hasToolCalls, hasAvailableTools });
 
     if (mentionsTools && !hasToolCalls && hasAvailableTools) {
-      console.warn(
-        "⚠️ [Tool Validation] AI mentioned accessing medical data but did not generate toolCalls",
-        {
-          responseExcerpt: fullResponse.substring(0, 200),
-          availableTools: finalTools,
-          mentionedKeywords: toolMentionKeywords.filter((k) =>
-            fullResponse.toLowerCase().includes(k.toLowerCase()),
-          ),
-        },
+      log.warn("AI mentioned accessing medical data but did not generate toolCalls", {
+        availableTools: finalTools,
+      });
+    }
+
+    // Resolve LLM output guard (should be done by now — it ran in parallel with Phase 2)
+    const llmGuard = await Promise.race([
+      llmGuardPromise,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 500)),
+    ]);
+
+    if (llmGuard && !llmGuard.safe && !guardResult.disclaimerAdded) {
+      log.info("LLM output guard triggered", { flags: llmGuard.flags, severity: llmGuard.severity, mode, language });
+      const disclaimer = safetyText("chat.safety.disclaimer", language);
+      controller.enqueue(
+        encoder.encode(
+          `data: ${JSON.stringify({ type: "chunk", content: `\n\n---\n*${disclaimer}*` })}\n\n`,
+        ),
       );
     }
 
@@ -328,6 +399,7 @@ async function processAIRequest(
         consentRequests: structuredData.consentRequests || [],
         toolCalls: structuredData.toolCalls || [],
         clarifyingQuestions: structuredData.clarifyingQuestions || [],
+        widgets: structuredData.widgets || [],
         sources: validatedSources,
         tokenUsage: tokenUsage.total,
         mode,
@@ -355,7 +427,7 @@ async function processAIRequest(
     // Close the stream
     controller.close();
   } catch (err) {
-    console.error("AI processing error:", err);
+    log.error("AI processing error:", err);
     controller.enqueue(
       encoder.encode(
         `data: ${JSON.stringify({

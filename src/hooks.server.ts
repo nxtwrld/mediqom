@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import { env } from "$env/dynamic/private";
 
 /**
  * Normalize malformed Supabase auth redirect URLs.
@@ -43,20 +44,40 @@ import {
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 
+/** CORS origin whitelist — Capacitor native HTTP bypasses CORS entirely */
+const ALLOWED_ORIGINS = new Set([
+  "https://mediqom.com",
+  "https://www.mediqom.com",
+  ...(env.ALLOWED_ORIGINS?.split(",").map((s) => s.trim()).filter(Boolean) ?? []),
+]);
+
+function getCorsOrigin(request: Request): string | null {
+  const origin = request.headers.get("Origin");
+  if (!origin) return null;
+  if (ALLOWED_ORIGINS.has(origin)) return origin;
+  // Allow Vercel preview deployments
+  if (origin.endsWith(".vercel.app")) return origin;
+  // Allow localhost in development
+  if (origin.startsWith("http://localhost:")) return origin;
+  return null;
+}
+
 const supabase: Handle = async ({ event, resolve }) => {
   const { method, headers: reqHeaders } = event.request;
   const { pathname } = event.url;
 
-  // Handle CORS preflight for mobile API calls
+  // Handle CORS preflight for API calls
   if (method === "OPTIONS" && pathname.startsWith("/v1/")) {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
+    const allowedOrigin = getCorsOrigin(event.request);
+    const headers: Record<string, string> = {
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, Cache-Control",
+    };
+    if (allowedOrigin) {
+      headers["Access-Control-Allow-Origin"] = allowedOrigin;
+      headers["Access-Control-Allow-Credentials"] = "true";
+    }
+    return new Response(null, { status: 204, headers });
   }
 
   /**
@@ -166,13 +187,22 @@ const supabase: Handle = async ({ event, resolve }) => {
     },
   });
 
-  // Add CORS headers for API routes (mobile Capacitor)
+  // Security headers
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // Add CORS headers for API routes
   if (event.url.pathname.startsWith("/v1/")) {
-    response.headers.set("Access-Control-Allow-Origin", "*");
-    response.headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
-    );
+    const allowedOrigin = getCorsOrigin(event.request);
+    if (allowedOrigin) {
+      response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
+      response.headers.set("Access-Control-Allow-Credentials", "true");
+      response.headers.set(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, Cache-Control",
+      );
+    }
   }
 
   return response;

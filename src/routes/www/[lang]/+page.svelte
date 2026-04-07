@@ -50,6 +50,8 @@
 			descriptionKey={section.descriptionKey}
 			screenshotUrl={section.screenshotUrl}
 			alignment={section.alignment}
+			linkKey={section.linkKey}
+			linkUrl={section.linkUrl}
 		/>
 	{/each}
 </div>

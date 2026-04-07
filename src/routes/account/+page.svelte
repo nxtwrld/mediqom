@@ -6,7 +6,7 @@
 	import type { VCard } from '$lib/contact/types.d';
 	import { goto } from '$app/navigation';
 	import { prepareKey, encrypt as encryptAES, exportKey } from '$lib/encryption/aes.js';
-	import { encrypt as encryptRSA, pemToKey } from '$lib/encryption/rsa.js';
+	import { wrapKey } from '$lib/encryption/keys';
 	import { log } from '$lib/logging/logger';
 	import { t } from '$lib/i18n';
 	import { apiFetch } from '$lib/api/client';
@@ -127,8 +127,11 @@
 			const cryptoKey = await prepareKey();
 			const encrypted = await Promise.all([d.content, d.metadata].map(s => encryptAES(cryptoKey, JSON.stringify(s))));
 			const exportedKey = await exportKey(cryptoKey);
-			const profile_key = await pemToKey(editData.privacy.publicKey as string);
-			const keyEncrypted = await encryptRSA(profile_key, exportedKey);
+			const keyEncrypted = await wrapKey(
+				editData.privacy.publicKey as string,
+				(editData.privacy as any).kemPublicKey ?? null,
+				exportedKey,
+			);
 			const keys = [{
 				key:  keyEncrypted,
 			}];
@@ -144,7 +147,7 @@
 		error = null;
 
 		try {
-			const payload = {
+			const payload: Record<string, any> = {
 				fullName: editData.bio.fullName,
 				avatarUrl: editData.bio.avatarUrl,
 				language: editData.bio.language,
@@ -156,6 +159,9 @@
 				privateKey: editData.privacy.privateKey,
 				key_hash: editData.privacy.key_hash,
 				documents: documentsEncrypted,
+				kemPublicKey: (editData.privacy as any).kemPublicKey ?? null,
+				encryptedKemSecretKey: (editData.privacy as any).encryptedKemSecretKey ?? null,
+				keyMode: (editData.privacy as any).keyMode ?? null,
 			};
 
 			const response = await apiFetch('/v1/account/onboarding', {
@@ -167,13 +173,21 @@
 
 			if (response.ok && result.success) {
 				log.ui.info('should go to /med');
-				const pendingShare = sessionStorage.getItem('pending_share_token');
-				if (pendingShare) {
+				const pendingShareRaw = sessionStorage.getItem('pending_share_token');
+				if (pendingShareRaw) {
 					sessionStorage.removeItem('pending_share_token');
-					goto(`/share/accept?t=${pendingShare}`);
-				} else {
-					goto('/med');
+					try {
+						const parsed = JSON.parse(pendingShareRaw);
+						const SHARE_TOKEN_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+						if (parsed.token && parsed.ts && Date.now() - parsed.ts < SHARE_TOKEN_MAX_AGE_MS) {
+							goto(`/share/accept?t=${parsed.token}`);
+							return;
+						}
+					} catch {
+						// Legacy plain-string format — treat as expired
+					}
 				}
+				goto('/med');
 				return;
 			}
 

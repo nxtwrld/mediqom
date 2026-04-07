@@ -9,7 +9,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_performer",
   description:
-    "Extract healthcare provider and medical professional information from medical documents including roles, names, and institutional affiliations.",
+    "Extract healthcare provider and medical professional information from medical documents including roles, names, and institutional affiliations.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

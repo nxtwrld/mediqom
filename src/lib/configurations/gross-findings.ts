@@ -12,7 +12,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_gross_findings",
   description:
-    "Extract comprehensive gross pathological examination findings including specimen descriptions, measurements, and macroscopic observations.",
+    "Extract comprehensive gross pathological examination findings including specimen descriptions, measurements, and macroscopic observations.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -140,7 +140,7 @@ export default {
                   },
                   size: {
                     type: "string",
-                    description: "Lesion dimensions",
+                    description: "Lesion dimensions. ONLY populate if explicitly stated in the document.",
                   },
                   color: {
                     type: "string",
@@ -217,7 +217,7 @@ export default {
           },
           count: {
             type: "number",
-            description: "Number of lymph nodes identified",
+            description: "Number of lymph nodes identified. ONLY populate if explicitly stated in the document.",
           },
           locations: {
             type: "array",
@@ -231,11 +231,11 @@ export default {
             properties: {
               largest: {
                 type: "string",
-                description: "Size of largest lymph node",
+                description: "Size of largest lymph node. ONLY populate if explicitly stated in the document.",
               },
               range: {
                 type: "string",
-                description: "Size range of lymph nodes",
+                description: "Size range of lymph nodes. ONLY populate if explicitly stated in the document.",
               },
             },
           },

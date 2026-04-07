@@ -55,11 +55,13 @@ export interface ModelConfiguration {
 export type FlowType =
   | "extraction"
   | "ocr_extraction"
+  | "image_analysis"
   | "medical_analysis"
   | "feature_detection"
   | "signal_processing"
   | "document_type_routing"
-  | "quality_validation";
+  | "quality_validation"
+  | "safety_check";
 
 // Global configuration cache
 let cachedConfig: ModelConfiguration | null = null;
@@ -194,15 +196,7 @@ export class ModelConfigManager {
       throw new Error(`Flow type '${flowType}' not configured`);
     }
 
-    // Check if cost optimization is enabled
-    let selectedModel = flowConfig.model;
-    if (config.cost_optimization.enable_cost_optimization) {
-      if (config.cost_optimization.simple_tasks.includes(flowType)) {
-        selectedModel = config.cost_optimization.simple_task_model;
-      } else if (config.cost_optimization.complex_tasks.includes(flowType)) {
-        selectedModel = config.cost_optimization.complex_task_model;
-      }
-    }
+    const selectedModel = flowConfig.model;
 
     const provider = config.providers[flowConfig.provider];
     if (!provider || !provider.enabled) {

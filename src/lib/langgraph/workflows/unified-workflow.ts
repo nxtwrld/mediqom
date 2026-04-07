@@ -5,7 +5,7 @@
  * unified approach using the multi-node orchestrator for ALL specialized processing.
  */
 
-import { StateGraph, END } from "@langchain/langgraph";
+import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
 import type {
   DocumentProcessingState,
   WorkflowConfig,
@@ -22,6 +22,7 @@ import {
 import { createWorkflowReplay } from "$lib/debug/workflow-replay";
 import { saveNodeResult } from "$lib/import.server/debug-output";
 import { DEBUG_IMPORT } from "$env/static/private";
+import { getLanguageEnglishName } from "$lib/languages";
 
 // Import essential workflow nodes only
 import { inputValidationNode } from "../nodes/input-validation";
@@ -38,9 +39,33 @@ import { resultsAggregatorNode } from "../nodes/results-aggregator";
 
 // Simplified conditional edge functions
 const shouldProcessMedical = (state: DocumentProcessingState): string => {
-  if (state.errors && state.errors.length > 0) {
-    console.log("🚫 Errors detected - skipping processing");
+  // Only block on critical errors (not feature detection failures)
+  const criticalErrors = (state.errors || []).filter(
+    (e: any) => {
+      const msg = typeof e === 'string' ? e : e?.message || '';
+      const node = typeof e === 'string' ? '' : e?.node || '';
+      // Feature detection errors are non-fatal — we default to processing anyway
+      return !msg.toLowerCase().includes('feature') && node !== 'feature_detection';
+    }
+  );
+
+  if (criticalErrors.length > 0) {
+    console.log("🚫 Critical errors detected - skipping processing:", criticalErrors);
     return "error";
+  }
+
+  // If feature detection failed, default to medical=true (better to try than skip)
+  const featureDetectionFailed = (state.errors || []).some(
+    (e: any) => {
+      const msg = typeof e === 'string' ? e : e?.message || '';
+      const node = typeof e === 'string' ? '' : e?.node || '';
+      return msg.toLowerCase().includes('feature') || node === 'feature_detection';
+    }
+  );
+
+  if (featureDetectionFailed) {
+    console.log("⚠️ Feature detection failed - defaulting to medical processing");
+    return "medical";
   }
 
   // Check if medical processing is needed
@@ -105,336 +130,133 @@ export const createUnifiedDocumentProcessingWorkflow = (
     };
   };
 
-  // Create state graph with state interface
-  const workflow = new StateGraph<DocumentProcessingState>({
-    channels: {
-      // Input channels
-      images: { reducer: (current: any, update: any) => update ?? current },
-      text: { reducer: (current: any, update: any) => update ?? current },
-      language: { reducer: (current: any, update: any) => update ?? current },
-      metadata: { reducer: (current: any, update: any) => update ?? current },
-      content: { reducer: (current: any, update: any) => update ?? current },
+  // Helper: last-write-wins reducer
+  const lastValue = <T>() =>
+    Annotation<T>({
+      reducer: (current: any, update: any) => update ?? current,
+      default: () => undefined as any,
+    });
 
-      // Core processing channels
-      // Token usage: accumulate across all nodes
-      tokenUsage: {
-        reducer: (current: any, update: any) => {
-          if (!update) return current || { total: 0 };
-          return {
-            total: (current?.total || 0) + (update?.total || 0),
-          };
-        },
+  // Helper: array accumulator reducer (for signals, medications, etc.)
+  const accumArray = <T>() =>
+    Annotation<T[]>({
+      reducer: (current: any[] | undefined, update: any[] | undefined) => {
+        if (update && !Array.isArray(update)) {
+          console.warn(
+            "⚠️ array reducer received non-array update, ignoring:",
+            typeof update,
+          );
+          return current || [];
+        }
+        if (!update || update.length === 0) return current || [];
+        return [...(current || []), ...update];
       },
-      featureDetection: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      featureDetectionResults: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
+      default: () => [],
+    });
 
-      // Multi-node results channels
-      // These receive updates from MULTIPLE parallel nodes via Send API
-      medicalAnalysis: {
-        reducer: (current: any, update: any) => update ?? current,
+  // Helper: object merger reducer (for report, imaging, etc.)
+  const mergeObject = <T>() =>
+    Annotation<T>({
+      reducer: (current: any, update: any) => {
+        if (!update) return current;
+        return { ...(current || {}), ...(update || {}) };
       },
-      // Signals: accumulate arrays from all signal-processing nodes
-      signals: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ signals reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      // Imaging: merge objects from imaging nodes
-      imaging: {
-        reducer: (current: any, update: any) => {
-          if (!update) return current;
-          return { ...(current || {}), ...(update || {}) };
-        },
-      },
-      // Medications: accumulate arrays from medication-processing nodes
-      medications: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ medications reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      // Procedures: accumulate arrays from procedure-processing nodes
-      procedures: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ procedures reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      // Multi-node results: merge metadata from dispatcher and aggregator
-      multiNodeResults: {
-        reducer: (current: any, update: any) => {
-          if (!update) return current;
-          return {
-            ...current,
-            ...update,
-            processedNodes: [
-              ...(current?.processedNodes || []),
-              ...(update?.processedNodes || []),
-            ],
-          };
-        },
-      },
-      // Report: merge objects from all medical processing nodes
-      report: {
-        reducer: (current: any, update: any) => {
-          if (!update) return current;
-          return { ...(current || {}), ...(update || {}) };
-        },
-      },
+      default: () => undefined as any,
+    });
 
-      // Additional medical section channels (populated by specialized nodes)
-      diagnosis: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ diagnosis reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      performer: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      patient: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      bodyParts: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ bodyParts reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      ecg: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ ecg reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      echo: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      allergies: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ allergies reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      anesthesia: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ anesthesia reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      microscopic: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      triage: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ triage reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      immunizations: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ immunizations reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      specimens: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ specimens reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      admission: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ admission reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      dental: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      tumorCharacteristics: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      treatmentPlan: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      treatmentResponse: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      imagingFindings: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      grossFindings: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      specialStains: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ specialStains reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      socialHistory: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      treatments: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (update && !Array.isArray(update)) {
-            console.warn(
-              "⚠️ treatments reducer received non-array update, ignoring:",
-              typeof update,
-            );
-            return current || [];
-          }
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
-      assessment: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      molecular: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
+  // Define state graph using Annotation API
+  const GraphState = Annotation.Root({
+    // Input channels
+    images: lastValue<any>(),
+    text: lastValue<any>(),
+    language: lastValue<any>(),
+    metadata: lastValue<any>(),
+    content: lastValue<any>(),
 
-      // Medical terms generation channel
-      medicalTermsGeneration: {
-        reducer: (current: any, update: any) => update ?? current,
+    // Core processing channels
+    tokenUsage: Annotation<any>({
+      reducer: (current: any, update: any) => {
+        if (!update) return current || { total: 0 };
+        return {
+          total: (current?.total || 0) + (update?.total || 0),
+        };
       },
+      default: () => ({ total: 0 }),
+    }),
+    featureDetection: lastValue<any>(),
+    featureDetectionResults: lastValue<any>(),
 
-      // Workflow control channels
-      documentTypeAnalysis: {
-        reducer: (current: any, update: any) => update ?? current,
+    // Multi-node results channels
+    medicalAnalysis: lastValue<any>(),
+    signals: accumArray<any>(),
+    imaging: mergeObject<any>(),
+    medications: accumArray<any>(),
+    procedures: accumArray<any>(),
+    multiNodeResults: Annotation<any>({
+      reducer: (current: any, update: any) => {
+        if (!update) return current;
+        return {
+          ...current,
+          ...update,
+          processedNodes: [
+            ...(current?.processedNodes || []),
+            ...(update?.processedNodes || []),
+          ],
+        };
       },
-      selectedProvider: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      providerMetadata: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      validationResults: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      confidence: { reducer: (current: any, update: any) => update ?? current },
-      // Errors: accumulate error arrays from all nodes
-      errors: {
-        reducer: (current: any[] | undefined, update: any[] | undefined) => {
-          if (!update || update.length === 0) return current || [];
-          return [...(current || []), ...update];
-        },
-      },
+      default: () => undefined as any,
+    }),
+    report: mergeObject<any>(),
 
-      // Progress tracking channels
-      progressCallback: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      currentStage: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      emitProgress: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      emitComplete: {
-        reducer: (current: any, update: any) => update ?? current,
-      },
-      emitError: { reducer: (current: any, update: any) => update ?? current },
-    },
+    // Additional medical section channels
+    diagnosis: accumArray<any>(),
+    performer: lastValue<any>(),
+    patient: lastValue<any>(),
+    bodyParts: accumArray<any>(),
+    ecg: accumArray<any>(),
+    echo: lastValue<any>(),
+    allergies: accumArray<any>(),
+    anesthesia: accumArray<any>(),
+    microscopic: lastValue<any>(),
+    triage: accumArray<any>(),
+    immunizations: accumArray<any>(),
+    specimens: accumArray<any>(),
+    admission: accumArray<any>(),
+    dental: lastValue<any>(),
+    tumorCharacteristics: lastValue<any>(),
+    treatmentPlan: lastValue<any>(),
+    treatmentResponse: lastValue<any>(),
+    imagingFindings: lastValue<any>(),
+    grossFindings: lastValue<any>(),
+    specialStains: accumArray<any>(),
+    socialHistory: lastValue<any>(),
+    treatments: accumArray<any>(),
+    assessment: lastValue<any>(),
+    molecular: lastValue<any>(),
+
+    // Medical terms generation channel
+    medicalTermsGeneration: lastValue<any>(),
+
+    // Workflow control channels
+    documentTypeAnalysis: lastValue<any>(),
+    selectedProvider: lastValue<any>(),
+    providerMetadata: lastValue<any>(),
+    validationResults: lastValue<any>(),
+    confidence: lastValue<any>(),
+    errors: accumArray<any>(),
+
+    // Progress tracking channels
+    progressCallback: lastValue<any>(),
+    currentStage: lastValue<any>(),
+    emitProgress: lastValue<any>(),
+    emitComplete: lastValue<any>(),
+    emitError: lastValue<any>(),
   });
+
+  // Create state graph using Annotation
+  // Use 'any' cast for workflow variable to work around strict nominal node-name typing
+  // in LangGraph v1.x — node names are validated at runtime
+  const workflow = new StateGraph(GraphState) as any;
 
   // Add essential workflow nodes with progress ranges
   workflow.addNode(
@@ -454,11 +276,8 @@ export const createUnifiedDocumentProcessingWorkflow = (
     createNodeWrapper(featureDetectionNode, { start: 60, end: 70 }),
   );
 
-  // Add new multi-node dispatcher (executes specialized nodes directly)
-  // Note: In LangGraph v0.0.26, Send API is not available, so the dispatcher
-  // executes nodes directly using the nodeRegistry instead of routing via LangGraph.
-  // Specialized nodes don't need to be registered in the workflow - they're
-  // managed by the nodeRegistry and executed within the dispatcher node.
+  // Multi-node dispatcher: executes specialized nodes via the nodeRegistry.
+  // Specialized nodes are managed by the nodeRegistry and executed within this dispatcher node.
   workflow.addNode(
     "multi_node_dispatcher",
     createNodeWrapper(multiNodeDispatcherNode, { start: 70, end: 85 }),
@@ -484,46 +303,41 @@ export const createUnifiedDocumentProcessingWorkflow = (
     createNodeWrapper(qualityGateNode, { start: 98, end: 100 }),
   );
 
-  // Define clean workflow flow
-  workflow.addEdge("input_validation" as any, "document_type_router" as any);
-  workflow.addEdge("document_type_router" as any, "provider_selection" as any);
-  workflow.addEdge("provider_selection" as any, "feature_detection" as any);
+  // Define clean workflow flow using START constant
+  workflow.addEdge(START, "input_validation");
+  workflow.addEdge("input_validation", "document_type_router");
+  workflow.addEdge("document_type_router", "provider_selection");
+  workflow.addEdge("provider_selection", "feature_detection");
 
   // Route to LangGraph-native multi-node dispatcher or end
   workflow.addConditionalEdges(
-    "feature_detection" as any,
+    "feature_detection",
     shouldProcessMedical,
     {
-      medical: "multi_node_dispatcher" as any,
+      medical: "multi_node_dispatcher",
       error: END,
     },
   );
 
   // Dispatcher uses Send API to route to specialized nodes in parallel
   // After all Send nodes complete, continue to results aggregator
-  workflow.addEdge("multi_node_dispatcher" as any, "results_aggregator" as any);
+  workflow.addEdge("multi_node_dispatcher", "results_aggregator");
 
   // After aggregation, continue to medical terms generation
-  workflow.addEdge(
-    "results_aggregator" as any,
-    "medical_terms_generation" as any,
-  );
+  workflow.addEdge("results_aggregator", "medical_terms_generation");
 
   // External validation (optional)
   workflow.addConditionalEdges(
-    "medical_terms_generation" as any,
+    "medical_terms_generation",
     shouldValidateExternally,
     {
-      validate: "external_validation" as any,
-      skip: "quality_gate" as any,
+      validate: "external_validation",
+      skip: "quality_gate",
     },
   );
 
-  workflow.addEdge("external_validation" as any, "quality_gate" as any);
-  workflow.addEdge("quality_gate" as any, END);
-
-  // Set entry point
-  workflow.setEntryPoint("input_validation" as any);
+  workflow.addEdge("external_validation", "quality_gate");
+  workflow.addEdge("quality_gate", END);
 
   // Compile the workflow
   return workflow.compile();
@@ -581,7 +395,7 @@ export async function runUnifiedDocumentProcessingWorkflow(
     const initialState: DocumentProcessingState = {
       images,
       text,
-      language: language || "English",
+      language: getLanguageEnglishName(language) || "English",
       content: text ? [{ type: "text" as const, text }] : [], // Fix content to be proper array
       metadata: {},
       tokenUsage: { total: 0 },

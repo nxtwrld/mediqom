@@ -10,7 +10,7 @@ import coreSignals from "./core.signals";
 export default {
   name: "extract_signals",
   description:
-    "Extract lab results, medical measurements, and vital signs from medical documents. Includes blood work, urinalysis, and other diagnostic test results.",
+    "Extract lab results, medical measurements, and vital signs from medical documents. Includes blood work, urinalysis, and other diagnostic test results.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -25,7 +25,7 @@ export default {
       processingNotes: {
         type: "string",
         description:
-          "Any notes about the signal extraction process or ambiguities encountered",
+          "Any notes about the signal extraction process or ambiguities encountered. Translate result to the [LANGUAGE] language if the source is in a different language.",
       },
     },
     required: ["signals", "processingConfidence"],

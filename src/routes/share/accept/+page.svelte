@@ -7,7 +7,7 @@
     import { apiGet, apiPost } from '$lib/api/client';
     import userStore, { type User } from '$lib/user';
     import { decryptString } from '$lib/encryption/passphrase';
-    import { encrypt as rsaEncrypt, pemToKey } from '$lib/encryption/rsa';
+    import { wrapKey } from '$lib/encryption/keys';
 
     type Status = 'loading' | 'processing' | 'done' | 'error' | 'needs-keys';
     let status: Status = $state('loading');
@@ -23,7 +23,8 @@
         }
 
         // Persist token across redirects (onboarding, key setup, etc.)
-        sessionStorage.setItem('pending_share_token', shareToken);
+        // Include timestamp so the account page can reject stale tokens (10 min TTL)
+        sessionStorage.setItem('pending_share_token', JSON.stringify({ token: shareToken, ts: Date.now() }));
 
         // Check if the user is logged in
         const currentUser = userStore.get() as User | null;
@@ -62,15 +63,17 @@
                 return;
             }
 
-            const recipientPubKey = await pemToKey(currentUser.publicKey, false);
-
             for (const share of pendingShares) {
                 try {
                     // Decrypt the AES key using the share token (which is the share_secret)
                     const rawAesKey = await decryptString(share.pending_encrypted_key, shareToken);
 
-                    // Re-encrypt with recipient's RSA public key
-                    const encryptedKeyForMe = await rsaEncrypt(recipientPubKey, rawAesKey);
+                    // Re-encrypt with recipient's keys (hybrid if KEM available)
+                    const encryptedKeyForMe = await wrapKey(
+                        currentUser.publicKey,
+                        (currentUser as any).kem_public_key ?? null,
+                        rawAesKey,
+                    );
 
                     // Accept the share
                     await apiPost('/v1/share/accept', {

@@ -2,6 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { auditFromEvent } from "$lib/audit/index.server";
 import type { ShareAcceptBody } from "$lib/share/types.d";
 
 function getServiceClient() {
@@ -13,10 +14,11 @@ function getServiceClient() {
  * Called by User B after decrypting the pending AES key and re-encrypting it
  * with their own RSA public key. Inserts the key and marks the share as active.
  */
-export const POST: RequestHandler = async ({
-  request,
-  locals: { safeGetSession, user },
-}) => {
+export const POST: RequestHandler = async (event) => {
+  const {
+    request,
+    locals: { safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     return error(401, { message: "Unauthorized" });
@@ -100,6 +102,8 @@ export const POST: RequestHandler = async ({
     console.error("[Share] Error updating share status:", updateError);
     return error(500, { message: "Error updating share status" });
   }
+
+  auditFromEvent(event, { action: "accept", resource_type: "share", resource_id: share_id, metadata: { document_id: share.document_id } });
 
   return json({ ok: true });
 };

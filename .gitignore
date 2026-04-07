@@ -24,3 +24,15 @@ vite.config.ts.timestamp-*
 mobile/dist
 
 gen-lang-client-0453401472-eb964eee450b.json
+
+tmp/
+
+# Playwright auth state
+tests/.auth/
+
+# Large ML model files
+static/models/*.onnx
+
+# Large ONNX Runtime binaries (copied from node_modules by viteStaticCopy)
+static/onnx/*.wasm
+static/onnx/*.mjs

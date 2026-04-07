@@ -13,6 +13,8 @@ export interface Section {
 	screenshotUrl?: string;
 	alignment: 'left' | 'right';
 	rayMapping?: SectionRayMapping;
+	linkKey?: string;
+	linkUrl?: string;
 }
 
 export const sections: Section[] = [
@@ -142,6 +144,8 @@ export const sections: Section[] = [
 		canvasColor: '#16d3dd',
 		screenshotUrl: '/www/screenshots/security.webp',
 		alignment: 'right',
+		linkKey: 'www.security.link',
+		linkUrl: '/www/en/security',
 		rayMapping: {
 			maleIcon: 'form-tablet',
 			femaleIcon: 'doctor',

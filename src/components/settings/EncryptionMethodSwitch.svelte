@@ -13,8 +13,8 @@
         authenticateWithPasskeyPRF,
         type PasskeyPRFSupport
     } from '$lib/encryption/passkey-prf';
-    import { keyToPEM } from '$lib/encryption/rsa';
-    import user, { getPrivateKeyPEM } from '$lib/user';
+    import { keyToPEM } from '$lib/encryption/keys';
+    import user, { getPrivateKeyPEM, getKemSecretKeySerialized } from '$lib/user';
     import type { User } from '$lib/user';
     import { apiFetch } from '$lib/api/client';
     import { onMount } from 'svelte';
@@ -72,6 +72,7 @@
 
     // Decrypted private key PEM (held in memory during switch)
     let privateKeyPEM: string | null = null;
+    let kemSecretKeySerialized: string | null = null;
 
     onMount(async () => {
         // Check passkey PRF support
@@ -90,6 +91,7 @@
             // First, try to get the already-decrypted private key
             // This works for convenience mode (auto-unlocked on login) and already-unlocked passkeys
             privateKeyPEM = await getPrivateKeyPEM();
+            kemSecretKeySerialized = await getKemSecretKeySerialized();
 
             if (privateKeyPEM) {
                 // Already have the key - skip verification!
@@ -123,6 +125,10 @@
                     privateKeyPEM = null;
                     return;
                 }
+                // Decrypt KEM secret key if available
+                if (currentUser.kem_secret_key) {
+                    kemSecretKeySerialized = await decryptString(currentUser.kem_secret_key, verifyPassphrase);
+                }
             } else {
                 // Passkey mode - authenticate with biometrics
                 if (!currentUser?.passkey_credential_id || !currentUser?.passkey_prf_salt || !currentUser?.privateKey) {
@@ -143,6 +149,10 @@
                     verifyError = $t('app.settings.privacy.encryption.error-verify');
                     privateKeyPEM = null;
                     return;
+                }
+                // Decrypt KEM secret key if available
+                if (currentUser.kem_secret_key) {
+                    kemSecretKeySerialized = await decryptWithPRFKey(currentUser.kem_secret_key, prfDerivedKey);
                 }
             }
 
@@ -180,6 +190,9 @@
 
             // Encrypt private key with PRF-derived key
             const encryptedPrivateKey = await encryptWithPRFKey(privateKeyPEM, result.derivedKey);
+            const encryptedKemSecretKey = kemSecretKeySerialized
+                ? await encryptWithPRFKey(kemSecretKeySerialized, result.derivedKey)
+                : undefined;
             const keyHash = await createHash(result.credential.credentialId);
 
             // Call API to update credentials
@@ -188,6 +201,7 @@
                 body: JSON.stringify({
                     newCredentials: {
                         privateKey: encryptedPrivateKey,
+                        kem_secret_key: encryptedKemSecretKey,
                         key_hash: keyHash,
                         key_derivation_method: 'passkey_prf',
                         passkey_credential_id: result.credential.credentialId,
@@ -226,6 +240,9 @@
         try {
             // Encrypt private key with new passphrase
             const encryptedPrivateKey = await encryptString(privateKeyPEM, newPassphrase);
+            const encryptedKemSecretKey = kemSecretKeySerialized
+                ? await encryptString(kemSecretKeySerialized, newPassphrase)
+                : undefined;
             const keyHash = await createHash(newPassphrase);
 
             // Call API to update credentials
@@ -234,6 +251,7 @@
                 body: JSON.stringify({
                     newCredentials: {
                         privateKey: encryptedPrivateKey,
+                        kem_secret_key: encryptedKemSecretKey,
                         key_hash: keyHash,
                         key_derivation_method: 'passphrase'
                     }
@@ -267,7 +285,7 @@
         isGeneratingRecovery = true;
 
         try {
-            recoveryData = await generateRecoveryData(privateKeyPEM);
+            recoveryData = await generateRecoveryData(privateKeyPEM, kemSecretKeySerialized);
 
             // Update recovery key in database
             const response = await apiFetch('/v1/settings/encryption', {
@@ -331,6 +349,7 @@
     function completeSwitch() {
         // Clear sensitive data from memory
         privateKeyPEM = null;
+        kemSecretKeySerialized = null;
         recoveryData = null;
         verifyPassphrase = '';
 
@@ -343,6 +362,7 @@
     function skipRecovery() {
         // Clear sensitive data from memory
         privateKeyPEM = null;
+        kemSecretKeySerialized = null;
         verifyPassphrase = '';
 
         currentStep = 'success';
@@ -354,6 +374,7 @@
     function handleClose() {
         // Clear sensitive data
         privateKeyPEM = null;
+        kemSecretKeySerialized = null;
         recoveryData = null;
         verifyPassphrase = '';
 

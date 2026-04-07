@@ -11,7 +11,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_echo_information",
   description:
-    "Extract all echocardiographic findings, cardiac measurements, ventricular function, valve assessments, and ultrasound interpretations from medical documents.",
+    "Extract all echocardiographic findings, cardiac measurements, ventricular function, valve assessments, and ultrasound interpretations from medical documents.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {
@@ -45,27 +45,27 @@ export default {
             properties: {
               lvedd: {
                 type: "number",
-                description: "Left ventricular end-diastolic diameter (mm)",
+                description: "Left ventricular end-diastolic diameter (mm). ONLY populate if explicitly stated in the document.",
               },
               lvesd: {
                 type: "number",
-                description: "Left ventricular end-systolic diameter (mm)",
+                description: "Left ventricular end-systolic diameter (mm). ONLY populate if explicitly stated in the document.",
               },
               lvpwt: {
                 type: "number",
-                description: "Left ventricular posterior wall thickness (mm)",
+                description: "Left ventricular posterior wall thickness (mm). ONLY populate if explicitly stated in the document.",
               },
               ivst: {
                 type: "number",
-                description: "Interventricular septal thickness (mm)",
+                description: "Interventricular septal thickness (mm). ONLY populate if explicitly stated in the document.",
               },
               lvedv: {
                 type: "number",
-                description: "Left ventricular end-diastolic volume (mL)",
+                description: "Left ventricular end-diastolic volume (mL). ONLY populate if explicitly stated in the document.",
               },
               lvesv: {
                 type: "number",
-                description: "Left ventricular end-systolic volume (mL)",
+                description: "Left ventricular end-systolic volume (mL). ONLY populate if explicitly stated in the document.",
               },
             },
           },
@@ -74,7 +74,7 @@ export default {
             properties: {
               ejectionFraction: {
                 type: "number",
-                description: "Left ventricular ejection fraction (%)",
+                description: "Left ventricular ejection fraction (%). ONLY populate if explicitly stated in the document.",
               },
               efMethod: {
                 type: "string",
@@ -128,27 +128,27 @@ export default {
               },
               eVelocity: {
                 type: "number",
-                description: "Mitral E velocity (m/s)",
+                description: "Mitral E velocity (m/s). ONLY populate if explicitly stated in the document.",
               },
               aVelocity: {
                 type: "number",
-                description: "Mitral A velocity (m/s)",
+                description: "Mitral A velocity (m/s). ONLY populate if explicitly stated in the document.",
               },
               eaRatio: {
                 type: "number",
-                description: "E/A ratio",
+                description: "E/A ratio. ONLY populate if explicitly stated in the document.",
               },
               ePrimeVelocity: {
                 type: "number",
-                description: "Tissue Doppler e' velocity (cm/s)",
+                description: "Tissue Doppler e' velocity (cm/s). ONLY populate if explicitly stated in the document.",
               },
               eeRatio: {
                 type: "number",
-                description: "E/e' ratio",
+                description: "E/e' ratio. ONLY populate if explicitly stated in the document.",
               },
               decelerationTime: {
                 type: "number",
-                description: "Deceleration time (ms)",
+                description: "Deceleration time (ms). ONLY populate if explicitly stated in the document.",
               },
             },
           },
@@ -179,11 +179,11 @@ export default {
           },
           tapse: {
             type: "number",
-            description: "Tricuspid annular plane systolic excursion (mm)",
+            description: "Tricuspid annular plane systolic excursion (mm). ONLY populate if explicitly stated in the document.",
           },
           rvsp: {
             type: "number",
-            description: "Right ventricular systolic pressure (mmHg)",
+            description: "Right ventricular systolic pressure (mmHg). ONLY populate if explicitly stated in the document.",
           },
         },
       },
@@ -202,11 +202,11 @@ export default {
           },
           volume: {
             type: "number",
-            description: "Left atrial volume (mL)",
+            description: "Left atrial volume (mL). ONLY populate if explicitly stated in the document.",
           },
           volumeIndex: {
             type: "number",
-            description: "Left atrial volume index (mL/m²)",
+            description: "Left atrial volume index (mL/m²). ONLY populate if explicitly stated in the document.",
           },
         },
       },
@@ -243,11 +243,11 @@ export default {
               },
               meanGradient: {
                 type: "number",
-                description: "Mean mitral gradient (mmHg)",
+                description: "Mean mitral gradient (mmHg). ONLY populate if explicitly stated in the document.",
               },
               valveArea: {
                 type: "number",
-                description: "Mitral valve area (cm²)",
+                description: "Mitral valve area (cm²). ONLY populate if explicitly stated in the document.",
               },
               morphology: {
                 type: "string",
@@ -270,15 +270,15 @@ export default {
               },
               peakVelocity: {
                 type: "number",
-                description: "Peak aortic velocity (m/s)",
+                description: "Peak aortic velocity (m/s). ONLY populate if explicitly stated in the document.",
               },
               meanGradient: {
                 type: "number",
-                description: "Mean aortic gradient (mmHg)",
+                description: "Mean aortic gradient (mmHg). ONLY populate if explicitly stated in the document.",
               },
               valveArea: {
                 type: "number",
-                description: "Aortic valve area (cm²)",
+                description: "Aortic valve area (cm²). ONLY populate if explicitly stated in the document.",
               },
               morphology: {
                 type: "string",
@@ -296,7 +296,7 @@ export default {
               },
               peakVelocity: {
                 type: "number",
-                description: "Peak tricuspid regurgitation velocity (m/s)",
+                description: "Peak tricuspid regurgitation velocity (m/s). ONLY populate if explicitly stated in the document.",
               },
             },
           },
@@ -335,11 +335,11 @@ export default {
         properties: {
           root: {
             type: "number",
-            description: "Aortic root dimension (mm)",
+            description: "Aortic root dimension (mm). ONLY populate if explicitly stated in the document.",
           },
           ascendingAorta: {
             type: "number",
-            description: "Ascending aorta dimension (mm)",
+            description: "Ascending aorta dimension (mm). ONLY populate if explicitly stated in the document.",
           },
           abnormalities: {
             type: "array",

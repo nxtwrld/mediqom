@@ -155,8 +155,6 @@ export const GET: RequestHandler = async ({
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache, no-store, must-revalidate",
         Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Cache-Control",
       },
     });
   } catch (err) {

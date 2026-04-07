@@ -16,7 +16,8 @@ import { PROFILE_NEW_ID } from "$lib/profiles/tools";
 import type { Profile } from "$lib/types.d";
 import type { Assessment, ReportAnalysis, ImportJob } from "./types";
 import { importKey, decrypt as decryptAES } from "$lib/encryption/aes";
-import { decrypt as decryptRSA } from "$lib/encryption/rsa";
+import { unwrapKey } from "$lib/encryption/keys";
+import { pemToKey } from "$lib/encryption/rsa";
 import { browser } from "$app/environment";
 import type { User } from "@supabase/supabase-js";
 import { deriveSections } from "$lib/documents/sections";
@@ -95,8 +96,9 @@ export async function decryptJobResults(
       throw new Error("User private key required to decrypt job results");
     }
 
-    const jobKeyExported = await decryptRSA(
+    const jobKeyExported = await unwrapKey(
       userPrivateKey,
+      null, // Job keys are always RSA-only wrapped (server-side)
       job.result_encryption_key!,
     );
     const jobKey = await importKey(jobKeyExported);
@@ -189,9 +191,11 @@ export async function assembleDocuments(
             let thumbnail = docPages[0]?.thumbnail || "";
             if (!thumbnail) {
               try {
-                const { processPDF } = await import("$lib/files/pdf");
-                const processedPdf = await processPDF(pdfBuffer);
-                thumbnail = processedPdf.pages[0]?.thumbnail || "";
+                const { loadPdfDocument, makeThumb } = await import("$lib/files/pdf");
+                const pdfDoc = await loadPdfDocument({ data: pdfBuffer.slice(0) });
+                const firstDocPage = doc.pages[0] || 1;
+                const page = await pdfDoc.getPage(firstDocPage);
+                thumbnail = await makeThumb(page);
               } catch {
                 /* skip thumbnail generation */
               }
@@ -333,6 +337,41 @@ export async function assembleDocuments(
         }
       }
 
+      // Collect embedded images from assessment pages for this document
+      const embeddedAttachments: {
+        thumbnail: string;
+        type: string;
+        file: string;
+        path: string;
+        url: string;
+        embedded: boolean;
+        imageId: string;
+      }[] = [];
+      const docPages = assessment.pages.filter((p) =>
+        doc.pages.includes(p.page),
+      );
+      let imgIdx = 0;
+      for (const page of docPages) {
+        if (page.images?.length) {
+          for (const img of page.images) {
+            if (img.data) {
+              embeddedAttachments.push({
+                thumbnail: img.data,
+                type: "image/jpeg",
+                file: img.data.includes(",")
+                  ? img.data.split(",")[1]
+                  : img.data,
+                path: "",
+                url: "",
+                embedded: true,
+                imageId: `img-${imgIdx}`,
+              });
+              imgIdx++;
+            }
+          }
+        }
+      }
+
       const content: any = {
         tags: analysis?.tags || [],
         title: reportData.title || doc.title,
@@ -346,6 +385,16 @@ export async function assembleDocuments(
         ...reportData,
       };
 
+      // Insert embedded image references into report content
+      if (embeddedAttachments.length > 0) {
+        const imgMarkdown = embeddedAttachments
+          .map((img) => `\n![Embedded image](embedded:${img.imageId})`)
+          .join("\n");
+        const section = "\n\n---\n\n### Embedded Images\n" + imgMarkdown;
+        if (content.content) content.content += section;
+        if (content.localizedContent) content.localizedContent += section;
+      }
+
       const importDoc = {
         title: reportData.title || doc.title || `Document ${ai + 1}-${di + 1}`,
         date: reportData.date || doc.date || new Date().toISOString(),
@@ -356,7 +405,10 @@ export async function assembleDocuments(
         state: DocumentState.PROCESSED,
         pages: assessment.pages.filter((p) => doc.pages.includes(p.page)),
         content,
-        attachments: attachment ? [attachment] : [],
+        attachments: [
+          ...(attachment ? [attachment] : []),
+          ...embeddedAttachments,
+        ],
         type: (originalFile?.type || "application/pdf") as any,
         files: originalFile ? [originalFile] : ([] as any),
         task: undefined as any,

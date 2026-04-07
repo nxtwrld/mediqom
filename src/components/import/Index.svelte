@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import { files, createTasks } from '$lib/files';
+    import { files, createTasks, detectPagesLayout } from '$lib/files';
     import { DocumentState, type Task, TaskState, type Document  } from '$lib/import';
     import { DocumentType, type Document as SavedDocument } from '$lib/documents/types.d';
     import  user, { type User } from '$lib/user';
@@ -12,7 +12,7 @@
     import SelectProfile from './SelectProfile.svelte';
     import { play } from '$components/ui/Sounds.svelte';
     import type { Profile } from '$lib/types.d';
-    import { mergeNamesOnReports } from '$lib/profiles/tools';
+    import { mergeNamesOnReports, PROFILE_NEW_ID } from '$lib/profiles/tools';
     import ImportDocument from './ImportDocument.svelte';
     import ImportProfile from './ImportProfile.svelte';
     import ScreenOverlay from '$components/ui/ScreenOverlay.svelte';
@@ -21,7 +21,7 @@
     import DualStageProgress from './DualStageProgress.svelte';
 
     // Job-based import
-    import { createJob, processJob, fetchJob, deleteJob } from '$lib/import/job-manager';
+    import { createJob, processJob, fetchJob, deleteJob, updateLayoutDetections } from '$lib/import/job-manager';
     import { assembleDocuments, saveDocuments, decryptJobResults } from '$lib/import/finalizer';
     import { getFiles as getCachedFiles, clearFiles } from '$lib/import/file-cache';
     import type { ImportJob } from '$lib/import/types';
@@ -165,7 +165,7 @@
                 await processJob(id, (event) => {
                     if (event.stage.includes('extract') || event.stage === 'initialization') {
                         currentStage = 'extract';
-                    } else if (event.stage.includes('analyz')) {
+                    } else if (event.stage === 'documents_detected' || event.stage.includes('analyz') || event.stage.startsWith('analysis_doc_')) {
                         currentStage = 'analyze';
                     }
                     stageProgress = event.progress;
@@ -225,32 +225,50 @@
 
             // Create persistent job — use task files (possibly decrypted clones) for caching
             const filesToCache = newTasks.flatMap(t => t.files as File[]);
-            const id = await createJob(newTasks, filesToCache, language);
-            currentJobId = id;
+            const job = await createJob(newTasks, filesToCache, language);
+            currentJobId = job.id;
 
             // Process with SSE + polling fallback
-            const completedJob = await processJob(id, (event) => {
+            // Layout detection is triggered reactively by the server's ocr_complete SSE event
+            const completedJob = await processJob(job.id, (event) => {
+                if (event.stage === 'ocr_complete') {
+                    const pages = event.data?.pagesWithImages;
+                    console.log(`[Import] ocr_complete: fileIndex=${event.data?.fileIndex}, pagesWithImages=[${pages?.join(', ') ?? 'none'}]`);
+
+                    if (pages?.length > 0) {
+                        const { fileIndex, pagesWithImages } = event.data;
+                        const task = newTasks[fileIndex];
+                        if (task) {
+                            detectPagesLayout(task, pagesWithImages).then((detections) => {
+                                console.log(`[LayoutDetection] Got ${detections.length} detection(s) for fileIndex=${fileIndex}`);
+                                if (detections.length > 0) {
+                                    updateLayoutDetections(job.id, newTasks);
+                                }
+                            }).catch((err) => console.warn('[LayoutDetection] Detection failed:', err));
+                        } else {
+                            console.warn(`[Import] ocr_complete: no task at fileIndex=${fileIndex} (have ${newTasks.length} tasks)`);
+                        }
+                    }
+                }
+
                 if (event.stage.includes('extract') || event.stage === 'initialization') {
                     currentStage = 'extract';
-                } else if (event.stage.includes('analyz')) {
+                } else if (event.stage === 'documents_detected') {
+                    currentStage = 'analyze';
+                } else if (event.stage.includes('analyz') || event.stage.startsWith('analysis_doc_')) {
                     currentStage = 'analyze';
                 }
                 stageProgress = event.progress;
             });
 
             // Assemble documents from results
-            const cachedFiles = await getCachedFiles(id);
+            const cachedFiles = await getCachedFiles(job.id);
 
             // Use decryptJobResults to handle both encrypted and plaintext jobs
             const { extraction, analysis } = await decryptJobResults(
                 completedJob,
                 user.keyPair?.privateKey ?? undefined,
             );
-
-            console.log('Normal flow - extraction:', extraction);
-            console.log('Normal flow - analysis:', analysis);
-            console.log('Normal flow - extraction type:', Array.isArray(extraction));
-            console.log('Normal flow - analysis type:', Array.isArray(analysis));
 
             const documents = await assembleDocuments(
                 extraction,
@@ -314,6 +332,24 @@
     function removeFiles(files: File[]) {
         currentFiles = [...currentFiles.filter(file => !files.includes(file))];
         processingFiles = [...processingFiles.filter(file => !files.includes(file))];
+    }
+
+    function reassignDocumentProfile(doc: Document, newProfile: Profile) {
+        // Remove doc from its current group
+        let sourceGroup = byProfileDetected.find(g => g.reports.includes(doc));
+        if (!sourceGroup) return;
+        sourceGroup.reports = sourceGroup.reports.filter(d => d !== doc);
+
+        // Find or create the target profile group
+        let targetGroup = byProfileDetected.find(g => g.profile.id === newProfile.id);
+        if (!targetGroup) {
+            targetGroup = { profile: newProfile, reports: [] };
+            byProfileDetected.push(targetGroup);
+        }
+        targetGroup.reports.push(doc);
+
+        // Remove empty groups
+        byProfileDetected = byProfileDetected.filter(g => g.reports.length > 0);
     }
 
     let savingDocumentsInProgress: boolean = $state(false);
@@ -388,7 +424,7 @@
                     <div class="report-import">
                         <ImportDocument {doc} onclick={() => previewReport = doc} onremove={() => removeItem('results', doc)} />
                         {#key JSON.stringify(profileDetected.profile)}
-                        <SelectProfile contact={profileDetected.profile} bind:selected={profileDetected.profile}  />
+                        <SelectProfile contact={profileDetected.profile} selected={profileDetected.profile} onchange={(newProfile) => reassignDocumentProfile(doc, newProfile)} />
                         {/key}
                     </div>
                 {/each}

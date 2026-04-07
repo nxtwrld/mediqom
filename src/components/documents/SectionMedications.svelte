@@ -360,7 +360,7 @@
         {/if}
         
         <!-- Adherence Assessment -->
-        {#if !isEmpty(adherenceAssessment)}
+        {#if adherenceAssessment && !isEmpty(adherenceAssessment)}
             
                 <h4 class="section-title-sub">{$t('report.adherence-assessment')}</h4>
                 <ul class="list-items">

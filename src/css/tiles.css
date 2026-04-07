@@ -1,6 +1,6 @@
 .tiles {
   --gap: 0.8rem;
-  --background-color: var(--color-gray-300);
+  --background-color: var(--color-background);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: var(--gap);

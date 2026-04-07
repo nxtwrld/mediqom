@@ -225,10 +225,10 @@
                 if (focusedName && isFocused) g.raise();
 
                 g.attr('opacity', isFocused ? 1 : 0.5)
-                 .style('filter', !isFocused ? 'saturate(50%)' : null);
+                 .style('filter', !isFocused ? 'saturate(50%)' : (null as unknown as string));
 
                 g.select<SVGPathElement>('path.series-line')
-                 .style('stroke-width', focusedName && isFocused ? '6px' : null);
+                 .style('stroke-width', focusedName && isFocused ? '6px' : (null as unknown as string));
 
                 g.select<SVGPathElement>('path.series-band')
                  .attr('opacity', isFocused ? 0.15 : 0.04);

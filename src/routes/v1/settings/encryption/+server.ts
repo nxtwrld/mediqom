@@ -3,6 +3,7 @@ import type { RequestHandler } from "./$types";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 export interface EncryptionUpdateRequest {
   newCredentials: {
@@ -24,7 +25,8 @@ export interface EncryptionUpdateRequest {
  * encryption methods. The client must first verify the current credentials
  * and re-encrypt the private key with the new method before calling this.
  */
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async (event) => {
+  const { request, locals } = event;
   const { safeGetSession, user } = locals;
   const { session } = await safeGetSession();
 
@@ -114,21 +116,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       error(500, { message: "Failed to update encryption method" });
     }
 
-    // Log the encryption method change
-    try {
-      await supabase.from("recovery_attempts").insert({
-        user_id: profile.id,
-        attempt_type: "encryption_method_change",
-        success: true,
-        metadata: {
-          new_method: newCredentials.key_derivation_method,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } catch (logErr) {
-      // Non-critical, just log
-      console.warn("Failed to log encryption method change:", logErr);
-    }
+    // Audit log the encryption method change
+    auditFromEvent(event, {
+      action: "encrypt_change",
+      resource_type: "encryption",
+      metadata: { new_method: newCredentials.key_derivation_method },
+    });
 
     return json({
       success: true,

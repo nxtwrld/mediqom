@@ -1,10 +1,12 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { auditFromEvent } from "$lib/audit/index.server";
 
-export const GET: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const GET: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
@@ -26,6 +28,8 @@ export const GET: RequestHandler = async ({
     return error(500, { message: "Error loading documents" });
   }
 
+  auditFromEvent(event, { action: "read", resource_type: "document", resource_id: params.did, metadata: { profile_id: params.pid } });
+
   return json(documentsLoad);
 };
 
@@ -34,11 +38,12 @@ export const GET: RequestHandler = async ({
  * @param param0
  * @returns
  */
-export const PUT: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const PUT: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
@@ -90,6 +95,8 @@ export const PUT: RequestHandler = async ({
   }
   console.log("Document udpated", documentUpdate);
 
+  auditFromEvent(event, { action: "update", resource_type: "document", resource_id: params.did, metadata: { profile_id: params.pid } });
+
   return json(documentUpdate);
 };
 
@@ -99,15 +106,29 @@ export const PUT: RequestHandler = async ({
  * @returns
  */
 
-export const DELETE: RequestHandler = async ({
-  request,
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const DELETE: RequestHandler = async (event) => {
+  const {
+    request,
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
 
   if (!session || !user) {
     return error(401, { message: "Unauthorized" });
+  }
+
+  // Verify the user owns the document key before allowing delete
+  const { data: documentKeys, error: documentKeysError } = await supabase
+    .from("keys")
+    .select("id")
+    .eq("document_id", params.did)
+    .eq("owner_id", params.pid)
+    .eq("user_id", user.id)
+    .single();
+
+  if (documentKeysError || !documentKeys) {
+    return error(403, { message: "Forbidden" });
   }
 
   const { data: documentDelete, error: documentDeleteError } = await supabase
@@ -120,6 +141,8 @@ export const DELETE: RequestHandler = async ({
     console.error("Error deleting document", documentDeleteError);
     return error(500, { message: "Error deleting document" });
   }
+
+  auditFromEvent(event, { action: "delete", resource_type: "document", resource_id: params.did, metadata: { profile_id: params.pid } });
 
   return json(documentDelete);
 };

@@ -4,12 +4,14 @@ import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { verifyRecoveryKeyHash } from "$lib/encryption/recovery";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 /**
  * Update user credentials after recovery
  * POST /v1/recover/update
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
+  const { request } = event;
   const { email, recoveryKey, newCredentials } = await request.json();
 
   if (!email || !recoveryKey || !newCredentials) {
@@ -82,11 +84,14 @@ export const POST: RequestHandler = async ({ request }) => {
       error(500, { message: "Failed to update credentials" });
     }
 
-    // Log the recovery attempt
-    await supabase.from("recovery_attempts").insert({
-      user_id: profile.id,
-      attempt_type: "passphrase_reset",
-      success: true,
+    // Audit log the recovery
+    auditFromEvent(event, {
+      action: "recover",
+      resource_type: "auth",
+      user_id: null,
+      actor_type: "anonymous",
+      actor_email: email,
+      metadata: { step: "update", new_method: newCredentials.key_derivation_method },
     });
 
     return json({ success: true });

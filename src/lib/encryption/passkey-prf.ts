@@ -197,7 +197,7 @@ export async function createPasskeyWithPRF(
     extensions: {
       prf: {
         eval: {
-          first: prfInput,
+          first: prfInput as BufferSource,
         },
       },
     },
@@ -262,7 +262,7 @@ export async function authenticateWithPasskeyPRF(
     allowCredentials: [
       {
         type: "public-key",
-        id: base64ToUint8Array(credentialId),
+        id: base64ToUint8Array(credentialId) as BufferSource,
       },
     ],
     userVerification: "required",
@@ -270,7 +270,7 @@ export async function authenticateWithPasskeyPRF(
     extensions: {
       prf: {
         eval: {
-          first: prfInput,
+          first: prfInput as BufferSource,
         },
       },
     },
@@ -321,7 +321,7 @@ export async function authenticateWithDiscoverablePasskey(
   for (const cred of storedCredentials) {
     const salt = base64ToUint8Array(cred.prfSalt);
     const prfInput = createPRFInput(salt);
-    evalByCredential[cred.credentialId] = { first: prfInput };
+    evalByCredential[cred.credentialId] = { first: prfInput as BufferSource };
     saltMap.set(cred.credentialId, salt);
   }
 
@@ -330,7 +330,7 @@ export async function authenticateWithDiscoverablePasskey(
     rpId: window.location.hostname,
     allowCredentials: storedCredentials.map((cred) => ({
       type: "public-key" as const,
-      id: base64ToUint8Array(cred.credentialId),
+      id: base64ToUint8Array(cred.credentialId) as BufferSource,
     })),
     userVerification: "required",
     timeout: 60000,

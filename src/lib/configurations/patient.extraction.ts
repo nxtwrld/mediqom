@@ -9,7 +9,7 @@ import corePatient from "./core.patient";
 export default {
   name: "extract_patient",
   description:
-    "Extract patient information from medical documents including demographics and basic patient data while respecting privacy requirements.",
+    "Extract patient information from medical documents including demographics and basic patient data while respecting privacy requirements.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

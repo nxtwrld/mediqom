@@ -197,10 +197,12 @@
         transition: max-height 0.25s ease;
         min-width: 10rem;
         white-space: nowrap;
+        visibility: hidden;
     }
 
     .tools-wrapper.-open .tools-popup {
         max-height: 20rem;
+        visibility: visible;
     }
 
     .tools-popup button {

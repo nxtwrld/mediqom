@@ -1,16 +1,10 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { ChatOpenAI } from "@langchain/openai";
-import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { HumanMessage } from "@langchain/core/messages";
 import type { Extractor } from "$lib/textract";
-//import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
-//import { type RunnableConfig, RunnableWithMessageHistory } from "@langchain/core/runnables";
-//import { ChatMessageHistory } from "@langchain/community/stores/message/in_memory";
 import { OPENAI_API_KEY } from "$env/static/private";
 import diagnosis from "./diagnosis.json";
 import gp_report from "./gp_report.json";
-// Instantiate the parser
-const parser = new JsonOutputFunctionsParser();
 
 const schemas: {
   [key: string]: Extractor;
@@ -98,15 +92,12 @@ export const POST: RequestHandler = async ({ request }) => {
     }
   }
 
-  const runnable = model
-    .bind({
-      functions: [data.schema],
-      function_call: { name: "extractor" },
-    })
-    .pipe(parser);
+  const structuredModel = model.withStructuredOutput(data.schema.parameters, {
+    name: data.schema.name || "extractor",
+  });
 
-  // Invoke the runnable with an input
-  const result = await runnable.invoke([new HumanMessage(data.text)]);
+  // Invoke the structured model with an input
+  const result = await structuredModel.invoke([new HumanMessage(data.text)]);
 
   //console.log({ result });
 

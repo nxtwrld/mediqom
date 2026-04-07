@@ -13,7 +13,7 @@ import {
   decrypt as decryptAES,
   prepareKey,
 } from "$lib/encryption/aes";
-import { pemToKey, encrypt as encryptRSA } from "$lib/encryption/rsa";
+import { wrapKey } from "$lib/encryption/keys";
 import { profile, profiles } from "$lib/profiles";
 import Errors from "$lib/Errors";
 import type { Profile } from "$lib/types.d";
@@ -518,12 +518,14 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
       path: attachmentsUrls[i].path,
       type: a.type,
       thumbnail: a.thumbnail, // Preserve thumbnail from original attachment
+      ...(a.embedded && { embedded: a.embedded, imageId: a.imageId }),
     })),
     ...attachmentsWithoutFiles.map((a: Attachment) => ({
       url: a.url,
       path: a.path,
       type: a.type,
       thumbnail: a.thumbnail, // Preserve thumbnail from existing attachment
+      ...(a.embedded && { embedded: a.embedded, imageId: a.imageId }),
     })),
   ];
   logger.documents.info("Add document", { document });
@@ -776,9 +778,7 @@ export async function encryptKeyForProfile(
     throw new Error(Errors.PublicKeyNotFound);
   }
 
-  const profile_key = await pemToKey(profile.publicKey);
-  const keyEncrypted = await encryptRSA(profile_key, exportedKey);
-  return keyEncrypted;
+  return wrapKey(profile.publicKey, (profile as any).kem_public_key ?? null, exportedKey);
 }
 
 export async function decrypt(

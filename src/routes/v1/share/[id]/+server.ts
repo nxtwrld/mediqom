@@ -2,6 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
+import { auditFromEvent } from "$lib/audit/index.server";
 
 function getServiceClient() {
   return createClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -11,10 +12,11 @@ function getServiceClient() {
  * DELETE /v1/share/[id]
  * Revoke a document share. Removes the recipient's key and marks the share as revoked.
  */
-export const DELETE: RequestHandler = async ({
-  params,
-  locals: { supabase, safeGetSession, user },
-}) => {
+export const DELETE: RequestHandler = async (event) => {
+  const {
+    params,
+    locals: { supabase, safeGetSession, user },
+  } = event;
   const { session } = await safeGetSession();
   if (!session || !user) {
     return error(401, { message: "Unauthorized" });
@@ -90,6 +92,8 @@ export const DELETE: RequestHandler = async ({
       }
     }
   }
+
+  auditFromEvent(event, { action: "revoke", resource_type: "share", resource_id: params.id, metadata: { document_id: share.document_id } });
 
   return json({ ok: true });
 };

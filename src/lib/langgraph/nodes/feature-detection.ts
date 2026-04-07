@@ -6,6 +6,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { log } from "$lib/logging/logger";
 import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import { recordWorkflowStep } from "$lib/debug/workflow-recorder";
+import { updateLanguage } from "$lib/ai/schema";
 
 export const featureDetectionNode = async (
   state: DocumentProcessingState,
@@ -87,9 +88,15 @@ export const featureDetectionNode = async (
     // Initialize token usage tracking
     const tokenUsage = { ...state.tokenUsage };
 
+    // Replace [LANGUAGE] placeholders in schema descriptions
+    const localizedSchema = updateLanguage(
+      JSON.parse(JSON.stringify(schema)),
+      state.language || "English",
+    ) as FunctionDefinition;
+
     const result = await fetchGptEnhanced(
       state.content,
-      schema,
+      localizedSchema,
       tokenUsage,
       state.language || "English",
       "feature_detection",
@@ -379,7 +386,9 @@ export const featureDetectionNode = async (
     const outputState = {
       featureDetection: featureDetectionResult,
       featureDetectionResults: aiFeatureDetectionResults,
-      language: aiFeatureDetectionResults.language,
+      // Do NOT overwrite state.language — it's the user's TARGET language (e.g., "Czech"),
+      // not the source document language. The detected document language is stored in
+      // featureDetectionResults.language for reference.
       tokenUsage,
     };
 

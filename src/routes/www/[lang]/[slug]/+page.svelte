@@ -81,7 +81,11 @@
 				// Show error in place of diagram
 				element.classList.remove('processed');
 				element.classList.add('mermaid-error');
-				                                element.innerHTML = `<div class="error">Failed to render diagram: ${(err as Error).message}</div>`;
+				const errorDiv = document.createElement('div');
+				errorDiv.className = 'error';
+				errorDiv.textContent = `Failed to render diagram: ${(err as Error).message}`;
+				element.textContent = '';
+				element.appendChild(errorDiv);
 			}
 			
 			// Small delay between renders to ensure proper cleanup

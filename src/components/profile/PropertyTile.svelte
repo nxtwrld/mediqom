@@ -197,7 +197,7 @@
         display: flex;
         flex-direction: column;
         gap: .5rem;
-        padding: .1rem .5rem .5rem;
+        padding: .3rem .5rem .5rem;
         margin-top: .4rem;
         top: 0;
         left: 0;

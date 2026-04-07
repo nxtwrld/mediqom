@@ -4,8 +4,10 @@ import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { SUPABASE_SERVICE_ROLE_KEY } from "$env/static/private";
 import { deleteUserStorage } from "$lib/storage/cleanup";
+import { auditFromEvent } from "$lib/audit/index.server";
 
-export const DELETE: RequestHandler = async ({ locals }) => {
+export const DELETE: RequestHandler = async (event) => {
+  const { locals } = event;
   const { session, user } = await locals.safeGetSession();
 
   if (!session || !user) {
@@ -34,6 +36,8 @@ export const DELETE: RequestHandler = async ({ locals }) => {
         { status: 500 },
       );
     }
+
+    auditFromEvent(event, { action: "delete", resource_type: "account" });
 
     return json({ success: true, message: "Account deleted successfully" });
   } catch (error) {

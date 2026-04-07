@@ -14,7 +14,7 @@ import coreSignals from "./core.signals";
 export default {
   name: "extract_assessment",
   description:
-    "Extract comprehensive clinical assessment and specialist evaluation including clinical impressions, differential diagnoses, and professional assessments.",
+    "Extract comprehensive clinical assessment and specialist evaluation including clinical impressions, differential diagnoses, and professional assessments.\n\nCRITICAL: ONLY extract information explicitly stated in the document. Do NOT infer, guess, or fabricate values. If a field is not mentioned, omit it entirely.",
   parameters: {
     type: "object",
     properties: {

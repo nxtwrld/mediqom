@@ -2,7 +2,6 @@
 // Backwards compatible with existing GPT implementation
 
 import { ChatOpenAI } from "@langchain/openai";
-import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import type { Content, TokenUsage } from "$lib/ai/types.d";
@@ -112,7 +111,6 @@ export class OpenAIProvider {
       maxTokens: number;
     },
   ): Promise<any> {
-    const parser = new JsonOutputFunctionsParser();
     const language = options.language || "English";
 
     console.log(`🤖 OpenAI Request (${options.modelId}) Language:`, language);
@@ -139,22 +137,19 @@ export class OpenAIProvider {
       ],
     });
 
-    const runnable = model
-      .bind({
-        functions: [schema],
-        function_call: { name: "extractor" },
-      })
-      .pipe(parser);
+    const structuredModel = model.withStructuredOutput(schema.parameters, {
+      name: schema.name || "extractor",
+    });
 
     const systemMessage = new SystemMessage({
       content: this.createSystemMessage(language),
     });
 
     const humanMessage = new HumanMessage({
-      content,
+      content: content as any,
     });
 
-    return await runnable.invoke([systemMessage, humanMessage]);
+    return await structuredModel.invoke([systemMessage, humanMessage]);
   }
 
   /**
