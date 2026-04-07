@@ -97,7 +97,11 @@
           "When a user asks about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
           "Example: If asked 'What medications am I taking?', use the queryMedicalHistory tool with category: 'medications'",
-          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools.",
+          "When discussing a specific medical item (diagnosis, medication, etc.), check if related information from other documents might be relevant. If the user asks about other conditions or problems, use searchDocuments to find relevant records.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If the user asks about a different type of medical data (e.g. asking about medications while you only have diagnosis data), use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When the conversation suggests the user has additional medical concerns or when you identify that related medical data could improve your response, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
@@ -230,7 +234,11 @@
           "You have access to medical data tools. USE THESE TOOLS when asked about {profileName}'s medical information.",
           "When asked about medications, conditions, test results, or medical history, you MUST request the appropriate tool.",
           "Do not say 'I don't have access' or 'no information available' without first attempting to use the relevant tools.",
-          "Never answer questions about {profileName}'s specific conditions, medications, procedures, or history from general knowledge alone — always verify against their records using the available tools."
+          "Never answer questions about {profileName}'s specific conditions, medications, procedures, or history from general knowledge alone — always verify against their records using the available tools.",
+          "When discussing a specific medical item, check if related information from other documents might be relevant. If asked about other conditions or problems, use searchDocuments to find relevant records.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If asked about a different type of medical data, use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When the conversation suggests additional medical concerns or when related medical data could improve your response, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
@@ -362,7 +370,11 @@
           "When analyzing patient data, medications, conditions, or test results, you MUST request the appropriate tool.",
           "Do not state 'no data available' without first attempting to use the relevant tools.",
           "Example: For medication review, use queryMedicalHistory with category: 'medications'",
-          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools."
+          "Never answer questions about the patient's specific conditions, medications, procedures, or history from general knowledge alone — always verify against the patient's records using the available tools.",
+          "When discussing a specific medical item, check if related information from other documents might be relevant. Use searchDocuments to find related records when the clinical picture would benefit from additional context.",
+          "If you reference a document ID but don't have its full content in your context, use getDocumentById to retrieve it before answering.",
+          "The pre-fetched data provided may only cover one category. If clinical analysis requires a different type of medical data, use the appropriate tool to fetch it.",
+          "PROACTIVE DATA RETRIEVAL: When clinical context suggests additional medical data could improve your analysis, generate a toolCall to search for it. Do not wait for the user to explicitly request it."
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",

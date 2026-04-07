@@ -2,6 +2,7 @@ import { get } from "svelte/store";
 import { chatStore, chatActions, createMessage, isOpen, resolveChatMode } from "./store";
 import ChatClientService from "./client-service";
 import AnatomyIntegration from "./anatomy-integration";
+import { getDocument } from "$lib/documents";
 import type {
   ChatMessage,
   ChatContext,
@@ -429,7 +430,7 @@ export class ChatManager {
     // Build rich context block embedding the specific item, its source document, and pre-fetched records
     const itemJson = data.data ? JSON.stringify(data.data, null, 2) : null;
     const sourceRef = data.documentId
-      ? `Source document: ${data.documentTitle || data.documentId} (id: ${data.documentId})`
+      ? `Source document: ${data.documentTitle || data.documentId} (id: ${data.documentId}). The full document content is loaded in your context — refer to it for additional diagnoses, medications, lab results, and other findings from this same visit/report.`
       : null;
 
     const contextBlock = [
@@ -454,6 +455,22 @@ export class ChatManager {
             },
           },
         });
+      }
+
+      // Load full source document content so AI can see all sections (diagnoses, meds, labs, etc.)
+      const docContent = await this.loadDocumentContent(data.documentId);
+      if (docContent) {
+        const latestState = get(chatStore);
+        if (latestState.context) {
+          const updatedDocsContent = new Map(latestState.context.pageContext.documentsContent || []);
+          updatedDocsContent.set(data.documentId, docContent);
+          chatActions.updateContext({
+            pageContext: {
+              ...latestState.context.pageContext,
+              documentsContent: updatedDocsContent,
+            },
+          });
+        }
       }
     }
 
@@ -536,6 +553,34 @@ export class ChatManager {
         return `Tell me more about this data`;
       default:
         return `Tell me more about this`;
+    }
+  }
+
+  /**
+   * Load a document's content stripped to fields relevant for chat context.
+   */
+  private async loadDocumentContent(documentId: string): Promise<any | null> {
+    try {
+      const document = await getDocument(documentId);
+      if (!document?.content) return null;
+
+      const c = document.content;
+      return {
+        title: c.title,
+        tags: c.tags,
+        diagnosis: c.diagnosis,
+        medications: c.medications,
+        vitals: c.vitals,
+        recommendations: c.recommendations,
+        signals: c.signals,
+        summary: c.summary,
+        laboratory: c.laboratory,
+        procedures: c.procedures,
+        allergies: c.allergies,
+      };
+    } catch (err) {
+      logger.namespace('Chat').warn('Failed to load source document content', { documentId, error: err });
+      return null;
     }
   }
 
