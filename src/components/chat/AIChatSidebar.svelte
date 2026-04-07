@@ -438,21 +438,29 @@
         </div>
       {/if}
 
-      <!-- AI Disclaimer -->
-      <div class="ai-disclaimer">
-        <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}</p>
-        {#if disclaimerExpanded}
-          <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
-        {/if}
-        <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
-          {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
-        </button>
-      </div>
     </div>
 
     <!-- Input Area -->
     <div class="input-area">
+    
       <div class="input-container">
+      <div>
+        <!-- AI Disclaimer -->
+        <div class="ai-disclaimer">
+          <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}
+
+            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
+              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
+            </button>
+          </p>
+          {#if disclaimerExpanded}
+            <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
+            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
+              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
+            </button>
+          {/if}
+    
+        </div>
         <textarea
           bind:value={messageInput}
           onkeydown={handleKeyPress}
@@ -460,6 +468,7 @@
           disabled={chatIsLoading}
           rows="2"
         ></textarea>
+      </div>
         <button 
           class="send-btn"
           onclick={sendMessage}
@@ -844,10 +853,10 @@
   }
 
   .ai-disclaimer {
-    margin-top: auto;
-    padding: 10px 12px;
+    padding: .5rem 1rem;
     background: var(--color-warning);
-    border-radius: var(--radius-8);
+    border-top-left-radius: var(--radius-8);
+    border-top-right-radius: var(--radius-8);
     font-size: 11px;
     line-height: 1.4;
     color: var(--color-warning-text);
@@ -855,6 +864,7 @@
 
   .ai-disclaimer-short {
     margin: 0;
+    font-weight: 600;
   }
 
   .ai-disclaimer-details {
@@ -885,9 +895,10 @@
   }
 
   .input-container textarea {
-    flex: 1;
+    width: 100%;
     border: 1px solid var(--color-gray-400);
-    border-radius: var(--radius-8);
+    border-bottom-left-radius: var(--radius-8);
+    border-bottom-right-radius: var(--radius-8);
     padding: 12px;
     resize: none;
     font-family: inherit;

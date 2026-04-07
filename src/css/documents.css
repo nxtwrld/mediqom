@@ -178,6 +178,10 @@
   border-bottom: 2px solid var(--color-border, #e0e0e0);
 }
 
+.document-section .table-list tr th:first-child {
+  border-left: 0.5rem solid var(--color-background);
+}
+
 /* Detail items (label/value pairs) - container responsive */
 .document-section .detail-item {
   display: flex;
