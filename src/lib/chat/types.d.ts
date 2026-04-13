@@ -85,6 +85,16 @@ export interface ChatContext {
   assembledContext?: any; // AssembledContext from context assembly system
   availableTools?: string[];
   mcpTools?: any; // MCP tools for AI to access medical data
+  // Sub-agent routing: classified in Call 1, used in Call 2
+  agentType?: string;
+}
+
+export interface DocumentCatalogEntry {
+  id: string;
+  title: string;
+  category?: string;
+  date?: string;
+  medicalTerms?: string[];
 }
 
 export interface PageContext {
@@ -97,6 +107,8 @@ export interface PageContext {
     vitals: string[];
   };
   documentsContent?: Map<string, any>; // documentId -> document content
+  /** Lightweight catalog of all profile documents (metadata only, no content) */
+  documentCatalog?: DocumentCatalogEntry[];
 }
 
 export interface AnatomyContext {

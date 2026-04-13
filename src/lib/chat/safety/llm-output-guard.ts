@@ -12,13 +12,14 @@ import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { OutputSafetyResult } from "./types";
 import { logger } from "$lib/logging/logger";
+import { modelConfig } from "$lib/config/model-config";
 
 const log = logger.namespace("LLMOutputGuard");
 
 const SAFETY_CHECK_SYSTEM_PROMPT = `You are a medical safety classifier. Analyze the following AI assistant response and check for safety concerns.
 
 Check for:
-1. **Medication dosages** — Any specific dosage amounts (e.g. "500 mg", "2 tablety", "10 ml") in any language or format
+1. **Medication dosages** — Any specific dosage amounts (e.g. "500 mg", "2 tablety", "10 ml") in any language or format. Only flag if the AI is recommending or prescribing dosages, NOT if it's quoting from existing medical records or lab results.
 2. **Prohibited diagnostic terms** — Direct cancer diagnoses or similar serious diagnoses presented as definitive (e.g. "rak", "Krebs", "tumore", "karcinom", "nowotwór") — only flag if the AI states the diagnosis as a fact, NOT if it's discussing test results or what a doctor said
 3. **Specific treatment recommendations** — The AI recommending specific treatments, drugs, or procedures as if prescribing them
 
@@ -44,6 +45,7 @@ function getModel(): ChatOpenAI {
       modelName: "gpt-4o-mini",
       temperature: 0,
       maxTokens: 256,
+      apiKey: modelConfig.getProviderApiKey("openai"),
     });
   }
   return cachedModel;
@@ -51,6 +53,7 @@ function getModel(): ChatOpenAI {
 
 /**
  * Check AI response for safety violations using an LLM.
+ * Accepts regex pre-filter flags as hints for the LLM.
  *
  * @returns OutputSafetyResult or null if timed out / errored (fail-open)
  */
@@ -58,19 +61,25 @@ export async function checkOutputSafety(
   response: string,
   mode: string,
   language: string,
+  regexFlags?: { flags: string[]; matches: string[] },
 ): Promise<OutputSafetyResult | null> {
-  // Only run for non-English, non-clinical
-  if (language === "en" || mode === "clinical") {
+  if (mode === "clinical") {
     return null;
   }
 
   try {
     const model = getModel();
 
+    let userMessage = `Language: ${language}\nMode: ${mode}\n\nAI Response to check:\n${response.slice(0, 2000)}`;
+
+    if (regexFlags && regexFlags.flags.length > 0) {
+      userMessage += `\n\nPre-filter detected: ${regexFlags.flags.join(", ")} (matched: ${regexFlags.matches.join(", ")}). Validate whether these are genuine safety concerns.`;
+    }
+
     const result = await Promise.race([
       model.invoke([
         new SystemMessage(SAFETY_CHECK_SYSTEM_PROMPT),
-        new HumanMessage(`Language: ${language}\nMode: ${mode}\n\nAI Response to check:\n${response.slice(0, 2000)}`),
+        new HumanMessage(userMessage),
       ]),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), LLM_TIMEOUT_MS)),
     ]);
@@ -86,11 +95,15 @@ export async function checkOutputSafety(
     const jsonStr = content.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(jsonStr);
 
-    return {
+    const safetyResult: OutputSafetyResult = {
       safe: parsed.safe ?? true,
       flags: Array.isArray(parsed.flags) ? parsed.flags : [],
       severity: parsed.severity || "none",
     };
+
+    log.debug("LLM output guard result", safetyResult);
+
+    return safetyResult;
   } catch (err) {
     log.warn("LLM output guard error, falling back to regex-only:", err);
     return null;

@@ -65,7 +65,7 @@
           "When given specific context document, answer follow up questions and explain the condition thoroughly",
           "Provide emotional support and coping strategies",
           "NEVER provide medical advice, diagnosis, or treatment recommendations. You may explain medical concepts for educational purposes only. Always defer to qualified healthcare providers for any medical decisions.",
-          "Use language appropriate for: {language}",
+          "You MUST write your entire response in {language}.",
           "You are discussing the medical profile for: {profileName}",
           "Do not assume the user is the patient - they may be a parent, guardian, caregiver, or family member",
           "Address the user respectfully without assuming their relationship to the patient",
@@ -105,8 +105,11 @@
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
-          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "ALWAYS generate a lab_trend_chart widget when your response mentions a specific lab/vital value with a reference range — even for a single data point. Example: glucose 120 mg/dL (ref 67-93) → {\"id\": \"w_glucose\", \"type\": \"lab_trend_chart\", \"title\": \"Glukóza\", \"data\": {\"series\": [{\"date\": \"2023-02-07\", \"value\": 120}], \"ranges\": [{\"name\": \"normal\", \"min\": 67, \"max\": 93}], \"unit\": \"mg/dL\"}}.",
+          "Also use widgets for: diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
           "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "CRITICAL for lab_trend_chart: Each series item MUST use 'date' (ISO YYYY-MM-DD) and 'value' (numeric). Do NOT use 'time' or 'timestamp'. Extract actual numeric values from tool results — never use 0 or placeholders. Always include 'ranges' with the reference range from the source data and 'unit'.",
+          "When reporting lab or vital sign results, ALWAYS cite the specific numeric value, unit, date, and reference range from the tool result. Never describe values only as 'normal' or 'within limits' without the actual number.",
           "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
           "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
@@ -213,7 +216,7 @@
           "IMPORTANT: Never provide specific medical advice, diagnosis recommendations, or treatment plans",
           "Always stress that any medical decisions must be discussed with {profileName}'s healthcare provider",
           "Be empathetic and supportive — acknowledge the caregiver's concern for {profileName}",
-          "Use language appropriate for: {language}",
+          "You MUST write your entire response in {language}.",
           "IMPORTANT: Base all information on {profileName}'s documented medical records only. Use tools to retrieve actual patient data."
         ],
         "anatomyInstructions": [
@@ -242,8 +245,11 @@
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
-          "Use widgets when discussing: lab results (lab_trend_chart), diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
+          "ALWAYS generate a lab_trend_chart widget when your response mentions a specific lab/vital value with a reference range — even for a single data point. Example: glucose 120 mg/dL (ref 67-93) → {\"id\": \"w_glucose\", \"type\": \"lab_trend_chart\", \"title\": \"Glukóza\", \"data\": {\"series\": [{\"date\": \"2023-02-07\", \"value\": 120}], \"ranges\": [{\"name\": \"normal\", \"min\": 67, \"max\": 93}], \"unit\": \"mg/dL\"}}.",
+          "Also use widgets for: diagnoses (diagnosis_card), symptoms (symptom_summary), treatments (treatment_plan), structured comparisons (data_table), body regions (anatomy_highlight), or health metrics (progress_indicator).",
           "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "CRITICAL for lab_trend_chart: Each series item MUST use 'date' (ISO YYYY-MM-DD) and 'value' (numeric). Do NOT use 'time' or 'timestamp'. Extract actual numeric values from tool results — never use 0 or placeholders. Always include 'ranges' with the reference range from the source data and 'unit'.",
+          "When reporting lab or vital sign results, ALWAYS cite the specific numeric value, unit, date, and reference range from the tool result. Never describe values only as 'normal' or 'within limits' without the actual number.",
           "Maximum 3 widgets per response. Always accompany widgets with explanatory text.",
           "Widgets appear inline in the chat message as interactive cards. Users can click them for more details."
         ]
@@ -343,7 +349,7 @@
           "Suggest diagnostic considerations",
           "Analyze patterns and correlations",
           "Reference medical literature when appropriate",
-          "Use language appropriate for: {language}",
+          "You MUST write your entire response in {language}.",
           "You are reviewing the medical profile for: {profileName}",
           "The user may be a healthcare provider, family member, or authorized person reviewing this profile",
           "Maintain professional clinical language while being accessible to the intended audience",
@@ -378,8 +384,11 @@
         ],
         "widgetInstructions": [
           "You can generate visual widgets alongside your text response using the 'widgets' field in structured output.",
-          "Use widgets when presenting: lab trends (lab_trend_chart), differential diagnoses (diagnosis_card), reported symptoms (symptom_summary), treatment plans (treatment_plan), comparative data (data_table), anatomical regions (anatomy_highlight), or clinical metrics (progress_indicator).",
+          "ALWAYS generate a lab_trend_chart widget when your response mentions a specific lab/vital value with a reference range — even for a single data point. Example: glucose 120 mg/dL (ref 67-93) → {\"id\": \"w_glucose\", \"type\": \"lab_trend_chart\", \"title\": \"Glucose\", \"data\": {\"series\": [{\"date\": \"2023-02-07\", \"value\": 120}], \"ranges\": [{\"name\": \"normal\", \"min\": 67, \"max\": 93}], \"unit\": \"mg/dL\"}}.",
+          "Also use widgets for: differential diagnoses (diagnosis_card), reported symptoms (symptom_summary), treatment plans (treatment_plan), comparative data (data_table), anatomical regions (anatomy_highlight), or clinical metrics (progress_indicator).",
           "Only generate widgets when the actual data is available in the context — never fabricate widget data.",
+          "CRITICAL for lab_trend_chart: Each series item MUST use 'date' (ISO YYYY-MM-DD) and 'value' (numeric). Do NOT use 'time' or 'timestamp'. Extract actual numeric values from tool results — never use 0 or placeholders. Always include 'ranges' with the reference range from the source data and 'unit'.",
+          "When reporting lab or vital sign results, ALWAYS cite the specific numeric value, unit, date, and reference range from the tool result. Never describe values only as 'normal' or 'within limits' without the actual number.",
           "Maximum 3 widgets per response. Always accompany widgets with clinical explanatory text.",
           "Widgets appear inline in the chat message as interactive cards. Clinicians can click them to drill down into details."
         ]
@@ -667,6 +676,11 @@
             },
             "description": "MCP tools to call ONLY when the needed data was NOT available in the provided context or pre-fetched data. If the user message already contained medical data (e.g., in a pre-fetched JSON block), or the assembled context contained the answer, do NOT include tool calls. Only include tools when your response genuinely requires data you do not have."
           },
+          "agentType": {
+            "type": "string",
+            "enum": ["general", "lab_results", "diagnosis", "medications", "general_medical"],
+            "description": "Classify the response type needed for follow-up processing. Use 'lab_results' when the user asks about lab/vital values, trends, or test results. Use 'diagnosis' when discussing specific diagnoses or conditions. Use 'medications' for medication queries. Use 'general_medical' for general health questions. Use 'general' for greetings, simple questions, or when no tools are needed."
+          },
           "widgets": {
             "type": "array",
             "items": {
@@ -699,7 +713,7 @@
                 },
                 "data": {
                   "type": "object",
-                  "description": "Widget-specific data. For lab_trend_chart: {code, unit, series: [{date, value, referenceRange?}], ranges?: [{name, min, max}], status}. For diagnosis_card: {name, probability (0-1), priority (1-10), icd10?, reasoning, confidence (0-1), redFlags?: string[], requiresInvestigation?}. For symptom_summary: {text, severity (1-10), confidence (0-1), source ('transcript'|'medical_history'|'suspected'), duration?, characteristics?: string[]}. For treatment_plan: {type ('medication'|'procedure'|'therapy'|'lifestyle'|'investigation'|'referral'), name, dosage?, priority (1-10), confidence (0-1), effectiveness? (0-1), description?, urgency? ('immediate'|'urgent'|'routine'), duration?}. For data_table: {headers: string[], rows: any[][], caption?}. For anatomy_highlight: {bodyParts: string[] (use exact anatomy IDs), description?}. For progress_indicator: {value (0-100), label, unit?}."
+                  "description": "Widget-specific data. For lab_trend_chart: {unit, series: [{date, value}] (even a single data point works), ranges: [{name: \"normal\", min, max}]}. For diagnosis_card: {name, probability (0-1), priority (1-10), icd10?, reasoning, confidence (0-1), redFlags?: string[], requiresInvestigation?}. For symptom_summary: {text, severity (1-10), confidence (0-1), source ('transcript'|'medical_history'|'suspected'), duration?, characteristics?: string[]}. For treatment_plan: {type ('medication'|'procedure'|'therapy'|'lifestyle'|'investigation'|'referral'), name, dosage?, priority (1-10), confidence (0-1), effectiveness? (0-1), description?, urgency? ('immediate'|'urgent'|'routine'), duration?}. For data_table: {headers: string[], rows: any[][], caption?}. For anatomy_highlight: {bodyParts: string[] (use exact anatomy IDs), description?}. For progress_indicator: {value (0-100), label, unit?}."
                 }
               },
               "required": ["id", "type", "data"]
@@ -707,8 +721,13 @@
             "description": "Visual widgets to render inline in the chat message. Use when discussing quantitative data (lab trends as charts), diagnoses (as cards), treatments (as cards), or structured comparisons (as tables). Always accompany widgets with explanatory text. Maximum 3 widgets per response. Only generate widgets when the data is available in context."
           }
         },
-        "required": ["response"]
+        "required": ["response"],
+        "additionalProperties": false
       }
+    },
+    "agentTypes": {
+      "description": "Registry of sub-agent types for Call 2 routing",
+      "types": ["general", "lab_results", "diagnosis", "medications", "general_medical"]
     }
   }
 }

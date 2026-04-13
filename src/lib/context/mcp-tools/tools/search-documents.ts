@@ -115,8 +115,38 @@ export class SearchDocumentsTool extends BaseMedicalTool {
 
       responseText += `${index + 1}. **${title}**\n`;
       responseText += `   - Category: ${doc.metadata?.category || "Unknown"}\n`;
+      responseText += `   - Date: ${doc.metadata?.date || "Unknown"}\n`;
       responseText += `   - Relevance: ${(result.relevance * 100).toFixed(1)}%\n`;
       responseText += `   - Matched terms: ${result.matchedTerms.join(", ")}\n`;
+
+      // Include matched signal data so the AI can use actual values
+      const hasSignalMatch = result.matchedTerms.some((t) => t.startsWith("signal:"));
+      if (hasSignalMatch && doc.content?.signals) {
+        const signalsArray = Array.isArray(doc.content.signals)
+          ? doc.content.signals
+          : doc.content.signals?.signals && Array.isArray(doc.content.signals.signals)
+            ? doc.content.signals.signals
+            : [];
+        const matchedSignalNames = result.matchedTerms
+          .filter((t) => t.startsWith("signal:"))
+          .map((t) => t.replace("signal:", "").toLowerCase());
+        const matchedSignals = signalsArray.filter((s: any) =>
+          matchedSignalNames.some((name) =>
+            (s.signal || s.test || "").toLowerCase().includes(name) ||
+            name.includes((s.signal || s.test || "").toLowerCase())
+          )
+        );
+        if (matchedSignals.length > 0) {
+          responseText += `   - Signal Data:\n`;
+          for (const s of matchedSignals) {
+            const name = s.signal || s.test || "Unknown";
+            const val = s.value ?? "N/A";
+            const unit = s.unit || "";
+            const ref = s.reference || "";
+            responseText += `     • ${name}: ${val} ${unit}${ref ? ` (ref: ${ref})` : ""}\n`;
+          }
+        }
+      }
 
       if (params.includeContent && result.relevance > 0.8 && doc.content) {
         const contentPreview =
@@ -252,6 +282,26 @@ export class SearchDocumentsTool extends BaseMedicalTool {
               ) {
                 relevance += 1;
                 matchedTerms.push(docTerm);
+              }
+            }
+          }
+        }
+
+        // Check signal names (e.g. "Glucose", "Cholesterol") stored in metadata.signals
+        if (doc.metadata?.signals && Array.isArray(doc.metadata.signals)) {
+          for (const searchTerm of nonTemporalTerms) {
+            const searchTermLower = searchTerm.toLowerCase();
+            for (const signalName of doc.metadata.signals) {
+              const signalLower = (signalName as string).toLowerCase();
+              if (signalLower === searchTermLower) {
+                relevance += 3; // High relevance for exact signal match
+                matchedTerms.push(`signal:${signalName}`);
+              } else if (
+                signalLower.includes(searchTermLower) ||
+                searchTermLower.includes(signalLower)
+              ) {
+                relevance += 2;
+                matchedTerms.push(`signal:${signalName}`);
               }
             }
           }

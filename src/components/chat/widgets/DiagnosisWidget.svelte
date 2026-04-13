@@ -1,49 +1,38 @@
 <script lang="ts">
-	import DiagnosisCard from '$components/session/shared/DiagnosisCard.svelte';
+	import SectionDiagnosis from '$components/documents/SectionDiagnosis.svelte';
 	import type { WidgetSpec, WidgetInteraction } from '$lib/chat/widgets/types';
-	import type { DiagnosisNode } from '$components/session/types/visualization.d';
 
 	interface Props {
 		spec: WidgetSpec;
 		onInteraction?: (interaction: WidgetInteraction) => void;
 	}
 
-	let { spec, onInteraction }: Props = $props();
+	let { spec }: Props = $props();
 
-	// Map spec.data to DiagnosisNode, applying safe defaults
-	let diagnosis: DiagnosisNode = $derived({
-		id: spec.id,
-		name: spec.data.name ?? 'Unknown',
-		probability: spec.data.probability ?? 0.5,
-		priority: spec.data.priority ?? 5,
-		confidence: spec.data.confidence ?? spec.data.probability ?? 0.5,
-		reasoning: spec.data.reasoning ?? '',
-		icd10: spec.data.icd10,
-		redFlags: spec.data.redFlags,
-		requiresInvestigation: spec.data.requiresInvestigation,
-		suppressed: false,
+	// Transform spec.data to SectionDiagnosis format: array of { code, description, type, confidence, date, notes }
+	let diagnosisData = $derived.by(() => {
+		const d = spec.data;
+		if (!d) return [];
+		// If already an array, map fields
+		const items = Array.isArray(d) ? d : [d];
+		return items.map((item: any) => ({
+			code: item.icd10 || item.code || '',
+			description: item.name || item.description || 'Unknown',
+			name: item.name || item.description || 'Unknown',
+			type: item.type || 'primary',
+			confidence: item.confidence || item.probability || undefined,
+			date: item.date || undefined,
+			notes: item.reasoning || item.notes || undefined,
+		}));
 	});
-
-	function handleClick() {
-		onInteraction?.({
-			widgetId: spec.id,
-			widgetType: spec.type,
-			action: 'click_diagnosis',
-			payload: { name: diagnosis.name, icd10: diagnosis.icd10 },
-		});
-	}
 </script>
 
 <div class="widget-diagnosis">
-	<DiagnosisCard {diagnosis} ondiagnosisClick={handleClick} />
+	<SectionDiagnosis data={diagnosisData} />
 </div>
 
 <style>
 	.widget-diagnosis {
-		padding: 4px;
-	}
-
-	.widget-diagnosis :global(.diagnosis-card) {
-		min-height: auto;
+		padding: 0;
 	}
 </style>

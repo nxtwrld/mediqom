@@ -1,3 +1,4 @@
+import { generateNamespacedTags } from "./generateTags";
 import user from "$lib/user";
 import {
   writable,
@@ -810,9 +811,13 @@ function deriveMetadata(
   document: Document | DocumentNew,
   metadata?: { [key: string]: any },
 ): { [key: string]: any } {
+  const legacyTags = mergeBodyPartTags(document.content.tags || [], document.content.bodyParts);
+  const namespacedTags = generateNamespacedTags(document.content);
+  const allTags = [...new Set([...legacyTags, ...namespacedTags])];
+
   let result: { [key: string]: any } = {
     title: document.content.title,
-    tags: mergeBodyPartTags(document.content.tags || [], document.content.bodyParts),
+    tags: allTags,
     date: document.content.date || new Date().toISOString(),
     ...(document.content.category && { category: document.content.category }),
     ...(document.subtype && { subtype: document.subtype }),

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import markdown from 'nano-markdown';
+    import { marked } from 'marked';
     import DOMPurify from 'dompurify';
     interface Props {
         text: any;
@@ -7,12 +7,33 @@
 
     let { text }: Props = $props();
 
+    // Configure marked for GFM tables and line breaks
+    marked.use({ gfm: true, breaks: true });
+
+    /** Add data-label attributes to <td> cells for responsive stacked layout */
+    function addTableDataLabels(html: string): string {
+        return html.replace(/<table>([\s\S]*?)<\/table>/g, (_match, inner) => {
+            const headers: string[] = [];
+            inner.replace(/<th[^>]*>([\s\S]*?)<\/th>/g, (_m: string, content: string) => {
+                headers.push(content.replace(/<[^>]+>/g, '').trim());
+            });
+            if (headers.length === 0) return `<table>${inner}</table>`;
+
+            let colIdx = 0;
+            const labeled = inner.replace(/<td([^>]*)>/g, (_m: string, attrs: string) => {
+                const label = headers[colIdx % headers.length] || '';
+                colIdx++;
+                return `<td${attrs} data-label="${label}">`;
+            });
+            return `<table>${labeled}</table>`;
+        });
+    }
 
 </script>
 
 
     <div class="markdown">
-        {@html DOMPurify.sanitize(markdown(text).replace(/\n/gm, '<br/>' ))}
+        {@html DOMPurify.sanitize(addTableDataLabels(marked.parse(text || '') as string), { ADD_ATTR: ['data-label'] })}
     </div>
 
 
@@ -21,6 +42,7 @@
     .markdown {
         user-select: text;
         cursor: text;
+        container-type: inline-size;
     }
     .markdown :global(p) {
         display: block;
@@ -106,6 +128,7 @@
     .markdown :global(table) {
         width: 100%;
         border-collapse: collapse;
+        font-size: .9em;
     }
     .markdown :global(th) {
         background-color: var(--color-background-panel);
@@ -121,6 +144,25 @@
     }
     .markdown :global(tr:hover) {
         background-color: var(--color-background-panel);
+    }
+
+    /* Responsive table: horizontal scroll on narrow containers */
+    @container (max-width: 400px) {
+        .markdown :global(table) {
+            display: block;
+            overflow-x: auto;
+            font-size: .8em;
+            white-space: nowrap;
+        }
+        .markdown :global(thead),
+        .markdown :global(tbody),
+        .markdown :global(tr) {
+            display: revert;
+        }
+        .markdown :global(th),
+        .markdown :global(td) {
+            padding: .3em .5em;
+        }
     }
     .markdown :global(hr) {
         border: 0;

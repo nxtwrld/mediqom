@@ -1,5 +1,6 @@
 <script lang="ts">
-	import SignalHistory from '$components/documents/SignalHistory.svelte';
+	import ReferenceRangeLineChart from '$components/charts/ReferenceRangeLineChart.svelte';
+	import ReferenceRange from '$components/charts/ReferenceRange.svelte';
 	import type { WidgetSpec, WidgetInteraction } from '$lib/chat/widgets/types';
 
 	interface Props {
@@ -9,40 +10,59 @@
 
 	let { spec, onInteraction }: Props = $props();
 
-	// Map spec.data to SignalHistory props
-	let series = $state(spec.data?.series ?? []);
-	let ranges = $state(spec.data?.ranges ?? []);
+	// Transform series data: ensure dates are Date objects
+	let series = $derived(
+		(spec.data?.series ?? []).map((item: any) => ({
+			date: new Date(item.date || item.time || item.timestamp),
+			value: Number(item.value ?? 0)
+		})).filter((item: any) => !isNaN(item.date.getTime()) && item.value !== 0)
+	);
 
-	function handleClick() {
-		onInteraction?.({
-			widgetId: spec.id,
-			widgetType: spec.type,
-			action: 'click_trend',
-			payload: { code: spec.data.code },
-		});
-	}
+	// Derive reference string from ranges (find normal range → "min-max") or fallback
+	let reference = $derived.by(() => {
+		const ranges = spec.data?.ranges;
+		if (Array.isArray(ranges)) {
+			const normal = ranges.find((r: any) => r.name === 'normal');
+			if (normal && normal.min != null && normal.max != null) {
+				return `${normal.min}-${normal.max}`;
+			}
+		}
+		if (spec.data?.reference) return String(spec.data.reference);
+		return '0-100';
+	});
+
+	let unit = $derived(spec.data?.unit ?? '');
+
+	// Latest value for single-point display
+	let latestValue = $derived(
+		series.length > 0 ? series[series.length - 1].value : (spec.data?.value != null ? Number(spec.data.value) : null)
+	);
 </script>
 
-<div class="widget-lab-trend" role="button" tabindex="0" onclick={handleClick} onkeydown={(e) => { if (e.key === 'Enter') handleClick(); }}>
+<div class="widget-lab-trend">
 	{#if series.length > 1}
-		<SignalHistory
-			code={spec.data.code ?? 'unknown'}
-			unit={spec.data.unit ?? ''}
-			status={spec.data.status ?? 'ok'}
-			date={spec.data.date ?? ''}
-			bind:series
-			bind:ranges
+		<ReferenceRangeLineChart
+			{unit}
+			{reference}
+			{series}
 		/>
+	{:else if latestValue != null}
+		<div class="single-value">
+			<ReferenceRange value={latestValue} {reference} />
+		</div>
 	{:else}
-		<p class="no-data">Not enough data points to display trend chart.</p>
+		<p class="no-data">No data available.</p>
 	{/if}
 </div>
 
 <style>
 	.widget-lab-trend {
-		padding: 8px;
-		min-height: 120px;
-		cursor: pointer;
+		padding: 0;
+		min-height: 60px;
+	}
+
+	.single-value {
+		padding: 8px 12px;
 	}
 
 	.no-data {

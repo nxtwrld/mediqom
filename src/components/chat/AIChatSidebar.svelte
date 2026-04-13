@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { chatStore, chatActions, isOpen, messages, isLoading } from '$lib/chat/store';
   import { chatManager } from '$lib/chat/chat-manager';
   import type { ChatMessage, SourceCitation } from '$lib/chat/types.d';
@@ -53,6 +53,7 @@
   let messageInput = $state('');
   let disclaimerExpanded = $state(false);
   let messagesContainer = $state<HTMLElement>();
+  let textareaRef: HTMLTextAreaElement | undefined = $state();
   let sidebarWidth = $state(400);
   let isResizing = $state(false);
   
@@ -130,6 +131,7 @@
       // Re-add message to input on error
       messageInput = message;
     }
+    textareaRef?.focus();
   }
 
   // Handle key press in input
@@ -245,6 +247,13 @@
       } else {
         //console.log('Profile/language unchanged, skipping profile switch event');
       }
+    }
+  });
+
+  // Autofocus textarea when chat opens
+  $effect(() => {
+    if (chatIsOpen) {
+      tick().then(() => textareaRef?.focus());
     }
   });
 </script>
@@ -462,6 +471,7 @@
     
         </div>
         <textarea
+          bind:this={textareaRef}
           bind:value={messageInput}
           onkeydown={handleKeyPress}
           placeholder={$t('app.chat.placeholders.ask')}
@@ -644,6 +654,7 @@
     color: var(--color-black);
     border-bottom-left-radius: 4px;
     font-weight: 300;
+    width: 100%;
   }
 
   /* Add chat bubble tail for assistant messages */
@@ -857,7 +868,7 @@
     background: var(--color-warning);
     border-top-left-radius: var(--radius-8);
     border-top-right-radius: var(--radius-8);
-    font-size: 11px;
+    font-size: .8rem;
     line-height: 1.4;
     color: var(--color-warning-text);
   }

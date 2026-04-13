@@ -4,8 +4,8 @@ import { auditFromEvent, auditLog } from "$lib/audit/index.server";
 import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
 import type { Content } from "$lib/ai/types.d";
 import { generateId } from "$lib/utils/id";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { chatConfigManager } from "$lib/config/chat-config";
+import { chatAgentConfigManager } from "$lib/config/chat-agent-config";
 import { serverChatContextService } from "$lib/context/integration/server/chat-context-server";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
 import { sanitizeInput } from "$lib/chat/input-sanitizer";
@@ -48,6 +48,7 @@ export const POST: RequestHandler = async (event) => {
       provider, // Optional provider override
       assembledContext, // Context from ChatManager
       availableTools, // MCP tools from ChatManager
+      agentType, // Sub-agent type (classified in Call 1, used in Call 2)
     } = await request.json();
 
     auditFromEvent(event, { action: "create", resource_type: "chat", metadata: { profile_id: profileId, mode } });
@@ -96,6 +97,7 @@ export const POST: RequestHandler = async (event) => {
           assembledContext,
           availableTools,
           emergency.banner,
+          agentType,
         ).catch((err) => {
           log.error("AI processing error:", err);
           controller.enqueue(
@@ -137,6 +139,7 @@ async function processAIRequest(
   assembledContext?: any,
   availableTools?: string[],
   emergencyBanner?: string | null,
+  agentType?: string,
 ) {
   const tokenUsage = { total: 0 };
 
@@ -175,99 +178,20 @@ async function processAIRequest(
 
     log.debug("MCP context", { tools: finalTools, hasContext: !!finalContext });
 
-    // Build system prompt with both document context (signals) and assembled context
-    const systemPrompt = chatConfigManager.buildSystemPrompt(
-      mode,
-      language,
-      pageContext,
-      finalContext,
-    );
+    // Build system prompt — use sub-agent config for Call 2, full config for Call 1
+    const useSubAgent = agentType && agentType !== 'general' && chatAgentConfigManager.hasAgent(agentType);
+    const systemPrompt = useSubAgent
+      ? chatAgentConfigManager.buildSubAgentPrompt(agentType!, mode, language, pageContext, finalContext)
+      : chatConfigManager.buildSystemPrompt(mode, language, pageContext, finalContext);
 
-    // Phase 1: Stream the text response using configured model
-    const streamingModel = chatConfigManager.createStreamingModel(provider);
+    if (useSubAgent) {
+      log.info("Using sub-agent", { agentType, mode });
+    }
 
     // Get conversation configuration
     const conversationConfig = chatConfigManager.getConversationConfig();
 
-    const messages = [
-      new SystemMessage(systemPrompt),
-      // Add conversation history based on configuration
-      ...(conversationHistory
-        .slice(-conversationConfig.maxMessages)
-        .flatMap((msg: any): any[] => {
-          if (msg.role === "user") return [new HumanMessage(msg.content)];
-          if (
-            msg.role === "assistant" &&
-            conversationConfig.includeSystemMessages
-          ) {
-            return [new SystemMessage(msg.content)];
-          }
-          return [];
-        }) as any[]),
-      new HumanMessage(userMessage),
-    ];
-
-    // Start streaming the response
-    let fullResponse = "";
-    const stream = await streamingModel.stream(messages);
-
-    for await (const chunk of stream) {
-      const text = chunk.content.toString();
-      fullResponse += text;
-
-      // Send chunk to client
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({
-            type: "chunk",
-            content: text,
-          })}\n\n`,
-        ),
-      );
-    }
-
-    // M2: Prepend emergency banner if detected
-    if (emergencyBanner) {
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({ type: "emergency_banner", content: emergencyBanner })}\n\n`,
-        ),
-      );
-    }
-
-    // H1C: Output safety guard for patient/caregiver mode (regex, localized)
-    const guardResult = guardOutput(fullResponse, mode, language);
-    if (guardResult.disclaimerAdded) {
-      log.info("Output guard triggered", { flags: guardResult.flags, mode });
-      // Send the disclaimer as an additional chunk
-      const disclaimerText = guardResult.response.slice(fullResponse.length);
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({ type: "chunk", content: disclaimerText })}\n\n`,
-        ),
-      );
-    }
-
-    // Start LLM output guard in parallel with Phase 2 (non-English, non-clinical only)
-    const llmGuardPromise = (language !== "en" && mode !== "clinical")
-      ? checkOutputSafety(fullResponse, mode, language).catch(() => null)
-      : Promise.resolve(null);
-
-    // M5: Audit data-sent metadata (not content)
-    auditLog({
-      action: "create",
-      resource_type: "chat",
-      resource_id: profileId,
-      metadata: {
-        token_count: tokenUsage.total,
-        mode,
-        provider: provider || chatConfigManager.getConfig().defaultProvider,
-        has_context: !!finalContext,
-        tool_count: finalTools.length,
-      },
-    });
-
-    // Phase 2: Get structured data using the full response
+    // Single LLM call: AI decides atomically whether to answer with text or request tools
     const content: Content[] = [{ type: "text", text: systemPrompt }];
 
     // Add assembled context if available
@@ -280,7 +204,6 @@ async function processAIRequest(
 
     // Add available tools information
     if (finalTools && finalTools.length > 0) {
-      // Get document IDs already in context to avoid duplicate tool requests
       const documentsInContext: string[] = pageContext?.documentsContent
         ? pageContext.documentsContent.map(([docId]: [string, any]) => docId)
         : [];
@@ -302,15 +225,14 @@ async function processAIRequest(
         })),
     );
 
-    // Add current exchange
-    content.push(
-      { type: "text", text: `user: ${userMessage}` },
-      { type: "text", text: `assistant: ${fullResponse}` },
-    );
+    // Add current user message
+    content.push({ type: "text", text: `user: ${userMessage}` });
 
-    const schema = chatConfigManager.createResponseSchema(mode);
+    const schema = useSubAgent
+      ? chatAgentConfigManager.createSubAgentSchema(agentType!, mode)
+      : chatConfigManager.createResponseSchema(mode);
 
-    // Get structured data (anatomy references, etc.)
+    // Single LLM call — returns text response + toolCalls + metadata atomically
     const structuredData = await enhancedAIProvider.analyzeDocument(
       content,
       schema,
@@ -322,60 +244,84 @@ async function processAIRequest(
       },
     );
 
+    const fullResponse = structuredData.response || "";
+    const hasToolCalls =
+      structuredData.toolCalls && structuredData.toolCalls.length > 0;
+
     log.debug("Structured data from AI", {
       toolCalls: structuredData.toolCalls?.length || 0,
       anatomyRefs: structuredData.anatomyReferences?.length || 0,
       documentRefs: structuredData.documentReferences?.length || 0,
+      hasResponse: !!fullResponse,
+      hasToolCalls,
     });
 
-    // Validate that AI is using tools when it should
-    const toolMentionKeywords = [
-      "check your",
-      "look at your",
-      "access your",
-      "review your",
-      "examine your",
-      "search for",
-      "find information",
-      "retrieve data",
-      "get your medical",
-      "medication",
-      "condition",
-      "test result",
-      "lab result",
-      "medical history",
-    ];
+    // M5: Audit data-sent metadata (not content)
+    auditLog({
+      action: "create",
+      resource_type: "chat",
+      resource_id: profileId,
+      metadata: {
+        token_count: tokenUsage.total,
+        mode,
+        provider: provider || chatConfigManager.getConfig().defaultProvider,
+        has_context: !!finalContext,
+        tool_count: finalTools.length,
+      },
+    });
 
-    const mentionsTools = toolMentionKeywords.some((keyword) =>
-      fullResponse.toLowerCase().includes(keyword.toLowerCase()),
-    );
-
-    const hasToolCalls =
-      structuredData.toolCalls && structuredData.toolCalls.length > 0;
-    const hasAvailableTools = finalTools && finalTools.length > 0;
-
-    log.debug("Tool validation", { mentionsTools, hasToolCalls, hasAvailableTools });
-
-    if (mentionsTools && !hasToolCalls && hasAvailableTools) {
-      log.warn("AI mentioned accessing medical data but did not generate toolCalls", {
-        availableTools: finalTools,
-      });
-    }
-
-    // Resolve LLM output guard (should be done by now — it ran in parallel with Phase 2)
-    const llmGuard = await Promise.race([
-      llmGuardPromise,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 500)),
-    ]);
-
-    if (llmGuard && !llmGuard.safe && !guardResult.disclaimerAdded) {
-      log.info("LLM output guard triggered", { flags: llmGuard.flags, severity: llmGuard.severity, mode, language });
-      const disclaimer = safetyText("chat.safety.disclaimer", language);
+    // Only send text response if no tool calls — tools are handled by the client
+    if (!hasToolCalls && fullResponse) {
+      // Send response as a single chunk
       controller.enqueue(
         encoder.encode(
-          `data: ${JSON.stringify({ type: "chunk", content: `\n\n---\n*${disclaimer}*` })}\n\n`,
+          `data: ${JSON.stringify({ type: "chunk", content: fullResponse })}\n\n`,
         ),
       );
+
+      // M2: Emergency banner
+      if (emergencyBanner) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: "emergency_banner", content: emergencyBanner })}\n\n`,
+          ),
+        );
+      }
+
+      // H1C: Two-layer output safety guard
+      // Layer 1: Regex pre-filter (fast, flags only)
+      const regexResult = guardOutput(fullResponse, mode);
+
+      // Layer 2: LLM validation (all languages, non-clinical)
+      if (mode !== "clinical") {
+        const llmGuard = await Promise.race([
+          checkOutputSafety(fullResponse, mode, language, regexResult).catch(() => null),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
+        ]);
+
+        // Add disclaimer if LLM confirms unsafe, or if LLM timed out and regex had flags (fail-safe)
+        const needsDisclaimer = llmGuard
+          ? !llmGuard.safe
+          : regexResult.flags.length > 0;
+
+        if (needsDisclaimer) {
+          const source = llmGuard ? "llm" : "regex-fallback";
+          log.info("Output guard triggered", {
+            source,
+            regexFlags: regexResult.flags,
+            llmFlags: llmGuard?.flags,
+            severity: llmGuard?.severity,
+            mode,
+            language,
+          });
+          const disclaimer = safetyText("chat.safety.disclaimer", language);
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: "chunk", content: `\n\n---\n*${disclaimer}*` })}\n\n`,
+            ),
+          );
+        }
+      }
     }
 
     // Filter sources to only approved domains
@@ -408,11 +354,12 @@ async function processAIRequest(
         documentCount: contextResult?.documentCount || 0,
         contextConfidence: contextResult?.confidence || 0,
         availableTools: finalTools,
+        // Sub-agent classification for Call 2 routing
+        agentType: structuredData.agentType || 'general',
         // Debug info
         debugInfo: {
-          mentionsTools,
           hasToolCalls,
-          hasAvailableTools,
+          hasAvailableTools: finalTools && finalTools.length > 0,
         },
       },
     };
@@ -511,7 +458,7 @@ function formatAvailableTools(
   const toolDescriptions: Record<string, string> = {
     searchDocuments: "Search patient documents using semantic similarity",
     getAssembledContext: "Get comprehensive assembled medical context",
-    getProfileData: "Access patient profile and basic health information",
+    getProfileData: "Access patient demographics and health profile (height, weight, age, blood type, allergies, medications, conditions)",
     queryMedicalHistory:
       "Query specific medical history (medications, conditions, procedures, allergies)",
     getDocumentById: "Retrieve specific document by ID",

@@ -60,6 +60,8 @@ export class ChatClientService {
           // Pass enhanced context features
           assembledContext: context.assembledContext,
           availableTools: context.availableTools,
+          // Sub-agent routing (classified in Call 1, used in Call 2)
+          agentType: context.agentType,
         }),
         timeout: 300000,
       });

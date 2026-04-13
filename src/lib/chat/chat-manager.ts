@@ -24,6 +24,7 @@ import { chatMCPToolWrapper } from "./mcp-tool-wrapper";
 import user, { type User } from "$lib/user";
 import { profile } from "$lib/profiles";
 import { logger } from "$lib/logging/logger";
+import { TestCommandHandler } from "./test-commands";
 
 export class ChatManager {
   private clientService: ChatClientService;
@@ -34,6 +35,7 @@ export class ChatManager {
   private currentContextResult: ChatContextResult | null = null;
   private currentPromptProfileId: string | null = null; // Track active profile prompt
   private lastToolCall: string | null = null; // Track last executed tool to prevent immediate duplicates
+  private lastAgentType: string = 'general'; // Sub-agent type classified in Call 1 for Call 2 routing
 
   private static readonly AVAILABLE_TOOLS = [
     'searchDocuments',
@@ -1126,8 +1128,13 @@ export class ChatManager {
       console.log(`Restored ${existingHistory.length} messages from history`);
     }
 
-    // Set the context
-    chatActions.setContext(context);
+    // Set the context with available tools
+    chatActions.setContext({
+      ...context,
+      availableTools: this.currentContextResult?.availableTools?.length
+        ? this.currentContextResult.availableTools
+        : ChatManager.AVAILABLE_TOOLS,
+    });
 
     this.isInitialized = true;
     this.currentProfileId = context.currentProfileId;
@@ -1153,6 +1160,12 @@ export class ChatManager {
     // Clear last tool call on new user message to allow fresh tool usage,
     // but immediately re-set if a pre-fetched tool key is provided (prevents Phase 2 re-trigger)
     this.lastToolCall = prefetchedToolKey ?? null;
+
+    // Intercept test commands
+    if (userMessage.startsWith("test:")) {
+      await this.handleTestCommand(userMessage);
+      return;
+    }
 
     const state = get(chatStore);
     if (!state.context) {
@@ -1257,6 +1270,7 @@ export class ChatManager {
                 hasToolCalls: !!event.data.toolCalls,
                 toolCallsLength: event.data.toolCalls?.length || 0,
                 toolCalls: event.data.toolCalls,
+                agentType: event.data.agentType,
                 debugInfo: event.data.debugInfo,
               });
 
@@ -1290,6 +1304,11 @@ export class ChatManager {
                   event.data.consentRequests,
                 );
                 this.handleConsentRequests(event.data.consentRequests);
+              }
+
+              // Store sub-agent type for Call 2 routing
+              if (event.data.agentType) {
+                this.lastAgentType = event.data.agentType;
               }
 
               // Handle tool call requests
@@ -1345,6 +1364,85 @@ export class ChatManager {
       const errorMsg = createMessage(
         "assistant",
         "I apologize, but I encountered an error processing your message. Please try again.",
+      );
+      chatActions.addMessage(errorMsg);
+    } finally {
+      this.isProcessing = false;
+      chatActions.setLoading(false);
+    }
+  }
+
+  /**
+   * Handle test: commands by bypassing AI and directly exercising tools/widgets.
+   */
+  private async handleTestCommand(input: string): Promise<void> {
+    this.isProcessing = true;
+    chatActions.setLoading(true);
+
+    try {
+      const state = get(chatStore);
+      const profileId = state.context?.currentProfileId;
+      if (!profileId) {
+        const errorMsg = createMessage(
+          "assistant",
+          "No active profile. Open a profile first to use test commands.",
+        );
+        chatActions.addMessage(createMessage("user", input));
+        chatActions.addMessage(errorMsg);
+        return;
+      }
+
+      // Add user message
+      chatActions.addMessage(createMessage("user", input));
+
+      const handler = new TestCommandHandler(profileId, state.context ?? undefined);
+      const result = await handler.execute(input);
+
+      // Create assistant message with widgets metadata
+      const assistantMsg = createMessage("assistant", result.content, {
+        widgets: result.widgets,
+        toolsUsed: result.toolsUsed,
+      });
+      chatActions.addMessage(assistantMsg);
+
+      // If the test command wants to send a real message through the AI pipeline
+      if (result.redirectMessage) {
+        this.isProcessing = false;
+        chatActions.setLoading(false);
+        await this.sendMessage(result.redirectMessage);
+        return;
+      }
+
+      // If the test command wants to trigger a real tool approval flow
+      if (result.pendingToolCall) {
+        const { toolName, parameters } = result.pendingToolCall;
+
+        const toolPrompt = await chatMCPToolWrapper.createToolPrompt(
+          toolName,
+          parameters,
+          profileId,
+          (toolResult) => this.onToolApproved(toolResult, toolName),
+          () => this.onToolDeclined(toolName),
+        );
+
+        // Track tool signature for duplicate prevention
+        this.lastToolCall = `${toolName}_${JSON.stringify(parameters)}`;
+
+        if (toolPrompt) {
+          // High-risk tool: show approval prompt
+          const promptMessage = createMessage("system", "", {
+            contextPrompt: toolPrompt,
+          });
+          chatActions.addMessage(promptMessage);
+        }
+        // If null, tool was auto-approved and onToolApproved callback fires
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorMsg = createMessage(
+        "assistant",
+        `Test command failed: ${errorMessage}`,
       );
       chatActions.addMessage(errorMsg);
     } finally {
@@ -1567,17 +1665,21 @@ export class ChatManager {
 
     const state = get(chatStore);
 
-    // Create a follow-up message to process the tool results
-    const followUpMessage = `Based on the ${result.toolName} results, here is the information:`;
+    // Create a follow-up message embedding the actual tool data so the AI can use it
+    const toolDataSummary = typeof result.data === 'string'
+      ? result.data
+      : JSON.stringify(result.data, null, 2);
+    const followUpMessage = `[Tool Result: ${result.toolName}]\n${toolDataSummary}\n\nPlease use the above data to answer my previous question.`;
 
     // Send the tool results back to the AI for processing
     try {
       chatActions.setLoading(true);
 
-      // Create enhanced context with tool results
+      // Create enhanced context with tool results and sub-agent routing
       const enhancedContext: ChatContext = {
         ...state.context!,
         mcpTools: { [result.toolName]: result.data },
+        agentType: this.lastAgentType,
       };
 
       // Send a message with tool results context
@@ -1727,8 +1829,9 @@ export class ChatManager {
   clearConversation(): void {
     chatActions.clearMessages();
 
-    // Clear last tool call to allow fresh tool usage in new conversation
+    // Clear last tool call and agent type for fresh conversation
     this.lastToolCall = null;
+    this.lastAgentType = 'general';
 
     // Clear approved documents for this session
     if (this.currentProfileId) {

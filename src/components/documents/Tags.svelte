@@ -7,6 +7,7 @@
 	import { throttle } from 'throttle-debounce';
 	import { t } from '$lib/i18n';
 	import { translateAnatomy } from '$lib/i18n/anatomy';
+	import { getLegacyTags } from '$lib/documents/generateTags';
 
 
 
@@ -45,12 +46,13 @@
 		});
 	});
 
-	let safeTags = $derived(tags.map(tag => tag.replace(/ /g, '_')));
+	let displayTags = $derived(getLegacyTags(tags));
+	let safeTags = $derived(displayTags.map(tag => tag.replace(/ /g, '_')));
 	let focusableTags = $derived(safeTags.filter((tag) => isObject(tag)));
 </script>
 
 <div class="tags" bind:this={tagContainer}>
-	{#each tags as tag}
+	{#each displayTags as tag}
         {#if isObject(tag.replace(/ /g, '_'))}
 			{#if active}
             	<button class="tag -object" class:-highlight={tag == $focused.object} onclick={(event) => focus(event, tag)}>{translateAnatomy(tag.replace(/ /g, '_'), $t)}</button>

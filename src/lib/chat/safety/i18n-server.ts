@@ -32,18 +32,28 @@ function resolveKey(obj: Record<string, any>, key: string): string | undefined {
  * Get a localized safety text string.
  * Falls back to English if the key is missing in the target language.
  *
- * @param key - Dot-separated key, e.g. "chat.safety.emergency-banner"
+ * @param key - Dot-separated key, e.g. "app.chat.safety.emergency-banner"
  * @param language - Language code, e.g. "cs", "de", "en", "cs-CZ"
  */
 export function safetyText(key: string, language: string): string {
   const langKey = language.split("-")[0].toLowerCase();
   const locale = locales[langKey];
 
+  // Callers use short keys like "chat.safety.disclaimer" — resolve with
+  // and without the "app." prefix to match the locale JSON structure.
+  const keys = key.startsWith("app.") ? [key] : [`app.${key}`, key];
+
   if (locale) {
-    const value = resolveKey(locale, key);
-    if (value) return value;
+    for (const k of keys) {
+      const value = resolveKey(locale, k);
+      if (value) return value;
+    }
   }
 
   // Fallback to English
-  return resolveKey(en, key) || key;
+  for (const k of keys) {
+    const value = resolveKey(en, k);
+    if (value) return value;
+  }
+  return key;
 }
