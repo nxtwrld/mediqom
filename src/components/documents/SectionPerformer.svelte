@@ -1,6 +1,12 @@
 <script lang="ts">
     import ProfileImage from "$components/profile/ProfileImage.svelte";
     import { t } from "$lib/i18n";
+    import { profile } from '$lib/profiles';
+    import { processDocumentForContacts } from '$lib/contacts/store';
+    import { extractProviderContacts } from '$lib/contacts/extractor';
+    import { getContacts, addContact } from '$lib/contacts/store';
+    import { findMatch } from '$lib/contacts/dedup';
+
     interface Performer {
         role?: string;
         name?: string;
@@ -28,9 +34,27 @@
 
     interface Props {
         data: Performer[] | Performer;
+        documentId?: string;
     }
 
-    let { data }: Props = $props();
+    let { data, documentId }: Props = $props();
+
+    let savedIndexes = $state<Set<number>>(new Set());
+
+    async function handleSaveToContacts(performer: Performer, index: number) {
+        if (!$profile?.id) return;
+        const extracted = extractProviderContacts({ performers: [performer] }, documentId || '', undefined);
+        if (extracted.length === 0) return;
+        const existing = getContacts($profile.id);
+        const match = findMatch(extracted[0], existing);
+        if (match.matchIndex >= 0) {
+            // Already exists
+            savedIndexes = new Set([...savedIndexes, index]);
+            return;
+        }
+        await addContact($profile.id, extracted[0]);
+        savedIndexes = new Set([...savedIndexes, index]);
+    }
 
     // Generic function to check if a value is valid (not undefined, null, empty string, or "undefined" string)
     function isValidValue(value: any): boolean {
@@ -263,6 +287,22 @@
                             {/each}
                         {/if}
                     </div>
+                    <div class="save-contact-action">
+                        <button
+                            class="button -small"
+                            class:-saved={savedIndexes.has(index)}
+                            onclick={() => handleSaveToContacts(performer, index)}
+                            disabled={savedIndexes.has(index)}
+                        >
+                            {#if savedIndexes.has(index)}
+                                <svg class="btn-icon"><use href="/icons-o.svg#checked" /></svg>
+                                {$t('contacts.saved')}
+                            {:else}
+                                <svg class="btn-icon"><use href="/icons.svg#user" /></svg>
+                                {$t('contacts.save-to-directory')}
+                            {/if}
+                        </button>
+                    </div>
                 </div>
             </div>
             {/if}
@@ -434,6 +474,28 @@
     .card:hover .actions a:hover {
         background-color: var(--color-interactivity);
         color: var(--color-interactivity-text);
+    }
+
+    .save-contact-action {
+        width: 100%;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--color-border, #e0e0e0);
+    }
+
+    .save-contact-action .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .save-contact-action .btn-icon {
+        width: 1rem;
+        height: 1rem;
+        fill: currentColor;
+    }
+
+    .save-contact-action .button.-saved {
+        color: var(--color-positive);
     }
 
     @media (max-width: 768px) {

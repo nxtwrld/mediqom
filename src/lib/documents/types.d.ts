@@ -3,6 +3,8 @@ export enum DocumentType {
   "document" = "document",
   "health" = "health",
   "internal" = "internal",
+  "contacts" = "contacts",
+  "appointments" = "appointments",
 }
 
 export enum DocumentState {

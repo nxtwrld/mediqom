@@ -31,6 +31,7 @@ export interface Profile {
   birthDate?: string;
   profileDocumentId?: string;
   healthDocumentId?: string;
+  settings?: Record<string, any>;
 }
 
 export interface ProfileNew {

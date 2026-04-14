@@ -765,10 +765,13 @@
       "email": "Email",
       "enable-total-privacy": "Enable total privacy",
       "full-name": "Full Name",
-      "healh-profile": "Healh profile",
+      "feet": "Feet",
+      "healh-profile": "Health Profile",
+      "health-subtitle": "Input your key health data to build a personalized digital health profile.",
       "hide-passphrase": "Hide passphrase.",
       "hit-save-to-start": "Hit SAVE to Start!",
       "i-am-not-sure": "I am not sure",
+      "inches": "Inches",
       "i-stored-or-remembered-the-passphrase-myself": "I stored or remembered the passphrase myself.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "If you loose this passphrase it can never be recovered and all your data will be lost. We suggest to keep it in password manager securely",
       "language": "Language",
@@ -3979,5 +3982,37 @@
       "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records.",
       "link": "Learn more about our security"
     }
+  },
+  "contacts": {
+    "nav": "My Doctors",
+    "title": "My Doctors",
+    "search-placeholder": "Search by name, specialty, or institution...",
+    "empty": "No doctor contacts yet. Contacts will be automatically extracted from your imported documents.",
+    "add-to-phone": "Add to Phone",
+    "update-on-phone": "Update on Phone",
+    "synced-to-device": "Synced to device",
+    "delete": "Delete",
+    "call": "Call",
+    "email": "Send email",
+    "map": "View on map",
+    "license": "License",
+    "confirm-delete": "Remove {name} from your doctor directory?",
+    "save-to-directory": "Save to My Doctors",
+    "saved": "Saved"
+  },
+  "appointments": {
+    "nav": "Appointments",
+    "title": "Appointments",
+    "empty": "No appointments yet. Appointments will be automatically extracted from your imported documents.",
+    "needs-action": "Needs Your Input",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "set-date": "Set Date",
+    "dismiss": "Dismiss",
+    "save": "Save",
+    "cancel": "Cancel",
+    "export": "Export",
+    "export-all": "Export All",
+    "synced": "Synced to calendar"
   }
 }

@@ -30,6 +30,7 @@ export const POST: RequestHandler = async ({
     privateKey,
     key_hash,
     documents,
+    settings,
     // Post-quantum (ML-KEM) fields
     kemPublicKey,
     encryptedKemSecretKey,
@@ -52,6 +53,7 @@ export const POST: RequestHandler = async ({
     language,
     publicKey,
     user_role: role ?? 'individual',
+    settings: settings ?? {},
     updated_at: new Date(),
   };
   if (kemPublicKey) {

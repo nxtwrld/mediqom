@@ -82,6 +82,18 @@
             >
                 {$t('medications.title')}
             </a>
+            <a
+                href="/med/p/{$profile.id}/contacts"
+                class:-active={isActive(`/med/p/${$profile.id}/contacts`)}
+            >
+                {$t('contacts.nav')}
+            </a>
+            <a
+                href="/med/p/{$profile.id}/appointments"
+                class:-active={isActive(`/med/p/${$profile.id}/appointments`)}
+            >
+                {$t('appointments.nav')}
+            </a>
         {:else}
             <div class="profile-spacer"></div>
         {/if}

@@ -31,6 +31,8 @@ import { logger } from "$lib/logging/logger";
 import { profileContextManager } from "$lib/context/integration/profile-context";
 import { apiFetch } from "$lib/api/client";
 import { deriveSections } from "$lib/documents/sections";
+import { processDocumentForContacts } from "$lib/contacts/store";
+import { processDocumentForAppointments } from "$lib/calendar/store";
 // Removed embedding migration import - now using medical terms classification
 
 export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
@@ -620,6 +622,14 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
       profileId: profile_id || user_id,
       error,
     });
+  }
+
+  // Extract contacts and appointments from medical documents (fire-and-forget)
+  if (document.type === DocumentType.document && newDocument.content) {
+    const pid = profile_id || user_id;
+    const docDate = newDocument.metadata?.date;
+    processDocumentForContacts(pid, newDocument.id, newDocument.content, docDate).catch(() => {});
+    processDocumentForAppointments(pid, newDocument.id, newDocument.content, docDate).catch(() => {});
   }
 
   return newDocument;

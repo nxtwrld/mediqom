@@ -108,7 +108,10 @@
       "Bash(git rm:*)",
       "Bash(npm audit:*)",
       "WebFetch(domain:cyber.gouv.fr)",
-      "WebFetch(domain:messervices.cyber.gouv.fr)"
+      "WebFetch(domain:messervices.cyber.gouv.fr)",
+      "Bash(psql -l)",
+      "Bash(supabase db:*)",
+      "Bash(supabase link:*)"
     ],
     "deny": []
   }
