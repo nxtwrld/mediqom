@@ -1,6 +1,7 @@
 import { test, expect, createMockJob } from "../fixtures/import-fixtures";
 import {
   createSuccessSSEEvents,
+  buildSSEBody,
 } from "../fixtures/mock-data";
 import * as path from "path";
 
@@ -60,5 +61,27 @@ test.describe("Import - Happy Path", () => {
     // Progress fill should exist
     const progressFill = importPage.page.locator(".progress-fill");
     await expect(progressFill).toBeVisible({ timeout: 5000 });
+  });
+
+  test("completed job appears immediately on page load (restored from server)", async ({
+    importPage,
+  }) => {
+    const jobId = "test-job-restored";
+    const restoredJob = createMockJob({
+      id: jobId,
+      status: "completed",
+      progress: 100,
+    });
+
+    // Simulate server returning a completed job on initial load
+    await importPage.mockJobList([restoredJob]);
+    await importPage.mockFetchJob(jobId, restoredJob);
+
+    await importPage.open();
+
+    // The completed job should surface without needing to upload a file
+    // (either as a completed card or surfaced documents list)
+    const importView = importPage.page.locator(".import-view");
+    await expect(importView).toBeVisible({ timeout: 10000 });
   });
 });

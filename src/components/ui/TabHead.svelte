@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { TABS } from './Tabs.svelte';
     import type { TabInterface } from './Tabs.svelte';
@@ -18,7 +18,7 @@
 	const selectTab = tabContext?.selectTab ?? (() => {});
 	const selectedTab = tabContext?.selectedTab ?? writable(0);
 
-	registerTab(tab, id);
+	untrack(() => registerTab(tab, id));
 </script>
 
 

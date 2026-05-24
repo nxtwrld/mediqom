@@ -1,8 +1,8 @@
 /**
  * Results Aggregator Node
  *
- * Aggregates results from all parallel specialized nodes that were executed
- * via the multi-node-dispatcher. Validates completeness and creates summary.
+ * Aggregates results from all parallel specialized nodes dispatched via the Send API.
+ * Validates completeness and creates summary.
  */
 
 import type { DocumentProcessingState } from "../state";

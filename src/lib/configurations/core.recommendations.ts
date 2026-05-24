@@ -2,6 +2,7 @@ import coreDiagnosis from "./core.diagnosis";
 import coreBodyParts from "./core.bodyParts";
 import corePerformer from "./core.performer";
 import coreSignals from "./core.signals";
+import coreTreatmentGoal from "./core.treatmentGoal";
 
 /**
  * Core Recommendations Schema
@@ -101,9 +102,7 @@ export default {
           goals: {
             type: "array",
             description: "Treatment or care goals",
-            items: {
-              type: "string",
-            },
+            items: coreTreatmentGoal,
           },
           duration: {
             type: "string",

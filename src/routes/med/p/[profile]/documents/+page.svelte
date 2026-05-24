@@ -20,9 +20,9 @@
 </script>
 
 <div class="page -empty">
-
-<h1 class="h1 heading">{$t('app.nav.documents')}</h1>
-
+    <div class="heading">
+<h1 class="h1">{$t('app.nav.documents')}</h1>
+        </div>
 <Documents user={$profile.id} filterTags={data.filters.tags} />
 
 </div>

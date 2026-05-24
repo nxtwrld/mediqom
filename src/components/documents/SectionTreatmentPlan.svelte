@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
+    import { normalizeTreatmentGoals } from '$lib/careplan/normalize';
 
     interface Props {
         data: any;
@@ -11,8 +12,10 @@
     let { data, document, key }: Props = $props();
 
     let hasTreatmentPlan = $derived(data && data.hasTreatmentPlan);
-    
-    let treatmentGoals = $derived(data?.treatmentGoals || []);
+
+    // Legacy extractions stored goals as plain strings; new ones are
+    // structured objects (see src/lib/configurations/core.treatmentGoal.ts).
+    let treatmentGoals = $derived(normalizeTreatmentGoals(data?.treatmentGoals));
     let therapies = $derived(data?.therapies || []);
     let medications = $derived(data?.medications || []);
     let procedures = $derived(data?.procedures || []);
@@ -92,13 +95,15 @@
         <h4 class="section-title-sub">{$t('report.treatment-goals')}</h4>
         <ul class="list-items">
             {#each treatmentGoals as goal}
-                <li class="panel goal-item {getPriorityClass(goal.priority)}">
+                <li class="panel goal-item {getPriorityClass(goal.priority || '')}">
                     <div class="goal-header">
                         <div class="goal-main">
-                            <h5 class="goal-title">{goal.title}</h5>
-                            <p class="goal-description">{goal.description}</p>
+                            <h5 class="goal-title">{goal.goal}</h5>
+                            {#if goal.description}
+                                <p class="goal-description">{goal.description}</p>
+                            {/if}
                         </div>
-                        
+
                         <div class="goal-badges">
                             {#if goal.priority}
                                 <span class="priority-badge {getPriorityClass(goal.priority)}">
@@ -112,29 +117,22 @@
                             {/if}
                         </div>
                     </div>
-                    
+
                     <div class="goal-details">
-                        {#if goal.targetOutcome}
-                            <div class="detail-item">
-                                <span class="label">{$t('report.target-outcome')}:</span>
-                                <span class="value">{goal.targetOutcome}</span>
-                            </div>
-                        {/if}
-                        
                         {#if goal.measurableOutcome}
                             <div class="detail-item">
                                 <span class="label">{$t('report.measurable-outcome')}:</span>
                                 <span class="value">{goal.measurableOutcome}</span>
                             </div>
                         {/if}
-                        
-                        {#if goal.timeframe}
+
+                        {#if goal.timeline}
                             <div class="detail-item">
                                 <span class="label">{$t('report.timeframe')}:</span>
-                                <span class="value">{formatDuration(goal.timeframe)}</span>
+                                <span class="value">{formatDuration(goal.timeline)}</span>
                             </div>
                         {/if}
-                        
+
                         {#if goal.achievabilityScore}
                             <div class="detail-item">
                                 <span class="label">{$t('report.achievability-score')}:</span>

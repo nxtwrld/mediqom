@@ -235,6 +235,9 @@ export interface DocumentProcessingState {
   // Quality validation
   qualityChecks?: string[];
 
+  // Which specialized node to run (set per-Send dispatch instance)
+  currentNodeId?: string;
+
   // Multi-node execution results
   multiNodeResults?: {
     processedNodes: string[];

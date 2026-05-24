@@ -33,11 +33,13 @@
 </script>
 
 <div class="page -empty">
-	<div class="page-header">
+	<div class="heading">
 		<h1 class="h1 heading">{$t('medications.title')}</h1>
-		<button type="button" class="button -primary -small" onclick={() => showAddModal = true}>
-			{$t('medications.add')}
-		</button>
+		<div class="toolbar">
+			<button type="button" onclick={() => showAddModal = true}>
+				{$t('medications.add')}
+			</button>
+		</div>
 	</div>
 
 	<MedicationList medications={$medications} extractedMedications={$extracted} profileId={$profile.id} />
@@ -53,11 +55,3 @@
 	</Modal>
 {/if}
 
-<style>
-	.page-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: var(--ui-pad-medium);
-	}
-</style>

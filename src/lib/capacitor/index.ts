@@ -76,17 +76,14 @@ async function initKeyboard(): Promise<void> {
 
   try {
     const { Keyboard } = await import("@capacitor/keyboard");
+    const { keyboardHeight } = await import("./keyboard-store");
 
-    // Listen for keyboard events if needed
     Keyboard.addListener("keyboardWillShow", (info) => {
-      console.log(
-        "[Capacitor] Keyboard will show, height:",
-        info.keyboardHeight,
-      );
+      keyboardHeight.set(info.keyboardHeight);
     });
 
     Keyboard.addListener("keyboardWillHide", () => {
-      console.log("[Capacitor] Keyboard will hide");
+      keyboardHeight.set(0);
     });
   } catch (error) {
     console.warn("[Capacitor] Keyboard not available:", error);

@@ -216,54 +216,17 @@
                 );
                 return { studies: Array.isArray(imaging) ? imaging : [imaging], attachments: allAttachments };
             }
-            case 'dental':
-                return document.content.dental;
-            case 'immunizations':
-                return document.content.immunizations;
-            case 'admission':
-                return document.content.admission;
             case 'procedures':
                 return document.content.procedures;
             case 'anesthesia':
                 return document.content.anesthesia;
-            case 'specimens':
-                return document.content.specimens;
-            case 'microscopic':
-                return document.content.microscopic;
-            case 'molecular':
-                return document.content.molecular;
-            case 'ecg':
-                return document.content.ecg;
-            case 'echo':
-                return document.content.echo;
             case 'triage':
                 return document.content.triage;
-            case 'treatments':
-                return document.content.treatments;
-            case 'assessment':
-                return document.content.assessment;
-            // Future enhanced sections (will be added when components are created)
-            case 'tumorCharacteristics':
-                return document.content.tumorCharacteristics;
-            case 'treatmentPlan':
-                return document.content.treatmentPlan;
-            case 'treatmentResponse':
-                return document.content.treatmentResponse;
-            case 'imagingFindings':
-                return document.content.imagingFindings;
-            case 'grossFindings':
-                return document.content.grossFindings;
-            case 'specialStains':
-                return document.content.specialStains;
             case 'allergies':
                 return document.content.allergies;
             case 'medications':
                 // Include both medications and prescriptions data for comprehensive view
                 return document.content.medications || document.content.prescriptions || document.content.prescription;
-            case 'procedures':
-                return document.content.procedures;
-            case 'socialHistory':
-                return document.content.socialHistory;
             default:
                 return null;
         }

@@ -48,7 +48,7 @@
 	{#if loading}
 		<p>{$t('app.loading')}</p>
 	{:else if medication}
-		<div class="page-header">
+		<div class="heading">
 			<h1 class="h1 heading">{medication.content.medication.medicationName}</h1>
 			<div class="actions">
 				<a
@@ -132,12 +132,6 @@
 </div>
 
 <style>
-	.page-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: var(--ui-pad-large);
-	}
 	.actions {
 		display: flex;
 		gap: var(--ui-pad-small);

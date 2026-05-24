@@ -112,6 +112,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
                     </a>
                     <!--div class="spacer"></div-->
                     <a href="/med/p/{$profile.id}/documents" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/documents/', $page.url.pathname)}>{ $t('app.nav.documents') }</a>
+                    <a href="/med/p/{$profile.id}/medications" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/medications/', $page.url.pathname)}>{ $t('medications.title') }</a>
                     <a href="/med/p/{$profile.id}/contacts" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/contacts/', $page.url.pathname)}>{ $t('contacts.nav') }</a>
                     <a href="/med/p/{$profile.id}/appointments" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/appointments/', $page.url.pathname)}>{ $t('appointments.nav') }</a>
                     <!--a href="/med/p/{$profile.id}/history" class="sub-item" class:-active={isActive('/med/p/' +$profile.id + '/history/', $page.url.pathname)}>{ $t('app.nav.history') }</a-->

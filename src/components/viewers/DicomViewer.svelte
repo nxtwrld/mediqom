@@ -20,6 +20,7 @@
     let rotation = $state(0);
     let isMultiFrame = $state(false);
     let currentSlice = $state(0);
+    const sliceId = `slice-ctrl-${Math.random().toString(36).slice(2)}`;
     let totalSlices = $state(0);
     let showVoiDropdown = $state(false);
     let showColorMapDropdown = $state(false);
@@ -541,10 +542,11 @@
         <!-- Slice controls for multi-frame -->
         {#if isMultiFrame}
             <div class="slice-controls">
-                <label class="slice-label">
+                <label class="slice-label" for={sliceId}>
                     {$t('dicom.slice')}: {currentSlice + 1} / {totalSlices}
                 </label>
                 <input
+                    id={sliceId}
                     type="range"
                     min="0"
                     max={totalSlices - 1}

@@ -3,6 +3,7 @@ import coreRecommendations from "./core.recommendations";
 import coreDiagnosis from "./core.diagnosis";
 import corePerformer from "./core.performer";
 import coreBodyParts from "./core.bodyParts";
+import coreTreatmentGoal from "./core.treatmentGoal";
 
 /**
  * Treatment Plan Schema
@@ -299,11 +300,7 @@ export default {
       treatmentGoals: {
         type: "array",
         description: "Specific treatment goals",
-        items: {
-          type: "string",
-          description:
-            "Treatment goal. Translate result to the [LANGUAGE] language if the source is in a different language.",
-        },
+        items: coreTreatmentGoal,
       },
 
       contraindications: {

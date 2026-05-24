@@ -1,6 +1,68 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
 ## Project Overview
 
@@ -448,6 +510,46 @@ export const POST: RequestHandler = async ({
 - **Platform adapters**: `src/lib/capacitor/auth.ts`, `src/lib/device.ts`
 - **Native directories**: `android/`, `ios/`, `mobile/`
 - For detailed context, use the `@mobile` command. Reference: `RESPONSIVE.md`
+
+### Keyboard Handling on Native (iOS/Android)
+
+**Key facts:**
+- `capacitor.config.ts` sets `Keyboard.resize: "none"` — the native WebView frame never resizes when the keyboard appears. `window.innerHeight` and `visualViewport` are both unaffected, so CSS-only or `visualViewport`-based approaches won't detect the keyboard.
+- Use the **Capacitor Keyboard plugin events** (`keyboardWillShow` / `keyboardWillHide`) — they fire with the exact native keyboard height before the animation starts.
+- `src/lib/capacitor/keyboard-store.ts` exports a `keyboardHeight` writable store (number, px). It is updated by `initKeyboard()` in `src/lib/capacitor/index.ts` which is called once at app startup.
+
+**Pattern for any fixed/absolute component that must stay above the keyboard:**
+
+```svelte
+<script lang="ts">
+  import { keyboardHeight } from '$lib/capacitor/keyboard-store';
+</script>
+
+<!-- Use $keyboardHeight directly — it's 0 on web, real px on native -->
+<div class="my-panel" style="bottom: {$keyboardHeight}px">
+  <!-- content -->
+</div>
+```
+
+The panel must have both `top` and `bottom` set (or use `height`) so that raising `bottom` shrinks it rather than moving it off-screen.
+
+**iOS auto-zoom prevention:** iOS zooms any input with `font-size < 16px`. Always set `font-size: 16px` on `<input>` and `<textarea>` inside `@media (max-width: 768px)` blocks. The mobile viewport also has `maximum-scale=1.0` as a safety net.
+
+**Pattern for scrollable forms with multiple inputs** — use the `keyboardScroll` action from `src/lib/capacitor/keyboard-scroll.ts`. Attach it once to the scroll container; it automatically adds `padding-bottom` equal to the keyboard height and scrolls the focused input into view.
+
+```svelte
+<script lang="ts">
+  import { keyboardScroll } from '$lib/capacitor/keyboard-scroll';
+</script>
+
+<div class="form-scroll" use:keyboardScroll>
+  <input ... />
+  <input ... />
+  <textarea ... />
+</div>
+```
+
+No per-input logic needed. On keyboard hide the padding is removed automatically.
 
 ## Session Development
 

@@ -60,3 +60,18 @@
   height: 100%;
   fill: currentColor;
 }
+
+
+
+.heading .toolbar button {
+  color: var(--color-text-secondary);
+}
+
+.heading .toolbar button:hover {
+  background: var(--color-interactivity);
+  color: var(--color-interactivity-text);
+}
+.heading .toolbar button.-danger:hover {
+  background: var(--color-negative);
+  color: var(--color-negative-text);
+}

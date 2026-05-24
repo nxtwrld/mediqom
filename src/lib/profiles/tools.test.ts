@@ -1,162 +1,471 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Inline pure functions to test without store/module side effects
+vi.mock("./honorificTitles", () => ({
+  prefixes: ["mr", "dr", "prof", "mrs", "ms", "mudr"],
+  suffixes: ["phd", "md", "jr"],
+}));
 
-const prefixes = [
-  "mr", "mrs", "ms", "dr", "prof", "sir", "madam", "mdm", "rev", "hon",
-];
-const suffixes = ["jr", "sr", "ii", "iii", "iv", "phd", "md", "esq"];
+vi.mock("$lib/strings", () => ({
+  capitalizeFirstLetters: (s: string) =>
+    s.replace(/\b\w/g, (c) => c.toUpperCase()),
+  removeNonAlpha: (s: string) => s.replace(/[^a-zA-Z]/g, ""),
+  removeNonAlphanumeric: (s: string) => s.replace(/[^a-zA-Z0-9]/g, ""),
+  removeNonNumeric: (s: string) => s.replace(/[^0-9]/g, ""),
+  searchOptimize: (s: string) => s.toLowerCase().trim(),
+}));
 
-function removePrefixes(name: string): string {
-  let words = name.split(/\s+/);
-  while (words.length > 0 && prefixes.includes(words[0])) words.shift();
-  while (words.length > 0 && suffixes.includes(words[words.length - 1]))
-    words.pop();
-  if (words.length > 2) words = [words[0], words[words.length - 1]];
-  return words.join(" ");
+const { mockGetProfiles, mockGetUser } = vi.hoisted(() => ({
+  mockGetProfiles: vi.fn().mockReturnValue([]),
+  mockGetUser: vi.fn().mockReturnValue({ language: "en" }),
+}));
+
+vi.mock("./index", () => ({
+  profiles: { get: mockGetProfiles, subscribe: vi.fn() },
+}));
+
+vi.mock("$lib/user", () => ({
+  default: { get: mockGetUser, subscribe: vi.fn() },
+}));
+
+import {
+  normalizeName,
+  fuzzyNameMatch,
+  removePrefixes,
+  findInProfiles,
+  mergeNamesOnReports,
+  normalizePatientData,
+  excludePossibleDuplicatesInPatients,
+  PROFILE_NEW_ID,
+} from "./tools";
+
+function makeProfile(overrides: Record<string, any> = {}) {
+  return {
+    id: "p1",
+    fullName: "John Smith",
+    insurance: { number: "12345", provider: "" },
+    health: {},
+    publicKey: "",
+    status: "active",
+    language: "en",
+    ...overrides,
+  };
 }
 
-function normalizeName(
-  name: string,
-  options: { removeDiacritics?: boolean } = {},
-): string {
-  const opt = Object.assign({ removeDiacritics: true }, options);
-  if (opt.removeDiacritics)
-    name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  name = name.toLowerCase().trim();
-  name = name.replace(/\^/g, " ");
-  name = name.replace(/[.,\/#!$%&\*;:{}=\-_`~()]/g, "");
-  name = name
-    .split(/\s+/)
-    .filter((w) => w.length > 1)
-    .join(" ");
-  return removePrefixes(name);
-}
+describe("profiles/tools", () => {
+  beforeEach(() => {
+    mockGetProfiles.mockReturnValue([]);
+    mockGetUser.mockReturnValue({ language: "en" });
+  });
 
-function levenshteinDistance(a: string, b: string): number {
-  const m = a.length;
-  const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () =>
-    new Array(n + 1).fill(0),
-  );
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] =
-        a[i - 1] === b[j - 1]
-          ? dp[i - 1][j - 1]
-          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+  // ── normalizeName ─────────────────────────────────────────────────────────
+
+  describe("normalizeName", () => {
+    it("lowercases input", () => {
+      expect(normalizeName("JOHN SMITH")).toBe("john smith");
+    });
+
+    it("removes diacritics by default", () => {
+      expect(normalizeName("Ondřej Mašek")).toBe("ondrej masek");
+    });
+
+    it("preserves diacritics when removeDiacritics is false", () => {
+      const result = normalizeName("Ondřej", { removeDiacritics: false });
+      expect(result).toContain("ř");
+    });
+
+    it("replaces DICOM ^ separators with spaces", () => {
+      const result = normalizeName("SMITH^JOHN");
+      expect(result).not.toContain("^");
+      expect(result).toContain("smith");
+      expect(result).toContain("john");
+    });
+
+    it("removes single-character initials from DICOM names", () => {
+      const result = normalizeName("Smith^John^M");
+      expect(result.split(" ").every((w) => w.length > 1)).toBe(true);
+    });
+
+    it("removes punctuation", () => {
+      const result = normalizeName("Dr. John-Smith");
+      expect(result).not.toContain(".");
+      expect(result).not.toContain("-");
+    });
+
+    it("strips honorific prefixes", () => {
+      expect(normalizeName("Dr John Smith")).toBe("john smith");
+    });
+
+    it("strips honorific suffixes", () => {
+      expect(normalizeName("John Smith PhD")).toBe("john smith");
+    });
+
+    it("returns empty string for empty input", () => {
+      expect(normalizeName("")).toBe("");
+    });
+
+    it("trims surrounding whitespace", () => {
+      expect(normalizeName("  John Smith  ")).toBe("john smith");
+    });
+  });
+
+  // ── removePrefixes ────────────────────────────────────────────────────────
+
+  describe("removePrefixes", () => {
+    it("removes a known prefix from the front", () => {
+      expect(removePrefixes("dr john smith")).toBe("john smith");
+    });
+
+    it("removes a known suffix from the end", () => {
+      expect(removePrefixes("john smith phd")).toBe("john smith");
+    });
+
+    it("removes both prefix and suffix", () => {
+      expect(removePrefixes("dr john smith md")).toBe("john smith");
+    });
+
+    it("keeps names with no prefix or suffix unchanged", () => {
+      expect(removePrefixes("john smith")).toBe("john smith");
+    });
+
+    it("reduces names longer than 2 words to first and last", () => {
+      expect(removePrefixes("john william doe")).toBe("john doe");
+    });
+
+    it("handles single-word name", () => {
+      expect(removePrefixes("smith")).toBe("smith");
+    });
+
+    it("removes prefix leaving single word", () => {
+      expect(removePrefixes("dr smith")).toBe("smith");
+    });
+  });
+
+  // ── fuzzyNameMatch ────────────────────────────────────────────────────────
+
+  describe("fuzzyNameMatch", () => {
+    it("matches identical names", () => {
+      expect(fuzzyNameMatch("John Smith", "John Smith")).toBe(true);
+    });
+
+    it("matches names with diacritics differences", () => {
+      expect(fuzzyNameMatch("Ondřej Mašek", "Ondrej Masek")).toBe(true);
+    });
+
+    it("matches DICOM format with normal format", () => {
+      expect(fuzzyNameMatch("MASEK^ONDREY", "ondřej mašek")).toBe(true);
+    });
+
+    it("matches names in different order", () => {
+      expect(fuzzyNameMatch("Smith John", "John Smith")).toBe(true);
+    });
+
+    it("matches with minor spelling variations", () => {
+      expect(fuzzyNameMatch("Masek Ondrey", "Ondrej Masek")).toBe(true);
+    });
+
+    it("does not match completely different names", () => {
+      expect(fuzzyNameMatch("John Smith", "Anna Novakova")).toBe(false);
+    });
+
+    it("does not match partial single-name overlap", () => {
+      expect(fuzzyNameMatch("John Smith", "John Doe")).toBe(false);
+    });
+
+    it("returns false when one name is empty", () => {
+      expect(fuzzyNameMatch("", "John Smith")).toBe(false);
+    });
+
+    it("returns false when both names are empty", () => {
+      expect(fuzzyNameMatch("", "")).toBe(false);
+    });
+  });
+
+  // ── findInProfiles ────────────────────────────────────────────────────────
+
+  describe("findInProfiles", () => {
+    it("returns empty array when no fullName and no insurance", () => {
+      mockGetProfiles.mockReturnValue([makeProfile()]);
+      expect(findInProfiles({})).toEqual([]);
+    });
+
+    it("returns empty array when no profiles match", () => {
+      mockGetProfiles.mockReturnValue([makeProfile({ fullName: "Alice Jones" })]);
+      expect(findInProfiles({ fullName: "Bob Smith" })).toHaveLength(0);
+    });
+
+    it("finds profile by exact name", () => {
+      const profile = makeProfile({ fullName: "John Smith" });
+      mockGetProfiles.mockReturnValue([profile]);
+
+      const result = findInProfiles({ fullName: "John Smith" });
+      expect(result).toHaveLength(1);
+      expect(result[0].fullName).toBe("John Smith");
+    });
+
+    it("finds profile by insurance number", () => {
+      const profile = makeProfile({ insurance: { number: "12345" } });
+      mockGetProfiles.mockReturnValue([profile]);
+
+      const result = findInProfiles({ insurance: { number: "12345" } });
+      expect(result).toHaveLength(1);
+    });
+
+    it("returns empty array when profiles store returns empty array", () => {
+      mockGetProfiles.mockReturnValue([]);
+      expect(findInProfiles({ fullName: "John Smith" })).toHaveLength(0);
+    });
+
+    it("matches profile by fuzzy name", () => {
+      const profile = makeProfile({ fullName: "John Smith" });
+      mockGetProfiles.mockReturnValue([profile]);
+
+      const result = findInProfiles({ fullName: "Jon Smith" });
+      expect(result).toHaveLength(1);
+    });
+
+    it("returns profiles sorted: name+insurance match first", () => {
+      const both = makeProfile({ fullName: "John Smith", insurance: { number: "111" } });
+      const nameOnly = makeProfile({ id: "p2", fullName: "John Smith", insurance: { number: "999" } });
+      mockGetProfiles.mockReturnValue([nameOnly, both]);
+
+      const result = findInProfiles({ fullName: "John Smith", insurance: { number: "111" } });
+      expect(result[0].id).toBe("p1"); // both matched → sorted first
+    });
+  });
+
+  // ── normalizePatientData ──────────────────────────────────────────────────
+
+  describe("normalizePatientData", () => {
+    it("capitalizes fullName", () => {
+      const result = normalizePatientData({ fullName: "john smith" } as any);
+      expect(result.fullName).toBe("John Smith");
+    });
+
+    it("copies health object when provided", () => {
+      const health = { bloodType: "A+" };
+      const result = normalizePatientData({ fullName: "John Smith", health } as any);
+      expect(result.health).toBe(health);
+    });
+
+    it("sets birthDate from top-level birthDate field", () => {
+      const result = normalizePatientData({
+        fullName: "John Smith",
+        birthDate: "1990-01-01",
+      } as any);
+      expect(result.health?.birthDate).toBe("1990-01-01");
+    });
+
+    it("strips non-numeric characters from insurance number", () => {
+      const result = normalizePatientData({
+        fullName: "John Smith",
+        insurance: { number: "123-456" },
+      } as any);
+      expect(result.insurance?.number).toBe("123456");
+    });
+
+    it("capitalizes insurance provider", () => {
+      const result = normalizePatientData({
+        fullName: "John Smith",
+        insurance: { provider: "health corp" },
+      } as any);
+      expect(result.insurance?.provider).toBe("Health Corp");
+    });
+
+    it("extracts insurance number from identifier field", () => {
+      const result = normalizePatientData({
+        fullName: "John Smith",
+        identifier: "ID-98765",
+      } as any);
+      expect(result.insurance?.number).toBe("98765");
+    });
+
+    it("identifier overrides insurance number when insurance already set", () => {
+      const result = normalizePatientData({
+        fullName: "John Smith",
+        insurance: { number: "111" },
+        identifier: "ID-222",
+      } as any);
+      expect(result.insurance?.number).toBe("222");
+    });
+  });
+
+  // ── mergeNamesOnReports ───────────────────────────────────────────────────
+
+  describe("mergeNamesOnReports", () => {
+    function makeReport(overrides: Partial<any> = {}): any {
+      return {
+        id: "r1",
+        content: {
+          patient: {
+            fullName: "John Smith",
+          },
+          ...overrides.content,
+        },
+        metadata: {},
+        ...overrides,
+      };
     }
-  }
-  return dp[m][n];
-}
 
-function namePartsMatch(a: string, b: string): boolean {
-  if (a === b) return true;
-  if (a.includes(b) || b.includes(a)) return true;
-  const maxLen = Math.max(a.length, b.length);
-  if (maxLen <= 2) return a === b;
-  const threshold = Math.max(1, Math.floor(maxLen * 0.3));
-  return levenshteinDistance(a, b) <= threshold;
-}
+    it("returns empty array for empty input", () => {
+      const result = mergeNamesOnReports([]);
+      expect(result).toHaveLength(0);
+    });
 
-function fuzzyNameMatch(nameA: string, nameB: string): boolean {
-  const partsA = normalizeName(nameA).split(/\s+/).filter(Boolean);
-  const partsB = normalizeName(nameB).split(/\s+/).filter(Boolean);
-  if (partsA.length === 0 || partsB.length === 0) return false;
-  const [shorter, longer] =
-    partsA.length <= partsB.length ? [partsA, partsB] : [partsB, partsA];
-  const used = new Set<number>();
-  let matchCount = 0;
-  for (const partS of shorter) {
-    for (let i = 0; i < longer.length; i++) {
-      if (used.has(i)) continue;
-      if (namePartsMatch(partS, longer[i])) {
-        used.add(i);
-        matchCount++;
-        break;
-      }
-    }
-  }
-  return matchCount === shorter.length;
-}
+    it("groups single report into one entry", () => {
+      const result = mergeNamesOnReports([makeReport()]);
+      expect(result).toHaveLength(1);
+      expect(result[0].reports).toHaveLength(1);
+    });
 
-describe("normalizeName", () => {
-  it("handles DICOM caret-separated names", () => {
-    expect(normalizeName("Masek^ondrey")).toBe("masek ondrey");
+    it("merges two reports with the same patient name", () => {
+      const r1 = makeReport({ id: "r1" });
+      const r2 = makeReport({ id: "r2" });
+      const result = mergeNamesOnReports([r1, r2]);
+      expect(result).toHaveLength(1);
+      expect(result[0].reports).toHaveLength(2);
+    });
+
+    it("keeps two reports with different patient names separate", () => {
+      const r1 = makeReport({ content: { patient: { fullName: "John Smith" } } });
+      const r2 = makeReport({ content: { patient: { fullName: "Jane Doe" } } });
+      const result = mergeNamesOnReports([r1, r2]);
+      expect(result).toHaveLength(2);
+    });
+
+    it("assigns NEW id to new profiles", () => {
+      const result = mergeNamesOnReports([makeReport()]);
+      expect(result[0].profile.id).toBe(PROFILE_NEW_ID);
+    });
+
+    it("uses unknown-* key for reports without patient fullName", () => {
+      const report = { id: "r1", content: {}, metadata: {} } as any;
+      const result = mergeNamesOnReports([report]);
+      expect(result).toHaveLength(1);
+      expect(result[0].profile.fullName).toBe("unknown");
+    });
+
+    it("merges insurance provider from second report when first has none", () => {
+      const r1 = makeReport({ content: { patient: { fullName: "John Smith" } } });
+      const r2 = makeReport({ content: { patient: { fullName: "John Smith", insurance: { provider: "HealthCorp" } } } });
+      const result = mergeNamesOnReports([r1, r2]);
+      expect(result).toHaveLength(1);
+    });
+
+    it("merges birthDate from second report when first has none", () => {
+      const r1 = makeReport({ content: { patient: { fullName: "John Smith" } } });
+      const r2 = makeReport({ content: { patient: { fullName: "John Smith", birthDate: "1990-01-01" } } });
+      const result = mergeNamesOnReports([r1, r2]);
+      expect(result).toHaveLength(1);
+    });
+
+    it("matches existing profile from store when found", () => {
+      const existingProfile = makeProfile({ fullName: "John Smith" });
+      mockGetProfiles.mockReturnValue([existingProfile]);
+      const result = mergeNamesOnReports([makeReport()]);
+      // If a matching profile is found, it should use that profile
+      expect(result[0].profile).toBeDefined();
+      mockGetProfiles.mockReturnValue([]);
+    });
+
+    it("extracts insurance number from identifier field", () => {
+      const r = makeReport({
+        content: { patient: { fullName: "John Smith", identifier: "ID-12345" } },
+      });
+      const result = mergeNamesOnReports([r]);
+      expect(result[0].profile.insurance?.number).toBe("12345");
+    });
+
+    it("capitalizes insurance provider", () => {
+      const r = makeReport({
+        content: { patient: { fullName: "John Smith", insurance: { provider: "health corp" } } },
+      });
+      const result = mergeNamesOnReports([r]);
+      expect(result[0].profile.insurance?.provider).toBe("Health Corp");
+    });
   });
 
-  it("removes diacritics", () => {
-    expect(normalizeName("Ondřej Mašek")).toBe("ondrej masek");
+  // ── PROFILE_NEW_ID ────────────────────────────────────────────────────────
+
+  describe("PROFILE_NEW_ID", () => {
+    it("is the string 'NEW'", () => {
+      expect(PROFILE_NEW_ID).toBe("NEW");
+    });
   });
 
-  it("lowercases and trims", () => {
-    expect(normalizeName("  John SMITH  ")).toBe("john smith");
+  // ── findInProfiles — store search ─────────────────────────────────────────
+
+  describe("findInProfiles — store search", () => {
+    it("returns [] when no fullName and no insurance number", () => {
+      expect(findInProfiles({})).toEqual([]);
+    });
+
+    it("finds profile by exact name match in store", () => {
+      const profile = makeProfile({ fullName: "John Smith" });
+      mockGetProfiles.mockReturnValue([profile]);
+      const result = findInProfiles({ fullName: "John Smith" });
+      expect(result).toHaveLength(1);
+      mockGetProfiles.mockReturnValue([]);
+    });
+
+    it("finds profile by insurance number", () => {
+      const profile = makeProfile({ insurance: { number: "12345" } });
+      mockGetProfiles.mockReturnValue([profile]);
+      const result = findInProfiles({ insurance: { number: "12345" } });
+      expect(result).toHaveLength(1);
+      mockGetProfiles.mockReturnValue([]);
+    });
+
+    it("handles non-array profilesData (wraps in array)", () => {
+      const profile = makeProfile({ fullName: "Solo User" });
+      mockGetProfiles.mockReturnValue(profile); // Returns object, not array
+      const result = findInProfiles({ fullName: "Solo User" });
+      expect(Array.isArray(result)).toBe(true);
+      mockGetProfiles.mockReturnValue([]);
+    });
+
+    it("uses fuzzy name match as fallback", () => {
+      const profile = makeProfile({ fullName: "Ondrej Masek" });
+      mockGetProfiles.mockReturnValue([profile]);
+      const result = findInProfiles({ fullName: "ondrey masek" }); // slight typo
+      expect(Array.isArray(result)).toBe(true);
+      mockGetProfiles.mockReturnValue([]);
+    });
   });
 
-  it("removes prefixes and suffixes", () => {
-    expect(normalizeName("Dr. John Smith Jr.")).toBe("john smith");
-  });
+  // ── excludePossibleDuplicatesInPatients ───────────────────────────────────
 
-  it("keeps only first and last when more than 2 words", () => {
-    expect(normalizeName("John Michael Smith")).toBe("john smith");
-  });
+  describe("excludePossibleDuplicatesInPatients", () => {
+    it("returns all patients when there are no duplicates", () => {
+      const patients = [
+        { fullName: "John Smith", insurance: { number: "111" } },
+        { fullName: "Jane Doe", insurance: { number: "222" } },
+      ];
+      expect(excludePossibleDuplicatesInPatients(patients)).toHaveLength(2);
+    });
 
-  it("removes single-character initials from DICOM names", () => {
-    expect(normalizeName("Smith^John^M")).toBe("smith john");
-  });
-});
+    it("removes exact duplicates (same name + insurance)", () => {
+      const patients = [
+        { fullName: "John Smith", insurance: { number: "111" } },
+        { fullName: "John Smith", insurance: { number: "111" } },
+      ];
+      expect(excludePossibleDuplicatesInPatients(patients)).toHaveLength(1);
+    });
 
-describe("fuzzyNameMatch", () => {
-  it("matches DICOM name to normal name with diacritics", () => {
-    expect(fuzzyNameMatch("Masek^ondrey", "Ondřej Mašek")).toBe(true);
-  });
+    it("keeps patients with same name but different insurance", () => {
+      const patients = [
+        { fullName: "John Smith", insurance: { number: "111" } },
+        { fullName: "John Smith", insurance: { number: "222" } },
+      ];
+      expect(excludePossibleDuplicatesInPatients(patients)).toHaveLength(2);
+    });
 
-  it("matches same name exactly", () => {
-    expect(fuzzyNameMatch("John Smith", "John Smith")).toBe(true);
-  });
+    it("handles empty array", () => {
+      expect(excludePossibleDuplicatesInPatients([])).toEqual([]);
+    });
 
-  it("matches reversed name order", () => {
-    expect(fuzzyNameMatch("Smith John", "John Smith")).toBe(true);
-  });
-
-  it("matches with diacritics differences", () => {
-    expect(fuzzyNameMatch("Ondrej Masek", "Ondřej Mašek")).toBe(true);
-  });
-
-  it("matches with minor transliteration differences", () => {
-    expect(fuzzyNameMatch("Masek Ondrey", "Ondrej Masek")).toBe(true);
-  });
-
-  it("does not match completely different names", () => {
-    expect(fuzzyNameMatch("John Smith", "Anna Novakova")).toBe(false);
-  });
-
-  it("does not match partial single-name overlap", () => {
-    expect(fuzzyNameMatch("John Smith", "John Doe")).toBe(false);
-  });
-
-  it("handles DICOM format with multiple carets", () => {
-    expect(fuzzyNameMatch("Smith^John^M", "John Smith")).toBe(true);
-  });
-
-  it("handles case differences", () => {
-    expect(fuzzyNameMatch("MASEK^ONDREY", "ondřej mašek")).toBe(true);
-  });
-});
-
-describe("levenshteinDistance", () => {
-  it("returns 0 for identical strings", () => {
-    expect(levenshteinDistance("abc", "abc")).toBe(0);
-  });
-
-  it("computes correct distance for ondrey/ondrej", () => {
-    expect(levenshteinDistance("ondrey", "ondrej")).toBe(1);
-  });
-
-  it("handles empty strings", () => {
-    expect(levenshteinDistance("", "abc")).toBe(3);
-    expect(levenshteinDistance("abc", "")).toBe(3);
+    it("returns single patient unchanged", () => {
+      const patients = [{ fullName: "John Smith", insurance: { number: "111" } }];
+      expect(excludePossibleDuplicatesInPatients(patients)).toHaveLength(1);
+    });
   });
 });

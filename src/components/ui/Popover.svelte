@@ -27,8 +27,8 @@
     const isAbsolute = $derived(x !== undefined && y !== undefined);
     const MARGIN = 10;
 
-    let wrapperEl: HTMLElement;
-    let popoverEl: HTMLElement;
+    let wrapperEl = $state<HTMLElement | undefined>(undefined);
+    let popoverEl = $state<HTMLElement | undefined>(undefined);
     let popoverStyle = $state('');
     let arrowStyle = $state('');
     let absoluteStyle = $state('');
@@ -80,7 +80,7 @@
     }
 
     async function positionPopover() {
-        const rect = wrapperEl.getBoundingClientRect();
+        const rect = wrapperEl!.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const vw = window.innerWidth;
         const vh = window.innerHeight;

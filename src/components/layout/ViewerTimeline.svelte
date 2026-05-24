@@ -334,7 +334,12 @@
     {/if}
     {#if showSignalPicker}
         <!-- Backdrop -->
-        <div class="signal-picker-backdrop" onclick={() => showSignalPicker = false}></div>
+        <div
+            class="signal-picker-backdrop"
+            onclick={() => showSignalPicker = false}
+            onkeydown={(e) => e.key === 'Escape' && (showSignalPicker = false)}
+            role="presentation"
+        ></div>
         <!-- Floating picker overlay -->
         <div class="signal-picker-overlay">
             {#each availableSignals as name}

@@ -35,9 +35,4 @@
         transition: letter-spacing .2s ease-in-out;
 
     }
-    @media (hover: hover) {
-        .empty:hover {
-            letter-spacing: .1rem;
-        }
-    }
 </style>

@@ -5,6 +5,9 @@ import { DocumentType, type Document } from '$lib/documents/types.d';
 import { logger } from '$lib/logging/logger';
 import type { Appointment, AppointmentsDocumentContent } from './types.d';
 import { extractAppointments } from './extractor';
+import { getContacts } from '$lib/contacts/store';
+import { findMatch } from '$lib/contacts/dedup';
+import type { ProviderContact } from '$lib/contacts/types.d';
 
 const APPOINTMENTS_DOC_VERSION = 1;
 
@@ -85,6 +88,32 @@ export async function processDocumentForAppointments(
     const extracted = extractAppointments(content, documentId, documentDate);
     if (extracted.length === 0) return;
 
+    // Try to match extracted providers to existing contacts
+    const existingContacts = getContacts(profileId);
+    if (existingContacts.length > 0) {
+      for (const appt of extracted) {
+        if (appt.provider?.name && !appt.provider.contactId) {
+          const candidate: ProviderContact = {
+            id: '',
+            vcard: { fn: appt.provider.name },
+            performer: {
+              role: 'specialist',
+              ...(appt.provider.specialty && { specialty: appt.provider.specialty }),
+            },
+            sourceDocuments: [],
+            createdAt: '',
+            updatedAt: '',
+            userEdited: false,
+            syncedToDevice: false,
+          };
+          const match = findMatch(candidate, existingContacts);
+          if (match.matchIndex >= 0) {
+            appt.provider.contactId = existingContacts[match.matchIndex].id;
+          }
+        }
+      }
+    }
+
     const existing = getAppointments(profileId);
     let updated = [...existing];
     let changed = false;
@@ -120,6 +149,17 @@ export async function processDocumentForAppointments(
       error,
     });
   }
+}
+
+/**
+ * Add a single appointment manually.
+ */
+export async function addAppointment(
+  profileId: string,
+  appointment: Appointment,
+): Promise<void> {
+  const existing = getAppointments(profileId);
+  await saveAppointments(profileId, [...existing, appointment]);
 }
 
 /**

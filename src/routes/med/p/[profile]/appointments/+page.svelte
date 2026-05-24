@@ -5,9 +5,17 @@
         appointmentsByProfile,
         confirmAppointment,
         dismissAppointment,
+        addAppointment,
+        updateAppointment,
     } from '$lib/calendar/store';
     import { downloadICS, downloadAllICS } from '$lib/calendar/ics-export';
     import type { Appointment } from '$lib/calendar/types.d';
+    import { getContacts, addContact } from '$lib/contacts/store';
+    import type { ProviderContact } from '$lib/contacts/types.d';
+    import Empty from '$components/ui/Empty.svelte';
+    import InputDateTime from '$components/forms/InputDateTime.svelte';
+    import Modal from '$components/ui/Modal.svelte';
+    import AppointmentForm from '$components/appointments/AppointmentForm.svelte';
 
     const appointments = $derived($profile?.id ? appointmentsByProfile($profile.id) : undefined);
 
@@ -27,8 +35,28 @@
         ($appointments || []).filter((a: Appointment) => a.status !== 'dismissed' && a.dateTime),
     );
 
+    let showAddModal = $state(false);
+    let saving = $state(false);
     let confirmingId: string | null = $state(null);
     let confirmDate = $state('');
+    let linkingId: string | null = $state(null);
+    let linkQuery = $state('');
+    let linkShowSuggestions = $state(false);
+    let linkSelectedIndex = $state(-1);
+
+    const contacts = $derived($profile?.id ? getContacts($profile.id) : []);
+
+    const filteredLinkContacts = $derived(
+        linkQuery.trim().length > 0
+            ? contacts.filter((c) =>
+                  c.vcard.fn?.toLowerCase().includes(linkQuery.trim().toLowerCase()),
+              )
+            : contacts,
+    );
+
+    function getContactName(contactId: string): string | undefined {
+        return contacts.find((c) => c.id === contactId)?.vcard.fn;
+    }
 
     function startConfirm(id: string) {
         confirmingId = id;
@@ -46,8 +74,92 @@
         await dismissAppointment($profile.id, appointmentId);
     }
 
+    function startLink(id: string) {
+        linkingId = id;
+        linkQuery = '';
+        linkShowSuggestions = true;
+        linkSelectedIndex = -1;
+    }
+
+    async function linkToContact(appointmentId: string, contact: ProviderContact) {
+        if (!$profile?.id) return;
+        await updateAppointment($profile.id, appointmentId, {
+            provider: {
+                name: contact.vcard.fn || '',
+                contactId: contact.id,
+                ...(contact.performer.specialty && { specialty: contact.performer.specialty }),
+                ...(contact.vcard.tel?.[0]?.value && { phone: contact.vcard.tel[0].value }),
+            },
+        });
+        linkingId = null;
+    }
+
+    function handleLinkInput() {
+        linkSelectedIndex = -1;
+        linkShowSuggestions = true;
+    }
+
+    function handleLinkKeydown(e: KeyboardEvent, appointmentId: string) {
+        if (!linkShowSuggestions || filteredLinkContacts.length === 0) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            linkSelectedIndex = Math.min(linkSelectedIndex + 1, filteredLinkContacts.length - 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            linkSelectedIndex = Math.max(linkSelectedIndex - 1, 0);
+        } else if (e.key === 'Enter' && linkSelectedIndex >= 0) {
+            e.preventDefault();
+            linkToContact(appointmentId, filteredLinkContacts[linkSelectedIndex]);
+        } else if (e.key === 'Escape') {
+            linkingId = null;
+        }
+    }
+
+    function handleLinkBlur() {
+        setTimeout(() => { linkShowSuggestions = false; }, 200);
+    }
+
+    async function handleSaveAsDoctor(appointment: Appointment) {
+        if (!$profile?.id || !appointment.provider?.name) return;
+        const now = new Date().toISOString();
+        const newContact: ProviderContact = {
+            id: crypto.randomUUID(),
+            vcard: {
+                fn: appointment.provider.name,
+                ...(appointment.provider.phone && { tel: [{ type: 'work', value: appointment.provider.phone }] }),
+            },
+            performer: {
+                role: 'specialist',
+                ...(appointment.provider.specialty && { specialty: appointment.provider.specialty }),
+            },
+            sourceDocuments: [],
+            createdAt: now,
+            updatedAt: now,
+            userEdited: false,
+            syncedToDevice: false,
+        };
+        await addContact($profile.id, newContact);
+        await updateAppointment($profile.id, appointment.id, {
+            provider: {
+                ...appointment.provider,
+                contactId: newContact.id,
+            },
+        });
+    }
+
     function handleExportSingle(appointment: Appointment) {
         downloadICS(appointment);
+    }
+
+    async function handleAddAppointment(appointment: Appointment) {
+        if (!$profile?.id) return;
+        saving = true;
+        try {
+            await addAppointment($profile.id, appointment);
+            showAddModal = false;
+        } finally {
+            saving = false;
+        }
     }
 
     function handleExportAll() {
@@ -72,19 +184,24 @@
     }
 </script>
 
-<div class="page-section">
-    <div class="page-header">
+<div class="page -empty">
+    <div class="heading">
         <h2 class="h2">{$t('appointments.title')}</h2>
-        {#if exportable.length > 0}
-            <button class="button -small" onclick={handleExportAll}>
-                <svg><use href="/icons.svg#download" /></svg>
-                {$t('appointments.export-all')}
+        <div class="heading-actions">
+            {#if exportable.length > 0}
+                <button class="button -small" onclick={handleExportAll}>
+                    <svg><use href="/icons.svg#download" /></svg>
+                    {$t('appointments.export-all')}
+                </button>
+            {/if}
+            <button type="button" class="button -primary -small" onclick={() => showAddModal = true}>
+                {$t('appointments.add')}
             </button>
-        {/if}
+        </div>
     </div>
 
     {#if suggested.length === 0 && upcoming.length === 0 && past.length === 0}
-        <p class="p empty-state">{$t('appointments.empty')}</p>
+        <Empty>{$t('appointments.empty')}</Empty>
     {/if}
 
     {#if suggested.length > 0}
@@ -97,7 +214,9 @@
                         {#if appointment.timeframe}
                             <p class="timeframe">{appointment.timeframe}</p>
                         {/if}
-                        {#if appointment.provider?.name}
+                        {#if appointment.provider?.contactId}
+                            <p class="provider -linked">{getContactName(appointment.provider.contactId) || appointment.provider.name}</p>
+                        {:else if appointment.provider?.name}
                             <p class="provider">{appointment.provider.name}</p>
                         {/if}
                         <span class="priority -priority-{appointment.priority}">{formatPriority(appointment.priority)}</span>
@@ -105,7 +224,7 @@
                     <div class="appointment-actions">
                         {#if confirmingId === appointment.id}
                             <div class="confirm-form">
-                                <input type="date" class="input -small" bind:value={confirmDate} />
+                                <InputDateTime type="date" bind:value={confirmDate} />
                                 <button class="button -small -primary" onclick={() => handleConfirm(appointment.id)}>
                                     {$t('appointments.save')}
                                 </button>
@@ -113,10 +232,53 @@
                                     {$t('appointments.cancel')}
                                 </button>
                             </div>
+                        {:else if linkingId === appointment.id}
+                            <div class="link-form">
+                                <input
+                                    type="text"
+                                    class="input"
+                                    bind:value={linkQuery}
+                                    oninput={handleLinkInput}
+                                    onkeydown={(e) => handleLinkKeydown(e, appointment.id)}
+                                    onblur={handleLinkBlur}
+                                    onfocus={() => { linkShowSuggestions = true; }}
+                                    placeholder={$t('appointments.select-doctor')}
+                                    autocomplete="off"
+                                />
+                                {#if linkShowSuggestions && filteredLinkContacts.length > 0}
+                                    <ul class="search-results" role="listbox">
+                                        {#each filteredLinkContacts as contact, i}
+                                            <li
+                                                role="option"
+                                                class:selected={i === linkSelectedIndex}
+                                                aria-selected={i === linkSelectedIndex}
+                                                onmousedown={() => linkToContact(appointment.id, contact)}
+                                            >
+                                                <span class="result-name">{contact.vcard.fn}</span>
+                                                {#if contact.performer.specialty}
+                                                    <span class="result-detail">{contact.performer.specialty}</span>
+                                                {/if}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                                <button class="button -small" onclick={() => (linkingId = null)}>
+                                    {$t('appointments.cancel')}
+                                </button>
+                            </div>
                         {:else}
                             <button class="button -small -primary" onclick={() => startConfirm(appointment.id)}>
                                 {$t('appointments.set-date')}
                             </button>
+                            {#if appointment.provider?.name && !appointment.provider.contactId && contacts.length > 0}
+                                <button class="button -small" onclick={() => startLink(appointment.id)}>
+                                    {$t('appointments.link-doctor')}
+                                </button>
+                            {:else if appointment.provider?.name && !appointment.provider.contactId}
+                                <button class="button -small" onclick={() => handleSaveAsDoctor(appointment)}>
+                                    {$t('appointments.save-as-doctor')}
+                                </button>
+                            {/if}
                             <button class="button -small -negative" onclick={() => handleDismiss(appointment.id)}>
                                 {$t('appointments.dismiss')}
                             </button>
@@ -135,7 +297,9 @@
                     <div class="appointment-info">
                         <p class="appointment-title">{appointment.title}</p>
                         <p class="date">{formatDate(appointment.dateTime)}</p>
-                        {#if appointment.provider?.name}
+                        {#if appointment.provider?.contactId}
+                            <p class="provider -linked">{getContactName(appointment.provider.contactId) || appointment.provider.name}</p>
+                        {:else if appointment.provider?.name}
                             <p class="provider">{appointment.provider.name}</p>
                         {/if}
                         {#if appointment.synced}
@@ -146,10 +310,55 @@
                         {/if}
                     </div>
                     <div class="appointment-actions">
-                        <button class="button -small" onclick={() => handleExportSingle(appointment)}>
-                            <svg><use href="/icons.svg#download" /></svg>
-                            {$t('appointments.export')}
-                        </button>
+                        {#if linkingId === appointment.id}
+                            <div class="link-form">
+                                <input
+                                    type="text"
+                                    class="input"
+                                    bind:value={linkQuery}
+                                    oninput={handleLinkInput}
+                                    onkeydown={(e) => handleLinkKeydown(e, appointment.id)}
+                                    onblur={handleLinkBlur}
+                                    onfocus={() => { linkShowSuggestions = true; }}
+                                    placeholder={$t('appointments.select-doctor')}
+                                    autocomplete="off"
+                                />
+                                {#if linkShowSuggestions && filteredLinkContacts.length > 0}
+                                    <ul class="search-results" role="listbox">
+                                        {#each filteredLinkContacts as contact, i}
+                                            <li
+                                                role="option"
+                                                class:selected={i === linkSelectedIndex}
+                                                aria-selected={i === linkSelectedIndex}
+                                                onmousedown={() => linkToContact(appointment.id, contact)}
+                                            >
+                                                <span class="result-name">{contact.vcard.fn}</span>
+                                                {#if contact.performer.specialty}
+                                                    <span class="result-detail">{contact.performer.specialty}</span>
+                                                {/if}
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                                <button class="button -small" onclick={() => (linkingId = null)}>
+                                    {$t('appointments.cancel')}
+                                </button>
+                            </div>
+                        {:else}
+                            {#if appointment.provider?.name && !appointment.provider.contactId && contacts.length > 0}
+                                <button class="button -small" onclick={() => startLink(appointment.id)}>
+                                    {$t('appointments.link-doctor')}
+                                </button>
+                            {:else if appointment.provider?.name && !appointment.provider.contactId}
+                                <button class="button -small" onclick={() => handleSaveAsDoctor(appointment)}>
+                                    {$t('appointments.save-as-doctor')}
+                                </button>
+                            {/if}
+                            <button class="button -small" onclick={() => handleExportSingle(appointment)}>
+                                <svg><use href="/icons.svg#download" /></svg>
+                                {$t('appointments.export')}
+                            </button>
+                        {/if}
                     </div>
                 </div>
             {/each}
@@ -164,7 +373,9 @@
                     <div class="appointment-info">
                         <p class="appointment-title">{appointment.title}</p>
                         <p class="date">{formatDate(appointment.dateTime)}</p>
-                        {#if appointment.provider?.name}
+                        {#if appointment.provider?.contactId}
+                            <p class="provider -linked">{getContactName(appointment.provider.contactId) || appointment.provider.name}</p>
+                        {:else if appointment.provider?.name}
                             <p class="provider">{appointment.provider.name}</p>
                         {/if}
                     </div>
@@ -174,35 +385,28 @@
     {/if}
 </div>
 
+{#if showAddModal}
+    <Modal onclose={() => { showAddModal = false; }}>
+        <AppointmentForm
+            profileId={$profile?.id || ''}
+            onSave={handleAddAppointment}
+            onCancel={() => showAddModal = false}
+            {saving}
+        />
+    </Modal>
+{/if}
+
 <style>
-    .page-section {
-        padding: var(--ui-pad-medium);
-        max-width: 48rem;
-        margin: 0 auto;
-    }
-
-    .page-header {
+    .heading-actions {
         display: flex;
+        gap: var(--ui-pad-small);
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: var(--ui-pad-medium);
     }
 
-    .page-header .h2 {
-        margin: 0;
-    }
-
-    .page-header .button svg {
+    .heading-actions .button svg {
         width: 1rem;
         height: 1rem;
         fill: currentColor;
-    }
-
-    .empty-state {
-        text-align: center;
-        color: var(--color-text-secondary);
-        padding: var(--ui-pad-xlarge) 0;
     }
 
     .appointment-section {
@@ -221,11 +425,11 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
-        padding: 1rem;
+        gap: var(--gap);
+        padding: var(--ui-pad-medium);
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
-        margin-bottom: 0.5rem;
+        margin-bottom: var(--ui-pad-small);
         background: var(--color-background);
     }
 
@@ -270,6 +474,11 @@
         margin: 0.25rem 0 0;
     }
 
+    .provider.-linked {
+        color: var(--color-interactivity);
+        font-weight: 500;
+    }
+
     .priority {
         display: inline-block;
         font-size: 0.7rem;
@@ -311,7 +520,7 @@
     .appointment-actions {
         flex-shrink: 0;
         display: flex;
-        gap: 0.5rem;
+        gap: var(--ui-pad-small);
         align-items: center;
     }
 
@@ -323,12 +532,55 @@
 
     .confirm-form {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--ui-pad-small);
         align-items: center;
     }
 
-    .confirm-form .input {
-        width: auto;
+    .link-form {
+        position: relative;
+        display: flex;
+        gap: var(--ui-pad-small);
+        align-items: center;
+    }
+
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-white);
+        border: 1px solid var(--color-border);
+        border-radius: var(--ui-radius-small);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-height: 16rem;
+        overflow-y: auto;
+        z-index: 100;
+        list-style: none;
+        margin: 0.25rem 0 0;
+        padding: 0;
+    }
+
+    .search-results li {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.5rem;
+        align-items: baseline;
+    }
+
+    .search-results li:hover,
+    .search-results li.selected {
+        background: var(--color-background-hover);
+    }
+
+    .result-name {
+        font-weight: 500;
+    }
+
+    .result-detail {
+        font-size: 0.8125rem;
+        color: var(--color-text-secondary);
     }
 
     @media (max-width: 768px) {

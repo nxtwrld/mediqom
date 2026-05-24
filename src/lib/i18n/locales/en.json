@@ -3998,7 +3998,32 @@
     "license": "License",
     "confirm-delete": "Remove {name} from your doctor directory?",
     "save-to-directory": "Save to My Doctors",
-    "saved": "Saved"
+    "saved": "Saved",
+    "add": "Add Doctor",
+    "form": {
+      "info": "Doctor Information",
+      "name": "Full Name",
+      "role": "Role",
+      "specialty": "Specialty",
+      "phone": "Phone",
+      "email": "Email",
+      "license": "License Number",
+      "institution": "Institution",
+      "institution-name": "Institution Name",
+      "department": "Department",
+      "address": "Address",
+      "role-primary": "Primary Physician",
+      "role-specialist": "Specialist",
+      "role-surgeon": "Surgeon",
+      "role-dentist": "Dentist",
+      "role-therapist": "Therapist",
+      "role-radiologist": "Radiologist",
+      "role-pharmacist": "Pharmacist",
+      "role-other": "Other",
+      "add-details": "Add details",
+      "add-institution": "Add institution",
+      "change": "Change"
+    }
   },
   "appointments": {
     "nav": "Appointments",
@@ -4013,6 +4038,33 @@
     "cancel": "Cancel",
     "export": "Export",
     "export-all": "Export All",
-    "synced": "Synced to calendar"
+    "synced": "Synced to calendar",
+    "add": "Add Appointment",
+    "form": {
+      "info": "Appointment Details",
+      "title": "Title",
+      "title-placeholder": "e.g. Follow-up visit",
+      "type": "Type",
+      "priority": "Priority",
+      "date": "Date",
+      "duration": "Duration (min)",
+      "provider": "Provider",
+      "type-office-visit": "Office Visit",
+      "type-lab-work": "Lab Work",
+      "type-imaging": "Imaging",
+      "type-procedure": "Procedure",
+      "type-referral": "Referral",
+      "type-review": "Review",
+      "type-other": "Other",
+      "priority-immediate": "Immediate",
+      "priority-urgent": "Urgent",
+      "priority-routine": "Routine",
+      "priority-as-needed": "As Needed"
+    },
+    "select-doctor": "Select a doctor...",
+    "or-type-name": "Or type a name",
+    "link-doctor": "Link to Doctor",
+    "save-as-doctor": "Save as Doctor",
+    "linked-to": "Linked to {name}"
   }
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import { untrack } from 'svelte';
 	import type { Signal } from '$lib/types.d';
 
 	interface Props {
@@ -15,8 +16,8 @@
 	// Form state
 	let dateId: string = Math.random().toString(36).substring(7);
 	let valueId: string = Math.random().toString(36).substring(7);
-	let date = $state(entry?.date || new Date().toISOString().split('T')[0]);
-	let value = $state<string | number>(entry?.value ?? '');
+	let date = $state(untrack(() => entry?.date || new Date().toISOString().split('T')[0]));
+	let value = $state<string | number>(untrack(() => entry?.value ?? ''));
 
 	function handleSave() {
 		const numValue = typeof value === 'string' ? parseFloat(value) : value;

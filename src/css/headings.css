@@ -12,7 +12,7 @@
 }
 
 .-heading-master:has(> .heading.-sticky > .h1) .heading:not(.-heading-main) {
-  --sticky-top: calc(3.5 * var(--heading-height));
+  --sticky-top: calc(2 * var(--heading-height));
   --sticky-z-index: 9;
 }
 .heading.-sticky {
@@ -57,7 +57,7 @@
 }
 .heading:has(.h1),
 .h1.heading {
-  height: calc(3.5 * var(--heading-height));
+  min-height: calc(2 * var(--heading-height));
 }
 .heading .heading-icon {
   height: 100%;
@@ -264,11 +264,11 @@
   height: 1.5rem;
   fill: currentColor;
 }
-
+/*
 .heading > .toolbar > button:hover,
 .heading > .toolbar > a:hover {
   color: var(--color-interactivity);
-}
+}*/
 
 /* Hide tools beyond first 2 */
 .heading > .toolbar > *:nth-child(n + 3) {
@@ -286,4 +286,9 @@
     height: 100%;
     width: auto;
   }
+}
+
+
+.heading .input {
+  margin: 0;
 }

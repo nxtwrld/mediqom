@@ -3,6 +3,7 @@
     import { weekSchedule, loadMedicationContent } from '$lib/medications/store';
     import type { MedicationOccurrence } from '$lib/medications/types';
     import { loadProfileDocuments } from '$lib/profiles';
+    import { untrack } from 'svelte';
 
     // Map JS day index (0=Sun..6=Sat) to translation key suffix
     const dayKeyMap: Record<number, string> = { 0: 'su', 1: 'mo', 2: 'tu', 3: 'we', 4: 'th', 5: 'fr', 6: 'sa' };
@@ -13,7 +14,7 @@
 
     let { profileId }: Props = $props();
 
-    const occurrences = weekSchedule(profileId);
+    const occurrences = untrack(() => weekSchedule(profileId));
 
     $effect(() => {
         loadProfileDocuments(profileId).then(() => {

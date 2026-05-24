@@ -5,6 +5,7 @@
   import type { ChatMessage, SourceCitation } from '$lib/chat/types.d';
   import ui from '$lib/ui';
   import { t } from '$lib/i18n';
+  import { keyboardHeight } from '$lib/capacitor/keyboard-store';
   import ContextPrompt from './ContextPrompt.svelte';
   import ChatWidget from './widgets/ChatWidget.svelte';
   import Markdown from '$components/ui/Markdown.svelte';
@@ -256,15 +257,22 @@
       tick().then(() => textareaRef?.focus());
     }
   });
+
+  // Scroll to bottom when keyboard rises so the latest message stays in view
+  $effect(() => {
+    if ($keyboardHeight > 0) {
+      setTimeout(() => scrollToBottom(), 50);
+    }
+  });
 </script>
 
 <!-- Chat Toggle Button removed - now in Header -->
 
 <!-- Chat Sidebar -->
 {#if chatIsOpen}
-  <div 
+  <div
     class="chat-sidebar"
-    style="width: {sidebarWidth}px"
+    style="width: {sidebarWidth}px; bottom: {$keyboardHeight}px"
   >
     <!-- Resize Handle -->
     <div
@@ -963,13 +971,17 @@
       width: 100vw !important;
       left: 0;
     }
-    
+
     .resize-handle {
       display: none;
     }
-    
+
     .message-content {
       max-width: 90%;
+    }
+
+    .input-container textarea {
+      font-size: 16px;
     }
   }
 </style>
