@@ -319,7 +319,7 @@ describe("profiles/save - saveProfileChanges", () => {
 
   it("does not call saveHealthProfile when health is undefined", async () => {
     const original = makeProfile({ health: { weight: 70 } });
-    const edited = makeProfile({ health: { weight: 75 }, ...{ health: undefined } });
+    const edited = makeProfile({ health: undefined });
 
     const result = await saveProfileChanges(edited, original);
 

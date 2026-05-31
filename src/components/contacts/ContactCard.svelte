@@ -16,7 +16,8 @@
     let { name, role, specialty, expanded = false, ontoggle, headerExtras, children, image }: Props = $props();
 
     function formatRole(raw: string): string {
-        return raw.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+        const str = Array.isArray(raw) ? (raw as string[]).join(', ') : String(raw);
+        return str.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
     }
 </script>
 

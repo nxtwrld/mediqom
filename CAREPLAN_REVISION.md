@@ -175,16 +175,128 @@ with a `changeType` enum. Work completed in this pass:
   prescription — was it stopped?"); the store never auto-mutates from
   an inferred discontinuation.
 
-### 2.3 Body parts enum is populated at runtime, not in the schema
+### 2.3 Body parts — the enum is the smallest of the problems
 
-`src/lib/configurations/core.bodyParts.ts:12` has `enum: []`. The PRD claims
-`bodyParts[].identification` "uses same enum as 3D model mesh names" — true in
-spirit, but the literal schema is empty. The enum is populated at extraction
-time from the 3D model mesh registry (see `bodyparts.extraction.ts`).
+`src/lib/configurations/core.bodyParts.ts:12` literally has `enum: []`. It gets
+populated at LLM dispatch time from `src/data/objects.json` (472 mesh names).
+Same source feeds the 3D viewer.
 
-If Care Plan needs the enum for client-side validation, consume the same runtime
-source. Reword the PRD to say: *"Populated at runtime from the 3D model mesh
-registry; both extraction and the Care Plan consume the same source."*
+The wording fix ("populated at runtime from the 3D model mesh registry; both
+extraction and the Care Plan consume the same source") is correct but only half
+the work. Deep analysis surfaces 12 gaps between today's extraction pipeline and
+what the Care Plan needs. They divide into three buckets:
+
+**Enum population stability — RESOLVED 2026-05-25** (covers G10's
+anti-hallucination prerequisite and the consistency half of G11):
+
+Old state — two duplicated population sites
+(`_base-processing-node.ts:280-308`, `medical-imaging-analysis.ts:167-178`)
+each matched a narrow hardcoded JSON path. The check fired for only 4 of the
+16 `coreBodyParts` consumers (those mounting it under the key `bodyParts`);
+the other 12 schemas (mounting it under `affectedBodyParts`, `treatmentSites`,
+`targetAreas`, `affectedStructures`, `bodyPart`, `targetBodyParts`,
+`sourceBodyPart`, `system`, etc.) relied on the shared `coreBodyParts` object
+reference being mutated by some other schema's load to inherit the populated
+enum. If a workflow ran only an "unmatched" schema in a fresh process, the LLM
+saw `enum: []` — i.e. no constraint — and could hallucinate mesh names.
+
+New state — single helper `populateSchemaEnums(schema)` in
+`src/lib/langgraph/nodes/_schema-enums.ts` walks the schema tree and fills
+every empty enum at known slots, irrespective of nesting key. Slots covered:
+
+- `properties.identification.enum` ← anatomy mesh names from `objects.json`
+- `properties.signal.enum` ← lab catalog keys minus `STATIC_PROPERTIES`
+
+Properties:
+- One call site per node: `populateSchemaEnums(this.schema)` replaces 28 lines
+  in `_base-processing-node.ts:278-280`; `populateSchemaEnums(schema)` replaces
+  11 lines in `medical-imaging-analysis.ts:167-169`.
+- Anatomy enum computed once at module load and frozen.
+- Idempotent (`enum.length === 0` guard) so repeated calls are safe.
+- WeakSet visit-guard inside a walk prevents cycles.
+- All 16 `coreBodyParts` consumers covered, plus the inlined `imaging.ts:24`
+  body-parts enum (which is a separate enum, not shared with `coreBodyParts`).
+
+This is not the full G11 "static compile-time import" refactor — the enum is
+still set at runtime — but the stability and consistency problem G11 was
+created to solve is now resolved. The remaining static-import refactor is
+purely a cleanup that can ship later without changing behavior.
+
+**Decided (folded into Phase 0 below):**
+
+- **G1 — Nothing is lost.** Promote `CarePlanItem.bodyParts` from `string[]` to
+  `CarePlanBodyPartRef[]` that carries `identification`, `part`, `status`,
+  `treatment`, `urgency` (max across documents) *and* a `sources[]` array of
+  back-references to the originating extraction. The Care Plan is a view over
+  the documents; the documents remain the source of truth.
+- **G2 — Multi-region highlight, now.** `setHighlight(name)` stays unchanged
+  (single-focus path for chat / documents). New additive
+  `setMultiHighlight([{ mesh, color, opacity }])` paints all active items at
+  once. Material cache extends to a bucketed `Map<variantKey, Material>` keyed
+  by `(color, opacity bucket)` so the cache stays bounded. Delta-swap so each
+  certainty recompute only updates meshes whose effective state changed.
+- **G3 — Two-layer registry + zero hallucination.** Keep the 472-mesh registry
+  as the granular layer. Add a new region meta-layer (`src/data/anatomy-regions.ts`)
+  that explicitly groups related meshes — `R_patella → R_knee → R_leg →
+  lower_limb`. Regions are first-class anchors in `identification`, not soft
+  aliases. The schema gains a `CRITICAL: ONLY extract...` guard matching the
+  medications schema pattern (revision §2.2): no inference from disease names,
+  no adjacent structures, omit rather than guess at side.
+- **G4 — Laterality is a question, not a merge rule.** When the same ICD-10
+  appears with different sides across documents, Phase 1 LLM decides whether
+  to link or to create a new item with `relatedTo[]` pointing back. Phase 2
+  merge respects the decision; both items keep their own state. The graph
+  edge surfaces in the UI as "you may want to discuss this" — never a silent
+  collapse or split.
+- **G5 — Anatomy is a perspective layer, not the main view.** Care Plan items
+  with no anatomical locus (depression, allergies, vitamin D deficiency, ME/CFS)
+  are first-class. `bodyParts: []` is valid. A reserved `whole_body` region
+  exists for items that affect the body generally. The Care Plan list must
+  not hide items just because no mesh lights up. The 3D body is one of several
+  views, not the home screen of the Care Plan.
+- **G11 — No empty enums.** ~~With the registry now living in `.ts`, the
+  enum becomes a static compile-time import in `core.bodyParts.ts`. The runtime
+  population code at `_base-processing-node.ts:280-294` is removed.~~ The
+  consistency goal is **RESOLVED 2026-05-25** via the shared
+  `populateSchemaEnums()` helper (see "Enum population stability" above) —
+  every empty enum is now reliably populated regardless of where it sits in a
+  schema. The remaining static-import refactor is optional cleanup.
+
+**Provenance and durability:**
+
+- **G6 — Union-merge with provenance.** Diabetes complications surface over
+  years: kidneys (2022), eyes (2024), feet (2025). The item accumulates body
+  parts via union; each entry's `sources[]` records which document contributed it.
+- **G8 — Per-region urgency.** The extraction's `urgency` 1–5 is a doctor-written
+  region-level severity signal that survives in the `CarePlanBodyPartRef`. Drives
+  pulse / aura intensity on the 3D model (independent of item-level certainty).
+- **G9 — Mesh-rename migration table** (`src/data/anatomy-aliases.ts`). Stored
+  Care Plan items reference mesh names that may be renamed years later. Client-side
+  normalization on load; telemetry counter for unresolved names to catch drift.
+
+**Phase 1 LLM guidance:**
+
+- **G7 — Region rollup in the context blob.** Body parts in
+  `CarePlanExtractionContext.activeItems[].bodyParts` carry their rollup parents
+  (`R_patella (R_knee, R_leg)`). Phase 1 prompt: *"Body-part disagreement is a
+  soft signal. ICD-10 is the hard anchor. Use rollup ancestry to match."* Phase 1
+  also emits `linkReason?: string` for the provenance reveal.
+- **G10 — Anti-hallucination guard** on `core.bodyParts.ts` is the same change
+  as G3's CRITICAL guard. Listed separately because it applies independent of
+  whether the meta-layer ships.
+
+**Performance:**
+
+- **G12 — Delta swap and bucketed opacities.** Already covered by G2's cache
+  redesign. Certainty recompute is throttled to once per page-load + once per
+  merge.
+
+**Constraint across all of the above: do not regress current behavior.** The
+single-mesh focus API, the chat anatomy integration, and the document-side
+extraction outputs must keep working identically through this refactor.
+
+Full analysis with file paths and merge rules lives in
+`~/.claude/plans/we-are-analyzing-the-cheerful-rain.md`.
 
 ---
 
@@ -281,52 +393,157 @@ hold the aggregated Care Plan in plaintext, multiplying privacy exposure over
 the per-document model. The hybrid keeps the LLM in the role where it earns
 its keep and keeps deterministic code in charge of the merge.
 
-### 5.2 Care Plan document size growth
+### 5.2 Care Plan document size growth — RESOLVED
 
-A patient with 10 years of medical history could have hundreds of `CarePlanItem`
-entries. The singleton encrypted doc must decrypt + load + render on every
-Care Plan page open. Plan for:
+**Resolution (2026-05-25):** archival policy folded into `CAREPLAN.md`
+§"Data Model" / `CarePlanDocument`. Key decisions:
 
-- **Archival rule:** items with `status: 'historical'` and
-  `lastSeenInDocumentDate > 3 years` move into a `historicalItems[]` array,
-  loaded lazily.
-- **Lazy load** the History section (PRD line 457 already shows it collapsed —
-  make it lazy-loaded too).
+- `CarePlanDocument.historicalItems[]` added alongside `items[]`.
+- Threshold: `status: 'historical' | 'resolved'` **and**
+  `lastSeenInDocumentDate > 1095 days` (3 years). Constant
+  `CAREPLAN_ARCHIVE_THRESHOLD_DAYS` lives in `src/lib/careplan/store.ts`.
+- Store exposes `getActivePlan()` (whole-doc decrypt + parse of `items[]`
+  only) and `getHistoricalItems()` (on-demand parse of the archived slice).
+  AES decryption is whole-doc — the lazy win is JSON parse + render cost,
+  which is the actual bottleneck for large histories.
+- Resurrection: if Phase 1 LLM returns `linkedCarePlanItemId` pointing to an
+  archived item, the merge moves it back into `items[]` before applying the
+  update. Merge logic stays uniform regardless of source array.
+- Dashboard counts: archived items are excluded from the homepage progress
+  dial and task strip; they appear only inside the Care Plan page's History
+  section.
 
-### 5.3 Timeframe parser robustness
+Build-order impact: one new row in §7 Phase 1 Logic (*"Archival/resurrection
+in store + lazy `getHistoricalItems()`"*). Medications avoid this same
+problem only because they're per-document; the Care Plan singleton design
+needs the explicit policy.
 
-PRD step 1 of build list: parse `"in 2 weeks"` → ISO date. Doctors write this
-in many forms across languages (CS/DE/EN). **Build a fixture set first**
-(`src/lib/careplan/__tests__/timeframe.fixtures.json`) with ~30 examples from
-real documents before writing the parser. Otherwise this ships with bugs and
-erodes trust in dates.
+### 5.3 Timeframe parser robustness — RESOLVED
 
-### 5.4 3D model highlight performance
+**Resolution (2026-05-25):** push the cross-language understanding upstream
+into the LLM extraction; keep a thin client fallback for legacy/missing
+cases.
 
-Highlight opacity mapped to per-item certainty means the model could re-render
-frequently as certainty recomputes (every app launch, every task completion).
-Memory notes the bisect: material caching was reverted in commit `5854011`.
+Codebase state checked: timeframe is currently a free-text string in three
+schemas (`core.recommendations.ts:51,128`, `imaging-findings.ts:418`,
+`session.diagnosis.ts:376`) — there is no client-side parsing today.
+`chrono-node` and `dayjs` are already dependencies but `parseDate()` only
+handles concrete dates, not natural-language durations.
 
-If material caching is still off, highlight updates may be expensive. **Build
-the Care Plan highlight integration after re-landing material caching**, or
-build it without expecting smooth animations.
+Decisions:
 
-### 5.5 Trust separation — "Recommended" vs "Suggested"
+1. **Schema extension** — add a structured sibling to the free-text field on
+   `core.recommendations.ts` (and any sibling schemas with timeframe):
+   ```ts
+   timeframe?: string                  // existing free-text, preserved
+   timeframeNormalized?: {             // NEW
+     unit: 'days' | 'weeks' | 'months' | 'years'
+     value: number
+   }
+   ```
+   Field-level guard: *"ONLY populate `timeframeNormalized` when the
+   timeframe text contains an explicit duration. Do not infer from context."*
+   Mirrors the medications anti-hallucination pattern from §2.2.
 
-PRD line 397: doctor-recommended → "Recommended" badge; AI-inferred →
-"Suggested" badge. **Currently, every recommendation comes through the AI
-extraction pipeline** — so "Recommended" really means "AI confidently
-extracted this from explicit doctor text."
+2. **Client compute + fallback** (`src/lib/careplan/timeframe.ts`):
+   - `computeDueDate(sourceDocumentDate, timeframeNormalized) → ISO` — pure
+     `dayjs` math.
+   - `parseTimeframeFallback(text, locale) → TimeframeNormalized | null` —
+     thin fallback for legacy extractions. `chrono-node` for English;
+     targeted regex for cs/de. Returns `null` on uncertainty (no guessing).
 
-Make the distinction provenance-based:
+3. **Fixture-first** (`src/lib/careplan/__tests__/timeframe.fixtures.json`):
+   ~30 examples drawn from real CS/DE/EN documents, plus edge cases (compound
+   forms "2-3 weeks", ranges "1–2 months", ambiguous "soon"). Built before
+   the parser; becomes the regression net for both the LLM normalisation and
+   the client fallback.
 
-- **Recommended:** source text contained an imperative recommendation by an
-  identified provider (extractable via `referralTo.provider` populated, or
-  `recommendation` text matches imperative patterns).
-- **Suggested:** derived from monitoring rules / signal thresholds without an
-  explicit doctor instruction.
-- **Both should link back to the source document quote** ("Dr. Novák wrote:
-  ...") so the user can verify.
+4. **UI fallback:** when neither `timeframeNormalized` nor the fallback
+   parser yields a date, the task card shows the original text verbatim
+   ("in 2 weeks per Dr. Novák") with no `dueDate`. The "ready for your
+   attention" framing never fires from a missing date.
+
+Why upstream: the LLM is already reading the doc cross-lingually for free —
+re-implementing that as a client parser would be the bug source. Delegate
+parsing to the LLM at extraction time; keep the fallback narrow.
+
+Build-order impact: §7 Phase 0 row split into "Schema: add
+`timeframeNormalized`" and "Client `computeDueDate()` + fallback + fixture
+set".
+
+### 5.4 3D model highlight performance — DISMISSED (premise stale)
+
+**Resolution (2026-05-25):** the original concern's premise no longer
+matches the codebase.
+
+State checked: material caching is live in `src/components/anatomy/material-system.ts`
+— `getCachedMaterials()` builds 3 variants per mesh, `precacheMaterials()` is
+invoked at model load (`model-loader.ts:104, 232`), and `highlight()` in
+`highlight-system.ts:125-171` uses the cache exclusively (reference swaps, no
+on-the-fly cloning). `Body.svelte:569` clears the cache on destroy. The
+"reverted in `5854011`" note in memory is out of date as of today.
+
+The real outstanding work — multi-region painting with bucketed-by-variant
+caching — is already captured by **G2** in §2.3 of this revision:
+
+> `setHighlight(name)` stays unchanged (single-focus path for chat /
+> documents). New additive `setMultiHighlight([{ mesh, color, opacity }])`
+> paints all active items at once. Material cache extends to a bucketed
+> `Map<variantKey, Material>` keyed by `(color, opacity bucket)` so the
+> cache stays bounded. Delta-swap so each certainty recompute only updates
+> meshes whose effective state changed.
+
+Combined with G12's throttle (certainty recompute = once per page-load +
+once per merge), the multi-region painting risk is fully addressed. No
+additional Phase 0 row is needed for §5.4 specifically.
+
+### 5.5 Trust separation — "Recommended" vs "Suggested" — RESOLVED (reframed)
+
+**Resolution (2026-05-25):** the original split labels two states that don't
+exist in v1. Reframed around provenance instead of badges.
+
+State checked: every recommendation today comes through LLM extraction of
+doctor text — no signal-threshold rule engine, no AI-derived "Suggested"
+path. The recommendation schema currently has no provenance fields
+(`originalText`, `sourceQuote`, `sourceProvider`) and no `isExplicitProviderInstruction`
+flag. `SectionRecommendations.svelte` renders `description` + `urgency`
+only; no source link, no provider attribution.
+
+Decisions:
+
+1. **Drop the "Recommended" / "Suggested" badge distinction from v1.** With
+   only one extraction pathway, slapping "Recommended" on every task makes
+   the badge meaningless; asking the LLM to mark "imperative enough" is a
+   brittle cross-language signal that won't survive.
+
+2. **Add provenance fields to the recommendation schema**
+   (`src/lib/configurations/core.recommendations.ts`):
+   ```ts
+   sourceQuote?: string           // exact substring from the doctor text
+   sourceProvider?: PerformerRef  // who recommended it, if attributable
+   ```
+   Field-level CRITICAL guards (anti-hallucination, same pattern as
+   medications schema §2.2):
+   - `sourceQuote`: *"ONLY populate with verbatim text from the source
+     document. Never paraphrase. Omit if the recommendation is not stated
+     literally."*
+   - `sourceProvider`: *"ONLY populate when an identifiable provider is
+     attached to this recommendation in the source. Do not infer from the
+     document's overall provider."*
+
+3. **Provenance reveal is the v1 trust UX.** Every Care Plan task surfaces a
+   one-tap reveal — *"Dr. Novák wrote: '...'"* — which collapses §5.5 into
+   §6.1 (the existing "Why is this here?" provenance reveal). No badge
+   needed; the source quote is the trust signal.
+
+4. **Defer "Suggested" until v2.** When signal-threshold rules or other
+   non-doctor-derived task generators land, *they* get the "Suggested"
+   badge and doctor-extracted tasks get "Recommended" by contrast. Not
+   before.
+
+Build-order impact: §7 Phase 0 Schema row added for `sourceQuote` +
+`sourceProvider` with anti-hallucination guards. §6.1 (provenance reveal)
+remains v1-essential — it was already on the "v1 must-have" list.
 
 ---
 
@@ -430,8 +647,20 @@ PRD's order is right (logic before UI) but missing key dependencies. Revised:
 | 0 — Prerequisites | Extend `treatment-plan.ts` to add structured goal fields | Schema (`src/lib/configurations/`) |
 | 0 — Prerequisites | ~~Add `changeType` to `prescription.ts`~~ — RESOLVED 2026-05-24 (see §2.2): unified into `medications.ts` + `Medication.changeType` in store; legacy `prescription.ts` deleted | Schema |
 | 0 — Prerequisites | Add link annotation fields (`linkedCarePlanItemId`, `progressionFrom`, `linkedCarePlanTaskId`, `resolves`) to diagnosis & recommendation schemas | Schema |
-| 0 — Prerequisites | Build timeframe parser with fixture-driven tests | New `src/lib/careplan/timeframe.ts` + tests |
+| 0 — Prerequisites (§5.3) | Schema: add `timeframeNormalized` (`{ unit, value }`) to recommendation + follow-up schemas with anti-hallucination guard | `src/lib/configurations/core.recommendations.ts`, `core.followup.ts` if present |
+| 0 — Prerequisites (§5.3) | Client `computeDueDate()` + `parseTimeframeFallback()` (chrono-node EN, regex cs/de) + fixture set (~30 examples) | New `src/lib/careplan/timeframe.ts`, `__tests__/timeframe.fixtures.json` |
+| 0 — Prerequisites (§5.5) | Schema: add `sourceQuote` + `sourceProvider` to recommendation schema with field-level CRITICAL guards (verbatim only, no inference) | `src/lib/configurations/core.recommendations.ts` |
+| 0 — Body parts (§2.3) | ~~Convert mesh registry to typed `.ts` and static-import enum into `core.bodyParts.ts`; remove runtime patch~~ — RESOLVED 2026-05-25 (see §2.3 "Enum population stability"): consistency achieved via shared `populateSchemaEnums()` helper. Static-import refactor is now optional cleanup, not a Phase 0 blocker. (G11) | `src/lib/langgraph/nodes/_schema-enums.ts` (new), `_base-processing-node.ts`, `medical-imaging-analysis.ts` |
+| 0 — Body parts (§2.3) | Region meta-layer registry — explicit named groups connecting related meshes (G3) | New `src/data/anatomy-regions.ts` |
+| 0 — Body parts (§2.3) | Anti-hallucination CRITICAL guards on body-parts schema (G3, G10) | `src/lib/configurations/core.bodyParts.ts` |
+| 0 — Body parts (§2.3) | Unify `AnatomyIntegration` chat aliases with region registry (G3) | `src/lib/chat/integrations/anatomy-integration.ts` |
+| 0 — Body parts (§2.3) | Mesh-name alias / migration table for future renames (G9) | New `src/data/anatomy-aliases.ts` |
+| 0 — Body parts (§2.3) | Care Plan anatomy helper — validate, rollup, normalize (G3, G9) | New `src/lib/careplan/bodyparts.ts` + fixture tests |
+| 0 — Body parts (§2.3) | `CarePlanBodyPartRef[]` with full provenance + per-region urgency (G1, G6, G8) | New `src/lib/careplan/types.d.ts` |
+| 0 — Body parts (§2.3) | `relatedItems` graph field; Phase 1 emits relationship hints (G4) | `src/lib/careplan/types.d.ts`, `merge.ts`, Phase 1 prompt |
+| 0 — Body parts (§2.3) | `setMultiHighlight([])` additive API; bucketed material cache; delta swap (G2, G12) | `src/components/anatomy/highlight-system.ts`, `material-system.ts`, `scene-state.ts` |
 | 1 — Logic | Types, store (singleton load/save via existing encryption helpers) | New `src/lib/careplan/{types.d.ts,store.ts}` |
+| 1 — Logic (§5.2) | Archival policy in store: `CAREPLAN_ARCHIVE_THRESHOLD_DAYS = 1095`, `getActivePlan()` / `getHistoricalItems()` split, resurrection on `linkedCarePlanItemId` | `src/lib/careplan/store.ts`, `merge.ts` |
 | 1 — Logic | Care Plan context blob builder (Phase 1 input) | New `src/lib/careplan/context.ts` |
 | 1 — Logic | Wire context blob into import request envelope (encrypt with per-job key) | `src/lib/import/`, `src/routes/v1/import/jobs/+server.ts` |
 | 1 — Logic | Extend LangGraph extraction nodes to consume context + emit link annotations | `src/lib/langgraph/nodes/*` |
@@ -441,7 +670,7 @@ PRD's order is right (logic before UI) but missing key dependencies. Revised:
 | 2 — UI shell | Empty state + Care Plan item card | New components |
 | 2 — UI shell | Care Plan page route | New `src/routes/med/p/[profile]/care-plan/+page.svelte` |
 | 2 — UI shell | Nav item, ProfileDashboard slot | Modify existing |
-| 3 — Differentiator | 3D model highlight integration (after material caching re-lands) | Modify `Body.svelte` |
+| 3 — Differentiator | 3D model highlight integration (material caching is already live — see §5.4; G2 multi-highlight + G12 throttle land in Phase 0) | Modify `Body.svelte` |
 | 3 — Differentiator | Post-import summary screen with delta framing | New component |
 | 4 — Trust layer | Provenance reveal on every item | Augment item card |
 | 4 — Trust layer | "Explain in plain language" toggle | Augment item card |
@@ -476,7 +705,26 @@ Read before writing assembly:
 
 ---
 
-## 9. Open Decisions for the Author
+## 9. Semantic Architecture — ONTOLOGY.md
+
+Broader questions about formal ontological grounding live in `ONTOLOGY.md`:
+
+- Honest positioning of the current architecture (well-governed conceptual map,
+  not formal ontology)
+- The LLM-as-reasoner epistemological gap (Phase 1 entity resolution is
+  probabilistic, not axiom-derived)
+- Concrete grounding paths: ICD-10 hierarchy traversal, FMA mapping for anatomy,
+  SNOMED CT, explicit clinical rules, OWL reasoning
+- Typed relation vocabulary roadmap — how `relatedItems.reason` grows from
+  `laterality/progression/comorbidity` toward `causation/manifestation/
+  monitoring-dependency`
+
+Decisions in §1–8 above are Care Plan-scoped; ONTOLOGY.md is the home for
+any cross-cutting semantic architecture decisions.
+
+---
+
+## 10. Open Decisions for the Author
 
 1. **Hybrid assembly model (§1)** — confirm the split: server-side LLM emits
    link annotations during extraction; client does the deterministic merge.
@@ -490,7 +738,7 @@ Read before writing assembly:
 
 ---
 
-## 10. Verified Codebase Claims (Reference)
+## 11. Verified Codebase Claims (Reference)
 
 | Claim | Status | Evidence |
 |---|---|---|
@@ -503,11 +751,15 @@ Read before writing assembly:
 | Recommendation fields | TRUE | `src/lib/configurations/core.recommendations.ts:19-95` |
 | Follow-up schedule fields | TRUE | `core.recommendations.ts:118-142` |
 | Signal urgency 1–5 | TRUE | `src/lib/configurations/core.signals.ts:61-64` |
-| `bodyParts[].identification` field | PARTIAL (enum populated at runtime) | `src/lib/configurations/core.bodyParts.ts:8-12` |
+| `bodyParts[].identification` field | TRUE (enum populated at runtime via shared helper since 2026-05-25) | `src/lib/configurations/core.bodyParts.ts:8-12` + `src/lib/langgraph/nodes/_schema-enums.ts` |
 | Medication store linkable by document id | TRUE | `src/lib/medications/store.ts` |
 | `ProfileDashboard.svelte`, `NavBar.svelte` | TRUE | both exist, ready for modification |
 | Treatment goals are structured objects | TRUE (resolved 2026-05-21) | shared shape in `core.treatmentGoal.ts`, consumed by `treatments.ts:357`, `treatment-plan.ts:299-303`, `core.recommendations.ts:101-105` |
 | Medications have new/changed/discontinued split | TRUE (resolved 2026-05-24) | unified `medications.ts` with split arrays + `changeType` on stored `Medication` (`medications/types.ts`); legacy `prescription.ts` and `analyzeReport.ts` deleted; convert layer walks all four arrays in `medications/convert.ts` |
+| Empty-enum population is reliable across all schemas | TRUE (resolved 2026-05-25) | shared `populateSchemaEnums()` helper in `src/lib/langgraph/nodes/_schema-enums.ts`; recursive walk covers all 16 `coreBodyParts` mount keys + inlined `imaging.ts` enum + signal enum; idempotent; both prior call sites collapsed to one line |
+| Material caching in 3D anatomy is active | TRUE (verified 2026-05-25 — §5.4 premise stale) | `material-system.ts` (`getCachedMaterials`, `precacheMaterials`), invoked at model load in `model-loader.ts:104,232`; cache cleared on destroy in `Body.svelte:569`. Outstanding work is bucketed multi-variant cache (G2 / §2.3), not the original cache. |
 | `MilestoneProgress.svelte` exists | FALSE (external aouros ref) | not in repo |
 | Server route is the *sole* assembly hook | FALSE → resolved via hybrid (§1) | LLM phase server-side, merge phase client-side in `finalizer.ts:80-138` |
 | Platform "never sees unencrypted health data" | OVERSTATED | server holds plaintext transiently during extraction for LLM dispatch — correct claim is "never stores" |
+| Timeframe is parsed to a structured duration | FALSE (resolved by §5.3 plan) | extraction captures `timeframe` as free-text only across `core.recommendations.ts:51,128`, `imaging-findings.ts:418`, `session.diagnosis.ts:376`. Phase 0 adds `timeframeNormalized` + client `computeDueDate()`. |
+| Recommendation schema captures source quote / provider | FALSE (resolved by §5.5 plan) | no `sourceQuote` or `sourceProvider` field today. Phase 0 adds both with anti-hallucination guards; provenance reveal in UI supersedes the Recommended/Suggested badge split for v1. |

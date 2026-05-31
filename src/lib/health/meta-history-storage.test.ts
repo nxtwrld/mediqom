@@ -439,7 +439,7 @@ describe("META_HISTORIES Storage System", () => {
 
       expect(mockAddDocument).toHaveBeenCalledTimes(2);
       const categories = mockAddDocument.mock.calls.map(
-        ([docArg]: [any]) => docArg.metadata.measurementType,
+        ([docArg]: any[]) => docArg.metadata.measurementType,
       );
       expect(categories).toContain("heart_rate");
       expect(categories).toContain("blood_glucose");

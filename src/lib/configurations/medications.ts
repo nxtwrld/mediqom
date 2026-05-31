@@ -214,6 +214,11 @@ export default {
               description:
                 "Search-optimized terms: generic names, brand names, drug classes, indications",
             },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
             isNewMedication: {
               type: "boolean",
               description:
@@ -320,6 +325,11 @@ export default {
               description:
                 "Search-optimized terms: generic names, brand names, drug classes, indications",
             },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
             linkedMedicationId: {
               type: "string",
               description:
@@ -364,6 +374,11 @@ export default {
               type: "string",
               description:
                 "Provider who discontinued. ONLY populate if explicitly named in the document.",
+            },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
             },
             linkedMedicationId: {
               type: "string",
@@ -426,6 +441,11 @@ export default {
               type: "string",
               description:
                 "When change takes effect. ONLY populate if explicitly stated in the document.",
+            },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
             },
             linkedMedicationId: {
               type: "string",

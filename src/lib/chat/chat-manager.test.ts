@@ -628,7 +628,7 @@ describe("ChatManager", () => {
   describe("acceptProfileContext", () => {
     it("calls initializeChat when profile data matches", () => {
       setState({ context: makeContext(), messages: [], conversationHistory: new Map() });
-      mockProfile.get.mockReturnValue({ id: "profile-2", fullName: "Bob", language: "en", health: null });
+      mockProfile.get.mockReturnValue({ id: "profile-2", fullName: "Bob", language: "en", health: null } as any);
       manager.acceptProfileContext("profile-2", "Bob", {});
       expect(mockChatContextService.prepareContextForChat).toHaveBeenCalled();
     });
@@ -643,7 +643,7 @@ describe("ChatManager", () => {
 
     it("falls back to manual context when profile store does not match", () => {
       setState({ context: makeContext(), messages: [], conversationHistory: new Map() });
-      mockProfile.get.mockReturnValue({ id: "different-id" });
+      mockProfile.get.mockReturnValue({ id: "different-id" } as any);
       manager.acceptProfileContext("profile-2", "Bob", {});
       expect(mockChatContextService.prepareContextForChat).toHaveBeenCalled();
     });
@@ -792,7 +792,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -834,7 +834,7 @@ describe("ChatManager", () => {
           fullName: "Alice",
           language: "en",
           health: null,
-        });
+        } as any);
         getListenerFor("chat:toggle")({});
         // initializeChatWithCurrentProfile is called and calls prepareContextForChat
         expect(mockChatContextService.prepareContextForChat).toHaveBeenCalled();
@@ -997,6 +997,7 @@ describe("ChatManager", () => {
     it("does nothing when context is null", async () => {
       setState({ context: null });
       await manager.handleWidgetInteraction({
+        widgetId: "widget-1",
         widgetType: "diagnosis_card",
         action: "click",
         payload: { name: "Flu" },
@@ -1007,6 +1008,7 @@ describe("ChatManager", () => {
     it("calls sendMessage for a diagnosis_card interaction", async () => {
       setState({ context: makeContext(), messages: [] });
       await manager.handleWidgetInteraction({
+        widgetId: "widget-2",
         widgetType: "diagnosis_card",
         action: "click",
         payload: { name: "Flu", icd10: "J11" },
@@ -1019,6 +1021,7 @@ describe("ChatManager", () => {
       (AI.isValidBodyPart as any).mockReturnValue(true);
       setState({ context: makeContext(), messages: [] });
       await manager.handleWidgetInteraction({
+        widgetId: "widget-3",
         widgetType: "anatomy_highlight",
         action: "focus_anatomy",
         payload: { bodyPart: "knee" },
@@ -1367,7 +1370,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1419,7 +1422,7 @@ describe("ChatManager", () => {
         fullName: "Bob",
         language: "en",
         health: null,
-      });
+      } as any);
       getListenerFor("chat:profile_switch")({
         profileId: "profile-2",
         profileName: "Bob",
@@ -1440,7 +1443,7 @@ describe("ChatManager", () => {
         fullName: "Bob",
         language: "en",
         health: null,
-      });
+      } as any);
       getListenerFor("chat:profile_switch")({
         profileId: "profile-2",
         profileName: "Bob",
@@ -1462,7 +1465,7 @@ describe("ChatManager", () => {
         fullName: "Bob",
         language: "en",
         health: null,
-      });
+      } as any);
       getListenerFor("chat:profile_switch")({
         profileId: "profile-2",
         profileName: "Bob",
@@ -1479,7 +1482,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1570,7 +1573,7 @@ describe("ChatManager", () => {
     });
 
     it("uses navigation event route when available", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "chat:navigation") return { data: { route: "/medications" } };
         return null;
       });
@@ -1643,7 +1646,7 @@ describe("ChatManager", () => {
     });
 
     it("uses profileData from aicontext:profile when profileId matches", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "aicontext:profile") {
           return { data: { profileId: "p1", profileName: "Alice Override" } };
         }
@@ -1654,7 +1657,7 @@ describe("ChatManager", () => {
     });
 
     it("ignores profileData from aicontext:profile when profileId does not match", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "aicontext:profile") {
           return { data: { profileId: "other-profile", profileName: "Other" } };
         }
@@ -1665,7 +1668,7 @@ describe("ChatManager", () => {
     });
 
     it("falls back to chat:profile_switch when aicontext:profile returns null", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "aicontext:profile") return null;
         if (event === "chat:profile_switch") {
           return { data: { profileId: "p1", profileName: "Alice From Switch" } };
@@ -1677,7 +1680,7 @@ describe("ChatManager", () => {
     });
 
     it("sets documentsContent and documents array when aicontext:document returns data", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "aicontext:document") {
           return { data: { documentId: "doc-42", content: { title: "Lab" } } };
         }
@@ -1690,7 +1693,7 @@ describe("ChatManager", () => {
     });
 
     it("uses route from chat:navigation event when available", () => {
-      mockUi.getLatest.mockImplementation((event: string) => {
+      (mockUi.getLatest as any).mockImplementation((event: string) => {
         if (event === "chat:navigation") {
           return { data: { route: "/medications" } };
         }
@@ -1707,7 +1710,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1767,7 +1770,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1796,7 +1799,7 @@ describe("ChatManager", () => {
         messages: [],
         conversationHistory: new Map(),
       });
-      mockProfile.get.mockReturnValue({ id: "wrong-id", fullName: "Wrong Person", language: "en" });
+      mockProfile.get.mockReturnValue({ id: "wrong-id", fullName: "Wrong Person", language: "en" } as any);
       getListenerFor("chat:profile_switch")({
         profileId: "profile-2",
         profileName: "Bob",
@@ -1813,7 +1816,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1867,7 +1870,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1891,7 +1894,7 @@ describe("ChatManager", () => {
     function getListenerFor(eventName: string): (data: any) => void {
       const call = mockUi.listen.mock.calls.find((c: any[]) => c[0] === eventName);
       if (!call) throw new Error(`No listener registered for "${eventName}"`);
-      return call[1];
+      return (call as any)[1];
     }
 
     beforeEach(() => {
@@ -1994,7 +1997,7 @@ describe("ChatManager", () => {
     });
 
     it("handles chunk event: updates existing message on second chunk", async () => {
-      const streamingMsg = { id: "stream-1", role: "assistant", content: "Hello " };
+      const streamingMsg = { id: "stream-1", role: "assistant" as const, content: "Hello ", timestamp: new Date(), metadata: undefined };
       mockCreateMessage.mockReturnValueOnce(streamingMsg);
 
       const service = (manager as any).clientService;
@@ -2039,7 +2042,7 @@ describe("ChatManager", () => {
     });
 
     it("handles complete event: finalizes streaming message with metadata", async () => {
-      const streamingMsg = { id: "stream-42", role: "assistant", content: "partial" };
+      const streamingMsg = { id: "stream-42", role: "assistant" as const, content: "partial", timestamp: new Date(), metadata: undefined };
       mockCreateMessage.mockReturnValueOnce(streamingMsg);
 
       const service = (manager as any).clientService;
@@ -2106,7 +2109,7 @@ describe("ChatManager", () => {
     it("does nothing when isProcessing is true", () => {
       setState({ context: makeContext(), messages: [] });
       (manager as any).isProcessing = true;
-      mockUi.getLatest.mockReturnValue({ data: { documentId: "doc-1", title: "Report", timestamp: new Date() } });
+      mockUi.getLatest.mockReturnValue({ data: { documentId: "doc-1", title: "Report", timestamp: new Date() } } as any);
       (manager as any).checkForLatestDocumentOnOpen();
       expect(mockChatActions.addMessage).not.toHaveBeenCalled();
     });
@@ -2124,7 +2127,7 @@ describe("ChatManager", () => {
       setState({ context: ctx, messages: [] });
       mockUi.getLatest.mockReturnValue({
         data: { documentId: "doc-1", title: "Report", timestamp: new Date() },
-      });
+      } as any);
       (manager as any).checkForLatestDocumentOnOpen();
       expect(mockChatActions.addMessage).not.toHaveBeenCalled();
     });
@@ -2134,7 +2137,7 @@ describe("ChatManager", () => {
       const oldTimestamp = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
       mockUi.getLatest.mockReturnValue({
         data: { documentId: "doc-new", title: "Old Report", timestamp: oldTimestamp },
-      });
+      } as any);
       (manager as any).checkForLatestDocumentOnOpen();
       expect(mockChatActions.addMessage).not.toHaveBeenCalled();
     });
@@ -2149,7 +2152,7 @@ describe("ChatManager", () => {
           content: {},
           timestamp: recentTimestamp,
         },
-      });
+      } as any);
       (manager as any).checkForLatestDocumentOnOpen();
       expect(mockChatActions.addMessage).toHaveBeenCalled();
     });

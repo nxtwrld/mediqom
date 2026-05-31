@@ -849,7 +849,7 @@ describe("context/mcp-tools/medical-expert-tools", () => {
       const result = await tools.secureToolCall(
         "searchDocuments",
         "search",
-        { profileId: "p1", userId: "u1", requestId: "r1" },
+        { profileId: "p1", user: { id: "u1" } as any },
         { terms: ["glucose"] },
         handler,
       );
@@ -868,7 +868,7 @@ describe("context/mcp-tools/medical-expert-tools", () => {
         tools.secureToolCall(
           "searchDocuments",
           "search",
-          { profileId: "p1", userId: "u1", requestId: "r1" },
+          { profileId: "p1", user: { id: "u1" } as any },
           {},
           vi.fn(),
         ),
@@ -882,7 +882,7 @@ describe("context/mcp-tools/medical-expert-tools", () => {
       await tools.secureToolCall(
         "getProfileData",
         "read",
-        { profileId: "p1", userId: "u1", requestId: "r1" },
+        { profileId: "p1", user: { id: "u1" } as any },
         {},
         handler,
       );
@@ -907,7 +907,7 @@ describe("context/mcp-tools/medical-expert-tools", () => {
         tools.secureToolCall(
           "getDocumentById",
           "read",
-          { profileId: "p1", userId: "u1", requestId: "r1" },
+          { profileId: "p1", user: { id: "u1" } as any },
           {},
           handler,
         ),

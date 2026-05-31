@@ -43,13 +43,30 @@ import {
 
 function makeSubscription(overrides: Record<string, any> = {}) {
   return {
+    id: "user-1",
     tier_id: "free",
     tier: { id: "free", name: "Free" },
     status: "active",
+    source: "stripe",
+    stripe_customer_id: null,
+    stripe_subscription_id: null,
+    apple_original_transaction_id: null,
+    google_purchase_token: null,
+    current_period_start: null,
+    current_period_end: null,
+    cancel_at_period_end: false,
+    scans_base: 5,
+    scans_used: 0,
+    scans_credits: 0,
+    scans_reset_at: null,
+    profiles: 1,
+    updated_at: new Date().toISOString(),
     scans_available: 5,
+    scans_remaining_base: 5,
+    profile_count: 1,
     can_create_profile: true,
     ...overrides,
-  };
+  } as any;
 }
 
 describe("billing/store", () => {

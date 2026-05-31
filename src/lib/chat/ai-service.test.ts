@@ -155,8 +155,8 @@ describe("chat/ai-service — ChatAIService", () => {
 
     it("includes recent conversation history in content", async () => {
       const history = [
-        { role: "user", content: "Hi", id: "1", timestamp: new Date() },
-        { role: "assistant", content: "Hello", id: "2", timestamp: new Date() },
+        { role: "user" as const, content: "Hi", id: "1", timestamp: new Date() },
+        { role: "assistant" as const, content: "Hello", id: "2", timestamp: new Date() },
       ];
       await service.processMessage("More context", makeContext(), history);
       const contentArg = mockAnalyzeDocument.mock.calls[0][0];
@@ -207,7 +207,7 @@ describe("chat/ai-service — ChatAIService", () => {
       const formatted = service.formatResponse({
         message: "Hello",
         anatomyReferences: [],
-        suggestions: [{ suggestion: "View heart model" }],
+        suggestions: [{ suggestion: "View heart model", bodyParts: [], actionText: "" }],
       });
       expect(formatted).toContain("Hello");
       expect(formatted).toContain("View heart model");
@@ -217,7 +217,7 @@ describe("chat/ai-service — ChatAIService", () => {
       const formatted = service.formatResponse({
         message: "Need access",
         anatomyReferences: [],
-        consentRequests: [{ message: "Please approve tool use" }],
+        consentRequests: [{ message: "Please approve tool use", type: "document_access" as const, reason: "" }],
       });
       expect(formatted).toContain("Please approve tool use");
     });
@@ -226,8 +226,8 @@ describe("chat/ai-service — ChatAIService", () => {
       const formatted = service.formatResponse({
         message: "Info",
         anatomyReferences: [],
-        suggestions: [{ suggestion: "Anatomy view" }],
-        consentRequests: [{ message: "Approve" }],
+        suggestions: [{ suggestion: "Anatomy view", bodyParts: [], actionText: "" }],
+        consentRequests: [{ message: "Approve", type: "document_access" as const, reason: "" }],
       });
       expect(formatted).toContain("Anatomy view");
       expect(formatted).toContain("Approve");

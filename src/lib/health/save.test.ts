@@ -101,7 +101,7 @@ import { saveHealthProfile } from "./save";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-function makeHealthDoc(content: Record<string, any> = {}) {
+function makeHealthDoc(content: Record<string, any> = {}): any {
   return {
     id: "health-doc-1",
     content: {

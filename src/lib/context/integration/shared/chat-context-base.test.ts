@@ -207,7 +207,7 @@ describe("context/integration/shared/chat-context-base", () => {
     it("searchDocuments rejects missing terms with an error result", async () => {
       const tools = svc.getMCPToolsForChat("profile-1");
 
-      const result = await tools.searchDocuments({});
+      const result = await tools.searchDocuments({ terms: [] });
 
       expect(result.isError).toBe(true);
     });

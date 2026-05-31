@@ -42,9 +42,23 @@ function makeSessionData(overrides: Record<string, any> = {}) {
   return {
     userId: "user-1",
     language: "en",
+    models: [],
+    status: "active" as const,
     startTime: new Date().toISOString(),
     transcripts: [],
     conversationHistory: [],
+    realtimeUpdates: [],
+    analysisState: {
+      lastProcessedTranscriptIndex: 0,
+      lastAnalysisTime: 0,
+      currentDiagnosis: [],
+      currentTreatment: [],
+      currentMedication: [],
+      currentFollowUp: [],
+      analysisInProgress: false,
+      contextAvailable: false,
+      lastContextUpdate: 0,
+    },
     ...overrides,
   };
 }

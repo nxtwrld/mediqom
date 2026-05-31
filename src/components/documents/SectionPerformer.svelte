@@ -88,6 +88,10 @@
 
     function cleanPerformerData(performer: Performer): Performer {
         const cleaned = { ...performer };
+        // jCard stores role as string[]; normalise to string
+        if (Array.isArray((cleaned as any).role)) {
+            cleaned.role = ((cleaned as any).role as string[]).filter(Boolean).join(', ') || undefined;
+        }
         cleaned.email = filterArrayProperty(cleaned.email);
         cleaned.tel = filterArrayProperty(cleaned.tel);
         cleaned.url = filterArrayProperty(cleaned.url);

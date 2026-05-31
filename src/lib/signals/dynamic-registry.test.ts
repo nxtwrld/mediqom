@@ -43,7 +43,7 @@ function makeContext(overrides = {}) {
 }
 
 describe("signals/dynamic-registry", () => {
-  let registry;
+  let registry: DynamicSignalRegistry;
 
   beforeEach(() => {
     (DynamicSignalRegistry as any).instance = undefined;
@@ -117,24 +117,24 @@ describe("signals/dynamic-registry", () => {
     it("suspicious for value below normal range", () => {
       const r = registry.validateSignalValue("glucose", 50, "mg/dL", makeContext());
       expect(r.status).toBe("suspicious");
-      expect(r.warnings.some((w) => w.includes("below"))).toBe(true);
+      expect(r.warnings?.some((w) => w.includes("below"))).toBe(true);
     });
 
     it("suspicious for value above normal range", () => {
       const r = registry.validateSignalValue("cholesterol", 250, "mg/dL", makeContext());
       expect(r.status).toBe("suspicious");
-      expect(r.warnings.some((w) => w.includes("above"))).toBe(true);
+      expect(r.warnings?.some((w) => w.includes("above"))).toBe(true);
     });
 
     it("unvalidated for unknown signal", () => {
       const r = registry.validateSignalValue("unknownsignal", 42, "units", makeContext());
       expect(r.status).toBe("unvalidated");
-      expect(r.warnings.some((w) => w.includes("not found"))).toBe(true);
+      expect(r.warnings?.some((w) => w.includes("not found"))).toBe(true);
     });
 
     it("adds unit mismatch warning", () => {
       const r = registry.validateSignalValue("glucose", 85, "mmol/L", makeContext());
-      expect(r.warnings.some((w) => w.includes("mismatch"))).toBe(true);
+      expect(r.warnings?.some((w) => w.includes("mismatch"))).toBe(true);
     });
 
     it("validated for known signal without reference range", () => {

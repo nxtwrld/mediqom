@@ -145,9 +145,9 @@ describe("session/analysis-manager — SessionAnalysisManager", () => {
 
       manager.answerQuestion("q-1", "Yes");
 
-      const action = manager.getSessionData()!.nodes.actions.find(
+      const action = manager.getSessionData()!.nodes.actions!.find(
         (a: any) => a.id === "q-1",
-      );
+      )!;
       expect(action.status).toBe("answered");
       expect(action.answer).toBe("Yes");
     });
@@ -184,9 +184,9 @@ describe("session/analysis-manager — SessionAnalysisManager", () => {
 
       manager.acknowledgeAlert("alert-1");
 
-      const action = manager.getSessionData()!.nodes.actions.find(
+      const action = manager.getSessionData()!.nodes.actions!.find(
         (a: any) => a.id === "alert-1",
-      );
+      )!;
       expect(action.status).toBe("acknowledged");
     });
 

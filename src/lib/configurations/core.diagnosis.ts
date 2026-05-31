@@ -46,6 +46,11 @@ export default {
         description:
           "Search-optimized keywords: ICD-10 codes, Latin terms, body systems, diagnostic categories",
       },
+      snomedCode: {
+        type: "string",
+        description:
+          "SNOMED CT concept identifier for this diagnosis. ONLY populate when you are certain this is the correct SNOMED CT concept. Omit if uncertain — an absent code is preferable to an incorrect one. Numeric string only, no prefix (e.g., '73211009' for Type 2 diabetes mellitus, '44054006' for Diabetes mellitus type 2 — use the most specific applicable concept).",
+      },
     },
     required: ["description"],
   },

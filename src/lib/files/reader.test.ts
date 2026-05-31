@@ -37,9 +37,7 @@ describe("readAsBase64", () => {
     vi.stubGlobal("FileReader", makeReaderClass("data:image/png;base64,abc"));
     const file = makeFile("hello");
     await readAsBase64(file);
-    const instance = new (FileReader as any)();
     // readAsDataURL was invoked — just verify promise resolves
-    expect(typeof result).toBe("undefined"); // will be unreachable
   });
 
   it("rejects on FileReader error", async () => {

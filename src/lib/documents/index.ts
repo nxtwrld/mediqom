@@ -28,6 +28,7 @@ import {
 } from "$lib/documents/types.d";
 import { base64ToArrayBuffer } from "$lib/arrays";
 import { logger } from "$lib/logging/logger";
+import { normalizeDocument } from "$lib/documents/normalize";
 import { profileContextManager } from "$lib/context/integration/profile-context";
 import { apiFetch } from "$lib/api/client";
 import { deriveSections } from "$lib/documents/sections";
@@ -86,7 +87,7 @@ export async function getDocument(id: string): Promise<Document | undefined> {
   if (!document.content) {
     return await loadDocument(id);
   }
-  return document as Document;
+  return normalizeDocument(document as Document);
 }
 
 let loadingDocumentsResolve: (value: boolean) => void;
@@ -187,7 +188,7 @@ export async function decryptDocumentsNoStore(
 
       if (dec[1]) {
         (base as Document).content = JSON.parse(dec[1]);
-        return base as Document;
+        return normalizeDocument(base as Document);
       }
       return base as DocumentPreload;
     }),
@@ -247,7 +248,7 @@ export async function loadDocument(
   let document = byID[id] as DocumentPreload | Document;
 
   if (document && document.content) {
-    return document as Document;
+    return normalizeDocument(document as Document);
   }
   if (document && document.user_id) {
     profile_id = document.user_id;
@@ -341,7 +342,7 @@ export async function loadDocument(
           return docs;
         });
         updateIndex();
-        return documentWithTerms;
+        return normalizeDocument(documentWithTerms);
       }
     } catch (error) {
       logger.documents.warn("Failed to process document with medical terms", {
@@ -352,7 +353,7 @@ export async function loadDocument(
     }
   }
 
-  return loadedDocument;
+  return normalizeDocument(loadedDocument);
 }
 
 export async function updateDocument(documentData: Document) {

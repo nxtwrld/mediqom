@@ -65,6 +65,8 @@ function makeSignalEntry(overrides: Record<string, any> = {}) {
   return {
     date: "2024-01-15",
     value: 75,
+    unit: "",
+    reference: "",
     source: "input",
     ...overrides,
   };
@@ -131,7 +133,7 @@ describe("health/signal-crud", () => {
       const doc = makeHealthDoc();
       mockGetHealthDocument.mockResolvedValue(doc);
 
-      await addSignalEntry("p1", "height", { date: "2024-01-15", value: 180 });
+      await addSignalEntry("p1", "height", { date: "2024-01-15", value: 180, unit: "", reference: "" });
       const entry = doc.content.signals["height"].values[0];
       expect(entry.unit).toBe("cm");
     });

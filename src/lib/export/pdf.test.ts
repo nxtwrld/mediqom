@@ -166,7 +166,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     expect(callArgs.info.title).toBe("Medical Report");
   });
 
@@ -185,7 +185,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item, profile);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     // Content should contain profile section items
     expect(callArgs.content).toBeDefined();
     expect(Array.isArray(callArgs.content)).toBe(true);
@@ -200,7 +200,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Patient presents with...");
   });
@@ -224,7 +224,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Hypertension");
     expect(contentStr).toContain("I10");
@@ -244,7 +244,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Hemoglobin");
   });
@@ -262,7 +262,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Glucose");
   });
@@ -286,7 +286,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("120/80");
     expect(contentStr).toContain("72");
@@ -306,7 +306,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Metformin");
     expect(contentStr).toContain("Lisinopril");
@@ -324,7 +324,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Exercise daily");
     expect(contentStr).toContain("Continue current medications");
@@ -341,7 +341,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Follow up in 3 months");
   });
@@ -363,7 +363,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Smith");
   });
@@ -382,7 +382,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Jones");
   });
@@ -512,7 +512,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const docDef = mockCreatePdf.mock.calls[0][0];
+    const docDef = (mockCreatePdf.mock.calls[0] as any[])[0];
 
     // Test header function
     const header = docDef.header(1, 5);
@@ -534,7 +534,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const docDef = mockCreatePdf.mock.calls[0][0];
+    const docDef = (mockCreatePdf.mock.calls[0] as any[])[0];
     const header = docDef.header(1, 1);
     expect(JSON.stringify(header)).toContain("Jane Doe");
   });
@@ -579,7 +579,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Rest for a week");
   });
@@ -595,7 +595,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("Physical therapy");
   });
@@ -637,7 +637,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     const contentStr = JSON.stringify(callArgs.content);
     expect(contentStr).toContain("72 bpm");
   });
@@ -655,7 +655,7 @@ describe("downloadPdf", () => {
 
     await downloadPdf(item);
 
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     expect(callArgs.content).toBeDefined();
   });
 
@@ -674,7 +674,7 @@ describe("downloadPdf", () => {
     await downloadPdf(item);
 
     // The tr function should have decoded the HTML entities
-    const callArgs = mockCreatePdf.mock.calls[0][0];
+    const callArgs = (mockCreatePdf.mock.calls[0] as any[])[0];
     expect(callArgs).toBeDefined();
   });
 

@@ -74,7 +74,7 @@ describe("device store – derived stores stay in sync after store update", () =
   it("orientation derived store emits correct landscape state", () => {
     // We can't easily trigger init without a full browser env, but we can
     // subscribe and verify the derived values stay consistent with the base.
-    let latestOrientation: ReturnType<typeof get<typeof orientation>> | null = null;
+    let latestOrientation: any = null;
     const unsub = orientation.subscribe((v) => { latestOrientation = v; });
 
     // Derived values should match base store at any point
@@ -86,7 +86,7 @@ describe("device store – derived stores stay in sync after store update", () =
   });
 
   it("connectivity derived store tracks isOnline from base store", () => {
-    let latest: ReturnType<typeof get<typeof connectivity>> | null = null;
+    let latest: any = null;
     const unsub = connectivity.subscribe((v) => { latest = v; });
 
     const base = get(device);

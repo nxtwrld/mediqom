@@ -29,7 +29,7 @@ function ensureWindow() {
     });
   }
   if (!global.window.location) {
-    global.window.location = { origin: "http://localhost:3000" } as Location;
+    (global.window as any).location = { origin: "http://localhost:3000" };
   }
 }
 

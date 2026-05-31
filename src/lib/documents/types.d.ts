@@ -32,6 +32,7 @@ export interface DocumentPreload {
   metadata: {
     title: string;
     tags: string[];
+    schemaVersion?: number;
     [key: string]: any;
   };
   content?: string | undefined;
@@ -67,6 +68,7 @@ export interface Document {
   metadata: {
     title: string;
     tags: string[];
+    schemaVersion?: number;
     [key: string]: any;
   };
   content: {
@@ -93,6 +95,7 @@ export interface Document {
 export interface DocumentNew {
   type: DocumentType;
   metadata?: {
+    schemaVersion?: number;
     [key: string]: any;
   };
   content: {

@@ -479,6 +479,7 @@ export async function saveDocuments(
           date: content.date,
           category: content.category,
           language: (document as any).language || "English",
+          schemaVersion: 1,
         },
         content: content,
         attachments:

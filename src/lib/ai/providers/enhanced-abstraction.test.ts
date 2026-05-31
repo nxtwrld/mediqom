@@ -415,7 +415,7 @@ describe("EnhancedAIProvider", () => {
           "run-1",
         );
         expect(tokenUsage.total).toBe(150);
-        expect(tokenUsage["my_description"]).toBe(150);
+        expect((tokenUsage as any)["my_description"]).toBe(150);
       }
     });
 
@@ -467,7 +467,7 @@ describe("EnhancedAIProvider", () => {
         capturedCallback.handleLLMEnd({}, "run-1");
         // "hello world" = 11 chars => ceil(11/4) = 3, image = 1000
         expect(tokenUsage.total).toBe(1003);
-        expect(tokenUsage["gemini_desc"]).toBe(1003);
+        expect((tokenUsage as any)["gemini_desc"]).toBe(1003);
       }
     });
   });
