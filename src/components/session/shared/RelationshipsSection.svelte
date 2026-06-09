@@ -147,24 +147,24 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
     }
 
     .relationship-type {
         font-weight: 600;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
     }
 
     .relationship-strength {
         font-size: 0.875rem;
-        color: var(--color-success, #10b981);
+        color: var(--color-positive, #10b981);
         font-weight: 500;
     }
 
     .relationship-direction {
         font-size: 0.75rem;
         padding: 0.125rem 0.375rem;
-        background: var(--color-info-bg, #dbeafe);
+        background: var(--color-info-light, #dbeafe);
         color: var(--color-info, #3b82f6);
         border-radius: 10px;
     }
@@ -178,13 +178,13 @@
     }
 
     .relationship-node-wrapper:hover {
-        background-color: var(--color-primary-bg, #dbeafe);
+        background-color: var(--color-interactivity-light, #dbeafe);
         transform: translateX(2px);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .relationship-node-wrapper:focus {
-        outline: 2px solid var(--color-primary, #3b82f6);
+        outline: 2px solid var(--color-interactivity, #3b82f6);
         outline-offset: 2px;
     }
 
@@ -193,13 +193,13 @@
         font-size: 0.875rem;
         color: var(--color-text-secondary, #6b7280);
         padding: 0.5rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 4px;
         border: 1px dashed var(--color-border, #e2e8f0);
     }
 
     .relationship-reasoning {
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         padding: .5rem;
         font-size: 0.875rem;
         color: var(--color-text-primary, #1f2937);

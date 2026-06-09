@@ -84,23 +84,23 @@
     .markdown :global(blockquote) {
         margin: 1em 0;
         padding: 1em;
-        background-color: var(--color-background-panel);
-        border-left: 4px solid var(--color-primary);
+        background-color: var(--color-surface);
+        border-left: 4px solid var(--color-interactivity);
     }
     .markdown :global(pre) {
         margin: 1em 0;
         padding: 1em;
-        background-color: var(--color-background-panel);
-        border: 1px solid var(--color-primary);
-        border-radius: var(--border-radius);
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-interactivity);
+        border-radius: var(--radius-16);
         overflow-x: auto;
     }
     .markdown :global(code) {
         font-family: monospace;
-        background-color: var(--color-background-panel);
+        background-color: var(--color-surface);
         padding: 0 .5em;
-        border: 1px solid var(--color-primary);
-        border-radius: var(--border-radius);
+        border: 1px solid var(--color-interactivity);
+        border-radius: var(--radius-16);
     }
     .markdown :global(ul) {
         margin: 1em 0;
@@ -115,7 +115,7 @@
         margin: .5em 0;
     }
     .markdown :global(a) {
-        color: var(--color-primary);
+        color: var(--color-interactivity);
         text-decoration: none;
     }
     .markdown :global(a:hover) {
@@ -131,19 +131,19 @@
         font-size: .9em;
     }
     .markdown :global(th) {
-        background-color: var(--color-background-panel);
-        border: 1px solid var(--color-primary);
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-interactivity);
         padding: .5em;
     }
     .markdown :global(td) {
-        border: 1px solid var(--color-primary);
+        border: 1px solid var(--color-interactivity);
         padding: .5em;
     }
     .markdown :global(tr:nth-child(2n)) {
-        background-color: var(--color-background-panel);
+        background-color: var(--color-surface);
     }
     .markdown :global(tr:hover) {
-        background-color: var(--color-background-panel);
+        background-color: var(--color-surface);
     }
 
     /* Responsive table: horizontal scroll on narrow containers */
@@ -166,7 +166,7 @@
     }
     .markdown :global(hr) {
         border: 0;
-        border-top: 1px solid var(--color-primary);
+        border-top: 1px solid var(--color-interactivity);
         margin: 1em 0;
     }
 

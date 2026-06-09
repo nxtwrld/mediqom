@@ -139,7 +139,7 @@
     }
 
     .resize-handle:hover {
-        background: var(--color-primary, #3b82f6);
+        background: var(--color-interactivity, #3b82f6);
     }
 
     /* Mobile Sidebar */
@@ -198,7 +198,7 @@
     }
 
     .close-btn:hover {
-        background: var(--color-surface-hover, #f1f5f9);
+        background: var(--color-gray-300, #f1f5f9);
     }
 
     .sidebar-content {

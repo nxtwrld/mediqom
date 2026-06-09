@@ -221,7 +221,7 @@
 
 /* Urgency colors */
 .document-section .urgency-1 {
-  --color-urgency: var(--color-danger);
+  --color-urgency: var(--color-negative);
 }
 
 .document-section .urgency-2 {
@@ -237,7 +237,7 @@
 }
 
 .document-section .urgency-5 {
-  --color-urgency: var(--color-secondary);
+  --color-urgency: var(--color-gray-800);
 }
 
 /* Status colors */
@@ -252,8 +252,8 @@
 }
 
 .document-section .status-discontinued {
-  background-color: var(--color-danger-light);
-  color: var(--color-danger-dark);
+  background-color: var(--color-negative-light);
+  color: var(--color-negative-dark);
 }
 
 .document-section .status-hold {
@@ -262,8 +262,8 @@
 }
 
 .document-section .status-unknown {
-  background-color: var(--color-secondary-light);
-  color: var(--color-secondary-dark);
+  background-color: var(--color-gray-600);
+  color: var(--color-gray-900);
 }
 
 /* Severity colors */
@@ -278,7 +278,7 @@
 .document-section .severity-major,
 .document-section .severity-severe,
 .document-section .severity-critical {
-  border-left-color: var(--color-danger);
+  border-left-color: var(--color-negative);
 }
 
 /* Common badge styles */
@@ -291,8 +291,8 @@
 }
 
 .document-section .badge-primary {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background-color: var(--color-interactivity-light);
+  color: var(--color-interactivity-dark);
 }
 
 .document-section .badge-success {
@@ -306,8 +306,8 @@
 }
 
 .document-section .badge-danger {
-  background-color: var(--color-danger-light);
-  color: var(--color-danger-dark);
+  background-color: var(--color-negative-light);
+  color: var(--color-negative-dark);
 }
 
 .document-section .badge-info {
@@ -316,8 +316,8 @@
 }
 
 .document-section .badge-secondary {
-  background-color: var(--color-secondary-light);
-  color: var(--color-secondary-dark);
+  background-color: var(--color-gray-600);
+  color: var(--color-gray-900);
 }
 
 /* Common header styles - container responsive */
@@ -416,7 +416,7 @@
 }
 
 .document-section .table-list .actions button:hover svg {
-  fill: var(--color-interactivity-hover);
+  fill: var(--color-interactivity-dark);
 }
 
 .document-section .table-list tr .actions button {

@@ -225,14 +225,14 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 /*
     .toolbar *:first-child {
 
-        border-top-left-radius: var(--radius);
-        border-bottom-left-radius: var(--radius);
-        padding-left: calc(var(--radius) / 1.5);
+        border-top-left-radius: var(--radius-16);
+        border-bottom-left-radius: var(--radius-16);
+        padding-left: calc(var(--radius-16);
     }
     .toolbar *:last-child {
-        border-top-right-radius: var(--radius);
-        border-bottom-right-radius: var(--radius);
-        padding-right: calc(var(--radius) / 1.5);
+        border-top-right-radius: var(--radius-16);
+        border-bottom-right-radius: var(--radius-16);
+        padding-right: calc(var(--radius-16);
     }
 */
 
@@ -254,7 +254,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         max-height: 0;
         min-width: 10rem;
         background-color: var(--color-gray-500);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         box-shadow: var(--menu-shadow);
         transition: max-height .5s;
         overflow: hidden;

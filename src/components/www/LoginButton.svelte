@@ -81,7 +81,7 @@
 		width: 1.75rem;
 		height: 1.75rem;
 		border-radius: 50%;
-		background: var(--color-primary, #16d3dd);
+		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
 		display: flex;
 		align-items: center;

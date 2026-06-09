@@ -73,7 +73,7 @@
   padding: 1rem;
   background-color: var(--color);
   border-radius: var(--radius-16);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   fill: currentColor;
 }
 

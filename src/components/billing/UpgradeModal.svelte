@@ -437,8 +437,8 @@
     }
 
     .tab.-active {
-        color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
+        color: var(--color-interactivity);
+        border-bottom-color: var(--color-interactivity);
     }
 
     .tab:hover:not(.-active) {
@@ -538,7 +538,7 @@
         width: 2rem;
         height: 2rem;
         border: 3px solid var(--color-border);
-        border-top-color: var(--color-primary);
+        border-top-color: var(--color-interactivity);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }

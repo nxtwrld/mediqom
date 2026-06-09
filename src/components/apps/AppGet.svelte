@@ -129,10 +129,10 @@
 
     /* Unused - price element is commented out in template
     .price {
-        background-color: var(--color-shade);
+        background-color: var(--color-gray-300);
         padding: .2rem .5rem;
         display: inline-block;
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         white-space: nowrap;
         font-weight: bold;
     }
@@ -164,7 +164,7 @@
     .app-details div {
         text-align: left;
         padding: 0 1rem 0 0 ;      
-        border-right: 1px solid var(--color-shade);
+        border-right: 1px solid var(--color-gray-300);
         height: 100%;
     }
     .app-details div:first-child {
@@ -209,8 +209,8 @@
         align-items: center;
         gap: 1rem;
         padding: .5rem 1rem;
-        background-color: var(--color-shade);
-        border-radius: var(--border-radius);
+        background-color: var(--color-gray-300);
+        border-radius: var(--radius-16);
         margin: 1rem 0;
     }
     .warning > svg {

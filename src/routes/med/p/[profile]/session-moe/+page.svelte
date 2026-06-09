@@ -452,7 +452,7 @@
         width: 32px;
         height: 32px;
         border: 3px solid var(--color-border, #e2e8f0);
-        border-top: 3px solid var(--color-primary, #3b82f6);
+        border-top: 3px solid var(--color-interactivity, #3b82f6);
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 1rem;
@@ -472,9 +472,9 @@
     .transcript-preview {
         margin-top: 2rem;
         padding: 1rem;
-        background: var(--color-surface-secondary, #f1f5f9);
+        background: var(--color-surface, #f1f5f9);
         border-radius: 8px;
-        border-left: 4px solid var(--color-primary, #3b82f6);
+        border-left: 4px solid var(--color-interactivity, #3b82f6);
     }
 
     .preview-label {
@@ -493,7 +493,7 @@
     }
 
     /* Ensure full height on mobile */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .session-moe-page {
             height: 100vh;
             height: 100dvh; /* Dynamic viewport height for mobile browsers */

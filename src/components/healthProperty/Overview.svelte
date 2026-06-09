@@ -137,7 +137,7 @@
 
 	{#if canAddEntries(category) && !isAdding}
 		<div class="add-button-container">
-			<button type="button" class="button --primary add-btn" onclick={startAdd} disabled={isProcessing}>
+			<button type="button" class="button -primary add-btn" onclick={startAdd} disabled={isProcessing}>
 				{$t('profile.health.history.add-entry')}
 			</button>
 		</div>
@@ -149,7 +149,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--gap-small);
+		gap: var(--gap);
 		flex-wrap: wrap;
 	}
 
@@ -166,24 +166,24 @@
 	}
 
 	.history-only {
-		padding: var(--gap-small) 0;
+		padding: var(--gap) 0;
 	}
 
 	.add-form-container {
 		margin-top: var(--gap);
-		padding: 0 var(--gap-small);
+		padding: 0 var(--gap);
 	}
 
 	.add-button-container {
 		margin-top: var(--gap);
-		padding: 0 var(--gap-small);
+		padding: 0 var(--gap);
 	}
 
 	.add-btn {
 		width: 100%;
 	}
 
-	@media screen and (max-width: 600px) {
+	@media screen and (max-width: 768px) {
 		.property-overview {
 			width: 100vw;
 			min-width: auto;

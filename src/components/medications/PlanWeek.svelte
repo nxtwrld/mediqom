@@ -207,7 +207,7 @@
     svg.time-of-day {
         width: 1.5rem;
         height: 1.5rem;
-        fill: var(--color-primary);
+        fill: var(--color-interactivity);
         flex-shrink: 0;
     }
     .segment-label {
@@ -291,12 +291,12 @@
         font-weight: 600;
         text-align: center;
         border-radius: 1rem;
-        background-color: var(--color-primary);
+        background-color: var(--color-interactivity);
         color: var(--color-white);
     }
 
     /* Mobile */
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
         .weekdays {
             flex-direction: column;
             min-height: auto;

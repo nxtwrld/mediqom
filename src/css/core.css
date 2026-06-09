@@ -167,10 +167,61 @@
   --color-text-primary: var(--color-black);
   --color-text-secondary: var(--color-gray-800);
 
-  /* Status Light Colors */
+  /* Status Light Colors (pale tints, used as subtle backgrounds) */
   --color-positive-light: #d4edda;
   --color-negative-light: #f8d7da;
   --color-warning-light: #fff3cd;
+  --color-info-light: #ece4fb;
+  --color-interactivity-light: #e8f0ff;
+
+  /* Status Dark shades (for text/icons on light backgrounds) */
+  --color-positive-dark: #1fa074;
+  --color-negative-dark: #c40d3a;
+  --color-warning-dark: #cc9d00;
+  --color-info-dark: #8a63d9;
+  --color-interactivity-dark: #2756cc;
+
+  /* Status RGB triplets (for use inside rgba(...)) */
+  --color-positive-rgb: 41, 204, 151;
+  --color-negative-rgb: 251, 16, 74;
+  --color-warning-rgb: 254, 196, 0;
+  --color-info-rgb: 169, 137, 238;
+  --color-interactivity-rgb: 53, 113, 255;
+
+  /* Grayscale ramp — additional shades */
+  --color-gray-100: #f2f3f5;
+  --color-gray-200: #e9eaed;
+  --color-gray-700: #6b6e7d;
+
+  /* Spacing — 4px step (scale: 4 / 8 / 16 / 24 / 32) */
+  --ui-pad-xsmall: 0.25rem;
+
+  /* Type scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.4rem;
+  --font-size-2xl: 1.6rem;
+
+  /* Motion */
+  --transition-fast: 0.15s;
+  --transition-default: 0.2s;
+  --transition-slow: 0.3s;
+
+  /* Radius alias */
+  --radius-12: min(0.75rem, 15px);
+
+  /* Z-index scale — named layers (values mirror the live hierarchy) */
+  --z-base: 1;
+  --z-content: 2;
+  --z-sticky: 10;
+  --z-dropdown: 100;
+  --z-chrome: 1000;
+  --z-overlay: 100000;
+  --z-modal: 100001;
+  --z-popover: 100002;
+  --z-app: 10000000;
 
   /* Color scheme hint for native controls */
   color-scheme: light;
@@ -212,10 +263,31 @@
   --color-text-primary: var(--color-black);
   --color-text-secondary: var(--color-gray-800);
 
-  /* Status */
+  /* Status — pale tints */
   --color-positive-light: #1a3a2a;
   --color-negative-light: #3a1a1e;
   --color-warning-light: #3a3018;
+  --color-info-light: #2a2540;
+  --color-interactivity-light: #1a2440;
+
+  /* Status — dark shades (brightened for dark bg) */
+  --color-positive-dark: #2bb98a;
+  --color-negative-dark: #e63555;
+  --color-warning-dark: #e6bd2e;
+  --color-info-dark: #a98fe6;
+  --color-interactivity-dark: #3a6fd9;
+
+  /* Status RGB triplets (dark-theme accents) */
+  --color-positive-rgb: 61, 224, 171;
+  --color-negative-rgb: 255, 77, 109;
+  --color-warning-rgb: 255, 210, 51;
+  --color-info-rgb: 185, 160, 245;
+  --color-interactivity-rgb: 77, 138, 255;
+
+  /* Grayscale ramp — additional shades */
+  --color-gray-100: #2a2d3c;
+  --color-gray-200: #232634;
+  --color-gray-700: #9a9eb0;
 
   /* Buttons */
   --button-color: transparent;

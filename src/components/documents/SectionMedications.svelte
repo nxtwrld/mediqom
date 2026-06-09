@@ -409,7 +409,7 @@
     
     /* Panel type variations */
     .medication-active {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .medication-new {
@@ -417,11 +417,11 @@
     }
     
     .medication-discontinued {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .change-increase {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .change-decrease {
@@ -429,7 +429,7 @@
     }
     
     .change-discontinued {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .change-added {
@@ -447,11 +447,11 @@
     .severity-major,
     .severity-severe,
     .severity-critical {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .allergy-item {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .adherence-panel {
@@ -482,13 +482,13 @@
     }
     
     .status-active {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .status-discontinued {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .status-hold {
@@ -497,7 +497,7 @@
     }
     
     .prescription-badge {
-        background-color: var(--color-success);
+        background-color: var(--color-positive);
         color: white;
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
@@ -530,16 +530,16 @@
     
     .dosage-value {
         font-weight: 600;
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .adherence-excellent {
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
         font-weight: 600;
     }
     
     .adherence-good {
-        color: var(--color-success);
+        color: var(--color-positive);
         font-weight: 600;
     }
     
@@ -549,7 +549,7 @@
     }
     
     .adherence-poor {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
         font-weight: 600;
     }
     

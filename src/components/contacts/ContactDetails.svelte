@@ -99,7 +99,7 @@
     .institution {
         margin-bottom: var(--ui-pad-small);
         padding: var(--ui-pad-small);
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: var(--ui-radius-small);
     }
 

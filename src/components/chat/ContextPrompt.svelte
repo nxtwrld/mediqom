@@ -140,13 +140,13 @@
   }
 
   .context-prompt.profile {
-    background: var(--color-blue-100);
-    border-color: var(--color-blue-200);
+    background: var(--color-interactivity-light);
+    border-color: var(--color-interactivity-light);
   }
 
   .context-prompt.tool {
-    background: var(--color-purple-100);
-    border-color: var(--color-purple-200);
+    background: var(--color-info-light);
+    border-color: var(--color-info-light);
   }
 
   .tool-header {
@@ -157,7 +157,7 @@
   }
 
   .tool-icon {
-    color: var(--color-purple-600);
+    color: var(--color-info);
     flex-shrink: 0;
   }
 
@@ -165,7 +165,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: var(--color-purple-800);
+    color: var(--color-info-dark);
   }
 
   .context-prompt-text {
@@ -179,18 +179,18 @@
   }
 
   .context-prompt.profile .context-prompt-text {
-    color: var(--color-blue-800);
+    color: var(--color-interactivity-dark);
   }
 
   .context-prompt.tool .context-prompt-text {
-    color: var(--color-purple-800);
+    color: var(--color-info-dark);
   }
 
   .data-access-list {
     margin: 12px 0;
     padding-left: 20px;
     font-size: 13px;
-    color: var(--color-purple-700);
+    color: var(--color-info-dark);
   }
 
   .data-access-list li {
@@ -207,18 +207,18 @@
   }
 
   .security-badge.level-low {
-    background: var(--color-green-100);
-    color: var(--color-green-800);
+    background: var(--color-positive-light);
+    color: var(--color-positive-dark);
   }
 
   .security-badge.level-medium {
-    background: var(--color-yellow-100);
-    color: var(--color-yellow-800);
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
   }
 
   .security-badge.level-high {
-    background: var(--color-orange-100);
-    color: var(--color-orange-800);
+    background: var(--color-warning-light);
+    color: var(--color-warning-dark);
   }
 
   .context-actions {
@@ -254,7 +254,7 @@
   }
 
   .context-prompt.profile .context-btn.accept:hover {
-    background: var(--color-blue-600);
+    background: var(--color-interactivity);
   }
 
   .context-prompt.tool .context-btn.accept {
@@ -262,7 +262,7 @@
   }
 
   .context-prompt.tool .context-btn.accept:hover {
-    background: var(--color-purple-600);
+    background: var(--color-info);
   }
 
   .context-btn.decline {

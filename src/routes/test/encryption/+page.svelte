@@ -1143,7 +1143,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.badge {
 		font-size: 0.75rem;
 		font-weight: 500;
-		background: var(--color-primary);
+		background: var(--color-interactivity);
 		color: white;
 		padding: 0.1rem 0.4rem;
 		border-radius: var(--ui-radius-small);
@@ -1200,7 +1200,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	}
 
 	.pipeline-step.running {
-		background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+		background: color-mix(in srgb, var(--color-interactivity) 8%, transparent);
 	}
 
 	.pipeline-step.step-error {

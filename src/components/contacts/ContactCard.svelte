@@ -77,7 +77,7 @@
     }
 
     .card-header:hover {
-        background-color: var(--color-background-hover);
+        background-color: var(--color-gray-300);
     }
 
     .card-header .name {

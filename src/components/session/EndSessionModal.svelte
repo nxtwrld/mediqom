@@ -147,10 +147,10 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.75rem;
-        background: var(--color-error-bg, #fef2f2);
-        border: 1px solid var(--color-error-border, #fecaca);
+        background: var(--color-negative-light, #fef2f2);
+        border: 1px solid var(--color-negative, #fecaca);
         border-radius: var(--radius-8, 8px);
-        color: var(--color-error, #dc2626);
+        color: var(--color-negative, #dc2626);
         font-size: 0.875rem;
         margin-bottom: 1.5rem;
     }

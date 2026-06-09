@@ -11,7 +11,7 @@ svg.app-icon {
 }
 img.app-icon {
   border-radius: 25%;
-  background-color: var(--color-background-panel);
+  background-color: var(--color-surface);
   box-shadow: 0rem 0.3rem 0.3rem -0.1rem rgba(0, 0, 0, 0.4);
 }
 .app-icon.-full {

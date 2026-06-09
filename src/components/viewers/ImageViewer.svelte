@@ -43,7 +43,7 @@
         justify-content: center;
         align-items: center;
         min-height: 200px;
-        background: var(--bg-secondary, #f8f9fa);
+        background: var(--color-background, #f8f9fa);
         border-radius: 8px;
     }
 
@@ -64,17 +64,17 @@
     .loading, .error {
         padding: 2rem;
         text-align: center;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
 
     .error {
-        color: var(--error-color, #dc3545);
+        color: var(--color-negative, #dc3545);
     }
 
     .image-info {
         margin-top: 1rem;
         font-size: 0.9rem;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
 
     .hidden {

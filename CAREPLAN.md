@@ -662,14 +662,15 @@ single highest-engagement moment in the product; positive framing rules apply
 - Structure is visible (condition name shape, task rows, goal bar) but content is unreadable
 - Subtle pulse animation — the placeholders feel alive, not static
 - Label: "Your Care Plan takes shape with each document you add"
-- Forward-looking promise: *"And later, Mediqom will help you share this with your next doctor."*
+- Forward-looking promise: *"And Mediqom will help you share this with your next doctor."*
 - Single CTA: "Import your first document"
 
 The shaded bars are a promise of value, not an absence of it.
 They show what categories will appear: conditions, tasks, goals, care team.
-The share line sets expectations from day one — the export-with-next-doctor
-flow is on the roadmap (§Deferred), not a v1 promise; visibility grows
-expectations correctly without committing the UI to deliver yet.
+Sharing is a v1 capability (see `CAREPLAN_REVISION.md` §6.17 — extends
+the existing `document_shares` system), so the share line in the empty
+state is a real promise the product can keep, not an expectation set
+against a future release.
 
 ### Time-aware empty state (profile has documents, none recent)
 
@@ -1119,14 +1120,21 @@ before UI is built against it.
   since both session persistence and session-output-as-document already
   exist. What stays deferred is the content-level merge.
 
-- Push notifications / local notifications for task reminders
-  Requires `@capacitor/local-notifications` integration.
+- Push notifications for task reminders
+  Requires server-side FCM/APNs configuration via
+  `@capacitor/push-notifications`. **Local notifications are v1** — see
+  `CAREPLAN_REVISION.md` §6.18 (no server work, device-scheduled).
 
 - Calendar integration for follow-up appointments
-  Requires Capacitor calendar plugin.
+  Requires Capacitor calendar plugin. The `Appointment` model already
+  carries `nativeEventId` + sync fields from the contacts/calendar PR;
+  the missing piece is the UI flow. Promote to v1 once local
+  notifications (§6.18) lands and proves the mobile reminder pattern.
 
-- Second-opinion workflow (share Care Plan with another doctor)
-  Existing share system extended — future phase.
+- ~~Second-opinion workflow (share Care Plan with another doctor)~~
+  **Promoted to v1.** See `CAREPLAN_REVISION.md` §6.17 — extends the
+  existing `document_shares` system with a `type: 'carePlan'` variant.
+  Read-only share; merge stays client-only on the owner's device.
 
 ---
 

@@ -164,9 +164,9 @@
         width: 2rem;
         height: 2rem;
         background-color: var(--color-negative);
-        border-bottom-left-radius: var(--border-radius-panel);
-        border-top-right-radius: var(--border-radius-panel);
-        box-shadow: var(--shadow-interactive);
+        border-bottom-left-radius: var(--radius-16);
+        border-top-right-radius: var(--radius-16);
+        box-shadow: var(--shadow-interactivity);
         display: flex;
         justify-content: center;
         align-items: center;

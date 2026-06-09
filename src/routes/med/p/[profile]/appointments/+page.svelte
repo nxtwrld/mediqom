@@ -571,7 +571,7 @@
 
     .search-results li:hover,
     .search-results li.selected {
-        background: var(--color-background-hover);
+        background: var(--color-gray-300);
     }
 
     .result-name {

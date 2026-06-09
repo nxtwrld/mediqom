@@ -291,7 +291,7 @@
             {/if}
         {/each}
         <div class="tile">
-            <button class="button --large" onclick={() => ui.emit('modal.healthForm', { data: $profile?.health })}>
+            <button class="button -large" onclick={() => ui.emit('modal.healthForm', { data: $profile?.health })}>
                 {$t('app.profile.edit-health-profile')}
             </button>
         </div>
@@ -366,8 +366,8 @@
         border: none;
         cursor: pointer;
         padding: 0.25rem;
-        color: var(--color-text-muted, #666);
-        border-radius: var(--radius-small, 4px);
+        color: var(--color-text-secondary, #666);
+        border-radius: var(--ui-radius-small, 4px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -376,7 +376,7 @@
 
     .edit-profile-btn:hover {
         background: var(--color-gray-200, #e5e5e5);
-        color: var(--color-text, #333);
+        color: var(--color-text-primary, #333);
     }
 
     .edit-profile-btn svg {
@@ -398,7 +398,7 @@
     }
 
   
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
         .profile-header {
             display: flex;
             flex-direction: column;
@@ -426,7 +426,7 @@
     .tile:last-child:first-child {
         grid-column: 1 / -1;
     }
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
         .tiles {
             grid-template-rows: auto;
             grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));

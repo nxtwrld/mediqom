@@ -64,7 +64,7 @@
     .toggle-option.-active {
         background-color: var(--color-background);
         color: var(--color-text-primary);
-        box-shadow: var(--shadow-small);
+        box-shadow: var(--shadow-interactivity);
     }
 
     .toggle-option:hover:not(.-active) {

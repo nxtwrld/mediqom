@@ -22,10 +22,10 @@
     }
 
     function getPriorityColor(priority: number): string {
-        if (priority <= 2) return 'var(--color-error, #dc2626)';
+        if (priority <= 2) return 'var(--color-negative, #dc2626)';
         if (priority <= 4) return 'var(--color-warning, #f59e0b)';
         if (priority <= 6) return 'var(--color-info, #3b82f6)';
-        return 'var(--color-success, #10b981)';
+        return 'var(--color-positive, #10b981)';
     }
 
     const basicInfoItems = $derived([
@@ -222,7 +222,7 @@
     .clinical-context-text {
         margin: 0;
         padding: 0.75rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 6px;
         font-size: 0.875rem;
         color: var(--color-text-primary, #1f2937);
@@ -232,9 +232,9 @@
     .alert-message {
         margin: 0;
         padding: 0.75rem;
-        background: var(--color-error-bg, #fee2e2);
+        background: var(--color-negative-light, #fee2e2);
         border-radius: 6px;
-        border-left: 3px solid var(--color-error, #dc2626);
+        border-left: 3px solid var(--color-negative, #dc2626);
         font-size: 0.875rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
@@ -244,7 +244,7 @@
     .answer-type-badge {
         font-size: 0.75rem;
         padding: 0.25rem 0.75rem;
-        background: var(--color-info-bg, #dbeafe);
+        background: var(--color-info-light, #dbeafe);
         color: var(--color-info, #3b82f6);
         border-radius: 12px;
         font-weight: 600;
@@ -260,31 +260,31 @@
     }
 
     .severity-badge.severity-low {
-        background: var(--color-success-bg, #dcfce7);
-        color: var(--color-success, #16a34a);
+        background: var(--color-positive-light, #dcfce7);
+        color: var(--color-positive, #16a34a);
     }
 
     .severity-badge.severity-medium {
-        background: var(--color-warning-bg, #fef3c7);
+        background: var(--color-warning-light, #fef3c7);
         color: var(--color-warning, #d97706);
     }
 
     .severity-badge.severity-high {
-        background: var(--color-error-bg, #fee2e2);
-        color: var(--color-error, #dc2626);
+        background: var(--color-negative-light, #fee2e2);
+        color: var(--color-negative, #dc2626);
     }
 
     .severity-badge.severity-critical {
-        background: var(--color-error, #dc2626);
+        background: var(--color-negative, #dc2626);
         color: white;
     }
 
     .follow-up-list {
         margin: 0;
         padding: 0.75rem 0.75rem 0.75rem 2rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 6px;
-        border-left: 3px solid var(--color-primary, #3b82f6);
+        border-left: 3px solid var(--color-interactivity, #3b82f6);
         font-size: 0.875rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;

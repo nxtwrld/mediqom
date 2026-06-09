@@ -28,10 +28,10 @@
     }
 
     function getPriorityColor(priority: number): string {
-        if (priority <= 2) return 'var(--color-error, #dc2626)';
+        if (priority <= 2) return 'var(--color-negative, #dc2626)';
         if (priority <= 4) return 'var(--color-warning, #f59e0b)';
         if (priority <= 6) return 'var(--color-info, #3b82f6)';
-        return 'var(--color-success, #10b981)';
+        return 'var(--color-positive, #10b981)';
     }
 
     function getPriorityClass(priority: number): string {
@@ -184,7 +184,7 @@
 
 <style>
     .question-card {
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border: 0;
         border-left: .5rem solid var(--priority-color, #e2e8f0);
         margin-bottom: 0.75rem;
@@ -262,8 +262,8 @@
     }
 
     .priority {
-        background: var(--color-primary-bg, #dbeafe);
-        color: var(--color-primary, #3b82f6);
+        background: var(--color-interactivity-light, #dbeafe);
+        color: var(--color-interactivity, #3b82f6);
     }
 
     .category {
@@ -287,13 +287,13 @@
     }
 
     .status-pending {
-        background: var(--color-warning-bg, #fef3c7);
+        background: var(--color-warning-light, #fef3c7);
         color: var(--color-warning, #d97706);
     }
 
     .status-answered {
-        background: var(--color-success-bg, #dcfce7);
-        color: var(--color-success, #16a34a);
+        background: var(--color-positive-light, #dcfce7);
+        color: var(--color-positive, #16a34a);
     }
 
     .expand-icon {
@@ -330,7 +330,7 @@
     .note-text {
         font-style: italic;
         color: var(--color-text-secondary, #6b7280);
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         padding: 0.75rem;
         border-radius: 6px;
         border: 1px dashed var(--color-border, #e2e8f0);
@@ -338,8 +338,8 @@
     }
 
     .answer-display .answer {
-        background: var(--color-success-bg, #dcfce7);
-        color: var(--color-success, #16a34a);
+        background: var(--color-positive-light, #dcfce7);
+        color: var(--color-positive, #16a34a);
         padding: 0.5rem;
         border-radius: 4px;
         font-weight: 500;
@@ -368,11 +368,11 @@
     }
 
     .impact-item.positive {
-        color: var(--color-success, #16a34a);
+        color: var(--color-positive, #16a34a);
     }
 
     .impact-item.negative {
-        color: var(--color-error, #dc2626);
+        color: var(--color-negative, #dc2626);
     }
 
     .relationships-list {
@@ -391,7 +391,7 @@
 
     .rel-type {
         font-weight: 500;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
     }
 
     .rel-target {
@@ -401,13 +401,13 @@
 
     .rel-strength {
         font-size: 0.75rem;
-        color: var(--color-success, #16a34a);
+        color: var(--color-positive, #16a34a);
         margin-left: auto;
     }
 
     /* Interactive node references */
     .node-reference {
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
         border-bottom: 1px dashed currentColor;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -415,7 +415,7 @@
 
     .node-reference:hover,
     .node-reference:focus {
-        background: var(--color-primary-bg, #dbeafe);
+        background: var(--color-interactivity-light, #dbeafe);
         border-bottom: 1px solid currentColor;
         padding: 0.125rem 0.25rem;
         margin: -0.125rem -0.25rem;
@@ -424,7 +424,7 @@
     }
 
     .node-reference:focus {
-        box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+        box-shadow: 0 0 0 2px var(--color-interactivity, #3b82f6);
     }
 
     /* Remove monospace styling for clickable node references */
@@ -433,7 +433,7 @@
     }
 
     /* Mobile optimizations */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .question-header {
             padding: 0.75rem;
         }

@@ -116,7 +116,7 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         background: var(--color-gray-200);
     }
     .preview svg {

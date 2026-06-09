@@ -603,7 +603,7 @@
         height: var(--tile-height);
         background-color: var(--color-background);
         border: var(--border-width) solid var(--color-background);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
     }
     .report .preview {
         position: relative;
@@ -658,7 +658,7 @@
     .alert.-info {
         padding: .75rem 1rem;
         margin: 0 1rem;
-        background-color: var(--color-blue-100, #e0f0ff);
+        background-color: var(--color-interactivity-light, #e0f0ff);
         border-radius: var(--radius-8);
         font-size: .85rem;
     }

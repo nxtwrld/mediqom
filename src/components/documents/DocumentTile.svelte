@@ -114,7 +114,7 @@
         align-items: center;
         justify-content: space-between;
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile:hover {
@@ -123,7 +123,7 @@
 
     .tile:hover .tile-footer {
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile  svg.category {
@@ -133,7 +133,7 @@
         fill: currentColor;
     }
     .tile:hover  svg.category {
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile .people {

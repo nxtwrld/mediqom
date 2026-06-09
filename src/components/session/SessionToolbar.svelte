@@ -136,7 +136,7 @@
     .tab-group-main {
         display: flex;
         align-items: stretch;
-        border-right: 2px solid var(--color-border-strong, #cbd5e1);
+        border-right: 2px solid var(--color-gray-600, #cbd5e1);
     }
     
     .tab-spacer {
@@ -153,12 +153,12 @@
     
     /* Visual distinction for main view tabs */
     .main-view-tab {
-        background-color: var(--color-surface-alt, #f8fafc);
+        background-color: var(--color-surface, #f8fafc);
     }
     
     .main-view-tab.-active {
         background-color: var(--color-surface, #fff);
-        border-top-color: var(--color-primary, #3b82f6);
+        border-top-color: var(--color-interactivity, #3b82f6);
     }
     
     .tab-head {
@@ -191,14 +191,14 @@
     }
     
     .tab-head:hover {
-        background-color: var(--color-surface-hover);
+        background-color: var(--color-gray-300);
         color: var(--color-text-primary);
     }
     
     .tab-head.-active {
         font-weight: 700;
-        border-top-color: var(--color-highlight, var(--color-primary));
-        color: var(--color-highlight, var(--color-primary));
+        border-top-color: var(--color-highlight, var(--color-interactivity));
+        color: var(--color-highlight, var(--color-interactivity));
         background-color: var(--color-surface);
     }
     
@@ -206,7 +206,7 @@
         position: absolute;
         top: 0.25rem;
         right: 0.25rem;
-        background: var(--color-error, #dc2626);
+        background: var(--color-negative, #dc2626);
         color: white;
         font-size: 0.625rem;
         font-weight: 700;

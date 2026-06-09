@@ -222,7 +222,7 @@
 
     .app-credits {
         position: absolute;
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         top: .5rem;
         right: .5rem;
         font-size: .8rem;
@@ -232,7 +232,7 @@
     @media (hover: hover) {
         .apps :global(> button:hover),
         .apps :global(> .popover-wrapper > button:hover) {
-            background-color: var(--color-background-panel);
+            background-color: var(--color-surface);
             color: black;
         }
     }

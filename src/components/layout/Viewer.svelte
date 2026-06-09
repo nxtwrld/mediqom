@@ -237,7 +237,7 @@
         width: 100%;
         height: 100%;
 /*
-        background-image: linear-gradient(90deg, var(--color-shade) 0%, var(--color-shade) 5%, transparent 35%, #FFF 50%, transparent 65%, var(--color-shade) 95%, var(--color-shade) 100%);*/
+        background-image: linear-gradient(90deg, var(--color-gray-300) 0%, var(--color-gray-300) 5%, transparent 35%, #FFF 50%, transparent 65%, var(--color-gray-300) 95%, var(--color-gray-300) 100%);*/
     }
     .model-tools,
     .model-layers {
@@ -256,7 +256,7 @@
         pointer-events: none;
         transition: opacity .2s ease-in-out .2s;
         box-shadow: 0px 0px 0px 1px rgba(255,255,255,.4), 2px 2px 2px 0px rgba(0,0,0,.4);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
     }
 
 
@@ -352,7 +352,7 @@
     .model-layers button.-active {
         background-color: var(--color-highlight);
         color: var(--color-highlight-text);
-        box-shadow: inset 0 0 0 .1rem var(--color-primary);
+        box-shadow: inset 0 0 0 .1rem var(--color-interactivity);
         z-index: 2;
     }
 
@@ -378,13 +378,13 @@
     .model-tools button:last-child,
     .model-layers button:last-child {
         margin-bottom: 0;
-        border-bottom-left-radius: var(--radius);
-        border-bottom-right-radius: var(--radius);
+        border-bottom-left-radius: var(--radius-16);
+        border-bottom-right-radius: var(--radius-16);
     }
     .model-tools button:first-of-type,
     .model-layers button:first-of-type {
-        border-top-left-radius: var(--radius);
-        border-top-right-radius: var(--radius);
+        border-top-left-radius: var(--radius-16);
+        border-top-right-radius: var(--radius-16);
     }
     .model-tools button svg,
     .model-layers button svg {
@@ -428,7 +428,7 @@
         background-color: rgba(0, 0, 0, .3);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         pointer-events: none;
         z-index: 1;
         text-transform: uppercase;

@@ -22,6 +22,12 @@ export interface MaterialCacheEntry {
     highlighted: THREE.Material | THREE.Material[];
 }
 
+export interface MultiHighlightRegion {
+    mesh: string;    // mesh name in the Three.js scene
+    color: string;   // CSS color string e.g. '#3b82f6'
+    opacity: number; // 0–1, will be bucketed
+}
+
 export interface SceneState {
     // Three.js core objects (populated by initScene)
     scene: THREE.Scene;
@@ -36,6 +42,11 @@ export interface SceneState {
     // Material cache
     materialCache: Map<string, MaterialCacheEntry>;
     focusableMeshes: THREE.Mesh[];
+
+    // Multi-highlight (Care Plan region painting)
+    multiHighlightRegions: MultiHighlightRegion[];
+    multiVariantCache: Map<string, THREE.Material | THREE.Material[]>;
+    previousMultiHighlight: Map<string, string>; // meshName → variantKey
 
     // Aura glow effect state
     auraMeshes: THREE.Mesh[];
@@ -86,6 +97,11 @@ export function createSceneState(): SceneState {
         // Material cache
         materialCache: new Map(),
         focusableMeshes: [],
+
+        // Multi-highlight
+        multiHighlightRegions: [],
+        multiVariantCache: new Map(),
+        previousMultiHighlight: new Map(),
 
         // Aura
         auraMeshes: [],

@@ -1396,7 +1396,7 @@
         background: rgba(255, 255, 255, 0.2);
         border: none;
         color: white;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         padding: 0.5rem;
         cursor: pointer;
         transition: background-color 0.2s ease;

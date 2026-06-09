@@ -31,10 +31,10 @@
     }
 
     function getPriorityColor(priority: number): string {
-        if (priority <= 2) return 'var(--color-error, #dc2626)';
+        if (priority <= 2) return 'var(--color-negative, #dc2626)';
         if (priority <= 4) return 'var(--color-warning, #f59e0b)';
         if (priority <= 6) return 'var(--color-info, #3b82f6)';
-        return 'var(--color-success, #10b981)';
+        return 'var(--color-positive, #10b981)';
     }
 
 
@@ -176,7 +176,7 @@
     .contraindications-list {
         margin: 0;
         padding: 0.75rem 0.75rem 0.75rem 2rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         font-size: 0.875rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
@@ -187,7 +187,7 @@
     }
 
     .contraindications-list {
-        border-left: .5rem solid var(--color-error, #dc2626);
+        border-left: .5rem solid var(--color-negative, #dc2626);
     }
 
     .side-effects-list li,

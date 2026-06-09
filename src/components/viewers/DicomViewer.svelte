@@ -740,7 +740,7 @@
     }
 
     /* Mobile responsive */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .dicom-toolbar {
             gap: 0.125rem;
             padding: 0.25rem;

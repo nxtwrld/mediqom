@@ -17,7 +17,7 @@
         font-size: 0.75rem;
         background-color: var(--color-gray-200);
         color: var(--color-gray-800);
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         text-transform: capitalize;
     }
     

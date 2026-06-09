@@ -180,7 +180,7 @@
         width: 3rem;
         height: 3rem;
         border: 3px solid var(--color-border);
-        border-top-color: var(--color-primary, #3182ce);
+        border-top-color: var(--color-interactivity, #3182ce);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }

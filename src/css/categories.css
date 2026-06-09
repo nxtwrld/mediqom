@@ -51,13 +51,13 @@
 }
 
 .category-none {
-  --color-category: var(--color-terciary);
+  --color-category: var(--color-positive);
 }
 .category-MEDICAL_APPOINTMENT {
-  --color-category: var(--color-primary);
+  --color-category: var(--color-interactivity);
 }
 .category-OTHER {
-  --color-category: var(--color-secondary);
+  --color-category: var(--color-gray-800);
 }
 .category-TELEMEDICINE {
   --color-category: #003b7e;
@@ -72,7 +72,7 @@
   --color-category: #ae00ff;
 }
 .category-CHECKUP {
-  --color-category: var(--color-primary);
+  --color-category: var(--color-interactivity);
 }
 .category-HOME_CARE {
   --color-category: #ee20b7;
@@ -80,53 +80,53 @@
 
 .category-exam {
   --color: #00a1ac;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-therapy {
   --color: #5d9d19;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-laboratory {
   --color: #a2165c;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-vital-signs {
   --color: #ff0084;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-imaging {
   --color: #444444;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-report {
   --color: #006196;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-survey {
   --color: #c300ff;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-procedure {
   --color: var(--color-interactivity);
-  --color-text: var(--color-interactivity-text);
+  --color-text-primary: var(--color-interactivity-text);
 }
 .category-general {
   --color: var(--color-interactivity);
-  --color-text: var(--color-interactivity-text);
+  --color-text-primary: var(--color-interactivity-text);
 }
 .category-medication {
   --color: #f5a623;
-  --color-text: #000;
+  --color-text-primary: #000;
 }
 .category-qom {
   --color: #0055a4;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }
 .category-other {
   --color: #aaa;
-  --color-text: #000;
+  --color-text-primary: #000;
 }
 .category-selected {
   --color: #009322;
-  --color-text: #fff;
+  --color-text-primary: #fff;
 }

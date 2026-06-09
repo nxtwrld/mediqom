@@ -183,9 +183,9 @@
         transition: all 0.15s ease;
     }
     .day-btn.-active {
-        background: var(--color-primary, #0066cc);
+        background: var(--color-interactivity, #0066cc);
         color: white;
-        border-color: var(--color-primary, #0066cc);
+        border-color: var(--color-interactivity, #0066cc);
     }
     .monthday-grid {
         display: grid;
@@ -203,9 +203,9 @@
         transition: all 0.15s ease;
     }
     .monthday-btn.-active {
-        background: var(--color-primary, #0066cc);
+        background: var(--color-interactivity, #0066cc);
         color: white;
-        border-color: var(--color-primary, #0066cc);
+        border-color: var(--color-interactivity, #0066cc);
     }
     .button.-icon {
         display: flex;

@@ -586,7 +586,7 @@
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        background-color: var(--color-bg-secondary, #f5f5f5);
+        background-color: var(--color-surface, #f5f5f5);
     }
 
     .recover-container {
@@ -635,11 +635,11 @@
     }
 
     .method-option:hover {
-        border-color: var(--color-primary);
+        border-color: var(--color-interactivity);
     }
 
     .method-option.selected {
-        border-color: var(--color-primary);
+        border-color: var(--color-interactivity);
         background-color: rgba(0, 122, 255, 0.05);
     }
 
@@ -669,7 +669,7 @@
     .setup-illustration .icon.-large {
         width: 6rem;
         height: 6rem;
-        color: var(--color-primary);
+        color: var(--color-interactivity);
     }
 
     .passphrase-actions {
@@ -680,7 +680,7 @@
     }
 
     .recovery-key-box {
-        background-color: var(--color-bg-secondary, #f5f5f5);
+        background-color: var(--color-surface, #f5f5f5);
         border: 1px solid var(--color-border);
         border-radius: 0.5rem;
         padding: 1rem;
@@ -704,11 +704,11 @@
     }
 
     .success-icon svg {
-        color: var(--color-success, #1e7e34);
+        color: var(--color-positive, #1e7e34);
     }
 
     .error-icon svg {
-        color: var(--color-error, #dc3545);
+        color: var(--color-negative, #dc3545);
     }
 
     .help-text {
@@ -721,7 +721,7 @@
         width: 3rem;
         height: 3rem;
         border: 3px solid var(--color-border);
-        border-top-color: var(--color-primary);
+        border-top-color: var(--color-interactivity);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }

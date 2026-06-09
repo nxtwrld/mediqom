@@ -339,21 +339,21 @@
         align-items: center;
         gap: 0.25rem;
         padding: 0.5rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 6px;
         border: 1px solid var(--color-border, #e2e8f0);
     }
 
     .arrow-icon {
         font-size: 1.5rem;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
         font-weight: bold;
     }
 
     .relationship-label {
         font-size: 0.75rem;
         font-weight: 600;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
         text-align: center;
     }
 
@@ -362,7 +362,7 @@
         font-size: 0.875rem;
         color: var(--color-text-secondary, #6b7280);
         padding: 0.5rem;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 4px;
         border: 1px dashed var(--color-border, #e2e8f0);
     }
@@ -385,7 +385,7 @@
     }
 
     .action-item.normal-priority {
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-left: 3px solid #6b7280;
     }
 
@@ -427,12 +427,12 @@
     }
 
     .action-type {
-        background: var(--color-info-bg, #dbeafe);
+        background: var(--color-info-light, #dbeafe);
         color: var(--color-info, #3b82f6);
     }
 
     .action-priority {
-        background: var(--color-neutral-bg, #f1f5f9);
+        background: var(--color-interactivity-light, #f1f5f9);
         color: var(--color-text-secondary, #6b7280);
     }
 

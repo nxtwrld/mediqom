@@ -13,7 +13,7 @@
     function getPriorityLevel(priority: number): { level: string; color: string; label: string } {
         if (priority <= 2) return { 
             level: 'critical', 
-            color: 'var(--color-error, #dc2626)', 
+            color: 'var(--color-negative, #dc2626)', 
             label: $t('session.priority.critical') 
         };
         if (priority <= 4) return { 
@@ -28,7 +28,7 @@
         };
         return { 
             level: 'low', 
-            color: 'var(--color-success, #10b981)', 
+            color: 'var(--color-positive, #10b981)', 
             label: $t('session.priority.low') 
         };
     }

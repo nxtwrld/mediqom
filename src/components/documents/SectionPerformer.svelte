@@ -229,7 +229,7 @@
     }
 
     .badge.-primary {
-        background-color: var(--color-primary);
+        background-color: var(--color-interactivity);
         color: white;
     }
 

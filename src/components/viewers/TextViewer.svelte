@@ -75,15 +75,15 @@
     .text-viewer {
         width: 100%;
         height: 100%;
-        background: var(--bg-primary, #fff);
+        background: var(--color-surface, #fff);
         border-radius: 8px;
         overflow: hidden;
     }
 
     .text-header {
         padding: 0.75rem 1rem;
-        background: var(--bg-secondary, #f8f9fa);
-        border-bottom: 1px solid var(--border-color, #e0e0e0);
+        background: var(--color-background, #f8f9fa);
+        border-bottom: 1px solid var(--color-border, #e0e0e0);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -91,7 +91,7 @@
 
     .text-info {
         font-size: 0.9rem;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
 
     .text-content {
@@ -101,7 +101,7 @@
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
         font-size: 0.875rem;
         line-height: 1.5;
-        background: var(--bg-code, #f8f9fa);
+        background: var(--color-gray-400, #f8f9fa);
     }
 
     .text-content pre {
@@ -109,34 +109,34 @@
         padding: 0;
         white-space: pre-wrap;
         word-wrap: break-word;
-        color: var(--text-primary, #333);
+        color: var(--color-text-primary, #333);
     }
 
     .loading, .error {
         padding: 2rem;
         text-align: center;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
 
     .error {
-        color: var(--error-color, #dc3545);
+        color: var(--color-negative, #dc3545);
     }
 
     .syntax-json {
-        color: var(--json-color, #0969da);
+        color: var(--color-green, #0969da);
     }
 
     .syntax-xml {
-        color: var(--xml-color, #cf222e);
+        color: var(--color-purple, #cf222e);
     }
 
     .syntax-html {
-        color: var(--html-color, #8250df);
+        color: var(--color-blue, #8250df);
     }
 
     .text-stats {
         font-size: 0.8rem;
-        color: var(--text-tertiary, #999);
+        color: var(--color-text-secondary, #999);
     }
 </style>
 

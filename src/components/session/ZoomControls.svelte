@@ -204,7 +204,7 @@
 
     /* Keyboard focus styles */
     .zoom-btn:focus-visible {
-        outline: 2px solid var(--color-primary, #3b82f6);
+        outline: 2px solid var(--color-interactivity, #3b82f6);
         outline-offset: -2px;
     }
 

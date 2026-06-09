@@ -243,8 +243,8 @@
     
     /* Triage level styling */
     .triage-level-1 {
-        border-left-color: var(--color-danger);
-        background-color: rgba(var(--color-danger-rgb), 0.05);
+        border-left-color: var(--color-negative);
+        background-color: rgba(var(--color-negative-rgb), 0.05);
     }
     
     .triage-level-2 {
@@ -258,17 +258,17 @@
     }
     
     .triage-level-4 {
-        border-left-color: var(--color-success);
-        background-color: rgba(var(--color-success-rgb), 0.05);
+        border-left-color: var(--color-positive);
+        background-color: rgba(var(--color-positive-rgb), 0.05);
     }
     
     .triage-level-5 {
-        border-left-color: var(--color-secondary);
-        background-color: rgba(var(--color-secondary-rgb), 0.05);
+        border-left-color: var(--color-gray-800);
+        background-color: rgba(var(--color-gray-800), 0.05);
     }
     
     .vitals-panel {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .quick-info-panel {
@@ -276,15 +276,15 @@
     }
     
     .notes-panel {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     /* Content styling */
     .chief-complaint {
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         padding: 1rem;
         border-radius: 0.5rem;
-        border-left: 4px solid var(--color-primary);
+        border-left: 4px solid var(--color-interactivity);
     }
     
     .complaint-text {
@@ -319,7 +319,7 @@
     }
     
     .triage-level-badge.triage-level-1 {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
     }
     
     .triage-level-badge.triage-level-2 {
@@ -331,11 +331,11 @@
     }
     
     .triage-level-badge.triage-level-4 {
-        background-color: var(--color-success);
+        background-color: var(--color-positive);
     }
     
     .triage-level-badge.triage-level-5 {
-        background-color: var(--color-secondary);
+        background-color: var(--color-gray-800);
     }
     
     .mode-badge,
@@ -349,8 +349,8 @@
     
     .mode-badge.mode-ambulance,
     .mode-badge.mode-helicopter {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .mode-badge.mode-police {
@@ -366,8 +366,8 @@
     }
     
     .urgency-badge.urgency-emergent {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .urgency-badge.urgency-urgent {
@@ -393,7 +393,7 @@
         flex-direction: column;
         gap: 0.25rem;
         padding: 0.75rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.5rem;
         text-align: center;
     }
@@ -412,7 +412,7 @@
     }
     
     .pain-score.pain-mild {
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .pain-score.pain-moderate {
@@ -420,7 +420,7 @@
     }
     
     .pain-score.pain-severe {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     /* Quick assessment */
@@ -449,8 +449,8 @@
     }
     
     .allergy-tag {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .medication-tag {

@@ -62,10 +62,10 @@
 		</div>
 	</div>
 	<div class="form-actions">
-		<button type="button" class="button --secondary" onclick={oncancel}>
+		<button type="button" class="button -secondary" onclick={oncancel}>
 			{$t('profile.health.history.cancel')}
 		</button>
-		<button type="submit" class="button --primary">
+		<button type="submit" class="button -primary">
 			{$t('profile.health.history.save')}
 		</button>
 	</div>
@@ -75,8 +75,8 @@
 	.entry-form {
 		padding: var(--gap);
 		background: var(--color-gray-100);
-		border-radius: var(--radius);
-		margin-bottom: var(--gap-small);
+		border-radius: var(--radius-16);
+		margin-bottom: var(--gap);
 	}
 
 	.form-row {
@@ -104,7 +104,7 @@
 		top: 50%;
 		transform: translateY(-50%);
 		padding: 1rem;
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 	}
 
 	@media screen and (max-width: 480px) {

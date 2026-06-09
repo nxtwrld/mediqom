@@ -45,9 +45,9 @@
 
 <style>
 	.www-layout {
-		--color-primary: #16d3dd;
-		--color-primary-dark: #02b8c1;
-		--color-primary-light: #4bf0f9;
+		--color-interactivity: #16d3dd;
+		--color-interactivity-dark: #02b8c1;
+		--color-interactivity-light: #4bf0f9;
 		--www-bg: #f5f6f8;
 		--www-text: #1a1a2e;
 		--www-text-secondary: #555;
@@ -75,13 +75,13 @@
 
 	/* Global www styles */
 	.www-layout :global(a) {
-		color: var(--color-primary-dark);
+		color: var(--color-interactivity-dark);
 		text-decoration: none;
 		transition: color 0.2s;
 	}
 
 	.www-layout :global(a:hover) {
-		color: var(--color-primary);
+		color: var(--color-interactivity);
 		text-shadow: none;
 	}
 </style>

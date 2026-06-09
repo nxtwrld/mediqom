@@ -270,7 +270,7 @@
   }
 
   .mode-selector button:hover {
-    background: var(--color-background-hover, #f5f5f5);
+    background: var(--color-gray-300, #f5f5f5);
   }
 
   .mode-selector button.active {

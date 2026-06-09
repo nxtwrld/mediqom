@@ -314,15 +314,15 @@
     }
 
     .share-doc.-selected {
-        border-color: var(--color, var(--color-primary, #3182ce));
-        background: color-mix(in srgb, var(--color, var(--color-primary, #3182ce)) 10%, transparent);
+        border-color: var(--color, var(--color-interactivity, #3182ce));
+        background: color-mix(in srgb, var(--color, var(--color-interactivity, #3182ce)) 10%, transparent);
     }
 
     .share-doc input[type="checkbox"] {
         flex-shrink: 0;
         width: 1rem;
         height: 1rem;
-        accent-color: var(--color, var(--color-primary, #3182ce));
+        accent-color: var(--color, var(--color-interactivity, #3182ce));
         cursor: pointer;
     }
 
@@ -332,7 +332,7 @@
         height: 1.6rem;
         border-radius: 50%;
         background-color: var(--color, #546e7a);
-        color: var(--color-text, #fff);
+        color: var(--color-text-primary, #fff);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -385,7 +385,7 @@
         width: 2.5rem;
         height: 2.5rem;
         border: 3px solid var(--color-border);
-        border-top-color: var(--color-primary, #3182ce);
+        border-top-color: var(--color-interactivity, #3182ce);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
     }

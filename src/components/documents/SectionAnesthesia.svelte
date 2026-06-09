@@ -431,7 +431,7 @@
     
     /* Anesthesia type variations */
     .anesthesia-general {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .anesthesia-regional,
@@ -441,7 +441,7 @@
     }
     
     .anesthesia-local {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .anesthesia-sedation,
@@ -450,7 +450,7 @@
     }
     
     .anesthesia-combined {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .patient-status-panel {
@@ -458,7 +458,7 @@
     }
     
     .medication-item {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .fluid-panel {
@@ -466,15 +466,15 @@
     }
     
     .complication-resolved {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .complication-unresolved {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .post-anesthesia-panel {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .team-member-panel {
@@ -500,7 +500,7 @@
     }
     
     .anesthesia-type-badge.anesthesia-general {
-        background-color: var(--color-primary);
+        background-color: var(--color-interactivity);
     }
     
     .anesthesia-type-badge.anesthesia-regional,
@@ -510,7 +510,7 @@
     }
     
     .anesthesia-type-badge.anesthesia-local {
-        background-color: var(--color-success);
+        background-color: var(--color-positive);
     }
     
     .anesthesia-type-badge.anesthesia-sedation,
@@ -521,7 +521,7 @@
     .airway-section {
         margin-bottom: 0.75rem;
         padding: 0.75rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.5rem;
     }
     
@@ -536,8 +536,8 @@
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-weight: 500;
-        background-color: var(--color-primary-light);
-        color: var(--color-primary-dark);
+        background-color: var(--color-interactivity-light);
+        color: var(--color-interactivity-dark);
     }
     
     .tube-size {
@@ -546,7 +546,7 @@
     }
     
     .difficulty-value.difficulty-easy {
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .difficulty-value.difficulty-moderate {
@@ -555,7 +555,7 @@
     
     .difficulty-value.difficulty-difficult,
     .difficulty-value.difficulty-failed {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     /* Patient status grid */
@@ -589,7 +589,7 @@
     
     .asa-badge.asa-1,
     .asa-badge.asa-2 {
-        background-color: var(--color-success);
+        background-color: var(--color-positive);
     }
     
     .asa-badge.asa-3 {
@@ -599,11 +599,11 @@
     .asa-badge.asa-4,
     .asa-badge.asa-5,
     .asa-badge.asa-6 {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
     }
     
     .asa-badge.asa-emergency {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
     }
     
     .mallampati-badge {
@@ -626,8 +626,8 @@
     }
     
     .allergy-tag {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.8rem;
@@ -661,7 +661,7 @@
     
     .dose-value {
         font-weight: 600;
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     /* Fluid management */
@@ -674,7 +674,7 @@
     
     .fluid-section {
         padding: 0.75rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.5rem;
     }
     
@@ -699,11 +699,11 @@
     
     .fluid-volume {
         font-weight: 600;
-        color: var(--color-primary);
+        color: var(--color-interactivity);
     }
     
     .fluid-volume.blood-loss {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     .blood-products-section {
@@ -724,17 +724,17 @@
         gap: 0.5rem;
         align-items: center;
         padding: 0.5rem;
-        background-color: var(--color-danger-light);
+        background-color: var(--color-negative-light);
         border-radius: 0.25rem;
     }
     
     .product-type {
         font-weight: 600;
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     .product-units {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     /* Complications */
@@ -760,13 +760,13 @@
     }
     
     .resolved-badge.resolved {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .resolved-badge.unresolved {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     /* Post-anesthesia */
@@ -781,7 +781,7 @@
         flex-direction: column;
         gap: 0.25rem;
         padding: 0.75rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.5rem;
         text-align: center;
     }
@@ -800,7 +800,7 @@
     }
     
     .pain-score.pain-mild {
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .pain-score.pain-moderate {
@@ -808,7 +808,7 @@
     }
     
     .pain-score.pain-severe {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     .disposition-badge {
@@ -820,8 +820,8 @@
     }
     
     .disposition-badge.disposition-icu {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .disposition-badge.disposition-pacu {
@@ -831,8 +831,8 @@
     
     .disposition-badge.disposition-floor,
     .disposition-badge.disposition-home {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .nausea-badge {
@@ -858,7 +858,7 @@
     }
     
     .member-role {
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         color: var(--color-text-secondary);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;

@@ -119,12 +119,12 @@
 	}
 
 	h2 {
-		color: var(--color-error, #e53e3e);
+		color: var(--color-negative, #e53e3e);
 		margin-bottom: 1rem;
 	}
 
 	a {
 		margin-top: 1rem;
-		color: var(--color-primary, #3182ce);
+		color: var(--color-interactivity, #3182ce);
 	}
 </style>

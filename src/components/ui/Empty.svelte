@@ -26,7 +26,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: var(--color-text-light);
+        color: var(--color-text-secondary);
         letter-spacing: .05rem;
         overflow: hidden;
         width: 100%;

@@ -30,7 +30,7 @@
         height: 100%;
         width: 100%;
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
         aspect-ratio: 1/1;
     }
     svg {

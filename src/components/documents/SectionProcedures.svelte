@@ -188,7 +188,7 @@
     
     /* Panel type variations */
     .procedure-item {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .team-member {
@@ -196,7 +196,7 @@
     }
     
     .role-surgeon {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .role-anesthesiologist {
@@ -204,11 +204,11 @@
     }
     
     .role-assistant {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .location-item {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     /* Content styling */
@@ -227,8 +227,8 @@
     }
     
     .cpt-code {
-        background-color: var(--color-primary-light);
-        color: var(--color-primary-dark);
+        background-color: var(--color-interactivity-light);
+        color: var(--color-interactivity-dark);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.8rem;
@@ -243,7 +243,7 @@
     }
     
     .outcome-success {
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .outcome-partial {
@@ -252,7 +252,7 @@
     
     .outcome-complicated,
     .outcome-failed {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
     }
     
     .outcome-cancelled {
@@ -273,8 +273,8 @@
     }
     
     .complication-tag {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
         padding: 0.125rem 0.375rem;
         border-radius: 0.25rem;
         font-size: 0.8rem;
@@ -294,7 +294,7 @@
     }
     
     .member-role {
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         color: var(--color-text-secondary);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;

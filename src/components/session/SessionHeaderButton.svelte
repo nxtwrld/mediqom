@@ -161,7 +161,7 @@
         gap: 0.5rem;
         padding: 0.5rem 1rem;
         color: var(--color-black);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         font-weight: var(--text-bold);
         z-index: 1001;
         text-decoration: none;
@@ -235,12 +235,12 @@
     }
 
     .end-session-btn {
-        background: var(--color-error, #dc2626);
-        color: var(--color-error-text, #fff);
+        background: var(--color-negative, #dc2626);
+        color: var(--color-negative-text, #fff);
         border: none;
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         cursor: pointer;
         transition: all 0.2s ease;
         font-weight: 500;
@@ -252,7 +252,7 @@
     }
 
     .end-session-btn:hover {
-        background: var(--color-error-hover, #b91c1c);
+        background: var(--color-negative-dark, #b91c1c);
         transform: translateY(-1px);
     }
 

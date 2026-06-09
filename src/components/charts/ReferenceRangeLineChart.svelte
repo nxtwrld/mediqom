@@ -413,7 +413,7 @@ onMount(() => {
     }
 
     .panel svg :global(.text) {
-        fill: var(--color-text);
+        fill: var(--color-text-primary);
         font-size: 1rem;
         font-weight: bold;
     }

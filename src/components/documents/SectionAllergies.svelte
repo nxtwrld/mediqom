@@ -350,7 +350,7 @@
     
     /* Panel type variations */
     .allergy-medication {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .allergy-food {
@@ -362,11 +362,11 @@
     }
     
     .allergy-latex {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .allergy-contrast {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .intolerance-item {
@@ -378,16 +378,16 @@
     }
     
     .family-allergy-item {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .alert-item {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     /* Severity-based styling */
     .severity-mild {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .severity-moderate {
@@ -396,7 +396,7 @@
     
     .severity-severe,
     .severity-critical {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     /* Content styling */
@@ -406,8 +406,8 @@
     }
     
     .nka-badge {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
         padding: 0.5rem 1rem;
         border-radius: 0.5rem;
         font-weight: 600;
@@ -453,8 +453,8 @@
     }
     
     .severity-badge.severity-mild {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .severity-badge.severity-moderate {
@@ -464,18 +464,18 @@
     
     .severity-badge.severity-severe,
     .severity-badge.severity-critical {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .status-badge.status-active {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .status-badge.status-resolved {
-        background-color: var(--color-secondary-light);
-        color: var(--color-secondary-dark);
+        background-color: var(--color-gray-600);
+        color: var(--color-gray-900);
     }
     
     .reactions-section {
@@ -490,7 +490,7 @@
     }
     
     .reaction-item {
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.9rem;
@@ -503,20 +503,20 @@
     }
     
     .emergency-section {
-        background-color: var(--color-danger-light);
+        background-color: var(--color-negative-light);
         padding: 0.75rem;
         border-radius: 0.5rem;
         margin-bottom: 0.75rem;
     }
     
     .emergency-label {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
         font-weight: 600;
         text-transform: uppercase;
     }
     
     .epipen-badge {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
         color: white;
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
@@ -527,7 +527,7 @@
     }
     
     .emergency-instructions {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
         margin-top: 0.5rem;
         margin-bottom: 0;
         font-weight: 500;
@@ -582,8 +582,8 @@
     
     .alert-priority.priority-critical,
     .alert-priority.priority-high {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .alert-priority.priority-medium {

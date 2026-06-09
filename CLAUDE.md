@@ -557,6 +557,10 @@ For session development context, use the `@session` command. Key references: `AI
 
 ## CSS Architecture & Styling Guidelines
 
+> **See [`DESIGN.md`](DESIGN.md)** (repo root) for the full design system —
+> canonical color/spacing/radius/z-index tokens, typography, the component
+> catalog, and Do's & Don'ts. Token source of truth is `src/css/core.css`.
+
 ### Core Principles
 
 1. **Use existing CSS files** - Never create inline styles or custom classes when standard ones exist
@@ -682,6 +686,7 @@ When reviewing or creating styled components:
 | `LOGGER_MIGRATION_GUIDE.md`         | Logger migration instructions                                        |
 | `LOGGER_EXAMPLE_MIGRATION.md`       | Logger migration examples                                            |
 | `MARKETING.md`                      | Marketing content                                                    |
+| `DESIGN.md`                         | Design system: tokens, typography, components, rules (Stitch format) |
 | `RESPONSIVE.md`                     | Mobile responsive patterns and breakpoints                           |
 | `TRANSCRIPTION.md`                  | Audio transcription providers and setup                              |
 | `docs/BETA_ACCESS_SYSTEM.md`        | Beta access management                                               |
@@ -694,6 +699,7 @@ When reviewing or creating styled components:
 | `CRYPTOGRAPHY.md`                   | Cryptographic architecture: algorithms, key hierarchy, wire formats |
 | `3D_TEXTURES.md`                    | 3D texture pipeline: Blender prep, glTF export, Three.js integration |
 | `SECURITY_REPORT.md`                | Security audit findings and HIPAA compliance status                  |
+| `NIS2_COMPLIANCE.md`                | NIS2 (EU 2022/2555) gap assessment, posture matrix, fix backlog      |
 
 ## Important Notes
 

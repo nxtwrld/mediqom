@@ -114,7 +114,7 @@
 
     .diagnosis-card.suppressed {
         opacity: 0.7;
-        background: var(--color-surface-alt, #f8fafc);
+        background: var(--color-surface, #f8fafc);
     }
 
     .card-header {
@@ -163,7 +163,7 @@
         font-size: 0.625rem;
         color: var(--color-text-secondary, #6b7280);
         font-weight: 600;
-        background: var(--color-surface-alt, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         padding: 0.125rem 0.375rem;
         border-radius: 4px;
         border: 1px solid var(--color-border, #e2e8f0);
@@ -185,7 +185,7 @@
         align-items: center;
         gap: 0.25rem;
         font-size: 0.625rem;
-        color: var(--color-error, #dc2626);
+        color: var(--color-negative, #dc2626);
         font-weight: 600;
         padding: 0.125rem 0.375rem;
         background: rgba(220, 38, 38, 0.1);

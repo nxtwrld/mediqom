@@ -640,7 +640,7 @@
         font-size: 0.85rem;
     }
     .alert.-info {
-        background-color: var(--color-blue-100, #e0f0ff);
+        background-color: var(--color-interactivity-light, #e0f0ff);
     }
     .alert.-warning {
         background-color: color-mix(in srgb, var(--color-warning) 15%, transparent);
