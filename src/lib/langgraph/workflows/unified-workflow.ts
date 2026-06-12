@@ -449,6 +449,9 @@ export async function runUnifiedDocumentProcessingWorkflow(
       report: undefined,
       // Add jobId for debug output correlation
       jobId: config.jobId,
+      // Care Plan extraction context (row 7d) — consumed by annotation-aware
+      // nodes, never persisted.
+      carePlanContext: config.carePlanContext,
     };
 
     console.log("🚀 Executing unified workflow...");

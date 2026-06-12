@@ -537,3 +537,19 @@ Remaining transitive:
 - `undici` — memory exhaustion, CRLF injection (transitive)
 - `devalue` ≤5.6.3 — prototype pollution (MODERATE)
 - `yaml` — stack overflow via nested collections (MODERATE)
+
+---
+
+**Remediation pass (2026-06-09):** `34 vulnerabilities (9 low, 18 moderate, 7 high)` → `14 (4 low, 10 moderate, 0 high)`. All HIGH severity resolved.
+
+Resolved:
+- ~~`undici` ≤6.23.0 (HIGH)~~ — ✅ upgraded `@vercel/blob` 0.19 → 2.4.0, which bundles patched undici. Only uses `put`/`del`/`list` (stable API).
+- ~~`cookie` <0.7.0 (low)~~ — ✅ forced `^0.7.2` via overrides. `@sveltejs/kit` 2.x is pinned to `cookie ^0.6.0` with no 2.x fix release (only the 3.0 prerelease); the override is API-compatible (0.7 change was input-validation only).
+- ~~`uuid`/`gaxios`/`teeny-request`/`retry-request` (moderate)~~ — ✅ upgraded `@google-cloud/speech` 6 → 7.3.2. Single usage file `src/lib/audio/googlesdk.ts`.
+- ~~`tar`/`minimatch`/`replace` (HIGH)~~ — ✅ removed `@capacitor/assets` (build-only, run ad-hoc for icon/splash generation; not in the app bundle or any npm script). Re-add with `npm i -D @capacitor/assets` when regenerating assets.
+
+Accepted (no safe upstream fix; not runtime-exploitable):
+- `@cornerstonejs/*` → `js-yaml` prototype-pollution + `uuid` (MODERATE, via `@kitware/vtk.js` → `xmlbuilder2`). npm's "fix" downgrades to `@cornerstonejs/tools@0.5.0` (years old), breaking the DICOM viewer. No real fix available.
+- `svelte-i18n@4` → `esbuild` (MODERATE). esbuild advisory only affects a running esbuild dev server reachable by a browser; here esbuild is internal to svelte-i18n's own tooling, not our dev server. "Fix" downgrades to 3.7.1 (drops Svelte 5 support).
+- `@originjs/vite-plugin-commonjs` → `esbuild` (MODERATE, dev-only).
+- `crypto-browserify` → `elliptic`/`browserify-sign`/`create-ecdh` (low). Required browser `crypto` polyfill aliased in `vite.config.ts` / `vite.config.mobile.ts`. No clean fix.

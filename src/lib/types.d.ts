@@ -31,6 +31,7 @@ export interface Profile {
   birthDate?: string;
   profileDocumentId?: string;
   healthDocumentId?: string;
+  carePlanDocumentId?: string; // Care Plan singleton — lazy-created on first merge
   settings?: Record<string, any>;
 }
 

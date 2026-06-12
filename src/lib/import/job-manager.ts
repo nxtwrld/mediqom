@@ -13,6 +13,9 @@ import { cacheFiles, clearFiles, hasFiles } from "./file-cache";
 import type { SSEProgressEvent } from "./sse-client";
 import { apiFetch } from "$lib/api/client";
 import { isNativePlatform } from "$lib/config/platform";
+import { get } from "svelte/store";
+import { profile } from "$lib/profiles";
+import { buildCarePlanContextForProfile } from "$lib/careplan/store";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -131,10 +134,29 @@ export async function updateLayoutDetections(
 export async function processJob(
   jobId: string,
   onProgress?: (event: SSEProgressEvent) => void,
+  carePlanContext?: unknown,
 ): Promise<ImportJob> {
   const controller = new AbortController();
   activeControllers.set(jobId, controller);
   const { signal } = controller;
+
+  // Care Plan context blob travels in the request body (never persisted server
+  // side); empty body when there is no plan yet — Care Plan build row 7c. When
+  // not supplied explicitly, build it from the currently active profile (the
+  // merge defensively validates every link id, so a wrong-profile guess is
+  // harmless — see CAREPLAN.md conflict C3).
+  let ctx = carePlanContext;
+  if (ctx === undefined) {
+    try {
+      const activeProfile = get(profile) as { id?: string } | null;
+      if (activeProfile?.id) {
+        ctx = (await buildCarePlanContextForProfile(activeProfile.id)) ?? undefined;
+      }
+    } catch {
+      ctx = undefined;
+    }
+  }
+  const processBody = JSON.stringify(ctx ? { carePlanContext: ctx } : {});
 
   const cleanup = () => { activeControllers.delete(jobId); };
 
@@ -149,6 +171,7 @@ export async function processJob(
           "Content-Type": "application/json",
           "X-Layout-Detection": "server",
         },
+        body: processBody,
       }).catch(() => null);
 
       // 409 = already processing (server concurrency guard) — just poll
@@ -200,6 +223,7 @@ export async function processJob(
           Accept: "text/event-stream",
           "X-Layout-Detection": "client",
         },
+        body: processBody,
       })
         .then(async (response) => {
           if (signal.aborted) return;

@@ -1,4 +1,70 @@
 {
+  "careplan": {
+    "title": "Care Plan",
+    "nav": "Care Plan",
+    "view-care-plan": "View Care Plan",
+    "active-items": "What we're watching",
+    "history": "From your past",
+    "history-from-before": "Items from before {date}",
+    "care-journey": "Your care journey",
+    "progress-by-periods": "Progress",
+    "no-changes-redirect": "Your Care Plan is up to date",
+    "potential": {
+      "first-time-title": "Your Care Plan takes shape with each document you add",
+      "first-time-share": "And Mediqom will help you share this with your next doctor.",
+      "cta": "Import your first document",
+      "time-aware": "Your last update was {month} — Mediqom is most useful when it's current. Want to add a recent visit?"
+    },
+    "certainty": {
+      "monitored": "Being monitored",
+      "check-in-soon": "Worth a check-in soon",
+      "fresh-look": "Ready for a fresh look",
+      "from-your-past": "From your past — still relevant?"
+    },
+    "item-state": {
+      "managed": "Being managed",
+      "revisiting": "Worth revisiting",
+      "historical": "From your past — is this still relevant?",
+      "resolved": "Resolved — great progress"
+    },
+    "task-state": {
+      "upcoming": "Your doctor suggested this",
+      "due-soon": "A good time to schedule this",
+      "past-due": "Ready for your attention",
+      "completed": "Done — well handled",
+      "snoozed": "We'll remind you later"
+    },
+    "trend": {
+      "improving": "Moving in the right direction",
+      "stable": "Holding steady",
+      "declining": "Worth discussing with your doctor",
+      "unknown": "Not enough data yet — import a report to track this"
+    },
+    "task": {
+      "done": "Mark done",
+      "snooze": "Remind me later",
+      "previously-completed": "Previously completed on {date}"
+    },
+    "why-here": "Why is this here?",
+    "explain-plain": "Explain in plain language",
+    "ask-ai": "Ask AI about this",
+    "provenance": {
+      "document": "From your {title} on {date}.",
+      "chat": "You added this from a chat with AI on {date}.",
+      "user": "You added this on {date}."
+    },
+    "update": {
+      "headline-new": "{count} new things to know",
+      "headline-improving": "{count} condition is improving",
+      "headline-task": "{count} task you can mark done",
+      "new-items": "New",
+      "updated-items": "Updated",
+      "confirmed-again": "Confirmed again by today's report",
+      "resolved-tasks": "This document satisfies a task — mark it done?",
+      "new-tasks": "New tasks",
+      "conflicts": "Worth a look"
+    }
+  },
   "app-connect": {
     "author": "Author",
     "credits": "credits",

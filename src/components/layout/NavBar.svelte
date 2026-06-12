@@ -71,6 +71,12 @@
             <a href="/med/p/{$profile.id}" aria-label={$profile.fullName} class="profile-name">{$profile.fullName}</a>
 
             <a
+                href="/med/p/{$profile.id}/care-plan"
+                class:-active={isActive(`/med/p/${$profile.id}/care-plan`)}
+            >
+                {$t('careplan.nav')}
+            </a>
+            <a
                 href="/med/p/{$profile.id}/documents"
                 class:-active={isActive(`/med/p/${$profile.id}/documents`)}
             >

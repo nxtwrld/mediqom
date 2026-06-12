@@ -16,6 +16,7 @@ import {
   workflowRecorder,
 } from "$lib/debug/workflow-recorder";
 import { populateSchemaEnums } from "./_schema-enums";
+import { renderContextForPrompt } from "$lib/careplan/context";
 
 export interface BaseProcessingNodeConfig {
   nodeName: string;
@@ -27,6 +28,9 @@ export interface BaseProcessingNodeConfig {
     message: string;
   }>;
   featureDetectionTriggers: string[];
+  /** When true, the Care Plan extraction context (if present in state) is
+   * injected into this node's prompt so it can emit link annotations. */
+  consumesCarePlanContext?: boolean;
 }
 
 export interface ProcessingNodeResult {
@@ -316,6 +320,17 @@ export abstract class BaseProcessingNode {
     }
     if (state.text) {
       content.push({ type: "text" as const, text: state.text });
+    }
+
+    // Inject the Care Plan extraction context for annotation-aware nodes so the
+    // LLM can emit linkedCarePlanItemId / resolves / etc. (build row 7d).
+    if (this.config.consumesCarePlanContext && state.carePlanContext) {
+      try {
+        const block = renderContextForPrompt(state.carePlanContext as any);
+        content.unshift({ type: "text" as const, text: block });
+      } catch {
+        // Malformed context — proceed without it; merge falls back to dedup.
+      }
     }
 
     // Fallback to state.content if no text/images found

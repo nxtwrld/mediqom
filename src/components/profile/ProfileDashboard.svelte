@@ -13,6 +13,7 @@
     import { goto } from '$app/navigation';
     import { getPropertyCategory } from '$lib/health/property-categories';
     import PlanWeek from '$components/medications/PlanWeek.svelte';
+    import CarePlanDashboardSection from '$components/careplan/CarePlanDashboardSection.svelte';
     //import MedicationWidget from '$components/medications/MedicationWidget.svelte';
     
     // Local state for ProfileEdit modal
@@ -280,6 +281,8 @@
             </div>
         </div>
     </div>
+
+    <CarePlanDashboardSection profileId={$profile.id} />
 
     <div class="tiles -vitals">
 

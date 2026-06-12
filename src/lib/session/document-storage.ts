@@ -70,6 +70,7 @@ export async function saveSessionAsDocument(
     // Create metadata
     const metadata = {
       category: "qom",
+      originKind: "session" as const,
       sessionDate: analysis.timestamp,
       duration: sessionDuration || 0,
       analysisVersion: analysis.analysisVersion,

@@ -261,7 +261,8 @@ export async function mapProfileData(core: ProfileCore, roots: Document[]): Prom
   let profileDoc: any = null,
     health: any = null,
     profileDocumentId: string | null = null,
-    healthDocumentId: string | null = null;
+    healthDocumentId: string | null = null,
+    carePlanDocumentId: string | null = null;
 
   roots.forEach((r) => {
     if (r.type === "profile") {
@@ -271,6 +272,11 @@ export async function mapProfileData(core: ProfileCore, roots: Document[]): Prom
     if (r.type === "health") {
       health = r.content;
       healthDocumentId = r.id;
+    }
+    if (r.type === "careplan") {
+      // Care Plan singleton — content stays lazy-loaded by the careplan store;
+      // we only surface the id here (mirrors healthDocumentId).
+      carePlanDocumentId = r.id;
     }
     if (r.content && typeof r.content === "object") {
       const content = r.content as any;
@@ -284,6 +290,7 @@ export async function mapProfileData(core: ProfileCore, roots: Document[]): Prom
     status: core.status,
     profileDocumentId,
     healthDocumentId,
+    carePlanDocumentId,
     insurance: {},
     health: {},
     vcard: {},

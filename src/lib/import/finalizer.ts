@@ -11,6 +11,10 @@ import {
 } from "$lib/documents/types.d";
 import { addDocument } from "$lib/documents";
 import { processHealthData } from "$lib/health/signals";
+import {
+  mergeDocumentIntoCarePlan,
+  type CarePlanDeltaEntry,
+} from "$lib/careplan/import-hook";
 import { createVirtualProfile } from "$lib/profiles";
 import { PROFILE_NEW_ID } from "$lib/profiles/tools";
 import type { Profile } from "$lib/types.d";
@@ -444,6 +448,7 @@ interface ProfileAssignment {
  */
 export async function saveDocuments(
   byProfileDetected: ProfileAssignment[],
+  opts: { onCarePlanDelta?: (entry: CarePlanDeltaEntry) => void } = {},
 ): Promise<SavedDocument[]> {
   const savedDocuments: SavedDocument[] = [];
 
@@ -480,6 +485,7 @@ export async function saveDocuments(
           category: content.category,
           language: (document as any).language || "English",
           schemaVersion: 1,
+          originKind: "import",
         },
         content: content,
         attachments:
@@ -550,6 +556,25 @@ export async function saveDocuments(
         profileDetected.profile.id,
         newSavedDocument.id,
       );
+
+      // Merge into the Care Plan (never fails the document save).
+      if (document.isMedical) {
+        const delta = await mergeDocumentIntoCarePlan(
+          content,
+          profileDetected.profile.id,
+          newSavedDocument.id,
+          content.date || new Date().toISOString().slice(0, 10),
+          Boolean((document as any).carePlanContextSent),
+          (document as any).language || "en",
+        );
+        if (delta) {
+          opts.onCarePlanDelta?.({
+            profileId: profileDetected.profile.id,
+            documentId: newSavedDocument.id,
+            delta,
+          });
+        }
+      }
 
       savedDocuments.push(newSavedDocument);
     }

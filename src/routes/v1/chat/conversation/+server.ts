@@ -48,6 +48,7 @@ export const POST: RequestHandler = async (event) => {
       provider, // Optional provider override
       assembledContext, // Context from ChatManager
       availableTools, // MCP tools from ChatManager
+      carePlanContext, // Focused Care Plan item (build row 7i)
       agentType, // Sub-agent type (classified in Call 1, used in Call 2)
     } = await request.json();
 
@@ -98,6 +99,7 @@ export const POST: RequestHandler = async (event) => {
           availableTools,
           emergency.banner,
           agentType,
+          carePlanContext,
         ).catch((err) => {
           log.error("AI processing error:", err);
           controller.enqueue(
@@ -140,6 +142,7 @@ async function processAIRequest(
   availableTools?: string[],
   emergencyBanner?: string | null,
   agentType?: string,
+  carePlanContext?: { focusedItemId?: string; itemSummary?: any },
 ) {
   const tokenUsage = { total: 0 };
 
@@ -199,6 +202,26 @@ async function processAIRequest(
       content.push({
         type: "text",
         text: formatAssembledContext(finalContext),
+      });
+    }
+
+    // Add the focused Care Plan item so the AI can answer about it and propose
+    // follow-through via the createCarePlanTask tool (build row 7i).
+    const cpSummary = carePlanContext?.itemSummary;
+    if (cpSummary) {
+      const tasks = Array.isArray(cpSummary.topTasks)
+        ? cpSummary.topTasks
+            .map((t: any) => `  - ${t.text} [${t.status}${t.dueDate ? `, due ${t.dueDate}` : ""}]`)
+            .join("\n")
+        : "";
+      content.push({
+        type: "text",
+        text:
+          `FOCUSED CARE PLAN ITEM (the user is asking about this):\n` +
+          `id: ${cpSummary.id}\n` +
+          `condition: ${cpSummary.description} <${cpSummary.conditionType}, ${cpSummary.status}>\n` +
+          (tasks ? `current tasks:\n${tasks}\n` : "") +
+          `If the user wants to add a reminder or follow-up, you may call createCarePlanTask with itemId=${cpSummary.id}.`,
       });
     }
 

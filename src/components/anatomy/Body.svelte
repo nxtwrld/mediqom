@@ -27,6 +27,7 @@
     import { precacheMaterials, clearMultiVariantCache } from './material-system';
     import {
         setHighlight as doSetHighlight,
+        setMultiHighlight as doSetMultiHighlight,
         focusObject,
         focusArea,
         highlight,
@@ -34,6 +35,7 @@
         setViewState,
         resetFocus as doResetFocus
     } from './highlight-system';
+    import type { MultiHighlightRegion } from './scene-state';
     import {
         updateModel as doUpdateModel,
         loadShade,
@@ -73,6 +75,9 @@
     export let fullscreen: boolean = false;
     export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
     export let selected: THREE.Object3D | null = null;
+    // Care Plan multi-region highlights (build row 13). When set, the model
+    // paints these regions; clicking one dispatches `carePlanRegionClick`.
+    export let carePlanRegions: MultiHighlightRegion[] = [];
 
     // ─── Shared State ─────────────────────────────────────────────
     const ss = createSceneState();
@@ -230,6 +235,10 @@
             const object = intersects[0].object;
             if (object.name) {
                 sounds.focus.play();
+                // Care Plan mode: a click on a painted region navigates the plan.
+                if (carePlanRegions.length > 0) {
+                    dispatch('carePlanRegionClick', { mesh: object.name });
+                }
                 focused.set({ object: object.name });
                 selected = object;
             }
@@ -243,6 +252,18 @@
     function setHighlight(name: string | null) {
         selected = doSetHighlight(ss, name, selected, mapped);
         requestRender();
+    }
+
+    // Care Plan multi-region painting — recompute only when the prop changes
+    // (the caller throttles to once per page-load / merge).
+    let lastCarePlanKey = '';
+    $: if (ss?.scene && carePlanRegions) {
+        const key = carePlanRegions.map((r) => `${r.mesh}:${r.color}:${r.opacity}`).join('|');
+        if (key !== lastCarePlanKey) {
+            lastCarePlanKey = key;
+            doSetMultiHighlight(ss, carePlanRegions);
+            requestRender();
+        }
     }
 
     function resetFocus() {

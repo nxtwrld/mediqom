@@ -17,6 +17,11 @@ vi.mock("$data/signal-catalog", () => ({
   }),
 }));
 
+vi.mock("$data/anatomy-regions", () => ({
+  regionIds: () => ["R_knee", "cardiovascular"],
+  WHOLE_BODY: "whole_body",
+}));
+
 vi.mock("$lib/health/property-categories", () => ({
   STATIC_PROPERTIES: ["weight", "height"],
 }));
@@ -36,9 +41,19 @@ describe("populateSchemaEnums", () => {
     };
     populateSchemaEnums(schema);
     expect(schema.properties.identification.enum).toEqual(
-      expect.arrayContaining(["skull", "jaw", "heart", "lung", "liver"]),
+      expect.arrayContaining([
+        "skull",
+        "jaw",
+        "heart",
+        "lung",
+        "liver",
+        // region ids and whole_body are first-class anchors in the enum
+        "R_knee",
+        "cardiovascular",
+        "whole_body",
+      ]),
     );
-    expect(schema.properties.identification.enum.length).toBe(5);
+    expect(schema.properties.identification.enum.length).toBe(8);
   });
 
   it("fills signal.enum with catalog keys minus static properties", () => {

@@ -144,6 +144,22 @@ export const POST: RequestHandler = async (event) => {
   // Mobile/Capacitor clients don't read SSE, so they can't run client-side ONNX
   const clientHandlesLayout = request.headers.get("X-Layout-Detection") === "client";
 
+  // Care Plan extraction context (build row 7c). Travels in the request body,
+  // held in memory for this dispatch only, NEVER persisted. Capped to bound
+  // prompt size; malformed bodies are ignored (extraction proceeds without it).
+  let carePlanContext: unknown;
+  try {
+    const raw = await request.text();
+    if (raw && raw.length <= 32_768) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.carePlanContext) {
+        carePlanContext = parsed.carePlanContext;
+      }
+    }
+  } catch {
+    carePlanContext = undefined;
+  }
+
   // Create SSE stream - processing continues even if stream disconnects
   const stream = new ReadableStream({
     async start(controller) {
@@ -609,6 +625,7 @@ export const POST: RequestHandler = async (event) => {
               enableExternalValidation: false,
               streamResults: true,
               jobId: job.id,
+              carePlanContext,
             },
             (event: any) => {
               const mappedProgress = Math.round(

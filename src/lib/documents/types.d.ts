@@ -5,7 +5,12 @@ export enum DocumentType {
   "internal" = "internal",
   "contacts" = "contacts",
   "appointments" = "appointments",
+  "careplan" = "careplan",
 }
+
+/** How a document entered the system. Drives the Care Journey Timeline icon
+ * (import vs recorded session) — Care Plan build row 7l. */
+export type DocumentOriginKind = "import" | "session";
 
 export enum DocumentState {
   NEW = "NEW",
@@ -69,6 +74,7 @@ export interface Document {
     title: string;
     tags: string[];
     schemaVersion?: number;
+    originKind?: DocumentOriginKind; // import | session — Care Plan timeline tag
     [key: string]: any;
   };
   content: {
@@ -96,6 +102,7 @@ export interface DocumentNew {
   type: DocumentType;
   metadata?: {
     schemaVersion?: number;
+    originKind?: DocumentOriginKind; // import | session — Care Plan timeline tag
     [key: string]: any;
   };
   content: {

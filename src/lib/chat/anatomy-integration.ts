@@ -3,72 +3,69 @@ import anatomyObjects from "$components/anatomy/objects.json";
 import { chatActions } from "./store";
 import ui from "$lib/ui";
 import focused from "$lib/focused";
+import {
+  ANATOMY_REGIONS,
+  isKnownAnatomyId,
+  regionMeshes,
+} from "$data/anatomy-regions";
 
-// Common body part mappings for natural language processing
-const bodyPartMappings: Record<string, string[]> = {
-  // Skeletal system
-  knee: ["L_patella", "R_patella", "cartilage_knee", "ligaments_knee"],
-  back: [
-    "lumbar_spine",
-    "thoracic_spine",
-    "cervical_spine",
-    "intervertebral_disks",
-  ],
-  spine: [
-    "lumbar_spine",
-    "thoracic_spine",
-    "cervical_spine",
-    "intervertebral_disks",
-  ],
-  shoulder: [
-    "L_scapula",
-    "R_scapula",
-    "L_clavicle",
-    "R_clavicle",
-    "ligaments_shoulder",
-  ],
-  hip: ["ilium", "L_femur", "R_femur", "cartilage_hip"],
-  ankle: ["L_talus", "R_talus", "cartilage_ankle", "ligaments_foot"],
-  wrist: ["L_wrist", "R_wrist", "ligaments_wrist"],
-  elbow: ["L_humerus", "R_humerus", "L_ulna", "R_ulna", "cartilage_elbow"],
+// Natural-language synonym → anatomy registry id(s) (region ids or mesh names).
+// Single source of anatomy names: the values are resolved through the region
+// registry below, so this stays aligned with extraction and Care Plan painting
+// (build row 7s). Each value is a region id or a mesh name; lateral regions are
+// listed per side.
+const NL_TO_REGION: Record<string, string[]> = {
+  // Joints / skeletal regions
+  knee: ["L_knee", "R_knee"],
+  back: ["back", "spine"],
+  spine: ["spine"],
+  shoulder: ["L_shoulder", "R_shoulder"],
+  hip: ["L_hip", "R_hip"],
+  ankle: ["L_ankle", "R_ankle"],
+  wrist: ["L_wrist", "R_wrist"],
+  elbow: ["L_elbow", "R_elbow"],
 
-  // Organs
+  // Organs / systems
   heart: ["heart", "vascular_system"],
   lungs: ["lungs", "bronchi"],
   liver: ["liver_left", "liver_right", "liver_ligament"],
   kidney: ["kidneys", "ureter"],
-  brain: ["brain", "skull"],
-  stomach: ["stomach", "digestive_system"],
+  brain: ["brain"],
+  stomach: ["stomach"],
   bladder: ["bladder", "urethra"],
 
-  // Muscular system
-  chest: ["R_pectoralis_major", "L_pectoralis_major"],
-  arm: [
-    "R_bicep_brachii_long_head",
-    "L_bicep_brachii_long_head",
-    "R_triceps_long_head",
-    "L_triceps_long_head",
-  ],
-  leg: ["R_quadriceps", "L_quadriceps", "R_hamstring", "L_hamstring"],
-  abdominal: ["rectus_abdominis", "external_oblique", "internal_oblique"],
+  // Soft-tissue regions
+  chest: ["thorax"],
+  arm: ["L_arm", "R_arm"],
+  leg: ["L_leg", "R_leg", "L_thigh", "R_thigh"],
+  abdominal: ["abdomen"],
 
-  // Additional mappings
-  foot: [
-    "L_phalanges",
-    "R_phalanges",
-    "L_metatarsal_bones",
-    "R_metatarsal_bones",
-  ],
-  hand: [
-    "L_finger_bones",
-    "R_finger_bones",
-    "L_metacarpal_bones",
-    "R_metacarpal_bones",
-  ],
+  // Limb extremities
+  foot: ["L_foot", "R_foot"],
+  hand: ["L_hand", "R_hand"],
   head: ["skull", "brain"],
-  neck: ["cervical_spine", "thyroid"],
-  pelvis: ["ilium", "pubic_symphysis", "sacrum"],
+  neck: ["neck"],
+  pelvis: ["pelvis"],
 };
+
+/**
+ * Expand each NL synonym to concrete, registry-valid mesh ids. A region id
+ * expands to its meshes; a mesh id resolves to itself. Unknown ids are dropped
+ * (and would be caught by the registry integrity test, not silently shipped).
+ */
+const bodyPartMappings: Record<string, string[]> = Object.fromEntries(
+  Object.entries(NL_TO_REGION).map(([name, ids]) => {
+    const meshes = new Set<string>();
+    for (const id of ids) {
+      if (id in ANATOMY_REGIONS) {
+        for (const m of regionMeshes(id)) meshes.add(m);
+      } else if (isKnownAnatomyId(id)) {
+        meshes.add(id);
+      }
+    }
+    return [name, [...meshes]];
+  }),
+);
 
 export class AnatomyIntegration {
   /**

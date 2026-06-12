@@ -14,6 +14,8 @@
  * strings. Readers (e.g. SectionTreatmentPlan.svelte, Care Plan merge) must
  * accept both shapes and wrap legacy strings as `{ goal: <string> }`.
  */
+import corePerformer from "./core.performer";
+
 export default {
   type: "object",
   description:
@@ -72,6 +74,13 @@ export default {
       },
       required: ["min", "max"],
     },
+    sourceQuote: {
+      type: "string",
+      description:
+        "Verbatim quote of the sentence(s) in the source document that state this goal, in the ORIGINAL document language. CRITICAL: copy exactly — do not paraphrase, translate, or fabricate. Omit entirely if no literal sentence states it.",
+    },
+    // Embed core.performer for the provider who set this goal
+    sourceProvider: corePerformer,
   },
   required: ["goal"],
 };

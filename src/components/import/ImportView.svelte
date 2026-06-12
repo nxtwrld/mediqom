@@ -15,6 +15,7 @@
     import ImportDocument from './ImportDocument.svelte';
     import ImportProfile from './ImportProfile.svelte';
     import ScreenOverlay from '$components/ui/ScreenOverlay.svelte';
+    import CarePlanUpdate from '$components/careplan/CarePlanUpdate.svelte';
     import LoaderThinking from '$components/ui/LoaderThinking.svelte';
     import DocumentTile from '$components/documents/DocumentTile.svelte';
     import JobProgressCard from './JobProgressCard.svelte';
@@ -46,6 +47,9 @@
     }[] = $state([]);
     let invalids: Document[] = $state([]);
     let savedDocuments: SavedDocument[] = $state([]);
+    // Post-import Care Plan summary (build row 14)
+    let carePlanDeltas: import('$lib/careplan/import-hook').CarePlanDeltaEntry[] = $state([]);
+    let carePlanSummaryProfileId = $state<string | null>(null);
 
     // File tracking
     let currentFiles: File[] = $state([]);
@@ -322,7 +326,10 @@
         savingDocs = new Set([...savingDocs, doc]);
 
         try {
-            const saved = await saveDocuments([{ profile: profileDetected.profile, reports: [doc] }]);
+            const saved = await saveDocuments(
+                [{ profile: profileDetected.profile, reports: [doc] }],
+                { onCarePlanDelta: (entry) => { carePlanDeltas = [...carePlanDeltas, entry]; carePlanSummaryProfileId = entry.profileId; } },
+            );
             savedDocuments = [...savedDocuments, ...saved];
 
             // Remove from pool
@@ -353,7 +360,9 @@
     async function saveAll() {
         savingAll = true;
         try {
-            const saved = await saveDocuments(byProfileDetected);
+            const saved = await saveDocuments(byProfileDetected, {
+                onCarePlanDelta: (entry) => { carePlanDeltas = [...carePlanDeltas, entry]; carePlanSummaryProfileId = entry.profileId; },
+            });
             savedDocuments = [...savedDocuments, ...saved];
             byProfileDetected = [];
             results = [];
@@ -565,6 +574,16 @@
             content: previewReport.content,
             attachments: []
         } as SavedDocument} />
+    </ScreenOverlay>
+{/if}
+
+{#if carePlanDeltas.length > 0 && carePlanSummaryProfileId}
+    <ScreenOverlay title={$t('careplan.title')} preventer={true} on:close={() => { carePlanDeltas = []; carePlanSummaryProfileId = null; }}>
+        <CarePlanUpdate
+            profileId={carePlanSummaryProfileId}
+            deltas={carePlanDeltas}
+            onClose={() => { carePlanDeltas = []; carePlanSummaryProfileId = null; }}
+        />
     </ScreenOverlay>
 {/if}
 

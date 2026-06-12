@@ -393,11 +393,14 @@ the LLM is already in flight during import extraction. The split is deliberate:
 ### Phase 1 — Server-side semantic matching (during import extraction)
 
 When the client begins an import, it builds a compact **Care Plan context blob**
-from the existing (decrypted) Care Plan and sends it alongside the document to
-the existing import endpoint. The blob is encrypted with the same per-job AES
-key as the document extraction, so it has identical persistence guarantees:
-transient plaintext on the server during LLM dispatch, encrypted at rest, never
-persisted in plaintext.
+from the existing (decrypted) Care Plan and sends it in the body of the
+`POST /v1/import/jobs/[id]/process` request over TLS — the same exposure profile
+as the document's processed images, which are already sent to that endpoint.
+(The per-job AES key is generated server-side at process time, so the client
+cannot wrap the blob with it; see `CAREPLAN_REVISION.md` §8 conflict C2.) The
+server holds the blob in memory only for the duration of LLM dispatch and
+**never persists it** — not to `import_jobs`, not anywhere. Transient plaintext
+during dispatch only, identical to the document extraction itself.
 
 ```typescript
 interface CarePlanExtractionContext {

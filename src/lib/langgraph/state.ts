@@ -155,6 +155,7 @@ export interface DocumentProcessingState {
   options?: any;
   metadata?: Record<string, any>;
   jobId?: string; // For debug output correlation
+  carePlanContext?: unknown; // Care Plan extraction context blob (row 7d), never persisted
 
   // Progress tracking
   progressCallback?: ProgressCallback;
@@ -295,4 +296,5 @@ export interface WorkflowConfig {
   preferredProvider?: string;
   streamResults?: boolean;
   jobId?: string; // For debug output correlation
+  carePlanContext?: unknown; // Care Plan extraction context blob (row 7d)
 }

@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  normalizeTreatmentGoal,
-  normalizeTreatmentGoals,
-} from "./normalize";
+import { normalizeTreatmentGoal, normalizeTreatmentGoals } from "./normalize";
 
 describe("normalizeTreatmentGoal", () => {
   it("wraps a legacy string into { goal }", () => {

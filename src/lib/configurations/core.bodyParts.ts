@@ -3,7 +3,7 @@ export default {
   items: {
     type: "object",
     description:
-      "Analyze the document and seek for the affected body parts. Provide information about individual the body parts mentioned in the report.",
+      "Analyze the document and seek for the affected body parts. Provide information about individual the body parts mentioned in the report.\n\nCRITICAL: ONLY extract body parts that the document literally names — never infer from disease names, adjacent structures, or laterality assumptions. If the side (left/right) is not explicitly stated, omit the entry rather than guessing a side. Omit if uncertain.",
     properties: {
       identification: {
         type: "string",

@@ -53,6 +53,49 @@ export default {
               description:
                 "Timeframe for the recommendation (e.g., 'in 2 weeks', 'within 48 hours')",
             },
+            timeframeNormalized: {
+              type: "object",
+              description:
+                "Normalized duration of the stated timeframe. CRITICAL: ONLY populate when the document explicitly states a timeframe. Never infer a default or typical interval. Omit entirely when no timeframe is stated.",
+              properties: {
+                unit: {
+                  type: "string",
+                  enum: ["days", "weeks", "months", "years"],
+                  description: "Duration unit of the stated timeframe",
+                },
+                value: {
+                  type: "number",
+                  description:
+                    "Duration value of the stated timeframe (e.g. 'in 2 weeks' → unit: weeks, value: 2; 'within 48 hours' → unit: days, value: 2)",
+                },
+              },
+              required: ["unit", "value"],
+            },
+            sourceQuote: {
+              type: "string",
+              description:
+                "Verbatim quote of the sentence(s) in the source document that state this recommendation, in the ORIGINAL document language. CRITICAL: copy exactly — do not paraphrase, translate, or fabricate. Omit entirely if no literal sentence states it.",
+            },
+            // Directly embed core.performer for the provider who made this recommendation
+            sourceProvider: corePerformer,
+            linkedCarePlanTaskId: {
+              type: "string",
+              description:
+                "ONLY valid when a Care Plan context block is present in the input: the id of an EXISTING task from that context which this recommendation duplicates (same action, same intent). Copy the id verbatim from the context. Omit when no context is provided or no existing task matches.",
+            },
+            isNewTask: {
+              type: "boolean",
+              description:
+                "ONLY valid when a Care Plan context block is present in the input: true when this recommendation does not match any existing task in the context. Omit when no context is provided.",
+            },
+            resolves: {
+              type: "array",
+              description:
+                "ONLY valid when a Care Plan context block is present in the input: ids of existing tasks from that context which THIS DOCUMENT satisfies (e.g. a lab report satisfying a 'get blood test' task). Copy ids verbatim from the context. Omit when no context is provided or nothing is resolved.",
+              items: {
+                type: "string",
+              },
+            },
             // Directly embed core.diagnosis schema
             relatedDiagnosis: coreDiagnosis,
             // Directly embed core.bodyParts schema for target body parts
@@ -128,6 +171,28 @@ export default {
             timeframe: {
               type: "string",
               description: "When to schedule (e.g., '2 weeks', '3 months')",
+            },
+            timeframeNormalized: {
+              type: "object",
+              description:
+                "Normalized duration of the stated timeframe. CRITICAL: ONLY populate when the document explicitly states a timeframe. Never infer a default or typical interval. Omit entirely when no timeframe is stated.",
+              properties: {
+                unit: {
+                  type: "string",
+                  enum: ["days", "weeks", "months", "years"],
+                  description: "Duration unit of the stated timeframe",
+                },
+                value: {
+                  type: "number",
+                  description: "Duration value of the stated timeframe",
+                },
+              },
+              required: ["unit", "value"],
+            },
+            sourceQuote: {
+              type: "string",
+              description:
+                "Verbatim quote of the sentence(s) in the source document that schedule this follow-up, in the ORIGINAL document language. CRITICAL: copy exactly — do not paraphrase, translate, or fabricate. Omit entirely if no literal sentence states it.",
             },
             // Directly embed core.performer schema for follow-up provider
             withProvider: corePerformer,

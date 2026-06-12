@@ -80,6 +80,7 @@ export interface ChatContext {
   language: string;
   pageContext: PageContext;
   anatomyContext?: AnatomyContext;
+  carePlanContext?: CarePlanChatContext; // Focused Care Plan item (build row 7i)
   isOwnProfile: boolean;
   // Context assembly integration
   assembledContext?: any; // AssembledContext from context assembly system
@@ -87,6 +88,13 @@ export interface ChatContext {
   mcpTools?: any; // MCP tools for AI to access medical data
   // Sub-agent routing: classified in Call 1, used in Call 2
   agentType?: string;
+}
+
+/** Care Plan focus passed into chat so the AI can answer about a specific item
+ * and propose follow-through (Care Plan build row 7i). */
+export interface CarePlanChatContext {
+  focusedItemId?: string;
+  itemSummary?: import("$lib/careplan/types").CarePlanItemChatSummary;
 }
 
 export interface DocumentCatalogEntry {
@@ -105,6 +113,7 @@ export interface PageContext {
     conditions: string[];
     medications: string[];
     vitals: string[];
+    carePlanItems?: string[]; // ids of active Care Plan items (build row 7i)
   };
   documentsContent?: Map<string, any>; // documentId -> document content
   /** Lightweight catalog of all profile documents (metadata only, no content) */
@@ -205,7 +214,7 @@ export interface ChatResponse {
 }
 
 export interface AskAboutEvent {
-  type: string;          // 'diagnosis', 'medication', 'lab', etc.
+  type: string;          // 'diagnosis', 'medication', 'lab', 'carePlanItem', etc.
   label: string;         // Human-readable item name (used in tooltip)
   data: any;             // Raw section item object
   documentId?: string;
