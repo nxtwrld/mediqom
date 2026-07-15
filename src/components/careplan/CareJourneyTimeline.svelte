@@ -4,18 +4,41 @@
   import type {
     MilestoneConfig,
     MilestonePosition,
+    JourneyEvent,
+    JourneyEventType,
   } from "$lib/careplan/journey";
 
   interface Props {
     config: MilestoneConfig;
+    /** Distinct-icon event markers on the same date axis (build row 17). */
+    events?: JourneyEvent[];
   }
 
-  let { config }: Props = $props();
+  let { config, events = [] }: Props = $props();
 
   let minStartDate = $derived(config.minStartDate);
   let maxEndDate = $derived(config.maxEndDate);
   let milestonePositions = $derived(config.milestonePositions);
   let currentDatePosition = $derived(config.currentDatePosition);
+
+  // Position each event by its date within the timeline's range.
+  let positionedEvents = $derived.by(() => {
+    const min = new Date(config.minStartDate).getTime();
+    const span = Math.max(1, new Date(config.maxEndDate).getTime() - min);
+    return events.map((e) => ({
+      ...e,
+      left: Math.min(100, Math.max(0, ((new Date(e.date).getTime() - min) / span) * 100)),
+    }));
+  });
+
+  // Per-type marker class — glyphs are CSS-drawn except session (mic sprite).
+  const EVENT_CLASS: Record<JourneyEventType, string> = {
+    import: "-import",
+    session: "-session",
+    task_done: "-done",
+    task_upcoming: "-upcoming",
+    task_snoozed: "-snoozed",
+  };
 
   function clickMilestone(m: MilestonePosition) {
     if (m.link) goto(m.link);
@@ -25,6 +48,22 @@
     return group.reduce((a, b) => a + b.progress, 0) / group.length;
   }
 </script>
+
+{#if positionedEvents.length > 0}
+  <div class="journey-events">
+    {#each positionedEvents as evt}
+      <span
+        class="journey-marker {EVENT_CLASS[evt.type]}"
+        style="left: {evt.left}%"
+        use:tooltip={{ text: evt.label }}
+      >
+        {#if evt.type === "session"}
+          <svg viewBox="0 0 24 24"><use href="/icons.svg#mic"></use></svg>
+        {/if}
+      </span>
+    {/each}
+  </div>
+{/if}
 
 {#if milestonePositions.length > 0}
   <div class="milestones">
@@ -80,6 +119,58 @@
 {/if}
 
 <style>
+  .journey-events {
+    position: relative;
+    height: 1.5rem;
+    margin-right: 2.5em;
+  }
+  .journey-marker {
+    position: absolute;
+    top: 50%;
+    width: 0.9rem;
+    height: 0.9rem;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* import: filled blue dot ● */
+  .journey-marker.-import {
+    background: var(--color-primary);
+  }
+  /* session: mic glyph (amber) 🎙️ */
+  .journey-marker.-session {
+    background: var(--color-warning);
+  }
+  .journey-marker.-session svg {
+    width: 0.6rem;
+    height: 0.6rem;
+    fill: var(--color-primary-contrast, #fff);
+  }
+  /* task done: green check ✓ */
+  .journey-marker.-done {
+    background: var(--color-positive);
+  }
+  .journey-marker.-done::after {
+    content: "";
+    width: 0.28rem;
+    height: 0.48rem;
+    border: solid var(--color-positive-text, #fff);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translateY(-1px);
+  }
+  /* upcoming: outlined certainty-faded ◎ */
+  .journey-marker.-upcoming {
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    opacity: 0.6;
+  }
+  /* snoozed: grey outline ○ */
+  .journey-marker.-snoozed {
+    background: transparent;
+    border: 2px solid var(--color-border);
+  }
   .milestones {
     position: relative;
     margin-top: var(--ui-pad-medium);

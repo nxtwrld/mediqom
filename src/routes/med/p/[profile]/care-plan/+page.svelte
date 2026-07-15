@@ -43,6 +43,12 @@
     if (profileId) reload();
   });
 
+  // Refresh when a chat suggested-action creates a task (build row 19).
+  $effect(() => {
+    const off = ui.listen("careplan:task-added", () => reload());
+    return off;
+  });
+
   // Region filter from the 3D click-through (?region=).
   let visibleItems = $derived(
     data.region
@@ -63,9 +69,20 @@
 
   let periods = $derived(progressByPeriods({ items }));
 
+  // docId → title, for provenance copy on cards (row 15).
+  let docTitles = $derived(
+    new Map<string, string>(
+      (($docsStore as any[]) ?? [])
+        .filter((d) => d?.id && d?.metadata?.title)
+        .map((d) => [d.id as string, d.metadata.title as string]),
+    ),
+  );
+
+  let journeyEvents = $derived(buildJourneyEvents({ items }, ($docsStore as any[]) ?? []));
+
   let milestoneConfig = $derived(
     calculateMilestones(
-      buildJourneyEvents({ items }, ($docsStore as any[]) ?? []).map(
+      journeyEvents.map(
         (e): Milestone => ({
           title: e.label,
           startDate: e.date,
@@ -75,6 +92,10 @@
       ),
     ),
   );
+
+  function openDocument(documentId: string) {
+    goto(`/med/p/${profileId}/documents?doc=${encodeURIComponent(documentId)}`);
+  }
 
   let daysSince = $derived(loaded ? daysSinceLastDocument({ items }) : null);
   let showPotential = $derived(loaded && items.length === 0);
@@ -132,14 +153,21 @@
 
     <section class="journey">
       <h2 class="h3">{$t("careplan.care-journey")}</h2>
-      <CareJourneyTimeline config={milestoneConfig} />
+      <CareJourneyTimeline config={milestoneConfig} events={journeyEvents} />
     </section>
 
     <section class="active-items">
       <h2 class="h3">{$t("careplan.active-items")}</h2>
       <div class="item-grid">
         {#each sortedItems as item (item.id)}
-          <CarePlanItemCard {item} {profileId} onBodyPartFocus={focusBodyPart} onChanged={reload} />
+          <CarePlanItemCard
+            {item}
+            {profileId}
+            {docTitles}
+            onBodyPartFocus={focusBodyPart}
+            onOpenDocument={openDocument}
+            onChanged={reload}
+          />
         {/each}
       </div>
     </section>
@@ -151,7 +179,7 @@
         <h2 class="h3">{$t("careplan.history")}</h2>
         <div class="item-grid">
           {#each historical as item (item.id)}
-            <CarePlanItemCard {item} {profileId} onChanged={reload} />
+            <CarePlanItemCard {item} {profileId} {docTitles} onOpenDocument={openDocument} onChanged={reload} />
           {/each}
         </div>
       {/if}

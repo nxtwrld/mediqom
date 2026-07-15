@@ -33,6 +33,27 @@ export interface ContextPrompt {
   onAnswer?: (answers: string[]) => void;
 }
 
+/** A follow-through the AI proposes during a Care Plan chat; the user taps the
+ * footer to create the task (build row 19). The AI emits this — it does NOT
+ * call a tool autonomously. */
+export interface SuggestedAction {
+  label: string; // user-facing prompt, e.g. "Add a reminder to call your doctor"
+  itemId: string; // Care Plan item id (copied verbatim from the focus block)
+  text: string; // the task text
+  category:
+    | "follow_up"
+    | "referral"
+    | "diagnostic_test"
+    | "monitoring"
+    | "lifestyle"
+    | "medication"
+    | "treatment"
+    | "prevention"
+    | "education";
+  priority: "immediate" | "urgent" | "routine" | "as_needed";
+  timeframeNormalized?: { unit: "days" | "weeks" | "months" | "years"; value: number };
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatMessageRole;
@@ -57,6 +78,9 @@ export interface ChatMessage {
     sources?: SourceCitation[];
     // Generative UI widgets
     widgets?: WidgetSpec[];
+    // Care Plan suggested-action footer (build row 19)
+    suggestedAction?: SuggestedAction;
+    suggestedActionDone?: boolean;
     // Keep legacy support temporarily
     documentPrompt?: {
       documentId: string;

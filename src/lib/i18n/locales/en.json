@@ -50,8 +50,37 @@
     "ask-ai": "Ask AI about this",
     "provenance": {
       "document": "From your {title} on {date}.",
+      "document-quote": "{provider} wrote: \"{quote}\" — from your {title} on {date}.",
       "chat": "You added this from a chat with AI on {date}.",
-      "user": "You added this on {date}."
+      "user": "You added this on {date}.",
+      "open-document": "Open document",
+      "open-chat": "Open chat",
+      "conflict": "A newer document disagrees — tap to review."
+    },
+    "snooze": {
+      "title": "Remind you later",
+      "reason-legend": "What's holding it up? (optional)",
+      "duration-legend": "Remind me in",
+      "reason": {
+        "cost": "Cost",
+        "time": "Time",
+        "unsure": "Not sure",
+        "other": "Something else"
+      },
+      "duration": {
+        "1w": "1 week",
+        "2w": "2 weeks",
+        "1m": "1 month",
+        "3m": "3 months"
+      },
+      "note-label": "Anything to remember? (optional)",
+      "note-placeholder": "Add a note for yourself",
+      "cancel": "Cancel",
+      "confirm": "Remind me later"
+    },
+    "suggested-action": {
+      "add": "Add to Care Plan",
+      "added": "Added ✓"
     },
     "update": {
       "headline-new": "{count} new things to know",
@@ -735,6 +764,11 @@
           "system": "System",
           "light": "Light",
           "dark": "Dark"
+        },
+        "careplan": {
+          "title": "Care Plan",
+          "certainty-description": "Care Plan items fade as they age. Turn this on to also show a short freshness label next to each item.",
+          "certainty-label": "Show certainty labels inline"
         }
       },
       "profile": {

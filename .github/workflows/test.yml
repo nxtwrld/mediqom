@@ -30,3 +30,72 @@ jobs:
           name: coverage
           path: coverage/
           retention-days: 14
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    env:
+      # Real project — required for the app to build and for auth-setup.ts
+      # to mint a session for TEST_USER_EMAIL via the Supabase admin API.
+      PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      # Care Plan specs seed data through a build-time-eliminated test hook —
+      # this flag only exists in this CI build, never in production.
+      PUBLIC_ENABLE_TEST_HOOKS: "true"
+      # Everything below is only referenced by `$env/static/*` at build time
+      # and never called for real by these tests (all network calls are
+      # mocked at the API boundary), so placeholder values are fine.
+      ASSEMBLYAI_API_KEY: "test-placeholder"
+      AZURE_SPEECH_KEY: "test-placeholder"
+      BLOB_READ_WRITE_TOKEN: "test-placeholder"
+      DEBUG_ANALYSIS: "false"
+      DEBUG_ANALYSIS_REPLAY_DELAY: "500"
+      DEBUG_ASSESSER: "false"
+      DEBUG_CONVERASATION_REPORT: "false"
+      DEBUG_CONVERSATION: "false"
+      DEBUG_EXTRACTOR: "false"
+      DEBUG_IMPORT: "false"
+      DEEPGRAM_API_KEY: "test-placeholder"
+      GOOGLE_API_KEY: "test-placeholder"
+      OPENAI_API_KEY: "test-placeholder"
+      OPENAI_MEDICAL_ASSISTANT_ID: "test-placeholder"
+      PUBLIC_MIXPANEL_TOKEN: "test-placeholder"
+      PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_placeholder"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install Playwright system deps
+        run: npx playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
+      - name: Run Playwright tests
+        run: npm run test:integration
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

@@ -350,6 +350,20 @@
               </div>
             {/if}
 
+            <!-- Care Plan suggested-action footer (build row 19) -->
+            {#if message.metadata?.suggestedAction}
+              <div class="suggested-action">
+                <span class="sa-label">{message.metadata.suggestedAction.label}</span>
+                {#if message.metadata.suggestedActionDone}
+                  <span class="sa-done">{$t('careplan.suggested-action.added')}</span>
+                {:else}
+                  <button class="button -small -primary" onclick={() => chatManager.acceptSuggestedAction(message.id)}>
+                    {$t('careplan.suggested-action.add')}
+                  </button>
+                {/if}
+              </div>
+            {/if}
+
             <!-- Anatomy Focus Buttons -->
             {#if message.metadata?.anatomyFocus && message.metadata.anatomyFocus.length > 0}
               <div class="anatomy-actions">
@@ -756,6 +770,27 @@
     font-size: 11px;
     color: var(--color-gray-800);
     text-align: right;
+  }
+
+  .suggested-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--ui-radius-medium);
+    background: var(--color-surface);
+  }
+  .suggested-action .sa-label {
+    font-size: 13px;
+    color: var(--color-text-primary);
+  }
+  .suggested-action .sa-done {
+    font-size: 13px;
+    color: var(--color-positive);
+    font-weight: 600;
   }
 
   .anatomy-actions {

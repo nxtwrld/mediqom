@@ -719,6 +719,56 @@
               "required": ["id", "type", "data"]
             },
             "description": "Visual widgets to render inline in the chat message. Use when discussing quantitative data (lab trends as charts), diagnoses (as cards), treatments (as cards), or structured comparisons (as tables). Always accompany widgets with explanatory text. Maximum 3 widgets per response. Only generate widgets when the data is available in context."
+          },
+          "suggestedAction": {
+            "type": "object",
+            "description": "OPTIONAL follow-through for a Care Plan item. ONLY emit when a FOCUSED CARE PLAN ITEM block is present in the context AND the user would clearly benefit from a concrete follow-up task (e.g. they ask what to do next, or you recommend a specific action). Do NOT emit on general questions, and never on every response. The user taps a footer to accept — you are NOT executing a tool.",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Short, friendly prompt for the footer button, e.g. 'Add a reminder to call your doctor'. Match the user's language."
+              },
+              "itemId": {
+                "type": "string",
+                "description": "Care Plan item id — copy VERBATIM from the FOCUSED CARE PLAN ITEM block (the 'id:' field). Never invent an id."
+              },
+              "text": {
+                "type": "string",
+                "description": "The task text (what the user should do). Match the user's language."
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "follow_up",
+                  "referral",
+                  "diagnostic_test",
+                  "monitoring",
+                  "lifestyle",
+                  "medication",
+                  "treatment",
+                  "prevention",
+                  "education"
+                ],
+                "description": "Task category"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["immediate", "urgent", "routine", "as_needed"],
+                "description": "Task priority"
+              },
+              "timeframeNormalized": {
+                "type": "object",
+                "description": "Optional due-date offset from today. Only when a concrete timeframe is appropriate.",
+                "properties": {
+                  "unit": {
+                    "type": "string",
+                    "enum": ["days", "weeks", "months", "years"]
+                  },
+                  "value": { "type": "number" }
+                }
+              }
+            },
+            "required": ["label", "itemId", "text", "category", "priority"]
           }
         },
         "required": ["response"],

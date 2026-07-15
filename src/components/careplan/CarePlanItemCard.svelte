@@ -1,31 +1,77 @@
 <script lang="ts">
   import { t } from "$lib/i18n";
   import { locale } from "svelte-i18n";
+  import user from "$lib/user";
   import AskButton from "$components/chat/AskButton.svelte";
+  import ProvenanceReveal from "./ProvenanceReveal.svelte";
+  import SnoozeDialog from "./SnoozeDialog.svelte";
   import {
     computeItemCertainty,
     certaintyBucket,
   } from "$lib/careplan/certainty";
   import { applyUserTaskAction } from "$lib/careplan/store";
   import { resolvePlainLanguage } from "$lib/careplan/plain-language";
+  import type { ProvenanceSource } from "$lib/careplan/provenance";
   import type { CarePlanItem, FollowUpTask } from "$lib/careplan/types";
 
   interface Props {
     item: CarePlanItem;
     profileId: string;
+    /** docId → title, for provenance copy. */
+    docTitles?: Map<string, string>;
     onBodyPartFocus?: (identification: string) => void;
+    onOpenDocument?: (documentId: string) => void;
     onChanged?: () => void;
   }
 
-  let { item, profileId, onBodyPartFocus, onChanged }: Props = $props();
+  let {
+    item,
+    profileId,
+    docTitles,
+    onBodyPartFocus,
+    onOpenDocument,
+    onChanged,
+  }: Props = $props();
 
   let certainty = $derived(computeItemCertainty(item));
   let bucket = $derived(certaintyBucket(certainty));
 
-  let showProvenance = $state(false);
+  // Optional inline certainty label — user-level reading preference (row 18).
+  let showInlineCertainty = $derived(
+    Boolean(($user as any)?.settings?.showCertaintyLabelsInline),
+  );
+
+  // Provenance reveal: null = closed, "item", or a task id (row 15).
+  let openProvenance = $state<string | null>(null);
+  // Task currently being snoozed (row 16).
+  let snoozingTask = $state<FollowUpTask | null>(null);
+
   let plainMode = $state(false);
   let plainText = $state<string | null>(null);
   let plainLoading = $state(false);
+
+  function docTitle(id: string | undefined): string {
+    return (id && docTitles?.get(id)) || "";
+  }
+
+  let itemProvenance = $derived<ProvenanceSource>({
+    sourceDocumentId: item.confirmingDocuments[0],
+    date: item.lastSeenInDocumentDate,
+    documentTitle: docTitle(item.confirmingDocuments[0]),
+    contradicting: item.contradictingDocuments.length > 0,
+  });
+
+  function taskProvenance(task: FollowUpTask): ProvenanceSource {
+    return {
+      sourceDocumentId: task.sourceDocumentId,
+      sourceQuote: task.sourceQuote,
+      sourceProvider: task.sourceProvider,
+      sourceMessageId: task.sourceMessageId,
+      date: task.sourceDocumentDate,
+      documentTitle: docTitle(task.sourceDocumentId),
+      contradicting: item.contradictingDocuments.length > 0,
+    };
+  }
 
   const TYPE_BADGE: Record<string, string> = {
     chronic: "-chronic",
@@ -55,8 +101,8 @@
     plainMode && plainText ? plainText : item.diagnosisDescription,
   );
 
-  function toggleProvenance() {
-    showProvenance = !showProvenance;
+  function toggleProvenance(key: string) {
+    openProvenance = openProvenance === key ? null : key;
   }
 
   async function togglePlain() {
@@ -86,12 +132,23 @@
     onChanged?.();
   }
 
-  async function snooze(task: FollowUpTask) {
-    const until = new Date(Date.now() + 14 * 86_400_000).toISOString();
+  function openSnooze(task: FollowUpTask) {
+    snoozingTask = task;
+  }
+
+  async function confirmSnooze(result: {
+    until: string;
+    reason: NonNullable<FollowUpTask["snoozeReason"]>;
+    note?: string;
+  }) {
+    const task = snoozingTask;
+    snoozingTask = null;
+    if (!task) return;
     await applyUserTaskAction(profileId, item.id, task.id, {
       kind: "snooze",
-      until,
-      reason: "other",
+      until: result.until,
+      reason: result.reason,
+      note: result.note,
     });
     onChanged?.();
   }
@@ -108,6 +165,9 @@
       <h3 class="item-title">
         {displayDescription}
         <span class="sr-only">— {$t(bucket.labelKey)}</span>
+        {#if showInlineCertainty}
+          <span class="certainty-inline">{$t(bucket.labelKey)}</span>
+        {/if}
       </h3>
       <span class="type-badge {TYPE_BADGE[item.conditionType] ?? ''}">
         {item.conditionType}
@@ -134,8 +194,8 @@
       </button>
       <button
         class="icon-btn"
-        onclick={toggleProvenance}
-        aria-expanded={showProvenance}
+        onclick={() => toggleProvenance("item")}
+        aria-expanded={openProvenance === "item"}
         title={$t("careplan.why-here")}
       >
         <svg width="16" height="16"><use href="/icons.svg#report"></use></svg>
@@ -143,45 +203,48 @@
     </div>
   </header>
 
-  {#if showProvenance}
-    <div class="provenance-reveal">
-      <!-- Minimal inline fallback (Phase 4 ProvenanceReveal panel replaces this). -->
-      <p>
-        {$t("careplan.provenance.document", {
-          values: {
-            title: item.confirmingDocuments[0] ?? "",
-            date: item.lastSeenInDocumentDate,
-          },
-        })}
-      </p>
-    </div>
+  {#if openProvenance === "item"}
+    <ProvenanceReveal source={itemProvenance} {onOpenDocument} />
   {/if}
 
   {#if sortedTasks.length}
     <ul class="task-list">
       {#each sortedTasks as task (task.id)}
         <li class="task-row" class:-snoozed={task.status === "snoozed"}>
-          <div class="task-text">
-            <span>{task.text}</span>
-            {#if task.previouslyCompleted}
-              <span class="task-hint">
-                {$t("careplan.task.previously-completed", {
-                  values: {
-                    date: task.previouslyCompleted.completedAt.slice(0, 10),
-                  },
-                })}
-              </span>
-            {/if}
+          <div class="task-line">
+            <div class="task-text">
+              <span>{task.text}</span>
+              {#if task.previouslyCompleted}
+                <span class="task-hint">
+                  {$t("careplan.task.previously-completed", {
+                    values: {
+                      date: task.previouslyCompleted.completedAt.slice(0, 10),
+                    },
+                  })}
+                </span>
+              {/if}
+            </div>
+            <div class="task-actions">
+              <button
+                class="icon-btn"
+                onclick={() => toggleProvenance(task.id)}
+                aria-expanded={openProvenance === task.id}
+                title={$t("careplan.why-here")}
+              >
+                <svg width="14" height="14"><use href="/icons.svg#report"></use></svg>
+              </button>
+              <button
+                class="button -small -secondary"
+                onclick={() => markDone(task)}>{$t("careplan.task.done")}</button
+              >
+              <button class="button -small" onclick={() => openSnooze(task)}
+                >{$t("careplan.task.snooze")}</button
+              >
+            </div>
           </div>
-          <div class="task-actions">
-            <button
-              class="button -small -secondary"
-              onclick={() => markDone(task)}>{$t("careplan.task.done")}</button
-            >
-            <button class="button -small" onclick={() => snooze(task)}
-              >{$t("careplan.task.snooze")}</button
-            >
-          </div>
+          {#if openProvenance === task.id}
+            <ProvenanceReveal source={taskProvenance(task)} {onOpenDocument} />
+          {/if}
         </li>
       {/each}
     </ul>
@@ -200,6 +263,14 @@
     />
   </footer>
 </article>
+
+{#if snoozingTask}
+  <SnoozeDialog
+    taskText={snoozingTask.text}
+    onConfirm={confirmSnooze}
+    onCancel={() => (snoozingTask = null)}
+  />
+{/if}
 
 <style>
   .careplan-item {
@@ -261,13 +332,11 @@
   .icon-btn:hover {
     background: var(--color-border);
   }
-  .provenance-reveal {
-    margin-top: var(--ui-pad-small);
-    padding: var(--ui-pad-small);
-    font-size: 0.85rem;
+  .certainty-inline {
+    font-size: 0.75rem;
+    font-weight: 400;
     color: var(--color-text-secondary);
-    background: color-mix(in srgb, var(--color-border) 40%, transparent);
-    border-radius: var(--ui-radius-small);
+    margin-left: 0.4rem;
   }
   .task-list {
     list-style: none;
@@ -278,6 +347,11 @@
     gap: var(--ui-pad-small);
   }
   .task-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .task-line {
     display: flex;
     justify-content: space-between;
     align-items: center;

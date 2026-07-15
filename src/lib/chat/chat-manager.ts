@@ -21,6 +21,7 @@ import { t } from "$lib/i18n";
 import { chatContextService } from "$lib/context/integration/chat-service";
 import type { ChatContextResult } from "$lib/context/integration/shared/chat-context-base";
 import { chatMCPToolWrapper } from "./mcp-tool-wrapper";
+import { addUserTask } from "$lib/careplan/store";
 import user, { type User } from "$lib/user";
 import { profile } from "$lib/profiles";
 import { logger } from "$lib/logging/logger";
@@ -536,6 +537,48 @@ export class ChatManager {
       await this.sendMessage(displayMessage, aiMessage);
     } catch (error) {
       logger.namespace('Chat').error('handleWidgetInteraction: sendMessage failed', { error });
+    }
+  }
+
+  /**
+   * Accept a suggested Care Plan action (build row 19). Creates the task with
+   * chat-message provenance and marks the suggestion consumed so the footer
+   * doesn't re-trigger. The user tapping the footer IS the consent.
+   */
+  async acceptSuggestedAction(messageId: string): Promise<void> {
+    const state = get(chatStore);
+    const message = state.messages.find((m) => m.id === messageId);
+    const action = message?.metadata?.suggestedAction;
+    const profileId = state.context?.currentProfileId;
+    if (!action || !profileId) return;
+
+    try {
+      const created = await addUserTask(
+        profileId,
+        action.itemId,
+        {
+          text: action.text,
+          category: action.category,
+          priority: action.priority,
+          timeframeNormalized: action.timeframeNormalized,
+        },
+        { sourceMessageId: messageId },
+      );
+      if (!created) {
+        logger.namespace('Chat').warn('acceptSuggestedAction: item not found', { itemId: action.itemId });
+        return;
+      }
+      // Mark consumed so the footer renders its confirmed state.
+      const updated = get(chatStore).messages.map((m) =>
+        m.id === messageId
+          ? { ...m, metadata: { ...m.metadata, suggestedActionDone: true } }
+          : m,
+      );
+      chatActions.setMessages(updated);
+      // Let any open Care Plan view refresh.
+      ui.emit('careplan:task-added', { profileId, itemId: action.itemId });
+    } catch (error) {
+      logger.namespace('Chat').error('acceptSuggestedAction failed', { error });
     }
   }
 
@@ -1281,6 +1324,7 @@ export class ChatManager {
                 toolsUsed: [],
                 sources: event.data.sources || [],
                 widgets: event.data.widgets || [],
+                suggestedAction: event.data.suggestedAction || undefined,
               };
 
               // Update the message with metadata

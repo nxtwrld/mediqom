@@ -15,15 +15,18 @@ import {
 // (build row 7s). Each value is a region id or a mesh name; lateral regions are
 // listed per side.
 const NL_TO_REGION: Record<string, string[]> = {
-  // Joints / skeletal regions
-  knee: ["L_knee", "R_knee"],
+  // Joints / skeletal regions. Lateral region ids expand to their leaf meshes;
+  // the unsided joint connective meshes (ligaments/cartilage, which live in the
+  // non-lateral limb root) are listed explicitly so a joint synonym still
+  // surfaces them.
+  knee: ["L_knee", "R_knee", "cartilage_knee", "ligaments_knee"],
   back: ["back", "spine"],
   spine: ["spine"],
-  shoulder: ["L_shoulder", "R_shoulder"],
-  hip: ["L_hip", "R_hip"],
-  ankle: ["L_ankle", "R_ankle"],
-  wrist: ["L_wrist", "R_wrist"],
-  elbow: ["L_elbow", "R_elbow"],
+  shoulder: ["L_shoulder", "R_shoulder", "cartilage_shoulder", "ligaments_shoulder"],
+  hip: ["L_hip", "R_hip", "cartilage_hip", "ligaments_ilium"],
+  ankle: ["L_ankle", "R_ankle", "cartilage_ankle"],
+  wrist: ["L_wrist", "R_wrist", "ligaments_wrist"],
+  elbow: ["L_elbow", "R_elbow", "cartilage_elbow", "ligaments_elbow"],
 
   // Organs / systems
   heart: ["heart", "vascular_system"],

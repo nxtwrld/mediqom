@@ -206,7 +206,7 @@ async function processAIRequest(
     }
 
     // Add the focused Care Plan item so the AI can answer about it and propose
-    // follow-through via the createCarePlanTask tool (build row 7i).
+    // follow-through via the suggestedAction field (build rows 7i / 19).
     const cpSummary = carePlanContext?.itemSummary;
     if (cpSummary) {
       const tasks = Array.isArray(cpSummary.topTasks)
@@ -221,7 +221,7 @@ async function processAIRequest(
           `id: ${cpSummary.id}\n` +
           `condition: ${cpSummary.description} <${cpSummary.conditionType}, ${cpSummary.status}>\n` +
           (tasks ? `current tasks:\n${tasks}\n` : "") +
-          `If the user wants to add a reminder or follow-up, you may call createCarePlanTask with itemId=${cpSummary.id}.`,
+          `If a concrete follow-up task would clearly help the user, emit a suggestedAction object with itemId=${cpSummary.id} (do NOT call a tool). Only do this when it is genuinely useful — never on every reply.`,
       });
     }
 
@@ -369,6 +369,7 @@ async function processAIRequest(
         toolCalls: structuredData.toolCalls || [],
         clarifyingQuestions: structuredData.clarifyingQuestions || [],
         widgets: structuredData.widgets || [],
+        suggestedAction: structuredData.suggestedAction || null,
         sources: validatedSources,
         tokenUsage: tokenUsage.total,
         mode,
