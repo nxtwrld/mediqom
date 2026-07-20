@@ -1,4 +1,5 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { isFeatureEnabled } from "$lib/config/feature-flags";
 
 const routes = {
   POR: "ORAL",
@@ -16,6 +17,8 @@ const form = {
 };
 
 export const GET: RequestHandler = async ({ url }) => {
+  if (!isFeatureEnabled("MEDICATIONS")) error(404, { message: "Not found" });
+
   const str = url.searchParams.get("drug") || "";
 
   if (str.length < 3) {

@@ -6,6 +6,7 @@
   import ui from '$lib/ui';
   import { t } from '$lib/i18n';
   import { keyboardHeight } from '$lib/capacitor/keyboard-store';
+  import { isFeatureEnabled } from '$lib/config/feature-flags';
   import ContextPrompt from './ContextPrompt.svelte';
   import ChatWidget from './widgets/ChatWidget.svelte';
   import Markdown from '$components/ui/Markdown.svelte';
@@ -351,7 +352,7 @@
             {/if}
 
             <!-- Care Plan suggested-action footer (build row 19) -->
-            {#if message.metadata?.suggestedAction}
+            {#if isFeatureEnabled('CARE_PLAN') && message.metadata?.suggestedAction}
               <div class="suggested-action">
                 <span class="sa-label">{message.metadata.suggestedAction.label}</span>
                 {#if message.metadata.suggestedActionDone}

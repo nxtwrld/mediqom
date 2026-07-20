@@ -824,9 +824,9 @@
         display: block;
         height: 100%;
         width: 100%;
-        border-radius: calc(var(--radius-16);
+        border-radius: var(--radius-16);
         border: 1px solid var(--color-white);
-        box-shadow: 1px 1px 6px 0 rgba(0,0,0.3);
+        box-shadow: 1px 1px 6px 0 rgba(0,0,0,0.3);
         transform: scale(.5);
         transition: transform .2s ease-in-out;
         background-color: var(--color);
@@ -840,7 +840,7 @@
         color: inherit;
         text-align: center;
         padding: .3rem .5rem;
-        border-radius: calc(var(--radius-16);
+        border-radius: var(--radius-16);
         border: 1px solid var(--color-white);
         font-size: inherit;
     }

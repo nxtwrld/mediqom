@@ -9,6 +9,7 @@
     import ImportView from "$components/import/ImportView.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
+    import { isFeatureEnabled } from "$lib/config/feature-flags";
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
     import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
@@ -690,6 +691,7 @@
                     >
                     {$t("app.nav.documents")}
                 </a>
+                {#if isFeatureEnabled('MEDICATIONS')}
                 <a
                     href={$profile?.id ? `/med/p/${$profile.id}/medications` : "/med"}
                     onclick={() => closeMobilePopups()}
@@ -699,6 +701,7 @@
                     >
                     {$t("medications.title")}
                 </a>
+                {/if}
                 <a
                     href={$profile?.id ? `/med/p/${$profile.id}/contacts` : "/med"}
                     onclick={() => closeMobilePopups()}

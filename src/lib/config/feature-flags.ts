@@ -7,6 +7,9 @@ export const FEATURE_FLAGS = {
   EXTERNAL_VALIDATION:
     (env as any).PUBLIC_ENABLE_EXTERNAL_VALIDATION === "true",
   SPECIALIZED_UI: (env as any).PUBLIC_ENABLE_SPECIALIZED_UI === "true",
+  // Care Plan / Medications features hidden by default for the beta release
+  CARE_PLAN: (env as any).PUBLIC_ENABLE_CARE_PLAN === "true",
+  MEDICATIONS: (env as any).PUBLIC_ENABLE_MEDICATIONS === "true",
   // Encryption enabled by default for security - set to 'false' to disable during debugging
   ENCRYPTED_IMPORT_CACHE:
     (env as any).PUBLIC_ENABLE_ENCRYPTED_IMPORT_CACHE !== "false",
@@ -23,5 +26,7 @@ export const {
   MULTI_PROVIDER_AI,
   EXTERNAL_VALIDATION,
   SPECIALIZED_UI,
+  CARE_PLAN,
+  MEDICATIONS,
   ENCRYPTED_IMPORT_CACHE,
 } = FEATURE_FLAGS;

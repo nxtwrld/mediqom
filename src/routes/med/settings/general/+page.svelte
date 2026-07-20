@@ -6,6 +6,7 @@
 	import SUPPORTED_LANGUAGES from '$lib/languages';
 	import { apiFetch } from '$lib/api/client';
 	import { themePreference, initTheme, type ThemePreference } from '$lib/theme/store';
+	import { isFeatureEnabled } from '$lib/config/feature-flags';
 
 	// Read language from $user store
 	let selectedLanguage = $state($user?.language || 'en');
@@ -192,6 +193,7 @@
 		</form>
 	</section>
 
+	{#if isFeatureEnabled('CARE_PLAN')}
 	<div class="section-divider"></div>
 
 	<section>
@@ -208,6 +210,7 @@
 			<span>{$t('app.settings.general.careplan.certainty-label')}</span>
 		</label>
 	</section>
+	{/if}
 </div>
 
 <style>

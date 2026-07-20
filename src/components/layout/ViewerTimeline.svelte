@@ -15,6 +15,7 @@
     import Loading from '$components/ui/Loading.svelte';
     import { medicationsByProfile, loadMedicationContent, extractedMedicationsByProfile, loadExtractedMedicationContent } from '$lib/medications/store';
     import type { MedicationDocument, Medication } from '$lib/medications/types';
+    import { MEDICATIONS } from '$lib/config/feature-flags';
     import { getSignalColor } from '$lib/signals/colors';
     import { DEFAULT_SIGNAL_REFERENCES } from '$lib/signals/references';
     import { normalizeSignalName } from '$lib/signals/normalize';
@@ -155,21 +156,23 @@
         const id = $profile?.id;
         if (!id) return;
         dataReady = false;
-        loadDocuments(id).then(() => {
-            return Promise.all([
-                loadMedicationContent(id),
-                loadExtractedMedicationContent(id),
-            ]);
+        loadDocuments(id).then(async () => {
+            if (MEDICATIONS) {
+                await Promise.all([
+                    loadMedicationContent(id),
+                    loadExtractedMedicationContent(id),
+                ]);
+            }
         }).then(() => {
             dataReady = true;
         });
     });
 
-    // Load medication documents
+    // Load medication documents (medication feature only)
     let medications = $state<MedicationDocument[]>([]);
     $effect(() => {
         const id = $profile?.id;
-        if (!id) { medications = []; return; }
+        if (!MEDICATIONS || !id) { medications = []; return; }
         return medicationsByProfile(id).subscribe(v => { medications = v; });
     });
 
@@ -177,7 +180,7 @@
     let extractedMeds = $state<Partial<Medication>[]>([]);
     $effect(() => {
         const id = $profile?.id;
-        if (!id) { extractedMeds = []; return; }
+        if (!MEDICATIONS || !id) { extractedMeds = []; return; }
         return extractedMedicationsByProfile(id).subscribe(v => { extractedMeds = v; });
     });
 

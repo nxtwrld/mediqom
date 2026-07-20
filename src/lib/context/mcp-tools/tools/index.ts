@@ -11,6 +11,7 @@ import { QueryMedicalHistoryTool } from "./query-medical-history";
 import { GetDocumentByIdTool } from "./get-document-by-id";
 import { GetPatientTimelineTool } from "./get-patient-timeline";
 import { CreateCarePlanTaskTool } from "./create-care-plan-task";
+import { CARE_PLAN } from "$lib/config/feature-flags";
 import type { BaseMedicalTool, MCPTool } from "../base/base-tool";
 import type { MCPSecurityContext } from "../security-audit";
 
@@ -24,8 +25,11 @@ toolRegistry.set("getProfileData", new GetProfileDataTool());
 toolRegistry.set("queryMedicalHistory", new QueryMedicalHistoryTool());
 toolRegistry.set("getDocumentById", new GetDocumentByIdTool());
 toolRegistry.set("getPatientTimeline", new GetPatientTimelineTool());
-// Mutating tool — appends a Care Plan task (build row 7j)
-toolRegistry.set("createCarePlanTask", new CreateCarePlanTaskTool());
+// Mutating tool — appends a Care Plan task (build row 7j). Gated: only
+// registered when the Care Plan feature is enabled.
+if (CARE_PLAN) {
+  toolRegistry.set("createCarePlanTask", new CreateCarePlanTaskTool());
+}
 
 /**
  * Get all tool definitions for MCP

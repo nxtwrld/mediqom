@@ -16,6 +16,7 @@
     import ImportProfile from './ImportProfile.svelte';
     import ScreenOverlay from '$components/ui/ScreenOverlay.svelte';
     import CarePlanUpdate from '$components/careplan/CarePlanUpdate.svelte';
+    import { isFeatureEnabled } from '$lib/config/feature-flags';
     import LoaderThinking from '$components/ui/LoaderThinking.svelte';
     import DocumentTile from '$components/documents/DocumentTile.svelte';
     import JobProgressCard from './JobProgressCard.svelte';
@@ -577,7 +578,7 @@
     </ScreenOverlay>
 {/if}
 
-{#if carePlanDeltas.length > 0 && carePlanSummaryProfileId}
+{#if isFeatureEnabled('CARE_PLAN') && carePlanDeltas.length > 0 && carePlanSummaryProfileId}
     <ScreenOverlay title={$t('careplan.title')} preventer={true} on:close={() => { carePlanDeltas = []; carePlanSummaryProfileId = null; }}>
         <CarePlanUpdate
             profileId={carePlanSummaryProfileId}

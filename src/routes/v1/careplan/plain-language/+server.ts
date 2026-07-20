@@ -5,6 +5,7 @@ import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import type { Content } from "$lib/ai/types.d";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { logger } from "$lib/logging/logger";
+import { isFeatureEnabled } from "$lib/config/feature-flags";
 
 /**
  * Plain-language rewrite of a single clinical string (Care Plan build row 7k).
@@ -30,6 +31,8 @@ const REWRITE_SCHEMA: FunctionDefinition = {
 };
 
 export const POST: RequestHandler = async (event) => {
+  if (!isFeatureEnabled("CARE_PLAN")) error(404, { message: "Not found" });
+
   const {
     request,
     locals: { safeGetSession },

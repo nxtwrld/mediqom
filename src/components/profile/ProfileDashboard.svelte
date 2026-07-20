@@ -14,6 +14,7 @@
     import { getPropertyCategory } from '$lib/health/property-categories';
     import PlanWeek from '$components/medications/PlanWeek.svelte';
     import CarePlanDashboardSection from '$components/careplan/CarePlanDashboardSection.svelte';
+    import { isFeatureEnabled } from '$lib/config/feature-flags';
     //import MedicationWidget from '$components/medications/MedicationWidget.svelte';
     
     // Local state for ProfileEdit modal
@@ -282,7 +283,9 @@
         </div>
     </div>
 
-    <CarePlanDashboardSection profileId={$profile.id} />
+    {#if isFeatureEnabled('CARE_PLAN')}
+        <CarePlanDashboardSection profileId={$profile.id} />
+    {/if}
 
     <div class="tiles -vitals">
 
@@ -300,7 +303,9 @@
         </div>
     </div>
 
-    <PlanWeek profileId={$profile.id} />
+    {#if isFeatureEnabled('MEDICATIONS')}
+        <PlanWeek profileId={$profile.id} />
+    {/if}
     <!--MedicationWidget profileId={$profile.id} /-->
 
     <h3 class="h3 heading">{ $t('app.headings.documents') }</h3>

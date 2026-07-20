@@ -34,8 +34,8 @@
 </script>
 
 <svelte:head>
-	<title>Mediqom - All your health data in your hands</title>
-	<meta name="description" content="Mediqom brings medical experience to the 21st century. Import, analyze, and manage your health records with AI-powered insights." />
+	<title>Mediqom — Your body remembers everything. Now your records do too.</title>
+	<meta name="description" content="Mediqom keeps your complete medical history in one place, so every doctor sees the whole story. Import, organize, and understand your health records with AI." />
 </svelte:head>
 
 <WwwCanvas activeSection={scrollObserver.activeSection} />

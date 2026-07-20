@@ -25,8 +25,24 @@ const CONTENT_DIR = "src/content/www";
 const SUPPORTED_LANGS = ["en", "cs", "de"];
 const DEFAULT_LANG = "en";
 
+// Slugs hidden from the public site for the consumer beta launch. The .md
+// files remain in the repo; removing a slug from this set re-publishes it.
+// - doctors / appconnect / faq-doctors: doctor-facing + AI-marketplace pages
+//   (voice/stress analysis, "350+ specialists", named partner claims)
+// - test-mermaid: leftover test page that should not ship
+const HIDDEN_SLUGS = new Set([
+  "doctors",
+  "appconnect",
+  "faq-doctors",
+  "test-mermaid",
+]);
+
 export function isValidLang(lang: string): boolean {
   return SUPPORTED_LANGS.includes(lang);
+}
+
+export function isHiddenSlug(slug: string): boolean {
+  return HIDDEN_SLUGS.has(slug);
 }
 
 export function getContentPath(lang: string, slug: string): string {
@@ -40,6 +56,11 @@ export async function loadContent(
   // Validate language
   if (!isValidLang(lang)) {
     throw error(404, `Language '${lang}' not supported`);
+  }
+
+  // Hidden slugs are not reachable on the public site
+  if (isHiddenSlug(slug)) {
+    throw error(404, `Content not found: ${slug}`);
   }
 
   // Try to load content for requested language
@@ -94,7 +115,8 @@ export async function listContent(lang: string): Promise<string[]> {
     const files = fs.readdirSync(contentDir);
     return files
       .filter((file) => file.endsWith(".md"))
-      .map((file) => file.replace(".md", ""));
+      .map((file) => file.replace(".md", ""))
+      .filter((slug) => !isHiddenSlug(slug));
   } catch (err) {
     console.error(`Error listing content for ${lang}:`, err);
     return [];

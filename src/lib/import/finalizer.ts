@@ -15,6 +15,7 @@ import {
   mergeDocumentIntoCarePlan,
   type CarePlanDeltaEntry,
 } from "$lib/careplan/import-hook";
+import { CARE_PLAN } from "$lib/config/feature-flags";
 import { createVirtualProfile } from "$lib/profiles";
 import { PROFILE_NEW_ID } from "$lib/profiles/tools";
 import type { Profile } from "$lib/types.d";
@@ -558,7 +559,7 @@ export async function saveDocuments(
       );
 
       // Merge into the Care Plan (never fails the document save).
-      if (document.isMedical) {
+      if (CARE_PLAN && document.isMedical) {
         const delta = await mergeDocumentIntoCarePlan(
           content,
           profileDetected.profile.id,

@@ -16,6 +16,7 @@ import { isNativePlatform } from "$lib/config/platform";
 import { get } from "svelte/store";
 import { profile } from "$lib/profiles";
 import { buildCarePlanContextForProfile } from "$lib/careplan/store";
+import { CARE_PLAN } from "$lib/config/feature-flags";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -146,7 +147,7 @@ export async function processJob(
   // merge defensively validates every link id, so a wrong-profile guess is
   // harmless — see CAREPLAN.md conflict C3).
   let ctx = carePlanContext;
-  if (ctx === undefined) {
+  if (CARE_PLAN && ctx === undefined) {
     try {
       const activeProfile = get(profile) as { id?: string } | null;
       if (activeProfile?.id) {
