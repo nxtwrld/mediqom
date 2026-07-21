@@ -246,6 +246,7 @@ export const createUnifiedDocumentProcessingWorkflow = (
     dental: lastValue<any>(),
     tumorCharacteristics: lastValue<any>(),
     treatmentPlan: lastValue<any>(),
+    recommendationsDetailed: lastValue<any>(),
     treatmentResponse: lastValue<any>(),
     imagingFindings: lastValue<any>(),
     grossFindings: lastValue<any>(),

@@ -102,18 +102,16 @@
         return cleaned;
     }
 
-    const performers = $derived(
-        (() => {
-            const normalized = Array.isArray(data) ? data : (data ? [data] : []);
-            return [...normalized]
-                .map(cleanPerformerData)
-                .sort((a, b) => {
-                    if (a.isPrimary && !b.isPrimary) return -1;
-                    if (!a.isPrimary && b.isPrimary) return 1;
-                    return 0;
-                });
-        })()
-    );
+    const performers = $derived.by(() => {
+        const normalized = Array.isArray(data) ? data : (data ? [data] : []);
+        return [...normalized]
+            .map(cleanPerformerData)
+            .sort((a, b) => {
+                if (a.isPrimary && !b.isPrimary) return -1;
+                if (!a.isPrimary && b.isPrimary) return 1;
+                return 0;
+            });
+    });
 
     let expandedCards = $state<Set<number>>(new Set());
 

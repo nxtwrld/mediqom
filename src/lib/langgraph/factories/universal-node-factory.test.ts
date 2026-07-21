@@ -78,6 +78,7 @@ const VALID_STATE_CHANNELS = [
 	'dental',
 	'tumorCharacteristics',
 	'treatmentPlan',
+	'recommendationsDetailed',
 	'treatmentResponse',
 	'grossFindings',
 	'specialStains',
@@ -92,8 +93,8 @@ const allNodeIds = Object.keys(NODE_CONFIGURATIONS);
 const allConfigs = Object.values(NODE_CONFIGURATIONS);
 
 describe('NODE_CONFIGURATIONS validation', () => {
-	it('has 30 node entries', () => {
-		expect(allNodeIds).toHaveLength(30);
+	it('has 31 node entries', () => {
+		expect(allNodeIds).toHaveLength(31);
 	});
 
 	it('every config has a nodeName string', () => {

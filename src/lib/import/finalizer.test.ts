@@ -62,6 +62,7 @@ vi.mock("$lib/encryption/aes", () => ({
 
 vi.mock("$lib/encryption/keys", () => ({
   unwrapKey: mockUnwrapKey,
+  HybridKeyPair: class HybridKeyPair {},
 }));
 
 vi.mock("$lib/encryption/rsa", () => ({

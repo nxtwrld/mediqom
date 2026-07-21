@@ -199,6 +199,7 @@ export interface DocumentProcessingState {
   dental?: any;
   tumorCharacteristics?: any;
   treatmentPlan?: any;
+  recommendationsDetailed?: any;
   treatmentResponse?: any;
   imagingFindings?: any;
   grossFindings?: any;
