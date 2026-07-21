@@ -453,7 +453,24 @@
       "beta-review-message": "Ihr Beta-Antrag wird geprüft. Wir senden Ihnen innerhalb von 48 Stunden eine E-Mail, sobald er genehmigt wurde.",
       "beta-check-spam": "Prüfen Sie Ihren Spam-Ordner, wenn Sie unsere E-Mail nicht sehen.",
       "beta-status": "Antragsstatus",
-      "beta-not-approved": "Ihr Beta-Antrag wurde nicht genehmigt. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie uns bitte unter"
+      "beta-not-approved": "Ihr Beta-Antrag wurde nicht genehmigt. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie uns bitte unter",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Dateien",
@@ -629,7 +646,8 @@
         "profile": "Profil",
         "privacy": "Datenschutz",
         "subscription": "Abonnement",
-        "about": "Über"
+        "about": "Über",
+        "invites": ""
       },
       "general": {
         "title": "Allgemeine Einstellungen",
@@ -743,6 +761,38 @@
           "title": "Danksagungen",
           "licenses": "Open-Source-Lizenzen",
           "description": "Mediqom basiert auf Open-Source-Technologien und Beiträgen der Community. Vielen Dank an alle Mitwirkenden und Betreuer."
+        }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
         }
       }
     },

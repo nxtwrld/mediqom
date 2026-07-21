@@ -446,7 +446,24 @@
       "beta-review-message": "Su solicitud de acceso beta está siendo revisada. Le enviaremos un correo en un plazo de 48 horas una vez aprobada.",
       "beta-check-spam": "Revise su carpeta de correo no deseado si no encuentra nuestro correo.",
       "beta-status": "Estado de la solicitud",
-      "beta-not-approved": "Su solicitud de acceso beta no fue aprobada. Si cree que esto es un error, póngase en contacto con nosotros en"
+      "beta-not-approved": "Su solicitud de acceso beta no fue aprobada. Si cree que esto es un error, póngase en contacto con nosotros en",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Archivos",
@@ -623,7 +640,8 @@
         "profile": "Perfil",
         "privacy": "Privacidad",
         "subscription": "Suscripción",
-        "about": "Acerca de"
+        "about": "Acerca de",
+        "invites": ""
       },
       "general": {
         "title": "Configuración general",
@@ -730,6 +748,38 @@
           "title": "Créditos",
           "licenses": "Licencias de código abierto",
           "description": "Mediqom está construido con tecnologías de código abierto y contribuciones de la comunidad. Gracias a todos los colaboradores y mantenedores."
+        }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
         }
       }
     },

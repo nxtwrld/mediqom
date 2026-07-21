@@ -558,7 +558,24 @@
       "beta-review-message": "Your beta application is being reviewed. We'll email you within 48 hours once approved.",
       "beta-check-spam": "Check your spam folder if you don't see our email.",
       "beta-status": "Application Status",
-      "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at"
+      "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at",
+      "new-here-title": "New here?",
+      "new-here-message": "Mediqom is invite-only right now. Use an invite code or join the waiting list below.",
+      "or": "or",
+      "invite": {
+        "title": "Have an invite code?",
+        "instruction": "Enter your invite code and email to create your account.",
+        "code-label": "Invite code",
+        "code-placeholder": "Enter your code",
+        "code-required": "Please enter an invite code",
+        "submit": "Redeem invite"
+      },
+      "waitlist": {
+        "title": "Join the waiting list",
+        "instruction": "No invite code yet? Leave your email and we'll notify you when one is available.",
+        "submit": "Join waiting list",
+        "joined": "You're on the list! We'll email you when an invite code is available."
+      }
     },
     "forms": {
       "files": "Files",
@@ -734,6 +751,7 @@
         "general": "General",
         "profile": "Profile",
         "privacy": "Privacy",
+        "invites": "Invites",
         "subscription": "Subscription",
         "about": "About"
       },
@@ -769,6 +787,38 @@
           "title": "Care Plan",
           "certainty-description": "Care Plan items fade as they age. Turn this on to also show a short freshness label next to each item.",
           "certainty-label": "Show certainty labels inline"
+        }
+      },
+      "invites": {
+        "title": "Invites",
+        "description": "Invite people to Mediqom. Each code can be used once.",
+        "remaining": "{used}/{limit} invites used",
+        "generate": "Generate invite code",
+        "no-invites-left": "No invites remaining",
+        "generating": "Generating...",
+        "code-list-empty": "You haven't generated any invite codes yet.",
+        "copy-link": "Copy link",
+        "link-copied": "Link copied!",
+        "status": {
+          "available": "Not yet claimed",
+          "claimed": "Claimed"
+        },
+        "error": {
+          "load-failed": "Could not load your invites",
+          "generate-failed": "Could not generate invite code"
+        },
+        "admin": {
+          "title": "Admin",
+          "send-title": "Send an invite directly",
+          "send-description": "Mint a code outside anyone's quota and invite this email immediately.",
+          "send-submit": "Send invite",
+          "send-success": "Invite sent",
+          "quota-title": "Grant bonus invites",
+          "quota-description": "Give a user extra invite codes beyond the default limit.",
+          "quota-email-label": "User email",
+          "quota-bonus-label": "Bonus invites",
+          "quota-submit": "Update quota",
+          "quota-success": "Quota updated"
         }
       },
       "profile": {

@@ -75,7 +75,9 @@ export const actions: Actions = {
         email,
         options: {
           emailRedirectTo: redirectUrl,
-          shouldCreateUser: true,
+          // Account creation only happens via /v1/invite/redeem (invite-only access) —
+          // this endpoint is sign-in only.
+          shouldCreateUser: false,
         },
       });
 

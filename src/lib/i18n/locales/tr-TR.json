@@ -446,7 +446,24 @@
       "beta-review-message": "Beta başvurunuz inceleniyor. Onaylandıktan sonra 48 saat içinde size e-posta göndereceğiz.",
       "beta-check-spam": "E-postamızı göremiyorsanız spam klasörünüzü kontrol edin.",
       "beta-status": "Başvuru Durumu",
-      "beta-not-approved": "Beta başvurunuz onaylanmadı. Bunun bir hata olduğunu düşünüyorsanız lütfen şu adresten bizimle iletişime geçin:"
+      "beta-not-approved": "Beta başvurunuz onaylanmadı. Bunun bir hata olduğunu düşünüyorsanız lütfen şu adresten bizimle iletişime geçin:",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Dosyalar",
@@ -623,7 +640,8 @@
         "profile": "Profil",
         "privacy": "Gizlilik",
         "subscription": "Abonelik",
-        "about": "Hakkında"
+        "about": "Hakkında",
+        "invites": ""
       },
       "general": {
         "title": "Genel Ayarlar",
@@ -730,6 +748,38 @@
           "title": "Krediler",
           "licenses": "Açık Kaynak Lisansları",
           "description": "Mediqom, açık kaynak teknolojileri ve topluluk katkılarıyla oluşturulmuştur. Tüm katkıda bulunanlara ve bakımcılara teşekkür ederiz."
+        }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
         }
       }
     },
