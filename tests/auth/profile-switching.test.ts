@@ -27,16 +27,18 @@ test.describe("Auth - Profile switching", () => {
     const profileUrl = new URL(page.url());
     const profileId = profileUrl.pathname.split("/med/p/")[1].split("/")[0];
 
-    const docsLink = page.locator(`a[href="/med/p/${profileId}/documents"]`);
+    const docsLink = page.locator(
+      `a[href="/med/p/${profileId}/documents"]:visible`,
+    );
     await expect(docsLink).toBeVisible();
     await docsLink.click();
-    await page.waitForURL(`**/med/p/${profileId}/documents`);
+    await page.waitForURL(`**/med/p/${profileId}/documents/`);
 
     const profileNameLink = page.locator(".profile-name");
     await expect(profileNameLink).toBeVisible();
     await profileNameLink.click();
-    await page.waitForURL(`**/med/p/${profileId}`);
-    expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}`);
+    await page.waitForURL(`**/med/p/${profileId}/`);
+    expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}/`);
   });
 
   test("mobile: avatar opens the profile panel and selecting a profile navigates", async ({
@@ -63,7 +65,7 @@ test.describe("Auth - Profile switching", () => {
     }
 
     await panelItem.first().click();
-    await page.waitForURL(`**/med/p/${profileId}`);
-    expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}`);
+    await page.waitForURL(`**/med/p/${profileId}/`);
+    expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}/`);
   });
 });

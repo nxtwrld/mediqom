@@ -30,10 +30,11 @@ class ImportPage {
     await this.page.goto("/med");
     await this.page.waitForLoadState("networkidle");
 
-    // Open import overlay via hash
-    await this.page.evaluate(() => {
-      location.hash = "#overlay-import";
-    });
+    // Open import overlay via the real Import button — setting
+    // location.hash directly does not work: UI.svelte's manageOverlay()
+    // only handles the close direction (hashchange back to "" / no
+    // #overlay- prefix); opening only happens via ui.emit("overlay.import").
+    await this.page.getByRole("button", { name: "Import", exact: true }).click();
 
     // Wait for import view to appear
     await this.page.waitForSelector(".import-view", { timeout: 10000 });
@@ -49,7 +50,7 @@ class ImportPage {
           body: JSON.stringify({ jobs }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
   }
@@ -64,7 +65,7 @@ class ImportPage {
           body: JSON.stringify({ id: jobId }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
   }
@@ -99,7 +100,7 @@ class ImportPage {
             body: JSON.stringify({ job }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );
@@ -121,7 +122,7 @@ class ImportPage {
             body: JSON.stringify({ ok: true }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );
@@ -139,7 +140,7 @@ class ImportPage {
             body: JSON.stringify({ ok: true }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );

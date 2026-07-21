@@ -32,6 +32,17 @@ test.describe("Import - Delete Job", () => {
     await importPage.open();
     await importPage.uploadFile(TEST_PDF);
 
+    // The card first appears with a client-generated "preparing-<uuid>"
+    // placeholder ID (see ImportView.svelte's analyze()) before being
+    // reconciled to the real, mocked job ID once job creation resolves.
+    // Wait for that so the delete click below targets the mocked ID, not
+    // the placeholder (which isn't intercepted and would hit the real API).
+    await importPage.page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/v1/import/jobs") &&
+        resp.request().method() === "POST",
+    );
+
     // Wait for the job card to appear
     const jobCard = importPage.page.locator(".job-progress-card");
     await expect(jobCard).toBeVisible({ timeout: 15000 });

@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import { setDocuments } from "$lib/documents";
+import { setDocuments, whenDocumentsLoaded } from "$lib/documents";
 import { DocumentType } from "$lib/documents/types.d";
 import { profile, updateProfile } from "$lib/profiles";
 import type { Document } from "$lib/documents/types.d";
@@ -19,11 +19,16 @@ export function installTestHooks(): void {
   (window as any).__testHooks = {
     goto,
 
-    seedDocuments(docs: Document[]) {
+    async seedDocuments(docs: Document[]) {
+      // Wait for the one-time real document fetch (ViewerTimeline.svelte)
+      // to land first, so this seed is the last write and doesn't get
+      // clobbered by it landing afterward.
+      await whenDocumentsLoaded();
       setDocuments(docs);
     },
 
-    seedCarePlan(items: CarePlanItem[], historicalItems: CarePlanItem[] = []) {
+    async seedCarePlan(items: CarePlanItem[], historicalItems: CarePlanItem[] = []) {
+      await whenDocumentsLoaded();
       const currentProfile = profile.get();
       if (!currentProfile) {
         throw new Error("__testHooks.seedCarePlan: no active profile");
@@ -51,5 +56,6 @@ export function installTestHooks(): void {
         updateProfile({ ...currentProfile, carePlanDocumentId: docId });
       }
     },
+
   };
 }

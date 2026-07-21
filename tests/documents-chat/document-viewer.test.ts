@@ -25,7 +25,7 @@ test.describe("Document viewer", () => {
     await expect(tile).toBeVisible();
 
     await tile.click();
-    await page.waitForURL(`**/med/p/${profileId}/documents/${doc.id}`);
+    await page.waitForURL(`**/med/p/${profileId}/documents/${doc.id}/`);
 
     await expect(page.locator(".heading.-heading-main h1.h1")).toContainText(
       doc.metadata.title,

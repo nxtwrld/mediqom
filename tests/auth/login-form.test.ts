@@ -18,8 +18,12 @@ test.describe("Auth - Login form", () => {
   }) => {
     await page.goto("/auth");
 
+    // /auth also renders invite-code and waitlist forms (Invite only
+    // feature) side by side with the magic-link form, each with their own
+    // submit button — scope to the form containing #email specifically.
+    const emailForm = page.locator("form").filter({ has: page.locator("#email") });
     await expect(page.locator("#email")).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(emailForm.locator('button[type="submit"]')).toBeVisible();
 
     // Passwordless flow — there must be no password field to fill.
     await expect(

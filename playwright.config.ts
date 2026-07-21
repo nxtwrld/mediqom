@@ -14,10 +14,12 @@ const config: PlaywrightTestConfig = {
     // server — this command builds from scratch first, which alone can take
     // 60s+ on a cold CI runner. Give it enough headroom for build + preview start.
     timeout: 180000,
-    // Enables window.__testHooks (see src/lib/testing/test-hooks.ts) only
-    // for this test-preview build — process.env takes priority over the
-    // "false" default in .env files, but real builds never set this.
-    env: { PUBLIC_ENABLE_TEST_HOOKS: "true" },
+    // Enables window.__testHooks (see src/lib/testing/test-hooks.ts) and the
+    // Care Plan feature (hidden by default for the beta release, see
+    // src/lib/config/feature-flags.ts) only for this test-preview build —
+    // process.env takes priority over the "false" default in .env files,
+    // but real builds never set these.
+    env: { PUBLIC_ENABLE_TEST_HOOKS: "true", PUBLIC_ENABLE_CARE_PLAN: "true" },
   },
   testDir: "tests",
   testMatch: /(.+\.)?(test|spec)\.[jt]s/,

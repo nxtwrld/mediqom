@@ -44,6 +44,9 @@ jobs:
       # Care Plan specs seed data through a build-time-eliminated test hook —
       # this flag only exists in this CI build, never in production.
       PUBLIC_ENABLE_TEST_HOOKS: "true"
+      # Care Plan is hidden by default for the beta release (feature-flags.ts)
+      # — the E2E suite specifically exercises it, so enable it here.
+      PUBLIC_ENABLE_CARE_PLAN: "true"
       # Everything below is only referenced by `$env/static/*` at build time
       # and never called for real by these tests (all network calls are
       # mocked at the API boundary), so placeholder values are fine.

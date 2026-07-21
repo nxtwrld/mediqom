@@ -19,7 +19,7 @@ test.describe("Import - Quota / Rate Limit", () => {
           body: JSON.stringify({ message: "Too many requests. Please upgrade your plan." }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
 
@@ -63,7 +63,7 @@ test.describe("Import - Quota / Rate Limit", () => {
           }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
 
@@ -75,6 +75,6 @@ test.describe("Import - Quota / Rate Limit", () => {
     await expect(jobCard).toBeVisible({ timeout: 15000 });
 
     // Eventually error state appears
-    await expect(page.locator(".import-error, [data-testid='import-error'], .error-state, .job-error")).toBeVisible({ timeout: 20000 });
+    await expect(page.locator(".job-progress-card.error")).toBeVisible({ timeout: 20000 });
   });
 });

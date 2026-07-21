@@ -78,6 +78,14 @@ function updateIndex() {
   });
 }
 
+/** Resolves once the first setDocuments() call has landed (e.g. the initial
+ * background load triggered by ViewerTimeline.svelte). Playwright-only test
+ * hooks await this before seeding, so a seed always lands after — not
+ * before — that one-time authoritative fetch and doesn't get clobbered by it. */
+export function whenDocumentsLoaded(): Promise<boolean> {
+  return loadingDocuments;
+}
+
 export async function getDocument(id: string): Promise<Document | undefined> {
   await loadingDocuments;
   const document = byID[id];

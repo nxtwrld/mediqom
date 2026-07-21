@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(
-        `fullName, subscription, user_role, publicKey, avatarUrl, auth_id, id, language, is_admin, private_keys(privateKey, key_hash, key_pass)`,
+        `fullName, subscription, user_role, publicKey, avatarUrl, auth_id, id, language, is_admin, kem_public_key, key_mode, private_keys(privateKey, key_hash, key_pass, kem_secret_key, key_mode)`,
       )
       .eq("auth_id", user.id)
       .single();

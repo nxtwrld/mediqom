@@ -11,7 +11,7 @@ class DocumentsPage {
 
   async seed(docs: any[]) {
     await this.page.evaluate((docs) => {
-      (window as any).__testHooks.seedDocuments(docs);
+      return (window as any).__testHooks.seedDocuments(docs);
     }, docs);
   }
 

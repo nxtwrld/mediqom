@@ -62,7 +62,7 @@ class CarePlanPage {
   async seed(items: CarePlanItem[], historicalItems: CarePlanItem[] = []) {
     await this.page.evaluate(
       ({ items, historicalItems }) => {
-        (window as any).__testHooks.seedCarePlan(items, historicalItems);
+        return (window as any).__testHooks.seedCarePlan(items, historicalItems);
       },
       { items, historicalItems },
     );

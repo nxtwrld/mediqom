@@ -32,7 +32,7 @@ test.describe("Care Plan - item actions", () => {
     await expect(reveal.locator(".prov-conflict")).toBeVisible();
 
     await reveal.locator(".prov-link").click();
-    await page.waitForURL(`**/med/p/${profileId}/documents?doc=doc-1`);
+    await page.waitForURL(`**/med/p/${profileId}/documents/?doc=doc-1`);
   });
 
   test("task-level provenance resolves the document-quote, chat, and user paths independently", async ({
@@ -71,7 +71,12 @@ test.describe("Care Plan - item actions", () => {
     await chatRow.locator(WHY_HERE).click();
     await expect(chatRow.locator(".prov-link")).toHaveText("Open chat");
     await chatRow.locator(".prov-link").click();
-    await expect(page.locator(".chat-sidebar")).toBeVisible();
+    const chatSidebar = page.locator(".chat-sidebar");
+    await expect(chatSidebar).toBeVisible();
+    // Close it — on mobile the sidebar is full-viewport-width and would
+    // otherwise intercept clicks on the task list below.
+    await chatSidebar.getByRole("button", { name: "Close chat" }).click();
+    await expect(chatSidebar).not.toBeVisible();
 
     const userRow = page.locator(".task-row", { hasText: "User task" });
     await userRow.locator(WHY_HERE).click();
