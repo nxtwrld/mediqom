@@ -54,12 +54,10 @@
     });
 
     $effect(() => {
-        data.settings = {
-            ...data.settings,
-            units: {
-                weight: weightUnit,
-                height: heightUnit,
-            }
+        if (!data.settings) data.settings = {};
+        data.settings.units = {
+            weight: weightUnit,
+            height: heightUnit,
         };
     });
 
