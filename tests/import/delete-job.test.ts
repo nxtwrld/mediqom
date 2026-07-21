@@ -1,7 +1,9 @@
 import { test, expect, createMockJob } from "../fixtures/import-fixtures";
 import { createStallingSSEEvents } from "../fixtures/mock-data";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_PDF = path.join(__dirname, "..", "fixtures", "test-document.pdf");
 
 test.describe("Import - Delete Job", () => {

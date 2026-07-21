@@ -10,6 +10,10 @@ const config: PlaywrightTestConfig = {
   webServer: {
     command: "npm run build && npm run preview",
     port: 4173,
+    // Default webServer timeout (60s) only covers starting an already-built
+    // server — this command builds from scratch first, which alone can take
+    // 60s+ on a cold CI runner. Give it enough headroom for build + preview start.
+    timeout: 180000,
     // Enables window.__testHooks (see src/lib/testing/test-hooks.ts) only
     // for this test-preview build — process.env takes priority over the
     // "false" default in .env files, but real builds never set this.

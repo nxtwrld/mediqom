@@ -79,14 +79,17 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: playwright-chromium-webkit-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      # The "mobile" project (devices["iPhone 13"]) defaults to the WebKit
+      # engine, not Chromium — both must be installed or all mobile-project
+      # specs fail with "Executable doesn't exist".
+      - name: Install Playwright Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Install Playwright system deps
-        run: npx playwright install-deps chromium
+        run: npx playwright install-deps chromium webkit
         if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Run Playwright tests

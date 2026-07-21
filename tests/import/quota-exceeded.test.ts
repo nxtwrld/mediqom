@@ -1,6 +1,8 @@
 import { test, expect } from "../fixtures/import-fixtures";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_PDF = path.join(__dirname, "..", "fixtures", "test-document.pdf");
 
 test.describe("Import - Quota / Rate Limit", () => {

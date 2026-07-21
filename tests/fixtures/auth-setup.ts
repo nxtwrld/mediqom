@@ -2,7 +2,9 @@ import { chromium, type FullConfig } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_DIR = path.join(__dirname, "..", ".auth");
 const STATE_FILE = path.join(AUTH_DIR, "state.json");
 const SKIP_MARKER = path.join(AUTH_DIR, "skip");

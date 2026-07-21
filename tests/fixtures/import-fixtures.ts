@@ -1,6 +1,7 @@
 import { test as base, expect, type Page, type Route } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import {
   buildSSEBody,
   createMockJob,
@@ -9,6 +10,7 @@ import {
 } from "./mock-data";
 import type { ImportJob } from "../../src/lib/import/types";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKIP_MARKER = path.join(__dirname, "..", ".auth", "skip");
 
 /** Check if tests should be skipped (missing credentials or auth failure) */
