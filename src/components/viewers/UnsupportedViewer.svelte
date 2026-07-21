@@ -85,9 +85,9 @@
         justify-content: center;
         padding: 3rem 2rem;
         text-align: center;
-        background: var(--bg-secondary, #f8f9fa);
+        background: var(--color-background, #f8f9fa);
         border-radius: 8px;
-        border: 2px dashed var(--border-color, #dee2e6);
+        border: 2px dashed var(--color-border, #dee2e6);
         min-height: 200px;
     }
 
@@ -104,28 +104,28 @@
     .file-name {
         font-size: 1.2rem;
         font-weight: 600;
-        color: var(--text-primary, #333);
+        color: var(--color-text-primary, #333);
         margin-bottom: 0.5rem;
         word-break: break-all;
     }
 
     .file-details {
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
         font-size: 0.9rem;
     }
 
     .file-type {
-        background: var(--bg-primary, #fff);
+        background: var(--color-surface, #fff);
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
-        border: 1px solid var(--border-color, #dee2e6);
+        border: 1px solid var(--color-border, #dee2e6);
         font-family: monospace;
         margin: 0.5rem 0;
         display: inline-block;
     }
 
     .preview-message {
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
         font-size: 0.9rem;
         margin-bottom: 1.5rem;
         max-width: 400px;
@@ -140,9 +140,9 @@
 
     .btn {
         padding: 0.75rem 1.5rem;
-        border: 1px solid var(--border-color, #ddd);
-        background: var(--bg-primary, #fff);
-        color: var(--text-primary, #333);
+        border: 1px solid var(--color-border, #ddd);
+        background: var(--color-surface, #fff);
+        color: var(--color-text-primary, #333);
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
@@ -154,28 +154,28 @@
     }
 
     .btn:hover {
-        background: var(--bg-hover, #f0f0f0);
+        background: var(--color-gray-300, #f0f0f0);
         transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .btn.primary {
-        background: var(--primary-color, #007bff);
+        background: var(--color-interactivity, #007bff);
         color: white;
-        border-color: var(--primary-color, #007bff);
+        border-color: var(--color-interactivity, #007bff);
     }
 
     .btn.primary:hover {
-        background: var(--primary-hover, #0056b3);
+        background: var(--color-interactivity-dark, #0056b3);
     }
 
     .future-support {
         margin-top: 2rem;
         padding: 1rem;
-        background: var(--info-bg, #e7f3ff);
-        border: 1px solid var(--info-border, #b3d9ff);
+        background: var(--color-info-light, #e7f3ff);
+        border: 1px solid var(--color-info, #b3d9ff);
         border-radius: 6px;
-        color: var(--info-text, #0066cc);
+        color: var(--color-info-text, #0066cc);
         font-size: 0.85rem;
     }
 </style>

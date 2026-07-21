@@ -1,15 +1,16 @@
 /**
- * Chat Output Guard
+ * Chat Output Guard — Regex Pre-Filter
  *
- * Post-processes AI responses in patient/caregiver mode to detect
- * potentially harmful content like medication dosages or prohibited terms.
- * Appends safety disclaimers when such content is detected.
+ * Scans AI responses for potential safety concerns using regex patterns.
+ * Returns flags only — disclaimer decisions are made by the LLM guard.
  */
 
-import { safetyText } from "./safety/i18n-server";
+import { logger } from "$lib/logging/logger";
+
+const log = logger.namespace("OutputGuard");
 
 /** Pattern matching medication dosages like "500 mg", "10 ml", "2.5mg" */
-const DOSAGE_PATTERN = /\b\d+(?:\.\d+)?\s*(?:mg|ml|mcg|μg|iu|units?|tablets?|capsules?|drops?)\b/i;
+const DOSAGE_PATTERN = /\b\d+(?:\.\d+)?\s*(?:mg|ml|mcg|μg|iu|units?|tablets?|capsules?|drops?)\b/gi;
 
 /** Prohibited diagnostic terms in patient/caregiver mode */
 const PROHIBITED_TERMS = [
@@ -26,47 +27,44 @@ const PROHIBITED_TERMS = [
 ];
 
 export interface GuardResult {
-  response: string;
-  disclaimerAdded: boolean;
   flags: string[];
+  matches: string[];
 }
 
 /**
- * Scan AI response for patient/caregiver mode safety concerns.
+ * Scan AI response for potential safety concerns using regex.
+ * Returns flags and matched strings for the LLM guard to validate.
  * Only applies in patient or caregiver mode.
- *
- * @param response - The AI response to check
- * @param mode - The chat mode ("patient", "caregiver", "clinical")
- * @param language - Language code for localized disclaimer. Defaults to "en".
  */
 export function guardOutput(
   response: string,
   mode: string,
-  language = "en",
 ): GuardResult {
-  // Only apply in patient/caregiver mode
   if (mode === "clinical") {
-    return { response, disclaimerAdded: false, flags: [] };
+    return { flags: [], matches: [] };
   }
 
   const flags: string[] = [];
+  const matches: string[] = [];
 
-  if (DOSAGE_PATTERN.test(response)) {
+  const dosageMatches = response.match(DOSAGE_PATTERN);
+  if (dosageMatches) {
     flags.push("medication_dosage_detected");
+    matches.push(...dosageMatches);
   }
 
   for (const pattern of PROHIBITED_TERMS) {
-    if (pattern.test(response)) {
+    const termMatch = response.match(pattern);
+    if (termMatch) {
       flags.push("prohibited_diagnostic_term");
+      matches.push(termMatch[0]);
       break;
     }
   }
 
-  const disclaimerAdded = flags.length > 0;
-  const disclaimer = safetyText("chat.safety.disclaimer", language);
-  const finalResponse = disclaimerAdded
-    ? response + `\n\n---\n*${disclaimer}*`
-    : response;
+  if (flags.length > 0) {
+    log.debug("Regex pre-filter flags", { flags, matches });
+  }
 
-  return { response: finalResponse, disclaimerAdded, flags };
+  return { flags, matches };
 }

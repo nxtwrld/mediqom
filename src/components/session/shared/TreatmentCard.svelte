@@ -290,14 +290,14 @@
     .effectiveness-bar {
         flex: 1;
         height: 6px;
-        background: var(--color-surface-alt, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border-radius: 3px;
         overflow: hidden;
     }
 
     .effectiveness-fill {
         height: 100%;
-        background: var(--color-success, #10b981);
+        background: var(--color-positive, #10b981);
         transition: width 0.3s ease;
     }
 

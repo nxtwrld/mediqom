@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from '$lib/i18n';
     import AskButton from '$components/chat/AskButton.svelte';
+    import { normalizeTreatmentGoals } from '$lib/careplan/normalize';
 
     interface Props {
         data: any;
@@ -11,8 +12,10 @@
     let { data, document, key }: Props = $props();
 
     let hasTreatmentPlan = $derived(data && data.hasTreatmentPlan);
-    
-    let treatmentGoals = $derived(data?.treatmentGoals || []);
+
+    // Legacy extractions stored goals as plain strings; new ones are
+    // structured objects (see src/lib/configurations/core.treatmentGoal.ts).
+    let treatmentGoals = $derived(normalizeTreatmentGoals(data?.treatmentGoals));
     let therapies = $derived(data?.therapies || []);
     let medications = $derived(data?.medications || []);
     let procedures = $derived(data?.procedures || []);
@@ -92,13 +95,15 @@
         <h4 class="section-title-sub">{$t('report.treatment-goals')}</h4>
         <ul class="list-items">
             {#each treatmentGoals as goal}
-                <li class="panel goal-item {getPriorityClass(goal.priority)}">
+                <li class="panel goal-item {getPriorityClass(goal.priority || '')}">
                     <div class="goal-header">
                         <div class="goal-main">
-                            <h5 class="goal-title">{goal.title}</h5>
-                            <p class="goal-description">{goal.description}</p>
+                            <h5 class="goal-title">{goal.goal}</h5>
+                            {#if goal.description}
+                                <p class="goal-description">{goal.description}</p>
+                            {/if}
                         </div>
-                        
+
                         <div class="goal-badges">
                             {#if goal.priority}
                                 <span class="priority-badge {getPriorityClass(goal.priority)}">
@@ -112,29 +117,22 @@
                             {/if}
                         </div>
                     </div>
-                    
+
                     <div class="goal-details">
-                        {#if goal.targetOutcome}
-                            <div class="detail-item">
-                                <span class="label">{$t('report.target-outcome')}:</span>
-                                <span class="value">{goal.targetOutcome}</span>
-                            </div>
-                        {/if}
-                        
                         {#if goal.measurableOutcome}
                             <div class="detail-item">
                                 <span class="label">{$t('report.measurable-outcome')}:</span>
                                 <span class="value">{goal.measurableOutcome}</span>
                             </div>
                         {/if}
-                        
-                        {#if goal.timeframe}
+
+                        {#if goal.timeline}
                             <div class="detail-item">
                                 <span class="label">{$t('report.timeframe')}:</span>
-                                <span class="value">{formatDuration(goal.timeframe)}</span>
+                                <span class="value">{formatDuration(goal.timeline)}</span>
                             </div>
                         {/if}
-                        
+
                         {#if goal.achievabilityScore}
                             <div class="detail-item">
                                 <span class="label">{$t('report.achievability-score')}:</span>
@@ -584,7 +582,7 @@
 
 <style>
     .goal-item {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .goal-header {
@@ -630,7 +628,7 @@
     
     .achievability-score {
         font-weight: 600;
-        color: var(--color-success-dark);
+        color: var(--color-positive-dark);
     }
     
     .therapy-item {
@@ -692,7 +690,7 @@
     }
     
     .medication-item {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .medication-header {
@@ -803,13 +801,13 @@
         gap: 0.75rem;
         align-items: center;
         padding: 0.5rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.25rem;
     }
     
     .milestone-date {
         font-weight: 600;
-        color: var(--color-primary);
+        color: var(--color-interactivity);
         min-width: 100px;
     }
     
@@ -830,7 +828,7 @@
         gap: 0.5rem;
         margin-bottom: 0.75rem;
         padding: 0.5rem 1rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.5rem;
     }
     
@@ -843,13 +841,13 @@
     }
     
     .prognosis-excellent {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .prognosis-good {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .prognosis-fair {
@@ -858,12 +856,12 @@
     }
     
     .prognosis-poor {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .prognosis-grave {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
         color: white;
     }
     
@@ -908,7 +906,7 @@
     }
     
     .complication-item {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .complication-header {
@@ -947,7 +945,7 @@
     }
     
     .alternative-item {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .alternative-header {
@@ -965,8 +963,8 @@
     }
     
     .effectiveness-badge {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
         padding: 0.25rem 0.5rem;
         border-radius: 0.25rem;
         font-size: 0.8rem;
@@ -1020,13 +1018,13 @@
     }
     
     .priority-immediate {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
         color: white;
     }
     
     .priority-urgent {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .priority-routine {
@@ -1035,8 +1033,8 @@
     }
     
     .priority-optional {
-        background-color: var(--color-secondary-light);
-        color: var(--color-secondary-dark);
+        background-color: var(--color-gray-600);
+        color: var(--color-gray-900);
     }
     
     .status-planned {
@@ -1045,18 +1043,18 @@
     }
     
     .status-active {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .status-completed {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .status-discontinued {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .status-on-hold {
@@ -1065,8 +1063,8 @@
     }
     
     .complexity-low {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .complexity-moderate {
@@ -1075,12 +1073,12 @@
     }
     
     .complexity-high {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .complexity-extreme {
-        background-color: var(--color-danger);
+        background-color: var(--color-negative);
         color: white;
     }
     
@@ -1105,12 +1103,12 @@
     
     /* Priority-based panel coloring */
     .priority-immediate {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
         border-left-width: 4px;
     }
     
     .priority-urgent {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .priority-routine {
@@ -1118,7 +1116,7 @@
     }
     
     .priority-optional {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     /* Status-based panel coloring */
@@ -1127,15 +1125,15 @@
     }
     
     .status-active {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .status-completed {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .status-discontinued {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .status-on-hold {

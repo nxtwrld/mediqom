@@ -3,6 +3,7 @@
     import { weekSchedule, loadMedicationContent } from '$lib/medications/store';
     import type { MedicationOccurrence } from '$lib/medications/types';
     import { loadProfileDocuments } from '$lib/profiles';
+    import { untrack } from 'svelte';
 
     // Map JS day index (0=Sun..6=Sat) to translation key suffix
     const dayKeyMap: Record<number, string> = { 0: 'su', 1: 'mo', 2: 'tu', 3: 'we', 4: 'th', 5: 'fr', 6: 'sa' };
@@ -13,7 +14,7 @@
 
     let { profileId }: Props = $props();
 
-    const occurrences = weekSchedule(profileId);
+    const occurrences = untrack(() => weekSchedule(profileId));
 
     $effect(() => {
         loadProfileDocuments(profileId).then(() => {
@@ -206,7 +207,7 @@
     svg.time-of-day {
         width: 1.5rem;
         height: 1.5rem;
-        fill: var(--color-primary);
+        fill: var(--color-interactivity);
         flex-shrink: 0;
     }
     .segment-label {
@@ -290,12 +291,12 @@
         font-weight: 600;
         text-align: center;
         border-radius: 1rem;
-        background-color: var(--color-primary);
+        background-color: var(--color-interactivity);
         color: var(--color-white);
     }
 
     /* Mobile */
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
         .weekdays {
             flex-direction: column;
             min-height: auto;

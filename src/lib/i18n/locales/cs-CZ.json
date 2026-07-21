@@ -453,7 +453,24 @@
       "beta-review-message": "Vaše beta žádost se posuzuje. Jakmile bude schválena, pošleme vám e-mail do 48 hodin.",
       "beta-check-spam": "Pokud e-mail nevidíte, zkontrolujte složku spam.",
       "beta-status": "Stav žádosti",
-      "beta-not-approved": "Vaše beta žádost nebyla schválena. Pokud si myslíte, že jde o chybu, kontaktujte nás na"
+      "beta-not-approved": "Vaše beta žádost nebyla schválena. Pokud si myslíte, že jde o chybu, kontaktujte nás na",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Soubory",
@@ -629,7 +646,8 @@
         "profile": "Profil",
         "privacy": "Soukromí",
         "subscription": "Předplatné",
-        "about": "O aplikaci"
+        "about": "O aplikaci",
+        "invites": ""
       },
       "general": {
         "title": "Obecné nastavení",
@@ -744,6 +762,38 @@
           "licenses": "Licence open source",
           "description": "Mediqom je postaven na open source technologiích a příspěvcích komunity. Děkujeme všem přispěvatelům a správcům."
         }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
+        }
       }
     },
     "onboarding": {
@@ -754,10 +804,13 @@
       "email": "E-mail",
       "enable-total-privacy": "Povolit úplné soukromí",
       "full-name": "Celé jméno",
+      "feet": "",
       "healh-profile": "Zdravotní profil",
+      "health-subtitle": "",
       "hide-passphrase": "Skrýt přístupovou frázi.",
       "hit-save-to-start": "Stiskněte ULOŽIT a začněte!",
       "i-am-not-sure": "Nejsem si jistý/á",
+      "inches": "",
       "i-stored-or-remembered-the-passphrase-myself": "Uložil/a jsem si přístupovou frázi nebo si ji pamatuji.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Pokud tuto přístupovou frázi ztratíte, nelze ji nikdy obnovit a všechna vaše data budou ztracena. Doporučujeme ji bezpečně uložit ve správci hesel.",
       "language": "Jazyk",
@@ -3977,5 +4030,89 @@
       "title": "Vaše data, vaše kontrola",
       "description": "Šifrování od začátku do konce zajišťuje, že k vašim zdravotním datům máte přístup pouze vy. Používáme kryptografii s veřejným klíčem, takže ani naše servery nikdy nevidí vaše nešifrované záznamy."
     }
+  },
+  "contacts": {
+    "nav": "Moji lékaři",
+    "title": "Moji lékaři",
+    "search-placeholder": "Hledejte podle jména, specializace nebo instituce...",
+    "empty": "Zatím žádné kontakty na lékaře. Kontakty budou automaticky extrahovány z vašich importovaných dokumentů.",
+    "add-to-phone": "Přidat do telefonu",
+    "update-on-phone": "Aktualizovat v telefonu",
+    "synced-to-device": "Synchronizováno se zařízením",
+    "delete": "Smazat",
+    "call": "Zavolat",
+    "email": "Odeslat e-mail",
+    "map": "Zobrazit na mapě",
+    "license": "Licence",
+    "confirm-delete": "Odebrat {name} z vašeho adresáře lékařů?",
+    "save-to-directory": "Uložit do Mojich lékařů",
+    "saved": "Uloženo",
+    "add": "Přidat lékaře",
+    "form": {
+      "info": "Informace o lékaři",
+      "name": "Celé jméno",
+      "role": "Role",
+      "specialty": "Specializace",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "license": "Číslo licence",
+      "institution": "Instituce",
+      "institution-name": "Název instituce",
+      "department": "Oddělení",
+      "address": "Adresa",
+      "role-primary": "Praktický lékař",
+      "role-specialist": "Specialista",
+      "role-surgeon": "Chirurg",
+      "role-dentist": "Zubní lékař",
+      "role-therapist": "Terapeut",
+      "role-radiologist": "Radiolog",
+      "role-pharmacist": "Lékárník",
+      "role-other": "Jiné",
+      "add-details": "Přidat podrobnosti",
+      "add-institution": "Přidat instituci",
+      "change": "Změnit"
+    }
+  },
+  "appointments": {
+    "nav": "Termíny",
+    "title": "Termíny",
+    "empty": "Zatím žádné termíny. Termíny budou automaticky extrahovány z vašich importovaných dokumentů.",
+    "needs-action": "Vyžaduje vaši pozornost",
+    "upcoming": "Nadcházející",
+    "past": "Minulé",
+    "set-date": "Nastavit datum",
+    "dismiss": "Zrušit",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "export": "Exportovat",
+    "export-all": "Exportovat vše",
+    "synced": "Synchronizováno s kalendářem",
+    "add": "Přidat termín",
+    "form": {
+      "info": "Podrobnosti termínu",
+      "title": "Název",
+      "title-placeholder": "např. Kontrolní vyšetření",
+      "type": "Typ",
+      "priority": "Priorita",
+      "date": "Datum",
+      "duration": "Délka (min)",
+      "provider": "Poskytovatel",
+      "type-office-visit": "Ambulantní návštěva",
+      "type-lab-work": "Laboratorní vyšetření",
+      "type-imaging": "Zobrazovací vyšetření",
+      "type-procedure": "Zákrok",
+      "type-referral": "Doporučení",
+      "type-review": "Kontrola",
+      "type-other": "Jiné",
+      "priority-immediate": "Okamžitě",
+      "priority-urgent": "Urgentní",
+      "priority-routine": "Běžný",
+      "priority-as-needed": "Dle potřeby"
+    },
+    "select-doctor": "Vyberte lékaře...",
+    "or-type-name": "Nebo zadejte jméno",
+    "link-doctor": "Propojit s lékařem",
+    "save-as-doctor": "Uložit jako lékaře",
+    "linked-to": "Propojeno s {name}"
   }
 }

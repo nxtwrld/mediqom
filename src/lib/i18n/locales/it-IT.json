@@ -446,7 +446,24 @@
       "beta-review-message": "La sua richiesta di accesso beta è in fase di revisione. Le invieremo una email entro 48 ore una volta approvata.",
       "beta-check-spam": "Controlli la cartella spam se non vede la nostra email.",
       "beta-status": "Stato della richiesta",
-      "beta-not-approved": "La sua richiesta di accesso beta non è stata approvata. Se ritiene che si tratti di un errore, ci contatti all'indirizzo"
+      "beta-not-approved": "La sua richiesta di accesso beta non è stata approvata. Se ritiene che si tratti di un errore, ci contatti all'indirizzo",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "File",
@@ -623,7 +640,8 @@
         "profile": "Profilo",
         "privacy": "Privacy",
         "subscription": "Abbonamento",
-        "about": "Informazioni"
+        "about": "Informazioni",
+        "invites": ""
       },
       "general": {
         "title": "Impostazioni generali",
@@ -731,6 +749,38 @@
           "licenses": "Licenze open source",
           "description": "Mediqom è costruito con tecnologie open source e contributi della community. Grazie a tutti i contributori e i maintainer."
         }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
+        }
       }
     },
     "onboarding": {
@@ -741,10 +791,13 @@
       "email": "Email",
       "enable-total-privacy": "Attiva privacy totale",
       "full-name": "Nome completo",
+      "feet": "",
       "healh-profile": "Profilo sanitario",
+      "health-subtitle": "",
       "hide-passphrase": "Nascondi passphrase.",
       "hit-save-to-start": "Premi SALVA per iniziare!",
       "i-am-not-sure": "Non sono sicuro",
+      "inches": "",
       "i-stored-or-remembered-the-passphrase-myself": "Ho salvato o memorizzato la passphrase.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Se perde questa passphrase non potrà mai essere recuperata e tutti i suoi dati andranno persi. Si consiglia di conservarla in modo sicuro in un password manager",
       "language": "Lingua",
@@ -3884,5 +3937,89 @@
       "no-data": "Nessun dato sanitario disponibile",
       "no-signals": "Nessun segnale selezionato"
     }
+  },
+  "contacts": {
+    "nav": "I miei medici",
+    "title": "I miei medici",
+    "search-placeholder": "Cerca per nome, specialità o struttura...",
+    "empty": "Nessun contatto medico. I contatti verranno estratti automaticamente dai documenti importati.",
+    "add-to-phone": "Aggiungi al telefono",
+    "update-on-phone": "Aggiorna sul telefono",
+    "synced-to-device": "Sincronizzato con il dispositivo",
+    "delete": "Elimina",
+    "call": "Chiama",
+    "email": "Invia email",
+    "map": "Visualizza sulla mappa",
+    "license": "Numero di iscrizione all'albo",
+    "confirm-delete": "Rimuovere {name} dalla rubrica dei medici?",
+    "save-to-directory": "Salva nei miei medici",
+    "saved": "Salvato",
+    "add": "Aggiungi medico",
+    "form": {
+      "info": "Informazioni sul medico",
+      "name": "Nome completo",
+      "role": "Ruolo",
+      "specialty": "Specializzazione",
+      "phone": "Telefono",
+      "email": "Email",
+      "license": "Numero di iscrizione all'albo",
+      "institution": "Struttura sanitaria",
+      "institution-name": "Nome della struttura",
+      "department": "Reparto",
+      "address": "Indirizzo",
+      "role-primary": "Medico di base",
+      "role-specialist": "Specialista",
+      "role-surgeon": "Chirurgo",
+      "role-dentist": "Dentista",
+      "role-therapist": "Terapista",
+      "role-radiologist": "Radiologo",
+      "role-pharmacist": "Farmacista",
+      "role-other": "Altro",
+      "add-details": "Aggiungi dettagli",
+      "add-institution": "Aggiungi istituzione",
+      "change": "Cambia"
+    }
+  },
+  "appointments": {
+    "nav": "Appuntamenti",
+    "title": "Appuntamenti",
+    "empty": "Nessun appuntamento. Gli appuntamenti verranno estratti automaticamente dai documenti importati.",
+    "needs-action": "Richiede la tua attenzione",
+    "upcoming": "Prossimi",
+    "past": "Passati",
+    "set-date": "Imposta data",
+    "dismiss": "Ignora",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "export": "Esporta",
+    "export-all": "Esporta tutto",
+    "synced": "Sincronizzato con il calendario",
+    "add": "Aggiungi appuntamento",
+    "form": {
+      "info": "Dettagli appuntamento",
+      "title": "Titolo",
+      "title-placeholder": "es. Visita di controllo",
+      "type": "Tipo",
+      "priority": "Priorità",
+      "date": "Data",
+      "duration": "Durata (min)",
+      "provider": "Medico",
+      "type-office-visit": "Visita ambulatoriale",
+      "type-lab-work": "Analisi di laboratorio",
+      "type-imaging": "Diagnostica per immagini",
+      "type-procedure": "Procedura",
+      "type-referral": "Impegnativa",
+      "type-review": "Revisione",
+      "type-other": "Altro",
+      "priority-immediate": "Immediata",
+      "priority-urgent": "Urgente",
+      "priority-routine": "Ordinaria",
+      "priority-as-needed": "Al bisogno"
+    },
+    "select-doctor": "Seleziona un medico...",
+    "or-type-name": "Oppure digita un nome",
+    "link-doctor": "Collega al medico",
+    "save-as-doctor": "Salva come medico",
+    "linked-to": "Collegato a {name}"
   }
 }

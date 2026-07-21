@@ -424,7 +424,7 @@
   }
 
   /* Responsive Design */
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .stages-container {
       flex-direction: column;
       gap: 12px;

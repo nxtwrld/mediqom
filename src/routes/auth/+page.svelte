@@ -2,9 +2,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms'
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import type { ActionData, SubmitFunction } from './$types.js'
 	import { isNativePlatform } from '$lib/config/platform';
 	import { signInWithMagicLink } from '$lib/capacitor/auth';
+	import { apiFetch } from '$lib/api/client';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -22,6 +24,86 @@
 
 	// Check if running on mobile platform
 	const isMobile = browser && isNativePlatform();
+
+	// Invite code redemption (new-user registration — the only self-service
+	// path that can create an account)
+	let inviteCode: string = $state($page.url.searchParams.get('invite') ?? '');
+	let inviteEmail: string = $state('');
+	let inviteLoading: boolean = $state(false);
+	let inviteResult: { type: 'success' | 'error'; text: string } | null = $state(null);
+
+	async function submitInvite(event: Event) {
+		event.preventDefault();
+		if (inviteLoading) return;
+
+		if (!inviteCode.trim()) {
+			inviteResult = { type: 'error', text: $t('app.auth.invite.code-required') };
+			return;
+		}
+		if (!inviteEmail || !inviteEmail.includes('@')) {
+			inviteResult = { type: 'error', text: $t('app.auth.invalid-email') };
+			return;
+		}
+
+		inviteLoading = true;
+		inviteResult = null;
+
+		try {
+			const response = await apiFetch('/v1/invite/redeem', {
+				method: 'POST',
+				body: JSON.stringify({ code: inviteCode.trim(), email: inviteEmail })
+			});
+			const result = await response.json();
+
+			if (response.ok && result.success) {
+				inviteResult = { type: 'success', text: result.message };
+			} else {
+				inviteResult = { type: 'error', text: result.message || $t('app.auth.unexpected-error') };
+			}
+		} catch (err) {
+			console.error('[Auth Form] Invite redeem error:', err);
+			inviteResult = { type: 'error', text: $t('app.auth.unexpected-error') };
+		} finally {
+			inviteLoading = false;
+		}
+	}
+
+	// Waiting list (no invite code yet)
+	let waitlistEmail: string = $state('');
+	let waitlistLoading: boolean = $state(false);
+	let waitlistResult: { type: 'success' | 'error'; text: string } | null = $state(null);
+
+	async function submitWaitlist(event: Event) {
+		event.preventDefault();
+		if (waitlistLoading) return;
+
+		if (!waitlistEmail || !waitlistEmail.includes('@')) {
+			waitlistResult = { type: 'error', text: $t('app.auth.invalid-email') };
+			return;
+		}
+
+		waitlistLoading = true;
+		waitlistResult = null;
+
+		try {
+			const response = await apiFetch('/v1/waitlist/join', {
+				method: 'POST',
+				body: JSON.stringify({ email: waitlistEmail })
+			});
+			const result = await response.json();
+
+			if (response.ok && result.success) {
+				waitlistResult = { type: 'success', text: $t('app.auth.waitlist.joined') };
+			} else {
+				waitlistResult = { type: 'error', text: result.message || $t('app.auth.unexpected-error') };
+			}
+		} catch (err) {
+			console.error('[Auth Form] Waitlist join error:', err);
+			waitlistResult = { type: 'error', text: $t('app.auth.unexpected-error') };
+		} finally {
+			waitlistLoading = false;
+		}
+	}
 
 	/**
 	 * Handle mobile form submission (client-side auth)
@@ -182,28 +264,10 @@
 			{#if form?.message !== undefined}
 			<div class="{form?.success ? '' : 'fail'}">
 				<p class="form-instructions -error">{form?.message}</p>
-				{#if form?.message?.includes('Beta access required')}
-					<div class="beta-notice">
-						<h3>{$t('app.auth.beta-need-access')}</h3>
-						<p>{$t('app.auth.beta-in-beta')}</p>
-						<ol>
-							<li>{$t('app.auth.beta-step-apply')} <a href="/www/en/beta">{$t('app.auth.beta-page')}</a></li>
-							<li>{$t('app.auth.beta-step-wait')}</li>
-							<li>{$t('app.auth.beta-step-check')}</li>
-						</ol>
-					</div>
-				{:else if form?.message?.includes('application is under review')}
-					<div class="beta-notice">
-						<h3>{$t('app.auth.beta-under-review')}</h3>
-						<p>{$t('app.auth.beta-review-message')}</p>
-						<p>{$t('app.auth.beta-check-spam')}</p>
-					</div>
-				{:else if form?.message?.includes('application was not approved')}
-					<div class="beta-notice">
-						<h3>{$t('app.auth.beta-status')}</h3>
-						<p>{$t('app.auth.beta-not-approved')} <a href="mailto:beta@mediqom.com">beta@mediqom.com</a>.</p>
-					</div>
-				{/if}
+				<div class="beta-notice">
+					<h3>{$t('app.auth.new-here-title')}</h3>
+					<p>{$t('app.auth.new-here-message')}</p>
+				</div>
 			</div>
 			{/if}
 
@@ -235,6 +299,82 @@
 		{/if}
 	</form>
 {/if}
+
+<div class="auth-secondary">
+	<div class="divider"><span>{$t('app.auth.or')}</span></div>
+
+	<form class="flex -column form modal" onsubmit={submitInvite}>
+		<h2 class="h2">{$t('app.auth.invite.title')}</h2>
+		<p class="form-instructions">{$t('app.auth.invite.instruction')}</p>
+
+		{#if inviteResult}
+		<p class="form-instructions {inviteResult.type === 'success' ? '-success' : '-error'}">{inviteResult.text}</p>
+		{/if}
+
+		{#if !inviteResult || inviteResult.type !== 'success'}
+		<div class="input">
+			<label for="invite-code">{$t('app.auth.invite.code-label')}</label>
+			<input
+				id="invite-code"
+				name="invite-code"
+				class="inputField"
+				type="text"
+				placeholder={$t('app.auth.invite.code-placeholder')}
+				bind:value={inviteCode}
+				disabled={inviteLoading}
+			/>
+		</div>
+		<div class="input">
+			<label for="invite-email">{$t('app.auth.email-label')}</label>
+			<input
+				id="invite-email"
+				name="invite-email"
+				class="inputField"
+				type="email"
+				placeholder={$t('app.auth.email-placeholder')}
+				bind:value={inviteEmail}
+				disabled={inviteLoading}
+			/>
+		</div>
+		<div class="form-actions">
+			<button class="button -primary -block" disabled={inviteLoading} type="submit">
+				{ inviteLoading ? $t('app.auth.sending') : $t('app.auth.invite.submit') }
+			</button>
+		</div>
+		{/if}
+	</form>
+
+	<div class="divider"><span>{$t('app.auth.or')}</span></div>
+
+	<form class="flex -column form modal" onsubmit={submitWaitlist}>
+		<h2 class="h2">{$t('app.auth.waitlist.title')}</h2>
+		<p class="form-instructions">{$t('app.auth.waitlist.instruction')}</p>
+
+		{#if waitlistResult}
+		<p class="form-instructions {waitlistResult.type === 'success' ? '-success' : '-error'}">{waitlistResult.text}</p>
+		{/if}
+
+		{#if !waitlistResult || waitlistResult.type !== 'success'}
+		<div class="input">
+			<label for="waitlist-email">{$t('app.auth.email-label')}</label>
+			<input
+				id="waitlist-email"
+				name="waitlist-email"
+				class="inputField"
+				type="email"
+				placeholder={$t('app.auth.email-placeholder')}
+				bind:value={waitlistEmail}
+				disabled={waitlistLoading}
+			/>
+		</div>
+		<div class="form-actions">
+			<button class="button -block" disabled={waitlistLoading} type="submit">
+				{ waitlistLoading ? $t('app.auth.sending') : $t('app.auth.waitlist.submit') }
+			</button>
+		</div>
+		{/if}
+	</form>
+</div>
 </div>
 
 
@@ -247,7 +387,32 @@
 		padding-right: var(--safe-area-right);
 		min-height: 100%;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
+		justify-content: center;
+	}
+
+	.auth-secondary {
+		width: 100%;
+	}
+
+	.divider {
+		display: flex;
+		align-items: center;
+		text-align: center;
+		color: var(--color-text-secondary);
+		margin: var(--ui-pad-large) 0;
+	}
+
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1;
+		border-top: 1px solid var(--color-border);
+	}
+
+	.divider span {
+		padding: 0 var(--ui-pad-medium);
 	}
 
 	.logo {
@@ -273,25 +438,6 @@
 	.beta-notice p {
 		margin-bottom: 0.5rem;
 		color: #6c757d;
-	}
-
-	.beta-notice ol {
-		margin: 0.5rem 0;
-		padding-left: 1.5rem;
-		color: #6c757d;
-	}
-
-	.beta-notice li {
-		margin-bottom: 0.25rem;
-	}
-
-	.beta-notice a {
-		color: #007bff;
-		text-decoration: none;
-	}
-
-	.beta-notice a:hover {
-		text-decoration: underline;
 	}
 
 

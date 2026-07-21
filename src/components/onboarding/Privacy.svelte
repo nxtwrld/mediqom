@@ -673,13 +673,13 @@
 
     .mode-option:hover,
     .method-option:hover {
-        border-color: var(--color-primary);
+        border-color: var(--color-interactivity);
     }
 
     .mode-option.selected,
     .method-option.selected {
-        border-color: var(--color-primary);
-        background-color: var(--color-primary-light, rgba(0, 122, 255, 0.05));
+        border-color: var(--color-interactivity);
+        background-color: var(--color-interactivity-light, rgba(0, 122, 255, 0.05));
     }
 
     .method-option.-disabled {
@@ -731,8 +731,8 @@
     }
 
     .badge.-recommended {
-        background-color: var(--color-success-light, #e6f4ea);
-        color: var(--color-success, #1e7e34);
+        background-color: var(--color-positive-light, #e6f4ea);
+        color: var(--color-positive, #1e7e34);
     }
 
     .badge.-security {
@@ -755,7 +755,7 @@
     .setup-illustration .icon.-large {
         width: 6rem;
         height: 6rem;
-        color: var(--color-primary);
+        color: var(--color-interactivity);
     }
 
     .strength-indicator {
@@ -770,7 +770,7 @@
     }
 
     .recovery-key-box {
-        background-color: var(--color-bg-secondary, #f5f5f5);
+        background-color: var(--color-surface, #f5f5f5);
         border: 1px solid var(--color-border);
         border-radius: 0.5rem;
         padding: 1rem;
@@ -815,7 +815,7 @@
     .success-icon svg {
         width: 4rem;
         height: 4rem;
-        color: var(--color-success, #1e7e34);
+        color: var(--color-positive, #1e7e34);
     }
 
     .flex.-gap {

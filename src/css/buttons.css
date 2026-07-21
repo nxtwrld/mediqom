@@ -2,7 +2,7 @@
   --radius: var(--radius-8);
   --color: var(--button-color);
   --color-hover: var(--color-gray-400);
-  --color-text: var(--button-text-color);
+  --color-text-primary: var(--button-text-color);
   --color-text-hover: var(--color-black);
   --color-border: var(--button-border-color);
   --color-border-hover: var(--button-border-color-hover);
@@ -11,13 +11,13 @@
   align-items: center;
   padding: 0.5rem 1rem;
   background-color: var(--color);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-weight: 700;
   border-width: 1px;
   border-style: solid;
   /* transform: scale(1.01); */
   border-color: var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-16);
   box-shadow: 0 0.3rem 0.2rem -0.2rem rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   cursor: pointer;
@@ -34,7 +34,7 @@
   --color-hover: var(--button-color-primary);
   --color-border: var(--button-border-color-primary);
   --color-border-hover: var(--button-border-color-primary-hover);
-  --color-text: var(--button-text-color-primary);
+  --color-text-primary: var(--button-text-color-primary);
   --color-text-hover: var(--button-text-color-primary);
   box-shadow: 0 0.3rem 0.2rem -0.2rem rgba(0, 0, 0, 0.3);
 }
@@ -43,7 +43,7 @@
   --color-hover: var(--color-negative);
   --color-border: var(--color-negative);
   --color-border-hover: var(--color-negative);
-  --color-text: var(--color-negative);
+  --color-text-primary: var(--color-negative);
   --color-text-hover: var(--color-negative-text);
 }
 
@@ -75,7 +75,7 @@
   --color-hover: var(--color-positive, #29cc97);
   --color-border: var(--color-positive, #29cc97);
   --color-border-hover: var(--color-positive, #29cc97);
-  --color-text: var(--color-positive-text, #ffffff);
+  --color-text-primary: var(--color-positive-text, #ffffff);
   --color-text-hover: var(--color-positive-text, #ffffff);
 }
 
@@ -84,7 +84,7 @@
   --color-hover: var(--color-negative, #fb104a);
   --color-border: var(--color-negative, #fb104a);
   --color-border-hover: var(--color-negative, #fb104a);
-  --color-text: var(--color-negative-text, #ffffff);
+  --color-text-primary: var(--color-negative-text, #ffffff);
   --color-text-hover: var(--color-negative-text, #ffffff);
 }
 
@@ -93,7 +93,7 @@
   --color-hover: var(--color-highlight, #a989ee);
   --color-border: var(--color-highlight, #a989ee);
   --color-border-hover: var(--color-highlight, #a989ee);
-  --color-text: var(--color-highlight-text, #ffffff);
+  --color-text-primary: var(--color-highlight-text, #ffffff);
   --color-text-hover: var(--color-highlight-text, #ffffff);
 }
 
@@ -102,17 +102,17 @@
   --color-hover: var(--color-positive, #16a34a);
   --color-border: var(--color-positive, #16a34a);
   --color-border-hover: var(--color-positive, #16a34a);
-  --color-text: var(--color-positive, #16a34a);
+  --color-text-primary: var(--color-positive, #16a34a);
   --color-text-hover: var(--color-positive-text, #ffffff);
 }
 
 .button.-no {
-  --color: var(--color-error-bg, #fee2e2);
-  --color-hover: var(--color-error, #dc2626);
-  --color-border: var(--color-error, #dc2626);
-  --color-border-hover: var(--color-error, #dc2626);
-  --color-text: var(--color-error, #dc2626);
-  --color-text-hover: var(--color-error-text, #ffffff);
+  --color: var(--color-negative-light, #fee2e2);
+  --color-hover: var(--color-negative, #dc2626);
+  --color-border: var(--color-negative, #dc2626);
+  --color-border-hover: var(--color-negative, #dc2626);
+  --color-text-primary: var(--color-negative, #dc2626);
+  --color-text-hover: var(--color-negative-text, #ffffff);
 }
 
 .button.-unknown {
@@ -120,7 +120,7 @@
   --color-hover: var(--color-gray-100, #f3f4f6);
   --color-border: var(--color-border, #e2e8f0);
   --color-border-hover: var(--color-text-secondary, #6b7280);
-  --color-text: var(--color-text-primary, #1f2937);
+  --color-text-primary: var(--color-text-primary, #1f2937);
   --color-text-hover: var(--color-text-primary, #1f2937);
 }
 
@@ -129,7 +129,7 @@
   --color-hover: var(--color-positive-bg, #dcfce7);
   --color-border: var(--color-positive, #16a34a);
   --color-border-hover: var(--color-positive, #16a34a);
-  --color-text: var(--color-positive, #16a34a);
+  --color-text-primary: var(--color-positive, #16a34a);
   --color-text-hover: var(--color-positive, #16a34a);
 }
 

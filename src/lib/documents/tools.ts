@@ -21,7 +21,10 @@ export function getByAnotherAuthor(document: Document): Profile | null {
   return getAuthor(document);
 }
 
-export function groupByTags(user_id: string | undefined = undefined): {
+export function groupByTags(
+  user_id: string | undefined = undefined,
+  options?: { namespace?: string; excludeNamespaced?: boolean },
+): {
   [key: string]: Document[];
 } {
   if (!user_id) user_id = get(profile).id;
@@ -32,6 +35,8 @@ export function groupByTags(user_id: string | undefined = undefined): {
   } = {};
   userDocuments.forEach((d) => {
     (d.metadata.tags || []).forEach((t) => {
+      if (options?.namespace && !t.startsWith(options.namespace + ':')) return;
+      if (options?.excludeNamespaced && t.includes(':')) return;
       if (!groups[t]) {
         groups[t] = [];
       }

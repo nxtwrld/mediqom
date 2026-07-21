@@ -8,6 +8,7 @@
     import { t } from '$lib/i18n';
     import { goto } from '$app/navigation';
     import { pendingJobs, activeJobs } from '$lib/import/job-store';
+    import { isFeatureEnabled } from '$lib/config/feature-flags';
 
     // ── Other UI state ──────────────────────────────────────────────────────
     let toolsPopupOpen = $state(false);
@@ -70,6 +71,22 @@
             </a>
             <a href="/med/p/{$profile.id}" aria-label={$profile.fullName} class="profile-name">{$profile.fullName}</a>
 
+            {#if isFeatureEnabled('CARE_PLAN')}
+            <a
+                href="/med/p/{$profile.id}/care-plan"
+                class:-active={isActive(`/med/p/${$profile.id}/care-plan`)}
+            >
+                {$t('careplan.nav')}
+            </a>
+            {/if}
+            {#if isFeatureEnabled('MEDICATIONS')}
+            <a
+                href="/med/p/{$profile.id}/medications"
+                class:-active={isActive(`/med/p/${$profile.id}/medications`)}
+            >
+                {$t('medications.title')}
+            </a>
+            {/if}
             <a
                 href="/med/p/{$profile.id}/documents"
                 class:-active={isActive(`/med/p/${$profile.id}/documents`)}
@@ -77,10 +94,16 @@
                 {$t('app.nav.documents')}
             </a>
             <a
-                href="/med/p/{$profile.id}/medications"
-                class:-active={isActive(`/med/p/${$profile.id}/medications`)}
+                href="/med/p/{$profile.id}/contacts"
+                class:-active={isActive(`/med/p/${$profile.id}/contacts`)}
             >
-                {$t('medications.title')}
+                {$t('contacts.nav')}
+            </a>
+            <a
+                href="/med/p/{$profile.id}/appointments"
+                class:-active={isActive(`/med/p/${$profile.id}/appointments`)}
+            >
+                {$t('appointments.nav')}
             </a>
         {:else}
             <div class="profile-spacer"></div>

@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { chatStore, chatActions, isOpen, messages, isLoading } from '$lib/chat/store';
   import { chatManager } from '$lib/chat/chat-manager';
   import type { ChatMessage, SourceCitation } from '$lib/chat/types.d';
   import ui from '$lib/ui';
   import { t } from '$lib/i18n';
+  import { keyboardHeight } from '$lib/capacitor/keyboard-store';
+  import { isFeatureEnabled } from '$lib/config/feature-flags';
   import ContextPrompt from './ContextPrompt.svelte';
   import ChatWidget from './widgets/ChatWidget.svelte';
   import Markdown from '$components/ui/Markdown.svelte';
@@ -53,6 +55,7 @@
   let messageInput = $state('');
   let disclaimerExpanded = $state(false);
   let messagesContainer = $state<HTMLElement>();
+  let textareaRef: HTMLTextAreaElement | undefined = $state();
   let sidebarWidth = $state(400);
   let isResizing = $state(false);
   
@@ -130,6 +133,7 @@
       // Re-add message to input on error
       messageInput = message;
     }
+    textareaRef?.focus();
   }
 
   // Handle key press in input
@@ -247,15 +251,29 @@
       }
     }
   });
+
+  // Autofocus textarea when chat opens
+  $effect(() => {
+    if (chatIsOpen) {
+      tick().then(() => textareaRef?.focus());
+    }
+  });
+
+  // Scroll to bottom when keyboard rises so the latest message stays in view
+  $effect(() => {
+    if ($keyboardHeight > 0) {
+      setTimeout(() => scrollToBottom(), 50);
+    }
+  });
 </script>
 
 <!-- Chat Toggle Button removed - now in Header -->
 
 <!-- Chat Sidebar -->
 {#if chatIsOpen}
-  <div 
+  <div
     class="chat-sidebar"
-    style="width: {sidebarWidth}px"
+    style="width: {sidebarWidth}px; bottom: {$keyboardHeight}px"
   >
     <!-- Resize Handle -->
     <div
@@ -330,6 +348,20 @@
                     onInteraction={(interaction) => chatManager.handleWidgetInteraction(interaction)}
                   />
                 {/each}
+              </div>
+            {/if}
+
+            <!-- Care Plan suggested-action footer (build row 19) -->
+            {#if isFeatureEnabled('CARE_PLAN') && message.metadata?.suggestedAction}
+              <div class="suggested-action">
+                <span class="sa-label">{message.metadata.suggestedAction.label}</span>
+                {#if message.metadata.suggestedActionDone}
+                  <span class="sa-done">{$t('careplan.suggested-action.added')}</span>
+                {:else}
+                  <button class="button -small -primary" onclick={() => chatManager.acceptSuggestedAction(message.id)}>
+                    {$t('careplan.suggested-action.add')}
+                  </button>
+                {/if}
               </div>
             {/if}
 
@@ -438,28 +470,38 @@
         </div>
       {/if}
 
-      <!-- AI Disclaimer -->
-      <div class="ai-disclaimer">
-        <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}</p>
-        {#if disclaimerExpanded}
-          <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
-        {/if}
-        <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
-          {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
-        </button>
-      </div>
     </div>
 
     <!-- Input Area -->
     <div class="input-area">
+    
       <div class="input-container">
+      <div>
+        <!-- AI Disclaimer -->
+        <div class="ai-disclaimer">
+          <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}
+
+            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
+              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
+            </button>
+          </p>
+          {#if disclaimerExpanded}
+            <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
+            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
+              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
+            </button>
+          {/if}
+    
+        </div>
         <textarea
+          bind:this={textareaRef}
           bind:value={messageInput}
           onkeydown={handleKeyPress}
           placeholder={$t('app.chat.placeholders.ask')}
           disabled={chatIsLoading}
           rows="2"
         ></textarea>
+      </div>
         <button 
           class="send-btn"
           onclick={sendMessage}
@@ -635,6 +677,7 @@
     color: var(--color-black);
     border-bottom-left-radius: 4px;
     font-weight: 300;
+    width: 100%;
   }
 
   /* Add chat bubble tail for assistant messages */
@@ -728,6 +771,27 @@
     font-size: 11px;
     color: var(--color-gray-800);
     text-align: right;
+  }
+
+  .suggested-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--ui-radius-medium);
+    background: var(--color-surface);
+  }
+  .suggested-action .sa-label {
+    font-size: 13px;
+    color: var(--color-text-primary);
+  }
+  .suggested-action .sa-done {
+    font-size: 13px;
+    color: var(--color-positive);
+    font-weight: 600;
   }
 
   .anatomy-actions {
@@ -844,17 +908,18 @@
   }
 
   .ai-disclaimer {
-    margin-top: auto;
-    padding: 10px 12px;
+    padding: .5rem 1rem;
     background: var(--color-warning);
-    border-radius: var(--radius-8);
-    font-size: 11px;
+    border-top-left-radius: var(--radius-8);
+    border-top-right-radius: var(--radius-8);
+    font-size: .8rem;
     line-height: 1.4;
     color: var(--color-warning-text);
   }
 
   .ai-disclaimer-short {
     margin: 0;
+    font-weight: 600;
   }
 
   .ai-disclaimer-details {
@@ -885,9 +950,10 @@
   }
 
   .input-container textarea {
-    flex: 1;
+    width: 100%;
     border: 1px solid var(--color-gray-400);
-    border-radius: var(--radius-8);
+    border-bottom-left-radius: var(--radius-8);
+    border-bottom-right-radius: var(--radius-8);
     padding: 12px;
     resize: none;
     font-family: inherit;
@@ -941,13 +1007,17 @@
       width: 100vw !important;
       left: 0;
     }
-    
+
     .resize-handle {
       display: none;
     }
-    
+
     .message-content {
       max-width: 90%;
+    }
+
+    .input-container textarea {
+      font-size: 16px;
     }
   }
 </style>

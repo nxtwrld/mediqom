@@ -101,7 +101,7 @@
 	}
 
 	.cta-button.-primary {
-		background: var(--color-primary, #16d3dd);
+		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
 	}
 

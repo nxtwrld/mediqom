@@ -90,8 +90,8 @@
     }
     @media screen and (max-width: 768px) {
         .app {
-            margin-top: calc(var(--top-offset) + var(--header-height));
-            height: calc(100vh - var(--top-offset) - var(--header-height)  - var(--footer-height) - var(--bottom-offset));
+            margin-top: calc(var(--top-offset) + var(--toolbar-height));
+            height: calc(100vh - var(--top-offset) - var(--toolbar-height)  - var(--toolbar-height) - var(--bottom-offset));
         }
         .close {
             top: 0;

@@ -748,19 +748,19 @@
 	function getStateColor(state: AudioState): string {
 		switch (state) {
 			case AudioState.Ready:
-				return 'var(--color-text-muted)';
+				return 'var(--color-text-secondary)';
 			case AudioState.Listening:
-				return 'var(--color-success)';
+				return 'var(--color-positive)';
 			case AudioState.Speaking:
 				return 'var(--color-warning)';
 			case AudioState.Stopping:
 				return 'var(--color-warning)';
 			case AudioState.Stopped:
-				return 'var(--color-text-muted)';
+				return 'var(--color-text-secondary)';
 			case AudioState.Error:
-				return 'var(--color-error)';
+				return 'var(--color-negative)';
 			default:
-				return 'var(--color-text)';
+				return 'var(--color-text-primary)';
 		}
 	}
 
@@ -809,13 +809,13 @@
 			</div>
 			<div class="status-item">
 				<span class="label">Recording:</span>
-				<span class="value" style="color: {isRecording ? 'var(--color-success)' : 'var(--color-text-muted)'}">
+				<span class="value" style="color: {isRecording ? 'var(--color-positive)' : 'var(--color-text-secondary)'}">
 					{isRecording ? '● REC' : '○ Idle'}
 				</span>
 			</div>
 			<div class="status-item">
 				<span class="label">Transcribing:</span>
-				<span class="value" style="color: {isTranscribing ? 'var(--color-info)' : 'var(--color-text-muted)'}">
+				<span class="value" style="color: {isTranscribing ? 'var(--color-info)' : 'var(--color-text-secondary)'}">
 					{isTranscribing ? '⟳ Processing...' : '✓ Ready'}
 				</span>
 			</div>
@@ -1008,37 +1008,37 @@
 	.audio-test-page {
 		max-width: 1400px;
 		margin: 0 auto;
-		padding: var(--ui-space-4);
-		font-family: var(--font-family-base);
+		padding: var(--ui-pad-medium);
+		font-family: var(--font-face);
 	}
 
 	.page-header {
-		margin-bottom: var(--ui-space-4);
+		margin-bottom: var(--ui-pad-medium);
 	}
 
 	.page-header h1 {
 		font-size: var(--font-size-2xl);
-		margin: 0 0 var(--ui-space-3) 0;
-		color: var(--color-text);
+		margin: 0 0 0.75rem 0;
+		color: var(--color-text-primary);
 	}
 
 	.status-bar {
 		display: flex;
-		gap: var(--ui-space-4);
-		padding: var(--ui-space-3);
-		background: var(--color-bg-secondary);
-		border-radius: var(--ui-radius-md);
-		font-family: var(--font-family-mono);
+		gap: var(--ui-pad-medium);
+		padding: 0.75rem;
+		background: var(--color-surface);
+		border-radius: var(--ui-radius-medium);
+		font-family: var(--font-face-values);
 		font-size: var(--font-size-sm);
 	}
 
 	.status-item {
 		display: flex;
-		gap: var(--ui-space-2);
+		gap: var(--ui-pad-small);
 	}
 
 	.status-item .label {
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 		font-weight: 500;
 	}
 
@@ -1048,36 +1048,36 @@
 
 	.controls {
 		display: flex;
-		gap: var(--ui-space-3);
-		margin-bottom: var(--ui-space-4);
+		gap: 0.75rem;
+		margin-bottom: var(--ui-pad-medium);
 	}
 
 	.transcription-settings {
-		background: var(--color-bg-secondary);
-		border-radius: var(--ui-radius-lg);
-		padding: var(--ui-space-4);
-		margin-bottom: var(--ui-space-4);
+		background: var(--color-surface);
+		border-radius: var(--ui-radius-large);
+		padding: var(--ui-pad-medium);
+		margin-bottom: var(--ui-pad-medium);
 		border: 1px solid var(--color-border);
 	}
 
 	.transcription-settings h3 {
-		margin: 0 0 var(--ui-space-3) 0;
+		margin: 0 0 0.75rem 0;
 		font-size: var(--font-size-lg);
 		font-weight: 600;
-		color: var(--color-text);
+		color: var(--color-text-primary);
 	}
 
 	.settings-grid {
 		display: grid;
 		grid-template-columns: 200px 200px 1fr;
-		gap: var(--ui-space-4);
+		gap: var(--ui-pad-medium);
 		align-items: start;
 	}
 
 	.setting-group {
 		display: flex;
 		flex-direction: column;
-		gap: var(--ui-space-2);
+		gap: var(--ui-pad-small);
 	}
 
 	.setting-group.full-width {
@@ -1087,17 +1087,17 @@
 	.setting-group label {
 		font-size: var(--font-size-sm);
 		font-weight: 600;
-		color: var(--color-text);
+		color: var(--color-text-primary);
 	}
 
 	.setting-group select,
 	.setting-group textarea {
-		padding: var(--ui-space-2) var(--ui-space-3);
+		padding: var(--ui-pad-small) 0.75rem;
 		border: 1px solid var(--color-border);
-		border-radius: var(--ui-radius-sm);
-		background: var(--color-bg);
-		color: var(--color-text);
-		font-family: var(--font-family-base);
+		border-radius: var(--ui-radius-small);
+		background: var(--color-background);
+		color: var(--color-text-primary);
+		font-family: var(--font-face);
 		font-size: var(--font-size-sm);
 	}
 
@@ -1109,23 +1109,23 @@
 
 	.setting-group select:focus,
 	.setting-group textarea:focus {
-		outline: 2px solid var(--color-primary);
+		outline: 2px solid var(--color-interactivity);
 		outline-offset: 0;
 	}
 
 	.setting-group textarea {
 		resize: vertical;
 		min-height: 60px;
-		font-family: var(--font-family-mono);
+		font-family: var(--font-face-values);
 		line-height: 1.5;
 	}
 
 	.checkbox-label {
 		display: flex;
 		align-items: center;
-		gap: var(--ui-space-2);
+		gap: var(--ui-pad-small);
 		cursor: pointer;
-		padding: var(--ui-space-2) 0;
+		padding: var(--ui-pad-small) 0;
 	}
 
 	.checkbox-label input[type='checkbox'] {
@@ -1141,28 +1141,28 @@
 	.checkbox-label span {
 		font-size: var(--font-size-sm);
 		font-weight: 600;
-		color: var(--color-text);
+		color: var(--color-text-primary);
 	}
 
 	.prompt-active {
-		color: var(--color-success);
+		color: var(--color-positive);
 		font-weight: 600;
 	}
 
 	.prompt-default {
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 		font-style: italic;
 	}
 
 	.prompt-error {
-		color: var(--color-error);
+		color: var(--color-negative);
 		font-weight: 600;
 	}
 
 	.content-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: var(--ui-space-4);
+		gap: var(--ui-pad-medium);
 		height: calc(100vh - 300px);
 		min-height: 500px;
 	}
@@ -1171,8 +1171,8 @@
 	.transcript-panel {
 		display: flex;
 		flex-direction: column;
-		background: var(--color-bg-secondary);
-		border-radius: var(--ui-radius-lg);
+		background: var(--color-surface);
+		border-radius: var(--ui-radius-large);
 		overflow: hidden;
 		border: 1px solid var(--color-border);
 	}
@@ -1181,8 +1181,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: var(--ui-space-3) var(--ui-space-4);
-		background: var(--color-bg-tertiary);
+		padding: 0.75rem var(--ui-pad-medium);
+		background: var(--color-gray-400);
 		border-bottom: 1px solid var(--color-border);
 	}
 
@@ -1190,29 +1190,29 @@
 		margin: 0;
 		font-size: var(--font-size-lg);
 		font-weight: 600;
-		color: var(--color-text);
+		color: var(--color-text-primary);
 	}
 
 	.panel-header .count {
 		font-size: var(--font-size-sm);
-		color: var(--color-text-muted);
-		font-family: var(--font-family-mono);
+		color: var(--color-text-secondary);
+		font-family: var(--font-face-values);
 	}
 
 	.log-container,
 	.transcript-container {
 		flex: 1;
 		overflow-y: auto;
-		padding: var(--ui-space-3);
+		padding: 0.75rem;
 	}
 
 	.log-entry {
-		margin-bottom: var(--ui-space-3);
-		padding: var(--ui-space-3);
-		background: var(--color-bg);
-		border-radius: var(--ui-radius-sm);
+		margin-bottom: 0.75rem;
+		padding: 0.75rem;
+		background: var(--color-background);
+		border-radius: var(--ui-radius-small);
 		border-left: 3px solid;
-		font-family: var(--font-family-mono);
+		font-family: var(--font-face-values);
 		font-size: var(--font-size-sm);
 	}
 
@@ -1221,7 +1221,7 @@
 	}
 
 	.log-entry.log-success {
-		border-left-color: var(--color-success);
+		border-left-color: var(--color-positive);
 	}
 
 	.log-entry.log-warning {
@@ -1229,19 +1229,19 @@
 	}
 
 	.log-entry.log-error {
-		border-left-color: var(--color-error);
+		border-left-color: var(--color-negative);
 		background: rgba(239, 68, 68, 0.05);
 	}
 
 	.log-header {
 		display: flex;
-		gap: var(--ui-space-2);
-		margin-bottom: var(--ui-space-2);
+		gap: var(--ui-pad-small);
+		margin-bottom: var(--ui-pad-small);
 		font-size: var(--font-size-xs);
 	}
 
 	.log-time {
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 	}
 
 	.log-category {
@@ -1259,7 +1259,7 @@
 	}
 
 	.log-entry.log-success .log-type {
-		color: var(--color-success);
+		color: var(--color-positive);
 	}
 
 	.log-entry.log-warning .log-type {
@@ -1267,22 +1267,22 @@
 	}
 
 	.log-entry.log-error .log-type {
-		color: var(--color-error);
+		color: var(--color-negative);
 	}
 
 	.log-message {
-		color: var(--color-text);
+		color: var(--color-text-primary);
 		line-height: 1.5;
 	}
 
 	.log-data {
-		margin-top: var(--ui-space-2);
+		margin-top: var(--ui-pad-small);
 		font-size: var(--font-size-xs);
 	}
 
 	.log-data summary {
 		cursor: pointer;
-		color: var(--color-primary);
+		color: var(--color-interactivity);
 		user-select: none;
 	}
 
@@ -1291,24 +1291,24 @@
 	}
 
 	.log-data pre {
-		margin-top: var(--ui-space-2);
-		padding: var(--ui-space-2);
-		background: var(--color-bg-tertiary);
-		border-radius: var(--ui-radius-sm);
+		margin-top: var(--ui-pad-small);
+		padding: var(--ui-pad-small);
+		background: var(--color-gray-400);
+		border-radius: var(--ui-radius-small);
 		overflow-x: auto;
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 	}
 
 	.transcript-segment {
-		margin-bottom: var(--ui-space-4);
-		padding: var(--ui-space-3);
-		background: var(--color-bg);
-		border-radius: var(--ui-radius-sm);
-		border-left: 3px solid var(--color-primary);
+		margin-bottom: var(--ui-pad-medium);
+		padding: 0.75rem;
+		background: var(--color-background);
+		border-radius: var(--ui-radius-small);
+		border-left: 3px solid var(--color-interactivity);
 	}
 
 	.transcript-segment.segment-final {
-		border-left-color: var(--color-success);
+		border-left-color: var(--color-positive);
 	}
 
 	.transcript-segment.segment-partial {
@@ -1330,36 +1330,36 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: var(--ui-space-2);
-		margin-bottom: var(--ui-space-2);
-		font-family: var(--font-family-mono);
+		gap: var(--ui-pad-small);
+		margin-bottom: var(--ui-pad-small);
+		font-family: var(--font-face-values);
 		font-size: var(--font-size-xs);
 	}
 
 	.segment-time {
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 	}
 
 	.segment-source {
-		color: var(--color-primary);
+		color: var(--color-interactivity);
 		font-weight: 600;
 		text-transform: uppercase;
 	}
 
 	.audio-controls {
 		display: flex;
-		gap: var(--ui-space-1);
+		gap: var(--ui-pad-xsmall);
 		margin-left: auto;
 	}
 
 	.play-audio-btn,
 	.download-audio-btn {
-		padding: var(--ui-space-1) var(--ui-space-2);
+		padding: var(--ui-pad-xsmall) var(--ui-pad-small);
 		font-size: var(--font-size-xs);
-		background: var(--color-primary);
+		background: var(--color-interactivity);
 		color: white;
 		border: none;
-		border-radius: var(--ui-radius-sm);
+		border-radius: var(--ui-radius-small);
 		cursor: pointer;
 		transition: all 0.2s;
 		white-space: nowrap;
@@ -1367,7 +1367,7 @@
 
 	.download-audio-btn {
 		background: var(--color-info);
-		padding: var(--ui-space-1) var(--ui-space-2);
+		padding: var(--ui-pad-xsmall) var(--ui-pad-small);
 		min-width: 28px;
 	}
 
@@ -1383,20 +1383,20 @@
 	}
 
 	.segment-text {
-		color: var(--color-text);
+		color: var(--color-text-primary);
 		line-height: 1.6;
 		font-size: var(--font-size-base);
 	}
 
 	.empty-state {
 		text-align: center;
-		padding: var(--ui-space-6);
-		color: var(--color-text-muted);
+		padding: var(--ui-pad-large);
+		color: var(--color-text-secondary);
 		font-style: italic;
 	}
 
 	.error-message {
-		color: var(--color-error);
+		color: var(--color-negative);
 		font-weight: 600;
 	}
 
@@ -1414,7 +1414,7 @@
 
 	.log-container::-webkit-scrollbar-track,
 	.transcript-container::-webkit-scrollbar-track {
-		background: var(--color-bg-tertiary);
+		background: var(--color-gray-400);
 	}
 
 	.log-container::-webkit-scrollbar-thumb,
@@ -1425,6 +1425,6 @@
 
 	.log-container::-webkit-scrollbar-thumb:hover,
 	.transcript-container::-webkit-scrollbar-thumb:hover {
-		background: var(--color-text-muted);
+		background: var(--color-text-secondary);
 	}
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount, onDestroy } from 'svelte';
+	import { getContext, onMount, onDestroy, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { TABS } from './Tabs.svelte';
     import type { TabInterface } from './Tabs.svelte';
@@ -29,7 +29,7 @@
 	const registerPanelHeight = tabContext?.registerPanelHeight ?? (() => {});
 	const panels = tabContext?.panels ?? [];
 
-	registerPanel(panel, id);
+	untrack(() => registerPanel(panel, id));
 	
 	// Get panel index for transform calculation
 	let panelIndex = $derived(panels?.indexOf(panel) ?? 0);

@@ -116,7 +116,7 @@
     .bar__ok,
     .bar__high {
         height: 100%;
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         margin-right: 1px;
         padding: .5rem;
         opacity: .5;
@@ -158,7 +158,7 @@
         left: 0;
         transform: translate(-50%, -100%);
         padding: .3rem .5rem;
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         font-size: 1rem;
         font-weight: bold;
     }

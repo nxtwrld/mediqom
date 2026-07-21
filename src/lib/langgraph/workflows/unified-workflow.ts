@@ -5,7 +5,7 @@
  * unified approach using the multi-node orchestrator for ALL specialized processing.
  */
 
-import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
+import { Annotation, StateGraph, START, END, Send } from "@langchain/langgraph";
 import type {
   DocumentProcessingState,
   WorkflowConfig,
@@ -33,55 +33,76 @@ import { qualityGateNode } from "../nodes/quality-gate";
 import { documentTypeRouterNode } from "../nodes/document-type-router";
 import { medicalTermsGenerationNode } from "../nodes/medical-terms-generation";
 
-// Import new LangGraph-native multi-node system
-import { multiNodeDispatcherNode } from "../nodes/multi-node-dispatcher";
+// Node registry for dynamic specialized node dispatch
+import { nodeRegistry } from "../registry/node-registry";
+import { UniversalNodeFactory, NODE_CONFIGURATIONS } from "../factories/universal-node-factory";
 import { resultsAggregatorNode } from "../nodes/results-aggregator";
 
-// Simplified conditional edge functions
-const shouldProcessMedical = (state: DocumentProcessingState): string => {
-  // Only block on critical errors (not feature detection failures)
-  const criticalErrors = (state.errors || []).filter(
-    (e: any) => {
-      const msg = typeof e === 'string' ? e : e?.message || '';
-      const node = typeof e === 'string' ? '' : e?.node || '';
-      // Feature detection errors are non-fatal — we default to processing anyway
-      return !msg.toLowerCase().includes('feature') && node !== 'feature_detection';
-    }
-  );
+// Bootstrap: register all factory-configured nodes into the registry once
+let nodesRegistered = false;
+function ensureNodesRegistered(): void {
+  if (nodesRegistered) return;
+  nodesRegistered = true;
+  for (const [nodeId, config] of Object.entries(NODE_CONFIGURATIONS)) {
+    nodeRegistry.registerNode({
+      nodeName: config.nodeName,
+      description: config.description,
+      featureDetectionTriggers: config.triggers,
+      priority: config.priority,
+      nodeFunction: UniversalNodeFactory.createNode(nodeId),
+    });
+  }
+  console.log(`📝 Registered ${Object.keys(NODE_CONFIGURATIONS).length} nodes into registry`);
+}
+
+// Dispatch function: returns Send[] for parallel fan-out, or falls through to END
+const dispatchToSpecializedNodes = (
+  state: DocumentProcessingState,
+): string | Send[] => {
+  const criticalErrors = (state.errors || []).filter((e: any) => {
+    const msg = typeof e === 'string' ? e : e?.error || '';
+    const node = typeof e === 'string' ? '' : e?.node || '';
+    return !msg.toLowerCase().includes('feature') && node !== 'feature_detection';
+  });
 
   if (criticalErrors.length > 0) {
     console.log("🚫 Critical errors detected - skipping processing:", criticalErrors);
-    return "error";
+    return END;
   }
 
-  // If feature detection failed, default to medical=true (better to try than skip)
-  const featureDetectionFailed = (state.errors || []).some(
-    (e: any) => {
-      const msg = typeof e === 'string' ? e : e?.message || '';
-      const node = typeof e === 'string' ? '' : e?.node || '';
-      return msg.toLowerCase().includes('feature') || node === 'feature_detection';
-    }
-  );
+  const featureDetectionFailed = (state.errors || []).some((e: any) => {
+    const msg = typeof e === 'string' ? e : e?.error || '';
+    const node = typeof e === 'string' ? '' : e?.node || '';
+    return msg.toLowerCase().includes('feature') || node === 'feature_detection';
+  });
 
-  if (featureDetectionFailed) {
-    console.log("⚠️ Feature detection failed - defaulting to medical processing");
-    return "medical";
-  }
-
-  // Check if medical processing is needed
   const isMedical =
     state.featureDetectionResults?.isMedical ||
     (state.featureDetection && state.featureDetection.confidence > 0.5);
 
-  if (isMedical) {
-    console.log(
-      "✅ Medical content detected - proceeding to multi-node processing",
-    );
-    return "medical";
+  if (!isMedical && !featureDetectionFailed) {
+    console.log("🚫 Non-medical content - skipping processing");
+    return END;
   }
 
-  console.log("🚫 Non-medical content - skipping processing");
-  return "error";
+  if (featureDetectionFailed) {
+    console.log("⚠️ Feature detection failed - defaulting to medical processing");
+  } else {
+    console.log("✅ Medical content detected - dispatching specialized nodes");
+  }
+
+  ensureNodesRegistered();
+  const selectedNodes = nodeRegistry.selectNodes(state.featureDetectionResults!);
+
+  if (selectedNodes.length === 0) {
+    console.log("📝 No specialized nodes selected - skipping to aggregator");
+    return "results_aggregator";
+  }
+
+  console.log(`📤 Dispatching ${selectedNodes.length} nodes in parallel: ${selectedNodes.map((n) => n.nodeName).join(", ")}`);
+  return selectedNodes.map((node) =>
+    new Send("run_specialized_node", { ...state, currentNodeId: node.nodeName }),
+  );
 };
 
 const shouldValidateExternally = (state: DocumentProcessingState): string => {
@@ -225,6 +246,7 @@ export const createUnifiedDocumentProcessingWorkflow = (
     dental: lastValue<any>(),
     tumorCharacteristics: lastValue<any>(),
     treatmentPlan: lastValue<any>(),
+    recommendationsDetailed: lastValue<any>(),
     treatmentResponse: lastValue<any>(),
     imagingFindings: lastValue<any>(),
     grossFindings: lastValue<any>(),
@@ -244,6 +266,9 @@ export const createUnifiedDocumentProcessingWorkflow = (
     validationResults: lastValue<any>(),
     confidence: lastValue<any>(),
     errors: accumArray<any>(),
+
+    // Per-Send dispatch: which specialized node to run in this instance
+    currentNodeId: lastValue<string>(),
 
     // Progress tracking channels
     progressCallback: lastValue<any>(),
@@ -276,11 +301,38 @@ export const createUnifiedDocumentProcessingWorkflow = (
     createNodeWrapper(featureDetectionNode, { start: 60, end: 70 }),
   );
 
-  // Multi-node dispatcher: executes specialized nodes via the nodeRegistry.
-  // Specialized nodes are managed by the nodeRegistry and executed within this dispatcher node.
+  // Single handler node for all specialized nodes — dispatched in parallel via Send API.
+  // LangGraph merges all parallel outputs via state reducers (accumArray, mergeObject, etc.)
   workflow.addNode(
-    "multi_node_dispatcher",
-    createNodeWrapper(multiNodeDispatcherNode, { start: 70, end: 85 }),
+    "run_specialized_node",
+    createNodeWrapper(
+      async (state: DocumentProcessingState) => {
+        const node = nodeRegistry.getNode(state.currentNodeId!);
+        if (!node) {
+          return {
+            errors: [
+              ...(state.errors || []),
+              { node: state.currentNodeId!, error: "Node not found in registry", timestamp: new Date().toISOString() },
+            ],
+          };
+        }
+        try {
+          console.log(`⚡ Running specialized node: ${state.currentNodeId}`);
+          const result = await node.nodeFunction(state);
+          console.log(`✅ Completed specialized node: ${state.currentNodeId}`);
+          return result;
+        } catch (error) {
+          console.error(`❌ Failed specialized node ${state.currentNodeId}:`, error);
+          return {
+            errors: [
+              ...(state.errors || []),
+              { node: state.currentNodeId!, error: error instanceof Error ? error.message : String(error), timestamp: new Date().toISOString() },
+            ],
+          };
+        }
+      },
+      { start: 70, end: 85 },
+    ),
   );
 
   // Add results aggregator to collect and validate parallel node results
@@ -309,19 +361,12 @@ export const createUnifiedDocumentProcessingWorkflow = (
   workflow.addEdge("document_type_router", "provider_selection");
   workflow.addEdge("provider_selection", "feature_detection");
 
-  // Route to LangGraph-native multi-node dispatcher or end
-  workflow.addConditionalEdges(
-    "feature_detection",
-    shouldProcessMedical,
-    {
-      medical: "multi_node_dispatcher",
-      error: END,
-    },
-  );
+  // Dispatch to specialized nodes in parallel via Send API, or fall through to END
+  workflow.addConditionalEdges("feature_detection", dispatchToSpecializedNodes);
 
-  // Dispatcher uses Send API to route to specialized nodes in parallel
-  // After all Send nodes complete, continue to results aggregator
-  workflow.addEdge("multi_node_dispatcher", "results_aggregator");
+  // After all parallel run_specialized_node instances complete, LangGraph merges
+  // their outputs via state reducers and proceeds to the aggregator
+  workflow.addEdge("run_specialized_node", "results_aggregator");
 
   // After aggregation, continue to medical terms generation
   workflow.addEdge("results_aggregator", "medical_terms_generation");
@@ -405,6 +450,9 @@ export async function runUnifiedDocumentProcessingWorkflow(
       report: undefined,
       // Add jobId for debug output correlation
       jobId: config.jobId,
+      // Care Plan extraction context (row 7d) — consumed by annotation-aware
+      // nodes, never persisted.
+      carePlanContext: config.carePlanContext,
     };
 
     console.log("🚀 Executing unified workflow...");

@@ -210,5 +210,35 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.{test,spec}.{js,ts}"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "html", "json-summary", "lcov"],
+      reportsDirectory: "./coverage",
+      include: ["src/lib/**/*.{ts,js}"],
+      exclude: [
+        "src/lib/**/*.test.ts",
+        "src/lib/**/*.spec.ts",
+        "src/lib/**/*.d.ts",
+        "src/lib/**/types.ts",
+        "src/lib/**/index.ts",
+        "src/lib/configurations/**",
+        "src/lib/prompts/**",
+        "src/lib/audio/**",
+        "src/lib/capacitor/**",
+        "src/lib/langgraph/nodes/**",
+        "src/lib/debug/**",
+        "src/lib/logging/**",
+        "src/lib/i18n/**",
+      ],
+      // Thresholds ratchet up each sprint; see docs/TEST_COVERAGE.md.
+      // Target: lines 80, functions 75, branches 70.
+      // Current floor is baseline - 2% to prevent regressions.
+      thresholds: {
+        lines: 24,
+        functions: 24,
+        statements: 24,
+        branches: 20,
+      },
+    },
   },
 });

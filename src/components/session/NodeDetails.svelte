@@ -90,11 +90,11 @@
     .unknown-node p {
         margin-bottom: 1rem;
         font-weight: 600;
-        color: var(--color-error, #dc2626);
+        color: var(--color-negative, #dc2626);
     }
 
     .unknown-node pre {
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         padding: 1rem;
         border-radius: 6px;
         border: 1px solid var(--color-border, #e2e8f0);

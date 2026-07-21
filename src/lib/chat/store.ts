@@ -86,6 +86,16 @@ export const chatActions = {
     chatStore.update((state) => ({ ...state, focusedBodyPart: bodyPart }));
   },
 
+  /** Focus a Care Plan item so the AI can answer about it (build row 7i). */
+  setCarePlanFocus: (carePlanContext: ChatContext["carePlanContext"] | null) => {
+    chatStore.update((state) => ({
+      ...state,
+      context: state.context
+        ? { ...state.context, carePlanContext: carePlanContext ?? undefined }
+        : state.context,
+    }));
+  },
+
   switchProfile: (profileId: string, isOwnProfile: boolean) => {
     const state = get(chatStore);
 

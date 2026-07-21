@@ -206,7 +206,7 @@
         border: none;
         pointer-events: all;
         background-color: transparent;
-        color: var(--color-text);
+        color: var(--color-text-primary);
         font-size: 0.8rem;
         cursor: pointer;
         z-index: 1;

@@ -171,7 +171,7 @@
 	h1 {
 		margin-bottom: 1rem;
 		font-size: 2.5rem;
-		color: var(--color-heading, #1a1a1a);
+		color: var(--color-text-primary, #1a1a1a);
 	}
 	*/
 
@@ -179,7 +179,7 @@
 	time {
 		display: block;
 		margin-bottom: 2rem;
-		color: var(--color-text-muted, #666);
+		color: var(--color-text-secondary, #666);
 		font-size: 0.9rem;
 	}
 	*/
@@ -197,7 +197,7 @@
 	.loading {
 		padding: 2rem;
 		text-align: center;
-		color: var(--color-text-muted, #666);
+		color: var(--color-text-secondary, #666);
 	}
 	*/
 
@@ -205,14 +205,14 @@
 		margin-top: 2rem;
 		margin-bottom: 1rem;
 		font-size: 1.8rem;
-		color: var(--color-heading, #1a1a1a);
+		color: var(--color-text-primary, #1a1a1a);
 	}
 
 	:global(.content-page h3) {
 		margin-top: 1.5rem;
 		margin-bottom: 0.75rem;
 		font-size: 1.4rem;
-		color: var(--color-heading, #1a1a1a);
+		color: var(--color-text-primary, #1a1a1a);
 	}
 
 	:global(.content-page p) {
@@ -225,7 +225,7 @@
 	}
 
 	:global(.content-page code) {
-		background-color: var(--color-bg-code, #f4f4f4);
+		background-color: var(--color-gray-400, #f4f4f4);
 		padding: 0.125rem 0.25rem;
 		border-radius: 0.25rem;
 		font-family: monospace;
@@ -233,7 +233,7 @@
 	}
 
 	:global(.content-page pre) {
-		background-color: var(--color-bg-code, #f4f4f4);
+		background-color: var(--color-gray-400, #f4f4f4);
 		padding: 1rem;
 		border-radius: 0.5rem;
 		overflow-x: auto;
@@ -246,11 +246,11 @@
 	}
 
 	:global(.content-page blockquote) {
-		border-left: 4px solid var(--color-primary, #007bff);
+		border-left: 4px solid var(--color-interactivity, #007bff);
 		padding-left: 1rem;
 		margin: 1rem 0;
 		font-style: italic;
-		color: var(--color-text-muted, #666);
+		color: var(--color-text-secondary, #666);
 	}
 
 	:global(.mermaid-diagram) {

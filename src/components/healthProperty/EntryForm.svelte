@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import { untrack } from 'svelte';
 	import type { Signal } from '$lib/types.d';
 
 	interface Props {
@@ -15,8 +16,8 @@
 	// Form state
 	let dateId: string = Math.random().toString(36).substring(7);
 	let valueId: string = Math.random().toString(36).substring(7);
-	let date = $state(entry?.date || new Date().toISOString().split('T')[0]);
-	let value = $state<string | number>(entry?.value ?? '');
+	let date = $state(untrack(() => entry?.date || new Date().toISOString().split('T')[0]));
+	let value = $state<string | number>(untrack(() => entry?.value ?? ''));
 
 	function handleSave() {
 		const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -61,10 +62,10 @@
 		</div>
 	</div>
 	<div class="form-actions">
-		<button type="button" class="button --secondary" onclick={oncancel}>
+		<button type="button" class="button -secondary" onclick={oncancel}>
 			{$t('profile.health.history.cancel')}
 		</button>
-		<button type="submit" class="button --primary">
+		<button type="submit" class="button -primary">
 			{$t('profile.health.history.save')}
 		</button>
 	</div>
@@ -74,8 +75,8 @@
 	.entry-form {
 		padding: var(--gap);
 		background: var(--color-gray-100);
-		border-radius: var(--radius);
-		margin-bottom: var(--gap-small);
+		border-radius: var(--radius-16);
+		margin-bottom: var(--gap);
 	}
 
 	.form-row {
@@ -103,7 +104,7 @@
 		top: 50%;
 		transform: translateY(-50%);
 		padding: 1rem;
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 	}
 
 	@media screen and (max-width: 480px) {

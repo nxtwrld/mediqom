@@ -82,8 +82,8 @@
     /* Unused - no document-header class in template
     .document-header {
         padding: 1rem;
-        border-bottom: 1px solid var(--border-color, #e0e0e0);
-        background: var(--bg-secondary, #f8f9fa);
+        border-bottom: 1px solid var(--color-border, #e0e0e0);
+        background: var(--color-background, #f8f9fa);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -94,7 +94,7 @@
     .document-info h3 {
         margin: 0;
         font-size: 1.1rem;
-        color: var(--text-primary, #333);
+        color: var(--color-text-primary, #333);
     }
     */
 
@@ -102,7 +102,7 @@
     .document-info p {
         margin: 0.25rem 0 0 0;
         font-size: 0.9rem;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
     */
 
@@ -116,9 +116,9 @@
     /* Unused - no btn class in template
     .btn {
         padding: 0.5rem 1rem;
-        border: 1px solid var(--border-color, #ddd);
-        background: var(--bg-primary, #fff);
-        color: var(--text-primary, #333);
+        border: 1px solid var(--color-border, #ddd);
+        background: var(--color-surface, #fff);
+        color: var(--color-text-primary, #333);
         border-radius: 4px;
         cursor: pointer;
         font-size: 0.9rem;
@@ -128,21 +128,21 @@
 
     /* Unused - no btn class in template
     .btn:hover {
-        background: var(--bg-hover, #f0f0f0);
+        background: var(--color-gray-300, #f0f0f0);
     }
     */
 
     /* Unused - no btn class in template
     .btn.primary {
-        background: var(--primary-color, #007bff);
+        background: var(--color-interactivity, #007bff);
         color: white;
-        border-color: var(--primary-color, #007bff);
+        border-color: var(--color-interactivity, #007bff);
     }
     */
 
     /* Unused - no btn class in template
     .btn.primary:hover {
-        background: var(--primary-hover, #0056b3);
+        background: var(--color-interactivity-dark, #0056b3);
     }
     */
 

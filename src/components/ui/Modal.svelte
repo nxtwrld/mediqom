@@ -81,7 +81,7 @@
         max-width: 80vw;
         max-height: 100vh;
         overflow: hidden;
-        box-shadow: 0 3rem 3rem -2rem rgba(0,0,0,.4);   
+        box-shadow: var(--shadow-modal);
     }
 
 
@@ -135,7 +135,7 @@
         max-height: 95vh;
         overflow: auto;
         z-index: 2;
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
     }
     .close {
         position: absolute;
@@ -144,8 +144,8 @@
         padding: .5rem;
         font-weight: bold;
         background-color: transparent;
-        border-top-right-radius: var(--radius);
-        border-bottom-left-radius: var(--radius);
+        border-top-right-radius: var(--radius-16);
+        border-bottom-left-radius: var(--radius-16);
         border: none;
         z-index: 3; 
     }
@@ -153,8 +153,8 @@
         .close:hover {
             background-color: var(--color-negative);
             color: var(--color-negative-text);
-            box-shadow: var(--shadow-interactive);
-            border: 1px solid var(--color-border-accent);
+            box-shadow: var(--shadow-interactivity);
+            border: 1px solid var(--color-interactivity);
             border-right: none;
             border-top: none;
         }

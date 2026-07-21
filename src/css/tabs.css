@@ -23,13 +23,13 @@
 
 .tab-heads > button:first-child,
 .tab-heads > a:first-child {
-  border-top-left-radius: var(--radius);
+  border-top-left-radius: var(--radius-16);
 }
 
 .tab-heads > button:last-child,
 .tab-heads > a:last-child {
   border-right: none;
-  border-top-right-radius: var(--radius);
+  border-top-right-radius: var(--radius-16);
 }
 
 .tab-heads > button:hover,

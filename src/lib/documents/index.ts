@@ -1,3 +1,4 @@
+import { generateNamespacedTags } from "./generateTags";
 import user from "$lib/user";
 import {
   writable,
@@ -27,9 +28,12 @@ import {
 } from "$lib/documents/types.d";
 import { base64ToArrayBuffer } from "$lib/arrays";
 import { logger } from "$lib/logging/logger";
+import { normalizeDocument } from "$lib/documents/normalize";
 import { profileContextManager } from "$lib/context/integration/profile-context";
 import { apiFetch } from "$lib/api/client";
 import { deriveSections } from "$lib/documents/sections";
+import { processDocumentForContacts } from "$lib/contacts/store";
+import { processDocumentForAppointments } from "$lib/calendar/store";
 // Removed embedding migration import - now using medical terms classification
 
 export const documents: Writable<(DocumentPreload | Document)[]> = writable([]);
@@ -74,6 +78,14 @@ function updateIndex() {
   });
 }
 
+/** Resolves once the first setDocuments() call has landed (e.g. the initial
+ * background load triggered by ViewerTimeline.svelte). Playwright-only test
+ * hooks await this before seeding, so a seed always lands after — not
+ * before — that one-time authoritative fetch and doesn't get clobbered by it. */
+export function whenDocumentsLoaded(): Promise<boolean> {
+  return loadingDocuments;
+}
+
 export async function getDocument(id: string): Promise<Document | undefined> {
   await loadingDocuments;
   const document = byID[id];
@@ -83,7 +95,7 @@ export async function getDocument(id: string): Promise<Document | undefined> {
   if (!document.content) {
     return await loadDocument(id);
   }
-  return document as Document;
+  return normalizeDocument(document as Document);
 }
 
 let loadingDocumentsResolve: (value: boolean) => void;
@@ -184,7 +196,7 @@ export async function decryptDocumentsNoStore(
 
       if (dec[1]) {
         (base as Document).content = JSON.parse(dec[1]);
-        return base as Document;
+        return normalizeDocument(base as Document);
       }
       return base as DocumentPreload;
     }),
@@ -244,7 +256,7 @@ export async function loadDocument(
   let document = byID[id] as DocumentPreload | Document;
 
   if (document && document.content) {
-    return document as Document;
+    return normalizeDocument(document as Document);
   }
   if (document && document.user_id) {
     profile_id = document.user_id;
@@ -338,7 +350,7 @@ export async function loadDocument(
           return docs;
         });
         updateIndex();
-        return documentWithTerms;
+        return normalizeDocument(documentWithTerms);
       }
     } catch (error) {
       logger.documents.warn("Failed to process document with medical terms", {
@@ -349,7 +361,7 @@ export async function loadDocument(
     }
   }
 
-  return loadedDocument;
+  return normalizeDocument(loadedDocument);
 }
 
 export async function updateDocument(documentData: Document) {
@@ -621,6 +633,14 @@ export async function addDocument(document: DocumentNew): Promise<Document> {
     });
   }
 
+  // Extract contacts and appointments from medical documents (fire-and-forget)
+  if (document.type === DocumentType.document && newDocument.content) {
+    const pid = profile_id || user_id;
+    const docDate = newDocument.metadata?.date;
+    processDocumentForContacts(pid, newDocument.id, newDocument.content, docDate).catch(() => {});
+    processDocumentForAppointments(pid, newDocument.id, newDocument.content, docDate).catch(() => {});
+  }
+
   return newDocument;
 }
 
@@ -810,9 +830,13 @@ function deriveMetadata(
   document: Document | DocumentNew,
   metadata?: { [key: string]: any },
 ): { [key: string]: any } {
+  const legacyTags = mergeBodyPartTags(document.content.tags || [], document.content.bodyParts);
+  const namespacedTags = generateNamespacedTags(document.content);
+  const allTags = [...new Set([...legacyTags, ...namespacedTags])];
+
   let result: { [key: string]: any } = {
     title: document.content.title,
-    tags: mergeBodyPartTags(document.content.tags || [], document.content.bodyParts),
+    tags: allTags,
     date: document.content.date || new Date().toISOString(),
     ...(document.content.category && { category: document.content.category }),
     ...(document.subtype && { subtype: document.subtype }),

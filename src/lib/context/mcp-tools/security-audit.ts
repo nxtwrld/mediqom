@@ -27,6 +27,9 @@ export interface MCPAccessPolicy {
     windowMs: number;
   };
   sensitivityLevel: "low" | "medium" | "high" | "critical";
+  /** Tool writes data (vs read-only). Audited as a write operation; profile
+   * ownership is always required. The first mutating tool is createCarePlanTask. */
+  mutating?: boolean;
 }
 
 export interface MCPAuditEntry {
@@ -159,6 +162,16 @@ export class MCPSecurityService {
       sensitivityLevel: "medium",
       rateLimit: { maxRequests: 20, windowMs: 60000 },
     });
+
+    // First MUTATING tool — adds a Care Plan task (build row 7j). Profile
+    // ownership is mandatory; never writes to a shared/foreign profile.
+    this.accessPolicies.set("createCarePlanTask", {
+      requireAuthentication: true,
+      requireProfileOwnership: true,
+      sensitivityLevel: "high",
+      rateLimit: { maxRequests: 20, windowMs: 60000 },
+      mutating: true,
+    });
   }
 
   /**
@@ -184,14 +197,18 @@ export class MCPSecurityService {
       return { allowed: false, reason: "Authentication required" };
     }
 
-    // Check profile ownership
+    // Check profile ownership (mutating tools require DIRECT ownership)
     if (policy.requireProfileOwnership) {
       const ownsProfile = await this.checkProfileOwnership(
         context.user.id,
         context.profileId,
+        policy.mutating === true,
       );
       if (!ownsProfile) {
-        return { allowed: false, reason: "Profile access denied" };
+        return {
+          allowed: false,
+          reason: policy.mutating ? "Mutating tools require profile ownership" : "Profile access denied",
+        };
       }
     }
 
@@ -330,6 +347,7 @@ export class MCPSecurityService {
   private async checkProfileOwnership(
     userId: string,
     profileId: string,
+    strict = false,
   ): Promise<boolean> {
     const client = this.getSupabaseClient();
     if (!client) {
@@ -354,6 +372,10 @@ export class MCPSecurityService {
       if (profile.user_id === userId) {
         return true;
       }
+
+      // Mutating tools require DIRECT ownership — never write to a profile
+      // accessed via a delegated share.
+      if (strict) return false;
 
       // Delegated access: check document_shares for an accepted share
       const { data: share, error: shareError } = await client

@@ -108,8 +108,28 @@
       "Bash(git rm:*)",
       "Bash(npm audit:*)",
       "WebFetch(domain:cyber.gouv.fr)",
-      "WebFetch(domain:messervices.cyber.gouv.fr)"
+      "WebFetch(domain:messervices.cyber.gouv.fr)",
+      "Bash(psql -l)",
+      "Bash(supabase db:*)",
+      "Bash(supabase link:*)",
+      "Bash(npm run *)",
+      "Bash(head -15 ls /Users/nxtwrld/Documents/GitHub/mediqom/src/lib/medications/*.test.ts)",
+      "Bash(read f *)",
+      "WebFetch(domain:gist.github.com)"
     ],
     "deny": []
+  },
+  "skillOverrides": {
+    "pet-clean": "off",
+    "pet-feed": "off",
+    "pet-help": "off",
+    "pet-name": "off",
+    "pet-pet": "off",
+    "pet-play": "off",
+    "pet-reset": "off",
+    "pet-sleep": "off",
+    "pet-stats": "off",
+    "pet-status": "off",
+    "pet-wake": "off"
   }
 }

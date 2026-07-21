@@ -40,7 +40,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1.5rem;
-		background: var(--color-primary, #16d3dd);
+		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
 		border-radius: 2rem;
 		text-decoration: none;

@@ -55,14 +55,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--color-primary-light, var(--color-primary));
+        background-color: var(--color-interactivity-light, var(--color-interactivity));
         border-radius: var(--ui-radius-medium);
     }
 
     .pack-icon svg {
         width: 1.5rem;
         height: 1.5rem;
-        fill: var(--color-primary);
+        fill: var(--color-interactivity);
     }
 
     .pack-info {
@@ -89,7 +89,7 @@
 
     .pack-price-per {
         margin: 0.125rem 0 0 0;
-        color: var(--color-text-tertiary);
+        color: var(--color-text-secondary);
         font-size: 0.75rem;
     }
 
@@ -114,7 +114,7 @@
         flex-shrink: 0;
     }
 
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 768px) {
         .pack-card {
             flex-wrap: wrap;
         }

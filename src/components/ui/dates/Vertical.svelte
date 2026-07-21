@@ -42,6 +42,6 @@
         font-size: 1rem;
         font-weight: 700;
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 </style>

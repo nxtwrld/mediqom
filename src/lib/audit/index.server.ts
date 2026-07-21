@@ -44,7 +44,8 @@ export type AuditResourceType =
   | "session"
   | "encryption"
   | "account"
-  | "auth";
+  | "auth"
+  | "careplan";
 
 export interface AuditEntry {
   user_id?: string | null;

@@ -134,7 +134,7 @@
   }
 
   .overall-score {
-    background: var(--color-background-secondary, #f9f9f9);
+    background: var(--color-surface, #f9f9f9);
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 2rem;
@@ -188,7 +188,7 @@
   }
 
   .question.unanswered {
-    background: var(--color-background-secondary, #f9f9f9);
+    background: var(--color-surface, #f9f9f9);
     border-style: dashed;
   }
 

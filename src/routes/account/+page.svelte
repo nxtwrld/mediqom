@@ -25,6 +25,7 @@
 		};
 		vcard: VCard;
 		health: Record<string, any>;
+		settings: Record<string, any>;
 		subscription: string;
 		insurance:{
             number: string;
@@ -81,6 +82,7 @@
 		vcard: JSON.parse(profile?.vcard ?? '{}'),
 		insurance: JSON.parse(profile?.insurance ?? '{}'),
 		health: JSON.parse(profile?.health ?? '{}'),
+		settings: profile?.settings ?? {},
 		privacy: {
 			enabled: (profile?.privateKey && profile?.publicKey) ?? false,
 			key_hash: profile?.key_hash ?? undefined,
@@ -152,6 +154,7 @@
 				avatarUrl: editData.bio.avatarUrl,
 				language: editData.bio.language,
 				subscription: editData.subscription,
+				settings: editData.settings,
 				passphrase: (!editData.privacy.enabled && editData.privacy.passphrase)
 					? editData.privacy.passphrase
 					: null,

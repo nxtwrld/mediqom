@@ -167,7 +167,7 @@
     .characteristic-tag,
     .more-tag {
         padding: 0.125rem 0.375rem;
-        background: var(--color-surface-alt, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border: 1px solid var(--color-border, #e2e8f0);
         border-radius: 4px;
         font-size: 0.625rem;
@@ -175,9 +175,9 @@
     }
 
     .more-tag {
-        background: var(--color-primary-light, #dbeafe);
-        color: var(--color-primary, #3b82f6);
-        border-color: var(--color-primary, #3b82f6);
+        background: var(--color-interactivity-light, #dbeafe);
+        color: var(--color-interactivity, #3b82f6);
+        border-color: var(--color-interactivity, #3b82f6);
     }
 
     .card-footer {

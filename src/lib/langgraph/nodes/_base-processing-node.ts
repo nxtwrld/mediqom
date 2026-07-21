@@ -9,15 +9,14 @@ import type { DocumentProcessingState } from "../state";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
 import { updateLanguage } from "$lib/ai/schema";
-import anatomyObjects from "$data/objects.json";
-import { getCatalog } from "$data/signal-catalog";
 import { log } from "$lib/logging/logger";
 // import { isStateTransitionDebuggingEnabled } from "$lib/config/logging-config";
 import {
   recordWorkflowStep,
   workflowRecorder,
 } from "$lib/debug/workflow-recorder";
-import { STATIC_PROPERTIES } from "$lib/health/property-categories";
+import { populateSchemaEnums } from "./_schema-enums";
+import { renderContextForPrompt } from "$lib/careplan/context";
 
 export interface BaseProcessingNodeConfig {
   nodeName: string;
@@ -29,6 +28,9 @@ export interface BaseProcessingNodeConfig {
     message: string;
   }>;
   featureDetectionTriggers: string[];
+  /** When true, the Care Plan extraction context (if present in state) is
+   * injected into this node's prompt so it can emit link annotations. */
+  consumesCarePlanContext?: boolean;
 }
 
 export interface ProcessingNodeResult {
@@ -277,35 +279,9 @@ export abstract class BaseProcessingNode {
         );
       }
 
-      // Populate empty bodyParts identification enum with valid 3D model objects
-      // Check both direct array schema (core.bodyParts.ts) and FunctionDefinition wrapper (bodyparts.extraction.ts)
-      const directSchemaItems = (this.schema as any)?.items?.properties
-        ?.identification;
-      const wrappedSchemaItems = (this.schema as any)?.parameters?.properties
-        ?.bodyParts?.items?.properties?.identification;
-      const schemaItems = directSchemaItems || wrappedSchemaItems;
-      if (schemaItems?.enum && schemaItems.enum.length === 0) {
-        // Extract all objects from anatomy object categories (these are valid 3D model objects)
-        const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
-          (category: any) => category.objects || [],
-        );
-        // Remove duplicates and set as enum
-        schemaItems.enum = [...new Set(validAnatomyObjects)];
-      }
-
-      // Populate empty signal enum with lab property keys (excluding static profile fields)
-      const signalSchema = (this.schema as any)?.parameters?.properties?.signals
-        ?.items?.properties?.signal;
-      if (
-        signalSchema?.enum &&
-        Array.isArray(signalSchema.enum) &&
-        signalSchema.enum.length === 0
-      ) {
-        const signalKeys = Object.keys(getCatalog()).filter(
-          (key) => !STATIC_PROPERTIES.includes(key),
-        );
-        signalSchema.enum.push(...signalKeys);
-      }
+      // Populate any empty enums (anatomy mesh names, signal catalog keys) in
+      // a single consistent pass, regardless of where they sit in the schema.
+      populateSchemaEnums(this.schema);
 
       console.log(`✅ Successfully loaded schema for ${this.config.nodeName}`);
     } catch (error) {
@@ -344,6 +320,17 @@ export abstract class BaseProcessingNode {
     }
     if (state.text) {
       content.push({ type: "text" as const, text: state.text });
+    }
+
+    // Inject the Care Plan extraction context for annotation-aware nodes so the
+    // LLM can emit linkedCarePlanItemId / resolves / etc. (build row 7d).
+    if (this.config.consumesCarePlanContext && state.carePlanContext) {
+      try {
+        const block = renderContextForPrompt(state.carePlanContext as any);
+        content.unshift({ type: "text" as const, text: block });
+      } catch {
+        // Malformed context — proceed without it; merge falls back to dedup.
+      }
     }
 
     // Fallback to state.content if no text/images found

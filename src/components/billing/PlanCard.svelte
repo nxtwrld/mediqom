@@ -100,8 +100,8 @@
     }
 
     .plan-card.-recommended {
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 1px var(--color-primary);
+        border-color: var(--color-interactivity);
+        box-shadow: 0 0 0 1px var(--color-interactivity);
     }
 
     .plan-card.-current {
@@ -114,8 +114,8 @@
         top: -0.75rem;
         left: 50%;
         transform: translateX(-50%);
-        background-color: var(--color-primary);
-        color: var(--color-primary-text);
+        background-color: var(--color-interactivity);
+        color: var(--color-interactivity-text);
         padding: 0.25rem 0.75rem;
         border-radius: var(--ui-radius-small);
         font-size: 0.75rem;

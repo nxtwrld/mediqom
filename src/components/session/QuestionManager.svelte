@@ -95,16 +95,16 @@
     }
 
     .tab.active {
-        background: var(--color-primary, #3b82f6);
+        background: var(--color-interactivity, #3b82f6);
         color: white;
-        border-color: var(--color-primary, #3b82f6);
+        border-color: var(--color-interactivity, #3b82f6);
     }
 
     .badge {
         position: absolute;
         top: -4px;
         right: -4px;
-        background: var(--color-error, #dc2626);
+        background: var(--color-negative, #dc2626);
         color: white;
         font-size: 0.75rem;
         padding: 0.125rem 0.375rem;
@@ -120,7 +120,7 @@
     }
 
     /* Mobile optimizations */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .manager-header,
         .content {
             padding: 0.75rem;

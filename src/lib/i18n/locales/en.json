@@ -1,4 +1,99 @@
 {
+  "careplan": {
+    "title": "Care Plan",
+    "nav": "Care Plan",
+    "view-care-plan": "View Care Plan",
+    "active-items": "What we're watching",
+    "history": "From your past",
+    "history-from-before": "Items from before {date}",
+    "care-journey": "Your care journey",
+    "progress-by-periods": "Progress",
+    "no-changes-redirect": "Your Care Plan is up to date",
+    "potential": {
+      "first-time-title": "Your Care Plan takes shape with each document you add",
+      "first-time-share": "And Mediqom will help you share this with your next doctor.",
+      "cta": "Import your first document",
+      "time-aware": "Your last update was {month} — Mediqom is most useful when it's current. Want to add a recent visit?"
+    },
+    "certainty": {
+      "monitored": "Being monitored",
+      "check-in-soon": "Worth a check-in soon",
+      "fresh-look": "Ready for a fresh look",
+      "from-your-past": "From your past — still relevant?"
+    },
+    "item-state": {
+      "managed": "Being managed",
+      "revisiting": "Worth revisiting",
+      "historical": "From your past — is this still relevant?",
+      "resolved": "Resolved — great progress"
+    },
+    "task-state": {
+      "upcoming": "Your doctor suggested this",
+      "due-soon": "A good time to schedule this",
+      "past-due": "Ready for your attention",
+      "completed": "Done — well handled",
+      "snoozed": "We'll remind you later"
+    },
+    "trend": {
+      "improving": "Moving in the right direction",
+      "stable": "Holding steady",
+      "declining": "Worth discussing with your doctor",
+      "unknown": "Not enough data yet — import a report to track this"
+    },
+    "task": {
+      "done": "Mark done",
+      "snooze": "Remind me later",
+      "previously-completed": "Previously completed on {date}"
+    },
+    "why-here": "Why is this here?",
+    "explain-plain": "Explain in plain language",
+    "ask-ai": "Ask AI about this",
+    "provenance": {
+      "document": "From your {title} on {date}.",
+      "document-quote": "{provider} wrote: \"{quote}\" — from your {title} on {date}.",
+      "chat": "You added this from a chat with AI on {date}.",
+      "user": "You added this on {date}.",
+      "open-document": "Open document",
+      "open-chat": "Open chat",
+      "conflict": "A newer document disagrees — tap to review."
+    },
+    "snooze": {
+      "title": "Remind you later",
+      "reason-legend": "What's holding it up? (optional)",
+      "duration-legend": "Remind me in",
+      "reason": {
+        "cost": "Cost",
+        "time": "Time",
+        "unsure": "Not sure",
+        "other": "Something else"
+      },
+      "duration": {
+        "1w": "1 week",
+        "2w": "2 weeks",
+        "1m": "1 month",
+        "3m": "3 months"
+      },
+      "note-label": "Anything to remember? (optional)",
+      "note-placeholder": "Add a note for yourself",
+      "cancel": "Cancel",
+      "confirm": "Remind me later"
+    },
+    "suggested-action": {
+      "add": "Add to Care Plan",
+      "added": "Added ✓"
+    },
+    "update": {
+      "headline-new": "{count} new things to know",
+      "headline-improving": "{count} condition is improving",
+      "headline-task": "{count} task you can mark done",
+      "new-items": "New",
+      "updated-items": "Updated",
+      "confirmed-again": "Confirmed again by today's report",
+      "resolved-tasks": "This document satisfies a task — mark it done?",
+      "new-tasks": "New tasks",
+      "conflicts": "Worth a look"
+    }
+  },
   "app-connect": {
     "author": "Author",
     "credits": "credits",
@@ -463,7 +558,24 @@
       "beta-review-message": "Your beta application is being reviewed. We'll email you within 48 hours once approved.",
       "beta-check-spam": "Check your spam folder if you don't see our email.",
       "beta-status": "Application Status",
-      "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at"
+      "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at",
+      "new-here-title": "New here?",
+      "new-here-message": "Mediqom is invite-only right now. Use an invite code or join the waiting list below.",
+      "or": "or",
+      "invite": {
+        "title": "Have an invite code?",
+        "instruction": "Enter your invite code and email to create your account.",
+        "code-label": "Invite code",
+        "code-placeholder": "Enter your code",
+        "code-required": "Please enter an invite code",
+        "submit": "Redeem invite"
+      },
+      "waitlist": {
+        "title": "Join the waiting list",
+        "instruction": "No invite code yet? Leave your email and we'll notify you when one is available.",
+        "submit": "Join waiting list",
+        "joined": "You're on the list! We'll email you when an invite code is available."
+      }
     },
     "forms": {
       "files": "Files",
@@ -639,6 +751,7 @@
         "general": "General",
         "profile": "Profile",
         "privacy": "Privacy",
+        "invites": "Invites",
         "subscription": "Subscription",
         "about": "About"
       },
@@ -669,6 +782,43 @@
           "system": "System",
           "light": "Light",
           "dark": "Dark"
+        },
+        "careplan": {
+          "title": "Care Plan",
+          "certainty-description": "Care Plan items fade as they age. Turn this on to also show a short freshness label next to each item.",
+          "certainty-label": "Show certainty labels inline"
+        }
+      },
+      "invites": {
+        "title": "Invites",
+        "description": "Invite people to Mediqom. Each code can be used once.",
+        "remaining": "{used}/{limit} invites used",
+        "generate": "Generate invite code",
+        "no-invites-left": "No invites remaining",
+        "generating": "Generating...",
+        "code-list-empty": "You haven't generated any invite codes yet.",
+        "copy-link": "Copy link",
+        "link-copied": "Link copied!",
+        "status": {
+          "available": "Not yet claimed",
+          "claimed": "Claimed"
+        },
+        "error": {
+          "load-failed": "Could not load your invites",
+          "generate-failed": "Could not generate invite code"
+        },
+        "admin": {
+          "title": "Admin",
+          "send-title": "Send an invite directly",
+          "send-description": "Mint a code outside anyone's quota and invite this email immediately.",
+          "send-submit": "Send invite",
+          "send-success": "Invite sent",
+          "quota-title": "Grant bonus invites",
+          "quota-description": "Give a user extra invite codes beyond the default limit.",
+          "quota-email-label": "User email",
+          "quota-bonus-label": "Bonus invites",
+          "quota-submit": "Update quota",
+          "quota-success": "Quota updated"
         }
       },
       "profile": {
@@ -765,10 +915,13 @@
       "email": "Email",
       "enable-total-privacy": "Enable total privacy",
       "full-name": "Full Name",
-      "healh-profile": "Healh profile",
+      "feet": "Feet",
+      "healh-profile": "Health Profile",
+      "health-subtitle": "Input your key health data to build a personalized digital health profile.",
       "hide-passphrase": "Hide passphrase.",
       "hit-save-to-start": "Hit SAVE to Start!",
       "i-am-not-sure": "I am not sure",
+      "inches": "Inches",
       "i-stored-or-remembered-the-passphrase-myself": "I stored or remembered the passphrase myself.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "If you loose this passphrase it can never be recovered and all your data will be lost. We suggest to keep it in password manager securely",
       "language": "Language",
@@ -3935,8 +4088,8 @@
       "login": "Login"
     },
     "hero": {
-      "motto": "All your health data in your hands",
-      "sub": "Bringing medical experience to the 21st century",
+      "motto": "Your body remembers everything. Now your records do too.",
+      "sub": "Mediqom keeps your full medical history in one place — so every doctor sees the whole story, not just one chapter.",
       "get-started": "Get Started Free"
     },
     "download": {
@@ -3979,5 +4132,89 @@
       "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records.",
       "link": "Learn more about our security"
     }
+  },
+  "contacts": {
+    "nav": "My Doctors",
+    "title": "My Doctors",
+    "search-placeholder": "Search by name, specialty, or institution...",
+    "empty": "No doctor contacts yet. Contacts will be automatically extracted from your imported documents.",
+    "add-to-phone": "Add to Phone",
+    "update-on-phone": "Update on Phone",
+    "synced-to-device": "Synced to device",
+    "delete": "Delete",
+    "call": "Call",
+    "email": "Send email",
+    "map": "View on map",
+    "license": "License",
+    "confirm-delete": "Remove {name} from your doctor directory?",
+    "save-to-directory": "Save to My Doctors",
+    "saved": "Saved",
+    "add": "Add Doctor",
+    "form": {
+      "info": "Doctor Information",
+      "name": "Full Name",
+      "role": "Role",
+      "specialty": "Specialty",
+      "phone": "Phone",
+      "email": "Email",
+      "license": "License Number",
+      "institution": "Institution",
+      "institution-name": "Institution Name",
+      "department": "Department",
+      "address": "Address",
+      "role-primary": "Primary Physician",
+      "role-specialist": "Specialist",
+      "role-surgeon": "Surgeon",
+      "role-dentist": "Dentist",
+      "role-therapist": "Therapist",
+      "role-radiologist": "Radiologist",
+      "role-pharmacist": "Pharmacist",
+      "role-other": "Other",
+      "add-details": "Add details",
+      "add-institution": "Add institution",
+      "change": "Change"
+    }
+  },
+  "appointments": {
+    "nav": "Appointments",
+    "title": "Appointments",
+    "empty": "No appointments yet. Appointments will be automatically extracted from your imported documents.",
+    "needs-action": "Needs Your Input",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "set-date": "Set Date",
+    "dismiss": "Dismiss",
+    "save": "Save",
+    "cancel": "Cancel",
+    "export": "Export",
+    "export-all": "Export All",
+    "synced": "Synced to calendar",
+    "add": "Add Appointment",
+    "form": {
+      "info": "Appointment Details",
+      "title": "Title",
+      "title-placeholder": "e.g. Follow-up visit",
+      "type": "Type",
+      "priority": "Priority",
+      "date": "Date",
+      "duration": "Duration (min)",
+      "provider": "Provider",
+      "type-office-visit": "Office Visit",
+      "type-lab-work": "Lab Work",
+      "type-imaging": "Imaging",
+      "type-procedure": "Procedure",
+      "type-referral": "Referral",
+      "type-review": "Review",
+      "type-other": "Other",
+      "priority-immediate": "Immediate",
+      "priority-urgent": "Urgent",
+      "priority-routine": "Routine",
+      "priority-as-needed": "As Needed"
+    },
+    "select-doctor": "Select a doctor...",
+    "or-type-name": "Or type a name",
+    "link-doctor": "Link to Doctor",
+    "save-as-doctor": "Save as Doctor",
+    "linked-to": "Linked to {name}"
   }
 }

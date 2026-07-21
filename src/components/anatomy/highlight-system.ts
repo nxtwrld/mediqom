@@ -5,7 +5,13 @@ import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
 import type { SceneState, ViewState } from './scene-state';
 import { HIGHLIGHT_COLOR } from './scene-state';
-import { getCachedMaterials } from './material-system';
+import {
+    getCachedMaterials,
+    getMultiVariantMaterial,
+    multiVariantKey,
+    bucketOpacity
+} from './material-system';
+import type { MultiHighlightRegion } from './scene-state';
 import { createAuraShellMaterials } from './aura.shader';
 import type { Writable } from 'svelte/store';
 
@@ -147,11 +153,18 @@ export function highlight(
             }
         }
     } else if (!object && selected) {
-        // Exiting focus mode: restore all meshes
+        // Exiting focus mode: restore meshes to multi-highlight variant if active, else original
         for (const mesh of state.focusableMeshes) {
             if (mesh.visible) {
                 const cached = state.materialCache.get(mesh.uuid);
-                if (cached) mesh.material = cached.original;
+                if (!cached) continue;
+                const multiKey = state.previousMultiHighlight.get(mesh.name);
+                if (multiKey) {
+                    const multiMat = state.multiVariantCache.get(multiKey);
+                    mesh.material = (multiMat ?? cached.original) as any;
+                } else {
+                    mesh.material = cached.original as any;
+                }
             }
         }
     }
@@ -286,6 +299,61 @@ export function setViewState(state: SceneState, viewState: ViewState): void {
             state.controls.update();
         })
         .start();
+    state.requestRender();
+}
+
+/**
+ * Paints multiple anatomy regions simultaneously with per-region color and opacity.
+ * Operates independently of the single-focus setHighlight path.
+ * Uses delta-swap so only changed meshes get material updates.
+ */
+export function setMultiHighlight(
+    state: SceneState,
+    regions: MultiHighlightRegion[]
+): void {
+    state.multiHighlightRegions = regions;
+
+    // Build desired map: meshName → { material, variantKey }
+    type DesiredEntry = { material: THREE.Material | THREE.Material[]; key: string };
+    const desired = new Map<string, DesiredEntry>();
+    for (const region of regions) {
+        const obj = state.scene.getObjectByName(region.mesh);
+        if (!obj || !(obj as any).isMesh) continue;
+        const mesh = obj as THREE.Mesh;
+        const colorHex = new THREE.Color(region.color).getHexString();
+        const bucket = bucketOpacity(region.opacity);
+        const key = multiVariantKey(mesh.uuid, colorHex, bucket);
+        const material = getMultiVariantMaterial(mesh, region.color, region.opacity, state.multiVariantCache);
+        desired.set(region.mesh, { material, key });
+    }
+
+    // Restore meshes no longer in the desired set (or whose key changed)
+    for (const [name, prevKey] of state.previousMultiHighlight) {
+        const next = desired.get(name);
+        if (!next || next.key !== prevKey) {
+            const obj = state.scene.getObjectByName(name);
+            if (obj && (obj as any).isMesh) {
+                const mesh = obj as THREE.Mesh;
+                const cached = state.materialCache.get(mesh.uuid);
+                if (cached) mesh.material = cached.original as any;
+            }
+        }
+    }
+
+    // Apply new or changed variants
+    for (const [name, { material, key }] of desired) {
+        if (state.previousMultiHighlight.get(name) !== key) {
+            const obj = state.scene.getObjectByName(name);
+            if (obj && (obj as any).isMesh) {
+                (obj as THREE.Mesh).material = material as any;
+            }
+        }
+    }
+
+    state.previousMultiHighlight = new Map(
+        [...desired.entries()].map(([n, v]) => [n, v.key])
+    );
+
     state.requestRender();
 }
 

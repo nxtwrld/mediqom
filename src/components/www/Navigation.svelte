@@ -165,7 +165,7 @@
 
 	.nav-cta {
 		padding: 0.45rem 1.25rem;
-		background: var(--color-primary, #16d3dd);
+		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
 		border-radius: 1.5rem;
 		text-decoration: none;

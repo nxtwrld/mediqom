@@ -1,6 +1,7 @@
 import { test as base, expect, type Page, type Route } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import {
   buildSSEBody,
   createMockJob,
@@ -9,6 +10,7 @@ import {
 } from "./mock-data";
 import type { ImportJob } from "../../src/lib/import/types";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKIP_MARKER = path.join(__dirname, "..", ".auth", "skip");
 
 /** Check if tests should be skipped (missing credentials or auth failure) */
@@ -28,10 +30,11 @@ class ImportPage {
     await this.page.goto("/med");
     await this.page.waitForLoadState("networkidle");
 
-    // Open import overlay via hash
-    await this.page.evaluate(() => {
-      location.hash = "#overlay-import";
-    });
+    // Open import overlay via the real Import button — setting
+    // location.hash directly does not work: UI.svelte's manageOverlay()
+    // only handles the close direction (hashchange back to "" / no
+    // #overlay- prefix); opening only happens via ui.emit("overlay.import").
+    await this.page.getByRole("button", { name: "Import", exact: true }).click();
 
     // Wait for import view to appear
     await this.page.waitForSelector(".import-view", { timeout: 10000 });
@@ -47,7 +50,7 @@ class ImportPage {
           body: JSON.stringify({ jobs }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
   }
@@ -62,7 +65,7 @@ class ImportPage {
           body: JSON.stringify({ id: jobId }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
   }
@@ -97,7 +100,7 @@ class ImportPage {
             body: JSON.stringify({ job }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );
@@ -119,7 +122,7 @@ class ImportPage {
             body: JSON.stringify({ ok: true }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );
@@ -137,7 +140,7 @@ class ImportPage {
             body: JSON.stringify({ ok: true }),
           });
         } else {
-          await route.continue();
+          await route.fallback();
         }
       },
     );

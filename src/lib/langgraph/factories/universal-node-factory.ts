@@ -19,6 +19,8 @@ export interface UniversalNodeConfig {
   triggers: string[];
   priority: number;
   timeout?: number;
+  /** Inject the Care Plan extraction context into this node's prompt (row 7d). */
+  consumesCarePlanContext?: boolean;
   customValidation?: (
     data: any,
     state: DocumentProcessingState,
@@ -58,9 +60,22 @@ export const NODE_CONFIGURATIONS: NodeRegistry = {
     schemaPath: "$lib/configurations/diagnosis.extraction",
     triggers: ["hasDiagnosis"],
     priority: 1,
+    consumesCarePlanContext: true,
     outputMapping: {
       reportField: "diagnosis",
       unwrapField: "diagnosis",
+    },
+  },
+  "recommendations-processing": {
+    nodeName: "recommendations-processing",
+    description:
+      "Clinical recommendations, follow-up schedule, and care-plan goals extraction (Care Plan source)",
+    schemaPath: "$lib/configurations/core.recommendations",
+    triggers: ["hasRecommendations"],
+    priority: 2,
+    consumesCarePlanContext: true,
+    outputMapping: {
+      reportField: "recommendationsDetailed",
     },
   },
   "performer-processing": {
@@ -398,6 +413,7 @@ export class UniversalProcessingNode extends BaseProcessingNode {
         },
       ],
       featureDetectionTriggers: nodeConfig.triggers,
+      consumesCarePlanContext: nodeConfig.consumesCarePlanContext,
     };
 
     super(baseConfig);

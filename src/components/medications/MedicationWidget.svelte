@@ -135,7 +135,7 @@
         fill: currentColor;
         opacity: 0.4;
     }
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
         .medication-grid {
             grid-template-columns: 1fr;
             overflow-x: auto;

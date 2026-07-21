@@ -553,18 +553,18 @@
     }
     
     .status-completed {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .status-insufficient {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .status-contaminated {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .urgency-routine {
@@ -578,8 +578,8 @@
     }
     
     .urgency-stat {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .specimen-details {
@@ -589,7 +589,7 @@
     }
     
     .labeling-issues {
-        color: var(--color-danger-dark);
+        color: var(--color-negative-dark);
         font-weight: 500;
     }
     
@@ -623,7 +623,7 @@
         gap: 0.5rem;
         align-items: center;
         padding: 0.25rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.25rem;
         flex-wrap: wrap;
     }
@@ -631,8 +631,8 @@
     .section-id {
         font-weight: 600;
         color: var(--color-text-primary);
-        background-color: var(--color-primary-light);
-        color: var(--color-primary-dark);
+        background-color: var(--color-interactivity-light);
+        color: var(--color-interactivity-dark);
         padding: 0.125rem 0.375rem;
         border-radius: 0.25rem;
         font-size: 0.8rem;
@@ -675,7 +675,7 @@
         gap: 0.5rem;
         margin-bottom: 0.75rem;
         padding: 0.5rem;
-        background-color: var(--color-background-secondary);
+        background-color: var(--color-surface);
         border-radius: 0.25rem;
     }
     
@@ -688,13 +688,13 @@
     }
     
     .quality-excellent {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .quality-good {
-        background-color: var(--color-success-light);
-        color: var(--color-success-dark);
+        background-color: var(--color-positive-light);
+        color: var(--color-positive-dark);
     }
     
     .quality-adequate {
@@ -703,13 +703,13 @@
     }
     
     .quality-poor {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .quality-inadequate {
-        background-color: var(--color-danger-light);
-        color: var(--color-danger-dark);
+        background-color: var(--color-negative-light);
+        color: var(--color-negative-dark);
     }
     
     .artifacts-section {
@@ -798,11 +798,11 @@
     
     /* Specimen type panel coloring */
     .specimen-tissue {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .specimen-blood {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .specimen-urine {
@@ -814,15 +814,15 @@
     }
     
     .specimen-cytology {
-        border-left-color: var(--color-secondary);
+        border-left-color: var(--color-gray-800);
     }
     
     .specimen-biopsy {
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
     
     .specimen-surgical {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .specimen-frozen {
@@ -843,15 +843,15 @@
     }
     
     .status-completed {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .status-insufficient {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
     }
     
     .status-contaminated {
-        border-left-color: var(--color-danger);
+        border-left-color: var(--color-negative);
         border-left-width: 4px;
     }
 </style>

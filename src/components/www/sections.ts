@@ -82,34 +82,6 @@ export const sections: Section[] = [
 		}
 	},
 	{
-		id: 'weekly-plan',
-		titleKey: 'www.weekly-plan.title',
-		descriptionKey: 'www.weekly-plan.description',
-		canvasColor: '#e9a642',
-		screenshotUrl: '/www/screenshots/weekly-plan.webp',
-		alignment: 'right',
-		rayMapping: {
-			maleIcon: 'form-capsule',
-			femaleIcon: 'form-spray',
-			maleScreenshot: '/www/screenshots/anatomy.png',
-			femaleScreenshot: '/www/screenshots/anatomy.png'
-		}
-	},
-	{
-		id: 'medications',
-		titleKey: 'www.medications.title',
-		descriptionKey: 'www.medications.description',
-		canvasColor: '#29cc97',
-		screenshotUrl: '/www/screenshots/medications.webp',
-		alignment: 'left',
-		rayMapping: {
-			maleIcon: 'pills',
-			femaleIcon: 'form-spray',
-			maleScreenshot: '/www/screenshots/anatomy.png',
-			femaleScreenshot: '/www/screenshots/anatomy.png'
-		}
-	},
-	{
 		id: 'imaging',
 		titleKey: 'www.imaging.title',
 		descriptionKey: 'www.imaging.description',

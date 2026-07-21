@@ -33,10 +33,10 @@
     }
 
     function getPriorityColor(priority: number): string {
-        if (priority <= 2) return 'var(--color-error, #dc2626)';
+        if (priority <= 2) return 'var(--color-negative, #dc2626)';
         if (priority <= 4) return 'var(--color-warning, #f59e0b)';
         if (priority <= 6) return 'var(--color-info, #3b82f6)';
-        return 'var(--color-success, #10b981)';
+        return 'var(--color-positive, #10b981)';
     }
 
     function getPriorityClass(priority: number): string {

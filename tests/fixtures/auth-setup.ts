@@ -1,14 +1,18 @@
 import { chromium, type FullConfig } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_DIR = path.join(__dirname, "..", ".auth");
 const STATE_FILE = path.join(AUTH_DIR, "state.json");
 const SKIP_MARKER = path.join(AUTH_DIR, "skip");
 
 export default async function globalSetup(config: FullConfig) {
   const email = process.env.TEST_USER_EMAIL;
-  const password = process.env.TEST_USER_PASSWORD;
+  const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // Ensure .auth directory exists
   if (!fs.existsSync(AUTH_DIR)) {
@@ -20,36 +24,43 @@ export default async function globalSetup(config: FullConfig) {
     fs.unlinkSync(SKIP_MARKER);
   }
 
-  if (!email || !password) {
+  if (!email || !supabaseUrl || !serviceRoleKey) {
     console.warn(
-      "\n⚠️  TEST_USER_EMAIL and TEST_USER_PASSWORD not set.\n" +
-        "   Import E2E tests will be skipped.\n" +
-        "   Set these env vars to run tests against a real Supabase user.\n",
+      "\n⚠️  TEST_USER_EMAIL, PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY not set.\n" +
+        "   Authenticated E2E tests will be skipped.\n" +
+        "   Set these env vars to run tests against a real (pre-existing) Supabase user.\n",
     );
     fs.writeFileSync(SKIP_MARKER, "missing credentials");
     return;
   }
 
-  const baseURL =
-    config.projects[0]?.use?.baseURL ?? "http://localhost:4173";
+  const baseURL = config.projects[0]?.use?.baseURL ?? "http://localhost:4173";
+
+  // The app's real login flow is passwordless magic-link (OTP) — there is no
+  // password field to fill. Instead, mint a magic-link token server-side via
+  // the Supabase admin API (no email is actually sent) and drive the app's
+  // own /auth/confirm endpoint with it, which is the exact same code path a
+  // real magic-link click would hit.
+  const admin = createClient(supabaseUrl, serviceRoleKey);
 
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
-    // Navigate to auth page
-    await page.goto(`${baseURL}/auth`);
-
-    // Fill in login form — adjust selectors to match your Supabase auth UI
-    await page.waitForSelector('input[type="email"], input[name="email"]', {
-      timeout: 15000,
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
     });
-    await page.fill('input[type="email"], input[name="email"]', email);
-    await page.fill('input[type="password"], input[name="password"]', password);
 
-    // Submit the form
-    await page.click('button[type="submit"]');
+    const tokenHash = data?.properties?.hashed_token;
+    if (error || !tokenHash) {
+      throw error ?? new Error("generateLink returned no hashed_token");
+    }
+
+    await page.goto(
+      `${baseURL}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink`,
+    );
 
     // Wait for redirect to /med (authenticated area)
     await page.waitForURL("**/med/**", { timeout: 30000 });

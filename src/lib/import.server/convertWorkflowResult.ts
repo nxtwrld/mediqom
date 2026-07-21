@@ -147,6 +147,7 @@ export function convertWorkflowResult(
     "dental",
     "tumorCharacteristics",
     "treatmentPlan",
+    "recommendationsDetailed",
     "treatmentResponse",
     "imagingFindings",
     "grossFindings",

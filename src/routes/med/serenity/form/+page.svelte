@@ -263,7 +263,7 @@
   .processing {
     text-align: center;
     padding: 2rem;
-    background: var(--color-background-secondary, #f9f9f9);
+    background: var(--color-surface, #f9f9f9);
     border-radius: 8px;
     margin: 1.5rem 0;
   }
@@ -313,7 +313,7 @@
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 1rem;
-    background: var(--color-background-secondary, #f9f9f9);
+    background: var(--color-surface, #f9f9f9);
   }
 
   .transcript-box textarea {

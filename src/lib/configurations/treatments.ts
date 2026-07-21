@@ -2,6 +2,7 @@ import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import coreBodyParts from "./core.bodyParts";
 import coreDiagnosis from "./core.diagnosis";
 import corePerformer from "./core.performer";
+import coreTreatmentGoal from "./core.treatmentGoal";
 
 /**
  * Treatments Schema
@@ -356,35 +357,7 @@ export default {
       treatmentGoals: {
         type: "array",
         description: "Overall treatment goals",
-        items: {
-          type: "object",
-          properties: {
-            goal: {
-              type: "string",
-              description:
-                "Treatment goal description. Translate result to the [LANGUAGE] language if the source is in a different language.",
-            },
-            category: {
-              type: "string",
-              enum: [
-                "curative",
-                "palliative",
-                "symptomatic",
-                "preventive",
-                "rehabilitative",
-              ],
-              description: "Goal category",
-            },
-            timeline: {
-              type: "string",
-              description: "Expected timeline to achieve goal",
-            },
-            measurableOutcome: {
-              type: "string",
-              description: "Measurable outcome to track progress",
-            },
-          },
-        },
+        items: coreTreatmentGoal,
       },
 
       treatmentBarriers: {

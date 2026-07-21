@@ -9,7 +9,7 @@
 
 .table-list th {
   background-color: var(--color-gray-400);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-weight: 600;
   text-align: left;
   padding: 0.5rem;
@@ -74,7 +74,7 @@
 
 .table-list th {
   background-color: var(--color-gray-500);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-weight: 600;
   text-align: left;
   padding: .5rem;
@@ -127,7 +127,7 @@
     content: attr(data-label);
     flex: 0 0 40%;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-text-primary);
     padding-right: 0.5rem;
   }
 

@@ -33,6 +33,27 @@ export interface ContextPrompt {
   onAnswer?: (answers: string[]) => void;
 }
 
+/** A follow-through the AI proposes during a Care Plan chat; the user taps the
+ * footer to create the task (build row 19). The AI emits this — it does NOT
+ * call a tool autonomously. */
+export interface SuggestedAction {
+  label: string; // user-facing prompt, e.g. "Add a reminder to call your doctor"
+  itemId: string; // Care Plan item id (copied verbatim from the focus block)
+  text: string; // the task text
+  category:
+    | "follow_up"
+    | "referral"
+    | "diagnostic_test"
+    | "monitoring"
+    | "lifestyle"
+    | "medication"
+    | "treatment"
+    | "prevention"
+    | "education";
+  priority: "immediate" | "urgent" | "routine" | "as_needed";
+  timeframeNormalized?: { unit: "days" | "weeks" | "months" | "years"; value: number };
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatMessageRole;
@@ -57,6 +78,9 @@ export interface ChatMessage {
     sources?: SourceCitation[];
     // Generative UI widgets
     widgets?: WidgetSpec[];
+    // Care Plan suggested-action footer (build row 19)
+    suggestedAction?: SuggestedAction;
+    suggestedActionDone?: boolean;
     // Keep legacy support temporarily
     documentPrompt?: {
       documentId: string;
@@ -80,11 +104,29 @@ export interface ChatContext {
   language: string;
   pageContext: PageContext;
   anatomyContext?: AnatomyContext;
+  carePlanContext?: CarePlanChatContext; // Focused Care Plan item (build row 7i)
   isOwnProfile: boolean;
   // Context assembly integration
   assembledContext?: any; // AssembledContext from context assembly system
   availableTools?: string[];
   mcpTools?: any; // MCP tools for AI to access medical data
+  // Sub-agent routing: classified in Call 1, used in Call 2
+  agentType?: string;
+}
+
+/** Care Plan focus passed into chat so the AI can answer about a specific item
+ * and propose follow-through (Care Plan build row 7i). */
+export interface CarePlanChatContext {
+  focusedItemId?: string;
+  itemSummary?: import("$lib/careplan/types").CarePlanItemChatSummary;
+}
+
+export interface DocumentCatalogEntry {
+  id: string;
+  title: string;
+  category?: string;
+  date?: string;
+  medicalTerms?: string[];
 }
 
 export interface PageContext {
@@ -95,8 +137,11 @@ export interface PageContext {
     conditions: string[];
     medications: string[];
     vitals: string[];
+    carePlanItems?: string[]; // ids of active Care Plan items (build row 7i)
   };
   documentsContent?: Map<string, any>; // documentId -> document content
+  /** Lightweight catalog of all profile documents (metadata only, no content) */
+  documentCatalog?: DocumentCatalogEntry[];
 }
 
 export interface AnatomyContext {
@@ -193,7 +238,7 @@ export interface ChatResponse {
 }
 
 export interface AskAboutEvent {
-  type: string;          // 'diagnosis', 'medication', 'lab', etc.
+  type: string;          // 'diagnosis', 'medication', 'lab', 'carePlanItem', etc.
   label: string;         // Human-readable item name (used in tooltip)
   data: any;             // Raw section item object
   documentId?: string;

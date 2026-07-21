@@ -191,7 +191,7 @@
         width: 2rem;
         height: 2rem;
         border: 3px solid var(--color-border);
-        border-top-color: var(--color-primary);
+        border-top-color: var(--color-interactivity);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -215,7 +215,7 @@
     .empty-state svg {
         width: 4rem;
         height: 4rem;
-        fill: var(--color-text-tertiary);
+        fill: var(--color-text-secondary);
         margin-bottom: var(--ui-pad-medium);
     }
 

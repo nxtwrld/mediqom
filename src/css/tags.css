@@ -8,7 +8,7 @@
   padding: 0.2rem 0.5rem;
   margin-right: 0.2rem;
   margin-bottom: 0.2rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius-16);
   font-size: inherit;
   background-color: var(--color-white);
 }

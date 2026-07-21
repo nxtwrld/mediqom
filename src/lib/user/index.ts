@@ -43,6 +43,9 @@ export type User = {
   unlocked: boolean | undefined;
   isMedical: boolean;
   role: 'individual' | 'medical' | string;
+  is_admin?: boolean;
+  // User-level preferences (account-holder settings jsonb)
+  settings?: Record<string, any>;
   // New encryption fields
   key_derivation_method?: KeyDerivationMethod;
   passkey_credential_id?: string;

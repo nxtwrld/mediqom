@@ -36,3 +36,5 @@ static/models/*.onnx
 # Large ONNX Runtime binaries (copied from node_modules by viteStaticCopy)
 static/onnx/*.wasm
 static/onnx/*.mjs
+
+test-results/

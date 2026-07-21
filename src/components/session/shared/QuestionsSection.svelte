@@ -123,7 +123,7 @@
     }
 
     .badge {
-        background: var(--color-error, #dc2626);
+        background: var(--color-negative, #dc2626);
         color: white;
         font-size: 0.75rem;
         padding: 0.125rem 0.375rem;
@@ -160,7 +160,7 @@
         color: var(--color-text-secondary, #6b7280);
         font-size: 0.875rem;
         text-align: center;
-        background: var(--color-surface-2, #f8fafc);
+        background: var(--color-surface, #f8fafc);
         border: 1px dashed var(--color-border, #e2e8f0);
         border-radius: 8px;
     }
@@ -171,7 +171,7 @@
     }
 
     /* Mobile optimizations */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .section-header {
             flex-direction: column;
             align-items: stretch;

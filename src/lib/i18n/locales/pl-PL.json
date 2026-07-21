@@ -446,7 +446,24 @@
       "beta-review-message": "Twój wniosek o dostęp do wersji beta jest rozpatrywany. Wyślemy wiadomość e-mail w ciągu 48 godzin po zatwierdzeniu.",
       "beta-check-spam": "Jeśli nie widzisz naszej wiadomości, sprawdź folder spam.",
       "beta-status": "Status wniosku",
-      "beta-not-approved": "Twój wniosek o dostęp do wersji beta nie został zatwierdzony. Jeśli uważasz, że to błąd, prosimy o kontakt pod adresem"
+      "beta-not-approved": "Twój wniosek o dostęp do wersji beta nie został zatwierdzony. Jeśli uważasz, że to błąd, prosimy o kontakt pod adresem",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Pliki",
@@ -623,7 +640,8 @@
         "profile": "Profil",
         "privacy": "Prywatność",
         "subscription": "Subskrypcja",
-        "about": "O aplikacji"
+        "about": "O aplikacji",
+        "invites": ""
       },
       "general": {
         "title": "Ustawienia ogólne",
@@ -731,6 +749,38 @@
           "licenses": "Licencje open source",
           "description": "Mediqom jest zbudowany z wykorzystaniem technologii open source i wkładów społeczności. Dziękujemy wszystkim współtwórcom i opiekunom."
         }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
+        }
       }
     },
     "onboarding": {
@@ -741,10 +791,13 @@
       "email": "E-mail",
       "enable-total-privacy": "Włącz pełną prywatność",
       "full-name": "Imię i nazwisko",
+      "feet": "",
       "healh-profile": "Profil zdrowotny",
+      "health-subtitle": "",
       "hide-passphrase": "Ukryj hasło.",
       "hit-save-to-start": "Naciśnij ZAPISZ, aby rozpocząć!",
       "i-am-not-sure": "Nie jestem pewien/pewna",
+      "inches": "",
       "i-stored-or-remembered-the-passphrase-myself": "Zapamiętałem/zapamiętałam lub zapisałem/zapisałam hasło samodzielnie.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Jeśli zgubisz to hasło, nie będzie możliwe jego odzyskanie i wszystkie dane zostaną utracone. Zalecamy przechowywanie go w bezpiecznym menedżerze haseł.",
       "language": "Język",
@@ -3884,5 +3937,89 @@
       "no-data": "Brak dostępnych danych zdrowotnych",
       "no-signals": "Nie wybrano żadnych sygnałów"
     }
+  },
+  "contacts": {
+    "nav": "Moi lekarze",
+    "title": "Moi lekarze",
+    "search-placeholder": "Szukaj po nazwisku, specjalizacji lub placówce...",
+    "empty": "Brak kontaktów do lekarzy. Kontakty zostaną automatycznie wyodrębnione z zaimportowanych dokumentów.",
+    "add-to-phone": "Dodaj do telefonu",
+    "update-on-phone": "Zaktualizuj w telefonie",
+    "synced-to-device": "Zsynchronizowano z urządzeniem",
+    "delete": "Usuń",
+    "call": "Zadzwoń",
+    "email": "Wyślij e-mail",
+    "map": "Pokaż na mapie",
+    "license": "Numer prawa wykonywania zawodu",
+    "confirm-delete": "Usunąć {name} z katalogu lekarzy?",
+    "save-to-directory": "Zapisz w Moich lekarzach",
+    "saved": "Zapisano",
+    "add": "Dodaj lekarza",
+    "form": {
+      "info": "Informacje o lekarzu",
+      "name": "Imię i nazwisko",
+      "role": "Rola",
+      "specialty": "Specjalizacja",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "license": "Numer prawa wykonywania zawodu",
+      "institution": "Placówka",
+      "institution-name": "Nazwa placówki",
+      "department": "Oddział",
+      "address": "Adres",
+      "role-primary": "Lekarz pierwszego kontaktu",
+      "role-specialist": "Specjalista",
+      "role-surgeon": "Chirurg",
+      "role-dentist": "Dentysta",
+      "role-therapist": "Terapeuta",
+      "role-radiologist": "Radiolog",
+      "role-pharmacist": "Farmaceuta",
+      "role-other": "Inny",
+      "add-details": "Dodaj szczegóły",
+      "add-institution": "Dodaj instytucję",
+      "change": "Zmień"
+    }
+  },
+  "appointments": {
+    "nav": "Wizyty",
+    "title": "Wizyty",
+    "empty": "Brak wizyt. Wizyty zostaną automatycznie wyodrębnione z zaimportowanych dokumentów.",
+    "needs-action": "Wymaga Twojej uwagi",
+    "upcoming": "Nadchodzące",
+    "past": "Przeszłe",
+    "set-date": "Ustaw datę",
+    "dismiss": "Odrzuć",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "export": "Eksportuj",
+    "export-all": "Eksportuj wszystko",
+    "synced": "Zsynchronizowano z kalendarzem",
+    "add": "Dodaj wizytę",
+    "form": {
+      "info": "Szczegóły wizyty",
+      "title": "Tytuł",
+      "title-placeholder": "np. Wizyta kontrolna",
+      "type": "Rodzaj",
+      "priority": "Priorytet",
+      "date": "Data",
+      "duration": "Czas trwania (min)",
+      "provider": "Lekarz",
+      "type-office-visit": "Wizyta w gabinecie",
+      "type-lab-work": "Badania laboratoryjne",
+      "type-imaging": "Diagnostyka obrazowa",
+      "type-procedure": "Zabieg",
+      "type-referral": "Skierowanie",
+      "type-review": "Przegląd",
+      "type-other": "Inne",
+      "priority-immediate": "Natychmiastowy",
+      "priority-urgent": "Pilny",
+      "priority-routine": "Rutynowy",
+      "priority-as-needed": "W razie potrzeby"
+    },
+    "select-doctor": "Wybierz lekarza...",
+    "or-type-name": "Lub wpisz nazwisko",
+    "link-doctor": "Powiąż z lekarzem",
+    "save-as-doctor": "Zapisz jako lekarza",
+    "linked-to": "Powiązano z {name}"
   }
 }

@@ -293,9 +293,9 @@
         justify-content: center;
         width: 100%;
         height: 100%;
-        background: var(--bg-secondary, #f8f9fa);
+        background: var(--color-background, #f8f9fa);
         border-radius: 8px;
-        border: 2px dashed var(--border-color, #dee2e6);
+        border: 2px dashed var(--color-border, #dee2e6);
     }
 
     .attachment-overlay {
@@ -330,9 +330,9 @@
     /* Button styles for modal */
     .btn {
         padding: 0.5rem 1rem;
-        border: 1px solid var(--border-color, #ddd);
-        background: var(--bg-primary, #fff);
-        color: var(--text-primary, #333);
+        border: 1px solid var(--color-border, #ddd);
+        background: var(--color-surface, #fff);
+        color: var(--color-text-primary, #333);
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
@@ -344,27 +344,27 @@
     }
 
     .btn:hover {
-        background: var(--bg-hover, #f0f0f0);
+        background: var(--color-gray-300, #f0f0f0);
     }
 
     .btn-retry {
-        background: var(--primary-color, #007bff);
+        background: var(--color-interactivity, #007bff);
         color: white;
-        border-color: var(--primary-color, #007bff);
+        border-color: var(--color-interactivity, #007bff);
     }
 
     .btn-retry:hover {
-        background: var(--primary-hover, #0056b3);
+        background: var(--color-interactivity-dark, #0056b3);
     }
 
     .btn-download {
-        background: var(--primary-color, #007bff);
+        background: var(--color-interactivity, #007bff);
         color: white;
-        border-color: var(--primary-color, #007bff);
+        border-color: var(--color-interactivity, #007bff);
     }
 
     .btn-download:hover {
-        background: var(--primary-hover, #0056b3);
+        background: var(--color-interactivity-dark, #0056b3);
     }
 
     /* Modal content styles */
@@ -379,17 +379,17 @@
 
     .modal-header {
         padding: .5rem 3rem .5rem 1rem;
-        border-bottom: 1px solid var(--border-color, #e0e0e0);
+        border-bottom: 1px solid var(--color-border, #e0e0e0);
         display: flex;
         justify-content: flex-start;
         gap: 1rem;
         align-items: center;
-        background: var(--bg-secondary, #f8f9fa);
+        background: var(--color-background, #f8f9fa);
     }
 
     .modal-header h3 {
         margin: 0;
-        color: var(--text-primary, #333);
+        color: var(--color-text-primary, #333);
     }
 
     .modal-body {
@@ -412,8 +412,8 @@
     .spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid var(--border-color, #e0e0e0);
-        border-top: 4px solid var(--primary-color, #007bff);
+        border: 4px solid var(--color-border, #e0e0e0);
+        border-top: 4px solid var(--color-interactivity, #007bff);
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 1rem;
@@ -425,7 +425,7 @@
     }
 
     .error-state {
-        color: var(--error-color, #dc3545);
+        color: var(--color-negative, #dc3545);
     }
 
     .error-icon {
@@ -439,16 +439,16 @@
 
     .error-state p {
         margin: 0 0 1.5rem 0;
-        color: var(--text-secondary, #666);
+        color: var(--color-text-secondary, #666);
     }
 
     .btn-retry {
-        background: var(--primary-color, #007bff);
+        background: var(--color-interactivity, #007bff);
         color: white;
-        border-color: var(--primary-color, #007bff);
+        border-color: var(--color-interactivity, #007bff);
     }
 
     .btn-retry:hover {
-        background: var(--primary-hover, #0056b3);
+        background: var(--color-interactivity-dark, #0056b3);
     }
 </style>

@@ -155,6 +155,7 @@ export interface DocumentProcessingState {
   options?: any;
   metadata?: Record<string, any>;
   jobId?: string; // For debug output correlation
+  carePlanContext?: unknown; // Care Plan extraction context blob (row 7d), never persisted
 
   // Progress tracking
   progressCallback?: ProgressCallback;
@@ -198,6 +199,7 @@ export interface DocumentProcessingState {
   dental?: any;
   tumorCharacteristics?: any;
   treatmentPlan?: any;
+  recommendationsDetailed?: any;
   treatmentResponse?: any;
   imagingFindings?: any;
   grossFindings?: any;
@@ -234,6 +236,9 @@ export interface DocumentProcessingState {
 
   // Quality validation
   qualityChecks?: string[];
+
+  // Which specialized node to run (set per-Send dispatch instance)
+  currentNodeId?: string;
 
   // Multi-node execution results
   multiNodeResults?: {
@@ -292,4 +297,5 @@ export interface WorkflowConfig {
   preferredProvider?: string;
   streamResults?: boolean;
   jobId?: string; // For debug output correlation
+  carePlanContext?: unknown; // Care Plan extraction context blob (row 7d)
 }

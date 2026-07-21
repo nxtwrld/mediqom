@@ -67,6 +67,65 @@ export function getCachedMaterials(
     return cache.get(key)!;
 }
 
+const OPACITY_BUCKETS = [0.2, 0.4, 0.6, 0.8, 1.0];
+
+/**
+ * Snaps an opacity value to the nearest bucket to bound cache size.
+ */
+export function bucketOpacity(opacity: number): number {
+    let closest = OPACITY_BUCKETS[0];
+    for (const b of OPACITY_BUCKETS) {
+        if (Math.abs(b - opacity) < Math.abs(closest - opacity)) closest = b;
+    }
+    return closest;
+}
+
+/**
+ * Cache key for a multi-highlight material variant.
+ */
+export function multiVariantKey(meshUuid: string, colorHex: string, bucket: number): string {
+    return `${meshUuid}:${colorHex}:${bucket}`;
+}
+
+/**
+ * Gets or creates a bucketed material variant for multi-highlight use.
+ * Normalises the CSS color string and snaps opacity to the nearest bucket.
+ */
+export function getMultiVariantMaterial(
+    mesh: THREE.Mesh,
+    colorCss: string,
+    opacity: number,
+    cache: Map<string, THREE.Material | THREE.Material[]>
+): THREE.Material | THREE.Material[] {
+    const colorHex = new THREE.Color(colorCss).getHexString();
+    const bucket = bucketOpacity(opacity);
+    const key = multiVariantKey(mesh.uuid, colorHex, bucket);
+    if (!cache.has(key)) {
+        cache.set(
+            key,
+            updateMaterial(mesh.material as THREE.Material, {
+                color: parseInt(colorHex, 16),
+                opacity: bucket,
+                transparent: true
+            })
+        );
+    }
+    return cache.get(key)!;
+}
+
+/**
+ * Disposes and clears the multi-variant cache. Called in onDestroy.
+ */
+export function clearMultiVariantCache(
+    cache: Map<string, THREE.Material | THREE.Material[]>
+): void {
+    for (const mat of cache.values()) {
+        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+        else mat.dispose();
+    }
+    cache.clear();
+}
+
 /**
  * Pre-caches materials for all meshes and builds the focusableMeshes list.
  * Called after model loading to ensure highlight() is fast.

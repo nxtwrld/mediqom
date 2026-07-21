@@ -280,7 +280,7 @@
     }
 
     .usage-info.-muted {
-        color: var(--color-text-tertiary);
+        color: var(--color-text-secondary);
         font-size: 0.75rem;
     }
 
@@ -309,7 +309,7 @@
         fill: currentColor;
     }
 
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 768px) {
         .status-actions {
             flex-direction: column;
         }

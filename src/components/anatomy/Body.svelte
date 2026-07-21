@@ -24,9 +24,10 @@
     import { createSceneState, MAX_IDLE_FRAMES } from './scene-state';
     import { initScene, resize, clearObjects, disposeScene, computeDefaultState } from './scene-setup';
     import type { DefaultState } from './scene-setup';
-    import { precacheMaterials } from './material-system';
+    import { precacheMaterials, clearMultiVariantCache } from './material-system';
     import {
         setHighlight as doSetHighlight,
+        setMultiHighlight as doSetMultiHighlight,
         focusObject,
         focusArea,
         highlight,
@@ -34,6 +35,7 @@
         setViewState,
         resetFocus as doResetFocus
     } from './highlight-system';
+    import type { MultiHighlightRegion } from './scene-state';
     import {
         updateModel as doUpdateModel,
         loadShade,
@@ -73,6 +75,9 @@
     export let fullscreen: boolean = false;
     export let viewportRect: { x: number; y: number; width: number; height: number } | null = null;
     export let selected: THREE.Object3D | null = null;
+    // Care Plan multi-region highlights (build row 13). When set, the model
+    // paints these regions; clicking one dispatches `carePlanRegionClick`.
+    export let carePlanRegions: MultiHighlightRegion[] = [];
 
     // ─── Shared State ─────────────────────────────────────────────
     const ss = createSceneState();
@@ -230,6 +235,10 @@
             const object = intersects[0].object;
             if (object.name) {
                 sounds.focus.play();
+                // Care Plan mode: a click on a painted region navigates the plan.
+                if (carePlanRegions.length > 0) {
+                    dispatch('carePlanRegionClick', { mesh: object.name });
+                }
                 focused.set({ object: object.name });
                 selected = object;
             }
@@ -243,6 +252,18 @@
     function setHighlight(name: string | null) {
         selected = doSetHighlight(ss, name, selected, mapped);
         requestRender();
+    }
+
+    // Care Plan multi-region painting — recompute only when the prop changes
+    // (the caller throttles to once per page-load / merge).
+    let lastCarePlanKey = '';
+    $: if (ss?.scene && carePlanRegions) {
+        const key = carePlanRegions.map((r) => `${r.mesh}:${r.color}:${r.opacity}`).join('|');
+        if (key !== lastCarePlanKey) {
+            lastCarePlanKey = key;
+            doSetMultiHighlight(ss, carePlanRegions);
+            requestRender();
+        }
     }
 
     function resetFocus() {
@@ -567,6 +588,8 @@
             ss.loadedFiles = [];
             loadedLayers = [];
             ss.materialCache.clear();
+            clearMultiVariantCache(ss.multiVariantCache);
+            ss.previousMultiHighlight.clear();
             ss.focusableMeshes = [];
             ss.objects = [];
             console.log('🧍', 'Destroyed');
@@ -674,7 +697,7 @@
         font-size: 1.1rem;
         background-color: rgba(0,0,0,.3);
         color: #FFF;
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         text-transform: uppercase;
@@ -746,7 +769,7 @@
     .model :global(.label.-open .highlight) {
         width: 13rem;
         height: auto;
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
     }
 
     .model :global(.label-menu) {
@@ -789,7 +812,7 @@
         transform: translate(-50%, -50%);
         width: 3rem;
         height: 3rem;
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
@@ -801,13 +824,13 @@
         display: block;
         height: 100%;
         width: 100%;
-        border-radius: calc(var(--radius) - .7rem);
+        border-radius: var(--radius-16);
         border: 1px solid var(--color-white);
-        box-shadow: 1px 1px 6px 0 rgba(0,0,0.3);
+        box-shadow: 1px 1px 6px 0 rgba(0,0,0,0.3);
         transform: scale(.5);
         transition: transform .2s ease-in-out;
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
         overflow: hidden;
         aspect-ratio: 1/1;
     }
@@ -817,7 +840,7 @@
         color: inherit;
         text-align: center;
         padding: .3rem .5rem;
-        border-radius: calc(var(--radius) - 1rem);
+        border-radius: var(--radius-16);
         border: 1px solid var(--color-white);
         font-size: inherit;
     }
@@ -862,10 +885,10 @@
         max-height: calc(var(--height) - 2rem);
         min-height: 2.5rem;;
         bottom: 1rem;
-        background-color: rgba(var(--color-background-rgb), .6);
+        background-color: rgba(230, 231, 234, .6);
         text-align: left;
         backdrop-filter: blur(2px);
-        border-radius: var(--border-radius);
+        border-radius: var(--radius-16);
         box-shadow: 2px 2px 10px rgba(0,0,0,.2);
     }
     .context-info :global(.close svg) {

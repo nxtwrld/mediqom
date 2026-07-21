@@ -453,7 +453,24 @@
       "beta-review-message": "Ihr Beta-Antrag wird geprüft. Wir senden Ihnen innerhalb von 48 Stunden eine E-Mail, sobald er genehmigt wurde.",
       "beta-check-spam": "Prüfen Sie Ihren Spam-Ordner, wenn Sie unsere E-Mail nicht sehen.",
       "beta-status": "Antragsstatus",
-      "beta-not-approved": "Ihr Beta-Antrag wurde nicht genehmigt. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie uns bitte unter"
+      "beta-not-approved": "Ihr Beta-Antrag wurde nicht genehmigt. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie uns bitte unter",
+      "new-here-title": "",
+      "new-here-message": "",
+      "or": "",
+      "invite": {
+        "title": "",
+        "instruction": "",
+        "code-label": "",
+        "code-placeholder": "",
+        "code-required": "",
+        "submit": ""
+      },
+      "waitlist": {
+        "title": "",
+        "instruction": "",
+        "submit": "",
+        "joined": ""
+      }
     },
     "forms": {
       "files": "Dateien",
@@ -629,7 +646,8 @@
         "profile": "Profil",
         "privacy": "Datenschutz",
         "subscription": "Abonnement",
-        "about": "Über"
+        "about": "Über",
+        "invites": ""
       },
       "general": {
         "title": "Allgemeine Einstellungen",
@@ -744,6 +762,38 @@
           "licenses": "Open-Source-Lizenzen",
           "description": "Mediqom basiert auf Open-Source-Technologien und Beiträgen der Community. Vielen Dank an alle Mitwirkenden und Betreuer."
         }
+      },
+      "invites": {
+        "title": "",
+        "description": "",
+        "remaining": "",
+        "generate": "",
+        "no-invites-left": "",
+        "generating": "",
+        "code-list-empty": "",
+        "copy-link": "",
+        "link-copied": "",
+        "status": {
+          "available": "",
+          "claimed": ""
+        },
+        "error": {
+          "load-failed": "",
+          "generate-failed": ""
+        },
+        "admin": {
+          "title": "",
+          "send-title": "",
+          "send-description": "",
+          "send-submit": "",
+          "send-success": "",
+          "quota-title": "",
+          "quota-description": "",
+          "quota-email-label": "",
+          "quota-bonus-label": "",
+          "quota-submit": "",
+          "quota-success": ""
+        }
       }
     },
     "onboarding": {
@@ -754,10 +804,13 @@
       "email": "E-Mail",
       "enable-total-privacy": "Vollständigen Datenschutz aktivieren",
       "full-name": "Vollständiger Name",
+      "feet": "",
       "healh-profile": "Gesundheitsprofil",
+      "health-subtitle": "",
       "hide-passphrase": "Passphrase verbergen.",
       "hit-save-to-start": "Klicken Sie auf SPEICHERN, um zu beginnen!",
       "i-am-not-sure": "Ich bin mir nicht sicher",
+      "inches": "",
       "i-stored-or-remembered-the-passphrase-myself": "Ich habe die Passphrase selbst gespeichert oder mir gemerkt.",
       "if-you-loose-this-passphrase-it-can-never-be-recovered-and-all-your-data-will-be-lost-we-suggest-to-keep-it-in-password-": "Wenn Sie diese Passphrase verlieren, kann sie nie wiederhergestellt werden und alle Ihre Daten gehen verloren. Wir empfehlen, sie sicher in einem Passwort-Manager aufzubewahren.",
       "language": "Sprache",
@@ -3977,5 +4030,89 @@
       "title": "Ihre Daten, Ihre Kontrolle",
       "description": "End-to-end encryption ensures only you can access your health data. We use public-key cryptography so even our servers never see your unencrypted records."
     }
+  },
+  "contacts": {
+    "nav": "Meine Ärzte",
+    "title": "Meine Ärzte",
+    "search-placeholder": "Nach Name, Fachgebiet oder Einrichtung suchen...",
+    "empty": "Noch keine Arztkontakte. Kontakte werden automatisch aus Ihren importierten Dokumenten extrahiert.",
+    "add-to-phone": "Zum Telefon hinzufügen",
+    "update-on-phone": "Auf dem Telefon aktualisieren",
+    "synced-to-device": "Mit Gerät synchronisiert",
+    "delete": "Löschen",
+    "call": "Anrufen",
+    "email": "E-Mail senden",
+    "map": "Auf Karte anzeigen",
+    "license": "Approbation",
+    "confirm-delete": "{name} aus Ihrem Ärzteverzeichnis entfernen?",
+    "save-to-directory": "In Meine Ärzte speichern",
+    "saved": "Gespeichert",
+    "add": "Arzt hinzufügen",
+    "form": {
+      "info": "Arztinformationen",
+      "name": "Vollständiger Name",
+      "role": "Rolle",
+      "specialty": "Fachgebiet",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "license": "Approbationsnummer",
+      "institution": "Einrichtung",
+      "institution-name": "Name der Einrichtung",
+      "department": "Abteilung",
+      "address": "Adresse",
+      "role-primary": "Hausarzt",
+      "role-specialist": "Facharzt",
+      "role-surgeon": "Chirurg",
+      "role-dentist": "Zahnarzt",
+      "role-therapist": "Therapeut",
+      "role-radiologist": "Radiologe",
+      "role-pharmacist": "Apotheker",
+      "role-other": "Sonstige",
+      "add-details": "Details hinzufügen",
+      "add-institution": "Institution hinzufügen",
+      "change": "Ändern"
+    }
+  },
+  "appointments": {
+    "nav": "Termine",
+    "title": "Termine",
+    "empty": "Noch keine Termine. Termine werden automatisch aus Ihren importierten Dokumenten extrahiert.",
+    "needs-action": "Ihre Eingabe erforderlich",
+    "upcoming": "Bevorstehend",
+    "past": "Vergangen",
+    "set-date": "Datum festlegen",
+    "dismiss": "Verwerfen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "export": "Exportieren",
+    "export-all": "Alle exportieren",
+    "synced": "Mit Kalender synchronisiert",
+    "add": "Termin hinzufügen",
+    "form": {
+      "info": "Termindetails",
+      "title": "Titel",
+      "title-placeholder": "z. B. Nachuntersuchung",
+      "type": "Art",
+      "priority": "Priorität",
+      "date": "Datum",
+      "duration": "Dauer (Min.)",
+      "provider": "Behandelnder Arzt",
+      "type-office-visit": "Praxisbesuch",
+      "type-lab-work": "Laboruntersuchung",
+      "type-imaging": "Bildgebung",
+      "type-procedure": "Eingriff",
+      "type-referral": "Überweisung",
+      "type-review": "Befundkontrolle",
+      "type-other": "Sonstige",
+      "priority-immediate": "Sofort",
+      "priority-urgent": "Dringend",
+      "priority-routine": "Routinemäßig",
+      "priority-as-needed": "Bei Bedarf"
+    },
+    "select-doctor": "Arzt auswählen...",
+    "or-type-name": "Oder Namen eingeben",
+    "link-doctor": "Mit Arzt verknüpfen",
+    "save-as-doctor": "Als Arzt speichern",
+    "linked-to": "Verknüpft mit {name}"
   }
 }

@@ -31,10 +31,10 @@
     }
 
     function getConfidenceColor(confidence: number): string {
-        if (confidence >= 0.8) return 'var(--color-success, #10b981)';
+        if (confidence >= 0.8) return 'var(--color-positive, #10b981)';
         if (confidence >= 0.6) return 'var(--color-info, #3b82f6)';
         if (confidence >= 0.4) return 'var(--color-warning, #f59e0b)';
-        return 'var(--color-error, #dc2626)';
+        return 'var(--color-negative, #dc2626)';
     }
 
     const basicInfoItems = $derived([

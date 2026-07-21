@@ -229,7 +229,7 @@ export async function generateRecoveryPDF(
     borderWidth: 2,
   });
 
-  page.drawText("⚠️ WARNING", {
+  page.drawText("! WARNING", {
     x: margin + boxPadding,
     y: warningBoxY + warningBoxHeight - 20,
     size: 12,

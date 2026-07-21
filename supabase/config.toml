@@ -209,10 +209,6 @@ max_frequency = "5s"
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
-# Auth hooks need to be configured in Supabase Dashboard
-# Go to Authentication > Settings > Auth Hooks
-# Add: pre_signup hook pointing to your deployed function URL
-
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]
 enabled = false
@@ -297,10 +293,6 @@ policy = "oneshot"
 inspector_port = 8083
 # The Deno major version to use.
 deno_version = 1
-
-[edge_runtime.secrets]
-BETA_ONLY_MODE = "env(BETA_ONLY_MODE)"
-SUPABASE_AUTH_HOOK_SECRET = "env(SUPABASE_AUTH_HOOK_SECRET)"
 
 [analytics]
 enabled = true

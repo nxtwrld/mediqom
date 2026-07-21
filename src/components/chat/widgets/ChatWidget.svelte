@@ -14,7 +14,7 @@
 
 	let { spec, onInteraction }: Props = $props();
 
-	let shadowHost: HTMLDivElement | undefined = $state();
+	let mountTarget: HTMLDivElement | undefined = $state();
 	let mountedComponent: Record<string, any> | undefined;
 	let validationError = $state('');
 
@@ -28,7 +28,7 @@
 	}
 
 	onMount(() => {
-		if (!shadowHost) return;
+		if (!mountTarget) return;
 
 		// M3: Validate before mounting
 		const error = validateWidgetSpec(spec);
@@ -37,31 +37,12 @@
 			// Fall through to render UnknownWidget
 		}
 
-		const shadow = shadowHost.attachShadow({ mode: 'open' });
-
-		// Inject base styles — CSS custom properties pierce Shadow DOM automatically
-		const style = document.createElement('style');
-		style.textContent = `
-			:host {
-				display: block;
-				width: 100%;
-			}
-			* {
-				box-sizing: border-box;
-				font-family: inherit;
-			}
-		`;
-		shadow.appendChild(style);
-
-		const target = document.createElement('div');
-		shadow.appendChild(target);
-
 		const Component = validationError
 			? (UnknownWidget as unknown as import('svelte').Component<WidgetComponentProps>)
 			: getWidgetComponent(spec.type) ?? (UnknownWidget as unknown as import('svelte').Component<WidgetComponentProps>);
 
 		mountedComponent = mount(Component, {
-			target,
+			target: mountTarget,
 			props: { spec, onInteraction }
 		});
 	});
@@ -75,7 +56,7 @@
 	{#if spec.title}
 		<div class="widget-title">{spec.title}</div>
 	{/if}
-	<div class="widget-shadow-host" bind:this={shadowHost}></div>
+	<div class="widget-content" bind:this={mountTarget}></div>
 </div>
 
 <style>
@@ -96,7 +77,33 @@
 		border-bottom: 1px solid var(--color-gray-400);
 	}
 
-	.widget-shadow-host {
+	.widget-content {
+		display: block;
 		width: 100%;
+	}
+
+	/* Section component overrides for chat context */
+	.widget-content :global(.h3.heading.-sticky) {
+		display: none;
+	}
+
+	.widget-content :global(.list-items) {
+		padding: 0;
+		margin: 0;
+	}
+
+	.widget-content :global(.panel) {
+		margin: 0;
+		padding: var(--ui-pad-small);
+	}
+
+	.widget-content :global(.section-title-sub) {
+		margin: var(--ui-pad-small) 0 0;
+		font-size: 0.85rem;
+	}
+
+	/* Constrain chart height in chat sidebar */
+	.widget-content :global(.panel svg) {
+		/*max-height: 200px; */
 	}
 </style>

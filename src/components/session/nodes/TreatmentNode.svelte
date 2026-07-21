@@ -127,7 +127,7 @@
 
     .treatment-node.selected {
         /*border-width: 3px;
-        border-color: var(--color-primary, #3b82f6);*/
+        border-color: var(--color-interactivity, #3b82f6);*/
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
     }
   

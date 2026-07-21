@@ -12,4 +12,3 @@ export * from "./testing";
 
 // Export session management (keep manager.ts here for server APIs)
 export * from "./manager";
-export * from "./analysis-integration";

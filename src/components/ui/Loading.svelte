@@ -39,7 +39,7 @@
   width: 1.5rem;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-interactivity);
   display: grid;
   animation: l22-0 2s infinite linear;
   margin-bottom: 3rem;
@@ -70,7 +70,7 @@
 .-line  .loader {
   width: 4rem;
   aspect-ratio: 4;
-  --_g: no-repeat radial-gradient(circle closest-side,var(--color-primary) 90%,var(--color-primary));
+  --_g: no-repeat radial-gradient(circle closest-side,var(--color-interactivity) 90%,var(--color-interactivity));
   background: 
     var(--_g) 0%   50%,
     var(--_g) 50%  50%,

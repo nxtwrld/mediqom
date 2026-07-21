@@ -462,7 +462,7 @@
     }
 
     .stat .count.urgent {
-        color: var(--color-error, #dc2626);
+        color: var(--color-negative, #dc2626);
     }
 
     .header-actions {
@@ -483,7 +483,7 @@
     }
 
     .sidebar-toggle:hover {
-        background: var(--color-surface-hover, #f1f5f9);
+        background: var(--color-gray-300, #f1f5f9);
     }
 
     /* Main Layout */

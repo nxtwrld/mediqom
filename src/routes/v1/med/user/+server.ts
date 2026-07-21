@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(
-        `fullName, subscription, user_role, publicKey, avatarUrl, auth_id, id, language, private_keys(privateKey, key_hash, key_pass)`,
+        `fullName, subscription, user_role, publicKey, avatarUrl, auth_id, id, language, is_admin, kem_public_key, key_mode, private_keys(privateKey, key_hash, key_pass, kem_secret_key, key_mode)`,
       )
       .eq("auth_id", user.id)
       .single();
@@ -50,6 +50,21 @@ export const GET: RequestHandler = async ({
       default_scans: 10,
       default_profiles: 5,
     };
+
+    // User-level preferences (Care Plan row 18). Read defensively so login never
+    // depends on the optional `settings` column — environments where migration
+    // 20260414 hasn't run yet simply fall back to {}.
+    try {
+      const { data: prefs, error: prefsError } = await supabase
+        .from("profiles")
+        .select("settings")
+        .eq("auth_id", user.id)
+        .single();
+      (profile as any).settings =
+        !prefsError && prefs?.settings ? prefs.settings : {};
+    } catch {
+      (profile as any).settings = {};
+    }
 
     return json(profile);
   } catch (authError) {

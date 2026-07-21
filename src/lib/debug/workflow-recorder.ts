@@ -87,17 +87,22 @@ export class WorkflowRecorder {
     const isProduction =
       process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 
+    // Always a plain project-relative path (never used in production, since
+    // recordingEnabled/replayMode stay false there) — a literal "/tmp" here
+    // previously made @vercel/nft's static analyzer glob the entire /tmp
+    // directory as a build dependency (via the dynamic join(debugDir, fileName)
+    // below), crashing the build on any non-regular file (sockets, pipes) in /tmp.
+    this.debugDir = join(process.cwd(), "test-data", "workflows");
+
     if (isProduction) {
       // Explicitly disable recording in production
       this.recordingEnabled = false;
       this.replayMode = false;
-      this.debugDir = "/tmp"; // Safe fallback, won't be used
       console.log("WorkflowRecorder: Disabled in production environment");
       return;
     }
 
     console.log("WorkflowRecorder: Constructor called");
-    this.debugDir = join(process.cwd(), "test-data", "workflows");
     console.log("WorkflowRecorder: Debug directory set to:", this.debugDir);
     this.initializeFromEnvironment();
     // Only ensure directory if recording is actually enabled

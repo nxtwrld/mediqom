@@ -45,7 +45,6 @@ Start free and see immediate value. Upgrade only when you need more features.
 - ✅ **Unlimited family members**
 - ✅ **Advanced AI health insights**
 - ✅ **Trend analysis & predictions**
-- ✅ **50 AppConnect credits/month**
 - ✅ **Multi-language document translation**
 - ✅ **Priority email support**
 - ✅ **Family sharing & permissions**
@@ -61,7 +60,6 @@ Start free and see immediate value. Upgrade only when you need more features.
 **For families who want everything**
 
 - ✅ **Everything in Family Plan**
-- ✅ **Unlimited AppConnect credits**
 - ✅ **Video consultation integration**
 - ✅ **Advanced AI medical analysis**
 - ✅ **White-glove onboarding**
@@ -72,92 +70,6 @@ Start free and see immediate value. Upgrade only when you need more features.
 **Price: €19.99/month or €199/year (save 17%)**
 
 [Choose Premium →](/www/en/beta)
-
-## For Healthcare Providers
-
-### Starter Practice
-
-**Solo practitioners & small clinics**
-
-- ✅ **1 provider account**
-- ✅ **Up to 100 patients**
-- ✅ **Basic conversation analysis**
-- ✅ **50 voice analysis sessions/month**
-- ✅ **100 AppConnect credits/month**
-- ✅ **Standard integrations**
-- ✅ **Email support**
-
-**Price: €99/month**
-
-[Start Trial →](/www/en/beta)
-
----
-
-### Professional Practice
-
-**Multi-provider practices**
-
-- ✅ **Up to 5 providers**
-- ✅ **Up to 500 patients**
-- ✅ **Advanced conversation analysis**
-- ✅ **Unlimited voice analysis**
-- ✅ **500 AppConnect credits/month**
-- ✅ **EHR integrations**
-- ✅ **Priority support**
-- ✅ **Team collaboration tools**
-
-**Price: €299/month**
-
-[Start Trial →](/www/en/beta)
-
----
-
-### Enterprise
-
-**Large practices & hospital systems**
-
-- ✅ **Unlimited providers**
-- ✅ **Unlimited patients**
-- ✅ **Custom AI model training**
-- ✅ **Unlimited voice analysis**
-- ✅ **Custom AppConnect pricing**
-- ✅ **Custom integrations**
-- ✅ **Dedicated success manager**
-- ✅ **SLA guarantees**
-- ✅ **On-premises deployment option**
-
-**Price: Contact for custom pricing**
-
-[Contact Sales →](/www/en/contact)
-
-## AppConnect Credit System
-
-### How Credits Work
-
-- **Pay-per-use**: Only pay for AI analysis you actually use
-- **Volume discounts**: Bulk credits cost less per unit
-- **Never expire**: Credits roll over month to month
-- **Transparent pricing**: See exact cost before running analysis
-
-### Credit Packages
-
-| Package          | Credits | Price  | Per Credit | Best For         |
-| ---------------- | ------- | ------ | ---------- | ---------------- |
-| **Starter**      | 100     | €49    | €0.49      | Occasional use   |
-| **Professional** | 500     | €199   | €0.40      | Regular practice |
-| **Practice**     | 1,000   | €349   | €0.35      | Busy clinic      |
-| **Enterprise**   | 5,000+  | Custom | €0.25+     | Hospital system  |
-
-### Popular Analysis Costs
-
-| AI Analysis Type           | Credits Required | Example Use Case           |
-| -------------------------- | ---------------- | -------------------------- |
-| **Basic Health Screening** | 10-20            | General wellness check     |
-| **Voice Stress Analysis**  | 15-25            | Mental health assessment   |
-| **Document Analysis**      | 20-40            | Lab result interpretation  |
-| **Mammography Review**     | 50               | Breast cancer screening    |
-| **Dermatology Analysis**   | 30-60            | Skin condition assessment  |
-| **Rare Disease Analysis**  | 100-150          | Complex diagnostic support |
 
 ## Why Our Pricing Works
 
@@ -192,17 +104,6 @@ Start free and see immediate value. Upgrade only when you need more features.
 
 ## Value Comparison
 
-### vs. Traditional EMR Systems
-
-| Feature            | Traditional EMR   | Mediqom              |
-| ------------------ | ----------------- | -------------------- |
-| **Setup Cost**     | €10,000-50,000    | €0                   |
-| **Monthly Cost**   | €200-500/provider | €99-299/practice     |
-| **AI Analysis**    | Not included      | Included + credits   |
-| **Patient Access** | Limited portal    | Full family accounts |
-| **Mobile Access**  | Often extra cost  | Included             |
-| **Data Ownership** | Vendor locked     | You own your data    |
-
 ### vs. Consumer Health Apps
 
 | Feature                  | Consumer Apps       | Mediqom                |
@@ -228,23 +129,7 @@ Start free and see immediate value. Upgrade only when you need more features.
 
 - Organized records save time on every visit
 - AI insights reduce unnecessary consultations
-- AppConnect provides specialist opinions for €5-20
 - **Annual savings: €1,000+ per family**
-
-### Practice Savings
-
-**Traditional Approach**:
-
-- Documentation time: 2 hours/day × €50/hour = €100/day
-- Specialist consultations: €200-500 per referral
-- Patient data management: 1 hour/day × €25/hour = €25/day
-
-**With Mediqom Professional (€299/month)**:
-
-- Reduce documentation time by 75%: Save €1,875/month
-- AppConnect specialist access: €20-100 per analysis
-- Automated data organization: Save €500/month
-- **Net monthly savings: €2,000+ per practice**
 
 ## Money-Back Guarantee
 
@@ -259,19 +144,9 @@ Start free and see immediate value. Upgrade only when you need more features.
 We're confident you'll see immediate value:
 
 - **94%** of families find their first lost document within 24 hours
-- **87%** of practices reduce documentation time in first week
-- **91%** would recommend to colleagues after one month
+- **91%** would recommend to friends and family after one month
 
-## Enterprise & Volume Discounts
-
-### Healthcare Systems
-
-- **50+ providers**: 20% discount
-- **100+ providers**: 30% discount
-- **Custom deployment**: Negotiated pricing
-- **Multi-year contracts**: Additional savings
-
-### Family Organization Plans
+## Family Organization Plans
 
 - **Schools**: Special education pricing
 - **Employee Benefits**: Corporate family plans
@@ -287,12 +162,6 @@ A: Yes, upgrade or downgrade anytime. Changes are prorated.
 
 **Q: What happens if I exceed my limits?**  
 A: We'll notify you and offer upgrade options. No surprise charges.
-
-**Q: Do unused AppConnect credits expire?**  
-A: No, credits roll over indefinitely.
-
-**Q: Can I get a custom plan?**  
-A: Enterprise customers can get tailored pricing and features.
 
 **Q: Is there a student discount?**  
 A: Medical students and residents get 50% off all plans.

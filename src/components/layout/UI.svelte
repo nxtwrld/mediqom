@@ -9,6 +9,7 @@
     import ImportView from "$components/import/ImportView.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
+    import { isFeatureEnabled } from "$lib/config/feature-flags";
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
     import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
@@ -164,7 +165,7 @@
 
     // Either popup can contribute to the bottom offset
     let anyPopupOpen = $derived(mobileToolsOpen || mobileDocsOpen);
-    let toolsExtraHeight = $derived(anyPopupOpen && !panelOpen ? 80 : 0);
+    let toolsExtraHeight = $derived(!anyPopupOpen || panelOpen ? 0 : mobileDocsOpen ? 160 : 80);
 
     function closeMobilePopups() {
         mobileToolsOpen = false;
@@ -690,6 +691,7 @@
                     >
                     {$t("app.nav.documents")}
                 </a>
+                {#if isFeatureEnabled('MEDICATIONS')}
                 <a
                     href={$profile?.id ? `/med/p/${$profile.id}/medications` : "/med"}
                     onclick={() => closeMobilePopups()}
@@ -698,6 +700,25 @@
                         ><use href="/icons.svg#pills"></use></svg
                     >
                     {$t("medications.title")}
+                </a>
+                {/if}
+                <a
+                    href={$profile?.id ? `/med/p/${$profile.id}/contacts` : "/med"}
+                    onclick={() => closeMobilePopups()}
+                >
+                    <svg aria-hidden="true"
+                        ><use href="/icons.svg#user"></use></svg
+                    >
+                    {$t("contacts.nav")}
+                </a>
+                <a
+                    href={$profile?.id ? `/med/p/${$profile.id}/appointments` : "/med"}
+                    onclick={() => closeMobilePopups()}
+                >
+                    <svg aria-hidden="true"
+                        ><use href="/icons-o.svg#calendar"></use></svg
+                    >
+                    {$t("appointments.nav")}
                 </a>
             </div>
             <div class="navbar-name">{$profile?.fullName ?? ""}</div>
@@ -923,36 +944,6 @@
     .panel-section.-anatomy {
         pointer-events: none;
         overflow: hidden;
-    }
-
-    /* ── Panel header (back button row) ──────────────────────── */
-    .panel-header {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-        flex-shrink: 0;
-    }
-
-    .panel-back {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--color-gray-800);
-        border-radius: var(--radius-8, 0.5rem);
-    }
-
-    .panel-back:hover {
-        background: var(--color-gray-300);
-    }
-
-    .panel-back svg {
-        width: 1.25rem;
-        height: 1.25rem;
     }
 
     /* ── Panel backdrop overlay (mobile only) ────────────────── */

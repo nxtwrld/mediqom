@@ -1,9 +1,7 @@
 import type { ImportJob, ImportJobStatus } from "../../src/lib/import/types";
 
 /** Create a mock ImportJob with sensible defaults */
-export function createMockJob(
-  overrides: Partial<ImportJob> = {},
-): ImportJob {
+export function createMockJob(overrides: Partial<ImportJob> = {}): ImportJob {
   const now = new Date().toISOString();
   return {
     id: overrides.id ?? "test-job-001",
@@ -46,22 +44,49 @@ export interface SSEEvent {
 /** Build an SSE response body from an array of events */
 export function buildSSEBody(events: SSEEvent[]): string {
   return events
-    .map(
-      (e) =>
-        `data: ${JSON.stringify({ ...e, timestamp: Date.now() })}\n\n`,
-    )
+    .map((e) => `data: ${JSON.stringify({ ...e, timestamp: Date.now() })}\n\n`)
     .join("");
 }
 
 /** Create SSE events for a successful processing flow */
 export function createSuccessSSEEvents(): SSEEvent[] {
   return [
-    { type: "progress", stage: "extraction", progress: 10, message: "Starting extraction..." },
-    { type: "progress", stage: "extraction", progress: 30, message: "Extracting text..." },
-    { type: "progress", stage: "extraction", progress: 50, message: "Extraction complete" },
-    { type: "progress", stage: "analysis", progress: 60, message: "Starting analysis..." },
-    { type: "progress", stage: "analysis", progress: 80, message: "Analyzing content..." },
-    { type: "progress", stage: "analysis", progress: 95, message: "Finalizing..." },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 10,
+      message: "Starting extraction...",
+    },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 30,
+      message: "Extracting text...",
+    },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 50,
+      message: "Extraction complete",
+    },
+    {
+      type: "progress",
+      stage: "analysis",
+      progress: 60,
+      message: "Starting analysis...",
+    },
+    {
+      type: "progress",
+      stage: "analysis",
+      progress: 80,
+      message: "Analyzing content...",
+    },
+    {
+      type: "progress",
+      stage: "analysis",
+      progress: 95,
+      message: "Finalizing...",
+    },
     {
       type: "complete",
       stage: "done",
@@ -77,8 +102,18 @@ export function createErrorSSEEvents(
   errorMessage = "AI provider returned an error",
 ): SSEEvent[] {
   return [
-    { type: "progress", stage: "extraction", progress: 10, message: "Starting extraction..." },
-    { type: "progress", stage: "extraction", progress: 30, message: "Extracting text..." },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 10,
+      message: "Starting extraction...",
+    },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 30,
+      message: "Extracting text...",
+    },
     { type: "error", stage: "extraction", progress: 30, message: errorMessage },
   ];
 }
@@ -86,8 +121,18 @@ export function createErrorSSEEvents(
 /** Create SSE events that stall (never complete — for delete/cancel tests) */
 export function createStallingSSEEvents(): SSEEvent[] {
   return [
-    { type: "progress", stage: "extraction", progress: 10, message: "Starting extraction..." },
-    { type: "progress", stage: "extraction", progress: 20, message: "Processing..." },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 10,
+      message: "Starting extraction...",
+    },
+    {
+      type: "progress",
+      stage: "extraction",
+      progress: 20,
+      message: "Processing...",
+    },
   ];
 }
 
@@ -114,6 +159,61 @@ export function createMockExtractionResult() {
       ],
       tokenUsage: { prompt: 100, completion: 50, total: 150 },
     },
+  ];
+}
+
+/** Create a mock Document (as seeded via window.__testHooks.seedDocuments) */
+export function createMockDocument(overrides: Record<string, any> = {}): any {
+  const now = new Date().toISOString();
+  const userId = overrides.user_id ?? "test-user-001";
+  return {
+    id: overrides.id ?? "test-doc-001",
+    key: "test-key",
+    type: "document",
+    user_id: userId,
+    owner_id: userId,
+    attachments: [],
+    created_at: now,
+    ...overrides,
+    metadata: {
+      title: "Blood Test Results",
+      tags: ["laboratory"],
+      category: "laboratory",
+      date: now,
+      ...overrides.metadata,
+    },
+    content: {
+      title: "Blood Test Results",
+      tags: ["laboratory"],
+      diagnosis: [
+        { type: "primary", description: "Mild anemia", code: "D64.9" },
+      ],
+      ...overrides.content,
+    },
+  };
+}
+
+// ── Chat SSE events (mirrors the "chunk → metadata → complete" sequence
+// asserted in src/lib/chat/chat-manager.test.ts) ──────────────────────────
+
+export interface ChatSSEEvent {
+  type: "chunk" | "metadata" | "complete" | "error" | "emergency_banner";
+  content?: string;
+  data?: any;
+  message?: string;
+}
+
+/** Build an SSE response body from an array of chat events */
+export function buildChatSSEBody(events: ChatSSEEvent[]): string {
+  return events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join("");
+}
+
+/** A minimal successful chat reply: one text chunk, metadata, then complete */
+export function createChatReplyEvents(replyText: string): ChatSSEEvent[] {
+  return [
+    { type: "chunk", content: replyText },
+    { type: "metadata", data: { tokenUsage: 100 } },
+    { type: "complete" },
   ];
 }
 

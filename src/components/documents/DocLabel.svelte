@@ -233,7 +233,7 @@
         height: 100%;
         border-radius: 50%;
         background-color: var(--color, #546e7a);
-        color: var(--color-text, #fff);
+        color: var(--color-text-primary, #fff);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -268,7 +268,7 @@
         max-width: 15rem;
         max-height: calc(100vh - 2rem);
         overflow-y: auto;
-        background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        background: rgba(230, 231, 234, 0.95);
         color: var(--color-text-primary);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
@@ -296,7 +296,7 @@
     .doc-popup::after {
         margin-left: -2px;
         border: 8px solid transparent;
-        border-left-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        border-left-color: rgba(230, 231, 234, 0.95);
     }
 
     .doc-popup-action {

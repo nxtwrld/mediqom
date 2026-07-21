@@ -6,6 +6,7 @@
 	import SUPPORTED_LANGUAGES from '$lib/languages';
 	import { apiFetch } from '$lib/api/client';
 	import { themePreference, initTheme, type ThemePreference } from '$lib/theme/store';
+	import { isFeatureEnabled } from '$lib/config/feature-flags';
 
 	// Read language from $user store
 	let selectedLanguage = $state($user?.language || 'en');
@@ -42,6 +43,32 @@
 	$effect(() => {
 		themePreference.set(selectedTheme as ThemePreference);
 	});
+
+	// Care Plan: show certainty labels inline (user-level preference, row 18)
+	let showCertaintyInline = $state(Boolean(($user as any)?.settings?.showCertaintyLabelsInline));
+	let savingCertainty = $state(false);
+
+	async function saveCertaintyInline() {
+		savingCertainty = true;
+		try {
+			const response = await apiFetch('/v1/user/settings', {
+				method: 'POST',
+				body: JSON.stringify({ showCertaintyLabelsInline: showCertaintyInline })
+			});
+			const result = await response.json();
+			if (result.success) {
+				user.update((u) => (u ? { ...u, settings: result.settings } : u));
+			} else {
+				// Revert the toggle on failure
+				showCertaintyInline = !showCertaintyInline;
+			}
+		} catch (error) {
+			console.error('[Settings] Certainty preference error:', error);
+			showCertaintyInline = !showCertaintyInline;
+		} finally {
+			savingCertainty = false;
+		}
+	}
 
 	async function saveLanguage() {
 		saving = true;
@@ -165,6 +192,25 @@
 			/>
 		</form>
 	</section>
+
+	{#if isFeatureEnabled('CARE_PLAN')}
+	<div class="section-divider"></div>
+
+	<section>
+		<h3 class="h3">{$t('app.settings.general.careplan.title')}</h3>
+		<p class="description">{$t('app.settings.general.careplan.certainty-description')}</p>
+
+		<label class="toggle-row">
+			<input
+				type="checkbox"
+				bind:checked={showCertaintyInline}
+				disabled={savingCertainty}
+				onchange={saveCertaintyInline}
+			/>
+			<span>{$t('app.settings.general.careplan.certainty-label')}</span>
+		</label>
+	</section>
+	{/if}
 </div>
 
 <style>
@@ -182,6 +228,14 @@
 	.description {
 		color: var(--color-text-secondary);
 		margin-top: var(--ui-pad-small);
+	}
+
+	.toggle-row {
+		display: flex;
+		align-items: center;
+		gap: var(--ui-pad-small);
+		margin-top: var(--ui-pad-medium);
+		cursor: pointer;
 	}
 
 	.message {

@@ -137,7 +137,7 @@
         padding: 1rem;
         background-color: var(--color-background);
         border: var(--border-width) solid var(--color-background);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         height: var(--tile-height);
     }
 
@@ -167,7 +167,7 @@
         text-align: center;
         font-size: 1rem;
         font-weight: bold;
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
     }
 
     .profile.-new .status {

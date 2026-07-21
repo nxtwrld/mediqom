@@ -178,7 +178,7 @@
         width: 2rem;
         height: 2rem;
         border: 2px solid var(--color-border, #e2e8f0);
-        border-top: 2px solid var(--color-primary, #3b82f6);
+        border-top: 2px solid var(--color-interactivity, #3b82f6);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -201,7 +201,7 @@
     }
     
     /* Mobile responsive */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .session-visualization {
             min-height: 400px;
         }

@@ -11,7 +11,7 @@ import corePerformer from "./core.performer";
 export default {
   name: "extract_medication_and_prescription_information",
   description:
-    "Extract comprehensive medication information including current medications, new prescriptions, dosages, administration instructions, and medication management details. This schema handles both medication lists and prescription documents.",
+    "Extract comprehensive medication information including current medications, new prescriptions, dosages, administration instructions, and medication management details. This schema handles both medication lists and prescription documents.\n\nCRITICAL CONSUMER-SAFETY RULE: Medications are doctor-controlled. NEVER infer dose changes, discontinuations, or new prescriptions by comparing across documents or filling in gaps. ONLY extract what is explicitly written by the prescribing provider in this specific document. If the document is silent about a change, the relevant array MUST be empty. Mediqom ships in consumer mode — fabricated medication actions can cause real patient harm. When uncertain, omit the field rather than guess.\n\nCARE PLAN LINK ANNOTATIONS: When the import request includes a CarePlanExtractionContext.recentMedications list (existing medications already known to the user's Care Plan), populate `linkedMedicationId` on currentMedications/discontinuedMedications/medicationChanges items to point to the matching existing medication id, and `isNewMedication: true` on newPrescriptions items that do NOT match any existing medication. Only set a link when you are confident it is the same medication (matching name and/or generic + similar dose context). If no context blob is provided, leave these fields unset.",
   parameters: {
     type: "object",
     properties: {
@@ -145,15 +145,17 @@ export default {
                 days: {
                   type: "number",
                   description:
-                    "Number of days (0 = until finished, -1 = not specified)",
+                    "Number of days (0 = until finished, -1 = not specified). ONLY populate if explicitly written in the prescription; otherwise use -1.",
                 },
                 quantity: {
                   type: "string",
-                  description: "Total quantity to dispense",
+                  description:
+                    "Total quantity to dispense. ONLY populate if explicitly written in the prescription.",
                 },
                 refills: {
                   type: "number",
-                  description: "Number of refills authorized",
+                  description:
+                    "Number of refills authorized. ONLY populate if explicitly written in the prescription; otherwise omit.",
                 },
                 daysSupply: {
                   type: "number",
@@ -212,6 +214,16 @@ export default {
               description:
                 "Search-optimized terms: generic names, brand names, drug classes, indications",
             },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
+            isNewMedication: {
+              type: "boolean",
+              description:
+                "Care Plan link annotation. ONLY set when a CarePlanExtractionContext was provided in the request. Set to true if this prescription does NOT match any medication in CarePlanExtractionContext.recentMedications. Leave unset otherwise.",
+            },
           },
           required: ["medicationName", "dosage", "route", "form"],
         },
@@ -241,7 +253,8 @@ export default {
             },
             dosage: {
               type: "string",
-              description: "Current dosage with units",
+              description:
+                "Current dosage with units. ONLY extract the dosage written in THIS document; do NOT carry over from a prior document.",
             },
             route: {
               type: "string",
@@ -269,7 +282,8 @@ export default {
                 "on_hold",
                 "unknown",
               ],
-              description: "Current status",
+              description:
+                "Current status. ONLY use 'discontinued' / 'on_hold' / 'completed' if the document explicitly says so. Default to 'active' for medications listed as current; NEVER infer a non-active status from absence or context.",
             },
             startDate: {
               type: "string",
@@ -311,6 +325,16 @@ export default {
               description:
                 "Search-optimized terms: generic names, brand names, drug classes, indications",
             },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
+            linkedMedicationId: {
+              type: "string",
+              description:
+                "Care Plan link annotation. ONLY set when a CarePlanExtractionContext was provided in the request and you are confident this medication matches an existing entry in CarePlanExtractionContext.recentMedications — set to that entry's id. Leave unset otherwise.",
+            },
           },
           required: ["medicationName"],
         },
@@ -318,17 +342,20 @@ export default {
       // Discontinued medications
       discontinuedMedications: {
         type: "array",
-        description: "Recently discontinued medications",
+        description:
+          "Recently discontinued medications. CRITICAL: ONLY include medications the document EXPLICITLY states are being stopped, withdrawn, or discontinued by the provider (e.g., 'stop atorvastatin', 'discontinue metformin'). Absence of a medication from a current-medications list is NOT evidence of discontinuation — that comparison is handled client-side with user confirmation. If no medication is explicitly discontinued in this document, return an empty array.",
         items: {
           type: "object",
           properties: {
             medicationName: {
               type: "string",
-              description: "Name of discontinued medication",
+              description:
+                "Name of discontinued medication. ONLY include if the document explicitly states this medication is being stopped/discontinued/withdrawn by the provider.",
             },
             dateDiscontinued: {
               type: "string",
-              description: "Date when stopped",
+              description:
+                "Date when stopped. ONLY populate if explicitly stated in the document.",
             },
             reasonDiscontinued: {
               type: "string",
@@ -340,11 +367,23 @@ export default {
                 "drug_interaction",
                 "completed_course",
               ],
-              description: "Reason for discontinuation",
+              description:
+                "Reason for discontinuation. ONLY populate if explicitly stated. Do NOT guess from clinical context.",
             },
             prescriber: {
               type: "string",
-              description: "Provider who discontinued",
+              description:
+                "Provider who discontinued. ONLY populate if explicitly named in the document.",
+            },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
+            linkedMedicationId: {
+              type: "string",
+              description:
+                "Care Plan link annotation. ONLY set when a CarePlanExtractionContext was provided in the request and you are confident this medication matches an existing entry in CarePlanExtractionContext.recentMedications — set to that entry's id. Leave unset otherwise.",
             },
           },
         },
@@ -352,13 +391,15 @@ export default {
       // Medication changes (for reconciliation documents)
       medicationChanges: {
         type: "array",
-        description: "Changes to existing medications",
+        description:
+          "Changes to existing medications. CRITICAL: ONLY include changes the document EXPLICITLY describes (e.g., 'increase dose to 20mg', 'switch to lisinopril', 'reduce frequency to once daily'). NEVER infer a change by comparing values across documents or by reasoning about what the doctor might mean. If no change is explicitly described in this document, return an empty array.",
         items: {
           type: "object",
           properties: {
             medicationName: {
               type: "string",
-              description: "Medication being changed",
+              description:
+                "Medication being changed. ONLY include if a change is explicitly described in the document.",
             },
             changeType: {
               type: "string",
@@ -370,15 +411,18 @@ export default {
                 "switched",
                 "added",
               ],
-              description: "Type of change",
+              description:
+                "Type of change. ONLY populate when the document explicitly describes the change (e.g., 'increase to 20mg', 'switch to lisinopril', 'stop atorvastatin'). Do NOT infer from comparing values across documents.",
             },
             previousDose: {
               type: "string",
-              description: "Previous dosage",
+              description:
+                "Previous dosage. ONLY extract the literal value written in this document. Do NOT reconstruct from prior context or memory.",
             },
             newDose: {
               type: "string",
-              description: "New dosage",
+              description:
+                "New dosage. ONLY extract the literal value written in this document. Do NOT reconstruct from prior context.",
             },
             reason: {
               type: "string",
@@ -390,11 +434,23 @@ export default {
                 "cost",
                 "availability",
               ],
-              description: "Reason for change",
+              description:
+                "Reason for change. ONLY populate if the document explicitly states the reason. Do NOT guess from clinical context.",
             },
             effectiveDate: {
               type: "string",
-              description: "When change takes effect",
+              description:
+                "When change takes effect. ONLY populate if explicitly stated in the document.",
+            },
+            rxnormCode: {
+              type: "string",
+              description:
+                "RxNorm concept unique identifier (RxCUI) for this medication. ONLY populate when you are certain of the correct RxCUI. Omit if uncertain. Numeric string only (e.g., '860975' for metformin 500 mg tablet). Use ingredient-level RxCUI when the document does not specify formulation; use clinical drug RxCUI when strength and form are explicit.",
+            },
+            linkedMedicationId: {
+              type: "string",
+              description:
+                "Care Plan link annotation. ONLY set when a CarePlanExtractionContext was provided in the request and you are confident this change refers to an existing entry in CarePlanExtractionContext.recentMedications — set to that entry's id. Leave unset otherwise.",
             },
           },
         },

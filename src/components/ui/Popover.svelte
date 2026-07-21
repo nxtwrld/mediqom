@@ -27,8 +27,8 @@
     const isAbsolute = $derived(x !== undefined && y !== undefined);
     const MARGIN = 10;
 
-    let wrapperEl: HTMLElement;
-    let popoverEl: HTMLElement;
+    let wrapperEl = $state<HTMLElement | undefined>(undefined);
+    let popoverEl = $state<HTMLElement | undefined>(undefined);
     let popoverStyle = $state('');
     let arrowStyle = $state('');
     let absoluteStyle = $state('');
@@ -80,7 +80,7 @@
     }
 
     async function positionPopover() {
-        const rect = wrapperEl.getBoundingClientRect();
+        const rect = wrapperEl!.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const vw = window.innerWidth;
         const vh = window.innerHeight;
@@ -202,7 +202,7 @@
     }
 
     .popover {
-        background: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        background: rgba(230, 231, 234, 0.95);
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-medium);
         backdrop-filter: blur(4px);
@@ -271,7 +271,7 @@
         top: 100%;
         margin-top: -2px;
         border: 8px solid transparent;
-        border-top-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        border-top-color: rgba(230, 231, 234, 0.95);
     }
 
     /* Arrow pointing UP (menu is below trigger) */
@@ -284,6 +284,6 @@
         bottom: 100%;
         margin-bottom: -2px;
         border: 8px solid transparent;
-        border-bottom-color: rgba(var(--color-background-rgb, 255, 255, 255), 0.95);
+        border-bottom-color: rgba(230, 231, 234, 0.95);
     }
 </style>

@@ -15,6 +15,8 @@
     import ImportDocument from './ImportDocument.svelte';
     import ImportProfile from './ImportProfile.svelte';
     import ScreenOverlay from '$components/ui/ScreenOverlay.svelte';
+    import CarePlanUpdate from '$components/careplan/CarePlanUpdate.svelte';
+    import { isFeatureEnabled } from '$lib/config/feature-flags';
     import LoaderThinking from '$components/ui/LoaderThinking.svelte';
     import DocumentTile from '$components/documents/DocumentTile.svelte';
     import JobProgressCard from './JobProgressCard.svelte';
@@ -46,6 +48,9 @@
     }[] = $state([]);
     let invalids: Document[] = $state([]);
     let savedDocuments: SavedDocument[] = $state([]);
+    // Post-import Care Plan summary (build row 14)
+    let carePlanDeltas: import('$lib/careplan/import-hook').CarePlanDeltaEntry[] = $state([]);
+    let carePlanSummaryProfileId = $state<string | null>(null);
 
     // File tracking
     let currentFiles: File[] = $state([]);
@@ -322,7 +327,10 @@
         savingDocs = new Set([...savingDocs, doc]);
 
         try {
-            const saved = await saveDocuments([{ profile: profileDetected.profile, reports: [doc] }]);
+            const saved = await saveDocuments(
+                [{ profile: profileDetected.profile, reports: [doc] }],
+                { onCarePlanDelta: (entry) => { carePlanDeltas = [...carePlanDeltas, entry]; carePlanSummaryProfileId = entry.profileId; } },
+            );
             savedDocuments = [...savedDocuments, ...saved];
 
             // Remove from pool
@@ -353,7 +361,9 @@
     async function saveAll() {
         savingAll = true;
         try {
-            const saved = await saveDocuments(byProfileDetected);
+            const saved = await saveDocuments(byProfileDetected, {
+                onCarePlanDelta: (entry) => { carePlanDeltas = [...carePlanDeltas, entry]; carePlanSummaryProfileId = entry.profileId; },
+            });
             savedDocuments = [...savedDocuments, ...saved];
             byProfileDetected = [];
             results = [];
@@ -409,13 +419,13 @@
                 {$t('app.import.add-files')}
             </label>
             {#if isNativePlatform()}
-                <button class="button -small" onclick={handleCameraCapture}>
+                <button class="button -small" onclick={handleCameraCapture} aria-label="Take photo">
                     <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                         <circle cx="12" cy="13" r="4"/>
                     </svg>
                 </button>
-                <button class="button -small" onclick={handleGalleryPick}>
+                <button class="button -small" onclick={handleGalleryPick} aria-label="Pick from gallery">
                     <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                         <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -568,6 +578,16 @@
     </ScreenOverlay>
 {/if}
 
+{#if isFeatureEnabled('CARE_PLAN') && carePlanDeltas.length > 0 && carePlanSummaryProfileId}
+    <ScreenOverlay title={$t('careplan.title')} preventer={true} on:close={() => { carePlanDeltas = []; carePlanSummaryProfileId = null; }}>
+        <CarePlanUpdate
+            profileId={carePlanSummaryProfileId}
+            deltas={carePlanDeltas}
+            onClose={() => { carePlanDeltas = []; carePlanSummaryProfileId = null; }}
+        />
+    </ScreenOverlay>
+{/if}
+
 <style>
     .import-view {
         display: flex;
@@ -640,7 +660,7 @@
         font-size: 0.85rem;
     }
     .alert.-info {
-        background-color: var(--color-blue-100, #e0f0ff);
+        background-color: var(--color-interactivity-light, #e0f0ff);
     }
     .alert.-warning {
         background-color: color-mix(in srgb, var(--color-warning) 15%, transparent);

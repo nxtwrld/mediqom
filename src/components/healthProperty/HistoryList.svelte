@@ -152,7 +152,7 @@
 	{/if}
 
 	{#if !hideAddButton && canAddEntries(category) && !isAdding}
-		<button type="button" class="button --secondary add-btn" onclick={startAdd} disabled={isProcessing}>
+		<button type="button" class="button -secondary add-btn" onclick={startAdd} disabled={isProcessing}>
 			{$t('profile.health.history.add-entry')}
 		</button>
 	{/if}
@@ -160,11 +160,11 @@
 
 <style>
 	.history-list {
-		padding: var(--gap-small) 0;
+		padding: var(--gap) 0;
 	}
 
 	.no-data {
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 		text-align: center;
 		padding: var(--gap);
 	}
@@ -186,15 +186,15 @@
 	.entry-content {
 		display: flex;
 		align-items: center;
-		padding: var(--gap-small) 0;
+		padding: var(--gap) 0;
 		gap: var(--gap);
 	}
 
 	.date {
 		flex: 0 0 auto;
 		min-width: 7rem;
-		color: var(--color-text-muted);
-		font-size: var(--font-size-small);
+		color: var(--color-text-secondary);
+		font-size: var(--font-size-sm);
 	}
 
 	.value {
@@ -204,7 +204,7 @@
 
 	.unit {
 		font-weight: 400;
-		color: var(--color-text-muted);
+		color: var(--color-text-secondary);
 		margin-left: 0.25rem;
 	}
 
@@ -219,8 +219,8 @@
 		border: none;
 		padding: 0.25rem;
 		cursor: pointer;
-		color: var(--color-text-muted);
-		border-radius: var(--radius-small);
+		color: var(--color-text-secondary);
+		border-radius: var(--ui-radius-small);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -228,11 +228,11 @@
 
 	.action-btn:hover {
 		background: var(--color-gray-200);
-		color: var(--color-text);
+		color: var(--color-text-primary);
 	}
 
 	.action-btn.delete:hover {
-		color: var(--color-error);
+		color: var(--color-negative);
 	}
 
 	.action-btn:disabled {
@@ -252,9 +252,9 @@
 		gap: 0.25rem;
 		padding: 0.125rem 0.5rem;
 		background: var(--color-gray-200);
-		border-radius: var(--radius-small);
-		font-size: var(--font-size-small);
-		color: var(--color-text-muted);
+		border-radius: var(--ui-radius-small);
+		font-size: var(--font-size-sm);
+		color: var(--color-text-secondary);
 	}
 
 	.badge svg {

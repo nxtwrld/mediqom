@@ -327,7 +327,7 @@
     outline-offset: 0px;
   }
   50% {
-    outline: 3px solid var(--color-primary, #3b82f6);
+    outline: 3px solid var(--color-interactivity, #3b82f6);
   }
   100% {
     outline: 5px solid transparent;
@@ -798,7 +798,7 @@
 .session-reasoning-text {
   margin: 0;
   padding: 0.75rem;
-  background: var(--color-surface-2, #f8fafc);
+  background: var(--color-surface, #f8fafc);
   border-radius: 6px;
   font-size: 0.875rem;
   color: var(--color-text-primary, #1f2937);
@@ -808,8 +808,8 @@
 .session-quote-text {
   margin: 0;
   padding: 0.75rem 1rem;
-  background: var(--color-surface-2, #f8fafc);
-  border-left: 3px solid var(--color-primary, #3b82f6);
+  background: var(--color-surface, #f8fafc);
+  border-left: 3px solid var(--color-interactivity, #3b82f6);
   border-radius: 0 4px 4px 0;
   font-style: italic;
   color: var(--color-text-secondary, #6b7280);
@@ -888,14 +888,14 @@
 }
 
 .session-relationship-wrapper:hover {
-  background-color: var(--color-primary-bg, #dbeafe);
+  background-color: var(--color-interactivity-light, #dbeafe);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-color: var(--color-primary, #3b82f6);
+  border-color: var(--color-interactivity, #3b82f6);
 }
 
 .session-relationship-wrapper:focus {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--color-interactivity, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -1213,7 +1213,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .sankey-container {
     min-height: 300px;
   }

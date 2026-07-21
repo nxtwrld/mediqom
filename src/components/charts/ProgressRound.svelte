@@ -7,7 +7,7 @@
         colors?: string[];
     }
 
-    let { value = 0, colors = ["var(--color-shade)", "var(--color-primary)"] }: Props = $props();
+    let { value = 0, colors = ["var(--color-gray-300)", "var(--color-interactivity)"] }: Props = $props();
 </script>
 
 <div class="progress">
@@ -40,7 +40,7 @@
     .progress svg .progress-value {
         font-size: 12rem;
         font-weight: bold;
-        fill: var(--color-primary-dark);
+        fill: var(--color-interactivity-dark);
         text-anchor: middle;
         dominant-baseline: middle;
     }

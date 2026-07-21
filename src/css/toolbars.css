@@ -7,7 +7,7 @@
   gap: var(--gap);
   width: 100%;
   height: 100%;
-  border-radius: var(--radius);
+  border-radius: var(--radius-16);
 }
 
 .toolbar .spacer {
@@ -38,7 +38,7 @@
 .toolbar a,
 .toolbar button {
   background-color: var(--button-color);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .toolbar a.-active,
@@ -59,4 +59,19 @@
   aspect-ratio: 1;
   height: 100%;
   fill: currentColor;
+}
+
+
+
+.heading .toolbar button {
+  color: var(--color-text-secondary);
+}
+
+.heading .toolbar button:hover {
+  background: var(--color-interactivity);
+  color: var(--color-interactivity-text);
+}
+.heading .toolbar button.-danger:hover {
+  background: var(--color-negative);
+  color: var(--color-negative-text);
 }

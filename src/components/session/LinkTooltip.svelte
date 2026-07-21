@@ -41,7 +41,7 @@
     /* Unified Tooltip Styles */
     .unified-tooltip {
         background: rgba(255, 255, 255, 0.3);
-        border-radius: var(--radius);
+        border-radius: var(--radius-16);
         padding: .2rem;;
         backdrop-filter: blur(4px);
         font-family: system-ui, sans-serif;
@@ -132,7 +132,7 @@
     }
 
     /* Mobile adjustments */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .unified-tooltip {
             padding: 6px;
             max-height: 180px;

@@ -176,18 +176,18 @@
 
     function getPriorityColor(priority: string): string {
         switch(priority) {
-            case 'critical': return 'var(--color-error)';
+            case 'critical': return 'var(--color-negative)';
             case 'high': return 'var(--color-warning)';
             case 'medium': return 'var(--color-info)';
-            case 'low': return 'var(--color-success)';
+            case 'low': return 'var(--color-positive)';
             default: return 'var(--color-gray-500)';
         }
     }
 
     function getConfidenceColor(probability: number): string {
-        if (probability >= 0.8) return 'var(--color-success)';
+        if (probability >= 0.8) return 'var(--color-positive)';
         if (probability >= 0.6) return 'var(--color-warning)';
-        return 'var(--color-error)';
+        return 'var(--color-negative)';
     }
 
     function formatConfidence(probability: number): string {
@@ -574,7 +574,7 @@
     
     .list-item.-pinned {
         font-weight: 700;
-        border-left-color: var(--color-primary);
+        border-left-color: var(--color-interactivity);
     }
 
     /* Enhanced Diagnosis Styles */
@@ -592,14 +592,14 @@
         font-family: monospace;
         background: var(--color-gray-100);
         padding: 0.25rem 0.5rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
     }
     
     .confidence-badge {
         color: white;
         padding: 0.25rem 0.5rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
         font-weight: bold;
     }
@@ -631,7 +631,7 @@
         background: var(--color-info-light);
         color: var(--color-info-dark);
         padding: 0.2rem 0.4rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
     }
 
@@ -647,7 +647,7 @@
         border-radius: var(--radius-8);
         padding: 1rem;
         margin-bottom: 0.5rem;
-        border-left: 4px solid var(--color-primary);
+        border-left: 4px solid var(--color-interactivity);
     }
     
     .recommendation-header {
@@ -660,13 +660,13 @@
     .recommendation-type {
         font-size: 0.8rem;
         font-weight: bold;
-        color: var(--color-primary);
+        color: var(--color-interactivity);
     }
     
     .priority-badge, .timeframe-badge {
         color: white;
         padding: 0.2rem 0.4rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.7rem;
         font-weight: bold;
     }
@@ -700,9 +700,9 @@
     .clarifying-question {
         background: white;
         border-radius: var(--radius-8);
-        padding: var(--space-16);
-        border: 1px solid var(--border-color);
-        margin-bottom: var(--space-12);
+        padding: var(--ui-pad-medium);
+        border: 1px solid var(--color-border);
+        margin-bottom: 0.75rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
@@ -722,27 +722,27 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: var(--space-12);
+        margin-bottom: 0.75rem;
     }
 
     .question-actions {
         display: flex;
         align-items: center;
-        gap: var(--space-8);
+        gap: var(--ui-pad-small);
     }
 
     .feedback-controls {
         display: flex;
         align-items: center;
-        gap: var(--space-4);
+        gap: var(--ui-pad-xsmall);
     }
 
     .feedback-btn {
         display: flex;
         align-items: center;
-        gap: var(--space-4);
-        padding: var(--space-4) var(--space-8);
-        border-radius: var(--radius-4);
+        gap: var(--ui-pad-xsmall);
+        padding: var(--ui-pad-xsmall) var(--ui-pad-small);
+        border-radius: var(--ui-radius-small);
         font-size: 12px;
         font-weight: 500;
         border: 1px solid;
@@ -811,7 +811,7 @@
     .category-badge {
         background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         color: white;
-        padding: var(--space-2) var(--space-8);
+        padding: 0.125rem var(--ui-pad-small);
         border-radius: var(--radius-12);
         font-size: 11px;
         font-weight: 600;
@@ -822,7 +822,7 @@
     .intent-badge {
         background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
-        padding: var(--space-2) var(--space-8);
+        padding: 0.125rem var(--ui-pad-small);
         border-radius: var(--radius-12);
         font-size: 11px;
         font-weight: 500;
@@ -831,14 +831,14 @@
     .question-text {
         font-size: 14px;
         font-weight: 600;
-        color: var(--text-primary);
-        margin: 0 0 var(--space-8) 0;
+        color: var(--color-text-primary);
+        margin: 0 0 var(--ui-pad-small) 0;
         line-height: 1.4;
     }
 
     .question-rationale {
         font-size: 13px;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
         font-style: italic;
         margin: 0;
         line-height: 1.4;
@@ -846,7 +846,7 @@
 
     /* Treatment Styles */
     .treatment-item {
-        border-left-color: var(--color-success);
+        border-left-color: var(--color-positive);
     }
     
     .treatment-header {
@@ -858,13 +858,13 @@
     
     .effectiveness-badge {
         padding: 0.25rem 0.5rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
         font-weight: bold;
     }
     
     .effectiveness-high {
-        background: var(--color-success);
+        background: var(--color-positive);
         color: white;
     }
     
@@ -874,7 +874,7 @@
     }
     
     .effectiveness-low {
-        background: var(--color-error);
+        background: var(--color-negative);
         color: white;
     }
     
@@ -883,10 +883,10 @@
     }
     
     .target-tag {
-        background: var(--color-success-light);
-        color: var(--color-success-dark);
+        background: var(--color-positive-light);
+        color: var(--color-positive-dark);
         padding: 0.2rem 0.4rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
         margin-right: 0.25rem;
     }
@@ -910,13 +910,13 @@
     
     .urgency-badge {
         padding: 0.25rem 0.5rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
         font-weight: bold;
     }
     
     .urgency-immediate {
-        background: var(--color-error);
+        background: var(--color-negative);
         color: white;
     }
     
@@ -931,7 +931,7 @@
     }
     
     .urgency-routine {
-        background: var(--color-success);
+        background: var(--color-positive);
         color: white;
     }
 
@@ -950,10 +950,10 @@
     }
     
     .alternative-tag {
-        background: var(--color-purple-light);
-        color: var(--color-purple-dark);
+        background: var(--color-info-light);
+        color: var(--color-info-dark);
         padding: 0.2rem 0.4rem;
-        border-radius: var(--radius-4);
+        border-radius: var(--ui-radius-small);
         font-size: 0.8rem;
         margin-right: 0.25rem;
     }

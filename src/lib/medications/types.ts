@@ -13,6 +13,8 @@ export type AdherenceStatus = 'taken' | 'missed' | 'skipped' | 'pending';
 
 export type AdherenceLevel = 'excellent' | 'good' | 'fair' | 'poor' | 'unknown';
 
+export type MedicationChangeType = 'new' | 'modified' | 'discontinued' | 'continued';
+
 export interface MedicationSchedule {
     frequency: MedicationFrequency;
     times: string[];           // ["08:00", "14:00", "20:00"]
@@ -72,6 +74,9 @@ export interface Medication {
     sideEffects?: string[];
     instructions?: MedicationInstructions;
     duration?: MedicationDuration;
+    // Doctor's authorial intent at time of source document. Never inferred — only set when the source
+    // document explicitly described this as a new prescription, a change, or a discontinuation.
+    changeType?: MedicationChangeType;
 
     // ── App-only fields (NOT in AI schema, populated by user/app) ──
     status: MedicationStatus;

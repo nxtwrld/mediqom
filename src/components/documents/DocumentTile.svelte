@@ -5,6 +5,7 @@
     import BadgeHorizontal from '$components/ui/dates/BadgeHorizontal.svelte';
     import { profile } from '$lib/profiles';
     import { t } from '$lib/i18n';
+    import { goto } from '$app/navigation';
 
     interface Props {
         document: Document;
@@ -43,15 +44,14 @@
             {/if}
         </div>
         {#if shareCount > 0}
-            <a
-                href="/med/p/{document.user_id}/shares"
+            <button
                 class="share-badge"
-                onclick={(e) => e.stopPropagation()}
+                onclick={(e) => { e.stopPropagation(); goto(`/med/p/${document.user_id}/shares`); }}
                 aria-label={$t('share.shared-count', { values: { count: shareCount } })}
             >
                 <svg><use href="/icons.svg#share" /></svg>
                 <span>{shareCount}</span>
-            </a>
+            </button>
         {/if}
     </div>
     <!--div class="actions"></div-->
@@ -114,7 +114,7 @@
         align-items: center;
         justify-content: space-between;
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile:hover {
@@ -123,7 +123,7 @@
 
     .tile:hover .tile-footer {
         background-color: var(--color);
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile  svg.category {
@@ -133,7 +133,7 @@
         fill: currentColor;
     }
     .tile:hover  svg.category {
-        color: var(--color-text);
+        color: var(--color-text-primary);
     }
 
     .tile .people {

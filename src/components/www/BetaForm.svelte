@@ -426,7 +426,7 @@
     max-width: 600px;
     margin: 2rem auto;
     padding: 2rem;
-    background: var(--surface-color, #ffffff);
+    background: var(--color-surface, #ffffff);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -439,17 +439,17 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: var(--text-primary, #333);
+    color: var(--color-text-primary, #333);
   }
   
   label.required::after {
     content: ' *';
-    color: var(--error-color, #dc3545);
+    color: var(--color-negative, #dc3545);
   }
   
   .help-text {
     font-size: 0.875rem;
-    color: var(--text-secondary, #666);
+    color: var(--color-text-secondary, #666);
     margin-bottom: 0.5rem;
     font-style: italic;
   }
@@ -461,7 +461,7 @@
   textarea {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid var(--border-color, #ddd);
+    border: 1px solid var(--color-border, #ddd);
     border-radius: 4px;
     font-size: 1rem;
     font-family: inherit;
@@ -494,12 +494,12 @@
   h3 {
     margin-top: 2rem;
     margin-bottom: 1rem;
-    color: var(--text-primary, #333);
+    color: var(--color-text-primary, #333);
   }
   
   .error {
     display: block;
-    color: var(--error-color, #dc3545);
+    color: var(--color-negative, #dc3545);
     font-size: 0.875rem;
     margin-top: 0.25rem;
   }
@@ -527,7 +527,7 @@
   .submit-button {
     width: 100%;
     padding: 0.75rem 1.5rem;
-    background-color: var(--primary-color, #007bff);
+    background-color: var(--color-interactivity, #007bff);
     color: white;
     border: none;
     border-radius: 4px;
@@ -538,7 +538,7 @@
   }
   
   .submit-button:hover:not(:disabled) {
-    background-color: var(--primary-hover, #0056b3);
+    background-color: var(--color-interactivity-dark, #0056b3);
   }
   
   .submit-button:disabled {
@@ -547,7 +547,7 @@
   }
   
   a {
-    color: var(--primary-color, #007bff);
+    color: var(--color-interactivity, #007bff);
     text-decoration: none;
   }
   

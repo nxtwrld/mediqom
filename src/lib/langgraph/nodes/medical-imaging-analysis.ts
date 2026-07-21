@@ -10,9 +10,9 @@
 import type { MedicalImagingState } from "../state-medical-imaging";
 import type { FunctionDefinition } from "@langchain/core/language_models/base";
 import { fetchGptEnhanced } from "$lib/ai/providers/enhanced-abstraction";
-import anatomyObjects from "$data/objects.json";
 import { log } from "$lib/logging/logger";
 import { recordWorkflowStep } from "$lib/debug/workflow-recorder";
+import { populateSchemaEnums } from "./_schema-enums";
 
 /**
  * Calculate patient age from birth date
@@ -164,18 +164,9 @@ export const medicalImagingAnalysisNode = async (
       }
       log.analysis.debug("Loaded medical-imaging-analysis schema");
 
-      // Populate empty bodyParts identification enum with valid 3D model objects
-      const schemaItems = (schema as any)?.parameters?.properties?.bodyParts
-        ?.items?.properties?.identification;
-      if (schemaItems?.enum && schemaItems.enum.length === 0) {
-        const validAnatomyObjects = Object.values(anatomyObjects).flatMap(
-          (category: any) => category.objects || [],
-        );
-        schemaItems.enum = [...new Set(validAnatomyObjects)];
-        log.analysis.debug("Populated bodyParts enum", {
-          count: schemaItems.enum.length,
-        });
-      }
+      // Populate any empty enums (anatomy mesh names, signal catalog keys) in
+      // a single consistent pass, regardless of where they sit in the schema.
+      populateSchemaEnums(schema);
     } catch (error) {
       log.analysis.error("Failed to load medical imaging schema:", error);
       throw new Error(`Failed to load schema: ${error}`);

@@ -236,7 +236,7 @@
 
     .action {
         font-weight: 600;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-interactivity, #3b82f6);
         font-size: 0.75rem;
     }
 
@@ -246,7 +246,7 @@
     }
 
     /* Responsive adjustments */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .legend {
             font-size: 0.8rem;
             padding: 0.75rem;
