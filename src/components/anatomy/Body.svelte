@@ -5,7 +5,7 @@
     import { onMount, createEventDispatcher } from 'svelte';
     import * as THREE from 'three';
     import ui, { state } from '$lib/ui';
-    import objects3d from '$lib/context/objects';
+    import objects3d from '$data/objects.json';
     import { fade } from 'svelte/transition';
     import TWEEN from '@tweenjs/tween.js';
     import focused from '$lib/focused';

@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Anatomy</title>
+<style>html,body{margin:0;height:100%}#root{width:100%;height:100%;min-height:420px}
+#boot{position:absolute;top:8px;left:10px;font:12px system-ui;color:#9fb3c8}</style></head>
+<body><div id="root"></div><div id="boot">loading external bundle…</div><script>
+var s=document.createElement('script');
+s.type='module';
+s.src="https://mediqom.com/spike/app.js";
+s.onerror=function(){document.getElementById('boot').textContent=
+  '0b-D FAIL: external script fetch refused (CSP)';};
+s.onload=function(){var b=document.getElementById('boot');if(b)b.textContent='0b-D PASS: external bundle executed';};
+document.head.appendChild(s);
+</script></body></html>

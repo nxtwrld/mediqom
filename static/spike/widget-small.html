@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Anatomy</title>
+<style>html,body{margin:0;height:100%}#c{width:100%;height:100%;min-height:420px;display:block}
+#m{position:absolute;top:8px;left:10px;font:12px system-ui;color:#9fb3c8}</style></head>
+<body><canvas id="c"></canvas><div id="m">probing…</div><script>
+(function(){
+  var c=document.getElementById('c'),m=document.getElementById('m');
+  var gl=c.getContext('webgl2')||c.getContext('webgl');
+  if(!gl){m.textContent='0b-A FAIL: no WebGL context in the sandboxed iframe';return;}
+  m.textContent='0b-A PASS: '+(gl.getParameter(gl.VERSION)||'webgl')+
+    ' | renderer='+(gl.getParameter(gl.RENDERER)||'?');
+  var t=0;
+  (function draw(){
+    t+=0.01;
+    gl.viewport(0,0,c.width=c.clientWidth,c.height=c.clientHeight);
+    gl.clearColor(0.06+0.06*Math.sin(t),0.09,0.13,1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    requestAnimationFrame(draw);
+  })();
+})();
+</script></body></html>

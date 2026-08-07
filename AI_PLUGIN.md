@@ -151,6 +151,59 @@ The tool description must not promise it, and the resolver should return an expl
 
 Three cheap experiments. **Nothing else in this document should be built until all three have answers.**
 
+## ✅ Results — measured 2026-08-07
+
+Built as one Slice Zero spike rather than four separate probes: `scripts/anatomy-pipeline/`
+(real, kept), plus `spike/widget/`, `vite.config.spike.ts` and `src/routes/v1/mcp-spike/`
+(throwaway). Everything below is measured, not estimated.
+
+**0a — PASSED, comfortably.** All 18 GLBs converted; **255 MB → 11.6 MB (22×)**.
+
+| | OBJ | GLB | | | OBJ | GLB |
+|---|---:|---:|---|---|---:|---:|
+| male skeletal | 14.6 MB | **697 KB** | | female skeletal | 59.3 MB | 2 547 KB |
+| male vascular | 25.9 MB | 941 KB | | female vascular | 26.7 MB | 998 KB |
+| male nervous | 18.4 MB | 805 KB | | female nervous | 17.8 MB | 805 KB |
+| male organs | 11.5 MB | 554 KB | | female organs | 18.8 MB | 830 KB |
+| male muscular | 9.4 MB | 726 KB | | female muscular | 9.2 MB | 709 KB |
+| **male, all 9 layers** | | **4.6 MB** | | **female, all 9 layers** | | **7.0 MB** |
+
+Gate was < 800 KB for the male skeleton: **697 KB**. Name fidelity gate: **18/18 layers,
+every source mesh name preserved exact-case.** `src/data/anatomy-manifest.json` is generated
+and confirms this document's phantom counts exactly — **430 male / 415 female of 465
+declared, 35 / 50 phantom**.
+
+Two corrections to §4's pipeline, both from the API having moved on:
+
+- `weld()` in gltf-transform 4.x takes no `tolerance` — it is exact-match welding now.
+- `meshopt()` quantizes internally (14-bit position by default), so calling `quantize()`
+  before it double-quantizes. Drop the separate `quantize()` step.
+
+And one that matters more than either: **the pipeline strips `NORMAL`, so `loadGlb` MUST
+call `computeVertexNormals()`.** Without it every lit material renders pure black — verified
+by screenshot, fixed, re-verified. This is `model-loader.ts:306` and it is the single most
+important thing the new loader has to carry over from `loadObj`.
+
+**0b-A — PASSED locally, still unverified in ChatGPT.** WebGL 2.0 renders; the 572 KB
+inlined widget loads a GLB cross-origin and highlights `R_patella` correctly, framed from
+the bounding sphere. Whole-body framing on the male 1500-unit world does not snap back.
+Headless Chrome is not the ChatGPT sandbox, so 0b-A/B/C/D remain open until the dev-mode run.
+
+**Widget sizes for the 0b-C bracket:** `widget-small` 946 B · `widget-real` **582 KB** ·
+`widget-padded` 2.50 MB · `widget-bootstrap` 722 B (+ `app.js` 580 KB fetched separately).
+Leak check on `widget-real`: 0 hits for supabase / svelte-i18n / signal-catalog /
+chrono-node / dayjs / howler / `PUBLIC_`; the only external origin is `mediqom.com`. The
+meshopt WASM is inlined as base64, so there is **no cross-origin decoder fetch** — the
+reason for choosing meshopt over Draco holds up.
+
+**MCP endpoint verified locally** over JSON-RPC: `initialize`, `tools/list` (50-value
+`structure` enum), `tools/call`, and `resources/read` returning 571 822 bytes at
+`text/html;profile=mcp-app`. `WebStandardStreamableHTTPServerTransport` is the correct
+class — see §8. The flagship call `{structure: "R_knee", highlight: ["medial meniscus"]}`
+resolves to `cartilage_knee` in the `connective` layer.
+
+**Still open — needs a human in ChatGPT developer mode:** 0b-A/B/C/D and 0c.
+
 ## 0a — Can the assets be made small enough?
 
 `static/anatomy_models/` is **265 MB**, loaded eagerly and unstreamed (`model-loader.ts:274,291-298`). But the framing "265 MB of geometry" is misleading — **this is an encoding problem, not a geometry problem:**
