@@ -27,6 +27,10 @@
         focus: [6000, 3000],
         accept: [9000, 3000]
     }
+    // Gestures that satisfy the browser autoplay policy. touchstart/pointerdown
+    // matter on mobile, where mousedown is synthesized late or not at all.
+    const UNLOCK_EVENTS = ['mousedown', 'keydown', 'touchstart', 'pointerdown'] as const;
+
     function enableSoundEffects() {
         Howler.volume(0.3);
         (Howler as any).mobileAutoEnable = true;
@@ -57,15 +61,26 @@
         }
 
 
-        window.removeEventListener('mousedown', enableSoundEffects);
-        window.removeEventListener('keydown', enableSoundEffects);
+        for (const event of UNLOCK_EVENTS) {
+            window.removeEventListener(event, enableSoundEffects, true);
+        }
     };
 
     onMount(() => {
         console.log('Sounds mounted');
 
-        window.addEventListener('mousedown', enableSoundEffects);
-        window.addEventListener('keydown', enableSoundEffects);
+        // Capture phase: label and cluster-badge handlers call stopPropagation()
+        // on mousedown, so a bubble-phase listener never sees the first gesture
+        // and audio stays locked. Capture runs before any target handler.
+        for (const event of UNLOCK_EVENTS) {
+            window.addEventListener(event, enableSoundEffects, true);
+        }
+
+        return () => {
+            for (const event of UNLOCK_EVENTS) {
+                window.removeEventListener(event, enableSoundEffects, true);
+            }
+        };
     });
 
 

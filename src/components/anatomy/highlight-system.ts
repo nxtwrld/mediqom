@@ -19,6 +19,121 @@ interface FocusedState {
     object?: string;
 }
 
+/** Named camera directions. `inferior` is absent by design — OrbitControls
+ *  clamps `maxPolarAngle` to π/2 (scene-setup.ts), so the camera cannot go
+ *  below the model. Use `reset()` to return to the initial view. */
+export type CameraPreset =
+    | 'anterior'
+    | 'posterior'
+    | 'left_lateral'
+    | 'right_lateral'
+    | 'superior';
+
+// Unit direction from the focus centre to the camera. `superior` carries a
+// slight forward tilt so OrbitControls never hits the degenerate polar angle 0.
+const PRESET_DIR: Record<CameraPreset, THREE.Vector3> = {
+    anterior: new THREE.Vector3(0, 0, 1),
+    posterior: new THREE.Vector3(0, 0, -1),
+    left_lateral: new THREE.Vector3(-1, 0, 0),
+    right_lateral: new THREE.Vector3(1, 0, 0),
+    superior: new THREE.Vector3(0, 1, 0.1).normalize()
+};
+
+/**
+ * Tweens the camera to frame a bounding sphere from `dir`.
+ * Shared by focusObject, focusArea and focusMeshGroup — the distance maths and
+ * the dual position/target tween used to be duplicated in each.
+ */
+function frameSphere(
+    state: SceneState,
+    center: THREE.Vector3,
+    radius: number,
+    dir: THREE.Vector3 = PRESET_DIR.anterior,
+    padding = 2
+): void {
+    const fovInRadians = (state.camera.fov * Math.PI) / 180;
+    const distance = (radius / Math.sin(fovInRadians / 2)) * padding;
+
+    const targetPosition = center.clone().addScaledVector(dir, distance);
+
+    // OrbitControls clamps to maxDistance (set to minZoom in initScene) on every
+    // update, which would drag the tween back mid-flight on wide shots such as a
+    // whole-body frame. Raise the ceiling to fit this shot.
+    const needed = targetPosition.distanceTo(center) * 1.1;
+    if (state.controls.maxDistance < needed) state.controls.maxDistance = needed;
+
+    state.camera.lookAt(center);
+    state.camera.updateProjectionMatrix();
+
+    new TWEEN.Tween(state.camera.position)
+        .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 2000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+
+    new TWEEN.Tween(state.controls.target)
+        .to({ x: center.x, y: center.y, z: center.z }, 2000)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .onUpdate(() => {
+            state.controls.update();
+        })
+        .start();
+
+    state.requestRender();
+}
+
+/**
+ * Frames a group of meshes by name from a named camera preset.
+ *
+ * Unlike `focusObject` this carries no selection semantics — it moves the camera
+ * only, leaving materials and `selected` untouched, so it composes with
+ * `setMultiHighlight` for Care Plan regions and `show_anatomy` results.
+ *
+ * Pass an empty `meshNames` to frame the whole loaded model. Returns the union
+ * bounding box, or null when nothing resolved.
+ */
+export function focusMeshGroup(
+    state: SceneState,
+    meshNames: string[],
+    preset: CameraPreset = 'anterior',
+    padding = 2
+): THREE.Box3 | null {
+    if (!state.scene) return null;
+
+    const objects: THREE.Object3D[] = [];
+    for (const name of meshNames) {
+        const object = state.scene.getObjectByName(name);
+        if (object) objects.push(object);
+    }
+    // No names given → frame the whole model. Names given but none found is a
+    // miss, not a request for the whole body.
+    if (objects.length === 0) {
+        if (meshNames.length > 0 || state.group.children.length === 0) return null;
+        objects.push(state.group);
+    }
+
+    const box = new THREE.Box3();
+    for (const object of objects) {
+        object.updateWorldMatrix(true, true);
+        box.expandByObject(object);
+    }
+    if (box.isEmpty()) return null;
+
+    const sphere = box.getBoundingSphere(new THREE.Sphere(new THREE.Vector3()));
+    if (sphere.radius === 0) return null;
+
+    // Save the pre-focus view so reset() can return to it.
+    if (!state.previousViewState) {
+        state.previousViewState = {
+            position: state.camera.position.clone(),
+            rotation: state.camera.rotation.clone(),
+            target: state.controls.target.clone()
+        };
+    }
+
+    frameSphere(state, sphere.center, sphere.radius, PRESET_DIR[preset], padding);
+    return box;
+}
+
 /**
  * Routes a highlight request by name string.
  * Returns the newly selected object (or null).
@@ -67,7 +182,9 @@ export function focusObject(
 
     if (processObjects.length === 0) return selected;
     if (processObjects.length > 1) {
-        console.warn('Multiple objects to focus not supported yet');
+        // focusObject marks one object as `selected` and dims the rest, so it is
+        // single-target by contract. Use focusMeshGroup() to frame a group.
+        console.warn('focusObject: multiple objects given, focusing the first — use focusMeshGroup()');
     }
 
     const object = processObjects[0];
@@ -90,37 +207,7 @@ export function focusObject(
     const aabb = new THREE.Box3().setFromObject(object);
     const sphere = aabb.getBoundingSphere(new THREE.Sphere(new THREE.Vector3()));
 
-    const center = sphere.center;
-    const radius = sphere.radius;
-
-    // Adjust the distance as needed
-    const fovInRadians = (state.camera.fov * Math.PI) / 180;
-    const distance = radius / Math.sin(fovInRadians / 2);
-
-    const targetPosition = new THREE.Vector3(
-        center.x,
-        center.y,
-        center.z + distance * 2
-    );
-
-    // Position the camera at this distance
-    state.camera.lookAt(center);
-    state.camera.updateProjectionMatrix();
-
-    new TWEEN.Tween(state.camera.position)
-        .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 2000)
-        .easing(TWEEN.Easing.Quadratic.Out)
-        .start();
-
-    new TWEEN.Tween(state.controls.target)
-        .to({ x: center.x, y: center.y, z: center.z }, 2000)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .onUpdate(() => {
-            state.controls.update();
-        })
-        .start();
-
-    state.requestRender();
+    frameSphere(state, sphere.center, sphere.radius);
     return object;
 }
 
@@ -249,32 +336,7 @@ export function focusArea(
         };
     }
 
-    const fovInRadians = (state.camera.fov * Math.PI) / 180;
-    const distance = radius / Math.sin(fovInRadians / 2);
-
-    const targetPosition = new THREE.Vector3(
-        center.x,
-        center.y,
-        center.z + distance * 2
-    );
-
-    state.camera.lookAt(center);
-    state.camera.updateProjectionMatrix();
-
-    new TWEEN.Tween(state.camera.position)
-        .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, 2000)
-        .easing(TWEEN.Easing.Quadratic.Out)
-        .start();
-
-    new TWEEN.Tween(state.controls.target)
-        .to({ x: center.x, y: center.y, z: center.z }, 2000)
-        .easing(TWEEN.Easing.Cubic.Out)
-        .onUpdate(() => {
-            state.controls.update();
-        })
-        .start();
-
-    state.requestRender();
+    frameSphere(state, center, radius);
 }
 
 /**
