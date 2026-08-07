@@ -1,19 +1,39 @@
 # Mediqom AI Plugin / Tool Integration
 
-> **Revision note (2026-08-07).** Rewritten after verifying every claim against the
-> codebase and the current OpenAI Apps SDK rules. Four things changed materially:
-> the canonical anatomy vocabulary the previous draft asked us to build **already
-> exists**; that vocabulary **declares 35–50 meshes the geometry doesn't contain**;
-> the asset problem is an **encoding** problem, not the geometry crisis it looks
-> like; and the proposed document-structuring capability is **prohibited by
-> OpenAI's app submission guidelines**. Sections marked ✅ describe existing code.
-> Claims marked ⚠️ are verified defects in the current codebase.
+> **Revision note (2026-08-07, second pass).** Re-verified against the codebase and
+> against the *current* OpenAI rules — which have been **renamed from "Apps SDK" to
+> "Plugins"** since the first pass. Five things changed materially:
+>
+> 1. **§9 was over-stated.** Document structuring is *constrained*, not categorically
+>    prohibited. The PHI ban is unconditional and has no BAA path, but published
+>    policy is **silent** on whether normalized clinical entities qualify — the
+>    question the PRD's "host model as Node 0" architecture turns on. Verbatim
+>    source snippets, however, must be dropped.
+> 2. **New §9b: the promotion boundary.** We *may* suggest Mediqom inside the widget;
+>    we may *not* put promotional language in model-readable fields, or point a CTA at
+>    signup, subscribe or upgrade.
+> 3. **Anonymity is now a compliance requirement, not just a product choice** — it is
+>    what keeps the entities plausibly de-identified. Account linking would undermine it.
+> 4. **§10 now carries a platform-sequencing decision.** ChatGPT first for anatomy;
+>    Claude/Gemini/API first for the report wedge and acquisition.
+> 5. **§5's component map was wrong.** `core/`, `interactions/` and `loaders/` are
+>    empty; nearly every `Body.svelte` line reference had drifted; `sounds.focus` and
+>    the `viewer:anatomy` payload bug are already fixed; `objects.json` exists twice.
+> 6. **ChatGPT Health assessed** (§9b). **No partner program exists** — nothing to
+>    apply to. Health has **no anatomy or imaging capability**, so the originality
+>    risk earlier drafts feared does not apply to us. It is **US-only,
+>    single-person, read-only and not zero-knowledge**, which is where the
+>    remaining differentiation lives.
+>
+> Sections marked ✅ describe existing code. Claims marked ⚠️ are verified defects or
+> open risks. Policy claims are labelled **documented**, **documented absence**, or
+> **inference** — the distinction matters, because the decisive question is unresolved.
 
 ## Goal
 
 Build a lightweight Mediqom integration for conversational AI platforms that gives the model a genuinely useful capability while driving discovery of the full Mediqom application.
 
-The initial — and, per §9, the *only* viable — capability is the **interactive 3D anatomy viewer**.
+The initial capability is the **interactive 3D anatomy viewer**. Per §9 and §10 it is also the only one that is clearly viable *on ChatGPT specifically* — the report-structuring wedge described in `Mediqom_Plugin_API_PRD.md` is sequenced onto Claude, Gemini and the Mediqom API instead.
 
 The integration must preserve Mediqom's core architecture:
 
@@ -29,9 +49,15 @@ The strategic positioning is:
 
 ### The privacy boundary is now an external constraint too
 
-OpenAI's app submission guidelines **prohibit apps from collecting Protected Health Information**, require data minimization to "the minimum data required to perform the tool's function", and require suitability for ages 13–17.
+OpenAI's plugin guidelines **prohibit apps from processing Protected Health Information**, require data minimization to "the minimum data required to perform the tool's function", and require suitability for ages 13–17.
 
-This is not an obstacle — it is the same line Mediqom already draws, enforced by someone else. It means the plugin can only ever be the *anatomy* capability plus a handoff. That alignment is worth stating explicitly in any app submission.
+This is largely the same line Mediqom already draws, enforced by someone else, and that alignment is worth stating explicitly in any submission. But it is **not** simply a restatement of our own boundary, and §9 works through where the two diverge:
+
+- Our boundary is about *decryption* — the server cannot read the vault. OpenAI's is about *processing* — a far broader verb that reaches data we never store.
+- Whether normalized clinical entities fall inside it is **unresolved in published policy**. That is the open question the report wedge depends on, not a settled prohibition.
+- **The plugin requires no Mediqom account.** That is what keeps the entities plausibly de-identified, and it is a compliance position as much as a product one.
+
+For the ChatGPT surface specifically, the practical shape is the *anatomy* capability plus an informational handoff — see §9b for exactly what that handoff may say, and §10 for why the other platforms are sequenced differently.
 
 ---
 
@@ -69,15 +95,21 @@ The previous draft asked us to "define canonical `AnatomyStructure` and `Anatomy
 | Asset | Location | What it gives us |
 |---|---|---|
 | `ANATOMY_REGIONS` — **50 region ids**, hierarchy `mesh → region → limb/system → whole_body` | `src/data/anatomy-regions.ts` | `regionMeshes(id)` — transitive expansion, documented as being *for 3D painting*. Also `rollupChain`, `nearestRegion`, `isKnownAnatomyId`, `regionIds` |
-| `ANATOMY_SNOMED` — **467 meshes** with SNOMED code, English label, laterality | `src/data/anatomy-snomed.ts` | The human-term ↔ mesh bridge. Invert it for term → mesh |
+| `ANATOMY_SNOMED` — **466 meshes** with SNOMED code, English label, laterality | `src/data/anatomy-snomed.ts` | The human-term ↔ mesh bridge. Invert it for term → mesh. ⚠️ **343 of 466 (74 %) have an empty `snomedCode`** — see below |
 | `ANATOMY_ALIASES` + `normalizeAnatomyId()` | `src/data/anatomy-aliases.ts` | Alias hook already stubbed (deliberately empty) — where `"ACL" → anterior_cruciate_ligament` goes |
 | 279 `anatomy.*` keys × 7 locales; `translateAnatomy()` — a 47-line **pure** function taking `t` as an argument | `src/lib/i18n/anatomy.ts` | Multilingual naming; degrades to a humanized mesh name when `t` is a no-op. The English slice is ~10 KB — trivially inlinable |
 | `buildHighlightRegions(items)` → `{mesh, color, opacity}[]` | `src/lib/careplan/highlights.ts:51` | **The reference implementation** of "semantic anchor → painted meshes". Pure, Supabase-free |
 | 10 layers × mesh membership | `src/data/objects.json` | `skin, skeleton, connective, muscular, vascular, nervous, lymphatic, respiratory, digestive, urogenital` |
 
-`Body.svelte` also already exposes a store-free, prop-driven surface that *is* the widget contract: the `carePlanRegions: {mesh, color, opacity}[]` prop → `setMultiHighlight()` (`Body.svelte:80,260-267`), the `carePlanRegionClick {mesh}` dispatch (`:239-241`), and the exported `reset()` (`:122`).
+`Body.svelte` also already exposes a store-free, prop-driven surface that *is* the widget contract: the `carePlanRegions: {mesh, color, opacity}[]` prop (`Body.svelte:82`) → `setMultiHighlight()` (`:272-281`, dispatched at `:278`), the `carePlanRegionClick {mesh}` dispatch (`:253-254`), and the exported `reset()` (`:124`).
 
 **Consequence:** `show_anatomy` is a thin **adapter over existing data**, not new domain modelling.
+
+## ⚠️ The SNOMED table is 74 % unpopulated
+
+`anatomy-snomed.ts` has 466 entries, but **343 carry `snomedCode: ""`**. The file's own header says so: *"seed entries populated for well-known structures. Remaining entries have empty snomedCode — fill in from SNOMED CT Browser."*
+
+This matters in two places. §6's resolver step 4 (numeric input → inverted `Map<snomedCode, meshName[]>`) covers only the populated quarter, and `AnatomyResolution.snomedCode` will be absent for most meshes. The English `label` field is populated throughout, so **step 5 (label index) is the load-bearing lookup, not step 4.** Order the resolver accordingly, and treat filling the table as a data task independent of the plugin — it is not on the critical path, but any claim that Mediqom returns SNOMED-coded anatomy is currently true for about a quarter of the body.
 
 ## ⚠️ But the vocabulary is a superset of the geometry
 
@@ -223,7 +255,7 @@ assetFormat: 'obj' | 'glb';   // default 'obj'
 assetBase: string;            // default '/anatomy_models'
 ```
 
-Leave `loadObj()` byte-untouched; add `loadGlb()` beside it and a `loadModelFile()` that branches on `state.assetFormat`. Swap the two call sites — `updateModel:136` and `loadShade:415`.
+Leave `loadObj()` byte-untouched; add `loadGlb()` beside it and a `loadModelFile()` that branches on `state.assetFormat`. Swap the two loaders — `updateModel` (defined `model-loader.ts:54`, called from `Body.svelte:391`) and `loadShade` (defined `:407`, called from `Body.svelte:511`).
 
 `loadGlb` must reproduce `loadObj`'s post-processing exactly: `object.name = opts.rename || opts.name`, `computeVertexNormals()`, the `isMuscularSystem` matcap branch (`:302-317`), and the `opts.opacity` transparency (`:319-322`). Register `MeshoptDecoder` once in `initScene`. Both `GLTFLoader` and `MeshoptDecoder` ship in `three@0.152`'s addons.
 
@@ -253,45 +285,62 @@ Pick the tier empirically in 0b-B, before writing any of it:
 
 ## The actual coupling
 
-Of the ~4 600 lines in `src/components/anatomy/`, **only `Body.svelte`, `label-manager.ts` and `store.ts` have app coupling at all.** Everything else — `scene-state`, `scene-setup`, `model-loader`, `highlight-system`, `material-system`, `label-clustering`, `muscle-materials`, the shaders — needs only `three`, `@tweenjs/tween.js`, and a 3-line `isTouchDevice()`.
+`src/components/anatomy/` is **28 files, 5 040 lines** (4 517 excluding JSON). Of those, **only `Body.svelte`, `label-manager.ts` and `store.ts` have app coupling at all:**
 
-Crucially, **none of the coupling touches auth, Supabase, or the network.** It is stores, i18n, and sound.
+| file | external imports |
+|---|---|
+| `Body.svelte` (963 lines) | 12 — `$app/navigation`, `$lib/ui`, `$lib/context/objects`, `$lib/focused`, `$lib/profiles`, `$lib/types.d`, `$lib/documents`, `$components/ui/Sounds.svelte`, `$lib/i18n`, `$lib/i18n/anatomy`, `$components/chat/AskButton.svelte`, `$lib/datetime` |
+| `label-manager.ts` | 3 — `$lib/context/objects`, `$lib/documents/tools`, `$lib/types.d` |
+| `store.ts` | 2 — `$lib/focused`, `$lib/ui` |
+
+The other 25 files need only `three`, `@tweenjs/tween.js`, and `isTouchDevice()`: `scene-state`, `scene-setup`, `model-loader`, `highlight-system`, `material-system`, `label-clustering`, `muscle-materials`, plus `3dtools.ts`, `particle-swarm.ts`, `transporter-ring.ts`, the four shader files, `context-manager.ts`, `context/*` and `animations/Immunity.ts`.
+
+Crucially, **none of the coupling touches auth, Supabase, or the network.** No `supabase`, no `fetch(`, no session references anywhere in the directory — verified. All assets load from static `/anatomy_models/` paths. It is stores, i18n, and sound.
+
+Two corrections to earlier drafts of this section:
+
+- **`core/`, `interactions/` and `loaders/` are empty.** They were created in June 2025 and never populated (`ls` reports `total 0`). The `bb45abb` refactor split `Body.svelte` into **flat top-level modules**, not into those directories. Only `context/` (81 lines, the educational-overlay registry) and `animations/` (249 lines) have contents. `body.ts` is a 0-byte file.
+- **`isTouchDevice()` is not incidental.** `src/lib/device.ts` is 14 lines and is imported by **four** files — `model-loader.ts:8`, `scene-setup.ts:7`, `particle-swarm.ts:2`, `transporter-ring.ts:2`.
+
+## ⚠️ `objects.json` exists twice, byte-identically
+
+`src/components/anatomy/objects.json` and `src/data/objects.json` are two independent regular files with the same MD5 (`815cdab36486be1428ac603be0e03b43`) — not a symlink. Consumers are **split across both copies**:
+
+| copy | imported by |
+|---|---|
+| `$data/objects.json` | `src/lib/context/objects.ts:1`, `src/lib/langgraph/nodes/_schema-enums.ts:16`, `src/lib/import.server/convertWorkflowResult.ts:2` |
+| `$components/anatomy/objects.json` | `src/components/anatomy/context/index.ts:3`, `src/components/layout/Viewer.svelte:6`, `src/lib/config/chat-config.ts:7`, `src/lib/chat/anatomy-integration.ts:2` |
+
+Non-anatomy app code reaches *into* the component folder for data. This is a live drift hazard: an edit to one copy silently diverges from the other. **The widget must consume `$data/objects.json`**, and the duplicate should be collapsed — but that is a separate cleanup, not part of the widget work.
 
 There is also a freebie: `label-manager.ts:54` opens with `if (!profile?.id) return { labels: [], layersToAdd: [] }`. **Given an empty profile, the entire document-labels feature self-disables at runtime** — no `showLabels` prop required to make it safe, only to make it explicit.
 
-## ⚠️ `sounds.focus.play()` is a latent crash in the app today
+## ✅ `sounds.focus` — already fixed
 
-More precisely than "the widget will break": `sounds` is `{}` at module scope and is populated lazily by `enableSoundEffects()` on the **first window mousedown or keydown** (`Sounds.svelte:67-68`). `onPointerClick` is bound to **`mouseup`** (`scene-setup.ts:91`), which always follows a mousedown — so `Body.svelte:237` happens to be safe by accident.
+An earlier draft flagged this as a latent crash: `sounds` is `{}` at module scope, populated lazily by `enableSoundEffects()` on first user gesture, and `handleClusterClick` is invoked from the **render loop** with no gesture guarantee.
 
-But `handleClusterClick` (`Body.svelte:87`) is invoked from the **render loop** via `updateClusters`, with no mousedown guarantee. This is a real crash in the shipping app, not merely a widget concern.
+**Both halves are now fixed and this section is historical.** All six call sites are optional-chained — `Body.svelte:89,199,251` and `Viewer.svelte:63,73,113` — and `Sounds.svelte:76` registers its unlock listeners in the **capture phase** (`addEventListener(event, enableSoundEffects, true)`), so label and cluster handlers calling `stopPropagation()` no longer swallow the first gesture.
 
-## The changes — 6 lines and 2 methods
+## The changes — 1 line
 
-Keep legacy `export let` / `$:`.
+Keep legacy `export let` / `$:`. Only one edit remains; the rest of this section's original checklist has shipped.
 
 ```diff
 - L8    import objects3d from '$lib/context/objects';
 + L8    import objects3d from '$data/objects.json';
 ```
-`Body` never uses `isObject`/`findObjects`, so this also drops a transitive 75 KB `signal-catalog` import from *both* the app and the widget.
+`Body` never uses `isObject`/`findObjects`, so this also drops a transitive 75 KB `signal-catalog` import from *both* the app and the widget. It also moves `Body` onto the copy of `objects.json` the widget will consume — see the duplication warning above.
 
-```diff
-- L87/185/237   sounds.focus.play();
-+ L87/185/237   sounds.focus?.play();
-```
+**Already implemented** (verified in place, contrary to earlier drafts):
 
-Add beside `reset()`:
+| method | location |
+|---|---|
+| `focusMeshGroup(state, meshNames, preset, padding)` | `highlight-system.ts:94` |
+| `CameraPreset` (5 values) | `highlight-system.ts:25` |
+| `showRegion(meshNames, preset)` | `Body.svelte:133` |
+| `setCamera(preset)` | `Body.svelte:138` — delegates with `[]`, which frames the whole model |
 
-```ts
-export function showRegion(meshNames: string[], preset: CameraPreset = 'anterior'): void {
-    focusMeshGroup(ss, meshNames, preset);
-}
-export function setCamera(preset: CameraPreset): void {
-    focusMeshGroup(ss, ['shade_skin'], preset);
-}
-```
-
-**Imperative methods, not more props** — `Viewer.svelte:18` already does `let model: Body;`, and the widget's driver is an async postMessage notification, which is imperative anyway.
+**Imperative methods, not more props** — `Viewer.svelte` already holds `let model: Body;`, and the widget's driver is an async postMessage notification, which is imperative anyway.
 
 ## Bundle-level decoupling needs a stub layer
 
@@ -311,9 +360,11 @@ Props gate *behaviour*; they cannot remove *imports*. A statically-imported modu
 
 **Verify:** `grep -c 'supabase\|svelte-i18n\|signal-catalog' static/widget/index.html` → 0, and `Viewer.svelte` plus the care-plan page render byte-identically.
 
-## ⚠️ Unrelated pre-existing bug, flagged not fixed
+## ✅ The `viewer:anatomy` payload mismatch — fixed
 
-`src/routes/med/p/[profile]/care-plan/+page.svelte:110` emits `ui.emit("viewer:anatomy", { focus: identification })`, but `src/lib/focused.ts:26` sets the payload verbatim into a store that `Body.svelte:527` reads as `.object`. `focusBodyPart()` therefore **clears** the highlight instead of setting it. Every other emitter (`SectionBody.svelte:17`, `SectionImaging.svelte:136`) correctly uses `{ object: … }`.
+An earlier draft flagged `care-plan/+page.svelte` emitting `{ focus: … }` where every other emitter uses `{ object: … }`, silently clearing the highlight instead of setting it.
+
+**This is resolved** and the §12 Phase 2 `[x]` is accurate. `src/lib/focused.ts:22-29` now validates that `payload.object` is a non-empty string and warns otherwise, and **no `{focus}` emitter remains anywhere** — the care-plan page no longer emits `viewer:anatomy` at all. Surviving emitters are all correct: `UI.svelte:200` and `NavBar.svelte:47` pass the boolean "open the panel" form; `SectionBody.svelte:17` and `SectionImaging.svelte:136` pass `{ object: … }`.
 
 ---
 
@@ -461,9 +512,9 @@ Also: `state.initialViewState` is only assigned inside `updateModel` (`model-loa
 
 # 8. OpenAI / ChatGPT implementation
 
-Official entry point: https://developers.openai.com/apps-sdk/
+Official entry point: https://developers.openai.com/plugins/ — **note the rename.** What this document originally called the "Apps SDK" is now documented as **"Plugins"**; `developers.openai.com/apps-sdk/*` redirects there. Key pages: [guidelines](https://developers.openai.com/plugins/app-guidelines), [auth](https://developers.openai.com/plugins/build/auth), [security & privacy](https://developers.openai.com/plugins/guides/security-privacy), [UI guidelines](https://developers.openai.com/plugins/concepts/ui-guidelines), [reference](https://developers.openai.com/plugins/reference), [review](https://developers.openai.com/plugins/deploy/app-review).
 
-## How Apps SDK widgets actually work
+## How plugin widgets actually work
 
 - The widget is an MCP **resource** with MIME type `text/html;profile=mcp-app`, linked from a tool via `_meta.ui.resourceUri` (ChatGPT alias `_meta["openai/outputTemplate"]`). **Ship both keys and feature-detect** — the naming is in flux.
 - It renders in a **sandboxed iframe**; the host bridge is JSON-RPC over `postMessage` (`ui/initialize`, `ui/notifications/tool-input`, `ui/notifications/tool-result`, `tools/call`, `ui/message`, `ui/update-model-context`).
@@ -520,23 +571,80 @@ Do not start with authentication, vault access, or subscriptions.
 
 ---
 
-# 9. ❌ Document structuring is prohibited — what replaces it
+# 9. ⚠️ Document structuring — constrained, not categorically prohibited
 
-The previous draft's second capability — `structure_medical_document`, `build_medical_timeline`, `extract_medications`, `extract_diagnoses`, `extract_lab_values`, `summarize_imaging_report` — **cannot ship as a ChatGPT app.** Four independent reasons, any one sufficient:
+> **Naming note.** OpenAI has renamed "Apps SDK" to **"Plugins."** The canonical policy page is now
+> [Plugin guidelines](https://developers.openai.com/plugins/app-guidelines); commercial terms are the
+> [App Developer Terms, updated 9 July 2026](https://openai.com/policies/developer-apps-terms/).
+> Every claim in this section is labelled **documented**, **documented absence**, or **inference**.
 
-1. **PHI prohibition.** A tool whose input argument is the user's lab report is, definitionally, collecting PHI on Mediqom's server. No schema wording makes this compliant.
-2. **Data minimization.** "The minimum data required to perform the tool's function" cannot mean "the full text of a medical record".
-3. **Prescription-drug content.** `extract_medications` is squarely in it.
-4. **It inverts our own thesis.** §7 of the previous draft said "Mediqom's server does not obtain plaintext patient records," while its §6 required exactly that. The document contradicted itself.
+An earlier draft declared document structuring flatly impossible. That was **over-stated in one direction and under-stated in another**, and the correction matters because `Mediqom_Plugin_API_PRD.md` builds its entire go-to-market wedge on this capability.
 
-Section 6 remains valid for the **Mediqom API** rung of the §11 ladder and for a **user-installed Claude/Gemini connector under an explicit agreement** — not the public ChatGPT app directory.
+## What is actually settled
+
+**The PHI ban is unconditional — documented.** App Developer Terms §2.4:
+
+> "You agree that your App will **not create, receive, maintain, transmit, or otherwise process**: (a) Protected Health Information as defined under the HIPAA Privacy Rule (45 C.F.R. Section 160.103)…"
+
+The Plugin guidelines repeat it under Restricted Data. Three things follow, all verified by full-text search of the guidelines:
+
+- **There is no BAA path.** Terms §2.3 forecloses it structurally: *"neither party is processing personal data on behalf of the other or acting as a service provider of the other"* — precisely the relationship a BAA requires. BAAs exist for the API platform and Enterprise, not for published plugins.
+- **There is no health-app category and no consent exception.** §2.4 has no consent gate at all, while the *very next sentence* about other sensitive data explicitly does have one. The drafters knew how to write a conditional rule and chose not to for PHI.
+- **There is no medical section in the guidelines.** The word "health" appears once, in the prohibition bullet.
+
+## What is genuinely unresolved
+
+**Whether normalized clinical entities count as PHI is not addressed anywhere in published policy.** This is the crux, and the honest answer is that no citable rule decides it.
+
+The PRD's "host model as Node 0" architecture (its §6) means ChatGPT reads the document and Mediqom receives only:
+
+```jsonc
+{ documentType: "MRI", bodyRegion: "R_knee", laterality: "right",
+  structures: ["medial meniscus"], findings: ["posterior horn tear"] }
+```
+
+The raw report never reaches our server. Under HIPAA proper, PHI is *individually identifiable* health information held by a covered entity or business associate; that payload contains **none of the 18 Safe Harbor identifiers** (45 C.F.R. §164.514(b)(2)). *That is our argument — it is inference, not policy text.*
+
+Cutting against it: §2.4's verb list is exhaustive and process-agnostic (*"or otherwise process"*), so if a reviewer classifies the entities as PHI, the architecture does not save us.
+
+**Minimization, by contrast, we pass cleanly — documented.** The guidelines' Data boundaries clause reads almost as an endorsement of Node 0: *"Operate only on the explicit snippets and resources the client or model chooses to send."* But minimization and the Restricted Data ban are **separate bullets**; being minimal about PHI is still processing PHI.
+
+## Anonymity is the decisive mitigation
+
+**The plugin must not require a Mediqom account.** This is settled product direction and it is also our strongest compliance position:
+
+- With no OAuth we hold **no durable subject identifier**, so the entities stay plausibly de-identified.
+- **Account linking would actively weaken this.** Linking makes the data individually identifiable *to us* — the exact thing the Safe Harbor argument depends on avoiding. Terms §2.3 (consent-conditioned) and §2.4 (flat ban) are separate clauses: user authorization satisfies §2.3 and **does not unlock §2.4**.
+- OAuth 2.1 + PKCE is fully supported by the platform, and its obligations are purely additive. We are declining it on PHI grounds, not capability grounds.
+
+## What must be dropped
+
+**Verbatim source snippets and quoted provenance.** The PRD requests these in its §7 (`map_report_anatomy` "optional source snippets/references") and §16 P0 ("Source/provenance display"). Two documented clauses cut directly against them:
+
+> "Do not request the full conversation history, **raw chat transcripts**, or broad contextual fields 'just in case.'"
+
+> "Design the input schema to limit data collection by default, rather than **a funnel for optional context**."
+
+An optional `sourceSnippets` field is that second phrase's textbook case, and it hands a reviewer a clean, quotable basis for rejection. Entities-only is defensible-but-unresolved; entities **plus** verbatim quotes is materially worse.
+
+If provenance must be shown, the safer shape is **host-side**: pass an anchor or offset that the widget resolves client-side against content the host already holds, rather than transmitting quoted text to our server. *(The policy does not address this distinction either — inference.)*
+
+## The directory tells us where the line falls in practice
+
+53 apps sit under Healthcare. Every personal-data one is **wellness/fitness** — Peloton, MyFitnessPal, Sleep Cycle, COROS. **None ingests clinical documents.** The single app that handles clinical records is *Health*, by OpenAI. Wellness data is not PHI (it does not come from a covered entity); an MRI report is. *That the line is enforced at the clinical/wellness boundary is inference from the app list, not documented policy.*
+
+There is one genuine counter-signal worth recording: OpenAI's own Health documentation explicitly contemplates health information reaching third-party plugins, gated by consent prompts rather than a hermetic ban. So the practice is a safeguard model, not an absolute one — but nothing in that help article overrides Terms §2.4 for our purposes.
+
+## Consequence for platform sequencing
+
+Both this document and the PRD assume ChatGPT first. **On the report wedge, that ordering is backwards.** The PHI gray zone is a marketplace-directory rule, not a universal one; user-installed Claude connectors, Gemini, and the Mediqom API carry no equivalent restriction. See §10.
 
 ## The replacement: same funnel, zero PHI
 
 1. **`show_anatomy`** — the hook. Arguments are body-structure terms.
 2. **`explain_structure(structure)`** — SNOMED-coded, education-grade text *about a structure*, not about the user. No PHI in, none out. Establishes "Mediqom knows anatomy" and gives the model something to say alongside the widget.
 3. **`list_anatomy_regions`** — lets the model enumerate what can be shown. Cheap.
-4. **A deep link, not a tool.** Widget footer → `https://mediqom.com/import?src=chatgpt&anatomy=<regionId>`. All document handling happens *inside* Mediqom, behind auth, inside the existing crypto boundary. The widget hands over a region id — a body part, not a diagnosis.
+4. **An informational link, not a tool — and not a signup link.** Widget footer → an **informational** page describing what Mediqom is. See §9b for why the destination cannot be `/import` or any signup flow.
 5. *(conditional)* **`fetch_anatomy_asset`** — the `_meta`-hidden CSP fallback, tier 3 of §4.
 
 ```text
@@ -544,14 +652,93 @@ User asks about a structure in ChatGPT
         ↓
 show_anatomy renders the interactive 3D view
         ↓
-"See this in the context of your own records" → deep link
+"Mediqom keeps your records encrypted and connects findings over time" → informational page
         ↓
-Mediqom — documents imported and decrypted client-side
+User decides, on our own site, whether to join
 ```
 
 Mediqom never receives the documents through OpenAI, so there is nothing to disclose, retain, or defend. The plugin's job is recognition and desire; the app's job is context.
 
-**Additional constraint: do not log tool arguments.** `"show me my herniated L4-L5"` arrives as `structure: "l4-l5"` — benign in isolation, PHI when logged against a session.
+**Additional constraint: do not log tool arguments.** `"show me my herniated L4-L5"` arrives as `structure: "l4-l5"` — benign in isolation, PHI when logged against a session. The guidelines' Security & Privacy page states the rule directly: *"Redact PII before writing to logs."*
+
+---
+
+# 9b. The promotion boundary — what we may and may not say
+
+The product intent is: **show anatomy to everyone, free and anonymous, and inside the widget suggest Mediqom as the more elegant place to keep records and get context-aware answers.** That is permitted. The boundary is precise, so it is worth stating exactly.
+
+## ✅ Permitted — documented
+
+| | source |
+|---|---|
+| Link out from the widget | `window.openai.openExternal({ href })`; `setOpenInAppUrl({ href })` exists specifically for app handoff |
+| Suggest Mediqom contextually | the test is *"Every plugin must deliver clear, legitimate functionality that provides **standalone value** to users"* — the anatomy viewer clears it |
+| Link to an **informational** page | plugins may *"Link to an informational page describing available plans or entitlement options."* |
+| Sign **in** to an existing account | *"Users may sign in to an existing paid account and access features already included in their subscription."* |
+
+## ❌ Prohibited — documented, verbatim
+
+| prohibition | text |
+|---|---|
+| Promotional **model-readable** fields | *"Descriptions must not favor or disparage other plugins or services or attempt to influence the model to select them over another plugin's tools."* / *"Avoid misleading, overly promotional, or comparative language."* |
+| Signup, subscribe, upgrade | *"Plugins must not display subscription plans, initiate new subscriptions, or promote upgrades."* **"Freemium upsells"** are named explicitly as prohibited indirect selling |
+| Transactional destinations | may not *"Link to a page that explicitly initiates the process to upgrade, subscribe, or complete a purchase."* |
+| Redirecting the interaction | *"Do not insert unrelated content, attempt to redirect the interaction…"* |
+| Existing as an ad vehicle | *"Plugins must not serve advertisements and must not exist primarily as an advertising vehicle."* |
+| Our logo in the widget body | *"Do not include your logo as part of the response."* ChatGPT appends it automatically |
+| More than two CTAs | *"one primary CTA and one optional secondary CTA"* |
+
+## The load-bearing rule
+
+> **Promotion lives in the widget UI. Never in the model-readable layer.**
+
+Tool names, descriptions and annotations are policed separately and strictly — they must describe *when the capability is useful*, never *why Mediqom is good*. §6's guidance on tool description copy already gets this right and should be followed literally.
+
+## Three practical consequences
+
+1. **The destination is an informational page, not `/import`.** `/import` does not exist as a page route today (only `src/routes/v1/import/*` APIs), and Mediqom signup is invite-only in code (`auth/+page.server.ts:80` sets `shouldCreateUser: false`) with manual approval. Pointing a CTA there would be both broken *and* prohibited. **This is convenient**: v1 needs only a static informational page — no import deep link, no attribution machinery, no change to the invite gate.
+2. **Attribution parameters are unaddressed in published policy.** No guideline mentions referral codes or UTM tags either way. ChatGPT itself appends `?redirectUrl=` to approved external links, so URL parameters are not inherently disallowed — but we should not assume a referral scheme is sanctioned. Treat this as an open question for review, not a settled permission.
+3. **The anatomy viewer must be worth using on its own.** The "standalone value" test is what separates a legitimate handoff from an ad vehicle. If the widget is genuinely useful to someone who never clicks through, the suggestion is fine. That is a design constraint on the viewer, not just a copy constraint.
+
+## ChatGPT Health — no way in, and a narrower threat than it looks
+
+**There is no developer or partner program for ChatGPT Health.** Verified 2026-08-07:
+
+- `developers.openai.com/plugins/llms-full.txt` — the complete Plugins documentation export — contains **zero** occurrences of health, medical, HIPAA, or ChatGPT Health. The only "protected health information" hit is the *prohibited data* list.
+- The submission and review docs describe **one universal queue** with a generic category field. No health track, no health tier, no elevated-review application.
+- Apps inside Health are **named launch partners** — Function, MyFitnessPal, Weight Watchers, AllTrails, Instacart, Peloton, One Medical, plus Apple Health. The only published gate is *"additional security review specific to inclusion in Health"*, with no process attached. This reads as business development, not a program.
+- **§2.4 was updated 9 July 2026 — two weeks *before* Health's GA — and still bars apps from processing PHI.** Health created no carve-out. Health itself *"does not offer a Business Associate Agreement."*
+
+The BAA path exists only outside Health: ChatGPT for Healthcare / for Clinicians (sales-managed) and the API (`baa@openai.com`). Neither is a plugin surface.
+
+**Do not plan around becoming a Health app.** If that changes it will be announced; there is nothing to apply to today.
+
+### ✅ The originality risk is resolved in our favour
+
+Health has **no anatomy, no imaging rendering, no 3D** — its documented visual layer is *"seeing recent data and trends."* It syncs radiologists' *"diagnostic interpretations"* as text and has no DICOM capability. So the guidelines' *"not natively supported by the products' built-in capabilities"* test is comfortably passed by the anatomy viewer. **This de-risks the §12 Phase 7 submission**; the concern flagged in earlier drafts applied to a records capability, not to ours.
+
+### ✅ Health does not operate in our market
+
+**Mediqom is Europe-only by choice. ChatGPT Health is United States-only.** The EEA, Switzerland and the UK were excluded at the January limited release and remain excluded at general availability; medical-record integrations were US-only from the start.
+
+**So Health is not a competitor in any market we serve, and this section is a watching brief rather than a strategic constraint.**
+
+For the record, the gaps that would matter if that ever changed — all documented, not inferred:
+
+| | ChatGPT Health | Mediqom |
+|---|---|---|
+| Market | **US only** | 7 locales (cs, de, en, es, it, pl, tr) |
+| Profiles | **One person.** Verbatim: *"intended for your own records… use a separate account"* | family / caretaker, `/med/p/[profile]`, sharing |
+| Encryption | *"authorized OpenAI personnel and trusted service providers might access data… unless you have opted out"* | zero-knowledge; RSA-4096 + ML-KEM-768 (`CRYPTOGRAPHY.md`) |
+| Record ownership | read-only; no write-back; disconnecting **deletes** rather than exports | user-owned, exportable, client-decrypted |
+| Anatomy / imaging | **absent entirely** | the wedge |
+| Platforms | web + iOS; no Android | web + iOS + Android (Capacitor) |
+
+**Zero-knowledge is the one position OpenAI structurally cannot take.** Health has to read the records to work — that is not a feature they declined to build, it is incompatible with the product.
+
+One structural note, recorded so it is not rediscovered: OpenAI does not own its aggregation layer. It licenses FHIR connectivity from **b.well**, a US network which sells the same SDK to Google, Samsung, athenahealth and Perplexity. **This is a US path and we are not taking it** — the EU equivalent is EHDS / MyHealth@EU, which is the direction any future record-ingestion work should look.
+
+**Net effect on this document: unchanged, and de-risked.** Anatomy is the plugin; the Mediqom suggestion stays restrained and informational; the EU funnel premise is untouched by Health.
 
 ---
 
@@ -566,6 +753,23 @@ Anthropic supports user-defined tools and remote MCP connectors; Gemini supports
 - Gemini tools/function calling: https://ai.google.dev/gemini-api/docs/tools
 
 The PHI constraint in §9 is an *OpenAI marketplace* rule, not a universal one. Other platforms have their own policies, to be checked rather than assumed either stricter or looser.
+
+## ⚠️ Decision: split the roadmap by platform, not by phase
+
+Both this document and `Mediqom_Plugin_API_PRD.md` §20 sequence ChatGPT first for everything. **For the anatomy wedge that is right; for the report wedge and the acquisition funnel it is backwards.** Three constraints all point the same way, and all three are specific to the OpenAI *directory*:
+
+| constraint | ChatGPT | Claude connector / Gemini / Mediqom API |
+|---|---|---|
+| PHI ban on clinical entities | unresolved gray zone (§9) | no equivalent marketplace rule; user-installed connectors and a direct API are a different regime |
+| Signup / upsell CTAs | prohibited (§9b) | our own surface, our own rules |
+| Originality vs. first-party product | ChatGPT Health competes directly | no conflict |
+
+So:
+
+- **ChatGPT** gets the anatomy viewer, `explain_structure`, `list_anatomy_regions`, and one informational handoff. Anonymous, no PHI, standalone-valuable. Its job is **reach and recognition**.
+- **Claude custom connectors, Gemini, and the Mediqom API** carry the report-structuring wedge and any genuine acquisition mechanics.
+
+This is a change of plan, not a restatement. Each platform's policies still need checking on their own terms before building — the point is only that OpenAI's directory rules must stop being treated as universal constraints on the whole product.
 
 ## Inline interactive UI: do not assume portability
 
@@ -640,7 +844,12 @@ Three complementary distribution paths, none of which makes Mediqom dependent on
 ## Phase 7 — submission readiness
 
 - [ ] Age-13-17 review of the default layer set (**default to `skeleton`**; consider gating `urogenital` and `skin` on a nude model).
-- [ ] Privacy policy; tool-description copy pass; audit that **no tool argument is ever logged**.
+- [ ] Privacy policy; tool-description copy pass; audit that **no tool argument is ever logged** (guidelines: *"Redact PII before writing to logs"*).
+- [ ] **Confirm the plugin requires no Mediqom account** — no OAuth, no login step. Both a product decision and the §9 PHI mitigation. New-account-signup flows are an automatic review rejection.
+- [ ] **Promotion-boundary audit against §9b**: one CTA; destination is an *informational* page, never signup/checkout; no Mediqom logo in the widget body (ChatGPT appends it); **no promotional language in any model-readable field** — tool names, descriptions, annotations.
+- [ ] Build the informational landing page the CTA points at. Static; no dependency on `/import`, attribution params, or the invite gate.
+- [ ] Confirm the anatomy viewer passes the **standalone-value** test — useful to someone who never clicks through.
+- [ ] Re-read the guidelines immediately before submission. They changed naming ("Apps SDK" → "Plugins") between drafts of this document; assume further drift.
 
 ## Phase 8 — other ecosystems
 
@@ -651,9 +860,10 @@ Three complementary distribution paths, none of which makes Mediqom dependent on
 
 # 13. What not to build in the first iteration
 
-- Mediqom login inside ChatGPT;
+- Mediqom login inside ChatGPT — **and not later either**: anonymity is a §9 compliance position, not a v1 shortcut;
 - any plugin access to the encrypted vault;
-- **any tool that receives medical documents** (§9 — prohibited, not merely deferred);
+- **any tool that receives raw medical documents or verbatim report text** (§9);
+- **any CTA that initiates signup, subscription or upgrade** (§9b — prohibited, not merely deferred);
 - care plan generation;
 - diagnosis / treatment recommendation workflows;
 - multi-model quorum;
@@ -675,9 +885,11 @@ They obscure the fundamental experiment:
 
 **The vocabulary is already built.** `anatomy-regions.ts`, `anatomy-snomed.ts` and `buildHighlightRegions()` mean `show_anatomy` is an adapter, not a new domain model.
 
-**The PHI prohibition is a gift.** It removes an ambiguous capability and forces the plugin into the shape it should have had anyway: a genuinely useful free visualization, and a handoff to the place where context lives.
+**The PHI rule is narrower than it looks, and wider than we'd like.** It is unconditional, has no BAA path and no health-app category — but it is an *OpenAI directory* rule, and published policy is **silent** on whether normalized clinical entities count. Staying anonymous is what keeps that silence working in our favour; account linking would end it. Verbatim source snippets must go.
 
-**OpenAI:** best first target — Apps SDK combines MCP tools with embedded UI, and Svelte works fine.
+**We can promote Mediqom — in the widget, not in the tool description.** One contextual CTA to an *informational* page is permitted. Signup, subscribe and upgrade flows are explicitly prohibited, "freemium upsells" by name. The anatomy viewer has to be worth using on its own; that is what makes the suggestion legitimate rather than an ad.
+
+**OpenAI:** best first target *for anatomy* — the plugin platform combines MCP tools with embedded UI, and Svelte works fine. **Not** the first target for report structuring or acquisition; see §10.
 
 **Anthropic / Gemini:** the tool layer is portable; the inline UI contract is not.
 

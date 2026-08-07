@@ -1,8 +1,11 @@
-import { type RequestHandler } from "@sveltejs/kit";
+import { error, type RequestHandler } from "@sveltejs/kit";
 import { sessions, processSession } from "./session-manager";
 
 // GET endpoint for SSE stream
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, locals }) => {
+  const { session: authSession } = await locals.safeGetSession();
+  if (!authSession) error(401, { message: "Unauthorized" });
+
   const sessionId = url.searchParams.get("sessionId") || crypto.randomUUID();
 
   const stream = new ReadableStream({

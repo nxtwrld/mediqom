@@ -133,7 +133,10 @@ async function transcribeChunk(
   return result;
 }
 
-export const GET: RequestHandler = async ({ request }) => {
+export const GET: RequestHandler = async ({ request, locals }) => {
+  const { session } = await locals.safeGetSession();
+  if (!session) error(401, { message: "Unauthorized" });
+
   const upgrade = request.headers.get("upgrade") || "";
   if (upgrade.toLowerCase() !== "websocket") {
     error(426, { message: "Expected WebSocket upgrade" });

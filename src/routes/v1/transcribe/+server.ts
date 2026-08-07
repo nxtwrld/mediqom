@@ -1,7 +1,10 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { transcriptionProvider } from "$lib/ai/providers/transcription-abstraction";
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const { session } = await locals.safeGetSession();
+  if (!session) error(401, { message: "Unauthorized" });
+
   //const str = url.searchParams.get('drug');
   let instructions = {
     lang: "en",

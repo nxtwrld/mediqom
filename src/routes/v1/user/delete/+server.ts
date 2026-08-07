@@ -21,8 +21,26 @@ export const DELETE: RequestHandler = async (event) => {
       SUPABASE_SERVICE_ROLE_KEY,
     );
 
-    // Clean up storage files (avatars, attachments) before deleting user
-    await deleteUserStorage(user.id, serviceClient);
+    // Clean up storage files (avatars, attachments) before deleting user.
+    // Must run first: it resolves the objects via profiles/documents, which the
+    // cascade removes.
+    const storageResult = await deleteUserStorage(user.id, serviceClient);
+
+    // Erasure has to be complete (GDPR Art. 17). If storage objects survived, stop
+    // rather than delete the DB rows that tell us which objects they were.
+    if (storageResult.totalErrors > 0) {
+      console.error(
+        "[User Delete] Storage cleanup incomplete, aborting:",
+        storageResult.errors,
+      );
+      return json(
+        {
+          success: false,
+          error: "Failed to delete stored files. Account was not deleted.",
+        },
+        { status: 500 },
+      );
+    }
 
     // Delete auth user - database cascades handle all related data automatically
     const { error: deleteError } = await serviceClient.auth.admin.deleteUser(
