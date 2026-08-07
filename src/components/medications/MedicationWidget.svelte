@@ -13,8 +13,8 @@
 
     let { profileId }: Props = $props();
 
-    const medications = activeMedicationsByProfile(profileId);
-    const extracted = extractedMedicationsByProfile(profileId);
+    const medications = $derived(activeMedicationsByProfile(profileId));
+    const extracted = $derived(extractedMedicationsByProfile(profileId));
 
     $effect(() => {
         loadProfileDocuments(profileId).then(() => {

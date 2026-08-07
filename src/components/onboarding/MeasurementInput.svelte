@@ -24,7 +24,7 @@
         { value: 'ft-in', label: 'ft/in' },
     ];
 
-    const options = type === 'weight' ? weightOptions : heightOptions;
+    const options = $derived(type === 'weight' ? weightOptions : heightOptions);
 
     // Display values (what the user sees/edits)
     let displayValue: number | undefined = $state(undefined);

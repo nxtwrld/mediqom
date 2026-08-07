@@ -24,6 +24,8 @@
         pillCount = $bindable(0),
     }: Props = $props();
 
+    const uid = $props.id();
+
     const DAY_KEYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] as const;
     const DAYS = $derived(DAY_KEYS.map(key => ({ key, value: $t(`medications.day-${key.toLowerCase()}`) })));
 
@@ -70,8 +72,8 @@
     <Input type="date" bind:value={endDate} label={$t('medications.end-date')} placeholder="" />
 
     {#if frequency !== 'as_needed' && frequency !== 'once'}
-        <div class="times-section">
-            <label class="label">{$t('medications.times-of-day')}</label>
+        <div class="times-section" role="group" aria-labelledby="{uid}-times">
+            <span class="label" id="{uid}-times">{$t('medications.times-of-day')}</span>
             {#each times as time, i}
                 <div class="time-row">
                     <input type="time" value={time} onchange={(e) => updateTime(i, e.currentTarget.value)} />
@@ -89,8 +91,8 @@
     {/if}
 
     {#if frequency === 'weekly'}
-        <div class="days-section">
-            <label class="label">{$t('medications.days-of-week')}</label>
+        <div class="days-section" role="group" aria-labelledby="{uid}-weekdays">
+            <span class="label" id="{uid}-weekdays">{$t('medications.days-of-week')}</span>
             <div class="day-buttons">
                 {#each DAYS as day}
                     <button
@@ -107,8 +109,8 @@
     {/if}
 
     {#if frequency === 'monthly'}
-        <div class="days-section">
-            <label class="label">{$t('medications.days-of-month')}</label>
+        <div class="days-section" role="group" aria-labelledby="{uid}-monthdays">
+            <span class="label" id="{uid}-monthdays">{$t('medications.days-of-month')}</span>
             <div class="monthday-grid">
                 {#each Array.from({length: 31}, (_, i) => i + 1) as day}
                     <button
