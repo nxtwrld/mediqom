@@ -64,6 +64,8 @@ export class ChatClientService {
           carePlanContext: context.carePlanContext,
           // Sub-agent routing (classified in Call 1, used in Call 2)
           agentType: context.agentType,
+          // Selected AI Gateway model (user-switchable mid-conversation)
+          model: context.selectedModel,
         }),
         timeout: 300000,
       });

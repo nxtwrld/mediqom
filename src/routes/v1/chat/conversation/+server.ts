@@ -1,7 +1,8 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { checkRateLimit } from "$lib/auth/rate-limiter";
 import { auditFromEvent, auditLog } from "$lib/audit/index.server";
-import { enhancedAIProvider } from "$lib/ai/providers/enhanced-abstraction";
+import { generateStructured } from "$lib/ai/gateway";
+import { DEFAULT_CHAT_MODEL, isValidChatModel } from "$lib/ai/model-catalog";
 import type { Content } from "$lib/ai/types.d";
 import { generateId } from "$lib/utils/id";
 import { chatConfigManager } from "$lib/config/chat-config";
@@ -45,14 +46,18 @@ export const POST: RequestHandler = async (event) => {
       conversationHistory,
       language = "en",
       pageContext,
-      provider, // Optional provider override
+      model, // Optional model override (gateway "provider/model" slug)
       assembledContext, // Context from ChatManager
       availableTools, // MCP tools from ChatManager
       carePlanContext, // Focused Care Plan item (build row 7i)
       agentType, // Sub-agent type (classified in Call 1, used in Call 2)
     } = await request.json();
 
-    auditFromEvent(event, { action: "create", resource_type: "chat", metadata: { profile_id: profileId, mode } });
+    auditFromEvent(event, {
+      action: "create",
+      resource_type: "chat",
+      metadata: { profile_id: profileId, mode },
+    });
 
     // Validate required fields
     if (!message || !mode || !profileId) {
@@ -61,19 +66,25 @@ export const POST: RequestHandler = async (event) => {
       });
     }
 
-    // H3: Validate mode and provider
+    // H3: Validate mode and model
     const VALID_MODES = new Set(["patient", "caregiver", "clinical"]);
     if (!VALID_MODES.has(mode)) {
       error(400, { message: "Invalid mode" });
     }
-    if (provider && !chatConfigManager.getAvailableProviders().includes(provider)) {
-      error(400, { message: "Invalid provider" });
+    if (model !== undefined && !isValidChatModel(model)) {
+      error(400, { message: "Invalid model" });
     }
+    // Resolve the model to use (falls back to default when not provided)
+    const resolvedModel = isValidChatModel(model) ? model : DEFAULT_CHAT_MODEL;
 
     // H1B: Sanitize input (with multilingual patterns)
     const sanitized = sanitizeInput(message, language);
     if (sanitized.flagged) {
-      log.warn("Prompt injection pattern detected", { mode, profileId, originalLength: sanitized.originalLength });
+      log.warn("Prompt injection pattern detected", {
+        mode,
+        profileId,
+        originalLength: sanitized.originalLength,
+      });
     }
 
     // M2: Emergency detection (with multilingual patterns)
@@ -92,7 +103,8 @@ export const POST: RequestHandler = async (event) => {
           conversationHistory || [],
           language,
           pageContext,
-          provider,
+          resolvedModel,
+          session.user.id,
           controller,
           encoder,
           assembledContext,
@@ -135,7 +147,8 @@ async function processAIRequest(
   conversationHistory: any[],
   language: string,
   pageContext: any,
-  provider: string | undefined,
+  model: string,
+  userId: string,
   controller: ReadableStreamDefaultController,
   encoder: TextEncoder,
   assembledContext?: any,
@@ -168,7 +181,10 @@ async function processAIRequest(
           },
         );
 
-        log.info("API context prepared", { documents: contextResult?.documentCount, confidence: contextResult?.confidence });
+        log.info("API context prepared", {
+          documents: contextResult?.documentCount,
+          confidence: contextResult?.confidence,
+        });
       } catch (error) {
         log.warn("Failed to prepare context in API route:", error);
         contextResult = null;
@@ -182,10 +198,24 @@ async function processAIRequest(
     log.debug("MCP context", { tools: finalTools, hasContext: !!finalContext });
 
     // Build system prompt — use sub-agent config for Call 2, full config for Call 1
-    const useSubAgent = agentType && agentType !== 'general' && chatAgentConfigManager.hasAgent(agentType);
+    const useSubAgent =
+      agentType &&
+      agentType !== "general" &&
+      chatAgentConfigManager.hasAgent(agentType);
     const systemPrompt = useSubAgent
-      ? chatAgentConfigManager.buildSubAgentPrompt(agentType!, mode, language, pageContext, finalContext)
-      : chatConfigManager.buildSystemPrompt(mode, language, pageContext, finalContext);
+      ? chatAgentConfigManager.buildSubAgentPrompt(
+          agentType!,
+          mode,
+          language,
+          pageContext,
+          finalContext,
+        )
+      : chatConfigManager.buildSystemPrompt(
+          mode,
+          language,
+          pageContext,
+          finalContext,
+        );
 
     if (useSubAgent) {
       log.info("Using sub-agent", { agentType, mode });
@@ -211,7 +241,10 @@ async function processAIRequest(
     if (cpSummary) {
       const tasks = Array.isArray(cpSummary.topTasks)
         ? cpSummary.topTasks
-            .map((t: any) => `  - ${t.text} [${t.status}${t.dueDate ? `, due ${t.dueDate}` : ""}]`)
+            .map(
+              (t: any) =>
+                `  - ${t.text} [${t.status}${t.dueDate ? `, due ${t.dueDate}` : ""}]`,
+            )
             .join("\n")
         : "";
       content.push({
@@ -255,17 +288,16 @@ async function processAIRequest(
       ? chatAgentConfigManager.createSubAgentSchema(agentType!, mode)
       : chatConfigManager.createResponseSchema(mode);
 
-    // Single LLM call — returns text response + toolCalls + metadata atomically
-    const structuredData = await enhancedAIProvider.analyzeDocument(
-      content,
-      schema,
+    // Single LLM call via the AI Gateway — returns text response + toolCalls + metadata
+    // atomically. The model is user-selectable (switchable mid-conversation).
+    const structuredData = await generateStructured(content, schema, {
+      model,
+      language: chatConfigManager.getLanguageName(language),
+      temperature: 0,
       tokenUsage,
-      {
-        language: chatConfigManager.getLanguageName(language),
-        temperature: 0,
-        flowType: mode === "patient" ? "medical_analysis" : "medical_analysis",
-      },
-    );
+      userId,
+      tags: ["feature:chat", `mode:${mode}`],
+    });
 
     const fullResponse = structuredData.response || "";
     const hasToolCalls =
@@ -287,7 +319,7 @@ async function processAIRequest(
       metadata: {
         token_count: tokenUsage.total,
         mode,
-        provider: provider || chatConfigManager.getConfig().defaultProvider,
+        model,
         has_context: !!finalContext,
         tool_count: finalTools.length,
       },
@@ -318,7 +350,9 @@ async function processAIRequest(
       // Layer 2: LLM validation (all languages, non-clinical)
       if (mode !== "clinical") {
         const llmGuard = await Promise.race([
-          checkOutputSafety(fullResponse, mode, language, regexResult).catch(() => null),
+          checkOutputSafety(fullResponse, mode, language, regexResult).catch(
+            () => null,
+          ),
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 3500)),
         ]);
 
@@ -349,11 +383,22 @@ async function processAIRequest(
 
     // Filter sources to only approved domains
     const APPROVED_DOMAINS = new Set([
-      "pubmed.ncbi.nlm.nih.gov", "ncbi.nlm.nih.gov", "cochranelibrary.com",
-      "europepmc.org", "semanticscholar.org", "scholar.google.com",
-      "bestpractice.bmj.com", "merckmanuals.com", "msdmanuals.com",
-      "mayoclinic.org", "my.clevelandclinic.org", "who.int",
-      "cdc.gov", "nih.gov", "nice.org.uk", "ecdc.europa.eu",
+      "pubmed.ncbi.nlm.nih.gov",
+      "ncbi.nlm.nih.gov",
+      "cochranelibrary.com",
+      "europepmc.org",
+      "semanticscholar.org",
+      "scholar.google.com",
+      "bestpractice.bmj.com",
+      "merckmanuals.com",
+      "msdmanuals.com",
+      "mayoclinic.org",
+      "my.clevelandclinic.org",
+      "who.int",
+      "cdc.gov",
+      "nih.gov",
+      "nice.org.uk",
+      "ecdc.europa.eu",
     ]);
     const validatedSources = (structuredData.sources || []).filter(
       (s: any) => s.url && s.domain && APPROVED_DOMAINS.has(s.domain),
@@ -373,13 +418,14 @@ async function processAIRequest(
         sources: validatedSources,
         tokenUsage: tokenUsage.total,
         mode,
+        model,
         // Include context metadata
         contextAvailable: !!(finalContext || contextResult),
         documentCount: contextResult?.documentCount || 0,
         contextConfidence: contextResult?.confidence || 0,
         availableTools: finalTools,
         // Sub-agent classification for Call 2 routing
-        agentType: structuredData.agentType || 'general',
+        agentType: structuredData.agentType || "general",
         // Debug info
         debugInfo: {
           hasToolCalls,
@@ -482,7 +528,8 @@ function formatAvailableTools(
   const toolDescriptions: Record<string, string> = {
     searchDocuments: "Search patient documents using semantic similarity",
     getAssembledContext: "Get comprehensive assembled medical context",
-    getProfileData: "Access patient demographics and health profile (height, weight, age, blood type, allergies, medications, conditions)",
+    getProfileData:
+      "Access patient demographics and health profile (height, weight, age, blood type, allergies, medications, conditions)",
     queryMedicalHistory:
       "Query specific medical history (medications, conditions, procedures, allergies)",
     getDocumentById: "Retrieve specific document by ID",

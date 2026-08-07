@@ -4,10 +4,23 @@ import type { ChatState, ChatMessage, ChatContext, ChatMode } from "./types.d";
 import { profile } from "$lib/profiles";
 import { generateId } from "$lib/utils/id";
 import user, { type User } from "$lib/user";
+import { DEFAULT_CHAT_MODEL, isValidChatModel } from "$lib/ai/model-catalog";
 
-export function resolveChatMode(isOwnProfile: boolean, isMedical: boolean): ChatMode {
+export function resolveChatMode(
+  isOwnProfile: boolean,
+  isMedical: boolean,
+): ChatMode {
   if (isOwnProfile) return "patient";
   return isMedical ? "clinical" : "caregiver";
+}
+
+const MODEL_STORAGE_KEY = "chat.selectedModel";
+
+/** Read the persisted model choice (browser only), falling back to the default. */
+export function getStoredChatModel(): string {
+  if (typeof localStorage === "undefined") return DEFAULT_CHAT_MODEL;
+  const stored = localStorage.getItem(MODEL_STORAGE_KEY);
+  return isValidChatModel(stored) ? stored : DEFAULT_CHAT_MODEL;
 }
 
 const initialState: ChatState = {
@@ -86,8 +99,24 @@ export const chatActions = {
     chatStore.update((state) => ({ ...state, focusedBodyPart: bodyPart }));
   },
 
+  /** Switch the active AI model (gateway slug); persists across sessions. */
+  setModel: (modelId: string) => {
+    if (!isValidChatModel(modelId)) return;
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(MODEL_STORAGE_KEY, modelId);
+    }
+    chatStore.update((state) => ({
+      ...state,
+      context: state.context
+        ? { ...state.context, selectedModel: modelId }
+        : state.context,
+    }));
+  },
+
   /** Focus a Care Plan item so the AI can answer about it (build row 7i). */
-  setCarePlanFocus: (carePlanContext: ChatContext["carePlanContext"] | null) => {
+  setCarePlanFocus: (
+    carePlanContext: ChatContext["carePlanContext"] | null,
+  ) => {
     chatStore.update((state) => ({
       ...state,
       context: state.context
@@ -122,7 +151,10 @@ export const chatActions = {
             ...s.context,
             currentProfileId: profileId,
             isOwnProfile,
-            mode: resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false),
+            mode: resolveChatMode(
+              isOwnProfile,
+              (user.get() as User)?.isMedical ?? false,
+            ),
           }
         : null,
     }));

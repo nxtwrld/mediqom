@@ -784,6 +784,15 @@
       }
     },
     "onboarding": {
+      "about-you": {
+        "title": "",
+        "subtitle": ""
+      },
+      "capability": {
+        "birth-date": "",
+        "biological-sex": "",
+        "measurements": ""
+      },
       "basic-profile": "Perfil básico",
       "click-here": "pulse aquí.",
       "copy-to-clipboard": "Copiar al portapapeles",
@@ -862,7 +871,10 @@
         "using-passkey": "Sus datos están protegidos con su clave de acceso.",
         "using-passphrase": "Sus datos están protegidos con su contraseña de cifrado.",
         "convenience-configured": "¡El modo conveniente está configurado!",
-        "convenience-explanation": "Sus datos están cifrados y podemos ayudarle a recuperar el acceso si es necesario."
+        "convenience-explanation": "Sus datos están cifrados y podemos ayudarle a recuperar el acceso si es necesario.",
+        "default-intro": "",
+        "secure-my-account": "",
+        "advanced-options": ""
       },
       "privacy-and-amp-encryption": "Privacidad &amp; Cifrado",
       "required": "obligatorio",
@@ -919,7 +931,13 @@
     "documents": {
       "remove": "Eliminar",
       "confirm-remove": "¿Está seguro de que desea eliminar este documento?",
-      "view-document": "Ver documento"
+      "view-document": "Ver documento",
+      "empty": {
+        "title": "",
+        "subtitle": "",
+        "import-cta": "",
+        "no-match": ""
+      }
     },
     "report": {
       "anatomy": {}

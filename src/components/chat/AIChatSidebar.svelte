@@ -1,15 +1,22 @@
 <script lang="ts">
-  import { onMount, onDestroy, tick } from 'svelte';
-  import { chatStore, chatActions, isOpen, messages, isLoading } from '$lib/chat/store';
-  import { chatManager } from '$lib/chat/chat-manager';
-  import type { ChatMessage, SourceCitation } from '$lib/chat/types.d';
-  import ui from '$lib/ui';
-  import { t } from '$lib/i18n';
-  import { keyboardHeight } from '$lib/capacitor/keyboard-store';
-  import { isFeatureEnabled } from '$lib/config/feature-flags';
-  import ContextPrompt from './ContextPrompt.svelte';
-  import ChatWidget from './widgets/ChatWidget.svelte';
-  import Markdown from '$components/ui/Markdown.svelte';
+  import { onMount, onDestroy, tick } from "svelte";
+  import {
+    chatStore,
+    chatActions,
+    isOpen,
+    messages,
+    isLoading,
+  } from "$lib/chat/store";
+  import { chatManager } from "$lib/chat/chat-manager";
+  import { CHAT_MODELS, DEFAULT_CHAT_MODEL } from "$lib/ai/model-catalog";
+  import type { ChatMessage, SourceCitation } from "$lib/chat/types.d";
+  import ui from "$lib/ui";
+  import { t } from "$lib/i18n";
+  import { keyboardHeight } from "$lib/capacitor/keyboard-store";
+  import { isFeatureEnabled } from "$lib/config/feature-flags";
+  import ContextPrompt from "./ContextPrompt.svelte";
+  import ChatWidget from "./widgets/ChatWidget.svelte";
+  import Markdown from "$components/ui/Markdown.svelte";
 
   /**
    * Inject source citation links into message text.
@@ -17,7 +24,12 @@
    */
   /** Escape HTML special chars to prevent XSS in injected attributes/content */
   function escapeHtml(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function injectSourceLinks(text: string, sources?: SourceCitation[]): string {
@@ -25,24 +37,27 @@
 
     return text.replace(/\[(\d+)\]/g, (match, numStr) => {
       const num = parseInt(numStr, 10);
-      const source = sources.find(s => s.id === num);
+      const source = sources.find((s) => s.id === num);
       if (!source) return match;
 
       // H4: Validate URL protocol — reject javascript: and data: URIs
       if (!source.url || !/^https?:\/\//i.test(source.url)) return match;
 
-      const safeTitle = escapeHtml(source.title || '');
+      const safeTitle = escapeHtml(source.title || "");
       const safeUrl = escapeHtml(source.url);
 
-      const truncatedUrl = source.url.replace(/^https?:\/\//, '').substring(0, 25);
-      const display = truncatedUrl.length < source.url.replace(/^https?:\/\//, '').length
-        ? escapeHtml(truncatedUrl) + '...'
-        : escapeHtml(truncatedUrl);
+      const truncatedUrl = source.url
+        .replace(/^https?:\/\//, "")
+        .substring(0, 25);
+      const display =
+        truncatedUrl.length < source.url.replace(/^https?:\/\//, "").length
+          ? escapeHtml(truncatedUrl) + "..."
+          : escapeHtml(truncatedUrl);
 
       return `<sup>[${num}]</sup> <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="source-link" title="${safeTitle}">${display}</a>`;
     });
   }
-  
+
   interface Props {
     currentProfile: any;
     isOwnProfile: boolean;
@@ -50,28 +65,31 @@
   }
 
   let { currentProfile, isOwnProfile, userLanguage }: Props = $props();
-  
+
   // Local component state
-  let messageInput = $state('');
+  let messageInput = $state("");
   let disclaimerExpanded = $state(false);
   let messagesContainer = $state<HTMLElement>();
   let textareaRef: HTMLTextAreaElement | undefined = $state();
   let sidebarWidth = $state(400);
   let isResizing = $state(false);
-  
+
   // Update CSS variable when sidebar width changes
   $effect(() => {
     if (chatIsOpen) {
-      document.documentElement.style.setProperty('--chat-sidebar-width', `${sidebarWidth}px`);
+      document.documentElement.style.setProperty(
+        "--chat-sidebar-width",
+        `${sidebarWidth}px`,
+      );
     }
   });
-  
+
   // Reactive state
   let chatMessages = $state<ChatMessage[]>([]);
   let chatIsLoading = $state(false);
   let chatIsOpen = $state(false);
-  let currentProfileName = $state<string>('');
-  
+  let currentProfileName = $state<string>("");
+
   // Subscribe to store changes
   let unsubscribeMessages: (() => void) | null = null;
   let unsubscribeLoading: (() => void) | null = null;
@@ -85,22 +103,22 @@
       // Auto-scroll to bottom when new messages arrive
       setTimeout(() => scrollToBottom(), 100);
     });
-    
+
     unsubscribeLoading = isLoading.subscribe((loading) => {
       chatIsLoading = loading;
     });
-    
+
     unsubscribeOpen = isOpen.subscribe((open) => {
       chatIsOpen = open;
     });
-    
+
     // Subscribe to chat store for context updates
     unsubscribeStore = chatStore.subscribe((state) => {
       if (state.context?.pageContext?.profileName) {
         currentProfileName = state.context.pageContext.profileName;
       }
     });
-    
+
     // Start listening to UI events
     chatManager.startListening();
   });
@@ -111,7 +129,7 @@
     unsubscribeLoading?.();
     unsubscribeOpen?.();
     unsubscribeStore?.();
-    
+
     // Stop listening to UI events
     chatManager.stopListening();
   });
@@ -122,14 +140,14 @@
   // Handle sending message
   async function sendMessage() {
     if (!messageInput.trim() || chatIsLoading) return;
-    
+
     const message = messageInput.trim();
-    messageInput = '';
-    
+    messageInput = "";
+
     try {
       await chatManager.sendMessage(message);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
       // Re-add message to input on error
       messageInput = message;
     }
@@ -138,7 +156,7 @@
 
   // Handle key press in input
   function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
     }
@@ -156,7 +174,7 @@
     try {
       await chatManager.focusAnatomy(bodyPartId);
     } catch (error) {
-      console.error('Failed to focus anatomy:', error);
+      console.error("Failed to focus anatomy:", error);
     }
   }
 
@@ -165,9 +183,28 @@
     chatManager.clearConversation();
   }
 
+  // Currently active AI model (falls back to the default before the context is set)
+  let selectedModel = $derived(
+    $chatStore.context?.selectedModel ?? DEFAULT_CHAT_MODEL,
+  );
+
+  // Switch the active model, optionally mid-conversation (asks another model)
+  function handleModelChange(event: Event) {
+    const value = (event.currentTarget as HTMLSelectElement).value;
+    chatManager.switchModel(value);
+  }
+
   // Handle document context acceptance
-  function acceptDocument(documentId: string, documentName: string, documentContent: any) {
-    chatManager.acceptDocumentContext(documentId, documentName, documentContent);
+  function acceptDocument(
+    documentId: string,
+    documentName: string,
+    documentContent: any,
+  ) {
+    chatManager.acceptDocumentContext(
+      documentId,
+      documentName,
+      documentContent,
+    );
   }
 
   // Handle document context decline
@@ -176,7 +213,11 @@
   }
 
   // Handle profile context acceptance
-  function acceptProfile(profileId: string, profileName: string, profileData: any) {
+  function acceptProfile(
+    profileId: string,
+    profileName: string,
+    profileData: any,
+  ) {
     chatManager.acceptProfileContext(profileId, profileName, profileData);
   }
 
@@ -187,31 +228,31 @@
 
   // Format message timestamp
   function formatTime(timestamp: Date): string {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
   // Handle sidebar resize
   function startResize(event: MouseEvent) {
     isResizing = true;
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', stopResize);
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", stopResize);
     event.preventDefault();
   }
 
   function handleResize(event: MouseEvent) {
     if (!isResizing) return;
-    
+
     const newWidth = window.innerWidth - event.clientX;
     sidebarWidth = Math.max(300, Math.min(800, newWidth));
   }
 
   function stopResize() {
     isResizing = false;
-    document.removeEventListener('mousemove', handleResize);
-    document.removeEventListener('mouseup', stopResize);
+    document.removeEventListener("mousemove", handleResize);
+    document.removeEventListener("mouseup", stopResize);
   }
 
   // Toggle sidebar
@@ -228,20 +269,21 @@
   $effect(() => {
     if (currentProfile && userLanguage) {
       const currentProfileId = currentProfile.id;
-      
+
       // Only emit if this is actually a change
-      if (previousProfileId !== currentProfileId || 
-          previousLanguage !== userLanguage || 
-          previousIsOwnProfile !== isOwnProfile) {
-        
+      if (
+        previousProfileId !== currentProfileId ||
+        previousLanguage !== userLanguage ||
+        previousIsOwnProfile !== isOwnProfile
+      ) {
         // Emit profile switch event
-        ui.emit('chat:profile_switch', {
+        ui.emit("chat:profile_switch", {
           profileId: currentProfileId,
-          profileName: currentProfile.fullName || 'Unknown',
+          profileName: currentProfile.fullName || "Unknown",
           isOwnProfile,
-          language: userLanguage
+          language: userLanguage,
         });
-        
+
         // Update previous values
         previousProfileId = currentProfileId;
         previousLanguage = userLanguage;
@@ -279,10 +321,15 @@
     <div
       class="resize-handle"
       onmousedown={startResize}
-      onkeydown={(e) => { if (e.key === 'ArrowLeft') sidebarWidth = Math.min(800, sidebarWidth + 10); if (e.key === 'ArrowRight') sidebarWidth = Math.max(300, sidebarWidth - 10); }}
+      onkeydown={(e) => {
+        if (e.key === "ArrowLeft")
+          sidebarWidth = Math.min(800, sidebarWidth + 10);
+        if (e.key === "ArrowRight")
+          sidebarWidth = Math.max(300, sidebarWidth - 10);
+      }}
       role="slider"
       aria-orientation="vertical"
-      aria-label={$t('app.chat.sidebar.resize')}
+      aria-label={$t("app.chat.sidebar.resize")}
       aria-valuenow={sidebarWidth}
       aria-valuemin={300}
       aria-valuemax={800}
@@ -292,31 +339,52 @@
     <!-- Header -->
     <div class="chat-header">
       <div class="chat-title">
-        <h3>{$t('app.chat.title')}</h3>
+        <h3>{$t("app.chat.title")}</h3>
         <div class="chat-subtitle">
-          <span class="chat-profile">{currentProfileName || 'No profile selected'}</span>
-          <span class="chat-mode">{$t('app.chat.mode.' + ($chatStore.context?.mode ?? (isOwnProfile ? 'patient' : 'clinical')))}</span>
+          <span class="chat-profile"
+            >{currentProfileName || "No profile selected"}</span
+          >
+          <span class="chat-mode"
+            >{$t(
+              "app.chat.mode." +
+                ($chatStore.context?.mode ??
+                  (isOwnProfile ? "patient" : "clinical")),
+            )}</span
+          >
         </div>
       </div>
       <div class="chat-actions">
-        <button 
+        <select
+          class="chat-model-select"
+          value={selectedModel}
+          onchange={handleModelChange}
+          title={$t("app.chat.model.label")}
+          aria-label={$t("app.chat.model.label")}
+        >
+          {#each CHAT_MODELS as m (m.id)}
+            <option value={m.id}>{m.label} · {m.provider}</option>
+          {/each}
+        </select>
+        <button
           class="chat-action-btn"
           onclick={clearConversation}
-          title={$t('app.chat.actions.clear')}
-          aria-label={$t('app.chat.actions.clear')}
+          title={$t("app.chat.actions.clear")}
+          aria-label={$t("app.chat.actions.clear")}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"/>
+            <path
+              d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2"
+            />
           </svg>
         </button>
-        <button 
+        <button
           class="chat-action-btn"
           onclick={toggleSidebar}
-          title={$t('app.chat.actions.close')}
-          aria-label={$t('app.chat.actions.close')}
+          title={$t("app.chat.actions.close")}
+          aria-label={$t("app.chat.actions.close")}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M18 6L6 18M6 6l12 12"/>
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
@@ -329,37 +397,53 @@
           <div class="message-content">
             <div class="message-text">
               {#if message.metadata?.translationKey}
-                {$t(message.metadata.translationKey, { values: message.metadata.translationParams })}
-              {:else if message.role === 'assistant'}
+                {$t(message.metadata.translationKey, {
+                  values: message.metadata.translationParams,
+                })}
+              {:else if message.role === "assistant"}
                 <!-- Render assistant messages with markdown formatting and source citations -->
-                <Markdown text={injectSourceLinks(message.content, message.metadata?.sources)} />
+                <Markdown
+                  text={injectSourceLinks(
+                    message.content,
+                    message.metadata?.sources,
+                  )}
+                />
               {:else}
                 <!-- Render user and system messages as plain text -->
                 {message.content}
               {/if}
             </div>
-            
+
             <!-- Generative UI Widgets -->
             {#if message.metadata?.widgets && message.metadata.widgets.length > 0}
               <div class="message-widgets">
                 {#each message.metadata.widgets as widgetSpec (widgetSpec.id)}
                   <ChatWidget
                     spec={widgetSpec}
-                    onInteraction={(interaction) => chatManager.handleWidgetInteraction(interaction)}
+                    onInteraction={(interaction) =>
+                      chatManager.handleWidgetInteraction(interaction)}
                   />
                 {/each}
               </div>
             {/if}
 
             <!-- Care Plan suggested-action footer (build row 19) -->
-            {#if isFeatureEnabled('CARE_PLAN') && message.metadata?.suggestedAction}
+            {#if isFeatureEnabled("CARE_PLAN") && message.metadata?.suggestedAction}
               <div class="suggested-action">
-                <span class="sa-label">{message.metadata.suggestedAction.label}</span>
+                <span class="sa-label"
+                  >{message.metadata.suggestedAction.label}</span
+                >
                 {#if message.metadata.suggestedActionDone}
-                  <span class="sa-done">{$t('careplan.suggested-action.added')}</span>
+                  <span class="sa-done"
+                    >{$t("careplan.suggested-action.added")}</span
+                  >
                 {:else}
-                  <button class="button -small -primary" onclick={() => chatManager.acceptSuggestedAction(message.id)}>
-                    {$t('careplan.suggested-action.add')}
+                  <button
+                    class="button -small -primary"
+                    onclick={() =>
+                      chatManager.acceptSuggestedAction(message.id)}
+                  >
+                    {$t("careplan.suggested-action.add")}
                   </button>
                 {/if}
               </div>
@@ -372,13 +456,19 @@
                   <button
                     class="anatomy-btn"
                     onclick={() => focusAnatomy(bodyPart)}
-                    aria-label={$t('app.chat.anatomy.view-aria', { bodyPart } as any)}
-                    title={$t('app.chat.anatomy.view', { bodyPart } as any)}
+                    aria-label={$t("app.chat.anatomy.view-aria", {
+                      bodyPart,
+                    } as any)}
+                    title={$t("app.chat.anatomy.view", { bodyPart } as any)}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                      <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/>
-                      <path d="M8 12h8M12 8v8"/>
+                      <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+                      />
+                      <path
+                        d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"
+                      />
+                      <path d="M8 12h8M12 8v8" />
                     </svg>
                   </button>
                 {/each}
@@ -394,27 +484,31 @@
             {#if message.metadata?.documentPrompt}
               <div class="document-prompt">
                 <p class="document-prompt-text">
-                  {$t('app.chat.document.add-prompt', { title: message.metadata.documentPrompt.title } as any)}
+                  {$t("app.chat.document.add-prompt", {
+                    title: message.metadata.documentPrompt.title,
+                  } as any)}
                 </p>
                 <div class="document-actions">
                   <button
                     class="document-btn accept"
-                    onclick={() => acceptDocument(
-                      message.metadata!.documentPrompt!.documentId,
-                      message.metadata!.documentPrompt!.title,
-                      message.metadata!.documentPrompt!.content
-                    )}
+                    onclick={() =>
+                      acceptDocument(
+                        message.metadata!.documentPrompt!.documentId,
+                        message.metadata!.documentPrompt!.title,
+                        message.metadata!.documentPrompt!.content,
+                      )}
                   >
-                    {$t('app.chat.document.add-yes')}
+                    {$t("app.chat.document.add-yes")}
                   </button>
                   <button
                     class="document-btn decline"
-                    onclick={() => declineDocument(
-                      message.metadata!.documentPrompt!.documentId,
-                      message.metadata!.documentPrompt!.title
-                    )}
+                    onclick={() =>
+                      declineDocument(
+                        message.metadata!.documentPrompt!.documentId,
+                        message.metadata!.documentPrompt!.title,
+                      )}
                   >
-                    {$t('app.chat.document.add-no')}
+                    {$t("app.chat.document.add-no")}
                   </button>
                 </div>
               </div>
@@ -424,39 +518,43 @@
             {#if message.metadata?.profilePrompt}
               <div class="profile-prompt">
                 <p class="profile-prompt-text">
-                  {$t('app.chat.profile.switch-prompt', { profileName: message.metadata.profilePrompt.profileName } as any)}
+                  {$t("app.chat.profile.switch-prompt", {
+                    profileName: message.metadata.profilePrompt.profileName,
+                  } as any)}
                 </p>
                 <div class="profile-actions">
                   <button
                     class="profile-btn accept"
-                    onclick={() => acceptProfile(
-                      message.metadata!.profilePrompt!.profileId,
-                      message.metadata!.profilePrompt!.profileName,
-                      message.metadata!.profilePrompt!.profileData
-                    )}
+                    onclick={() =>
+                      acceptProfile(
+                        message.metadata!.profilePrompt!.profileId,
+                        message.metadata!.profilePrompt!.profileName,
+                        message.metadata!.profilePrompt!.profileData,
+                      )}
                   >
-                    {$t('app.chat.profile.switch-yes')}
+                    {$t("app.chat.profile.switch-yes")}
                   </button>
                   <button
                     class="profile-btn decline"
-                    onclick={() => declineProfile(
-                      message.metadata!.profilePrompt!.profileId,
-                      message.metadata!.profilePrompt!.profileName
-                    )}
+                    onclick={() =>
+                      declineProfile(
+                        message.metadata!.profilePrompt!.profileId,
+                        message.metadata!.profilePrompt!.profileName,
+                      )}
                   >
-                    {$t('app.chat.profile.switch-no')}
+                    {$t("app.chat.profile.switch-no")}
                   </button>
                 </div>
               </div>
             {/if}
-            
+
             <div class="message-time">
               {formatTime(message.timestamp)}
             </div>
           </div>
         </div>
       {/each}
-      
+
       <!-- Loading indicator -->
       {#if chatIsLoading}
         <div class="message assistant">
@@ -469,48 +567,58 @@
           </div>
         </div>
       {/if}
-
     </div>
 
     <!-- Input Area -->
     <div class="input-area">
-    
       <div class="input-container">
-      <div>
-        <!-- AI Disclaimer -->
-        <div class="ai-disclaimer">
-          <p class="ai-disclaimer-short">{$t('app.chat.disclaimer.short')}
+        <div>
+          <!-- AI Disclaimer -->
+          <div class="ai-disclaimer">
+            <p class="ai-disclaimer-short">
+              {$t("app.chat.disclaimer.short")}
 
-            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
-              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
-            </button>
-          </p>
-          {#if disclaimerExpanded}
-            <p class="ai-disclaimer-details">{$t('app.chat.disclaimer.details')}</p>
-            <button class="ai-disclaimer-toggle" onclick={() => disclaimerExpanded = !disclaimerExpanded}>
-              {disclaimerExpanded ? $t('app.chat.disclaimer.less') : $t('app.chat.disclaimer.more')}
-            </button>
-          {/if}
-    
+              <button
+                class="ai-disclaimer-toggle"
+                onclick={() => (disclaimerExpanded = !disclaimerExpanded)}
+              >
+                {disclaimerExpanded
+                  ? $t("app.chat.disclaimer.less")
+                  : $t("app.chat.disclaimer.more")}
+              </button>
+            </p>
+            {#if disclaimerExpanded}
+              <p class="ai-disclaimer-details">
+                {$t("app.chat.disclaimer.details")}
+              </p>
+              <button
+                class="ai-disclaimer-toggle"
+                onclick={() => (disclaimerExpanded = !disclaimerExpanded)}
+              >
+                {disclaimerExpanded
+                  ? $t("app.chat.disclaimer.less")
+                  : $t("app.chat.disclaimer.more")}
+              </button>
+            {/if}
+          </div>
+          <textarea
+            bind:this={textareaRef}
+            bind:value={messageInput}
+            onkeydown={handleKeyPress}
+            placeholder={$t("app.chat.placeholders.ask")}
+            disabled={chatIsLoading}
+            rows="2"
+          ></textarea>
         </div>
-        <textarea
-          bind:this={textareaRef}
-          bind:value={messageInput}
-          onkeydown={handleKeyPress}
-          placeholder={$t('app.chat.placeholders.ask')}
-          disabled={chatIsLoading}
-          rows="2"
-        ></textarea>
-      </div>
-        <button 
+        <button
           class="send-btn"
           onclick={sendMessage}
           disabled={chatIsLoading || !messageInput.trim()}
-          aria-label={$t('app.chat.actions.send')}
+          aria-label={$t("app.chat.actions.send")}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M22 2L2 12l8 4 12-8-8-8z"/>
-            <path d="M10 16l-2 6 8-4"/>
+            <path d="M22 2L2 12l8 4 12-8-8-8z" />
+            <path d="M10 16l-2 6 8-4" />
           </svg>
         </button>
       </div>
@@ -587,7 +695,20 @@
 
   .chat-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
+  }
+
+  .chat-model-select {
+    height: 32px;
+    max-width: 160px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border-radius: var(--ui-radius-small);
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    cursor: pointer;
   }
 
   .chat-action-btn {
@@ -627,7 +748,6 @@
   .message {
     display: flex;
     flex-direction: column;
-
   }
 
   .message.user {
@@ -661,7 +781,7 @@
 
   /* Add chat bubble tail for user messages */
   .message.user .message-content::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 0;
@@ -682,7 +802,7 @@
 
   /* Add chat bubble tail for assistant messages */
   .message.assistant .message-content::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 0;
@@ -731,19 +851,19 @@
   .message-text :global(.markdown) {
     margin: 0;
   }
-  
+
   .message-text :global(.markdown p) {
     margin: 0.5em 0;
   }
-  
+
   .message-text :global(.markdown p:first-child) {
     margin-top: 0;
   }
-  
+
   .message-text :global(.markdown p:last-child) {
     margin-bottom: 0;
   }
-  
+
   .message-text :global(.markdown h1),
   .message-text :global(.markdown h2),
   .message-text :global(.markdown h3),
@@ -752,7 +872,7 @@
   .message-text :global(.markdown h6) {
     margin: 0.5em 0;
   }
-  
+
   .message-text :global(.markdown ul),
   .message-text :global(.markdown ol) {
     margin: 0.5em 0;
@@ -897,7 +1017,9 @@
   }
 
   @keyframes typing {
-    0%, 60%, 100% {
+    0%,
+    60%,
+    100% {
       transform: scale(1);
       opacity: 0.5;
     }
@@ -908,11 +1030,11 @@
   }
 
   .ai-disclaimer {
-    padding: .5rem 1rem;
+    padding: 0.5rem 1rem;
     background: var(--color-warning);
     border-top-left-radius: var(--radius-8);
     border-top-right-radius: var(--radius-8);
-    font-size: .8rem;
+    font-size: 0.8rem;
     line-height: 1.4;
     color: var(--color-warning-text);
   }

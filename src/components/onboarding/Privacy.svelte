@@ -19,9 +19,8 @@
 
     const bubble = createBubbler();
 
-    export const ready: boolean = true;
-
     interface Props {
+        ready?: boolean;
         data: {
             bio: {
                 email: string;
@@ -44,7 +43,15 @@
         profileForm: HTMLFormElement;
     }
 
-    let { data = $bindable(), profileForm }: Props = $props();
+    let { ready = $bindable(false), data = $bindable(), profileForm }: Props = $props();
+
+    // Save is only allowed once a key mode has actually been configured
+    $effect(() => {
+        ready = !!data.privacy.publicKey;
+    });
+
+    // Whether the advanced (zero-knowledge) options are revealed
+    let showAdvanced = $state(false);
 
     // Security mode: 'convenience' stores passphrase on server, 'zero-knowledge' requires recovery
     type SecurityMode = 'convenience' | 'zero-knowledge';
@@ -365,52 +372,74 @@
 <h2 class="h2">{$t('app.onboarding.privacy-and-amp-encryption')}</h2>
 
 {#if currentStep === 'mode-select'}
-    <!-- Step 1: Security Mode Selection -->
+    <!-- Step 1: One-tap default with advanced disclosure -->
     <div class="security-mode-selection">
-        <p class="p form-message">{$t('app.onboarding.privacy.choose-security-level')}</p>
+        <p class="p form-message">{$t('app.onboarding.privacy.default-intro')}</p>
 
-        <div class="mode-option" class:selected={securityMode === 'convenience'}>
-            <label>
-                <input type="radio" bind:group={securityMode} value="convenience" />
-                <div class="mode-content">
-                    <strong>{$t('app.onboarding.privacy.convenience-mode')}</strong>
-                    <span class="badge -recommended">{$t('app.onboarding.privacy.recommended')}</span>
-                    <ul>
-                        <li>{$t('app.onboarding.privacy.convenience-backup')}</li>
-                        <li>{$t('app.onboarding.privacy.convenience-recovery')}</li>
-                        <li>{$t('app.onboarding.privacy.convenience-encrypted')}</li>
-                    </ul>
-                </div>
-            </label>
-        </div>
-
-        <div class="mode-option" class:selected={securityMode === 'zero-knowledge'}>
-            <label>
-                <input type="radio" bind:group={securityMode} value="zero-knowledge" />
-                <div class="mode-content">
-                    <strong>{$t('app.onboarding.privacy.zero-knowledge-mode')}</strong>
-                    <span class="badge -security">{$t('app.onboarding.privacy.maximum-security')}</span>
-                    <ul>
-                        <li>{$t('app.onboarding.privacy.zero-knowledge-only-you')}</li>
-                        <li>{$t('app.onboarding.privacy.zero-knowledge-no-access')}</li>
-                        <li>{$t('app.onboarding.privacy.zero-knowledge-recovery-required')}</li>
-                    </ul>
-                    <p class="warning-text">{$t('app.onboarding.privacy.zero-knowledge-warning')}</p>
-                </div>
-            </label>
-        </div>
+        <ul class="default-benefits">
+            <li>{$t('app.onboarding.privacy.convenience-encrypted')}</li>
+            <li>{$t('app.onboarding.privacy.convenience-backup')}</li>
+            <li>{$t('app.onboarding.privacy.convenience-recovery')}</li>
+        </ul>
 
         <div class="flex -center -column">
-            {#if securityMode === 'convenience'}
-                <button class="button -large -primary" onclick={setupConvenienceMode} disabled={isSettingUp}>
-                    {isSettingUp ? $t('app.onboarding.privacy.setting-up') : $t('app.onboarding.privacy.continue-with-convenience')}
-                </button>
-            {:else}
-                <button class="button -large -primary" onclick={() => currentStep = 'key-method'}>
-                    {$t('app.onboarding.privacy.continue-with-zero-knowledge')}
-                </button>
-            {/if}
+            <button class="button -large -primary" onclick={setupConvenienceMode} disabled={isSettingUp}>
+                {isSettingUp ? $t('app.onboarding.privacy.setting-up') : $t('app.onboarding.privacy.secure-my-account')}
+            </button>
         </div>
+
+        {#if !showAdvanced}
+            <button type="button" class="a advanced-toggle" onclick={() => showAdvanced = true}>
+                {$t('app.onboarding.privacy.advanced-options')}
+            </button>
+        {:else}
+            <div class="advanced-panel">
+                <p class="p form-message">{$t('app.onboarding.privacy.choose-security-level')}</p>
+
+                <div class="mode-option" class:selected={securityMode === 'convenience'}>
+                    <label>
+                        <input type="radio" bind:group={securityMode} value="convenience" />
+                        <div class="mode-content">
+                            <strong>{$t('app.onboarding.privacy.convenience-mode')}</strong>
+                            <span class="badge -recommended">{$t('app.onboarding.privacy.recommended')}</span>
+                            <ul>
+                                <li>{$t('app.onboarding.privacy.convenience-backup')}</li>
+                                <li>{$t('app.onboarding.privacy.convenience-recovery')}</li>
+                                <li>{$t('app.onboarding.privacy.convenience-encrypted')}</li>
+                            </ul>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="mode-option" class:selected={securityMode === 'zero-knowledge'}>
+                    <label>
+                        <input type="radio" bind:group={securityMode} value="zero-knowledge" />
+                        <div class="mode-content">
+                            <strong>{$t('app.onboarding.privacy.zero-knowledge-mode')}</strong>
+                            <span class="badge -security">{$t('app.onboarding.privacy.maximum-security')}</span>
+                            <ul>
+                                <li>{$t('app.onboarding.privacy.zero-knowledge-only-you')}</li>
+                                <li>{$t('app.onboarding.privacy.zero-knowledge-no-access')}</li>
+                                <li>{$t('app.onboarding.privacy.zero-knowledge-recovery-required')}</li>
+                            </ul>
+                            <p class="warning-text">{$t('app.onboarding.privacy.zero-knowledge-warning')}</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex -center -column">
+                    {#if securityMode === 'convenience'}
+                        <button class="button -primary" onclick={setupConvenienceMode} disabled={isSettingUp}>
+                            {isSettingUp ? $t('app.onboarding.privacy.setting-up') : $t('app.onboarding.privacy.continue-with-convenience')}
+                        </button>
+                    {:else}
+                        <button class="button -primary" onclick={() => currentStep = 'key-method'}>
+                            {$t('app.onboarding.privacy.continue-with-zero-knowledge')}
+                        </button>
+                    {/if}
+                </div>
+            </div>
+        {/if}
     </div>
 
 {:else if currentStep === 'key-method'}
@@ -660,6 +689,32 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
+    }
+
+    .default-benefits {
+        margin: 0 auto 1rem;
+        padding-left: 1.5rem;
+        max-width: 300px;
+    }
+
+    .default-benefits li {
+        margin: 0.25rem 0;
+        color: var(--color-text-secondary);
+    }
+
+    .advanced-toggle {
+        display: block;
+        margin: 1rem auto 0;
+        text-align: center;
+    }
+
+    .advanced-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-border);
     }
 
     .mode-option,

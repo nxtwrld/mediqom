@@ -51,7 +51,10 @@ export interface SuggestedAction {
     | "prevention"
     | "education";
   priority: "immediate" | "urgent" | "routine" | "as_needed";
-  timeframeNormalized?: { unit: "days" | "weeks" | "months" | "years"; value: number };
+  timeframeNormalized?: {
+    unit: "days" | "weeks" | "months" | "years";
+    value: number;
+  };
 }
 
 export interface ChatMessage {
@@ -81,6 +84,10 @@ export interface ChatMessage {
     // Care Plan suggested-action footer (build row 19)
     suggestedAction?: SuggestedAction;
     suggestedActionDone?: boolean;
+    // Model that produced this message (gateway "provider/model" slug)
+    model?: string;
+    // Marks a lightweight system notice, e.g. a mid-conversation model switch
+    systemNotice?: boolean;
     // Keep legacy support temporarily
     documentPrompt?: {
       documentId: string;
@@ -112,6 +119,8 @@ export interface ChatContext {
   mcpTools?: any; // MCP tools for AI to access medical data
   // Sub-agent routing: classified in Call 1, used in Call 2
   agentType?: string;
+  // Selected AI Gateway model ("provider/model" slug); user-switchable mid-conversation.
+  selectedModel?: string;
 }
 
 /** Care Plan focus passed into chat so the AI can answer about a specific item
@@ -238,9 +247,9 @@ export interface ChatResponse {
 }
 
 export interface AskAboutEvent {
-  type: string;          // 'diagnosis', 'medication', 'lab', 'carePlanItem', etc.
-  label: string;         // Human-readable item name (used in tooltip)
-  data: any;             // Raw section item object
+  type: string; // 'diagnosis', 'medication', 'lab', 'carePlanItem', etc.
+  label: string; // Human-readable item name (used in tooltip)
+  data: any; // Raw section item object
   documentId?: string;
   documentTitle?: string;
 }
