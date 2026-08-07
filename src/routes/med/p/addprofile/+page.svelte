@@ -45,4 +45,3 @@
         <button>{$t('app.buttons.create')}</button>
     {/if}
 </div>
-<slot />

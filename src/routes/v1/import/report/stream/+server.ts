@@ -13,7 +13,10 @@ interface ProgressEvent {
   timestamp: number;
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const { session } = await locals.safeGetSession();
+  if (!session) error(401, { message: "Unauthorized" });
+
   const data = await request.json();
 
   if (data.images === undefined && data.text === undefined) {

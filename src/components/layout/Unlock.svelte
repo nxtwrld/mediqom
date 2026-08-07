@@ -33,7 +33,7 @@
                 error = $t('app.unlock.invalid-passphrase');
              } else {
                 passphrase = '';
-                sounds.focus.play();    
+                sounds.focus?.play();
              }
 
         }

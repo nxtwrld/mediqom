@@ -60,7 +60,7 @@
         } else {
             activeLayers = [...activeLayers, layer];
         }
-        sounds.focus.play();
+        sounds.focus?.play();
      //   console.log('activeLayers', activeLayers);
     }
 
@@ -70,7 +70,7 @@
         } else {
             activeTools = [...activeTools, tool];
         }
-        sounds.focus.play();
+        sounds.focus?.play();
        // console.log('activeTools', activeTools);
        showLayers = false;
     }
@@ -104,13 +104,13 @@
 
     function ready() {
         modelLoaded = true;
-        if (firstLoad) sounds.model.play();
+        if (firstLoad) sounds.model?.play();
         firstLoad = false;
     }
 
 
     function resetModel() {
-        sounds.focus.play();
+        sounds.focus?.play();
         model.reset();
     }
     function closeModel() {

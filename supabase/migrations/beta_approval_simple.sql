@@ -1,5 +1,6 @@
 -- Drop the previous triggers and functions if they exist
 DROP TRIGGER IF EXISTS on_beta_approval ON public.beta_applications;
+DROP TRIGGER IF EXISTS on_auth_user_confirmed ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_beta_approval();
 DROP TABLE IF EXISTS public.beta_invitations;
 

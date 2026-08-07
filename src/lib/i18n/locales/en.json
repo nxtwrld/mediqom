@@ -630,6 +630,9 @@
         "open": "Open AI Chat",
         "send": "Send message"
       },
+      "model": {
+        "label": "AI model"
+      },
       "placeholders": {
         "ask": "Ask me about medical information..."
       },
@@ -908,6 +911,15 @@
       }
     },
     "onboarding": {
+      "about-you": {
+        "title": "About you",
+        "subtitle": "A few basics to personalize your health profile. You can change these anytime."
+      },
+      "capability": {
+        "birth-date": "Unlocks age-appropriate screening reminders.",
+        "biological-sex": "Lets us apply the correct lab reference ranges.",
+        "measurements": "Powers BMI and long-term trend tracking."
+      },
       "basic-profile": "Basic Profile",
       "click-here": "click here.",
       "copy-to-clipboard": "Copy to clipboard",
@@ -986,7 +998,10 @@
         "using-passkey": "Your data is protected with your passkey.",
         "using-passphrase": "Your data is protected with your passphrase.",
         "convenience-configured": "Convenience mode is configured!",
-        "convenience-explanation": "Your data is encrypted and we can help you recover access if needed."
+        "convenience-explanation": "Your data is encrypted and we can help you recover access if needed.",
+        "default-intro": "Your health data is encrypted. Secure your account in one tap.",
+        "secure-my-account": "Secure my account",
+        "advanced-options": "Advanced security options"
       },
       "privacy-and-amp-encryption": "Privacy &amp; Encryption",
       "required": "required",
@@ -1043,7 +1058,13 @@
     "documents": {
       "remove": "Remove",
       "confirm-remove": "Are you sure you want to remove this document?",
-      "view-document": "View document"
+      "view-document": "View document",
+      "empty": {
+        "title": "No documents yet",
+        "subtitle": "Import a lab result, prescription, or report to start building your health record.",
+        "import-cta": "Import your first document",
+        "no-match": "No documents match the current filter."
+      }
     },
     "report": {
       "anatomy": {}

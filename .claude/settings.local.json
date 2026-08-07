@@ -115,7 +115,8 @@
       "Bash(npm run *)",
       "Bash(head -15 ls /Users/nxtwrld/Documents/GitHub/mediqom/src/lib/medications/*.test.ts)",
       "Bash(read f *)",
-      "WebFetch(domain:gist.github.com)"
+      "WebFetch(domain:gist.github.com)",
+      "Bash(awk '{print}')"
     ],
     "deny": []
   },

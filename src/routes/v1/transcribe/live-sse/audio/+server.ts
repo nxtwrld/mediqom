@@ -37,7 +37,10 @@ function decodePcm(message: ClientAudioMessage): Float32Array {
   );
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const { session: authSession } = await locals.safeGetSession();
+  if (!authSession) error(401, { message: "Unauthorized" });
+
   try {
     const data: ClientAudioMessage = await request.json();
 

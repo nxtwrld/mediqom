@@ -797,6 +797,15 @@
       }
     },
     "onboarding": {
+      "about-you": {
+        "title": "",
+        "subtitle": ""
+      },
+      "capability": {
+        "birth-date": "",
+        "biological-sex": "",
+        "measurements": ""
+      },
       "basic-profile": "Základní profil",
       "click-here": "klikněte zde.",
       "copy-to-clipboard": "Kopírovat do schránky",
@@ -875,7 +884,10 @@
         "using-passkey": "Vaše data jsou chráněna přístupovým klíčem.",
         "using-passphrase": "Vaše data jsou chráněna přístupovou frází.",
         "convenience-configured": "Komfortní režim je nakonfigurován!",
-        "convenience-explanation": "Vaše data jsou šifrována a v případě potřeby vám pomůžeme obnovit přístup."
+        "convenience-explanation": "Vaše data jsou šifrována a v případě potřeby vám pomůžeme obnovit přístup.",
+        "default-intro": "",
+        "secure-my-account": "",
+        "advanced-options": ""
       },
       "privacy-and-amp-encryption": "Soukromí &amp; Šifrování",
       "required": "povinné",
@@ -932,7 +944,13 @@
     "documents": {
       "remove": "Odebrat",
       "confirm-remove": "Opravdu chcete tento dokument odebrat?",
-      "view-document": "Zobrazit dokument"
+      "view-document": "Zobrazit dokument",
+      "empty": {
+        "title": "",
+        "subtitle": "",
+        "import-cta": "",
+        "no-match": ""
+      }
     },
     "report": {
       "anatomy": {}

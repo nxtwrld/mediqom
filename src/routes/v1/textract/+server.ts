@@ -59,7 +59,10 @@ const extractionFunctionSchema = {
 }
  */
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const { session } = await locals.safeGetSession();
+  if (!session) error(401, { message: "Unauthorized" });
+
   //const str = url.searchParams.get('drug');
 
   const data = await request.json();

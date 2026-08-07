@@ -102,8 +102,4 @@
 		font-size: 0.85rem;
 	}
 
-	/* Constrain chart height in chat sidebar */
-	.widget-content :global(.panel svg) {
-		/*max-height: 200px; */
-	}
 </style>

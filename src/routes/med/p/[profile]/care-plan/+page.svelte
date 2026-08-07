@@ -107,7 +107,7 @@
   }
 
   function focusBodyPart(identification: string) {
-    ui.emit("viewer:anatomy", { focus: identification });
+    ui.emit("viewer:anatomy", { object: identification });
   }
 
   // 3D model painting (build row 13). Recomputed only when items change.

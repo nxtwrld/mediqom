@@ -151,6 +151,7 @@ vi.mock("./store", () => ({
   createMessage: mockCreateMessage,
   isOpen: mockIsOpen,
   resolveChatMode: mockResolveChatMode,
+  getStoredChatModel: vi.fn(() => "openai/gpt-5.4"),
 }));
 
 vi.mock("./client-service", () => ({

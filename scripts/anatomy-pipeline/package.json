@@ -1,0 +1,19 @@
+{
+  "name": "anatomy-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Converts static/anatomy_models/**/*.obj to meshopt-compressed GLB and emits src/data/anatomy-manifest.json. Run from this directory.",
+  "scripts": {
+    "convert": "node convert.mjs",
+    "verify": "node verify.mjs",
+    "all": "node convert.mjs && node verify.mjs"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "4.3.0",
+    "@gltf-transform/extensions": "4.3.0",
+    "@gltf-transform/functions": "4.3.0",
+    "meshoptimizer": "1.0.1",
+    "obj2gltf": "3.2.0"
+  }
+}

@@ -784,6 +784,15 @@
       }
     },
     "onboarding": {
+      "about-you": {
+        "title": "",
+        "subtitle": ""
+      },
+      "capability": {
+        "birth-date": "",
+        "biological-sex": "",
+        "measurements": ""
+      },
       "basic-profile": "Temel Profil",
       "click-here": "buraya tıklayın.",
       "copy-to-clipboard": "Panoya kopyala",
@@ -862,7 +871,10 @@
         "using-passkey": "Verileriniz geçiş anahtarınızla korunuyor.",
         "using-passphrase": "Verileriniz parolanızla korunuyor.",
         "convenience-configured": "Kolaylık modu yapılandırıldı!",
-        "convenience-explanation": "Verileriniz şifrelendi ve gerektiğinde erişimi kurtarmanıza yardımcı olabiliriz."
+        "convenience-explanation": "Verileriniz şifrelendi ve gerektiğinde erişimi kurtarmanıza yardımcı olabiliriz.",
+        "default-intro": "",
+        "secure-my-account": "",
+        "advanced-options": ""
       },
       "privacy-and-amp-encryption": "Gizlilik &amp; Şifreleme",
       "required": "gerekli",
@@ -919,7 +931,13 @@
     "documents": {
       "remove": "Kaldır",
       "confirm-remove": "Bu belgeyi kaldırmak istediğinizden emin misiniz?",
-      "view-document": "Belgeyi görüntüle"
+      "view-document": "Belgeyi görüntüle",
+      "empty": {
+        "title": "",
+        "subtitle": "",
+        "import-cta": "",
+        "no-match": ""
+      }
     },
     "report": {
       "anatomy": {}

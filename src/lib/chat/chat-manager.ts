@@ -1,7 +1,15 @@
 import { get } from "svelte/store";
-import { chatStore, chatActions, createMessage, isOpen, resolveChatMode } from "./store";
+import {
+  chatStore,
+  chatActions,
+  createMessage,
+  isOpen,
+  resolveChatMode,
+  getStoredChatModel,
+} from "./store";
 import ChatClientService from "./client-service";
 import AnatomyIntegration from "./anatomy-integration";
+import { getChatModel } from "$lib/ai/model-catalog";
 import { getDocument } from "$lib/documents";
 import type {
   ChatMessage,
@@ -36,23 +44,23 @@ export class ChatManager {
   private currentContextResult: ChatContextResult | null = null;
   private currentPromptProfileId: string | null = null; // Track active profile prompt
   private lastToolCall: string | null = null; // Track last executed tool to prevent immediate duplicates
-  private lastAgentType: string = 'general'; // Sub-agent type classified in Call 1 for Call 2 routing
+  private lastAgentType: string = "general"; // Sub-agent type classified in Call 1 for Call 2 routing
 
   private static readonly AVAILABLE_TOOLS = [
-    'searchDocuments',
-    'getAssembledContext',
-    'getProfileData',
-    'queryMedicalHistory',
-    'getDocumentById',
+    "searchDocuments",
+    "getAssembledContext",
+    "getProfileData",
+    "queryMedicalHistory",
+    "getDocumentById",
   ];
 
   private readonly askAboutTypeToTool: Record<string, string> = {
-    medications: 'medications',
-    conditions: 'conditions',
-    allergies: 'allergies',
-    procedures: 'procedures',
-    diagnosis: 'conditions',
-    vitals: 'vitals',
+    medications: "medications",
+    conditions: "conditions",
+    allergies: "allergies",
+    procedures: "procedures",
+    diagnosis: "conditions",
+    vitals: "vitals",
   };
 
   constructor() {
@@ -214,7 +222,10 @@ export class ChatManager {
     const documentData = documentEvent?.data;
 
     return {
-      mode: resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false),
+      mode: resolveChatMode(
+        isOwnProfile,
+        (user.get() as User)?.isMedical ?? false,
+      ),
       currentProfileId: profileId,
       conversationThreadId: generateId(),
       language: language,
@@ -414,7 +425,7 @@ export class ChatManager {
       // Wait up to 3s for context to initialize
       let retries = 0;
       while (!get(chatStore).context && retries < 30) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         retries++;
       }
     } else if (!state.isOpen) {
@@ -425,7 +436,11 @@ export class ChatManager {
     if (!freshState.context) return;
 
     const profileId = freshState.context.currentProfileId;
-    const displayMessage = this.buildAskAboutMessage(data, freshState.context.mode, freshState.context.pageContext.profileName);
+    const displayMessage = this.buildAskAboutMessage(
+      data,
+      freshState.context.mode,
+      freshState.context.pageContext.profileName,
+    );
 
     // Pre-fetch tool data so AI has real data and generates ONE coherent answer
     const prefetchedJson = await this.prefetchAskAboutData(data, profileId);
@@ -437,24 +452,36 @@ export class ChatManager {
       : null;
 
     const contextBlock = [
-      itemJson && `[Specific item the user is asking about:]\n\`\`\`json\n${itemJson}\n\`\`\``,
+      itemJson &&
+        `[Specific item the user is asking about:]\n\`\`\`json\n${itemJson}\n\`\`\``,
       sourceRef && `[${sourceRef}]`,
-      prefetchedJson && `[Pre-fetched ${data.type} records for this profile:]\n\`\`\`json\n${prefetchedJson}\n\`\`\``,
-    ].filter(Boolean).join('\n\n');
+      prefetchedJson &&
+        `[Pre-fetched ${data.type} records for this profile:]\n\`\`\`json\n${prefetchedJson}\n\`\`\``,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
-    const aiMessage = contextBlock ? `${displayMessage}\n\n${contextBlock}` : undefined;
+    const aiMessage = contextBlock
+      ? `${displayMessage}\n\n${contextBlock}`
+      : undefined;
 
     // Silently register source document in context so Phase 2 sees it in documentsInContext
     if (data.documentId) {
       const freshState2 = get(chatStore);
-      const already = freshState2.context?.pageContext.availableData.documents.includes(data.documentId);
+      const already =
+        freshState2.context?.pageContext.availableData.documents.includes(
+          data.documentId,
+        );
       if (!already && freshState2.context) {
         chatActions.updateContext({
           pageContext: {
             ...freshState2.context.pageContext,
             availableData: {
               ...freshState2.context.pageContext.availableData,
-              documents: [...freshState2.context.pageContext.availableData.documents, data.documentId],
+              documents: [
+                ...freshState2.context.pageContext.availableData.documents,
+                data.documentId,
+              ],
             },
           },
         });
@@ -465,7 +492,9 @@ export class ChatManager {
       if (docContent) {
         const latestState = get(chatStore);
         if (latestState.context) {
-          const updatedDocsContent = new Map(latestState.context.pageContext.documentsContent || []);
+          const updatedDocsContent = new Map(
+            latestState.context.pageContext.documentsContent || [],
+          );
           updatedDocsContent.set(data.documentId, docContent);
           chatActions.updateContext({
             pageContext: {
@@ -478,13 +507,14 @@ export class ChatManager {
     }
 
     // For anatomy: register ALL associated document IDs in context
-    if (data.type === 'anatomy' && Array.isArray(data.data?.documents)) {
+    if (data.type === "anatomy" && Array.isArray(data.data?.documents)) {
       const freshState2 = get(chatStore);
       if (freshState2.context) {
-        const existingDocs = freshState2.context.pageContext.availableData.documents;
+        const existingDocs =
+          freshState2.context.pageContext.availableData.documents;
         const newDocIds = (data.data.documents as Array<{ id: string }>)
-          .map(d => d.id)
-          .filter(id => id && !existingDocs.includes(id));
+          .map((d) => d.id)
+          .filter((id) => id && !existingDocs.includes(id));
         if (newDocIds.length > 0) {
           chatActions.updateContext({
             pageContext: {
@@ -508,9 +538,11 @@ export class ChatManager {
     try {
       await this.sendMessage(displayMessage, aiMessage, prefetchedToolKey);
     } catch (error) {
-      logger.namespace('Chat').error('handleAskAbout: sendMessage failed', { error });
+      logger
+        .namespace("Chat")
+        .error("handleAskAbout: sendMessage failed", { error });
     }
-  }
+  };
 
   /**
    * Handle interaction from a Generative UI widget.
@@ -521,7 +553,10 @@ export class ChatManager {
     if (!state.context) return;
 
     // For anatomy_highlight focus action, delegate to the existing focusAnatomy method
-    if (interaction.widgetType === 'anatomy_highlight' && interaction.action === 'focus_anatomy') {
+    if (
+      interaction.widgetType === "anatomy_highlight" &&
+      interaction.action === "focus_anatomy"
+    ) {
       await this.focusAnatomy(interaction.payload.bodyPart);
       return;
     }
@@ -536,7 +571,9 @@ export class ChatManager {
     try {
       await this.sendMessage(displayMessage, aiMessage);
     } catch (error) {
-      logger.namespace('Chat').error('handleWidgetInteraction: sendMessage failed', { error });
+      logger
+        .namespace("Chat")
+        .error("handleWidgetInteraction: sendMessage failed", { error });
     }
   }
 
@@ -565,7 +602,11 @@ export class ChatManager {
         { sourceMessageId: messageId },
       );
       if (!created) {
-        logger.namespace('Chat').warn('acceptSuggestedAction: item not found', { itemId: action.itemId });
+        logger
+          .namespace("Chat")
+          .warn("acceptSuggestedAction: item not found", {
+            itemId: action.itemId,
+          });
         return;
       }
       // Mark consumed so the footer renders its confirmed state.
@@ -576,25 +617,27 @@ export class ChatManager {
       );
       chatActions.setMessages(updated);
       // Let any open Care Plan view refresh.
-      ui.emit('careplan:task-added', { profileId, itemId: action.itemId });
+      ui.emit("careplan:task-added", { profileId, itemId: action.itemId });
     } catch (error) {
-      logger.namespace('Chat').error('acceptSuggestedAction failed', { error });
+      logger.namespace("Chat").error("acceptSuggestedAction failed", { error });
     }
   }
 
-  private buildWidgetInteractionMessage(interaction: WidgetInteraction): string {
+  private buildWidgetInteractionMessage(
+    interaction: WidgetInteraction,
+  ): string {
     const { widgetType, action, payload } = interaction;
 
     switch (widgetType) {
-      case 'diagnosis_card':
-        return `Tell me more about ${payload.name || 'this diagnosis'}${payload.icd10 ? ` (${payload.icd10})` : ''}`;
-      case 'symptom_summary':
-        return `Tell me more about the symptom: ${payload.text || 'this symptom'}`;
-      case 'treatment_plan':
-        return `Tell me more about ${payload.name || 'this treatment'}`;
-      case 'lab_trend_chart':
-        return `Tell me more about the ${payload.code || 'lab'} trend`;
-      case 'data_table':
+      case "diagnosis_card":
+        return `Tell me more about ${payload.name || "this diagnosis"}${payload.icd10 ? ` (${payload.icd10})` : ""}`;
+      case "symptom_summary":
+        return `Tell me more about the symptom: ${payload.text || "this symptom"}`;
+      case "treatment_plan":
+        return `Tell me more about ${payload.name || "this treatment"}`;
+      case "lab_trend_chart":
+        return `Tell me more about the ${payload.code || "lab"} trend`;
+      case "data_table":
         return `Tell me more about this data`;
       default:
         return `Tell me more about this`;
@@ -624,18 +667,26 @@ export class ChatManager {
         allergies: c.allergies,
       };
     } catch (err) {
-      logger.namespace('Chat').warn('Failed to load source document content', { documentId, error: err });
+      logger
+        .namespace("Chat")
+        .warn("Failed to load source document content", {
+          documentId,
+          error: err,
+        });
       return null;
     }
   }
 
-  private async prefetchAskAboutData(data: AskAboutEvent, profileId: string): Promise<string | null> {
+  private async prefetchAskAboutData(
+    data: AskAboutEvent,
+    profileId: string,
+  ): Promise<string | null> {
     const queryType = this.askAboutTypeToTool[data.type];
     if (!queryType) return null;
 
     try {
       const result = await chatMCPToolWrapper.executeToolDirectly(
-        'queryMedicalHistory',
+        "queryMedicalHistory",
         { queryType },
         profileId,
       );
@@ -646,40 +697,80 @@ export class ChatManager {
     }
   }
 
-  private buildAskAboutMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
-    if (data.type === 'diagnosis') {
+  private buildAskAboutMessage(
+    data: AskAboutEvent,
+    mode: ChatMode,
+    profileName: string,
+  ): string {
+    if (data.type === "diagnosis") {
       return this.buildDiagnosisMessage(data.data, mode, profileName);
     }
-    if (data.type === 'anatomy') {
+    if (data.type === "anatomy") {
       return this.buildAnatomyMessage(data, mode, profileName);
     }
     const tr = get(t);
-    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
-    return tr(`app.chat.ask-about.${modeKey}`, { values: { type: data.type, label: data.label, profileName } });
+    const modeKey =
+      mode === "caregiver"
+        ? "caregiver"
+        : mode === "patient"
+          ? "patient"
+          : "clinical";
+    return tr(`app.chat.ask-about.${modeKey}`, {
+      values: { type: data.type, label: data.label, profileName },
+    });
   }
 
-  private buildAnatomyMessage(data: AskAboutEvent, mode: ChatMode, profileName: string): string {
+  private buildAnatomyMessage(
+    data: AskAboutEvent,
+    mode: ChatMode,
+    profileName: string,
+  ): string {
     const tr = get(t);
-    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
-    const count = Array.isArray(data.data?.documents) ? data.data.documents.length : 0;
-    return tr(`app.chat.ask-about.anatomy.${modeKey}`, { values: { bodyPart: data.label, count, profileName } });
+    const modeKey =
+      mode === "caregiver"
+        ? "caregiver"
+        : mode === "patient"
+          ? "patient"
+          : "clinical";
+    const count = Array.isArray(data.data?.documents)
+      ? data.data.documents.length
+      : 0;
+    return tr(`app.chat.ask-about.anatomy.${modeKey}`, {
+      values: { bodyPart: data.label, count, profileName },
+    });
   }
 
-  private buildDiagnosisMessage(diagnosis: any, mode: ChatMode, profileName: string): string {
+  private buildDiagnosisMessage(
+    diagnosis: any,
+    mode: ChatMode,
+    profileName: string,
+  ): string {
     const tr = get(t);
-    const modeKey = mode === 'caregiver' ? 'caregiver' : mode === 'patient' ? 'patient' : 'clinical';
-    const code = diagnosis.code ? ` (${diagnosis.code})` : '';
-    const desc = diagnosis.description || 'this diagnosis';
-    const diagnosisType = diagnosis.type || 'general';
-    const notes = diagnosis.notes ? ` Notes: ${diagnosis.notes}` : '';
+    const modeKey =
+      mode === "caregiver"
+        ? "caregiver"
+        : mode === "patient"
+          ? "patient"
+          : "clinical";
+    const code = diagnosis.code ? ` (${diagnosis.code})` : "";
+    const desc = diagnosis.description || "this diagnosis";
+    const diagnosisType = diagnosis.type || "general";
+    const notes = diagnosis.notes ? ` Notes: ${diagnosis.notes}` : "";
 
     // Normalise underscore to hyphen for i18n key lookup (rule_out → rule-out)
-    const typeKey = diagnosisType.replace(/_/g, '-');
+    const typeKey = diagnosisType.replace(/_/g, "-");
     const extraKey = `app.chat.ask-about.diagnosis.type-extra.${typeKey}.${modeKey}`;
-    const extraMsg = tr(extraKey) !== extraKey ? tr(extraKey) : '';
+    const extraMsg = tr(extraKey) !== extraKey ? tr(extraKey) : "";
 
     return tr(`app.chat.ask-about.diagnosis.${modeKey}`, {
-      values: { desc, code, diagnosisType, notes, extra: extraMsg, profileName },
+      values: {
+        desc,
+        code,
+        diagnosisType,
+        notes,
+        extra: extraMsg,
+        profileName,
+      },
     });
   }
 
@@ -713,7 +804,7 @@ export class ChatManager {
     );
 
     // Determine isOwnProfile from the latest profile switch event emitted by AIChatSidebar on mount
-    const profileSwitchEvent = ui.getLatest('chat:profile_switch');
+    const profileSwitchEvent = ui.getLatest("chat:profile_switch");
     const isOwnProfile =
       profileSwitchEvent?.data?.profileId === currentProfile.id
         ? profileSwitchEvent.data.isOwnProfile
@@ -1177,6 +1268,8 @@ export class ChatManager {
       availableTools: this.currentContextResult?.availableTools?.length
         ? this.currentContextResult.availableTools
         : ChatManager.AVAILABLE_TOOLS,
+      // Hydrate the persisted model choice (falls back to the default)
+      selectedModel: context.selectedModel ?? getStoredChatModel(),
     });
 
     this.isInitialized = true;
@@ -1194,7 +1287,11 @@ export class ChatManager {
    * @param prefetchedToolKey - Optional tool signature to set as lastToolCall after clearing,
    *                            preventing Phase 2 from re-triggering a tool whose data was pre-fetched.
    */
-  async sendMessage(userMessage: string, aiMessage?: string, prefetchedToolKey?: string): Promise<void> {
+  async sendMessage(
+    userMessage: string,
+    aiMessage?: string,
+    prefetchedToolKey?: string,
+  ): Promise<void> {
     if (this.isProcessing) {
       console.warn("Chat is already processing a message");
       return;
@@ -1325,6 +1422,7 @@ export class ChatManager {
                 sources: event.data.sources || [],
                 widgets: event.data.widgets || [],
                 suggestedAction: event.data.suggestedAction || undefined,
+                model: event.data.model || undefined,
               };
 
               // Update the message with metadata
@@ -1439,7 +1537,10 @@ export class ChatManager {
       // Add user message
       chatActions.addMessage(createMessage("user", input));
 
-      const handler = new TestCommandHandler(profileId, state.context ?? undefined);
+      const handler = new TestCommandHandler(
+        profileId,
+        state.context ?? undefined,
+      );
       const result = await handler.execute(input);
 
       // Create assistant message with widgets metadata
@@ -1710,9 +1811,10 @@ export class ChatManager {
     const state = get(chatStore);
 
     // Create a follow-up message embedding the actual tool data so the AI can use it
-    const toolDataSummary = typeof result.data === 'string'
-      ? result.data
-      : JSON.stringify(result.data, null, 2);
+    const toolDataSummary =
+      typeof result.data === "string"
+        ? result.data
+        : JSON.stringify(result.data, null, 2);
     const followUpMessage = `[Tool Result: ${result.toolName}]\n${toolDataSummary}\n\nPlease use the above data to answer my previous question.`;
 
     // Send the tool results back to the AI for processing
@@ -1855,7 +1957,10 @@ export class ChatManager {
     chatActions.switchProfile(profileId, isOwnProfile);
 
     // Update context mode
-    const newMode = resolveChatMode(isOwnProfile, (user.get() as User)?.isMedical ?? false);
+    const newMode = resolveChatMode(
+      isOwnProfile,
+      (user.get() as User)?.isMedical ?? false,
+    );
     chatActions.updateContext({ mode: newMode });
 
     // Add profile switch message
@@ -1868,6 +1973,29 @@ export class ChatManager {
   }
 
   /**
+   * Switch the active AI model mid-conversation and mark the switch in the transcript
+   * so it's clear which model answered what (e.g. asking another model for a second opinion).
+   */
+  switchModel(modelId: string): void {
+    const state = get(chatStore);
+    if (state.context?.selectedModel === modelId) {
+      return; // Already on this model
+    }
+
+    chatActions.setModel(modelId);
+
+    const label = getChatModel(modelId)?.label ?? modelId;
+    // Only mark the switch once a conversation is underway (skip the empty/greeting state).
+    if (state.messages.length > 0) {
+      const switchMsg = createMessage("system", `Switched to ${label}`, {
+        systemNotice: true,
+        model: modelId,
+      });
+      chatActions.addMessage(switchMsg);
+    }
+  }
+
+  /**
    * Clear current conversation
    */
   clearConversation(): void {
@@ -1875,7 +2003,7 @@ export class ChatManager {
 
     // Clear last tool call and agent type for fresh conversation
     this.lastToolCall = null;
-    this.lastAgentType = 'general';
+    this.lastAgentType = "general";
 
     // Clear approved documents for this session
     if (this.currentProfileId) {
@@ -1922,7 +2050,9 @@ export class ChatManager {
     if (context.mode === "patient") {
       return get(t)("app.chat.greetings.patient");
     } else if (context.mode === "caregiver") {
-      return get(t)("app.chat.greetings.caregiver", { values: { profileName } });
+      return get(t)("app.chat.greetings.caregiver", {
+        values: { profileName },
+      });
     } else {
       return get(t)("app.chat.greetings.clinical", { values: { profileName } });
     }

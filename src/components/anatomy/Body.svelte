@@ -5,7 +5,7 @@
     import { onMount, createEventDispatcher } from 'svelte';
     import * as THREE from 'three';
     import ui, { state } from '$lib/ui';
-    import objects3d from '$lib/context/objects';
+    import objects3d from '$data/objects.json';
     import { fade } from 'svelte/transition';
     import TWEEN from '@tweenjs/tween.js';
     import focused from '$lib/focused';
@@ -30,11 +30,13 @@
         setMultiHighlight as doSetMultiHighlight,
         focusObject,
         focusArea,
+        focusMeshGroup,
         highlight,
         removeAuraMesh,
         setViewState,
         resetFocus as doResetFocus
     } from './highlight-system';
+    import type { CameraPreset } from './highlight-system';
     import type { MultiHighlightRegion } from './scene-state';
     import {
         updateModel as doUpdateModel,
@@ -84,7 +86,7 @@
     const clusterState = createClusterState();
 
     function handleClusterClick(cluster: LabelCluster) {
-        sounds.focus.play();
+        sounds.focus?.play();
         suppressCluster(clusterState, cluster, ss);
         focusArea(ss, cluster.worldCenter, cluster.radius);
     }
@@ -123,6 +125,18 @@
         resetFocus();
         ss.previousViewState = ss.initialViewState ?? null;
         if (ss.initialViewState) setViewState(ss, ss.initialViewState);
+    }
+
+    /** Frames a group of meshes — e.g. the meshes of a Care Plan region or a
+     *  `show_anatomy` result. Moves the camera only; pair with `carePlanRegions`
+     *  to paint them. */
+    export function showRegion(meshNames: string[], preset: CameraPreset = 'anterior') {
+        return focusMeshGroup(ss, meshNames, preset);
+    }
+
+    /** Moves the camera to a named view of the whole model. */
+    export function setCamera(preset: CameraPreset) {
+        return focusMeshGroup(ss, [], preset);
     }
 
     // ─── Label handlers (stay in component — tightly coupled to DOM/stores) ──
@@ -182,7 +196,7 @@
 
     function handleLabelMouseDown(event: MouseEvent) {
         event.stopPropagation();
-        sounds.focus.play();
+        sounds.focus?.play();
         ($state as any).focusView = true;
         // Close previously opened label
         if (ss.openedLabel) {
@@ -234,7 +248,7 @@
 
             const object = intersects[0].object;
             if (object.name) {
-                sounds.focus.play();
+                sounds.focus?.play();
                 // Care Plan mode: a click on a painted region navigates the plan.
                 if (carePlanRegions.length > 0) {
                     dispatch('carePlanRegionClick', { mesh: object.name });
