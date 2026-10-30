@@ -549,9 +549,10 @@
                     aria-expanded={exploreOpen}
                 >
                     <span class="nav-glyph">
-                        <svg aria-hidden="true"><use href="/icons.svg#{exploreOpen ? 'close' : 'medical-tools'}"></use></svg>
+                        <svg aria-hidden="true"><use href="/icons.svg#medical-tools"></use></svg>
+                        {#if exploreOpen}<span class="close-badge" aria-hidden="true"><svg><use href="/icons.svg#close"></use></svg></span>{/if}
                     </span>
-                    <span class="nav-label">{exploreOpen ? $t("app.nav.close") : $t("app.nav.explore")}</span>
+                    <span class="nav-label">{$t("app.nav.explore")}</span>
                 </button>
                 <button
                     class="nav-icon -layer"
@@ -561,9 +562,10 @@
                     aria-expanded={chatSheetOpen}
                 >
                     <span class="nav-glyph">
-                        <svg aria-hidden="true"><use href="/icons.svg#{chatSheetOpen ? 'close' : 'ai-chat'}"></use></svg>
+                        <svg aria-hidden="true"><use href="/icons.svg#ai-chat"></use></svg>
+                        {#if chatSheetOpen}<span class="close-badge" aria-hidden="true"><svg><use href="/icons.svg#close"></use></svg></span>{/if}
                     </span>
-                    <span class="nav-label">{chatSheetOpen ? $t("app.nav.close") : $t("app.nav.ask")}</span>
+                    <span class="nav-label">{$t("app.nav.ask")}</span>
                 </button>
             </nav>
             <button
@@ -581,6 +583,7 @@
                 class="panel-section"
                 class:-anatomy={anatomyFullscreen}
                 class:-chat={panelView === "chat"}
+                class:-collapsed={!panelOpen}
             >
                 {#if panelView === "profiles"}
                     <NavPanelProfiles
@@ -805,6 +808,41 @@
         color: var(--color-highlight-text);
     }
 
+    /* The open layer keeps its icon; a small ✕ badge says "tap to close" */
+    .close-badge {
+        position: absolute;
+        top: -0.4rem;
+        right: -0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: var(--color-highlight-text);
+        color: var(--color-highlight);
+        animation: close-badge-in 0.2s ease-out;
+    }
+
+    .close-badge > svg {
+        width: 0.8rem;
+        height: 0.8rem;
+        fill: currentColor;
+    }
+
+    @keyframes close-badge-in {
+        from {
+            opacity: 0;
+            transform: scale(0.4);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .close-badge {
+            animation: none;
+        }
+    }
+
     /* Import progress on the Docs icon */
     .import-ring {
         position: absolute;
@@ -895,6 +933,12 @@
     .panel-section.-anatomy {
         pointer-events: none;
         overflow: hidden;
+    }
+    /* Hide (not unmount, not resize) on close: the Viewer stays mounted for a
+       5s grace period and its fullscreen canvas is position:fixed, so it would
+       otherwise linger over the page after the pill collapses */
+    .panel-section.-collapsed {
+        visibility: hidden;
     }
     .panel-section.-chat {
         padding: 0;
