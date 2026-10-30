@@ -345,7 +345,14 @@
       "logout": "Odhlášení",
       "new-session": "Nové sezení",
       "profiles": "Profily",
-      "settings": "Nastavení"
+      "settings": "Nastavení",
+      "docs": "Dokumenty",
+      "doctors": "Lékaři",
+      "explore": "Prozkoumat",
+      "ask": "Zeptat se AI",
+      "close": "Zavřít",
+      "switch-profile": "Přepnout profil",
+      "overview": "Přehled profilu"
     },
     "import": {
       "add-files": "Přidat soubory",

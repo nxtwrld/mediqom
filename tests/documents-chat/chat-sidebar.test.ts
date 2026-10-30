@@ -31,7 +31,7 @@ test.describe("Chat sidebar", () => {
     await chatPage.close();
   });
 
-  test("mobile: opens as a full-viewport overlay with no resize handle", async ({
+  test("mobile: opens as a sheet under the living bar with no resize handle", async ({
     chatPage,
   }, testInfo) => {
     test.skip(
@@ -45,11 +45,15 @@ test.describe("Chat sidebar", () => {
     await chatPage.open();
     await expect(chatPage.page.locator(".resize-handle")).toBeHidden();
 
+    // The sheet spans the bar's width (viewport minus the pill's side margins)
     const sidebarBox = await chatPage.page
       .locator(".chat-sidebar")
       .boundingBox();
     const viewport = chatPage.page.viewportSize();
-    expect(sidebarBox?.width).toBeCloseTo(viewport?.width ?? 0, 0);
+    expect(sidebarBox?.width ?? 0).toBeGreaterThan((viewport?.width ?? 0) * 0.85);
+    await expect(
+      chatPage.page.getByRole("button", { name: "Close chat" }),
+    ).toBeVisible();
 
     await chatPage.mockConversation(
       createChatReplyEvents("Here's what I found."),

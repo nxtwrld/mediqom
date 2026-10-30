@@ -826,7 +826,7 @@
         transform: translate(-50%, -50%);
         width: 4.8rem;
         height: 4.8rem;
-        border-radius: var(--radius-16);
+        border-radius: var(--radius-24);
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);

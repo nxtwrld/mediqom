@@ -450,7 +450,14 @@
       "logout": "Logout",
       "new-session": "New Session",
       "profiles": "Profiles",
-      "settings": "Settings"
+      "settings": "Settings",
+      "docs": "Docs",
+      "doctors": "Doctors",
+      "explore": "Explore",
+      "ask": "Ask AI",
+      "close": "Close",
+      "switch-profile": "Switch profile",
+      "overview": "Profile overview"
     },
     "import": {
       "add-files": "Add files",

@@ -11,5 +11,12 @@ export const load: PageLoad = async ({ parent, url }) => {
     filters: {
       tags,
     },
+    // Set by the `overlay.import` listener in UI.svelte — import lives inline on this page
+    importRequest: searchParams.has("import")
+      ? {
+          jobId: searchParams.get("job") || undefined,
+          autoOpen: searchParams.get("autoOpen") === "1",
+        }
+      : null,
   };
 };

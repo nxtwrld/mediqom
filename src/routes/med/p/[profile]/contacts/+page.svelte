@@ -15,6 +15,7 @@
     import ContactCard from '$components/contacts/ContactCard.svelte';
     import ContactActions from '$components/contacts/ContactActions.svelte';
     import ContactDetails from '$components/contacts/ContactDetails.svelte';
+    import ProfileSectionTabs from '$components/layout/ProfileSectionTabs.svelte';
 
     let search = $state('');
     let showAddModal = $state(false);
@@ -75,6 +76,7 @@
 </script>
 
 <div class="page -empty">
+    <ProfileSectionTabs group="doctors" />
     <div class="heading">
         <h2 class="h2">{$t('contacts.title')}</h2>
         <Input type="search" bind:value={search} placeholder={$t('contacts.search-placeholder')} />

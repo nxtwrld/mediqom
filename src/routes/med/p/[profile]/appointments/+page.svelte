@@ -16,6 +16,7 @@
     import InputDateTime from '$components/forms/InputDateTime.svelte';
     import Modal from '$components/ui/Modal.svelte';
     import AppointmentForm from '$components/appointments/AppointmentForm.svelte';
+    import ProfileSectionTabs from '$components/layout/ProfileSectionTabs.svelte';
 
     const appointments = $derived($profile?.id ? appointmentsByProfile($profile.id) : undefined);
 
@@ -185,6 +186,7 @@
 </script>
 
 <div class="page -empty">
+    <ProfileSectionTabs group="doctors" />
     <div class="heading">
         <h2 class="h2">{$t('appointments.title')}</h2>
         <div class="heading-actions">

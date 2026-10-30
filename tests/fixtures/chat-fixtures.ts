@@ -21,8 +21,9 @@ class ChatPage {
   }
 
   async close() {
-    // Second .chat-action-btn in .chat-actions is the close button.
-    await this.page.locator(".chat-actions .chat-action-btn").nth(1).click();
+    // Desktop: the sidebar header button. Mobile: the bar's Ask button, which
+    // turns into Close while the chat sheet is open. Both share the label.
+    await this.page.getByRole("button", { name: "Close chat" }).click();
     await expect(this.page.locator(".chat-sidebar")).toHaveCount(0);
   }
 

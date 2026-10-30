@@ -345,7 +345,14 @@
       "logout": "Cerrar sesión",
       "new-session": "Nueva sesión",
       "profiles": "Perfiles",
-      "settings": "Configuración"
+      "settings": "Configuración",
+      "docs": "Documentos",
+      "doctors": "Médicos",
+      "explore": "Explorar",
+      "ask": "Preguntar a la IA",
+      "close": "Cerrar",
+      "switch-profile": "Cambiar perfil",
+      "overview": "Resumen del perfil"
     },
     "import": {
       "add-files": "Añadir archivos",

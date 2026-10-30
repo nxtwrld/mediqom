@@ -15,7 +15,6 @@
 
   function importFirst() {
     ui.emit("overlay.import");
-    location.hash = "#overlay-import";
   }
 </script>
 

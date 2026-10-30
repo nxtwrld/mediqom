@@ -6,6 +6,7 @@
 	import MedicationList from '$components/medications/MedicationList.svelte';
 	import MedicationForm from '$components/medications/MedicationForm.svelte';
 	import Modal from '$components/ui/Modal.svelte';
+	import ProfileSectionTabs from '$components/layout/ProfileSectionTabs.svelte';
 
 	let medications = $derived(medicationsByProfile($profile.id));
 	let extracted = $derived(extractedMedicationsByProfile($profile.id));
@@ -33,6 +34,7 @@
 </script>
 
 <div class="page -empty">
+	<ProfileSectionTabs group="docs" />
 	<div class="heading">
 		<h1 class="h1 heading">{$t('medications.title')}</h1>
 		<div class="toolbar">

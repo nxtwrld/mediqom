@@ -6,14 +6,11 @@
     import Modal from "$components/ui/Modal.svelte";
     import HealthForm from "../profile/HealthForm.svelte";
     import HealthProperty from "../healthProperty/Overview.svelte";
-    import ImportView from "$components/import/ImportView.svelte";
     import ui from "$lib/ui";
     import { t } from "$lib/i18n";
-    import { isFeatureEnabled } from "$lib/config/feature-flags";
     import { onMount } from "svelte";
-    import { fade } from "svelte/transition";
-    import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
-    import { Overlay, state as uiState } from "$lib/ui";
+    import { beforeNavigate, goto } from "$app/navigation";
+    import { state as uiState } from "$lib/ui";
     import shortcuts from "$lib/shortcuts";
     import Sounds from "$components/ui/Sounds.svelte";
     import Viewer from "./Viewer.svelte";
@@ -23,12 +20,13 @@
     import { page } from "$app/stores";
     import { chatManager } from "$lib/chat/chat-manager";
     import type { Profile } from "$lib/types.d";
-    import { isOpen as chatIsOpen } from "$lib/chat/store";
+    import { isOpen as chatIsOpen, chatActions } from "$lib/chat/store";
     import { device } from "$lib/device";
     import { initTheme } from "$lib/theme/store";
     import { saveHealthProfile } from "$lib/health/save";
     import user from "$lib/user";
     import { pendingJobs, activeJobs } from "$lib/import/job-store";
+    import { keyboardHeight } from "$lib/capacitor/keyboard-store";
     import { App } from "@capacitor/app";
     import { isNativePlatform } from "$lib/config/platform";
 
@@ -61,11 +59,6 @@
         healthFormData: null as any,
     });
 
-    // Import overlay state
-    let importJobId: string | undefined = $state(undefined);
-    let importAutoOpen = $state(false);
-    // importHasFiles removed — ImportView handles file state internally
-
     // Chat state
     let currentProfile: Profile | null = $state(null);
     let isOwnProfile = $state(false);
@@ -88,7 +81,7 @@
 
     $effect(() => {
         const isActive =
-            (panelOpen && panelView === "anatomy") ||
+            (panelOpen && panelView === "explore") ||
             ($uiState.viewer && !$device.isMobile);
         if (isActive) {
             // Cancel any pending unload
@@ -129,146 +122,110 @@
         };
     });
 
+    function destroyViewerNow() {
+        if (viewerMountTimer !== null) {
+            clearTimeout(viewerMountTimer);
+            viewerMountTimer = null;
+        }
+        if (viewerUnloadTimer !== null) {
+            clearTimeout(viewerUnloadTimer);
+            viewerUnloadTimer = null;
+        }
+        viewerAlive = false;
+    }
+
     // Desktop viewer resize state
     let viewerWidth = $state(33);
     let isResizingViewer = $state(false);
     let minViewerWidth = 20;
     let maxViewerWidth = 50;
 
-    // Mobile bottom sheet resize state (for anatomy viewer in layout, kept for compatibility)
-    let mobileViewerHeight = $state(60);
-    let isMobileResizing = $state(false);
-    let mobileResizeTouchStartY = 0;
-    let mobileResizeStartHeight = 0;
-
-    // ── Mobile panel / bottom-sheet ──────────────────────────────────────────
-    type PanelView = "profiles" | "anatomy" | "import";
+    // ── Mobile living bar ────────────────────────────────────────────────────
+    // The bar rides on top of whichever layer is open; the layer's own button
+    // turns into its Close. One layer at a time on mobile.
+    type PanelView = "profiles" | "explore" | "chat";
     let panelView = $state<PanelView>("profiles");
     let panelHeight = $state(0);
     let panelOpen = $derived(panelHeight > 0);
     let isSnappingPanel = $state(false);
     let navbarWrapEl = $state<HTMLElement | undefined>(undefined);
-    let navbarBarEl = $state<HTMLElement | undefined>(undefined);
+    let exploreView = $state<"anatomy" | "timeline">("anatomy");
 
-    function handleAvatarClick() {
-        ui.emit("nav:profiles");
-    }
+    let exploreOpen = $derived(panelOpen && panelView === "explore");
+    let chatSheetOpen = $derived(panelOpen && panelView === "chat");
+    let profilesOpen = $derived(panelOpen && panelView === "profiles");
+    // Not tied to panelOpen: Body resizes its canvas whenever this flips, and the Viewer
+    // stays mounted for 5s after closing — flipping it on close left a 0-height canvas on reopen
+    let anatomyFullscreen = $derived($device.isMobile && panelView === "explore" && exploreView === "anatomy");
 
-    // ── Mobile toolbar handlers ──────────────────────────────────────────────
     function isActive(path: string): boolean {
-        if ($uiState.overlay !== Overlay.none) return false;
         return $page.url.pathname.startsWith(path);
     }
 
-    let mobileToolsOpen = $state(false);
-    let mobileDocsOpen = $state(false);
+    let profileBase = $derived($profile?.id ? `/med/p/${$profile.id}` : "/med/p");
+    let docsActive = $derived(
+        !!$profile?.id && (isActive(`${profileBase}/documents`) || isActive(`${profileBase}/medications`)),
+    );
+    let doctorsActive = $derived(
+        !!$profile?.id && (isActive(`${profileBase}/contacts`) || isActive(`${profileBase}/appointments`)),
+    );
 
-    // Either popup can contribute to the bottom offset
-    let anyPopupOpen = $derived(mobileToolsOpen || mobileDocsOpen);
-    let toolsExtraHeight = $derived(!anyPopupOpen || panelOpen ? 0 : mobileDocsOpen ? 160 : 80);
+    // Import progress on the Docs icon: ring while running, dot when ready to review
+    const RING_CIRCUMFERENCE = 2 * Math.PI * 15;
+    let importProgress = $derived(
+        $activeJobs.length
+            ? $activeJobs.reduce((sum, job) => sum + (job.progress ?? 0), 0) / $activeJobs.length
+            : null,
+    );
 
-    function closeMobilePopups() {
-        mobileToolsOpen = false;
-        mobileDocsOpen = false;
-    }
-
-    function handleAnatomyMobile(e: MouseEvent) {
-        e.stopPropagation();
-        isSnappingPanel = true;
-        mobileDocsOpen = false;
-        const opening = !mobileToolsOpen;
-        mobileToolsOpen = opening;
-        if (opening && panelOpen && panelView !== "anatomy") {
-            closePanel();
+    function handleAvatarClick() {
+        if (!$profile?.id) return ui.emit("nav:profiles");
+        if ($page.url.pathname === `${profileBase}` || $page.url.pathname === `${profileBase}/`) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            goto(`${profileBase}`);
         }
     }
 
-    function handleDocsMobile(e: MouseEvent) {
-        e.stopPropagation();
-        isSnappingPanel = true;
-        mobileToolsOpen = false;
-        const opening = !mobileDocsOpen;
-        mobileDocsOpen = opening;
-        if (opening && panelOpen && panelView !== "anatomy") {
-            closePanel();
-        }
+    function handleNameClick() {
+        ui.emit("nav:profiles");
     }
 
-    function handleMobileOpenAnatomy(e: MouseEvent) {
-        e.stopPropagation();
-        closeMobilePopups();
+    // Same rule Viewer.svelte uses on mount: the most recently requested view wins
+    function latestExploreView(): "anatomy" | "timeline" {
+        const timeline = ui.getLatest("viewer:timeline");
+        const anatomy = ui.getLatest("viewer:anatomy");
+        return timeline && (!anatomy || timeline.timestamp > anatomy.timestamp) ? "timeline" : "anatomy";
+    }
+
+    function handleExplore() {
+        if (exploreOpen) {
+            closePanel();
+            return;
+        }
+        exploreView = latestExploreView();
+        openPanel("explore");
+    }
+
+    function handleAsk() {
+        if (chatSheetOpen) closePanel();
+        else ui.emit("chat:toggle");
+    }
+
+    function showAnatomy() {
         ui.emit("viewer:anatomy", true);
-        openPanel("anatomy");
     }
 
-    function handleMobileOpenTimeline(e: MouseEvent) {
-        e.stopPropagation();
-        closeMobilePopups();
+    function showTimeline() {
         ui.emit("viewer:timeline", null);
-        openPanel("anatomy");
-    }
-
-    let importBadge = $derived($pendingJobs.length + $activeJobs.length);
-
-    function handleImportMobile(e: MouseEvent) {
-        e.stopPropagation();
-        ui.emit("nav:import");
-    }
-    function handleMobileChatToggle() {
-        ui.emit("chat:toggle");
     }
 
     const MAX_PANEL_HEIGHT: Record<PanelView, () => number> = {
         profiles: () => Math.round(Math.min(window.innerHeight * 0.65, 380)),
-        anatomy: () => Math.round(window.innerHeight * 0.82),
-        import: () => Math.round(window.innerHeight * 0.88),
+        explore: () => Math.round(window.innerHeight * 0.82),
+        // Capped to the screen by .navbar-outer max-height
+        chat: () => window.innerHeight,
     };
-
-    // Fullscreen anatomy canvas
-    let panelSectionEl = $state<HTMLElement | undefined>(undefined);
-    let anatomyViewportRect = $state<{ x: number; y: number; width: number; height: number } | null>(null);
-    let anatomyFullscreen = $derived($device.isMobile && panelView === 'anatomy');
-
-    // Compute viewportRect: area above the floating pill (navbar-outer).
-    // Use window.innerHeight minus safe-area-top, pill height, and bottom gap
-    // rather than getBoundingClientRect() which can be unreliable during layout.
-    /*
-    function computeAnatomyViewportRect() {
-        if (!navbarBarEl) return null;
-        const style = getComputedStyle(document.documentElement);
-        const safeTop = parseFloat(style.getPropertyValue('--safe-area-top')) || 0;
-        const safeBottom = parseFloat(style.getPropertyValue('--safe-area-bottom')) || 0;
-        const rem = parseFloat(style.fontSize);
-        // Use only the toolbar row height (excludes expanded panel content)
-        const toolbarH = navbarBarEl.offsetHeight;
-        // bottom inset: native uses safe-area-bottom, web uses 0.8rem
-        const bottomGap = safeBottom > 0 ? safeBottom : 0.5 * rem;
-        const height = window.innerHeight - safeTop - toolbarH - bottomGap;
-        const rect = { x: 0, y: safeTop, width: window.innerWidth, height };
-
-        return rect;
-    }
-
-    $effect(() => {
-        
-        const el = panelSectionEl;
-        void panelHeight; // track drag changes
-        if (!el || !anatomyFullscreen) {
-            anatomyViewportRect = null;
-            return;
-        }
-
-        function updateRect() {
-            anatomyViewportRect = computeAnatomyViewportRect();
-        }
-
-        //updateRect();
-        
-        const ro = new ResizeObserver(updateRect);
-        ro.observe(el);
-        return () => ro.disconnect();
-    });
-    */
 
     // Touch drag tracking (plain vars, not reactive)
     let panelTouchStartY = 0;
@@ -278,7 +235,8 @@
 
     function openPanel(view?: PanelView) {
         if (view) panelView = view;
-        closeMobilePopups();
+        // One layer at a time: leaving the chat sheet closes the chat
+        if (panelView !== "chat" && $chatIsOpen) chatActions.close();
         isSnappingPanel = true;
         panelHeight = MAX_PANEL_HEIGHT[panelView]();
     }
@@ -286,13 +244,14 @@
     function closePanel() {
         isSnappingPanel = true;
         panelHeight = 0;
+        if (panelView === "chat" && $chatIsOpen) chatActions.close();
     }
 
     function onPanelTouchStart(e: TouchEvent) {
         const target = e.target as HTMLElement;
         // Only block drag when panel is open and touch is inside panel content.
         // When panel is closed, allow drag from anywhere on the pill (including .panel-section itself).
-        if (panelHeight > 0 && target.closest(".panel-section")) {
+        if (panelHeight > 0 && target.closest(".panel-section, .explore-switch")) {
             panelTouchActive = false;
             return;
         }
@@ -317,21 +276,15 @@
         panelTouchActive = false;
         if (!isDraggingPanel) return;
         isDraggingPanel = false;
-        isSnappingPanel = true;
         const maxH = MAX_PANEL_HEIGHT[panelView]();
         const willClose = panelHeight <= maxH * 0.3;
-        panelHeight = willClose ? 0 : maxH;
-        // Swipe-down on anatomy panel — destroy viewer immediately (no grace period)
-        if (willClose && panelView === 'anatomy') {
-            if (viewerMountTimer !== null) {
-                clearTimeout(viewerMountTimer);
-                viewerMountTimer = null;
-            }
-            if (viewerUnloadTimer !== null) {
-                clearTimeout(viewerUnloadTimer);
-                viewerUnloadTimer = null;
-            }
-            viewerAlive = false;
+        if (willClose) {
+            closePanel();
+            // Swipe-down on explore panel — destroy viewer immediately (no grace period)
+            if (panelView === "explore") destroyViewerNow();
+        } else {
+            isSnappingPanel = true;
+            panelHeight = maxH;
         }
     }
 
@@ -356,12 +309,6 @@
                 "--viewer-width",
                 `${viewerWidth}vw`,
             );
-            if ($device.isMobile) {
-                document.documentElement.style.setProperty(
-                    "--mobile-viewer-height",
-                    `${mobileViewerHeight}vh`,
-                );
-            }
         }
     });
 
@@ -388,48 +335,12 @@
         document.removeEventListener("mouseup", stopViewerResize);
     }
 
-    // Mobile viewer resize (layout-embedded viewer)
-    function handleMobileResizeStart(event: TouchEvent) {
-        if (!$device.isMobile) return;
-        event.preventDefault();
-        isMobileResizing = true;
-        mobileResizeTouchStartY = event.touches[0].clientY;
-        mobileResizeStartHeight = mobileViewerHeight;
-    }
-
-    function handleMobileResizeMove(event: TouchEvent) {
-        if (!isMobileResizing || !$device.isMobile) return;
-        event.preventDefault();
-        const deltaY = mobileResizeTouchStartY - event.touches[0].clientY;
-        const deltaPercent = (deltaY / window.innerHeight) * 100;
-        mobileViewerHeight = Math.max(
-            25,
-            Math.min(90, mobileResizeStartHeight + deltaPercent),
-        );
-    }
-
-    function handleMobileResizeEnd() {
-        isMobileResizing = false;
-    }
-
     // Close panel immediately when navigation starts (no delay waiting for load)
     beforeNavigate(() => {
         if ($device.isMobile && panelOpen) {
             closePanel();
         }
     });
-
-    // Manage overlay state after navigation completes
-    afterNavigate(() => {
-        manageOverlay();
-    });
-
-    function manageOverlay() {
-        // Only close overlay when hash is cleared (back button / escape)
-        if (location.hash.indexOf("#overlay-") !== 0 && $uiState.overlay !== Overlay.none) {
-            $uiState.overlay = Overlay.none;
-        }
-    }
 
     // Subscribe to profile changes for chat
     $effect(() => {
@@ -455,20 +366,22 @@
         device.init();
         initTheme();
 
-        // Android hardware back button: close overlay instead of exiting app
+        // Android hardware back button: lower the open layer instead of exiting the app
         let backButtonHandle: Promise<{ remove: () => void }> | null = null;
         if (isNativePlatform()) {
             backButtonHandle = App.addListener("backButton", () => {
-                if ($uiState.overlay !== null && $uiState.overlay !== "none") {
-                    location.hash = "";
-                }
+                if (panelOpen) closePanel();
+                else if ($chatIsOpen) chatActions.close();
+                else history.back();
             });
         }
 
-        document.addEventListener("touchmove", handleMobileResizeMove, {
-            passive: false,
+        // Mobile: the chat is a layer of the living bar — keep the sheet and the chat store in sync
+        const offChat = chatIsOpen.subscribe((open) => {
+            if (!$device.isMobile) return;
+            if (open && !chatSheetOpen) openPanel("chat");
+            else if (!open && chatSheetOpen) closePanel();
         });
-        document.addEventListener("touchend", handleMobileResizeEnd);
 
         const offs = [
             ui.listen("modal.healthProperty", (config: any) => {
@@ -487,105 +400,78 @@
                 dialogs.healthForm = config === false ? false : config || true;
                 dialogs.healthFormData = config?.data || $profile?.health || {};
             }),
-            ui.listen("overlay.import", (state: any = true) => {
+            // Import lives inline on the Documents page; every entry point lands there
+            ui.listen("overlay.import", (request: any = true) => {
+                if (!request) return;
                 logger.ui.debug("import");
-                if (state && typeof state === "object" && state.jobId) {
-                    importJobId = state.jobId;
-                    importAutoOpen = false;
-                } else {
-                    importJobId = undefined;
-                    importAutoOpen = !!(
-                        state &&
-                        typeof state === "object" &&
-                        state.autoOpen
-                    );
-                }
-                if (state) {
-                    location.hash = "#overlay-import";
-                    $uiState.overlay = Overlay.import;
-                } else {
-                    importJobId = undefined;
-                    importAutoOpen = false;
-                    $uiState.overlay = Overlay.none;
-                    if (location.hash.indexOf("#overlay-") == 0) {
-                        history.back();
-                    }
-                }
+                const params = new URLSearchParams({ import: "1" });
+                if (typeof request === "object" && request.jobId) params.set("job", request.jobId);
+                if (typeof request === "object" && request.autoOpen) params.set("autoOpen", "1");
+                goto($profile?.id ? `${profileBase}/documents?${params}` : "/med/p/");
             }),
             ui.listen("viewer:close", () => {
                 if ($device.isMobile) closePanel();
                 else $uiState.viewer = false;
                 // Explicit close — bypass the 5s grace period, destroy Viewer immediately
-                if (viewerMountTimer !== null) {
-                    clearTimeout(viewerMountTimer);
-                    viewerMountTimer = null;
-                }
-                if (viewerUnloadTimer !== null) {
-                    clearTimeout(viewerUnloadTimer);
-                    viewerUnloadTimer = null;
-                }
-                viewerAlive = false;
+                destroyViewerNow();
             }),
             ui.listen("viewer:anatomy", () => {
-                if ($device.isMobile) openPanel("anatomy");
+                exploreView = "anatomy";
+                if ($device.isMobile) openPanel("explore");
                 else $uiState.viewer = true;
             }),
             ui.listen("viewer:timeline", (highlight: any) => {
+                exploreView = "timeline";
                 viewerSignalHighlight = highlight;
-                if ($device.isMobile) openPanel("anatomy");
+                if ($device.isMobile) openPanel("explore");
                 else $uiState.viewer = true;
             }),
             // Nav events: mobile opens/toggles panel, desktop uses existing behaviour
             ui.listen("nav:profiles", () => {
                 if ($device.isMobile) {
-                    if (panelOpen && panelView === "profiles") closePanel();
+                    if (profilesOpen) closePanel();
                     else openPanel("profiles");
                 } else goto("/med/p/");
             }),
             ui.listen("nav:anatomy", () => {
-                if ($device.isMobile) openPanel("anatomy");
+                if ($device.isMobile) openPanel("explore");
                 else $uiState.viewer = true;
             }),
-            ui.listen("nav:import", () => {
-                if ($device.isMobile) openPanel("import");
-                else ui.emit("overlay.import", true);
-            }),
             shortcuts.listen("Escape", () => {
-                if (location.hash.indexOf("#overlay-") == 0) {
-                    history.back();
-                }
+                if (panelOpen) closePanel();
             }),
         ];
-
-        const handleWindowClick = () => {
-            closeMobilePopups();
-        };
-        window.addEventListener("click", handleWindowClick);
 
         const handleBeforeUnload = () => {
             chatManager.saveCurrentConversation();
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
 
-        manageOverlay();
-
         return () => {
+            offChat();
             offs.forEach((off) => off());
             device.destroy();
-            window.removeEventListener("click", handleWindowClick);
             window.removeEventListener("beforeunload", handleBeforeUnload);
-            document.removeEventListener("touchmove", handleMobileResizeMove);
-            document.removeEventListener("touchend", handleMobileResizeEnd);
             if (backButtonHandle) backButtonHandle.then((h) => h.remove());
         };
     });
 </script>
 
-<svelte:window onhashchange={manageOverlay} />
+{#snippet exploreSwitch()}
+    <div class="explore-switch" role="group" aria-label={$t("app.nav.explore")}>
+        <button class:-active={exploreView === "anatomy"} aria-pressed={exploreView === "anatomy"} onclick={showAnatomy}>
+            {$t("viewer.panels.anatomy")}
+        </button>
+        <button class:-active={exploreView === "timeline"} aria-pressed={exploreView === "timeline"} onclick={showTimeline}>
+            {$t("viewer.panels.timeline")}
+        </button>
+    </div>
+{/snippet}
 
 <DropFiles>
     <!--
-        MOBILE: floating pill, bottom-anchored.
+        MOBILE: living bar — floating pill, bottom-anchored.
+        The pill grows upward when a layer opens, so the bar rides on top of it.
         Two-layer approach:
         - .navbar-outer: overflow:visible so avatar can protrude above pill
         - .navbar-inner: overflow:hidden clips the panel; owns bg/shadow/radius
@@ -594,7 +480,6 @@
     <div
         class="panel-backdrop"
         class:-open={panelOpen}
-        class:-anatomy={anatomyFullscreen}
         onclick={closePanel}
         aria-hidden="true"
     ></div>
@@ -603,127 +488,100 @@
         class="navbar-outer"
         class:-snapping={isSnappingPanel}
         class:-native={isNativePlatform()}
-        style="height: calc(var(--toolbar-height) + 2rem + {panelHeight}px); --tools-offset: {toolsExtraHeight}px"
+        style="height: calc(var(--toolbar-height) + 2rem + {panelHeight}px); --kb: {chatSheetOpen ? $keyboardHeight : 0}px"
         bind:this={navbarWrapEl}
     >
         <!-- Avatar floats above the pill — outside overflow:hidden boundary -->
         <button
             class="nav-avatar"
             onclick={handleAvatarClick}
-            aria-label={$profile?.fullName ?? "Profile"}
+            aria-label={$t("app.nav.overview")}
         >
             <ProfileImage profile={$profile} size={5} />
         </button>
 
         <!-- Inner pill: clips the panel -->
         <div class="navbar-inner">
-            <nav class="navbar-bar toolbar" aria-label="Main navigation" bind:this={navbarBarEl}>
-                <button
+            <nav class="navbar-bar toolbar" aria-label="Main navigation">
+                <!-- Left: pages -->
+                <a
                     class="nav-icon"
-                    class:-active={!!$profile?.id && (
-                        isActive(`/med/p/${$profile.id}/documents`) ||
-                        isActive(`/med/p/${$profile.id}/medications`)
-                    )}
-                    onclick={handleDocsMobile}
-                    aria-label={$t("app.nav.documents")}
+                    class:-active={docsActive}
+                    href={$profile?.id ? `${profileBase}/documents` : "/med/p/"}
+                    aria-current={docsActive ? "page" : undefined}
                 >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#report"></use></svg
-                    >
-                </button>
-                <button
+                    <span class="nav-glyph">
+                        <svg aria-hidden="true"><use href="/icons.svg#report"></use></svg>
+                        {#if importProgress !== null}
+                            <svg class="import-ring" viewBox="0 0 34 34" aria-hidden="true">
+                                <circle cx="17" cy="17" r="15" class="-track" />
+                                <circle
+                                    cx="17" cy="17" r="15" class="-fill"
+                                    stroke-dasharray={RING_CIRCUMFERENCE}
+                                    stroke-dashoffset={RING_CIRCUMFERENCE * (1 - importProgress / 100)}
+                                />
+                            </svg>
+                        {:else if $pendingJobs.length > 0}
+                            <span class="import-dot" aria-hidden="true"></span>
+                        {/if}
+                    </span>
+                    <span class="nav-label">{$t("app.nav.docs")}</span>
+                </a>
+                <a
                     class="nav-icon"
-                    class:-disabled={!isProfileActive}
-                    onclick={isProfileActive ? handleAnatomyMobile : undefined}
-                    aria-label={$t("app.nav.anatomy-model")}
+                    class:-active={doctorsActive}
+                    href={$profile?.id ? `${profileBase}/contacts` : "/med/p/"}
+                    aria-current={doctorsActive ? "page" : undefined}
                 >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#medical-tools"></use></svg
-                    >
-                </button>
+                    <span class="nav-glyph">
+                        <svg aria-hidden="true"><use href="/icons.svg#doctor"></use></svg>
+                    </span>
+                    <span class="nav-label">{$t("app.nav.doctors")}</span>
+                </a>
                 <div class="nav-avatar-slot"></div>
+                <!-- Right: layers — the open layer's button becomes its Close -->
                 <button
-                    class="nav-icon"
-                    class:-active={$chatIsOpen}
-                    onclick={handleMobileChatToggle}
-                    aria-label="AI Chat"
+                    class="nav-icon -layer"
+                    class:-open={exploreOpen}
+                    class:-disabled={!isProfileActive}
+                    onclick={isProfileActive ? handleExplore : undefined}
+                    aria-label={exploreOpen ? `${$t("app.nav.close")} ${$t("app.nav.explore")}` : $t("app.nav.explore")}
+                    aria-expanded={exploreOpen}
                 >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#doctor"></use></svg
-                    >
+                    <span class="nav-glyph">
+                        <svg aria-hidden="true"><use href="/icons.svg#{exploreOpen ? 'close' : 'medical-tools'}"></use></svg>
+                    </span>
+                    <span class="nav-label">{exploreOpen ? $t("app.nav.close") : $t("app.nav.explore")}</span>
                 </button>
                 <button
-                    class="nav-icon import-btn"
-                    onclick={handleImportMobile}
-                    aria-label="Import"
+                    class="nav-icon -layer"
+                    class:-open={chatSheetOpen}
+                    onclick={handleAsk}
+                    aria-label={chatSheetOpen ? $t("app.chat.actions.close") : "AI Chat"}
+                    aria-expanded={chatSheetOpen}
                 >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#plus"></use></svg
-                    >
-                    {#if importBadge > 0}
-                        <span class="badge">{importBadge}</span>
-                    {/if}
+                    <span class="nav-glyph">
+                        <svg aria-hidden="true"><use href="/icons.svg#{chatSheetOpen ? 'close' : 'ai-chat'}"></use></svg>
+                    </span>
+                    <span class="nav-label">{chatSheetOpen ? $t("app.nav.close") : $t("app.nav.ask")}</span>
                 </button>
             </nav>
-            <!-- Mobile tools popup — slides down from toolbar, covers navbar-name -->
-            <div class="mobile-tools-popup" class:-open={mobileToolsOpen}>
-                <button onclick={handleMobileOpenAnatomy}>
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#anatomy"></use></svg
-                    >
-                    {$t("viewer.panels.anatomy")}
-                </button>
-                <button onclick={handleMobileOpenTimeline}>
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#chart-line"></use></svg
-                    >
-                    {$t("viewer.panels.timeline")}
-                </button>
-            </div>
-            <!-- Mobile docs popup — slides down from toolbar, same pattern as tools -->
-            <div class="mobile-tools-popup" class:-open={mobileDocsOpen}>
-                <a
-                    href={$profile?.id ? `/med/p/${$profile.id}/documents` : "/med"}
-                    onclick={() => closeMobilePopups()}
-                >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#report"></use></svg
-                    >
-                    {$t("app.nav.documents")}
-                </a>
-                {#if isFeatureEnabled('MEDICATIONS')}
-                <a
-                    href={$profile?.id ? `/med/p/${$profile.id}/medications` : "/med"}
-                    onclick={() => closeMobilePopups()}
-                >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#pills"></use></svg
-                    >
-                    {$t("medications.title")}
-                </a>
-                {/if}
-                <a
-                    href={$profile?.id ? `/med/p/${$profile.id}/contacts` : "/med"}
-                    onclick={() => closeMobilePopups()}
-                >
-                    <svg aria-hidden="true"
-                        ><use href="/icons.svg#user"></use></svg
-                    >
-                    {$t("contacts.nav")}
-                </a>
-                <a
-                    href={$profile?.id ? `/med/p/${$profile.id}/appointments` : "/med"}
-                    onclick={() => closeMobilePopups()}
-                >
-                    <svg aria-hidden="true"
-                        ><use href="/icons-o.svg#calendar"></use></svg
-                    >
-                    {$t("appointments.nav")}
-                </a>
-            </div>
-            <div class="navbar-name">{$profile?.fullName ?? ""}</div>
+            <button
+                class="navbar-name"
+                class:-open={profilesOpen}
+                onclick={handleNameClick}
+                aria-expanded={profilesOpen}
+                title={$t("app.nav.switch-profile")}
+            >
+                {$profile?.fullName ?? ""}
+                <svg aria-hidden="true"><use href="/icons.svg#arrow-nav-down"></use></svg>
+            </button>
 
-            <div class="panel-section" class:-anatomy={anatomyFullscreen} bind:this={panelSectionEl}>
+            <div
+                class="panel-section"
+                class:-anatomy={anatomyFullscreen}
+                class:-chat={panelView === "chat"}
+            >
                 {#if panelView === "profiles"}
                     <NavPanelProfiles
                         onSelectProfile={(id) => {
@@ -732,14 +590,20 @@
                         }}
                         onClose={closePanel}
                     />
-                {:else if panelView === "anatomy"}
+                {:else if panelView === "explore"}
                     {#if viewerAlive}
-                        <Viewer signalHighlight={viewerSignalHighlight} fullscreen={anatomyFullscreen} viewportRect={anatomyViewportRect} />
+                        <Viewer signalHighlight={viewerSignalHighlight} fullscreen={anatomyFullscreen} />
                     {/if}
-                {:else if panelView === "import"}
-                    <ImportView oncomplete={closePanel} />
+                {/if}
+                <!-- Mobile chat lives in the sheet; it stays mounted because it owns the chat listeners -->
+                {#if $device.isMobile && $page.url.pathname.startsWith("/med")}
+                    <AIChatSidebar variant="sheet" {currentProfile} {isOwnProfile} {userLanguage} />
                 {/if}
             </div>
+
+            {#if exploreOpen}
+                {@render exploreSwitch()}
+            {/if}
         </div>
     </div>
 
@@ -755,7 +619,12 @@
                 class="layout-viewer"
                 style="width: {$uiState.viewer ? viewerWidth : 0}vw"
             >
-                <Viewer signalHighlight={viewerSignalHighlight} />
+                {#if $uiState.viewer}
+                    {@render exploreSwitch()}
+                {/if}
+                <div class="layout-viewer-body">
+                    <Viewer signalHighlight={viewerSignalHighlight} />
+                </div>
                 {#if $uiState.viewer}
                     <button
                         class="viewer-resize-handle"
@@ -767,18 +636,6 @@
         {/if}
         <section class="layout-content">{@render children?.()}</section>
     </main>
-
-    {#if $uiState.overlay == Overlay.import}
-        <div class="virtual-page" transition:fade>
-            <ImportView
-                expandedJobId={importJobId}
-                autoOpen={importAutoOpen}
-                oncomplete={() => {
-                    importJobId = undefined;
-                }}
-            />
-        </div>
-    {/if}
 
     {#if dialogs.healthForm}
         <Modal onclose={handleHealthFormClose}>
@@ -794,7 +651,7 @@
         </Modal>
     {/if}
 
-    {#if $page.url.pathname.startsWith("/med")}
+    {#if !$device.isMobile && $page.url.pathname.startsWith("/med")}
         <AIChatSidebar {currentProfile} {isOwnProfile} {userLanguage} />
     {/if}
 </DropFiles>
@@ -813,11 +670,12 @@
         position: fixed;
         left: 1.6rem;
         right: 1.6rem;
-        bottom: calc(0.8rem + var(--tools-offset, 0px));
+        /* --kb lifts the chat sheet above the native keyboard (Keyboard.resize is "none") */
+        bottom: calc(0.8rem + var(--kb, 0px));
         /* height is set via inline style (toolbar + panelHeight) */
         max-height: calc(
             100dvh - var(--safe-area-top, 0px) - var(--safe-area-bottom, 0px) -
-                1.6rem
+                1.6rem - var(--kb, 0px)
         );
         overflow: visible;
         z-index: 1000;
@@ -828,7 +686,7 @@
 
     /* On native Capacitor: respect safe-area-bottom (home indicator) */
     .navbar-outer.-native {
-        bottom: calc(var(--safe-area-bottom, 0px) + var(--tools-offset, 0px));
+        bottom: calc(var(--safe-area-bottom, 0px) + var(--kb, 0px));
     }
 
     .navbar-outer.-snapping {
@@ -898,10 +756,87 @@
     .nav-icon {
         flex: 1;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 0.6rem;
+        gap: 0.2rem;
+        padding: 0.4rem 0.2rem;
         min-width: var(--toolbar-height);
+        color: var(--color-text-secondary);
+        text-decoration: none;
+    }
+
+    .nav-glyph {
+        position: relative;
+        display: flex;
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .nav-glyph > svg {
+        width: 100%;
+        height: 100%;
+        fill: currentColor;
+    }
+
+    .nav-label {
+        max-width: 100%;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Pages: underline when current */
+    .nav-icon.-active {
+        color: var(--color-interactivity);
+        box-shadow: inset 0 -0.3rem 0 var(--color-interactivity);
+    }
+
+    /* Layers: tinted; the open layer's button becomes a filled Close */
+    .nav-icon.-layer {
+        color: var(--color-highlight);
+    }
+
+    .nav-icon.-layer.-open {
+        background: var(--color-highlight);
+        color: var(--color-highlight-text);
+    }
+
+    /* Import progress on the Docs icon */
+    .import-ring {
+        position: absolute;
+        inset: -0.5rem;
+        width: 3.4rem;
+        height: 3.4rem;
+        transform: rotate(-90deg);
+        pointer-events: none;
+    }
+
+    .import-ring circle {
+        fill: none;
+        stroke-width: 2.5;
+    }
+
+    .import-ring .-track {
+        stroke: var(--color-border);
+    }
+
+    .import-ring .-fill {
+        stroke: var(--color-interactivity);
+        transition: stroke-dashoffset 0.4s;
+    }
+
+    .import-dot {
+        position: absolute;
+        top: -0.2rem;
+        right: -0.4rem;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: var(--color-negative);
     }
 
     .nav-icon.-disabled {
@@ -920,6 +855,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 0.4rem;
+        border: none;
+        color: inherit;
+        cursor: pointer;
         font-size: 1.6rem;
         white-space: nowrap;
         overflow: hidden;
@@ -933,6 +872,18 @@
         z-index: 999;
     }
 
+    .navbar-name > svg {
+        flex-shrink: 0;
+        width: 1.2rem;
+        height: 1.2rem;
+        fill: currentColor;
+        transition: transform 0.25s;
+    }
+
+    .navbar-name.-open > svg {
+        transform: rotate(180deg);
+    }
+
     /* ── Panel section ───────────────────────────────────────── */
     .panel-section {
         flex: 1;
@@ -944,6 +895,55 @@
     .panel-section.-anatomy {
         pointer-events: none;
         overflow: hidden;
+    }
+    .panel-section.-chat {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    /* Anatomy | Timeline: segmented pill styled like the bar. In flow, so the
+       view above ends where the switch starts instead of running under it. */
+    .explore-switch {
+        align-self: center;
+        flex-shrink: 0;
+        display: flex;
+        gap: 0.2rem;
+        margin: 0.8rem auto;
+        padding: 0.3rem;
+        border-radius: var(--radius-16, 1.6rem);
+        background: var(--color-gray-300);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 3px 0.3rem 0 rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+    }
+
+    .explore-switch > button {
+        padding: 0.6rem 1.6rem;
+        border: none;
+        border-radius: var(--radius-16, 1.6rem);
+        background: none;
+        color: var(--color-text-secondary);
+        font-size: 1.3rem;
+        font-weight: 700;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .explore-switch > button.-active {
+        background: var(--color-highlight);
+        color: var(--color-highlight-text);
+    }
+
+    /* Desktop viewer panel: switch on top, viewer fills the rest */
+    .layout-viewer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .layout-viewer-body {
+        position: relative;
+        flex: 1;
+        min-height: 0;
     }
 
     /* ── Panel backdrop overlay (mobile only) ────────────────── */
@@ -968,111 +968,9 @@
         pointer-events: auto;
     }
 
-    /*.panel-backdrop.-open.-anatomy {
-        background: transparent;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        pointer-events: none;
-    }*/
-
     @media (min-width: 769px) {
         .panel-backdrop {
             display: none;
         }
-    }
-
-    .virtual-page {
-        position: fixed;
-        top: calc(var(--toolbar-height) + var(--gap) + var(--safe-area-top));
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 100000;
-        background: var(--background);
-    }
-
-    @media (max-width: 768px) {
-        .virtual-page {
-            top: var(--safe-area-top);
-            bottom: 0;
-        }
-    }
-
-    /* ── Mobile tools popup ───────────────────────────────── */
-    /* Absolutely positioned under the toolbar bar, overlays navbar-name.
-       Slides down via max-height; z-index between bar (1001) and name (999). */
-    .mobile-tools-popup {
-        position: absolute;
-        top: var(--toolbar-height);
-        left: 0;
-        right: 0;
-        max-height: 0;
-        overflow: hidden;
-        background-color: var(--color-gray-300);
-        margin: 0 1.6rem;
-        border-bottom-left-radius: var(--radius-16, 1.6rem);
-        border-bottom-right-radius: var(--radius-16, 1.6rem);
-        box-shadow: 0 1px 15px rgba(0, 0, 0, 0.4);
-        transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1000;
-    }
-
-    .mobile-tools-popup.-open {
-        max-height: 90vh;
-    }
-
-    .mobile-tools-popup button,
-    .mobile-tools-popup a {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
-        padding: 0.8rem 1.6rem;
-        text-align: left;
-        text-decoration: none;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--color-black);
-        font-size: 1.4rem;
-    }
-    .mobile-tools-popup button:last-child,
-    .mobile-tools-popup a:last-child {
-        padding-bottom: 2.4rem;
-    }
-
-    .mobile-tools-popup button > svg,
-    .mobile-tools-popup a > svg {
-        width: 2rem;
-        height: 2rem;
-        flex-shrink: 0;
-        fill: currentColor;
-    }
-
-    .mobile-tools-popup button:active,
-    .mobile-tools-popup a:active {
-        background: rgba(0, 0, 0, 0.05);
-    }
-
-    /* ── Import button badge ─────────────────────────────────── */
-    .import-btn {
-        position: relative;
-    }
-
-    .badge {
-        position: absolute;
-        top: 0.2rem;
-        right: 0.2rem;
-        min-width: 1.8rem;
-        height: 1.8rem;
-        padding: 0 0.4rem;
-        border-radius: 1.6rem;
-        background: var(--color-negative);
-        color: #fff;
-        font-size: 1rem;
-        font-weight: 700;
-        line-height: 1.8rem;
-        text-align: center;
-        pointer-events: none;
     }
 </style>

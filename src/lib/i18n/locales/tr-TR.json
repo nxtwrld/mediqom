@@ -345,7 +345,14 @@
       "logout": "Çıkış Yap",
       "new-session": "Yeni Oturum",
       "profiles": "Profiller",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "docs": "Belgeler",
+      "doctors": "Doktorlar",
+      "explore": "Keşfet",
+      "ask": "Yapay zekâya sor",
+      "close": "Kapat",
+      "switch-profile": "Profil değiştir",
+      "overview": "Profile genel bakış"
     },
     "import": {
       "add-files": "Dosya Ekle",

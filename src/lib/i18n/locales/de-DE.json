@@ -345,7 +345,14 @@
       "logout": "Abmelden",
       "new-session": "Neue Sitzung",
       "profiles": "Profile",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "docs": "Unterlagen",
+      "doctors": "Ärzte",
+      "explore": "Erkunden",
+      "ask": "KI fragen",
+      "close": "Schließen",
+      "switch-profile": "Profil wechseln",
+      "overview": "Profilübersicht"
     },
     "import": {
       "add-files": "Dateien hinzufügen",

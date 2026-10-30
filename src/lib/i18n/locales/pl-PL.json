@@ -345,7 +345,14 @@
       "logout": "Wyloguj",
       "new-session": "Nowa sesja",
       "profiles": "Profile",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "docs": "Dokumenty",
+      "doctors": "Lekarze",
+      "explore": "Odkrywaj",
+      "ask": "Zapytaj AI",
+      "close": "Zamknij",
+      "switch-profile": "Zmień profil",
+      "overview": "Przegląd profilu"
     },
     "import": {
       "add-files": "Dodaj pliki",

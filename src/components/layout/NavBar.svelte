@@ -2,16 +2,11 @@
     import { profile } from '$lib/profiles';
     import { page } from '$app/stores';
     import user, { type User } from '$lib/user';
-    import ui, { state as uiState, Overlay } from '$lib/ui';
+    import ui, { state as uiState } from '$lib/ui';
     import { isOpen as chatIsOpen } from '$lib/chat/store';
     import ProfileImage from '$components/profile/ProfileImage.svelte';
     import { t } from '$lib/i18n';
-    import { goto } from '$app/navigation';
-    import { pendingJobs, activeJobs } from '$lib/import/job-store';
     import { isFeatureEnabled } from '$lib/config/feature-flags';
-
-    // ── Other UI state ──────────────────────────────────────────────────────
-    let toolsPopupOpen = $state(false);
 
     // ── Helpers ─────────────────────────────────────────────────────────────
     function isFullUser(u: unknown): u is User {
@@ -19,42 +14,17 @@
     }
 
     function isActive(path: string): boolean {
-        if ($uiState.overlay !== Overlay.none) return false;
         return $page.url.pathname.startsWith(path);
     }
 
     // ── Action handlers ─────────────────────────────────────────────────────
     function handleChatToggle() { ui.emit('chat:toggle'); }
 
-    let importBadge = $derived($pendingJobs.length + $activeJobs.length);
-
-    function handleImport(e: MouseEvent) {
-        e.stopPropagation();
-        if ($uiState.overlay === Overlay.import) {
-            ui.emit('overlay.import', false);
-        } else {
-            ui.emit('overlay.import', true);
-        }
+    // Explore opens the viewer in the left panel; the same button closes it
+    function handleExploreToggle() {
+        if ($uiState.viewer) ui.emit('viewer:close');
+        else ui.emit('viewer:anatomy', true);
     }
-
-    function handleToolsClick(e: MouseEvent) {
-        e.stopPropagation();
-        toolsPopupOpen = !toolsPopupOpen;
-    }
-
-    function handleOpenAnatomy(e: MouseEvent) {
-        e.stopPropagation();
-        ui.emit('viewer:anatomy', true);
-        toolsPopupOpen = false;
-    }
-
-    function handleOpenTimeline(e: MouseEvent) {
-        e.stopPropagation();
-        ui.emit('viewer:timeline', null);
-        toolsPopupOpen = false;
-    }
-
-    function handleWindowClick() { toolsPopupOpen = false; }
 </script>
 
 <!-- DESKTOP: full-width top bar — hidden on mobile -->
@@ -64,6 +34,9 @@
             <a href="/med/p/" class:-active={$page.url.pathname === '/med/p/'}>
                 {$t('app.nav.profiles')}
             </a>
+            {#if $profile?.id}
+                <span class="crumb-sep" aria-hidden="true">›</span>
+            {/if}
         {/if}
         {#if $profile?.id}
             <a class="profile-avatar-link" href="/med/p/{$profile.id}" aria-label={$profile.fullName}>
@@ -108,35 +81,20 @@
         {:else}
             <div class="profile-spacer"></div>
         {/if}
-            <div class={toolsPopupOpen ? 'tools-wrapper -open' : 'tools-wrapper'}>
-                <button onclick={handleToolsClick} aria-label={$t('app.nav.anatomy-model')}>
-                    <svg aria-hidden="true"><use href="/icons.svg#medical-tools"></use></svg>
-                </button>
-                <div class="tools-popup">
-                    <button onclick={handleOpenAnatomy}>
-                        <svg aria-hidden="true"><use href="/icons.svg#anatomy"></use></svg>
-                        {$t('viewer.panels.anatomy')}
-                    </button>
-                    <button onclick={handleOpenTimeline}>
-                        <svg aria-hidden="true"><use href="/icons.svg#chart-line"></use></svg>
-                        {$t('viewer.panels.timeline')}
-                    </button>
-                </div>
-            </div>
+            <button
+                class:-active={$uiState.viewer}
+                onclick={handleExploreToggle}
+                aria-label={$t('app.nav.explore')}
+                aria-pressed={$uiState.viewer}
+            >
+                <svg aria-hidden="true"><use href="/icons.svg#medical-tools"></use></svg>
+            </button>
 
         <button class:-active={$chatIsOpen} onclick={handleChatToggle} aria-label="AI Chat">
             <svg aria-hidden="true"><use href="/icons.svg#ai-chat"></use></svg>
         </button>
-        <button class="import-btn" onclick={handleImport} aria-label="Import">
-            <svg aria-hidden="true"><use href="/icons.svg#plus"></use></svg>
-            {#if importBadge > 0}
-                <span class="badge">{importBadge}</span>
-            {/if}
-        </button>
     </nav>
 </header>
-
-<svelte:window onclick={handleWindowClick} />
 
 <style>
     /* ═══════════════════════════════════════════════════════════
@@ -192,86 +150,11 @@
         flex: 3;
     }
 
-    /* ── Desktop tools dropdown ──────────────────────────────── */
-    .tools-wrapper {
-        position: relative;
-        padding: 0;
-    }
-
-    .tools-wrapper > button {
-        height: 100%;
-        padding: 0 1.6rem;
-        min-width: var(--toolbar-height);
+    /* ── Breadcrumb separator: PROFILES › current profile ───── */
+    .crumb-sep {
         display: flex;
         align-items: center;
-        justify-content: center;
-    }
-
-    .tools-popup {
-        position: absolute;
-        top: calc(100% + 0.2rem);
-        right: 0;
-        background: var(--color-white);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-8, 0.8rem);
-        box-shadow: var(--shadow-modal);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.25s ease;
-        min-width: 16rem;
-        white-space: nowrap;
-        visibility: hidden;
-    }
-
-    .tools-wrapper.-open .tools-popup {
-        max-height: 32rem;
-        visibility: visible;
-    }
-
-    .tools-popup button {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
-        padding: 1rem 1.6rem;
-        text-align: left;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--color-black);
-        font-size: 1.4rem;
-    }
-
-    .tools-popup button > svg {
-        width: 2.4rem;
-        height: 2.4rem;
-        flex-shrink: 0;
-        fill: currentColor;
-    }
-
-    .tools-popup button:hover {
-        background: var(--color-gray-300);
-    }
-
-    /* ── Import button badge ─────────────────────────────────── */
-    .import-btn {
-        position: relative;
-    }
-
-    .badge {
-        position: absolute;
-        top: 0.4rem;
-        right: 0.4rem;
-        min-width: 1.8rem;
-        height: 1.8rem;
-        padding: 0 0.4rem;
-        border-radius: 1.6rem;
-        background: var(--color-negative);
-        color: #fff;
-        font-size: 1rem;
-        font-weight: 700;
-        line-height: 1.8rem;
-        text-align: center;
-        pointer-events: none;
+        flex: 0;
+        color: var(--color-text-secondary);
     }
 </style>

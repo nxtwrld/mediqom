@@ -62,9 +62,12 @@
     currentProfile: any;
     isOwnProfile: boolean;
     userLanguage: string;
+    /** "sheet": rendered inside the mobile living bar, which owns sizing and close */
+    variant?: "sidebar" | "sheet";
   }
 
-  let { currentProfile, isOwnProfile, userLanguage }: Props = $props();
+  let { currentProfile, isOwnProfile, userLanguage, variant = "sidebar" }: Props = $props();
+  let isSheet = $derived(variant === "sheet");
 
   // Local component state
   let messageInput = $state("");
@@ -316,9 +319,11 @@
 {#if chatIsOpen}
   <div
     class="chat-sidebar"
-    style="width: {sidebarWidth}px; bottom: {$keyboardHeight}px"
+    class:-sheet={isSheet}
+    style={isSheet ? undefined : `width: ${sidebarWidth}px; bottom: ${$keyboardHeight}px`}
   >
     <!-- Resize Handle -->
+    {#if !isSheet}
     <div
       class="resize-handle"
       onmousedown={startResize}
@@ -336,6 +341,7 @@
       aria-valuemax={800}
       tabindex="0"
     ></div>
+    {/if}
 
     <!-- Header -->
     <div class="chat-header">
@@ -378,6 +384,7 @@
             />
           </svg>
         </button>
+        {#if !isSheet}
         <button
           class="chat-action-btn"
           onclick={toggleSidebar}
@@ -388,6 +395,7 @@
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
+        {/if}
       </div>
     </div>
 
@@ -641,6 +649,18 @@
     flex-direction: column;
     z-index: 100001;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mobile living bar: the bar sits above, the sheet owns size and position */
+  .chat-sidebar.-sheet {
+    position: relative;
+    top: auto;
+    width: 100%;
+    height: 100%;
+    border-left: none;
+    box-shadow: none;
+    border-radius: var(--radius-16, 1.6rem) var(--radius-16, 1.6rem) 0 0;
+    z-index: auto;
   }
 
   .resize-handle {
@@ -1126,7 +1146,7 @@
 
   /* Mobile responsive */
   @media (max-width: 768px) {
-    .chat-sidebar {
+    .chat-sidebar:not(.-sheet) {
       width: 100vw !important;
       left: 0;
     }

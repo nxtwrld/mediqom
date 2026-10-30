@@ -69,7 +69,7 @@ Coding conventions live in [`../CLAUDE.md`](../CLAUDE.md), and design tokens in 
 | Doc                                            | Status             | Notes                                                                    |
 | ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
 | [Models review](research/MODELS_REVIEW.md)     | Partial (outdated) | `models.yaml` is still on gpt-4o. Chat has moved to the gateway catalog. |
-| [Responsive layout](design/RESPONSIVE.md)      | Partial (diverged) | The real layout in `UI.svelte` differs from the recommended approach.    |
+| [Responsive layout](design/RESPONSIVE.md)      | Implemented        | Living bar navigation: pages left, layers right, import in Documents.    |
 | [Cryptography](security/CRYPTOGRAPHY.md)       | Implemented        | AES/RSA plus ML-KEM hybrid, passkey PRF, recovery key.                   |
 | [Security report](security/SECURITY_REPORT.md) | Partial            | 24 fixed, 3 accepted, 2 partial (H-1, M-9), 2 open (H-9, M-8).           |
 | [NIS2](compliance/NIS2.md)                     | Pending            | 0 of 12 technical items.                                                 |

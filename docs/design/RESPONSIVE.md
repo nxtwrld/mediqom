@@ -1,12 +1,14 @@
 # Mobile Responsive Strategy for Mediqom UI Layout
 
-> **Status:** Partial (implementation diverged) · **Type:** Plan · **Verified:** 2026-10-21
-> **Built:** `src/components/layout/UI.svelte` (mobile breakpoint 768px, `$device.isMobile`) · **Diverged:** the recommended tab system (Phase 1) was not built — see "Current reality" below
+> **Status:** Implemented (living bar) · **Type:** Architecture · **Verified:** 2026-10-30
+> **Built:** `src/components/layout/UI.svelte` (mobile, ≤768px), `src/components/layout/NavBar.svelte` (desktop), `src/components/layout/ProfileSectionTabs.svelte` · **Prototype:** https://claude.ai/artifact/H8zk6DWN62Yd9jKKnD1zA5
 
-> **Current reality (2026-10-21).** The shipped mobile layout in `src/components/layout/UI.svelte` does not use the Document | Anatomy | Chat tab bar recommended below. Instead it uses:
-> - a floating bottom navbar with toolbar buttons that open two slide-down popups, `mobileToolsOpen` (Anatomy, Timeline) and `mobileDocsOpen` (Documents, Medications, …);
-> - a mobile bottom-sheet panel (`panelOpen` / `panelView`: `profiles` | `anatomy` | `import`) with touch resizing (`mobileViewerHeight`), where the anatomy view goes fullscreen (`anatomyFullscreen`);
-> - on desktop, the left viewer stays resizable (20–50vw, default 33vw) via the viewer resize handle.
+> **Current reality (2026-10-30): the "living bar".**
+> - **Mobile bar** (bottom floating pill): pages on the left (**Docs** → Documents | Medications, **Doctors** → Contacts | Appointments, as route tabs via `ProfileSectionTabs`), the profile avatar in the centre (→ profile overview; tap again to scroll to top), the name chip ▾ under it (→ profile switcher sheet), layers on the right (**Explore**, **Ask AI**).
+> - **Layers** (`panelView`: `profiles` | `explore` | `chat`): the pill grows upward so the bar rides on top of the sheet. The opening button turns into **Close**. One layer at a time; Explore and Ask swap in place. Close via the button, swipe down, backdrop tap, Esc or the Android back button.
+> - **Explore** hosts `Viewer.svelte` with an Anatomy | Timeline switch at the bottom. **Ask** mounts `AIChatSidebar` with `variant="sheet"` inside the panel; the chat store and the sheet are kept in sync, so `chat:ask_about` from anywhere opens the sheet.
+> - **Import** has no overlay any more: every `overlay.import` emit navigates to `/med/p/{id}/documents?import=1`, where `ImportView` renders inline. A ring on the Docs icon shows running import progress, a dot shows jobs ready to review.
+> - **Desktop** keeps the 3-column layout: breadcrumb `PROFILES › avatar + name`, page links, an **Explore** toggle (left viewer panel with the same Anatomy | Timeline switch) and the AI chat button (right panel).
 >
 > The options analysis below is kept as design background.
 

@@ -25,16 +25,15 @@ function shouldSkip(): string | false {
 class ImportPage {
   constructor(public page: Page) {}
 
-  /** Navigate to /med and open the import overlay */
+  /** Open the inline import section on the active profile's Documents page */
   async open() {
     await this.page.goto("/med");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForURL(/\/med\/p\/[^/]+/, { timeout: 15000 });
+    const profileId = new URL(this.page.url()).pathname.split("/med/p/")[1].split("/")[0];
 
-    // Open import overlay via the real Import button — setting
-    // location.hash directly does not work: UI.svelte's manageOverlay()
-    // only handles the close direction (hashchange back to "" / no
-    // #overlay- prefix); opening only happens via ui.emit("overlay.import").
-    await this.page.getByRole("button", { name: "Import", exact: true }).click();
+    // Every import entry point (ui.emit("overlay.import")) lands on this URL
+    await this.page.goto(`/med/p/${profileId}/documents?import=1`);
+    await this.page.waitForLoadState("networkidle");
 
     // Wait for import view to appear
     await this.page.waitForSelector(".import-view", { timeout: 10000 });

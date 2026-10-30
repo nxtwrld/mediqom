@@ -41,7 +41,7 @@ test.describe("Auth - Profile switching", () => {
     expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}/`);
   });
 
-  test("mobile: avatar opens the profile panel and selecting a profile navigates", async ({
+  test("mobile: name chip opens the profile panel and selecting a profile navigates", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "mobile-only nav layout");
@@ -52,9 +52,9 @@ test.describe("Auth - Profile switching", () => {
     const profileId = profileUrl.pathname.split("/med/p/")[1].split("/")[0];
     const profileName = await page.locator(".navbar-name").textContent();
 
-    const avatarButton = page.locator("button.nav-avatar");
-    await expect(avatarButton).toBeVisible();
-    await avatarButton.click();
+    const nameChip = page.locator("button.navbar-name");
+    await expect(nameChip).toBeVisible();
+    await nameChip.click();
 
     const panelItem = page.locator(".panel-profiles .panel-profile-item");
     await expect(panelItem.first()).toBeVisible();
@@ -65,6 +65,23 @@ test.describe("Auth - Profile switching", () => {
     }
 
     await panelItem.first().click();
+    await page.waitForURL(`**/med/p/${profileId}/`);
+    expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}/`);
+  });
+
+  test("mobile: avatar returns to the profile overview", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "mobile-only nav layout");
+
+    await page.goto("/med");
+    await page.waitForURL(/\/med\/p\/[^/]+/, { timeout: 15000 });
+    const profileId = new URL(page.url()).pathname.split("/med/p/")[1].split("/")[0];
+
+    await page.locator(".navbar-bar a.nav-icon").first().click();
+    await page.waitForURL(`**/med/p/${profileId}/documents**`);
+
+    await page.locator("button.nav-avatar").click();
     await page.waitForURL(`**/med/p/${profileId}/`);
     expect(new URL(page.url()).pathname).toBe(`/med/p/${profileId}/`);
   });
