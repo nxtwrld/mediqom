@@ -139,10 +139,10 @@
 
 <style>
     .legend {
-        border-radius: 8px;
-        padding: 1rem;
-        font-size: 0.875rem;
-        max-width: 280px;
+        border-radius: 0.8rem;
+        padding: 1.6rem;
+        font-size: 1.4rem;
+        max-width: 28rem;
     }
 
     .legend.detailed {
@@ -152,7 +152,7 @@
 
 
     .legend-section {
-        margin-bottom: 1.25rem;
+        margin-bottom: 2rem;
     }
 
     .legend-section:last-child {
@@ -160,72 +160,72 @@
     }
 
     .legend-section h5 {
-        margin: 0 0 0.5rem;
-        font-size: 0.875rem;
+        margin: 0 0 0.8rem;
+        font-size: 1.4rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
     }
 
     .legend-items {
         display: grid;
-        gap: 0.375rem;
+        gap: 0.6rem;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .color-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 2px;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 0.2rem;
         flex-shrink: 0;
     }
 
     .node-indicator {
-        border-radius: 3px;
+        border-radius: 0.3rem;
         border: 1px solid rgba(0,0,0,0.1);
     }
 
     .source-indicator {
-        width: 4px;
-        height: 16px;
-        border-radius: 2px;
+        width: 0.4rem;
+        height: 1.6rem;
+        border-radius: 0.2rem;
     }
 
     .line-indicator {
-        height: 3px;
-        width: 20px;
+        height: 0.3rem;
+        width: 2rem;
         border-radius: 1px;
     }
 
     .priority-indicator {
         border-radius: 50%;
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
     }
 
     .label {
         color: var(--color-text-primary, #1f2937);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
 
     .compact-info {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
 
     .info-text {
         margin: 0;
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         line-height: 1.4;
     }
 
     .interaction-guide {
         display: grid;
-        gap: 0.375rem;
+        gap: 0.6rem;
     }
 
     .guide-item {
@@ -237,45 +237,45 @@
     .action {
         font-weight: 600;
         color: var(--color-interactivity, #3b82f6);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
 
     .description {
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .legend {
-            font-size: 0.8rem;
-            padding: 0.75rem;
+            font-size: 1.2rem;
+            padding: 1.2rem;
         }
 
 
         .legend-section h5 {
-            font-size: 0.8rem;
+            font-size: 1.2rem;
         }
 
         .label,
         .action,
         .description {
-            font-size: 0.75rem;
+            font-size: 1.2rem;
         }
 
         .color-indicator {
-            width: 10px;
-            height: 10px;
+            width: 1rem;
+            height: 1rem;
         }
 
         .source-indicator {
-            width: 3px;
-            height: 14px;
+            width: 0.3rem;
+            height: 1.4rem;
         }
 
         .line-indicator {
-            width: 16px;
-            height: 2px;
+            width: 1.6rem;
+            height: 0.2rem;
         }
     }
 </style>

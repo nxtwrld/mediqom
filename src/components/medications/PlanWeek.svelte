@@ -158,7 +158,7 @@
     .weekdays {
         display: flex;
         gap: var(--ui-pad-small);
-        min-height: 10rem;
+        min-height: 16rem;
     }
     .weekday {
         flex: 1;
@@ -181,7 +181,7 @@
         padding: var(--ui-pad-small);
         text-align: center;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         background-color: var(--color-surface, var(--color-white));
         border-radius: var(--ui-radius-medium);
         margin-bottom: var(--ui-pad-small);
@@ -202,23 +202,23 @@
         padding: var(--ui-pad-small);
         background-color: var(--color-surface, var(--color-white));
         border-radius: var(--ui-radius-medium);
-        margin-bottom: 2px;
+        margin-bottom: 0.2rem;
     }
     svg.time-of-day {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: var(--color-interactivity);
         flex-shrink: 0;
     }
     .segment-label {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: var(--color-text-secondary);
     }
     .details {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 0.2rem;
     }
     .occurrence {
         display: flex;
@@ -227,18 +227,18 @@
         padding: var(--ui-pad-small);
         background-color: var(--color-surface, var(--color-white));
         border-radius: var(--ui-radius-medium);
-        font-size: 0.85rem;
+        font-size: 1.4rem;
     }
     .form-icon {
-        width: 1.2rem;
-        height: 1.2rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
         flex-shrink: 0;
         opacity: 0.6;
     }
     .occ-time {
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         flex-shrink: 0;
     }
     .occ-name {
@@ -250,14 +250,14 @@
     }
     .occ-dosage {
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         flex-shrink: 0;
     }
     .empty-day {
         flex: 1;
         background-color: var(--color-surface, var(--color-white));
         border-radius: var(--ui-radius-medium);
-        min-height: 3rem;
+        min-height: 4.8rem;
     }
 
     /* Condensed view */
@@ -276,21 +276,21 @@
         display: inline-block;
     }
     .condensed .form-icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         opacity: 0.5;
     }
     .badge {
         position: absolute;
-        top: -0.4rem;
-        right: -0.6rem;
+        top: -0.6rem;
+        right: -1rem;
         display: block;
-        min-width: 1.2rem;
-        padding: 0.1rem 0.3rem;
-        font-size: 0.7rem;
+        min-width: 2rem;
+        padding: 0.2rem 0.4rem;
+        font-size: 1.2rem;
         font-weight: 600;
         text-align: center;
-        border-radius: 1rem;
+        border-radius: 1.6rem;
         background-color: var(--color-interactivity);
         color: var(--color-white);
     }
@@ -303,13 +303,13 @@
         }
         .weekday {
             flex-direction: row;
-            min-height: 3rem;
+            min-height: 4.8rem;
             gap: var(--ui-pad-small);
         }
         .weekday-name {
             margin-bottom: 0;
-            min-width: 3rem;
-            max-width: 3rem;
+            min-width: 4.8rem;
+            max-width: 4.8rem;
             display: flex;
             align-items: center;
             justify-content: center;

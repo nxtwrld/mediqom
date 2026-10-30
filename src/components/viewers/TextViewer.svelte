@@ -76,12 +76,12 @@
         width: 100%;
         height: 100%;
         background: var(--color-surface, #fff);
-        border-radius: 8px;
+        border-radius: 0.8rem;
         overflow: hidden;
     }
 
     .text-header {
-        padding: 0.75rem 1rem;
+        padding: 1.2rem 1.6rem;
         background: var(--color-background, #f8f9fa);
         border-bottom: 1px solid var(--color-border, #e0e0e0);
         display: flex;
@@ -90,16 +90,16 @@
     }
 
     .text-info {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #666);
     }
 
     .text-content {
-        padding: 1rem;
+        padding: 1.6rem;
         overflow: auto;
-        height: calc(100% - 60px);
+        height: calc(100% - 6rem);
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         line-height: 1.5;
         background: var(--color-gray-400, #f8f9fa);
     }
@@ -113,7 +113,7 @@
     }
 
     .loading, .error {
-        padding: 2rem;
+        padding: 3.2rem;
         text-align: center;
         color: var(--color-text-secondary, #666);
     }
@@ -135,7 +135,7 @@
     }
 
     .text-stats {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #999);
     }
 </style>

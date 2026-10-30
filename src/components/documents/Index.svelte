@@ -90,15 +90,15 @@
     }
 
     .documents-empty .empty-icon {
-        width: 5rem;
-        height: 5rem;
+        width: 8rem;
+        height: 8rem;
         fill: var(--color-text-secondary);
         opacity: 0.6;
     }
 
     .empty-subtitle {
         color: var(--color-text-secondary);
-        max-width: 28rem;
+        max-width: 44.8rem;
     }
 
     .documents-no-match {

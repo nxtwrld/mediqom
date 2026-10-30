@@ -553,7 +553,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: calc(100vh - var(--heading-height) - var(--toolbar-height) - 10rem);
+        height: calc(100vh - var(--heading-height) - var(--toolbar-height) - 16rem);
     }
 
     .button-loading {
@@ -568,7 +568,7 @@
         align-items: center;
         justify-content: center;
         height: calc(100vh - var(--heading-height) - var(--toolbar-height));
-        padding: 2rem;
+        padding: 3.2rem;
     }
 
     .imports {
@@ -576,19 +576,19 @@
         flex-wrap: wrap;
         align-items: flex-start;
         justify-content: center;
-        gap: 1rem;
+        gap: 1.6rem;
 
         overflow-y: auto;
-        --border-width: .2rem;
+        --border-width: 0.3rem;
         --radius: var(--radius-8);
-        --tile-height: 13rem;
+        --tile-height: 20.8rem;
     }
     .report-import {
-        width: 8rem;
-        min-height: 20rem;
+        width: 12.8rem;
+        min-height: 32rem;
     }
     .report-done {
-        width: 12rem;
+        width: 19.2rem;
         background-color: var(--color-gray-300);
     }
 
@@ -611,8 +611,8 @@
         justify-content: center;
         align-items: center;
         widtH: 100%;
-        height: 8rem;
-        padding: 1rem;
+        height: 12.8rem;
+        padding: 1.6rem;
         overflow: hidden;
 
     }
@@ -628,10 +628,10 @@
         justify-content: center;
         text-wrap: wrap;
         align-items: center;
-        padding: .5rem;
+        padding: 0.8rem;
         text-align: center;
-        font-size: .8rem;
-        height: 4rem;
+        font-size: 1.2rem;
+        height: 6.4rem;
         font-weight: bold;
         width: 100%;
         overflow: hidden;
@@ -643,24 +643,24 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        height: 10rem;
+        gap: 1.6rem;
+        padding: 1.6rem;
+        height: 16rem;
         background-color: var(--color-background);
     }
     .controls .actions {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .alert.-info {
-        padding: .75rem 1rem;
-        margin: 0 1rem;
+        padding: 1.2rem 1.6rem;
+        margin: 0 1.6rem;
         background-color: var(--color-interactivity-light, #e0f0ff);
         border-radius: var(--radius-8);
-        font-size: .85rem;
+        font-size: 1.4rem;
     }
 
 </style>

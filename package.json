@@ -88,6 +88,7 @@
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.28",
     "@capacitor/camera": "^8.0.1",
+    "@capacitor/text-zoom": "^8.0.1",
     "@capgo/capacitor-health": "^8.11.12",
     "@cornerstonejs/core": "^4.19.2",
     "@cornerstonejs/dicom-image-loader": "^4.19.2",

@@ -292,18 +292,18 @@
   .item-title-row {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .item-title {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.6rem;
     color: var(--color-text-primary);
   }
   .type-badge {
     align-self: flex-start;
-    font-size: 0.7rem;
+    font-size: 1.2rem;
     text-transform: capitalize;
-    padding: 0.1rem 0.5rem;
+    padding: 0.2rem 0.8rem;
     border-radius: var(--ui-radius-small);
     background: var(--color-border);
     color: var(--color-text-secondary);
@@ -319,13 +319,13 @@
   }
   .item-actions {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .icon-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.25rem;
+    padding: 0.4rem;
     border-radius: var(--ui-radius-small);
     fill: var(--color-text-secondary);
   }
@@ -333,10 +333,10 @@
     background: var(--color-border);
   }
   .certainty-inline {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     font-weight: 400;
     color: var(--color-text-secondary);
-    margin-left: 0.4rem;
+    margin-left: 0.6rem;
   }
   .task-list {
     list-style: none;
@@ -349,7 +349,7 @@
   .task-row {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .task-line {
     display: flex;
@@ -365,12 +365,12 @@
     flex-direction: column;
   }
   .task-hint {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     color: var(--color-text-secondary);
   }
   .task-actions {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.4rem;
     flex-shrink: 0;
   }
   .item-foot {

@@ -278,7 +278,7 @@
 */
 
     tr td:first-child {
-        border-left: .5rem solid var(--background-color);
+        border-left: 0.8rem solid var(--background-color);
     }
 
 
@@ -290,19 +290,19 @@
     
     /* Make table cells responsive to container size */
     .title {
-        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        font-size: clamp(1.4rem, 2.5vw, 1.8rem);
         word-break: break-word;
     }
     
     @container (max-width: 600px) {
         .title {
-            font-size: 0.9rem;
+            font-size: 1.4rem;
         }
     }
     
     @container (max-width: 400px) {
         .title {
-            font-size: 0.8rem;
+            font-size: 1.2rem;
         }
     }
 /*
@@ -320,10 +320,10 @@
 
         */
     .status {
-        margin-right: 1rem;
-        min-width: min(4rem, 25%);
+        margin-right: 1.6rem;
+        min-width: min(6.4rem, 25%);
         border-radius: var(--radius-16);
-        padding: 0 min(1.5rem, 4%) 0 min(1rem, 3%);
+        padding: 0 min(2.4rem, 4%) 0 min(1.6rem, 3%);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -341,13 +341,13 @@
     /* Container-responsive adjustments for Signal */
     @container (max-width: 500px) {
         .status {
-            min-width: 3rem;
-            padding: 0 0.75rem 0 0.5rem;
-            margin-right: 0.5rem;
+            min-width: 4.8rem;
+            padding: 0 1.2rem 0 0.8rem;
+            margin-right: 0.8rem;
         }
         
         .status strong {
-            font-size: 1.2rem;
+            font-size: 2rem;
         }
         
         .actions {
@@ -357,12 +357,12 @@
     
     @container (max-width: 400px) {
         .status strong {
-            font-size: 1rem;
-            margin-right: 0.25rem;
+            font-size: 1.6rem;
+            margin-right: 0.4rem;
         }
         
         .unit {
-            font-size: 0.8rem;
+            font-size: 1.2rem;
         }
     }
 
@@ -395,14 +395,14 @@
 
     .status svg {
         fill: currentColor;
-        height: 1.5rem;
-        width: 1.5rem;
-        margin-right: .5rem;
+        height: 2.4rem;
+        width: 2.4rem;
+        margin-right: 0.8rem;
     }
     .status strong {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 900;
-        margin-right: .5rem;
+        margin-right: 0.8rem;
         flex-grow: 1;
     }
   

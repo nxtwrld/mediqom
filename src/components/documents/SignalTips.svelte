@@ -29,20 +29,20 @@
 <style>
     .tips {
         display: flex;
-        margin: 1rem;
+        margin: 1.6rem;
         align-items: center;
     }
     .tips svg {
         fill: currentColor;
-        height: 5rem;
-        width: 5rem;
-        margin-right: 1rem;
+        height: 8rem;
+        width: 8rem;
+        margin-right: 1.6rem;
     }
     ul {
-        margin: 1rem;
+        margin: 1.6rem;
         list-style:disc
     }
     li {
-        margin: .5rem 0 0 1rem ;
+        margin: 0.8rem 0 0 1.6rem ;
     }
 </style>

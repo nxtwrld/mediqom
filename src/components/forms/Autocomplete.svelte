@@ -70,20 +70,20 @@
     }
     span :global(.autocomplete.input) {
         padding: 0 !important;
-        font-size: 1.1rem !important;
+        font-size: 1.8rem !important;
     }
     span :global(.autocomplete input) {
         width: 100% !important;
         margin: 0 !important;
-        padding: .5rem !important;
-        font-size: 1.1rem !important;
+        padding: 0.8rem !important;
+        font-size: 1.8rem !important;
         background-color: transparent !important;
         border: none !important;
         color: inherit !important;
     }
     span :global(.autocomplete:not(.hide-arrow):not(.is-loading)::after) {
 
-        --size: .3rem;
+        --size: 0.4rem;
         color: inherit  !important;
         border-color: #000 !important;
         border-width: 2.5px !important;

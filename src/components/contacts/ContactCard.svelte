@@ -82,26 +82,26 @@
 
     .card-header .name {
         font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         margin: 0;
     }
 
     .card-header .role {
         color: var(--color-text-secondary);
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         margin: 0;
     }
 
     .card-header .specialty {
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         margin: 0;
     }
 
     .expand-toggle {
         flex-shrink: 0;
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -131,7 +131,7 @@
         background-color: var(--color-background);
         padding: var(--ui-pad-medium);
         flex-shrink: 0;
-        max-width: min(5rem, 20vw);
+        max-width: min(8rem, 20vw);
     }
 
     @media (max-width: 768px) {

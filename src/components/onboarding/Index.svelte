@@ -205,14 +205,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
-		min-height: 40rem;
+		min-height: 64rem;
 	}
 	.modal .form-contents {
 		flex-grow: 1;
 	}
 	.signout {
 		position: fixed;
-		top: calc(1rem + var(--safe-area-top));
-		right: calc(1rem + var(--safe-area-right));
+		top: calc(1.6rem + var(--safe-area-top));
+		right: calc(1.6rem + var(--safe-area-right));
 	}
 </style>

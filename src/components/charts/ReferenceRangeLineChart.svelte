@@ -378,7 +378,7 @@ onMount(() => {
     .panel {
         width: 100%;
         height: 300px;
-        padding: .5rem;
+        padding: 0.8rem;
     }
     .panel svg {
         width: 100%;
@@ -390,16 +390,16 @@ onMount(() => {
 
     }
     .panel svg :global(.point) {
-        r: .4rem;
+        r: 0.6rem;
         opacity: 1;
         stroke: #FFF;
         fill: var(--color-positive);
-        stroke-width: .1rem;
+        stroke-width: 0.2rem;
         filter: drop-shadow( 2px 2px 2px rgba(0, 0, 0, .5));
     }
 
     .panel svg :global(.point.fromReport) {
-        r: .8rem;
+        r: 1.2rem;
     }
 
     .panel svg :global(.rangeLabelText) {
@@ -414,11 +414,11 @@ onMount(() => {
 
     .panel svg :global(.text) {
         fill: var(--color-text-primary);
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: bold;
     }
     .panel svg :global(.text tspan) {
-        font-size: .7rem;
+        font-size: 1.2rem;
         font-weight: normal;
     }
 

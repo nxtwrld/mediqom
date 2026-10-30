@@ -47,6 +47,6 @@
         justify-content: center;
         border-radius: 50%;
 
-        padding: .5rem;
+        padding: 0.8rem;
     }
 </style>

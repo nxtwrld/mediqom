@@ -239,15 +239,15 @@
         justify-content: stretch;
         align-items: stretch;
         flex-grow: 1;
-        gap: 1rem;
-        padding: 1.5rem;
+        gap: 1.6rem;
+        padding: 2.4rem;
         background-color: var(--color-background);
         margin-bottom: var(--gap);
     }
 
     .attachment {
         width: auto;
-        height: 15rem;
+        height: 24rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -256,7 +256,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: 8px;
+        border-radius: 0.8rem;
         overflow: hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -275,10 +275,10 @@
         width: auto;
         max-width: 100%;
         object-fit: contain;
-        box-shadow: 0 1rem 1rem -1rem rgba(0,0,0,.6);
+        box-shadow: 0 1.6rem 1.6rem -1.6rem rgba(0,0,0,.6);
         transition: transform .3s, border-width .3s;
         border: 0px solid var(--color-interactivity);
-        border-radius: 4px;
+        border-radius: 0.4rem;
     }
 
     .attachment:hover img {
@@ -286,7 +286,7 @@
     }
 
     .attachment-placeholder {
-        font-size: 4rem;
+        font-size: 6.4rem;
         opacity: 0.6;
         display: flex;
         align-items: center;
@@ -294,25 +294,25 @@
         width: 100%;
         height: 100%;
         background: var(--color-background, #f8f9fa);
-        border-radius: 8px;
+        border-radius: 0.8rem;
         border: 2px dashed var(--color-border, #dee2e6);
     }
 
     .attachment-overlay {
         position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
+        top: 0.8rem;
+        right: 0.8rem;
         background: rgba(0, 0, 0, 0.7);
         color: white;
         border-radius: 50%;
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         display: flex;
         align-items: center;
         justify-content: center;
         opacity: 0;
         transition: opacity 0.3s ease;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
 
     .attachment:hover .attachment-overlay {
@@ -329,18 +329,18 @@
 
     /* Button styles for modal */
     .btn {
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1.6rem;
         border: 1px solid var(--color-border, #ddd);
         background: var(--color-surface, #fff);
         color: var(--color-text-primary, #333);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         transition: all 0.2s ease;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .btn:hover {
@@ -378,11 +378,11 @@
     }
 
     .modal-header {
-        padding: .5rem 3rem .5rem 1rem;
+        padding: 0.8rem 4.8rem 0.8rem 1.6rem;
         border-bottom: 1px solid var(--color-border, #e0e0e0);
         display: flex;
         justify-content: flex-start;
-        gap: 1rem;
+        gap: 1.6rem;
         align-items: center;
         background: var(--color-background, #f8f9fa);
     }
@@ -404,19 +404,19 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 3rem;
+        padding: 4.8rem;
         text-align: center;
-        min-height: 300px;
+        min-height: 30rem;
     }
 
     .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid var(--color-border, #e0e0e0);
-        border-top: 4px solid var(--color-interactivity, #007bff);
+        width: 4rem;
+        height: 4rem;
+        border: 0.4rem solid var(--color-border, #e0e0e0);
+        border-top: 0.4rem solid var(--color-interactivity, #007bff);
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
     }
 
     @keyframes spin {
@@ -429,16 +429,16 @@
     }
 
     .error-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
+        font-size: 4.8rem;
+        margin-bottom: 1.6rem;
     }
 
     .error-state h4 {
-        margin: 0 0 1rem 0;
+        margin: 0 0 1.6rem 0;
     }
 
     .error-state p {
-        margin: 0 0 1.5rem 0;
+        margin: 0 0 2.4rem 0;
         color: var(--color-text-secondary, #666);
     }
 

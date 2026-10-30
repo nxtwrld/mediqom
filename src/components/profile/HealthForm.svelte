@@ -284,7 +284,7 @@
 
 <style>
     .form {
-        min-width: 35rem;
+        min-width: 56rem;
         max-width: 100%;
     }
 </style>

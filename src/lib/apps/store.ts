@@ -3,10 +3,10 @@ import type { Writable } from "svelte/store";
 import type { AppRecord } from "./types.d";
 //import { get as vaultGet, set as vaultSet } from '$lib/vault/index';
 import ui from "$lib/ui";
-import sampleData from "./samplefile.apps.json";
+import appData from "./apps.json";
 const STORE_NAME = "apps";
 
-const store: Writable<AppRecord[]> = writable(sampleData.slice(0, 2));
+const store: Writable<AppRecord[]> = writable(appData.slice(0, 2));
 /*
 ui.on('vault-ready', async () => {
     loadStore();

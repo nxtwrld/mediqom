@@ -120,8 +120,8 @@
 	.crop-container {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		width: min(400px, 80vw);
+		gap: 1.6rem;
+		width: min(40rem, 80vw);
 	}
 
 	.crop-container h3 {
@@ -132,7 +132,7 @@
 	.cropper-wrapper {
 		position: relative;
 		width: 100%;
-		height: 300px;
+		height: 30rem;
 		background: var(--color-gray-800);
 		border-radius: var(--radius-8);
 		overflow: hidden;
@@ -141,17 +141,17 @@
 	.zoom-control {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.8rem;
 	}
 
 	.zoom-control :global(.label) {
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		color: var(--color-text-secondary);
 	}
 
 	.actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: 0.5rem;
+		gap: 0.8rem;
 	}
 </style>

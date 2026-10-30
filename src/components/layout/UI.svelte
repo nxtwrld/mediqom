@@ -241,7 +241,7 @@
         const rem = parseFloat(style.fontSize);
         // Use only the toolbar row height (excludes expanded panel content)
         const toolbarH = navbarBarEl.offsetHeight;
-        // bottom inset: native uses safe-area-bottom, web uses 0.5rem
+        // bottom inset: native uses safe-area-bottom, web uses 0.8rem
         const bottomGap = safeBottom > 0 ? safeBottom : 0.5 * rem;
         const height = window.innerHeight - safeTop - toolbarH - bottomGap;
         const rect = { x: 0, y: safeTop, width: window.innerWidth, height };
@@ -603,7 +603,7 @@
         class="navbar-outer"
         class:-snapping={isSnappingPanel}
         class:-native={isNativePlatform()}
-        style="height: calc(var(--toolbar-height) + 1.25rem + {panelHeight}px); --tools-offset: {toolsExtraHeight}px"
+        style="height: calc(var(--toolbar-height) + 2rem + {panelHeight}px); --tools-offset: {toolsExtraHeight}px"
         bind:this={navbarWrapEl}
     >
         <!-- Avatar floats above the pill — outside overflow:hidden boundary -->
@@ -811,17 +811,17 @@
     /* Outer: positioning context, overflow visible so avatar can protrude */
     .navbar-outer {
         position: fixed;
-        left: 1rem;
-        right: 1rem;
-        bottom: calc(0.5rem + var(--tools-offset, 0px));
+        left: 1.6rem;
+        right: 1.6rem;
+        bottom: calc(0.8rem + var(--tools-offset, 0px));
         /* height is set via inline style (toolbar + panelHeight) */
         max-height: calc(
             100dvh - var(--safe-area-top, 0px) - var(--safe-area-bottom, 0px) -
-                1rem
+                1.6rem
         );
         overflow: visible;
         z-index: 1000;
-        box-shadow: 0 0 2rem 1rem color-mix(in srgb, var(--color-background) 80%, transparent);
+        box-shadow: 0 0 3.2rem 1.6rem color-mix(in srgb, var(--color-background) 80%, transparent);
         background-color: color-mix(in srgb, var(--color-background) 60%, transparent);
         /* No transition by default (during drag); added by .-snapping */
     }
@@ -854,9 +854,9 @@
     .nav-avatar {
         position: absolute;
         left: 50%;
-        top: calc(var(--toolbar-height) / 2 - 2.8rem);
+        top: calc(var(--toolbar-height) / 2 - 4.4rem);
         transform: translateX(-50%);
-        height: 5rem;
+        height: 8rem;
         padding: 0;
         border: none;
         background: none;
@@ -867,11 +867,11 @@
     }
 
     .nav-avatar :global(.avatar) {
-        width: 4rem !important;
-        height: 4rem !important;
-        max-width: 5rem;
-        max-height: 5rem;
-        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.4);
+        width: 6.4rem !important;
+        height: 6.4rem !important;
+        max-width: 8rem;
+        max-height: 8rem;
+        box-shadow: 0 0 1.6rem rgba(0, 0, 0, 0.4);
     }
 
     /* ── Mobile toolbar row ──────────────────────────────────── */
@@ -879,28 +879,28 @@
         width: 100%;
         height: var(--toolbar-height);
         flex-shrink: 0;
-        border-radius: var(--radius-16, 1rem);
+        border-radius: var(--radius-16, 1.6rem);
         overflow: hidden;
         --button-color: var(--color-gray-300);
         background: var(--color-gray-300);
         box-shadow:
-            0 -5px 1rem rgba(0, 0, 0, 0.2),
-            0 3px 0.2rem 0 rgba(0, 0, 0, 0.2);
+            0 -5px 1.6rem rgba(0, 0, 0, 0.2),
+            0 3px 0.3rem 0 rgba(0, 0, 0, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.9);
         z-index: 1001;
     }
     .navbar-bar  > *:first-child {
-        border-bottom-left-radius: var(--radius-16, 1rem);
+        border-bottom-left-radius: var(--radius-16, 1.6rem);
     }
     .navbar-bar > *:last-child {
-        border-bottom-right-radius: var(--radius-16, 1rem);
+        border-bottom-right-radius: var(--radius-16, 1.6rem);
     }
     .nav-icon {
         flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 0.4rem;
+        padding: 0.6rem;
         min-width: var(--toolbar-height);
     }
 
@@ -915,20 +915,20 @@
     }
 
     .navbar-name {
-        height: 1.5rem;
+        height: 2.4rem;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: 1.6rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        padding: 0.2rem 0.75rem;
+        padding: 0.3rem 1.2rem;
         background-color: var(--color-gray-600);
-        margin: 0 1rem;
-        border-bottom-left-radius: var(--radius-16, 1rem);
-        border-bottom-right-radius: var(--radius-16, 1rem);
+        margin: 0 1.6rem;
+        border-bottom-left-radius: var(--radius-16, 1.6rem);
+        border-bottom-right-radius: var(--radius-16, 1.6rem);
         text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
         z-index: 999;
     }
@@ -939,7 +939,7 @@
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        padding: 0 1rem;
+        padding: 0 1.6rem;
     }
     .panel-section.-anatomy {
         pointer-events: none;
@@ -1009,9 +1009,9 @@
         max-height: 0;
         overflow: hidden;
         background-color: var(--color-gray-300);
-        margin: 0 1rem;
-        border-bottom-left-radius: var(--radius-16, 1rem);
-        border-bottom-right-radius: var(--radius-16, 1rem);
+        margin: 0 1.6rem;
+        border-bottom-left-radius: var(--radius-16, 1.6rem);
+        border-bottom-right-radius: var(--radius-16, 1.6rem);
         box-shadow: 0 1px 15px rgba(0, 0, 0, 0.4);
         transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
@@ -1025,26 +1025,26 @@
     .mobile-tools-popup a {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 1rem;
         width: 100%;
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1.6rem;
         text-align: left;
         text-decoration: none;
         background: none;
         border: none;
         cursor: pointer;
         color: var(--color-black);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
     .mobile-tools-popup button:last-child,
     .mobile-tools-popup a:last-child {
-        padding-bottom: 1.5rem;
+        padding-bottom: 2.4rem;
     }
 
     .mobile-tools-popup button > svg,
     .mobile-tools-popup a > svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         flex-shrink: 0;
         fill: currentColor;
     }
@@ -1061,17 +1061,17 @@
 
     .badge {
         position: absolute;
-        top: 0.15rem;
-        right: 0.15rem;
-        min-width: 1.1rem;
-        height: 1.1rem;
-        padding: 0 0.3rem;
-        border-radius: 1rem;
+        top: 0.2rem;
+        right: 0.2rem;
+        min-width: 1.8rem;
+        height: 1.8rem;
+        padding: 0 0.4rem;
+        border-radius: 1.6rem;
         background: var(--color-negative);
         color: #fff;
-        font-size: 0.65rem;
+        font-size: 1rem;
         font-weight: 700;
-        line-height: 1.1rem;
+        line-height: 1.8rem;
         text-align: center;
         pointer-events: none;
     }

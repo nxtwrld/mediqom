@@ -42,9 +42,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 200px;
+        min-height: 20rem;
         background: var(--color-background, #f8f9fa);
-        border-radius: 8px;
+        border-radius: 0.8rem;
     }
 
     .image-container {
@@ -57,12 +57,12 @@
         max-width: 100%;
         max-height: 70vh;
         object-fit: contain;
-        border-radius: 4px;
+        border-radius: 0.4rem;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .loading, .error {
-        padding: 2rem;
+        padding: 3.2rem;
         text-align: center;
         color: var(--color-text-secondary, #666);
     }
@@ -72,8 +72,8 @@
     }
 
     .image-info {
-        margin-top: 1rem;
-        font-size: 0.9rem;
+        margin-top: 1.6rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #666);
     }
 

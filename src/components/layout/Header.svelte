@@ -168,7 +168,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         height: calc(var(--toolbar-height) + var(--safe-area-bottom));
         padding-bottom: var(--safe-area-bottom);
         z-index: 1000;
-        --menu-shadow: 0 1rem 1rem -.5rem var(--color-gray-800);
+        --menu-shadow: 0 1.6rem 1.6rem -0.8rem var(--color-gray-800);
     }
     @media (min-width: 768px) {
         header {
@@ -185,7 +185,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
 
     .icon {
         width: var(--toolbar-height);
-        padding: .5rem;
+        padding: 0.8rem;
     }
     .icon.logo {
         padding: 0;
@@ -255,7 +255,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         top: calc(100% + var(--gap));
         left: 0;
         max-height: 0;
-        min-width: 10rem;
+        min-width: 16rem;
         background-color: var(--color-gray-500);
         border-radius: var(--radius-16);
         box-shadow: var(--menu-shadow);
@@ -278,7 +278,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
     .menu > ul.menu li a {
         background-color: var(--color-gray-300);
         border: none;
-        padding: .5rem;
+        padding: 0.8rem;
         width: 100%;
         margin: 0;
         text-align: left;
@@ -295,8 +295,8 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
     .user {
         display: flex;
         flex-direction: column;
-        gap: .5rem;
-        padding: .5rem;
+        gap: 0.8rem;
+        padding: 0.8rem;
     }
     .user .h3 {
         white-space: nowrap;
@@ -309,7 +309,7 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
     }
 
     .mobile-menu {
-        padding: .6rem;
+        padding: 1rem;
     }
     @media screen and (max-width: 768px) {
         .toolbar .navigation-mobile {
@@ -339,12 +339,12 @@ https://svelte.dev/e/store_invalid_scoped_subscription -->
         }
         .toolbar > .navigation > a {
             display: block;
-            padding: 1rem;
+            padding: 1.6rem;
             margin-bottom: var(--gap);
             flex-grow: 0;
         }
         .toolbar > .navigation > a.sub-item {
-            padding-left: 2rem;
+            padding-left: 3.2rem;
         }
         .toolbar > .navigation > a.-active {
             background-color: var(--color-white);

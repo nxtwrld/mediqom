@@ -83,16 +83,16 @@
         display: inline-block;
         flex-grow: 1;
         width: 100%;
-        min-width: 15rem;
-        margin: .1rem .1rem 1rem .1rem;
+        min-width: 24rem;
+        margin: 0.2rem 0.2rem 1.6rem 0.2rem;
         height: 100%;
     }
 .range.-value {
-    padding-top: 2rem;
+    padding-top: 3.2rem;
 }
 
     .range legend {
-        margin: .2rem 0 0 0;
+        margin: 0.3rem 0 0 0;
         position: relative;
 
 
@@ -118,7 +118,7 @@
         height: 100%;
         border-radius: var(--radius-16);
         margin-right: 1px;
-        padding: .5rem;
+        padding: 0.8rem;
         opacity: .5;
         display: flex;
         align-items: center;
@@ -148,18 +148,18 @@
         width: 0;
         height: 0;
         border-style: solid;
-        border-width:  .5rem .5rem 0 .5rem;
+        border-width:  0.8rem 0.8rem 0 0.8rem;
         border-color: var(--color-background) transparent transparent transparent;
         transform: translate(-50%, 0) rotate(360deg);
     }
     .bar__value {
         position: absolute;
-        top: -.3rem;
+        top: -0.4rem;
         left: 0;
         transform: translate(-50%, -100%);
-        padding: .3rem .5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--radius-16);
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: bold;
     }
     .bar__value:after {
@@ -169,7 +169,7 @@
         left: 50%;
         transform: translate(-50%, 0);
         border-style: solid;
-        border-width:  .5rem .5rem 0 .5rem;
+        border-width:  0.8rem 0.8rem 0 0.8rem;
     }
     .bar__value.low,
     .bar__value.high {

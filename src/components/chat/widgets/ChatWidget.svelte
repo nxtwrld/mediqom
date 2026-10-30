@@ -61,7 +61,7 @@
 
 <style>
 	.chat-widget {
-		margin-top: 8px;
+		margin-top: 0.8rem;
 		border: 1px solid var(--color-gray-400);
 		border-radius: var(--radius-8);
 		overflow: hidden;
@@ -69,8 +69,8 @@
 	}
 
 	.widget-title {
-		padding: 6px 10px;
-		font-size: 12px;
+		padding: 0.6rem 1rem;
+		font-size: 1.2rem;
 		font-weight: 600;
 		color: var(--color-gray-800);
 		background: var(--color-gray-300);
@@ -99,7 +99,7 @@
 
 	.widget-content :global(.section-title-sub) {
 		margin: var(--ui-pad-small) 0 0;
-		font-size: 0.85rem;
+		font-size: 1.4rem;
 	}
 
 </style>

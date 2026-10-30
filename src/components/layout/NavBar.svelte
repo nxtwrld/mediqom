@@ -171,7 +171,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.25rem;
+        padding: 0.4rem;
         flex-shrink: 0;
         flex: 0;
     }
@@ -180,8 +180,8 @@
     .profile-name {
         display: flex;
         align-items: center;
-        padding: 0 0.75rem;
-        font-size: 0.875rem;
+        padding: 0 1.2rem;
+        font-size: 1.4rem;
         color: var(--color-black);
         white-space: nowrap;
         overflow: hidden;
@@ -200,7 +200,7 @@
 
     .tools-wrapper > button {
         height: 100%;
-        padding: 0 1rem;
+        padding: 0 1.6rem;
         min-width: var(--toolbar-height);
         display: flex;
         align-items: center;
@@ -209,42 +209,42 @@
 
     .tools-popup {
         position: absolute;
-        top: calc(100% + 2px);
+        top: calc(100% + 0.2rem);
         right: 0;
         background: var(--color-white);
         border: 1px solid var(--color-border);
-        border-radius: var(--radius-8, 0.5rem);
+        border-radius: var(--radius-8, 0.8rem);
         box-shadow: var(--shadow-modal);
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.25s ease;
-        min-width: 10rem;
+        min-width: 16rem;
         white-space: nowrap;
         visibility: hidden;
     }
 
     .tools-wrapper.-open .tools-popup {
-        max-height: 20rem;
+        max-height: 32rem;
         visibility: visible;
     }
 
     .tools-popup button {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 1rem;
         width: 100%;
-        padding: 0.65rem 1rem;
+        padding: 1rem 1.6rem;
         text-align: left;
         background: none;
         border: none;
         cursor: pointer;
         color: var(--color-black);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
 
     .tools-popup button > svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         flex-shrink: 0;
         fill: currentColor;
     }
@@ -260,17 +260,17 @@
 
     .badge {
         position: absolute;
-        top: 0.25rem;
-        right: 0.25rem;
-        min-width: 1.1rem;
-        height: 1.1rem;
-        padding: 0 0.3rem;
-        border-radius: 1rem;
+        top: 0.4rem;
+        right: 0.4rem;
+        min-width: 1.8rem;
+        height: 1.8rem;
+        padding: 0 0.4rem;
+        border-radius: 1.6rem;
         background: var(--color-negative);
         color: #fff;
-        font-size: 0.65rem;
+        font-size: 1rem;
         font-weight: 700;
-        line-height: 1.1rem;
+        line-height: 1.8rem;
         text-align: center;
         pointer-events: none;
     }

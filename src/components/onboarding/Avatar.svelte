@@ -195,7 +195,7 @@
 	.upload {
 		position: absolute;
 		margin-top: 1em;
-		bottom: .2rem;
+		bottom: 0.3rem;
 		left: 50%;
 		transform: translatex(-50%);
 		display: flex;

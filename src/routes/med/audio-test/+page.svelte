@@ -1006,7 +1006,7 @@
 
 <style>
 	.audio-test-page {
-		max-width: 1400px;
+		max-width: 140rem;
 		margin: 0 auto;
 		padding: var(--ui-pad-medium);
 		font-family: var(--font-face);
@@ -1018,14 +1018,14 @@
 
 	.page-header h1 {
 		font-size: var(--font-size-2xl);
-		margin: 0 0 0.75rem 0;
+		margin: 0 0 1.2rem 0;
 		color: var(--color-text-primary);
 	}
 
 	.status-bar {
 		display: flex;
 		gap: var(--ui-pad-medium);
-		padding: 0.75rem;
+		padding: 1.2rem;
 		background: var(--color-surface);
 		border-radius: var(--ui-radius-medium);
 		font-family: var(--font-face-values);
@@ -1048,7 +1048,7 @@
 
 	.controls {
 		display: flex;
-		gap: 0.75rem;
+		gap: 1.2rem;
 		margin-bottom: var(--ui-pad-medium);
 	}
 
@@ -1061,7 +1061,7 @@
 	}
 
 	.transcription-settings h3 {
-		margin: 0 0 0.75rem 0;
+		margin: 0 0 1.2rem 0;
 		font-size: var(--font-size-lg);
 		font-weight: 600;
 		color: var(--color-text-primary);
@@ -1069,7 +1069,7 @@
 
 	.settings-grid {
 		display: grid;
-		grid-template-columns: 200px 200px 1fr;
+		grid-template-columns: 20rem 20rem 1fr;
 		gap: var(--ui-pad-medium);
 		align-items: start;
 	}
@@ -1092,7 +1092,7 @@
 
 	.setting-group select,
 	.setting-group textarea {
-		padding: var(--ui-pad-small) 0.75rem;
+		padding: var(--ui-pad-small) 1.2rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--ui-radius-small);
 		background: var(--color-background);
@@ -1115,7 +1115,7 @@
 
 	.setting-group textarea {
 		resize: vertical;
-		min-height: 60px;
+		min-height: 6rem;
 		font-family: var(--font-face-values);
 		line-height: 1.5;
 	}
@@ -1130,8 +1130,8 @@
 
 	.checkbox-label input[type='checkbox'] {
 		cursor: pointer;
-		width: 18px;
-		height: 18px;
+		width: 1.8rem;
+		height: 1.8rem;
 	}
 
 	.checkbox-label input[type='checkbox']:disabled {
@@ -1163,8 +1163,8 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--ui-pad-medium);
-		height: calc(100vh - 300px);
-		min-height: 500px;
+		height: calc(100vh - 30rem);
+		min-height: 50rem;
 	}
 
 	.log-panel,
@@ -1181,7 +1181,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.75rem var(--ui-pad-medium);
+		padding: 1.2rem var(--ui-pad-medium);
 		background: var(--color-gray-400);
 		border-bottom: 1px solid var(--color-border);
 	}
@@ -1203,12 +1203,12 @@
 	.transcript-container {
 		flex: 1;
 		overflow-y: auto;
-		padding: 0.75rem;
+		padding: 1.2rem;
 	}
 
 	.log-entry {
-		margin-bottom: 0.75rem;
-		padding: 0.75rem;
+		margin-bottom: 1.2rem;
+		padding: 1.2rem;
 		background: var(--color-background);
 		border-radius: var(--ui-radius-small);
 		border-left: 3px solid;
@@ -1301,7 +1301,7 @@
 
 	.transcript-segment {
 		margin-bottom: var(--ui-pad-medium);
-		padding: 0.75rem;
+		padding: 1.2rem;
 		background: var(--color-background);
 		border-radius: var(--ui-radius-small);
 		border-left: 3px solid var(--color-interactivity);
@@ -1368,7 +1368,7 @@
 	.download-audio-btn {
 		background: var(--color-info);
 		padding: var(--ui-pad-xsmall) var(--ui-pad-small);
-		min-width: 28px;
+		min-width: 2.8rem;
 	}
 
 	.play-audio-btn:hover,
@@ -1409,7 +1409,7 @@
 	/* Scrollbar styling */
 	.log-container::-webkit-scrollbar,
 	.transcript-container::-webkit-scrollbar {
-		width: 8px;
+		width: 0.8rem;
 	}
 
 	.log-container::-webkit-scrollbar-track,
@@ -1420,7 +1420,7 @@
 	.log-container::-webkit-scrollbar-thumb,
 	.transcript-container::-webkit-scrollbar-thumb {
 		background: var(--color-border);
-		border-radius: 4px;
+		border-radius: 0.4rem;
 	}
 
 	.log-container::-webkit-scrollbar-thumb:hover,

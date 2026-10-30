@@ -48,7 +48,7 @@
     .priority-value {
         display: flex;
         align-items: center;
-        min-height: 1.5rem;
+        min-height: 2.4rem;
     }
     
     /* Override session.css styles to make items horizontal instead of vertical */
@@ -56,14 +56,14 @@
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        gap: 0.75rem !important;
-        min-height: 1.75rem !important;
+        gap: 1.2rem !important;
+        min-height: 2.8rem !important;
     }
     
     :global(.session-info-grid) .session-info-item .session-info-label {
         font-weight: 500 !important;
         color: var(--color-text-secondary, #6b7280) !important;
-        font-size: 0.875rem !important;
+        font-size: 1.4rem !important;
         flex-shrink: 0 !important;
         margin-bottom: 0 !important;
     }

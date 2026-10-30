@@ -159,7 +159,7 @@
 
 <style>
     .medication-form {
-        max-width: 40rem;
+        max-width: 64rem;
     }
     fieldset {
         border: none;
@@ -167,7 +167,7 @@
         margin: 0 0 var(--ui-pad-large) 0;
     }
     legend {
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin-bottom: var(--ui-pad-medium);
         color: var(--color-text-primary);
@@ -183,11 +183,11 @@
         gap: var(--ui-pad-small);
     }
     .select-with-icon .select-icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: var(--color-text-secondary);
         flex-shrink: 0;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     .form-actions {
         display: flex;

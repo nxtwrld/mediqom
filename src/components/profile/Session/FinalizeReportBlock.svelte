@@ -60,9 +60,9 @@
     }
     textarea {
         width: 100%;
-        padding: 1rem;
+        padding: 1.6rem;
         border: none;
-        line-height: 1.3rem;
+        line-height: 2rem;
         resize: none;
         font-family: var(--font-face-print);
     }

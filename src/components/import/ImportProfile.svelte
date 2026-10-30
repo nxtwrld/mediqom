@@ -134,7 +134,7 @@
         display: flex;
         align-items: center;
         flex-direction: column;
-        padding: 1rem;
+        padding: 1.6rem;
         background-color: var(--color-background);
         border: var(--border-width) solid var(--color-background);
         border-radius: var(--radius-16);
@@ -147,13 +147,13 @@
 
 
     .profile .name {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-weight: bold;
-        margin-top: 1rem;
+        margin-top: 1.6rem;
     }
 
     .profile .insurance {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
     }
 
     .profile .status {
@@ -161,11 +161,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        top: 1rem;
-        right: -.8rem;
-        padding: .3rem .5rem;
+        top: 1.6rem;
+        right: -1.2rem;
+        padding: 0.4rem 0.8rem;
         text-align: center;
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: bold;
         border-radius: var(--radius-16);
     }

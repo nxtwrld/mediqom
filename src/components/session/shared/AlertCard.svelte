@@ -90,14 +90,14 @@
     .alert-card {
         background: var(--color-surface, #f8fafc);
         border: 0px;
-        border-left: .5rem solid var(--priority-color, #dc2626);
-        margin-bottom: 0.75rem;
+        border-left: 0.8rem solid var(--priority-color, #dc2626);
+        margin-bottom: 1.2rem;
         overflow: hidden;
         transition: box-shadow 0.2s ease;
     }
 
     .alert-card.compact {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .alert-card:hover {
@@ -107,20 +107,20 @@
     .alert-header {
         display: flex;
         align-items: flex-start;
-        gap: 0.75rem;
-        padding: 1rem;
+        gap: 1.2rem;
+        padding: 1.6rem;
     }
 
     .alert-card.compact .alert-header {
-        padding: 0.75rem;
+        padding: 1.2rem;
     }
 
     .priority-indicator {
-        width: 4px;
-        height: 24px;
-        border-radius: 2px;
+        width: 0.4rem;
+        height: 2.4rem;
+        border-radius: 0.2rem;
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 0.2rem;
     }
 
     .alert-content {
@@ -129,26 +129,26 @@
     }
 
     .alert-text {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .alert-meta {
         display: flex;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
+        gap: 1.2rem;
+        margin-bottom: 1.2rem;
         flex-wrap: wrap;
     }
 
     .category,
     .priority {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 500;
-        padding: 0.125rem 0.5rem;
-        border-radius: 12px;
+        padding: 0.2rem 0.8rem;
+        border-radius: 1.2rem;
     }
 
     .priority {
@@ -178,12 +178,12 @@
     }
 
     .recommendation {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
         background: var(--color-info-light, #dbeafe);
-        padding: 0.5rem;
-        border-radius: 4px;
+        padding: 0.8rem;
+        border-radius: 0.4rem;
         border-left: 3px solid var(--color-info, #3b82f6);
     }
 
@@ -201,16 +201,16 @@
     /* Mobile optimizations */
     @media (max-width: 768px) {
         .alert-header {
-            padding: 0.75rem;
+            padding: 1.2rem;
         }
 
         .alert-meta {
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
         .alert-header .button {
-            padding: 0.375rem 0.5rem;
-            font-size: 0.8125rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 1.4rem;
         }
     }
 </style>

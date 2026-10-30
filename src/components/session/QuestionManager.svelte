@@ -73,22 +73,22 @@
     }
 
     .manager-header {
-        padding: 1rem;
+        padding: 1.6rem;
         border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
     .tabs {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .tab {
         position: relative;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+        padding: 0.8rem 1.6rem;
+        font-size: 1.4rem;
         border: 1px solid var(--color-border, #e2e8f0);
         background: var(--color-surface, #fff);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         cursor: pointer;
         transition: all 0.2s ease;
         font-weight: 500;
@@ -102,28 +102,28 @@
 
     .badge {
         position: absolute;
-        top: -4px;
-        right: -4px;
+        top: -0.4rem;
+        right: -0.4rem;
         background: var(--color-negative, #dc2626);
         color: white;
-        font-size: 0.75rem;
-        padding: 0.125rem 0.375rem;
-        border-radius: 10px;
-        min-width: 16px;
+        font-size: 1.2rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        min-width: 1.6rem;
         text-align: center;
     }
 
     .content {
         flex: 1;
         overflow-y: auto;
-        padding: 1rem;
+        padding: 1.6rem;
     }
 
     /* Mobile optimizations */
     @media (max-width: 768px) {
         .manager-header,
         .content {
-            padding: 0.75rem;
+            padding: 1.2rem;
         }
     }
 </style>

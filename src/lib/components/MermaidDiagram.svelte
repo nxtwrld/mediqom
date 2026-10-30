@@ -50,7 +50,7 @@
 
 <style>
 	.mermaid-container {
-		margin: 2rem 0;
+		margin: 3.2rem 0;
 		display: flex;
 		justify-content: center;
 	}
@@ -61,10 +61,10 @@
 	}
 
 	.error {
-		padding: 1rem;
+		padding: 1.6rem;
 		background-color: #fee;
 		border: 1px solid #fcc;
-		border-radius: 0.25rem;
+		border-radius: 0.4rem;
 		color: #c00;
 	}
 

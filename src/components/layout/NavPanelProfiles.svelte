@@ -28,8 +28,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 1.8rem;
-        margin: 3rem 0 0;
+        gap: 2.8rem;
+        margin: 4.8rem 0 0;
     }
 
     .panel-profile-item {
@@ -38,8 +38,8 @@
         align-items: left;
         text-align: left;
         width: 100%;
-        font-size: 1rem;
-        padding: 1rem .5rem .5rem;
+        font-size: 1.6rem;
+        padding: 1.6rem 0.8rem 0.8rem;
     }
 
     .panel-profile-item :global(.avatar) {

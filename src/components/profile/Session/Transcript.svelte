@@ -71,10 +71,10 @@
 .conversation {
         display: flex;
         flex-direction: column;
-        padding: 1rem;
-        gap: 1rem;
+        padding: 1.6rem;
+        gap: 1.6rem;
         height: 100%;
-        padding-bottom: 10rem;
+        padding-bottom: 16rem;
         overflow: auto;
     }
 
@@ -82,11 +82,11 @@
         --color: var(--color-info);
         position: relative;
         display: flex;
-        gap: .5rem;
+        gap: 0.8rem;
         width: 100%;
         background-color: var(--color);
         color: var(--color-info-text);
-        padding: .5rem;
+        padding: 0.8rem;
         border-radius: var(--radius-8);
         font-weight: 600;
     }
@@ -100,11 +100,11 @@
         width: 0;
         height: 0;
 
-        border-top: 10px solid var(--color);
-        border-right: 10px solid transparent;
-        border-left: 10px solid transparent;
-        bottom: -10px;
-        left: 10px;
+        border-top: 1rem solid var(--color);
+        border-right: 1rem solid transparent;
+        border-left: 1rem solid transparent;
+        bottom: -1rem;
+        left: 1rem;
     }
     .message.-nurse,
     .message.-doctor {
@@ -116,9 +116,9 @@
     }
     .message.-nurse:after,
     .message.-doctor:after {
-        right: 10px;
+        right: 1rem;
         left: auto;
-        border-top: 10px solid var(--color);
+        border-top: 1rem solid var(--color);
     }
 
 

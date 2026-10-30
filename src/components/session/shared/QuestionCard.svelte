@@ -186,14 +186,14 @@
     .question-card {
         background: var(--color-surface, #f8fafc);
         border: 0;
-        border-left: .5rem solid var(--priority-color, #e2e8f0);
-        margin-bottom: 0.75rem;
+        border-left: 0.8rem solid var(--priority-color, #e2e8f0);
+        margin-bottom: 1.2rem;
         overflow: hidden;
         transition: box-shadow 0.2s ease;
     }
 
     .question-card.compact {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .question-card:hover {
@@ -205,32 +205,32 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        padding: 1rem;
+        padding: 1.6rem;
         background: transparent;
         border: none;
         text-align: left;
         cursor: pointer;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .question-card.compact .question-header {
-        padding: 0.75rem;
+        padding: 1.2rem;
         cursor: default;
     }
 
     .header-content {
         display: flex;
         align-items: flex-start;
-        gap: 0.75rem;
+        gap: 1.2rem;
         flex: 1;
     }
 
     .priority-indicator {
-        width: 4px;
-        height: 24px;
-        border-radius: 2px;
+        width: 0.4rem;
+        height: 2.4rem;
+        border-radius: 0.2rem;
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 0.2rem;
     }
 
     .question-info {
@@ -240,24 +240,24 @@
 
     .question-text {
         display: block;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .question-meta {
         display: flex;
-        gap: 0.75rem;
-        font-size: 0.75rem;
+        gap: 1.2rem;
+        font-size: 1.2rem;
         flex-wrap: wrap;
     }
 
     .priority,
     .category {
-        padding: 0.125rem 0.5rem;
-        border-radius: 12px;
+        padding: 0.2rem 0.8rem;
+        border-radius: 1.2rem;
         font-weight: 500;
     }
 
@@ -275,14 +275,14 @@
     .header-actions {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         flex-shrink: 0;
     }
 
     .status {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
+        font-size: 1.2rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 1.2rem;
         font-weight: 500;
     }
 
@@ -299,7 +299,7 @@
     .expand-icon {
         transition: transform 0.2s ease;
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
 
     .expand-icon.expanded {
@@ -307,32 +307,32 @@
     }
 
     .question-details {
-        padding: 0 1rem 1rem;
+        padding: 0 1.6rem 1.6rem;
         background: var(--color-surface, #fff);
     }
 
     .question-details.compact {
-        padding: 0 0.75rem 0.75rem;
+        padding: 0 1.2rem 1.2rem;
     }
 
     .question-details h5 {
-        margin: 0 0 0.5rem;
-        font-size: 0.875rem;
+        margin: 0 0 0.8rem;
+        font-size: 1.4rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
     }
 
 
     .pending-note {
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
     }
     
     .note-text {
         font-style: italic;
         color: var(--color-text-secondary, #6b7280);
         background: var(--color-surface, #f8fafc);
-        padding: 0.75rem;
-        border-radius: 6px;
+        padding: 1.2rem;
+        border-radius: 0.6rem;
         border: 1px dashed var(--color-border, #e2e8f0);
         margin: 0;
     }
@@ -340,31 +340,31 @@
     .answer-display .answer {
         background: var(--color-positive-light, #dcfce7);
         color: var(--color-positive, #16a34a);
-        padding: 0.5rem;
-        border-radius: 4px;
+        padding: 0.8rem;
+        border-radius: 0.4rem;
         font-weight: 500;
         margin: 0;
     }
 
     .impact-info,
     .relationships-info {
-        margin-top: 1rem;
+        margin-top: 1.6rem;
     }
 
     .impact-scenario {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
 
     .scenario-label {
         font-weight: 500;
         color: var(--color-text-primary, #1f2937);
         display: block;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
     }
 
     .impact-item {
-        font-size: 0.875rem;
-        padding: 0.25rem 0;
+        font-size: 1.4rem;
+        padding: 0.4rem 0;
     }
 
     .impact-item.positive {
@@ -384,9 +384,9 @@
     .relationship {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.25rem 0;
-        font-size: 0.875rem;
+        gap: 0.8rem;
+        padding: 0.4rem 0;
+        font-size: 1.4rem;
     }
 
     .rel-type {
@@ -400,7 +400,7 @@
     }
 
     .rel-strength {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-positive, #16a34a);
         margin-left: auto;
     }
@@ -417,9 +417,9 @@
     .node-reference:focus {
         background: var(--color-interactivity-light, #dbeafe);
         border-bottom: 1px solid currentColor;
-        padding: 0.125rem 0.25rem;
-        margin: -0.125rem -0.25rem;
-        border-radius: 3px;
+        padding: 0.2rem 0.4rem;
+        margin: -0.2rem -0.4rem;
+        border-radius: 0.3rem;
         outline: none;
     }
 
@@ -435,12 +435,12 @@
     /* Mobile optimizations */
     @media (max-width: 768px) {
         .question-header {
-            padding: 0.75rem;
+            padding: 1.2rem;
         }
 
 
         .question-meta {
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
     }
 </style>

@@ -156,35 +156,35 @@
     }
 
     .details-header {
-        padding: 1rem;
+        padding: 1.6rem;
         border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
     .node-type {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
     }
 
     .type-label {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #6b7280);
         font-weight: 500;
         text-transform: capitalize;
     }
 
     .priority-badge {
-        font-size: 0.75rem;
-        padding: 0.125rem 0.5rem;
-        border-radius: 12px;
+        font-size: 1.2rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: 1.2rem;
         color: white;
         font-weight: 600;
     }
 
     .node-title {
         margin: 0;
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
@@ -192,27 +192,27 @@
 
     .details-content {
         flex: 1;
-        padding: 1rem;
+        padding: 1.6rem;
         overflow-y: auto;
     }
 
     .info-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.4rem;
     }
 
     .info-section h4 {
-        margin: 0 0 0.75rem;
-        font-size: 1rem;
+        margin: 0 0 1.2rem;
+        font-size: 1.6rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
     }
 
     .info-section-label {
         display: block;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-secondary, #6b7280);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .description-text,
@@ -221,40 +221,40 @@
     .reasoning-text,
     .clinical-context-text {
         margin: 0;
-        padding: 0.75rem;
+        padding: 1.2rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 6px;
-        font-size: 0.875rem;
+        border-radius: 0.6rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
     }
 
     .alert-message {
         margin: 0;
-        padding: 0.75rem;
+        padding: 1.2rem;
         background: var(--color-negative-light, #fee2e2);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         border-left: 3px solid var(--color-negative, #dc2626);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
         font-weight: 500;
     }
 
     .answer-type-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
+        font-size: 1.2rem;
+        padding: 0.4rem 1.2rem;
         background: var(--color-info-light, #dbeafe);
         color: var(--color-info, #3b82f6);
-        border-radius: 12px;
+        border-radius: 1.2rem;
         font-weight: 600;
         text-transform: uppercase;
     }
 
     .severity-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
+        font-size: 1.2rem;
+        padding: 0.4rem 1.2rem;
+        border-radius: 1.2rem;
         font-weight: 600;
         text-transform: uppercase;
     }
@@ -281,17 +281,17 @@
 
     .follow-up-list {
         margin: 0;
-        padding: 0.75rem 0.75rem 0.75rem 2rem;
+        padding: 1.2rem 1.2rem 1.2rem 3.2rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         border-left: 3px solid var(--color-interactivity, #3b82f6);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
     }
 
     .follow-up-list li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
     }
 
     .follow-up-list li:last-child {

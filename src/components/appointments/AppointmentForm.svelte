@@ -127,7 +127,7 @@
         margin: 0 0 var(--ui-pad-large) 0;
     }
     legend {
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin-bottom: var(--ui-pad-medium);
         color: var(--color-text-primary);

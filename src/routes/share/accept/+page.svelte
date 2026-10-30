@@ -161,7 +161,7 @@
     }
 
     .accept-card {
-        max-width: 28rem;
+        max-width: 44.8rem;
         width: 100%;
         text-align: center;
         display: flex;
@@ -177,8 +177,8 @@
     }
 
     .spinner {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity, #3182ce);
         border-radius: 50%;

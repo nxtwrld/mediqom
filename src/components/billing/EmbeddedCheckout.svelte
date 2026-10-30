@@ -77,7 +77,7 @@
 <style>
     .embedded-checkout {
         width: 100%;
-        min-height: 400px;
+        min-height: 40rem;
         position: relative;
     }
 
@@ -92,8 +92,8 @@
     }
 
     .loader {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 4rem;
+        height: 4rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity);
         border-radius: 50%;
@@ -112,8 +112,8 @@
     }
 
     .error svg {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         fill: currentColor;
     }
 

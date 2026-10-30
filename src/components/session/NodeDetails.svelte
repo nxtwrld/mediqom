@@ -82,24 +82,24 @@
 
 <style>
     .unknown-node {
-        padding: 1rem;
+        padding: 1.6rem;
         background: var(--color-surface, #fff);
         color: var(--color-text-primary, #1f2937);
     }
 
     .unknown-node p {
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
         font-weight: 600;
         color: var(--color-negative, #dc2626);
     }
 
     .unknown-node pre {
         background: var(--color-surface, #f8fafc);
-        padding: 1rem;
-        border-radius: 6px;
+        padding: 1.6rem;
+        border-radius: 0.6rem;
         border: 1px solid var(--color-border, #e2e8f0);
         overflow: auto;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         line-height: 1.4;
     }
 </style>

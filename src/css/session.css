@@ -8,12 +8,12 @@
    ============================================================================ */
 
 .session-node-base {
-  padding: 0.4rem;
+  padding: 0.6rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   font-family: system-ui, sans-serif;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   border: 0px solid transparent;
 
   /* Default color with opacity control */
@@ -23,7 +23,7 @@
 
   /* Default left border */
   border-left-color: #6b7280;
-  border-left-width: 0.5rem;
+  border-left-width: 0.8rem;
 }
 
 /* ============================================================================
@@ -76,9 +76,9 @@
 }
 
 .session-priority-badge {
-  font-size: 0.75rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 12px;
+  font-size: 1.2rem;
+  padding: 0.2rem 0.8rem;
+  border-radius: 1.2rem;
   color: white;
   font-weight: 600;
   background-color: var(--priority-color, #6b7280);
@@ -89,7 +89,7 @@
   font-weight: 700;
   color: white;
   background: rgba(220, 38, 38, 0.9);
-  padding: 2px 4px;
+  padding: 0.2rem 0.4rem;
 }
 
 /* ============================================================================
@@ -139,7 +139,7 @@
   box-shadow:
     0 0 0 2px rgba(59, 130, 246, 0.5),
     0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-0.2rem) scale(1.02);
   filter: brightness(1.08);
   transition: all 0.2s ease;
   position: relative;
@@ -153,7 +153,7 @@
   box-shadow:
     0 0 0 3px rgba(59, 130, 246, 0.6),
     0 6px 16px rgba(0, 0, 0, 0.25);
-  transform: translateY(-3px) scale(1.03);
+  transform: translateY(-0.3rem) scale(1.03);
   filter: brightness(1.1) contrast(1.05);
   transition: all 0.3s ease-out;
   position: relative;
@@ -180,7 +180,7 @@
   overflow: visible;
   z-index: 100; /* Higher than hovered (50) */
   position: relative;
-  box-shadow: 0 0 2.5rem 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 4rem 0 rgba(0, 0, 0, 0.5);
 }
 
 /* Connected nodes styling */
@@ -330,8 +330,8 @@
     outline: 3px solid var(--color-interactivity, #3b82f6);
   }
   100% {
-    outline: 5px solid transparent;
-    outline-offset: 5px;
+    outline: 0.6rem solid transparent;
+    outline-offset: 0.6rem;
   }
 }
 
@@ -356,18 +356,18 @@
   position: relative;
   width: 100%;
   height: 100%;
-  padding: 6px;
+  padding: 0.6rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   font-family: system-ui, sans-serif;
   border: 0px solid transparent;
-  border-left-width: 0.5rem;
+  border-left-width: 0.8rem;
   --color-opacity: 0.8;
 }
 
 .session-node.mobile {
-  padding: 4px;
+  padding: 0.4rem;
 }
 
 /* Node content areas */
@@ -377,8 +377,8 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  gap: 2px;
-  margin-top: 0.2rem;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
 }
 
 .session-node-meta {
@@ -388,7 +388,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 3px;
+  gap: 0.3rem;
   align-items: center;
 }
 
@@ -402,11 +402,11 @@
 
 /* Desktop vs mobile node names */
 .session-node:not(.mobile) .session-node-name {
-  font-size: 11px;
+  font-size: 1.2rem;
 }
 
 .session-node.mobile .session-node-name {
-  font-size: 9px;
+  font-size: 1rem;
 }
 
 /* ============================================================================
@@ -566,7 +566,7 @@
 .session-badge {
   font-weight: 700;
   color: white;
-  border-radius: 4px;
+  border-radius: 0.4rem;
   line-height: 1;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -574,18 +574,18 @@
 
 /* Specific badge types */
 .session-probability-badge {
-  font-size: 9px;
-  padding: 2px 5px;
+  font-size: 1rem;
+  padding: 0.2rem 0.6rem;
 }
 
 .session-effectiveness-badge {
-  font-size: 9px;
-  padding: 2px 5px;
+  font-size: 1rem;
+  padding: 0.2rem 0.6rem;
 }
 
 .session-severity-badge {
   font-size: 0.65em;
-  padding: 2px 4px;
+  padding: 0.2rem 0.4rem;
   background: rgba(220, 38, 38, 0.9); /* Default red for critical */
 }
 
@@ -615,8 +615,8 @@
 /* Mobile badge adjustments */
 .session-node.mobile .session-probability-badge,
 .session-node.mobile .session-effectiveness-badge {
-  font-size: 8px;
-  padding: 1px 3px;
+  font-size: 0.8rem;
+  padding: 1px 0.3rem;
 }
 
 /* Badge value color classes */
@@ -640,8 +640,8 @@
 /* Small info badges */
 .session-info-badge {
   font-size: 0.6em;
-  padding: 1px 3px;
-  border-radius: 2px;
+  padding: 1px 0.3rem;
+  border-radius: 0.2rem;
   line-height: 1;
 }
 
@@ -694,12 +694,12 @@
 
 /* Special indicators */
 .session-investigation-flag {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 0.3rem;
   background: rgba(245, 158, 11, 0.9);
   color: white;
-  font-size: 10px;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -709,21 +709,21 @@
 }
 
 .session-node.mobile .session-investigation-flag {
-  width: 12px;
-  height: 12px;
-  font-size: 9px;
+  width: 1.2rem;
+  height: 1.2rem;
+  font-size: 1rem;
 }
 
 .session-suppressed-indicator {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 0.2rem;
+  right: 0.2rem;
   font-size: 0.55em;
   color: #6b7280;
   font-weight: 600;
   background: rgba(107, 114, 128, 0.1);
-  padding: 1px 3px;
-  border-radius: 2px;
+  padding: 1px 0.3rem;
+  border-radius: 0.2rem;
   line-height: 1;
   opacity: 0.8;
 }
@@ -743,19 +743,19 @@
 }
 
 .session-details-header {
-  padding: 1rem;
+  padding: 1.6rem;
   border-bottom: 1px solid var(--color-border, #e2e8f0);
 }
 
 .session-node-type {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
 }
 
 .session-type-label {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: var(--color-text-secondary, #6b7280);
   font-weight: 500;
   text-transform: capitalize;
@@ -763,7 +763,7 @@
 
 .session-node-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: var(--color-text-primary, #1f2937);
   line-height: 1.4;
@@ -771,17 +771,17 @@
 
 .session-details-content {
   flex: 1;
-  padding: 1rem;
+  padding: 1.6rem;
   overflow-y: auto;
 }
 
 .session-info-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
 }
 
 .session-info-section h4 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
+  margin: 0 0 1.2rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-text-primary, #1f2937);
 }
@@ -789,28 +789,28 @@
 .session-info-section label,
 .session-info-section .session-info-label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: var(--color-text-secondary, #6b7280);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
 }
 
 .session-reasoning-text {
   margin: 0;
-  padding: 0.75rem;
+  padding: 1.2rem;
   background: var(--color-surface, #f8fafc);
-  border-radius: 6px;
-  font-size: 0.875rem;
+  border-radius: 0.6rem;
+  font-size: 1.4rem;
   color: var(--color-text-primary, #1f2937);
   line-height: 1.5;
 }
 
 .session-quote-text {
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: var(--color-surface, #f8fafc);
   border-left: 3px solid var(--color-interactivity, #3b82f6);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 0.4rem 0.4rem 0;
   font-style: italic;
   color: var(--color-text-secondary, #6b7280);
 }
@@ -824,24 +824,24 @@
 .session-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1.2rem;
 }
 
 .session-info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.4rem;
 }
 
 .session-info-item label,
 .session-info-item .session-info-label {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: var(--color-text-secondary, #6b7280);
 }
 
 .session-info-item .value {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: var(--color-text-primary, #1f2937);
   font-weight: 500;
 }
@@ -882,14 +882,14 @@
 .session-relationship-wrapper {
   cursor: pointer;
   transition: all 0.2s ease;
-  border-radius: 6px;
-  padding: 2px;
+  border-radius: 0.6rem;
+  padding: 0.2rem;
   border: 1px solid transparent;
 }
 
 .session-relationship-wrapper:hover {
   background-color: var(--color-interactivity-light, #dbeafe);
-  transform: translateY(-2px);
+  transform: translateY(-0.2rem);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-color: var(--color-interactivity, #3b82f6);
 }
@@ -1067,12 +1067,12 @@
 
 @media (max-width: 768px) {
   .session-node-base {
-    padding: 0.3rem;
+    padding: 0.4rem;
   }
 
   .session-details-header,
   .session-details-content {
-    padding: 0.75rem;
+    padding: 1.2rem;
   }
 
   .session-relationship-wrapper {
@@ -1082,12 +1082,12 @@
   /* Mobile adjustments for selected and hovered nodes */
   .node-html.selected > div {
     outline-width: 2px; /* Slightly thinner outline on mobile for better fit */
-    outline-offset: 2px; /* Keep consistent offset */
+    outline-offset: 0.2rem; /* Keep consistent offset */
   }
 
   .node-html.hovered > div {
     outline-width: 1px; /* Thinner outline for hover on mobile */
-    outline-offset: 2px; /* Keep consistent offset */
+    outline-offset: 0.2rem; /* Keep consistent offset */
   }
 }
 
@@ -1112,7 +1112,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px; /* Padding for scale effects */
+  padding: 0.6rem; /* Padding for scale effects */
 }
 
 /* Button dimensions (used in JS for positioning) */
@@ -1120,7 +1120,7 @@
   --show-more-button-width: 140px;
   --show-more-button-height: 40px;
   --show-more-button-padding: 20px; /* Distance below nodes */
-  --show-more-button-overflow: 10px; /* Extra space for hover effects */
+  --show-more-button-overflow: 1rem; /* Extra space for hover effects */
 }
 
 /* ============================================================================
@@ -1130,8 +1130,8 @@
 .sankey-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
-  min-width: 300px;
+  min-height: 40rem;
+  min-width: 30rem;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -1154,11 +1154,11 @@
   pointer-events: none;
   background: white;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 8px;
-  font-size: 12px;
-  max-width: 300px;
+  padding: 0.8rem;
+  font-size: 1.2rem;
+  max-width: 30rem;
 }
 
 .empty-state {
@@ -1167,7 +1167,7 @@
   justify-content: center;
   height: 100%;
   color: var(--color-text-secondary, #6b7280);
-  font-size: 14px;
+  font-size: 1.4rem;
 }
 
 /* Global styles for D3 elements */
@@ -1207,15 +1207,15 @@
 /* Mobile touch targets */
 @media (pointer: coarse) {
   .sankey-container .node {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
   }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .sankey-container {
-    min-height: 300px;
+    min-height: 30rem;
   }
 }
 
@@ -1252,8 +1252,8 @@
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 6px;
-  padding: 6px;
+  border-radius: 0.6rem;
+  padding: 0.6rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1278,7 +1278,7 @@
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 11px;
+  font-size: 1.2rem;
 }
 
 /* Link animation now handled by global CSS in session.css */

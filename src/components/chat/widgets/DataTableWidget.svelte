@@ -52,28 +52,28 @@
 
 <style>
 	.widget-table {
-		padding: 8px;
+		padding: 0.8rem;
 		overflow-x: auto;
 	}
 
 	table {
 		width: 100%;
 		border-collapse: collapse;
-		font-size: 12px;
+		font-size: 1.2rem;
 	}
 
 	caption {
-		font-size: 11px;
+		font-size: 1.2rem;
 		color: var(--color-gray-800);
 		text-align: left;
-		padding: 0 0 6px;
+		padding: 0 0 0.6rem;
 		font-weight: 500;
 	}
 
 	th {
 		text-align: left;
-		padding: 6px 8px;
-		font-size: 11px;
+		padding: 0.6rem 0.8rem;
+		font-size: 1.2rem;
 		font-weight: 600;
 		color: var(--color-gray-800);
 		border-bottom: 2px solid var(--color-gray-400);
@@ -81,7 +81,7 @@
 	}
 
 	td {
-		padding: 5px 8px;
+		padding: 0.6rem 0.8rem;
 		border-bottom: 1px solid var(--color-gray-400);
 		color: var(--color-black);
 	}
@@ -95,10 +95,10 @@
 	}
 
 	.no-data {
-		font-size: 12px;
+		font-size: 1.2rem;
 		color: var(--color-gray-800);
 		text-align: center;
-		padding: 12px;
+		padding: 1.2rem;
 		margin: 0;
 	}
 </style>

@@ -36,6 +36,7 @@ export async function initCapacitor(): Promise<void> {
     // Initialize other Capacitor plugins as needed
     await initStatusBar();
     await initKeyboard();
+    await initTextZoom();
     await initSplashScreen();
 
     initialized = true;
@@ -87,6 +88,33 @@ async function initKeyboard(): Promise<void> {
     });
   } catch (error) {
     console.warn("[Capacitor] Keyboard not available:", error);
+  }
+}
+
+/**
+ * Follow the OS text-size setting (iOS Dynamic Type, Android font scale)
+ * by scaling the root rem, so layout grows with text instead of only text.
+ */
+async function initTextZoom(): Promise<void> {
+  if (!isNativePlatform()) return;
+
+  try {
+    const { TextZoom } = await import("@capacitor/text-zoom");
+    const { App } = await import("@capacitor/app");
+
+    const apply = async () => {
+      const { value } = await TextZoom.getPreferred();
+      const zoom = Math.min(2, Math.max(0.85, value));
+      document.documentElement.style.setProperty("--text-zoom", String(zoom));
+    };
+
+    // Disable the WebView's own text-only zoom so the scale isn't applied twice
+    await TextZoom.set({ value: 1 });
+    await apply();
+
+    App.addListener("resume", apply);
+  } catch (error) {
+    console.warn("[Capacitor] TextZoom not available:", error);
   }
 }
 

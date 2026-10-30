@@ -477,26 +477,26 @@
     .quality-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .specimen-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .specimen-main {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex: 1;
     }
     
     .specimen-id {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
@@ -504,7 +504,7 @@
     
     .specimen-meta {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: center;
         flex-wrap: wrap;
     }
@@ -512,31 +512,31 @@
     .specimen-type {
         background-color: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
     
     .specimen-source {
         color: var(--color-text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-style: italic;
     }
     
     .specimen-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .status-badge,
     .priority-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
         white-space: nowrap;
@@ -585,7 +585,7 @@
     .specimen-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .labeling-issues {
@@ -594,37 +594,37 @@
     }
     
     .gross-description {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid var(--color-border);
     }
     
     .description-text {
-        margin: 0.25rem 0 0 0;
+        margin: 0.4rem 0 0 0;
         color: var(--color-text-primary);
         line-height: 1.5;
     }
     
     .sections-info {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid var(--color-border);
     }
     
     .sections-list {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        margin-top: 0.5rem;
+        gap: 0.4rem;
+        margin-top: 0.8rem;
     }
     
     .section-item {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: center;
-        padding: 0.25rem;
+        padding: 0.4rem;
         background-color: var(--color-surface);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
         flex-wrap: wrap;
     }
     
@@ -633,58 +633,58 @@
         color: var(--color-text-primary);
         background-color: var(--color-interactivity-light);
         color: var(--color-interactivity-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
     }
     
     .section-description {
         color: var(--color-text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         flex: 1;
     }
     
     .section-stains {
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-style: italic;
     }
     
     .specimen-notes {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid var(--color-border);
     }
     
     .notes-text {
-        margin: 0.25rem 0 0 0;
+        margin: 0.4rem 0 0 0;
         color: var(--color-text-secondary);
         line-height: 1.5;
         font-style: italic;
     }
     
     .processing-notes {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid var(--color-border);
     }
     
     .quality-overall {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-        padding: 0.5rem;
+        gap: 0.8rem;
+        margin-bottom: 1.2rem;
+        padding: 0.8rem;
         background-color: var(--color-surface);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
     }
     
     .quality-value {
         font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
         text-transform: uppercase;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
     
     .quality-excellent {
@@ -713,57 +713,57 @@
     }
     
     .artifacts-section {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .artifacts-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-top: 0.25rem;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
     }
     
     .artifact-tag {
         background-color: var(--color-warning-light);
         color: var(--color-warning-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
     }
     
     .limitations-section,
     .quality-recommendations {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .limitations-list,
     .recommendations-list {
-        margin: 0.5rem 0 0 1.5rem;
+        margin: 0.8rem 0 0 2.4rem;
         padding: 0;
     }
     
     .limitations-list li,
     .recommendations-list li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
         color: var(--color-text-secondary);
     }
     
     .staff-info {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 1.2rem;
     }
     
     .staff-member {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: flex-start;
     }
     
     .staff-details {
         display: flex;
         flex-direction: column;
-        gap: 0.125rem;
+        gap: 0.2rem;
     }
     
     .staff-name {
@@ -774,19 +774,19 @@
     .staff-title,
     .staff-department {
         color: var(--color-text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
     
     .detail-item {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: flex-start;
     }
     
     .label {
         font-weight: 500;
         color: var(--color-text-secondary);
-        min-width: 150px;
+        min-width: 15rem;
         flex-shrink: 0;
     }
     
@@ -852,6 +852,6 @@
     
     .status-contaminated {
         border-left-color: var(--color-negative);
-        border-left-width: 4px;
+        border-left-width: 0.4rem;
     }
 </style>

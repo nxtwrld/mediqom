@@ -138,11 +138,11 @@
         gap: var(--ui-pad-small);
     }
     .select-with-icon .select-icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: var(--color-text-secondary);
         flex-shrink: 0;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     .schedule-editor {
         display: flex;
@@ -152,36 +152,36 @@
     .times-section {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     .time-row {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     .time-row input[type="time"] {
-        padding: 0.375rem 0.5rem;
+        padding: 0.6rem 0.8rem;
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
     .days-section {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     .day-buttons {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex-wrap: wrap;
     }
     .day-btn {
-        padding: 0.375rem 0.625rem;
+        padding: 0.6rem 1rem;
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
         background: var(--color-white);
         cursor: pointer;
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
         transition: all 0.15s ease;
     }
     .day-btn.-active {
@@ -192,15 +192,15 @@
     .monthday-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
     .monthday-btn {
-        padding: 0.25rem;
+        padding: 0.4rem;
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
         background: var(--color-white);
         cursor: pointer;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         text-align: center;
         transition: all 0.15s ease;
     }
@@ -213,11 +213,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.25rem;
+        padding: 0.4rem;
     }
     .button.-icon svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 </style>

@@ -187,7 +187,7 @@ Loading...
 {/if}
 <style>
     h3.title {
-        margin: 1rem 0;
+        margin: 1.6rem 0;
         color: var(--color-positive-text);
     }
 
@@ -198,8 +198,8 @@ Loading...
 
 
     .range {
-        height: 5rem;
-        font-size: .8rem;
+        height: 8rem;
+        font-size: 1.2rem;
     }
 
 
@@ -211,13 +211,13 @@ Loading...
     .value .h3 {
         text-align: center;
         font-weight: bold;
-        font-size: 3rem !important;
+        font-size: 4.8rem !important;
     }
     .status.risk .value {
         color: var(--color-negative-text);
     }
     .consult {
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: bold;
         font-style: italic;
     }

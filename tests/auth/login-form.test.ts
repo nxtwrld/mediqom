@@ -19,7 +19,7 @@ test.describe("Auth - Login form", () => {
     await page.goto("/auth");
 
     // /auth also renders invite-code and waitlist forms (Invite only
-    // feature) side by side with the magic-link form, each with their own
+    // feature) as tabs next to the magic-link form, each with their own
     // submit button — scope to the form containing #email specifically.
     const emailForm = page.locator("form").filter({ has: page.locator("#email") });
     await expect(page.locator("#email")).toBeVisible();

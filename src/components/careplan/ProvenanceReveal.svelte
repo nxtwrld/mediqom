@@ -56,13 +56,13 @@
   .provenance-reveal {
     margin-top: var(--ui-pad-small);
     padding: var(--ui-pad-small);
-    font-size: 0.85rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary);
     background: color-mix(in srgb, var(--color-border) 40%, transparent);
     border-radius: var(--ui-radius-small);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .prov-copy {
     margin: 0;
@@ -74,7 +74,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     text-decoration: underline;
   }
   .prov-link {

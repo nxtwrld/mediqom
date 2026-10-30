@@ -196,32 +196,32 @@
 <style>
   .qom-simulation-panel {
     position: fixed;
-    top: 50px;
-    right: 20px;
+    top: 5rem;
+    right: 2rem;
     background: #f8fafc;
     border: 2px dashed #e2e8f0;
-    border-radius: 8px;
-    padding: 10px;
-    margin: 20px;
+    border-radius: 0.8rem;
+    padding: 1rem;
+    margin: 2rem;
     font-family: system-ui, -apple-system, sans-serif;
     z-index: 100000;
   }
   
   .controls-section {
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
   }
   
   .action-buttons {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 1rem;
+    margin-top: 1.6rem;
   }
   
   .btn {
-    padding: 8px 16px;
+    padding: 0.8rem 1.6rem;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 0.6rem;
+    font-size: 1.4rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;

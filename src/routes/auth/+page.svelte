@@ -7,6 +7,7 @@
 	import { isNativePlatform } from '$lib/config/platform';
 	import { signInWithMagicLink } from '$lib/capacitor/auth';
 	import { apiFetch } from '$lib/api/client';
+	import { keyboardScroll } from '$lib/capacitor/keyboard-scroll';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -31,6 +32,15 @@
 	let inviteEmail: string = $state('');
 	let inviteLoading: boolean = $state(false);
 	let inviteResult: { type: 'success' | 'error'; text: string } | null = $state(null);
+
+	// Only one of the three forms is shown at a time; an ?invite= link opens the invite tab
+	type Mode = 'signin' | 'invite' | 'waitlist';
+	let mode: Mode = $state(inviteCode ? 'invite' : 'signin');
+	const tabs: { mode: Mode; label: string }[] = [
+		{ mode: 'signin', label: 'app.auth.tabs.sign-in' },
+		{ mode: 'invite', label: 'app.auth.tabs.invite' },
+		{ mode: 'waitlist', label: 'app.auth.tabs.waitlist' }
+	];
 
 	async function submitInvite(event: Event) {
 		event.preventDefault();
@@ -194,13 +204,27 @@
 	<title>{$t('app.auth.title')}</title>
 </svelte:head>
 
-<div class="auth-page">
+<div class="auth-page" use:keyboardScroll>
+<div class="modal auth-card">
+	<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
+	<h1 class="h1">{$t('app.auth.title')}</h1>
+
+	<nav class="tab-heads" role="tablist" aria-label={$t('app.auth.tabs.label')}>
+		{#each tabs as tab}
+		<button
+			type="button"
+			role="tab"
+			aria-selected={mode === tab.mode}
+			class:-active={mode === tab.mode}
+			onclick={() => (mode = tab.mode)}
+		>{$t(tab.label)}</button>
+		{/each}
+	</nav>
+
+{#if mode === 'signin'}
 {#if isMobile}
 	<!-- Mobile: Client-side form submission -->
-	<form class="flex -column form modal" onsubmit={handleMobileSubmit}>
-		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
-
-		<h1 class="h1">{$t('app.auth.title')}</h1>
+	<form class="flex -column form" onsubmit={handleMobileSubmit}>
 		{#if submitted && successMessage}
 		<div class="success">
 			<p class="form-instructions -success">{successMessage}</p>
@@ -240,16 +264,13 @@
 	</form>
 {:else}
 	<!-- Web: Server-side form action -->
-	<form class="flex -column form modal" method="POST" use:enhance={handleWebSubmit} onsubmit={(e) => {
+	<form class="flex -column form" method="POST" use:enhance={handleWebSubmit} onsubmit={(e) => {
 		if (loading || submitted) {
 			console.log('[Auth Form] Preventing form submit via event listener');
 			e.preventDefault();
 			return false;
 		}
 	}}>
-		<img src="/icon.svg" loading="lazy" alt="Mediqom app" class="logo" />
-
-		<h1 class="h1">{$t('app.auth.title')}</h1>
 		{#if form?.success}
 		<div class="success">
 			<p class="form-instructions -success">{form?.message}</p>
@@ -267,6 +288,10 @@
 				<div class="beta-notice">
 					<h3>{$t('app.auth.new-here-title')}</h3>
 					<p>{$t('app.auth.new-here-message')}</p>
+					<div class="beta-notice-actions">
+						<button class="button" type="button" onclick={() => (mode = 'invite')}>{$t('app.auth.invite.title')}</button>
+						<button class="button" type="button" onclick={() => (mode = 'waitlist')}>{$t('app.auth.waitlist.title')}</button>
+					</div>
 				</div>
 			</div>
 			{/if}
@@ -299,12 +324,8 @@
 		{/if}
 	</form>
 {/if}
-
-<div class="auth-secondary">
-	<div class="divider"><span>{$t('app.auth.or')}</span></div>
-
-	<form class="flex -column form modal" onsubmit={submitInvite}>
-		<h2 class="h2">{$t('app.auth.invite.title')}</h2>
+{:else if mode === 'invite'}
+	<form class="flex -column form" onsubmit={submitInvite}>
 		<p class="form-instructions">{$t('app.auth.invite.instruction')}</p>
 
 		{#if inviteResult}
@@ -343,11 +364,8 @@
 		</div>
 		{/if}
 	</form>
-
-	<div class="divider"><span>{$t('app.auth.or')}</span></div>
-
-	<form class="flex -column form modal" onsubmit={submitWaitlist}>
-		<h2 class="h2">{$t('app.auth.waitlist.title')}</h2>
+{:else}
+	<form class="flex -column form" onsubmit={submitWaitlist}>
 		<p class="form-instructions">{$t('app.auth.waitlist.instruction')}</p>
 
 		{#if waitlistResult}
@@ -368,12 +386,13 @@
 			/>
 		</div>
 		<div class="form-actions">
-			<button class="button -block" disabled={waitlistLoading} type="submit">
+			<button class="button -primary -block" disabled={waitlistLoading} type="submit">
 				{ waitlistLoading ? $t('app.auth.sending') : $t('app.auth.waitlist.submit') }
 			</button>
 		</div>
 		{/if}
 	</form>
+{/if}
 </div>
 </div>
 
@@ -392,53 +411,63 @@
 		justify-content: center;
 	}
 
-	.auth-secondary {
+	.auth-card {
 		width: 100%;
-	}
-
-	.divider {
+		max-width: 56rem;
 		display: flex;
-		align-items: center;
-		text-align: center;
-		color: var(--color-text-secondary);
-		margin: var(--ui-pad-large) 0;
+		flex-direction: column;
+		gap: var(--ui-pad-medium);
 	}
 
-	.divider::before,
-	.divider::after {
-		content: '';
-		flex: 1;
-		border-top: 1px solid var(--color-border);
-	}
-
-	.divider span {
-		padding: 0 var(--ui-pad-medium);
+	.auth-card .tab-heads > button {
+		font-size: inherit;
 	}
 
 	.logo {
-		width: 8rem;
+		width: 12.8rem;
 		margin: 0 auto;
 		display: block;
 	}
 	.beta-notice {
-		background-color: #f8f9fa;
-		border: 1px solid #dee2e6;
-		border-radius: 8px;
-		padding: 1.5rem;
-		margin-top: 1rem;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--ui-radius-medium);
+		padding: var(--ui-pad-large);
+		margin-top: var(--ui-pad-medium);
 	}
 
 	.beta-notice h3 {
 		margin-top: 0;
-		margin-bottom: 1rem;
-		color: #495057;
-		font-size: 1.125rem;
+		margin-bottom: var(--ui-pad-medium);
+		font-size: 1.8rem;
 	}
 
 	.beta-notice p {
-		margin-bottom: 0.5rem;
-		color: #6c757d;
+		margin-bottom: var(--ui-pad-small);
+		color: var(--color-text-secondary);
 	}
 
+	.beta-notice-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--ui-pad-small);
+	}
+
+	@media (max-width: 768px) {
+		.auth-card {
+			min-width: 0;
+			max-height: none;
+			padding: var(--ui-pad-large) var(--ui-pad-medium);
+			border-radius: var(--radius-16);
+		}
+
+		.logo {
+			width: 6.4rem;
+		}
+
+		.auth-card input {
+			font-size: 16px;
+		}
+	}
 
 </style>

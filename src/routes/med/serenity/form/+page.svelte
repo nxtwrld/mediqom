@@ -191,18 +191,18 @@
 
 <style>
   .serenity-form-page {
-    max-width: 1000px;
+    max-width: 100rem;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 3.2rem;
   }
 
   header {
-    margin-bottom: 2rem;
+    margin-bottom: 3.2rem;
   }
 
   h1 {
-    margin: 0 0 0.5rem 0;
-    font-size: 2rem;
+    margin: 0 0 0.8rem 0;
+    font-size: 3.2rem;
   }
 
   .subtitle {
@@ -213,33 +213,33 @@
   .controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 2.4rem;
+    margin-bottom: 2.4rem;
   }
 
   .form-selector,
   .language-selector {
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 0.8rem;
+    padding: 2.4rem;
   }
 
   h3 {
     margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.125rem;
+    margin-bottom: 1.6rem;
+    font-size: 1.8rem;
   }
 
   .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.2rem;
   }
 
   .radio-group label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.8rem;
     cursor: pointer;
   }
 
@@ -253,26 +253,26 @@
 
   .language-selector select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 1.2rem;
     border: 1px solid var(--color-border);
-    border-radius: 4px;
+    border-radius: 0.4rem;
     background: var(--color-background);
-    font-size: 1rem;
+    font-size: 1.6rem;
   }
 
   .processing {
     text-align: center;
-    padding: 2rem;
+    padding: 3.2rem;
     background: var(--color-surface, #f9f9f9);
-    border-radius: 8px;
-    margin: 1.5rem 0;
+    border-radius: 0.8rem;
+    margin: 2.4rem 0;
   }
 
   .spinner {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 1rem;
-    border: 4px solid var(--color-border);
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.6rem;
+    border: 0.4rem solid var(--color-border);
     border-top-color: var(--color-interactivity);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -285,9 +285,9 @@
   .error-message {
     background: #fff5f5;
     border: 1px solid var(--color-negative);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
+    border-radius: 0.8rem;
+    padding: 2.4rem;
+    margin: 2.4rem 0;
   }
 
   .error-message h4 {
@@ -296,56 +296,56 @@
   }
 
   .error-message button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
+    margin-top: 1.6rem;
+    padding: 0.8rem 1.6rem;
     background: var(--color-negative);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.4rem;
     cursor: pointer;
   }
 
   .transcript-section {
-    margin: 1.5rem 0;
+    margin: 2.4rem 0;
   }
 
   .transcript-box {
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 0.8rem;
+    padding: 1.6rem;
     background: var(--color-surface, #f9f9f9);
   }
 
   .transcript-box textarea {
     width: 100%;
-    min-height: 150px;
+    min-height: 15rem;
     border: none;
     background: transparent;
     font-family: inherit;
-    font-size: 0.875rem;
+    font-size: 1.4rem;
     resize: vertical;
     padding: 0;
   }
 
   .word-count {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     color: var(--color-text-secondary, #666);
     text-align: right;
-    margin: 0.5rem 0 0 0;
+    margin: 0.8rem 0 0 0;
   }
 
   .actions {
     text-align: center;
-    margin-top: 2rem;
+    margin-top: 3.2rem;
   }
 
   .reset-button {
-    padding: 0.75rem 2rem;
+    padding: 1.2rem 3.2rem;
     background: var(--color-interactivity);
     color: var(--color-interactivity-text);
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 0.4rem;
+    font-size: 1.6rem;
     cursor: pointer;
     transition: opacity 0.2s;
   }
@@ -360,7 +360,7 @@
     }
 
     .serenity-form-page {
-      padding: 1rem;
+      padding: 1.6rem;
     }
   }
 </style>

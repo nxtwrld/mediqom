@@ -404,8 +404,8 @@
     }
 
     .heading-actions .button svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
@@ -414,9 +414,9 @@
     }
 
     .appointment-section .h3 {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
         color: var(--color-text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
@@ -457,21 +457,21 @@
 
     .date {
         color: var(--color-text-primary);
-        font-size: 0.9rem;
-        margin: 0.25rem 0 0;
+        font-size: 1.4rem;
+        margin: 0.4rem 0 0;
     }
 
     .timeframe {
         color: var(--color-warning);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-style: italic;
-        margin: 0.25rem 0 0;
+        margin: 0.4rem 0 0;
     }
 
     .provider {
         color: var(--color-text-secondary);
-        font-size: 0.85rem;
-        margin: 0.25rem 0 0;
+        font-size: 1.4rem;
+        margin: 0.4rem 0 0;
     }
 
     .provider.-linked {
@@ -481,10 +481,10 @@
 
     .priority {
         display: inline-block;
-        font-size: 0.7rem;
-        padding: 0.125rem 0.4rem;
+        font-size: 1.2rem;
+        padding: 0.2rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .-priority-immediate {
@@ -505,15 +505,15 @@
     .sync-indicator {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
+        gap: 0.4rem;
+        font-size: 1.2rem;
         color: var(--color-positive);
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .sync-indicator svg {
-        width: 0.9rem;
-        height: 0.9rem;
+        width: 1.4rem;
+        height: 1.4rem;
         fill: currentColor;
     }
 
@@ -525,8 +525,8 @@
     }
 
     .appointment-actions .button svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
@@ -552,20 +552,20 @@
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-height: 16rem;
+        max-height: 25.6rem;
         overflow-y: auto;
         z-index: 100;
         list-style: none;
-        margin: 0.25rem 0 0;
+        margin: 0.4rem 0 0;
         padding: 0;
     }
 
     .search-results li {
-        padding: 0.5rem 0.75rem;
+        padding: 0.8rem 1.2rem;
         cursor: pointer;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem 0.5rem;
+        gap: 0.4rem 0.8rem;
         align-items: baseline;
     }
 
@@ -579,7 +579,7 @@
     }
 
     .result-detail {
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 

@@ -1279,11 +1279,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        bottom: calc(40% + 3rem);
+        bottom: calc(40% + 4.8rem);
         width: 60vw;
         height: 60vw;
         left: 50%;
-        transform: translate(-50%, calc(50% - 3rem));
+        transform: translate(-50%, calc(50% - 4.8rem));
         z-index: 1001;
         pointer-events: none;
         transition: bottom .3s, left .3s, z-index .1s;
@@ -1294,7 +1294,7 @@
     }
     .audio-recorder.-running {
         left: calc(100% / 6 * 5);
-        bottom: 1.5rem;
+        bottom: 2.4rem;
     }
 
     /* Adjust position when viewer is open */
@@ -1313,9 +1313,9 @@
     .canvas > * {
         margin: var(--gap) 0;
         background-color: var(--color-gray-300);
-        height: calc(100vh - 2 * var(--gap) -  var(--toolbar-height) - 4rem); /* TODO: 4rem for models */
+        height: calc(100vh - 2 * var(--gap) -  var(--toolbar-height) - 6.4rem); /* TODO: 4rem for models */
         container-type: inline-size;
-        padding-bottom: 2rem;
+        padding-bottom: 3.2rem;
         overflow: auto;
     }
     .transcript {
@@ -1324,7 +1324,7 @@
 
 
     .report-background {
-        padding: 1rem;
+        padding: 1.6rem;
         min-height: 100%;
         display: flex;
         justify-content: center;
@@ -1335,9 +1335,9 @@
         background-color: var(--color-white);
         margin: 0 auto;
         width: 100%;
-        max-width: 800px;
+        max-width: 80rem;
         aspect-ratio: 1/1.414;
-        box-shadow: 0 .5rem 1rem 0 var(--color-gray-800);
+        box-shadow: 0 0.8rem 1.6rem 0 var(--color-gray-800);
     }
 
     .session {
@@ -1348,7 +1348,7 @@
     /* Session Restoration Notification Styles */
     .session-restoration-notice {
         position: fixed;
-        top: 1rem;
+        top: 1.6rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 1000;
@@ -1356,8 +1356,8 @@
         color: white;
         border-radius: var(--radius-8);
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        padding: 1rem 1.5rem;
-        max-width: 500px;
+        padding: 1.6rem 2.4rem;
+        max-width: 50rem;
         width: 90vw;
         animation: slideInFromTop 0.5s ease-out;
     }
@@ -1365,12 +1365,12 @@
     .notice-content {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .notice-icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: currentColor;
         flex-shrink: 0;
     }
@@ -1379,16 +1379,16 @@
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .notice-text strong {
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 1.6rem;
     }
 
     .notice-text span {
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         opacity: 0.9;
     }
 
@@ -1397,7 +1397,7 @@
         border: none;
         color: white;
         border-radius: var(--ui-radius-small);
-        padding: 0.5rem;
+        padding: 0.8rem;
         cursor: pointer;
         transition: background-color 0.2s ease;
         flex-shrink: 0;
@@ -1408,8 +1408,8 @@
     }
 
     .notice-dismiss svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
@@ -1425,7 +1425,7 @@
      }
 
     .dashboard {
-        margin-top: 1rem;
+        margin-top: 1.6rem;
         column-gap: 0;
     }
     
@@ -1448,10 +1448,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 2rem;
+        font-size: 3.2rem;
     }
     .canvas-start .uhint {
-        padding-top: 12rem;
+        padding-top: 19.2rem;
         color: var(--color-blue);
     }
 

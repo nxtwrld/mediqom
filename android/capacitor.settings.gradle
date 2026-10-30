@@ -5,6 +5,9 @@ project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
 
+include ':capacitor-text-zoom'
+project(':capacitor-text-zoom').projectDir = new File('../node_modules/@capacitor/text-zoom/android')
+
 include ':capgo-capacitor-health'
 project(':capgo-capacitor-health').projectDir = new File('../node_modules/@capgo/capacitor-health/android')
 

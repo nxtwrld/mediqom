@@ -2,18 +2,18 @@
   --gap: 0.8rem;
   --background-color: var(--color-background);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(19.2rem, 1fr));
   gap: var(--gap);
   margin: var(--gap);
   text-align: left;
 }
 .tiles.-fit {
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(19.2rem, 1fr));
 }
 
 .tile {
   background-color: var(--background-color);
-  min-height: 6rem;
+  min-height: 9.6rem;
   /*min-width: 12rem;*/
   display: flex;
   flex-direction: column;
@@ -21,5 +21,5 @@
   align-items: center;
 }
 .tile.-vertical {
-  min-height: 16rem;
+  min-height: 25.6rem;
 }

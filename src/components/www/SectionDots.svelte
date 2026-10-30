@@ -35,18 +35,18 @@
 <style>
 	.section-dots {
 		position: fixed;
-		right: 1.5rem;
+		right: 2.4rem;
 		top: 50%;
 		transform: translateY(-50%);
 		z-index: 10;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 1.2rem;
 	}
 
 	.dot {
-		width: 10px;
-		height: 10px;
+		width: 1rem;
+		height: 1rem;
 		border-radius: 50%;
 		border: 1.5px solid rgba(0, 0, 0, 0.2);
 		background: transparent;

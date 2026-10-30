@@ -38,7 +38,7 @@
         left: 0;
     }
     .progress svg .progress-value {
-        font-size: 12rem;
+        font-size: 19.2rem;
         font-weight: bold;
         fill: var(--color-interactivity-dark);
         text-anchor: middle;

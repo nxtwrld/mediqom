@@ -242,29 +242,29 @@
 <style>
   .serenity-audio-input {
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    border-radius: 0.8rem;
+    padding: 2.4rem;
+    margin-bottom: 2.4rem;
   }
 
   h3 {
     margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
+    margin-bottom: 1.6rem;
+    font-size: 2rem;
   }
 
   .mode-selector {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: 0.8rem;
+    margin-bottom: 2.4rem;
   }
 
   .mode-selector button {
     flex: 1;
-    padding: 0.75rem;
+    padding: 1.2rem;
     border: 1px solid var(--color-border);
     background: var(--color-background);
-    border-radius: 4px;
+    border-radius: 0.4rem;
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -286,29 +286,29 @@
 
   .upload-section input[type="file"] {
     width: 100%;
-    padding: 0.75rem;
+    padding: 1.2rem;
     border: 2px dashed var(--color-border);
-    border-radius: 4px;
+    border-radius: 0.4rem;
     cursor: pointer;
   }
 
   .file-info {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
+    margin-top: 0.8rem;
+    font-size: 1.4rem;
     color: var(--color-positive);
   }
 
   .test-file-section select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 1.2rem;
     border: 1px solid var(--color-border);
-    border-radius: 4px;
+    border-radius: 0.4rem;
     background: var(--color-background);
   }
 
   .hint {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
+    margin-top: 0.8rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary, #666);
   }
 
@@ -320,11 +320,11 @@
   .stop-button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    gap: 0.8rem;
+    padding: 1.6rem 3.2rem;
+    font-size: 1.6rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.4rem;
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -351,17 +351,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.8rem;
   }
 
   .recording-duration {
-    font-size: 1.5rem;
+    font-size: 2.4rem;
     font-weight: bold;
-    margin: 0.5rem 0;
+    margin: 0.8rem 0;
   }
 
   .recording-status {
-    font-size: 0.875rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary, #666);
     margin: 0;
   }

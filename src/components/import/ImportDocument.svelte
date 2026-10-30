@@ -112,17 +112,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        bottom: -2.5rem;
+        bottom: -4rem;
         left: 50%;
         transform: translateX(-50%);
         text-align: center;
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: bold;
         z-index: 10;
         border-radius: var(--radius-8);
         background-color: var(--color);
         color: var(--color-text-primary);
-        padding: .5rem;
+        padding: 0.8rem;
     }
 
 
@@ -132,8 +132,8 @@
         justify-content: center;
         align-items: center;
         widtH: 100%;
-        height: 8rem;
-        padding: 1rem;
+        height: 12.8rem;
+        padding: 1.6rem;
         overflow: hidden;
      
     }
@@ -148,29 +148,29 @@
         justify-content: center;
         text-wrap: wrap;
         align-items: center;
-        padding: .5rem;
+        padding: 0.8rem;
         text-align: center;
-        font-size: .8rem;
-        height: 4rem;
+        font-size: 1.2rem;
+        height: 6.4rem;
         font-weight: bold;
         width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     .thumbmail {
-        max-width: 6rem;
-        max-height: 6rem;
+        max-width: 9.6rem;
+        max-height: 9.6rem;
         object-fit: contain;
         border: 1px solid var(--color-gray-500);
-        box-shadow: 0 .4rem .5rem -.3rem rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0.6rem 0.8rem -0.4rem rgba(0, 0, 0, 0.3);
 
     }
 
     .report .remove {
         position: absolute;
-        top: -.2rem;
-        right: -.2rem;
-        padding: .4rem;
+        top: -0.3rem;
+        right: -0.3rem;
+        padding: 0.6rem;
         background-color: transparent;
         fill: currentColor;
         border: none;
@@ -185,7 +185,7 @@
 
     .report .remove svg {
         fill: currentColor;
-        width: 1.2rem;
-        height: 1.2rem;
+        width: 2rem;
+        height: 2rem;
     }
 </style>

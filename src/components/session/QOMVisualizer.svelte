@@ -595,11 +595,11 @@
   :global(.qom-node-panel) {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    padding: 4px;
+    gap: 0.8rem;
+    padding: 0.4rem;
     background: white;
     border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 0.8rem;
     height: 100%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     cursor: pointer;
@@ -615,8 +615,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 3.2rem;
+    height: 3.2rem;
     flex-shrink: 0;
   }
 
@@ -633,12 +633,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.2rem;
     min-width: 0;
   }
 
   :global(.qom-node-name) {
-    font-size: 12px;
+    font-size: 1.2rem;
     font-weight: 500;
     color: #1f2937;
     white-space: normal;
@@ -652,7 +652,7 @@
   }
 
   :global(.qom-node-status) {
-    font-size: 10px;
+    font-size: 1rem;
     color: #6b7280;
   }
 
@@ -776,10 +776,10 @@
   .qom-visualizer {
     width: 100%;
     height: 100%;
-    min-height: 600px;  /* Ensure minimum height */
+    min-height: 60rem;  /* Ensure minimum height */
     position: relative;
     background: var(--color-surface, #fff);
-    border-radius: 8px;
+    border-radius: 0.8rem;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -789,15 +789,15 @@
 
   .qom-metrics {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 1rem;
+    right: 1rem;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid var(--color-border, #e2e8f0);
-    border-radius: 6px;
-    padding: 8px 12px;
+    border-radius: 0.6rem;
+    padding: 0.8rem 1.2rem;
     display: flex;
-    gap: 16px;
-    font-size: 12px;
+    gap: 1.6rem;
+    font-size: 1.2rem;
     z-index: 10;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -805,7 +805,7 @@
   .metric {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 0.4rem;
   }
 
   .metric-label {

@@ -92,7 +92,7 @@
     }
     .medication-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(22.4rem, 1fr));
         gap: var(--ui-pad-medium);
     }
     .add-card {
@@ -107,15 +107,15 @@
         color: var(--color-text-secondary);
         text-decoration: none;
         transition: border-color 0.15s ease, color 0.15s ease;
-        min-height: 5rem;
+        min-height: 8rem;
     }
     .add-card:hover {
         border-color: var(--color-text-primary);
         color: var(--color-text-primary);
     }
     .add-card svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: currentColor;
     }
     .empty-state {
@@ -130,8 +130,8 @@
         color: var(--color-text-secondary);
     }
     .empty-icon {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 4rem;
+        height: 4rem;
         fill: currentColor;
         opacity: 0.4;
     }

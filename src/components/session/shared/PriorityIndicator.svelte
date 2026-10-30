@@ -90,7 +90,7 @@
     .priority-indicator {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .priority-text {
@@ -100,20 +100,20 @@
     }
     
     .priority-text.small {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
     
     .priority-text.medium {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
     
     .priority-text.large {
-        font-size: 1rem;
+        font-size: 1.6rem;
     }
     
     .dots, .stars {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: center;
     }
     
@@ -123,23 +123,23 @@
     }
     
     .dot.small {
-        width: 6px;
-        height: 6px;
+        width: 0.6rem;
+        height: 0.6rem;
     }
     
     .priority-indicator.small .dot {
-        width: 6px;
-        height: 6px;
+        width: 0.6rem;
+        height: 0.6rem;
     }
     
     .priority-indicator.medium .dot {
-        width: 8px;
-        height: 8px;
+        width: 0.8rem;
+        height: 0.8rem;
     }
     
     .priority-indicator.large .dot {
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
     }
     
     .star {
@@ -148,19 +148,19 @@
     }
     
     .priority-indicator.small .star {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
     
     .priority-indicator.medium .star {
-        font-size: 1rem;
+        font-size: 1.6rem;
     }
     
     .priority-indicator.large .star {
-        font-size: 1.125rem;
+        font-size: 1.8rem;
     }
     
     .priority-label {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: var(--color-text-secondary, #6b7280);
         text-transform: uppercase;
@@ -168,11 +168,11 @@
     }
     
     .priority-indicator.small .priority-label {
-        font-size: 0.6875rem;
+        font-size: 1.2rem;
     }
     
     .priority-indicator.large .priority-label {
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
     }
     
     /* Hover effects */

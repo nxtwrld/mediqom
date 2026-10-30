@@ -13,8 +13,8 @@
 <style>
     .report-label {
         display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 1.2rem;
         background-color: var(--color-gray-200);
         color: var(--color-gray-800);
         border-radius: var(--radius-16);

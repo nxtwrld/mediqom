@@ -43,12 +43,12 @@ colors:
   white: "#f9fafb"
 
 fontSize: # --font-size-* scale
-  xs: "0.75rem"
-  sm: "0.875rem"
-  base: "1rem"
-  lg: "1.25rem"
-  xl: "1.4rem"
-  2xl: "1.6rem"
+  xs: "1.2rem"
+  sm: "1.4rem"
+  base: "1.6rem"
+  lg: "2rem"
+  xl: "2.2rem"
+  2xl: "2.6rem"
 
 typography:
   body: { family: "Mulish", weight: 300, weights: "200-1000 (variable)" }
@@ -56,34 +56,34 @@ typography:
   values: { family: "Roboto Mono", note: "numbers, codes, units" }
   cursive: { family: "Caveat", note: "hints / annotations only" }
   scale:
-    h1: { size: "1.8rem", weight: 700, mobile: "1.5rem" }
-    h2: { size: "1.6rem", weight: 700, mobile: "1.5rem" }
-    h3: { size: "1.4rem", weight: 600, mobile: "1.25rem" }
-    h4: { size: "1.25rem", weight: 600, mobile: "1.1rem" }
-    body: { lineHeight: "1.3rem" }
+    h1: { size: "2.8rem", weight: 700, mobile: "2.4rem" }
+    h2: { size: "2.6rem", weight: 700, mobile: "2.4rem" }
+    h3: { size: "2.2rem", weight: 600, mobile: "2rem" }
+    h4: { size: "2rem", weight: 600, mobile: "1.8rem" }
+    body: { lineHeight: "2rem" }
 
 spacing:
-  # --ui-pad-* scale (4px base step)
-  xsmall: "0.25rem" # 4px
-  small: "0.5rem" # 8px
-  medium: "1rem" # 16px
-  large: "1.5rem" # 24px
-  xlarge: "2rem" # 32px
+  # --ui-pad-* scale (1rem = 10px at default font size)
+  xsmall: "0.4rem" # 4px
+  small: "0.8rem" # 8px
+  medium: "1.6rem" # 16px
+  large: "2.4rem" # 24px
+  xlarge: "3.2rem" # 32px
   gap: "2px" # --gap, the tight grid gap between cells
-  height-unit: "min(3rem, 50px)" # touch-target base for bars/actions
+  height-unit: "4.8rem" # touch-target base for bars/actions
 
 radius:
-  small: "0.25rem" # --ui-radius-small / 4px
-  medium: "0.5rem" # --ui-radius-medium / 8px
-  large: "1rem" # --ui-radius-large / 16px
-  r8: "min(0.5rem, 10px)" # --radius-8
-  r12: "min(0.75rem, 15px)" # --radius-12
-  r16: "min(1rem, 20px)" # --radius-16 (default --radius)
-  r24: "min(2rem, 40px)" # --radius-24 (modals)
+  small: "0.4rem" # --ui-radius-small / 4px
+  medium: "0.8rem" # --ui-radius-medium / 8px
+  large: "1.6rem" # --ui-radius-large / 16px
+  r8: "0.8rem" # --radius-8
+  r12: "1.2rem" # --radius-12
+  r16: "1.6rem" # --radius-16 (default --radius)
+  r24: "3.2rem" # --radius-24 (modals)
 
 shadows:
-  interactivity: "0 0.3rem 0.2rem -0.2rem rgba(0,0,0,0.1)"
-  modal: "0 2rem 2rem -0.75rem rgba(0,0,0,0.2)"
+  interactivity: "0 0.4rem 0.3rem -0.3rem rgba(0,0,0,0.1)"
+  modal: "0 3.2rem 3.2rem -1.2rem rgba(0,0,0,0.2)"
 
 zIndex: # named layers — never use raw integers; values mirror the live hierarchy
   base: 1
@@ -215,8 +215,23 @@ Loaded via `src/css/fonts.css` (WOFF2, `font-display: swap`):
 which already apply the right family, weight, and a responsive size step at
 ≤768px. `.value` / `.unit` render in Roboto Mono. Links use
 `--color-interactivity` at weight 600. Bold = `700` (`--text-bold`).
-The `--font-size-*` scale (`xs` 0.75 · `sm` 0.875 · `base` 1 · `lg` 1.25 ·
-`xl` 1.4 · `2xl` 1.6 rem) is available for non-heading text.
+The `--font-size-*` scale (`xs` 1.2 · `sm` 1.4 · `base` 1.6 · `lg` 2 ·
+`xl` 2.2 · `2xl` 2.6 rem) is available for non-heading text.
+
+## Sizing policy
+
+- **Root:** `html { font-size: calc(62.5% * var(--text-zoom, 1)) }` (in
+  `src/css/core.css`) — `1rem` = 10px at the user's default font size and
+  follows their browser setting. On iOS/Android, `initTextZoom()` in
+  `src/lib/capacitor/index.ts` sets `--text-zoom` from the OS text-size setting
+  (Dynamic Type / font scale, clamped 0.85–2) and disables the WebView's own
+  text-only zoom, so the whole layout scales, not just text.
+- **Use `rem`** for font sizes, spacing, widths/heights and radii;
+  `em` only for sizes that should follow the local font size (icons inline
+  with text, letter-spacing).
+- **Keep `px`** for hairline borders/outlines (≤3px), box/text shadows,
+  filters, SVG strokes, canvas/d3 chart geometry, media queries, and values
+  measured in JS. Never write a `min(rem, px)` cap — it blocks scaling.
 
 ## Layout & Spacing
 
@@ -224,8 +239,8 @@ The `--font-size-*` scale (`xs` 0.75 · `sm` 0.875 · `base` 1 · `lg` 1.25 ·
   (4/8/16/24/32px). Use these for padding and margins; `--gap` (2px) is the
   tight grid gap.
 - **Touch targets:** bars, headings, and actions are sized from
-  `--ui-height-unit` (`min(3rem, 50px)`) — reuse `--toolbar-height`,
-  `--action-height`, `--input-height` (2.5rem) rather than inventing heights.
+  `--ui-height-unit` (`4.8rem`) — reuse `--toolbar-height`,
+  `--action-height`, `--input-height` (4rem) rather than inventing heights.
 - **Utilities:** `.flex`, `.flex.-column`, `.flex.-center` for quick flex
   layouts; `.page`, `.heading`, `.toolbar` for app-shell structure.
 - **Safe areas:** `--safe-area-top/right/bottom/left` for notch handling.
@@ -256,7 +271,7 @@ mobile↔desktop split. Container queries on document sections use **300 / 400 /
 
 Rounded everything. Pick by element size:
 `--ui-radius-small` (4px, chips/badges) · `--ui-radius-medium` (8px, inputs/
-buttons) · `--radius-12` (15px) · `--radius-16` (default, cards) · `--radius-24`
+buttons) · `--radius-12` (12px) · `--radius-16` (default, cards) · `--radius-24`
 (modals). Generic alias: `--radius` = `--radius-16`.
 
 ## Motion
@@ -318,7 +333,7 @@ Key props: `type`, `label`, `bind:value` (or `bind:checked` for checkbox/radio),
 </form>
 ```
 
-`.form` (max-width 35rem) · `.form-actions` (end-aligned button row) ·
+`.form` (max-width 56rem) · `.form-actions` (end-aligned button row) ·
 `.input.-error` for the error state.
 
 ### Modal (`$components/ui/Modal.svelte`)

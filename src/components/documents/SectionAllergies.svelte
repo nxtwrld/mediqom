@@ -402,47 +402,47 @@
     /* Content styling */
     .no-allergies-statement {
         text-align: center;
-        padding: 1rem;
+        padding: 1.6rem;
     }
     
     .nka-badge {
         background-color: var(--color-positive-light);
         color: var(--color-positive-dark);
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
+        padding: 0.8rem 1.6rem;
+        border-radius: 0.8rem;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 1.6rem;
     }
     
     .allergy-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .allergy-main {
         flex: 1;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         flex-wrap: wrap;
     }
     
     .allergy-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .category-badge,
     .severity-badge,
     .status-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -479,34 +479,34 @@
     }
     
     .reactions-section {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .reactions-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.25rem;
+        gap: 0.8rem;
+        margin-top: 0.4rem;
     }
     
     .reaction-item {
         background-color: var(--color-surface);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.4rem;
     }
     
     .reaction-system {
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
-        margin-left: 0.25rem;
+        font-size: 1.2rem;
+        margin-left: 0.4rem;
     }
     
     .emergency-section {
         background-color: var(--color-negative-light);
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        margin-bottom: 0.75rem;
+        padding: 1.2rem;
+        border-radius: 0.8rem;
+        margin-bottom: 1.2rem;
     }
     
     .emergency-label {
@@ -518,17 +518,17 @@
     .epipen-badge {
         background-color: var(--color-negative);
         color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
         display: inline-block;
     }
     
     .emergency-instructions {
         color: var(--color-negative-dark);
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
         margin-bottom: 0;
         font-weight: 500;
     }
@@ -539,24 +539,24 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .intolerance-badge {
         background-color: var(--color-warning-light);
         color: var(--color-warning-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
     .seasonal-badge {
         background-color: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
@@ -569,13 +569,13 @@
     }
     
     .alert-header {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .alert-priority {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -598,7 +598,7 @@
     
     .alert-message {
         font-weight: 500;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .alert-instructions {

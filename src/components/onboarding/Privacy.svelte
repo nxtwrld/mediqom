@@ -676,8 +676,8 @@
 <style>
     .automatic-passphrase {
         position: fixed;
-        top: -100000000px;
-        left: -100000000px;
+        top: -10000000rem;
+        left: -10000000rem;
     }
 
     .security-mode-selection,
@@ -688,40 +688,40 @@
     .success-state {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .default-benefits {
-        margin: 0 auto 1rem;
-        padding-left: 1.5rem;
-        max-width: 300px;
+        margin: 0 auto 1.6rem;
+        padding-left: 2.4rem;
+        max-width: 30rem;
     }
 
     .default-benefits li {
-        margin: 0.25rem 0;
+        margin: 0.4rem 0;
         color: var(--color-text-secondary);
     }
 
     .advanced-toggle {
         display: block;
-        margin: 1rem auto 0;
+        margin: 1.6rem auto 0;
         text-align: center;
     }
 
     .advanced-panel {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
+        gap: 1.6rem;
+        margin-top: 1.6rem;
+        padding-top: 1.6rem;
         border-top: 1px solid var(--color-border);
     }
 
     .mode-option,
     .method-option {
         border: 2px solid var(--color-border);
-        border-radius: 0.5rem;
-        padding: 1rem;
+        border-radius: 0.8rem;
+        padding: 1.6rem;
         cursor: pointer;
         transition: border-color 0.2s, background-color 0.2s;
     }
@@ -745,7 +745,7 @@
     .mode-option label,
     .method-option label {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         cursor: pointer;
     }
 
@@ -755,34 +755,34 @@
     }
 
     .mode-content ul {
-        margin: 0.5rem 0;
-        padding-left: 1.5rem;
+        margin: 0.8rem 0;
+        padding-left: 2.4rem;
     }
 
     .mode-content li {
-        margin: 0.25rem 0;
+        margin: 0.4rem 0;
         color: var(--color-text-secondary);
     }
 
     .method-content {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         align-items: flex-start;
     }
 
     .method-content .icon {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         flex-shrink: 0;
     }
 
     .badge {
         display: inline-block;
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin-left: 0.5rem;
+        margin-left: 0.8rem;
     }
 
     .badge.-recommended {
@@ -797,19 +797,19 @@
 
     .warning-text {
         color: var(--color-warning, #e65100);
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
+        font-size: 1.4rem;
+        margin-top: 0.8rem;
     }
 
     .setup-illustration {
         display: flex;
         justify-content: center;
-        padding: 2rem;
+        padding: 3.2rem;
     }
 
     .setup-illustration .icon.-large {
-        width: 6rem;
-        height: 6rem;
+        width: 9.6rem;
+        height: 9.6rem;
         color: var(--color-interactivity);
     }
 
@@ -819,7 +819,7 @@
 
     .passphrase-actions {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         justify-content: center;
         flex-wrap: wrap;
     }
@@ -827,40 +827,40 @@
     .recovery-key-box {
         background-color: var(--color-surface, #f5f5f5);
         border: 1px solid var(--color-border);
-        border-radius: 0.5rem;
-        padding: 1rem;
+        border-radius: 0.8rem;
+        padding: 1.6rem;
         text-align: center;
         font-family: monospace;
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         letter-spacing: 0.05em;
         word-break: break-all;
     }
 
     .recovery-actions {
-        margin: 1rem 0;
+        margin: 1.6rem 0;
     }
 
     .recovery-actions button svg {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-right: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+        margin-right: 0.8rem;
     }
 
     .recovery-confirmations {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 1.2rem;
     }
 
     .checkbox {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: flex-start;
         cursor: pointer;
     }
 
     .checkbox input[type="checkbox"] {
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .success-state {
@@ -868,22 +868,22 @@
     }
 
     .success-icon svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         color: var(--color-positive, #1e7e34);
     }
 
     .flex.-gap {
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .button.-large {
         width: 100%;
-        max-width: 300px;
+        max-width: 30rem;
     }
 
     .loading {
         text-align: center;
-        padding: 2rem;
+        padding: 3.2rem;
     }
 </style>

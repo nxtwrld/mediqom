@@ -263,8 +263,8 @@
     }
     .contact-detail {
         color: var(--color-text-secondary);
-        font-size: 0.85rem;
-        margin: 0.125rem 0 0;
+        font-size: 1.4rem;
+        margin: 0.2rem 0 0;
     }
     .selected-contact .button {
         margin-top: var(--ui-pad-small);
@@ -281,19 +281,19 @@
         border: 1px solid var(--color-border);
         border-radius: var(--ui-radius-small);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-height: 16rem;
+        max-height: 25.6rem;
         overflow-y: auto;
         z-index: 100;
         list-style: none;
-        margin: 0.25rem 0 0;
+        margin: 0.4rem 0 0;
         padding: 0;
     }
     .search-results li {
-        padding: 0.5rem 0.75rem;
+        padding: 0.8rem 1.2rem;
         cursor: pointer;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem 0.5rem;
+        gap: 0.4rem 0.8rem;
         align-items: baseline;
     }
     .search-results li:hover,
@@ -304,7 +304,7 @@
         font-weight: 500;
     }
     .result-detail {
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
     .expand-toggle {
@@ -312,7 +312,7 @@
         border: none;
         color: var(--color-interactivity);
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         padding: var(--ui-pad-small) 0;
         text-align: left;
     }

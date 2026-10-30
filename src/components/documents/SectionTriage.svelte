@@ -282,13 +282,13 @@
     /* Content styling */
     .chief-complaint {
         background-color: var(--color-surface);
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid var(--color-interactivity);
+        padding: 1.6rem;
+        border-radius: 0.8rem;
+        border-left: 0.4rem solid var(--color-interactivity);
     }
     
     .complaint-text {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 500;
         margin: 0;
         color: var(--color-text-primary);
@@ -298,21 +298,21 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .triage-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .triage-level-badge {
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.9rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.8rem;
+        font-size: 1.4rem;
         font-weight: 600;
         text-transform: uppercase;
         color: white;
@@ -340,9 +340,9 @@
     
     .mode-badge,
     .urgency-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
     }
@@ -384,29 +384,29 @@
     /* Vitals grid */
     .vitals-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+        gap: 1.6rem;
     }
     
     .vital-item {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.75rem;
+        gap: 0.4rem;
+        padding: 1.2rem;
         background-color: var(--color-surface);
-        border-radius: 0.5rem;
+        border-radius: 0.8rem;
         text-align: center;
     }
     
     .vital-label {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: var(--color-text-secondary);
         text-transform: uppercase;
     }
     
     .vital-value {
-        font-size: 1.2rem;
+        font-size: 2rem;
         font-weight: 600;
         color: var(--color-text-primary);
     }
@@ -425,26 +425,26 @@
     
     /* Quick assessment */
     .quick-info-header {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .info-label {
         font-weight: 600;
         color: var(--color-text-primary);
         text-transform: uppercase;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
     
     .info-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .info-tag {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     

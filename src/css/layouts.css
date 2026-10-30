@@ -41,7 +41,7 @@ main.layout.-viewer section.layout-viewer {
 
 /* Adjust content when chat is open */
 main.layout.chat-open section.layout-content {
-  margin-right: var(--chat-sidebar-width, 400px);
+  margin-right: var(--chat-sidebar-width, 40rem);
   transition: margin-right 0.3s ease;
 }
 
@@ -49,7 +49,7 @@ main.layout.chat-open section.layout-content {
 @media (min-width: 769px) {
   main.layout.-viewer.chat-open section.layout-content {
     margin-left: var(--viewer-width, 33vw);
-    margin-right: var(--chat-sidebar-width, 400px);
+    margin-right: var(--chat-sidebar-width, 40rem);
   }
 }
 
@@ -58,7 +58,7 @@ main.layout.chat-open section.layout-content {
   position: absolute;
   top: 0;
   right: 0;
-  width: 4px;
+  width: 0.4rem;
   height: 100%;
   background: transparent;
   border: none;
@@ -142,7 +142,7 @@ main.layout.chat-open section.layout-content {
     top: 0;
     left: 0;
     right: 0;
-    height: 20px;
+    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,10 +155,10 @@ main.layout.chat-open section.layout-content {
   }
 
   .pull-handle-bar {
-    width: 40px;
-    height: 4px;
+    width: 4rem;
+    height: 0.4rem;
     background: var(--color-gray-600);
-    border-radius: 2px;
+    border-radius: 0.2rem;
   }
 
   /* Chat sidebar stays as overlay */

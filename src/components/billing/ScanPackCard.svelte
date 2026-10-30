@@ -50,8 +50,8 @@
     }
 
     .pack-icon {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -60,8 +60,8 @@
     }
 
     .pack-icon svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: var(--color-interactivity);
     }
 
@@ -70,16 +70,16 @@
     }
 
     .pack-name {
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
     }
 
     .pack-scans {
-        margin: 0.25rem 0 0 0;
+        margin: 0.4rem 0 0 0;
         color: var(--color-text-secondary);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
 
     .pack-scans .count {
@@ -88,9 +88,9 @@
     }
 
     .pack-price-per {
-        margin: 0.125rem 0 0 0;
+        margin: 0.2rem 0 0 0;
         color: var(--color-text-secondary);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
 
     .pack-price {
@@ -99,14 +99,14 @@
 
     .price {
         display: block;
-        font-size: 1.25rem;
+        font-size: 2rem;
         font-weight: 700;
         color: var(--color-text-primary);
     }
 
     .one-time {
         display: block;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 

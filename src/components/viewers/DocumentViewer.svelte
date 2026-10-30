@@ -149,11 +149,11 @@
     .viewer-content {
         flex: 1;
         overflow: auto;
-        padding: 1rem;
+        padding: 1.6rem;
     }
 
     .preview-mode .viewer-content {
-        max-height: 400px;
+        max-height: 40rem;
     }
 </style>
 

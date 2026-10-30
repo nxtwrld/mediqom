@@ -138,33 +138,33 @@
 <style>
     .description {
         color: var(--color-text-secondary, #6b7280);
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.4rem;
         line-height: 1.5;
     }
 
     .error-message {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
+        gap: 0.8rem;
+        padding: 1.2rem;
         background: var(--color-negative-light, #fef2f2);
         border: 1px solid var(--color-negative, #fecaca);
-        border-radius: var(--radius-8, 8px);
+        border-radius: var(--radius-8, 0.8rem);
         color: var(--color-negative, #dc2626);
-        font-size: 0.875rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+        margin-bottom: 2.4rem;
     }
 
     .error-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
         flex-shrink: 0;
     }
 
     .spinner {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         border: 2px solid transparent;
         border-top: 2px solid currentColor;
         border-radius: 50%;

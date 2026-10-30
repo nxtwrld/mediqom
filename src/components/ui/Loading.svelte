@@ -23,26 +23,26 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    min-width: 5rem;
-    min-height: 5rem;
+    min-width: 8rem;
+    min-height: 8rem;
 }  
 
 .loader-container.-big {
-    min-width: 10rem;
-    min-height: 10rem;
-    min-width: 5rem;
-    min-height: 5rem;
+    min-width: 16rem;
+    min-height: 16rem;
+    min-width: 8rem;
+    min-height: 8rem;
 }
 
 
 .-big .loader {
-  width: 1.5rem;
+  width: 2.4rem;
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--color-interactivity);
   display: grid;
   animation: l22-0 2s infinite linear;
-  margin-bottom: 3rem;
+  margin-bottom: 4.8rem;
 
 }
 .-big .loader:before,
@@ -68,7 +68,7 @@
 
 
 .-line  .loader {
-  width: 4rem;
+  width: 6.4rem;
   aspect-ratio: 4;
   --_g: no-repeat radial-gradient(circle closest-side,var(--color-interactivity) 90%,var(--color-interactivity));
   background: 

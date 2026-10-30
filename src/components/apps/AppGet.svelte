@@ -121,10 +121,10 @@
     .app-header {
         display: flex;
         align-items: flex-start;
-        gap: 1rem;
+        gap: 1.6rem;
         container-type: inline-size;
         container-name: appheader;
-        width: 40rem;
+        width: 64rem;
     }
 
     /* Unused - price element is commented out in template
@@ -148,22 +148,22 @@
         display: flex;
         align-items: flex-start;
         justify-content: stretch;
-        gap: 1rem;
-        margin-top: 1rem;
+        gap: 1.6rem;
+        margin-top: 1.6rem;
         
     }
 
     .app-details h5 {
-        font-size: .7rem;
+        font-size: 1.2rem;
         text-transform: uppercase;
-        margin-bottom: .5rem;
+        margin-bottom: 0.8rem;
     }
 
 
 
     .app-details div {
         text-align: left;
-        padding: 0 1rem 0 0 ;      
+        padding: 0 1.6rem 0 0 ;      
         border-right: 1px solid var(--color-gray-300);
         height: 100%;
     }
@@ -181,12 +181,12 @@
         }
         .app-header img {
             float: left;
-            margin-right: 1rem;
+            margin-right: 1.6rem;
         }
 
         .app-details {
             flex-direction: column;
-            gap: .5rem;
+            gap: 0.8rem;
             align-items: flex-start;
         }
         .app-details div {
@@ -200,22 +200,22 @@
         }
         .app-details div {
             display: table-cell;
-            padding: 0 1rem;
+            padding: 0 1.6rem;
         }
     }
 
     .warning {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: .5rem 1rem;
+        gap: 1.6rem;
+        padding: 0.8rem 1.6rem;
         background-color: var(--color-gray-300);
         border-radius: var(--radius-16);
-        margin: 1rem 0;
+        margin: 1.6rem 0;
     }
     .warning > svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
     }
 
     .contents {

@@ -169,7 +169,7 @@
 	.description {
 		color: var(--color-text-secondary);
 		margin-bottom: var(--ui-pad-medium);
-		font-size: 0.9rem;
+		font-size: 1.4rem;
 	}
 
 	.toggle-row {
@@ -207,12 +207,12 @@
 
 	.last-sync {
 		color: var(--color-text-secondary);
-		font-size: 0.85rem;
+		font-size: 1.4rem;
 	}
 
 	.sync-result {
 		color: var(--color-positive);
-		font-size: 0.9rem;
+		font-size: 1.4rem;
 	}
 
 	.sync-result.has-errors {
@@ -221,7 +221,7 @@
 
 	.sync-error {
 		color: var(--color-negative);
-		font-size: 0.85rem;
+		font-size: 1.4rem;
 	}
 
 	.not-available {

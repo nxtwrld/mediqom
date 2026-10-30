@@ -42,26 +42,26 @@
         margin-left: -10%;
     }
     h1 {
-        font-size: 3rem;
+        font-size: 4.8rem;
         color: var(--color-white);
         font-weight: 400;
-        margin: 1rem 0 1rem;
+        margin: 1.6rem 0 1.6rem;
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
     }
     h2 {
-        font-size: 2rem;
+        font-size: 3.2rem;
         color: var(--color-white);
         font-weight: 405;
-        margin-top: 1rem;
+        margin-top: 1.6rem;
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
     }
     .pi {
         position: absolute;
-        bottom: .2rem;
-        right: .2rem;
-        font-size: .8rem;
+        bottom: 0.3rem;
+        right: 0.3rem;
+        font-size: 1.2rem;
         color: var(--color-white);
         text-decoration: none;
     }

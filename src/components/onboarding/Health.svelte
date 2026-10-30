@@ -90,7 +90,7 @@
 
 <style>
     .subtitle {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         margin-bottom: var(--ui-pad-large);
     }

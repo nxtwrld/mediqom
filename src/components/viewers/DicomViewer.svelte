@@ -567,13 +567,13 @@
         height: 100%;
         background: #000;
         position: relative;
-        min-height: 400px;
+        min-height: 40rem;
     }
 
     .dicom-canvas {
         width: 100%;
         flex: 1;
-        min-height: 500px;
+        min-height: 50rem;
         position: relative;
         touch-action: none;
         overflow: hidden;
@@ -591,13 +591,13 @@
     }
 
     .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #333;
-        border-top: 4px solid #aaa;
+        width: 4rem;
+        height: 4rem;
+        border: 0.4rem solid #333;
+        border-top: 0.4rem solid #aaa;
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
     }
 
     @keyframes spin {
@@ -613,48 +613,48 @@
         justify-content: center;
         color: #f66;
         z-index: 1;
-        padding: 2rem;
+        padding: 3.2rem;
         text-align: center;
     }
 
     .dicom-toolbar {
         display: flex;
         align-items: center;
-        padding: 0.375rem 0.5rem;
+        padding: 0.6rem 0.8rem;
         background: #1a1a1a;
         color: #aaa;
-        font-size: 0.75rem;
-        gap: 0.25rem;
+        font-size: 1.2rem;
+        gap: 0.4rem;
         flex-wrap: wrap;
         border-top: 1px solid #333;
     }
 
     .toolbar-group {
         display: flex;
-        gap: 0.125rem;
+        gap: 0.2rem;
     }
 
     .toolbar-separator {
         width: 1px;
-        height: 1.5rem;
+        height: 2.4rem;
         background: #444;
-        margin: 0 0.25rem;
+        margin: 0 0.4rem;
     }
 
     .toolbar-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.25rem;
-        padding: 0.3rem 0.4rem;
+        gap: 0.4rem;
+        padding: 0.4rem 0.6rem;
         background: #2a2a2a;
         color: #bbb;
         border: 1px solid #444;
-        border-radius: 4px;
+        border-radius: 0.4rem;
         cursor: pointer;
-        font-size: 0.7rem;
-        min-width: 1.75rem;
-        height: 1.75rem;
+        font-size: 1.2rem;
+        min-width: 2.8rem;
+        height: 2.8rem;
         transition: background 0.15s, color 0.15s;
     }
 
@@ -670,16 +670,16 @@
     }
 
     .icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
     .toolbar-info {
         display: flex;
-        gap: 0.75rem;
+        gap: 1.2rem;
         font-family: monospace;
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         color: #888;
         margin-left: auto;
     }
@@ -694,21 +694,21 @@
         left: 0;
         background: #2a2a2a;
         border: 1px solid #555;
-        border-radius: 4px;
-        min-width: 8rem;
+        border-radius: 0.4rem;
+        min-width: 12.8rem;
         z-index: 10;
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
     }
 
     .dropdown-item {
         display: block;
         width: 100%;
-        padding: 0.4rem 0.75rem;
+        padding: 0.6rem 1.2rem;
         background: none;
         border: none;
         color: #ccc;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         text-align: left;
         cursor: pointer;
     }
@@ -721,15 +721,15 @@
     .slice-controls {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.375rem 0.75rem;
+        gap: 1.2rem;
+        padding: 0.6rem 1.2rem;
         background: #1a1a1a;
         border-top: 1px solid #333;
     }
 
     .slice-label {
         color: #aaa;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-family: monospace;
         white-space: nowrap;
     }
@@ -742,8 +742,8 @@
     /* Mobile responsive */
     @media (max-width: 768px) {
         .dicom-toolbar {
-            gap: 0.125rem;
-            padding: 0.25rem;
+            gap: 0.2rem;
+            padding: 0.4rem;
         }
 
         .toolbar-separator {
@@ -757,9 +757,9 @@
         }
 
         .toolbar-btn {
-            padding: 0.25rem;
-            min-width: 1.5rem;
-            height: 1.5rem;
+            padding: 0.4rem;
+            min-width: 2.4rem;
+            height: 2.4rem;
         }
     }
 </style>

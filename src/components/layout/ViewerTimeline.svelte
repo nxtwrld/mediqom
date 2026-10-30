@@ -405,29 +405,29 @@
     .signal-bar {
         display: flex;
         align-items: center;
-        gap: 0.3rem;
-        padding: 0.25rem 0.4rem;
-        border-bottom: 0.1rem solid var(--color-border);
+        gap: 0.4rem;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 0.2rem solid var(--color-border);
         flex-shrink: 0;
-        min-height: 1.8rem;
+        min-height: 2.8rem;
         background: var(--color-surface, #fff);
     }
 
     .signal-bar-chips {
         display: flex;
         flex-wrap: nowrap;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex: 1;
         overflow: hidden;
         cursor: pointer;
         align-items: center;
-        min-height: 1.3rem;
+        min-height: 2rem;
     }
 
     .signal-chip {
-        font-size: 0.65rem;
-        padding: 0.1rem 0.4rem;
-        border-radius: 2rem;
+        font-size: 1rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 3.2rem;
         background: var(--signal-color);
         color: #fff;
         white-space: nowrap;
@@ -435,7 +435,7 @@
     }
 
     .signal-bar-hint {
-        font-size: 0.65rem;
+        font-size: 1rem;
         color: var(--color-text-secondary);
     }
 
@@ -445,10 +445,10 @@
         border: none;
         cursor: pointer;
         color: var(--color-text-secondary);
-        padding: 0.15rem;
+        padding: 0.2rem;
         display: flex;
         align-items: center;
-        border-radius: var(--ui-radius-small, 0.25rem);
+        border-radius: var(--ui-radius-small, 0.4rem);
         transition: background 0.1s;
     }
 
@@ -465,24 +465,24 @@
 
     .signal-picker-overlay {
         position: absolute;
-        top: 1.8rem;
+        top: 2.8rem;
         left: 0;
         right: 0;
         z-index: 10;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem;
-        padding: 0.4rem;
+        gap: 0.4rem;
+        padding: 0.6rem;
         background: var(--color-surface, #fff);
-        border-bottom: 0.1rem solid var(--color-border);
-        box-shadow: 0 0.3rem 0.6rem rgba(0,0,0,0.08);
+        border-bottom: 0.2rem solid var(--color-border);
+        box-shadow: 0 0.4rem 1rem rgba(0,0,0,0.08);
     }
 
     .signal-btn {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.45rem;
-        border-radius: var(--ui-radius-small, 0.25rem);
-        border: 0.1rem solid var(--signal-color, var(--color-border));
+        font-size: 1rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: var(--ui-radius-small, 0.4rem);
+        border: 0.2rem solid var(--signal-color, var(--color-border));
         background: transparent;
         color: var(--color-text-primary);
         cursor: pointer;
@@ -505,7 +505,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        padding: 0.5rem;
+        padding: 0.8rem;
         box-sizing: border-box;
     }
 
@@ -527,16 +527,16 @@
         justify-content: center;
         height: 100%;
         color: var(--color-text-secondary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         text-align: center;
     }
 
     /* Doc overlay — sits on the right edge of the chart */
     .doc-overlay {
         position: absolute;
-        top: 0.5rem;
-        right: 1rem;
-        width: 2.4rem;
+        top: 0.8rem;
+        right: 1.6rem;
+        width: 3.8rem;
         pointer-events: none;
         z-index: 5;
     }

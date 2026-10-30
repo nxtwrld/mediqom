@@ -216,11 +216,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .procedure-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
@@ -229,9 +229,9 @@
     .cpt-code {
         background-color: var(--color-interactivity-light);
         color: var(--color-interactivity-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         font-family: monospace;
     }
@@ -262,22 +262,22 @@
     /* procedure-findings now uses global .item-notes styles */
     
     .complications {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .complications-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-top: 0.25rem;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
     }
     
     .complication-tag {
         background-color: var(--color-negative-light);
         color: var(--color-negative-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
     }
     
     /* Surgical Team */
@@ -285,7 +285,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .member-name {
@@ -296,15 +296,15 @@
     .member-role {
         background-color: var(--color-surface);
         color: var(--color-text-secondary);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
     }
     
     .member-credentials {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
     

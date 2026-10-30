@@ -175,24 +175,24 @@
     .side-effects-list,
     .contraindications-list {
         margin: 0;
-        padding: 0.75rem 0.75rem 0.75rem 2rem;
+        padding: 1.2rem 1.2rem 1.2rem 3.2rem;
         background: var(--color-surface, #f8fafc);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.5;
     }
 
     .side-effects-list {
-        border-left: .5rem solid var(--color-warning, #f59e0b);
+        border-left: 0.8rem solid var(--color-warning, #f59e0b);
     }
 
     .contraindications-list {
-        border-left: .5rem solid var(--color-negative, #dc2626);
+        border-left: 0.8rem solid var(--color-negative, #dc2626);
     }
 
     .side-effects-list li,
     .contraindications-list li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
     }
 
     .side-effects-list li:last-child,

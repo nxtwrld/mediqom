@@ -195,7 +195,7 @@
   }
   .anatomy-hero {
     position: relative;
-    height: 24rem;
+    height: 38.4rem;
     background: var(--color-surface);
     border-radius: var(--ui-radius-large);
     overflow: hidden;
@@ -208,18 +208,18 @@
   .capsule {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    min-width: 6rem;
+    gap: 0.4rem;
+    min-width: 9.6rem;
     flex: 1;
   }
   .capsule-label {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     text-transform: capitalize;
     color: var(--color-text-secondary);
   }
   .capsule-bar {
     display: flex;
-    height: 0.5rem;
+    height: 0.8rem;
     border-radius: var(--ui-radius-small);
     overflow: hidden;
     background: var(--color-border);
@@ -231,12 +231,12 @@
     background: color-mix(in srgb, var(--color-primary) 40%, transparent);
   }
   .capsule-count {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     color: var(--color-text-secondary);
   }
   .item-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(32rem, 1fr));
     gap: var(--ui-pad-medium);
   }
 </style>

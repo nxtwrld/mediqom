@@ -3,7 +3,7 @@
 /* Section headings - container responsive */
 .document-section .h3.heading {
   margin-bottom: 0;
-  font-size: clamp(0.8rem, 3vw, 1.5rem);
+  font-size: clamp(1.2rem, 3vw, 2.4rem);
 }
 
 .document-section .h3.heading.-sticky {
@@ -14,8 +14,8 @@
 }
 
 .document-section .h4 {
-  font-size: clamp(0.6rem, 2vw, 1.2rem);
-  padding: .5rem 1rem;
+  font-size: clamp(1rem, 2vw, 2rem);
+  padding: 0.8rem 1.6rem;
   margin: 0;
 }
 
@@ -23,9 +23,9 @@
 .document-section .heading > h1,
 .document-section .heading > h2,
 .document-section .heading > h3 {
-  font-size: clamp(0.8rem, 3vw, 1.5rem);
+  font-size: clamp(1.2rem, 3vw, 2.4rem);
   line-height: 1.2;
-  padding: 0 1rem;
+  padding: 0 1.6rem;
 }
 
 
@@ -36,7 +36,7 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 1rem;
+    font-size: 1.6rem;
     line-height: 1.1;
   }
 }
@@ -46,8 +46,8 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 1rem;
-    padding: 0 1rem;
+    font-size: 1.6rem;
+    padding: 0 1.6rem;
   }
 }
 
@@ -56,7 +56,7 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 1rem;
+    font-size: 1.6rem;
     line-height: 1;
   }
 
@@ -71,7 +71,7 @@
   .document-section .heading > h1,
   .document-section .heading > h2,
   .document-section .heading > h3 {
-    font-size: 0.75rem;
+    font-size: 1.2rem;
     line-height: 1;
   }
 
@@ -84,7 +84,7 @@
 .document-section .section-title-sub {
   background-color: var(--color-gray-500);
   font-weight: 600;
-  padding: 0.5rem;
+  padding: 0.8rem;
   margin-bottom: var(--gap);
 }
 
@@ -92,11 +92,11 @@
 .document-section .list-items {
   list-style: none;
   padding: 0;
-  --indicator-width: 0.5rem;
+  --indicator-width: 0.8rem;
 }
 
 .document-section .list-items li {
-  padding: 1rem;
+  padding: 1.6rem;
   background-color: var(--color-background);
   margin-bottom: var(--gap);
 }
@@ -108,7 +108,7 @@
 
 /* Page/block styling */
 .document-section .page.-block {
-  padding: 1rem;
+  padding: 1.6rem;
   background-color: var(--color-background);
   margin-bottom: var(--gap);
 }
@@ -118,17 +118,17 @@
   width: 100%;
   border-collapse: collapse;
   margin-bottom: var(--gap);
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
 }
 
 /* Container queries for table responsiveness */
 @container (max-width: 600px) {
   .document-section .table-list {
-    font-size: 0.85rem;
+    font-size: 1.4rem;
   }
 
   .document-section .table-list tr td {
-    padding: 0.5rem 0.25rem;
+    padding: 0.8rem 0.4rem;
   }
 
   .document-section .table-list .actions {
@@ -149,7 +149,7 @@
 
 @container (max-width: 400px) {
   .document-section .table-list {
-    font-size: 0.8rem;
+    font-size: 1.2rem;
   }
 }
 
@@ -161,17 +161,17 @@
 }
 
 .document-section .table-list tr td:first-child {
-  border-left: 0.5rem solid var(--color-urgency, var(--color-info));
+  border-left: 0.8rem solid var(--color-urgency, var(--color-info));
 }
 
 @media screen and (max-width: 768px) {
   .document-section .table-list.-mobile-list tr td {
-    border-left: 0.5rem solid var(--color-urgency, var(--color-info));
+    border-left: 0.8rem solid var(--color-urgency, var(--color-info));
   }
 }
 
 .document-section .table-list tr th {
-  padding: 0.75rem;
+  padding: 1.2rem;
   text-align: left;
   font-weight: 600;
   background-color: var(--color-background);
@@ -179,19 +179,19 @@
 }
 
 .document-section .table-list tr th:first-childresim {
-  border-left: 0.5rem solid var(--color-background);
+  border-left: 0.8rem solid var(--color-background);
 }
 
 /* Detail items (label/value pairs) - container responsive */
 .document-section .detail-item {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 .document-section .label {
   font-weight: 500;
   color: var(--color-text-secondary);
-  min-width: min(80px, 30%);
+  min-width: min(8rem, 30%);
   flex-shrink: 0;
 }
 
@@ -203,7 +203,7 @@
 @container (max-width: 300px) {
   .document-section .detail-item {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
 
   .document-section .label {
@@ -216,7 +216,7 @@
   text-align: center;
   color: var(--color-text-secondary);
   font-style: italic;
-  padding: 2rem;
+  padding: 3.2rem;
 }
 
 /* Urgency colors */
@@ -283,9 +283,9 @@
 
 /* Common badge styles */
 .document-section .badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
   font-weight: 500;
   display: inline-block;
 }
@@ -325,9 +325,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.2rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 @container (max-width: 400px) {
@@ -338,7 +338,7 @@
 }
 
 .document-section .item-name {
-  font-size: 1.1rem;
+  font-size: 1.8rem;
   font-weight: 600;
   margin: 0;
   color: var(--color-text-primary);
@@ -347,9 +347,9 @@
 /* Grid layout for details - container responsive */
 .document-section .item-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
 }
 
 /* For very narrow containers, use single column */
@@ -361,12 +361,12 @@
 
 /* Notes and additional text */
 .document-section .item-notes {
-  font-size: 0.9rem;
+  font-size: 1.4rem;
   color: var(--color-text-secondary);
 }
 
 .document-section .item-notes p {
-  margin: 0.25rem 0 0 0;
+  margin: 0.4rem 0 0 0;
   line-height: 1.4;
 }
 
@@ -374,24 +374,24 @@
 .document-section .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
 @container (max-width: 500px) {
   .document-section .tag-list {
-    gap: 0.125rem;
+    gap: 0.2rem;
   }
 
   .document-section .tag {
-    font-size: 0.7rem;
+    font-size: 1.2rem;
   }
 }
 
 .document-section .tag {
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.4rem;
+  font-size: 1.2rem;
 }
 
 /* Action buttons in tables */
@@ -403,15 +403,15 @@
 .document-section .table-list .actions button {
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .document-section .table-list .actions button svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 2rem;
+  height: 2rem;
   background-color: transparent;
 }
 
@@ -423,7 +423,7 @@
   background: var(--color-interactivity);
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -449,7 +449,7 @@
 @container (max-width: 600px) {
   .document-section .detail-item {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
 
   .document-section .label {
@@ -459,18 +459,18 @@
   /* Reduce padding for compact layout */
   .document-section .page.-block,
   .document-section .list-items li {
-    padding: 0.75rem;
+    padding: 1.2rem;
   }
 }
 
 @container (max-width: 400px) {
   .document-section .page.-block,
   .document-section .list-items li {
-    padding: 0.5rem;
+    padding: 0.8rem;
   }
 
   .document-section .item-name {
-    font-size: 1rem;
+    font-size: 1.6rem;
   }
 }
 
@@ -487,8 +487,8 @@
   }
 
   .document-section .table-list td {
-    padding: 0.25rem;
-    font-size: 0.75rem;
+    padding: 0.4rem;
+    font-size: 1.2rem;
   }
 }
 
@@ -500,7 +500,7 @@
 
   .document-section .detail-item {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
 
   .document-section .label {

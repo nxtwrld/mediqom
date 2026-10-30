@@ -168,58 +168,58 @@
 <style>
   .dual-stage-progress {
     background: white;
-    border-radius: 12px;
-    padding: 24px;
+    border-radius: 1.2rem;
+    padding: 2.4rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
+    max-width: 60rem;
     margin: 0 auto;
   }
 
   .dual-stage-progress.error {
-    border-left: 4px solid #ef4444;
+    border-left: 0.4rem solid #ef4444;
   }
 
   /* Overall Progress */
   .overall-progress {
-    margin-bottom: 32px;
+    margin-bottom: 3.2rem;
   }
 
   .progress-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 1.2rem;
   }
 
   .progress-header h3 {
     margin: 0;
     color: #1f2937;
-    font-size: 18px;
+    font-size: 1.8rem;
     font-weight: 600;
   }
 
   .progress-percentage {
-    font-size: 18px;
+    font-size: 1.8rem;
     font-weight: 700;
     color: #3b82f6;
   }
 
   .progress-bar {
     width: 100%;
-    height: 8px;
+    height: 0.8rem;
     background-color: #e5e7eb;
-    border-radius: 4px;
+    border-radius: 0.4rem;
     overflow: hidden;
   }
 
   .progress-bar.overall {
-    height: 12px;
+    height: 1.2rem;
   }
 
   .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-    border-radius: 4px;
+    border-radius: 0.4rem;
     transition: width 0.3s ease;
   }
 
@@ -235,14 +235,14 @@
   .stages-container {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 1.6rem;
+    margin-bottom: 2.4rem;
   }
 
   .stage {
     flex: 1;
-    padding: 16px;
-    border-radius: 8px;
+    padding: 1.6rem;
+    border-radius: 0.8rem;
     background: #f9fafb;
     border: 2px solid #e5e7eb;
     transition: all 0.3s ease;
@@ -262,20 +262,20 @@
   .stage-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
   }
 
   .stage-icon {
-    width: 24px;
-    height: 24px;
+    width: 2.4rem;
+    height: 2.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     background: #e5e7eb;
     color: #6b7280;
-    font-size: 12px;
+    font-size: 1.2rem;
     font-weight: 600;
   }
 
@@ -290,20 +290,20 @@
   }
 
   .stage-number {
-    font-size: 12px;
+    font-size: 1.2rem;
     font-weight: 600;
   }
 
   .stage h4 {
     margin: 0;
-    font-size: 14px;
+    font-size: 1.4rem;
     font-weight: 600;
     color: #374151;
     flex: 1;
   }
 
   .stage-progress {
-    font-size: 12px;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #6b7280;
   }
@@ -313,12 +313,12 @@
   }
 
   .stage-bar {
-    height: 4px;
-    margin-bottom: 8px;
+    height: 0.4rem;
+    margin-bottom: 0.8rem;
   }
 
   .stage-description {
-    font-size: 12px;
+    font-size: 1.2rem;
     color: #6b7280;
     margin: 0;
     line-height: 1.4;
@@ -338,10 +338,10 @@
   }
 
   .connector-line {
-    width: 2px;
-    height: 20px;
+    width: 0.2rem;
+    height: 2rem;
     background: #d1d5db;
-    margin-bottom: 4px;
+    margin-bottom: 0.4rem;
   }
 
   .stage-connector.active .connector-line {
@@ -349,7 +349,7 @@
   }
 
   .connector-arrow {
-    font-size: 16px;
+    font-size: 1.6rem;
     color: #d1d5db;
     font-weight: bold;
   }
@@ -361,13 +361,13 @@
   /* Current Status */
   .current-status {
     border-top: 1px solid #e5e7eb;
-    padding-top: 16px;
+    padding-top: 1.6rem;
   }
 
   .status-message {
     display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
   }
 
   .status-label {
@@ -381,7 +381,7 @@
   }
 
   .file-counter {
-    font-size: 14px;
+    font-size: 1.4rem;
     color: #6b7280;
     text-align: center;
   }
@@ -389,28 +389,28 @@
   /* Error State */
   .error-state {
     text-align: center;
-    padding: 16px;
+    padding: 1.6rem;
     background: #fef2f2;
-    border-radius: 8px;
+    border-radius: 0.8rem;
     border: 1px solid #fecaca;
-    margin-top: 16px;
+    margin-top: 1.6rem;
   }
 
   .error-icon {
-    font-size: 24px;
-    margin-bottom: 8px;
+    font-size: 2.4rem;
+    margin-bottom: 0.8rem;
   }
 
   .error-state p {
     margin: 0;
     color: #dc2626;
-    font-size: 14px;
+    font-size: 1.4rem;
   }
 
   /* Spinner Animation */
   .spinner {
-    width: 16px;
-    height: 16px;
+    width: 1.6rem;
+    height: 1.6rem;
     border: 2px solid #e5e7eb;
     border-top: 2px solid currentColor;
     border-radius: 50%;
@@ -427,7 +427,7 @@
   @media (max-width: 768px) {
     .stages-container {
       flex-direction: column;
-      gap: 12px;
+      gap: 1.2rem;
     }
 
     .stage-connector {
@@ -435,8 +435,8 @@
     }
 
     .connector-line {
-      width: 20px;
-      height: 2px;
+      width: 2rem;
+      height: 0.2rem;
     }
 
     .connector-arrow {

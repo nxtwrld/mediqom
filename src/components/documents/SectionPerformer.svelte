@@ -220,10 +220,10 @@
 <style>
     .badge {
         display: inline-block;
-        padding: 0.125rem 0.5rem;
-        font-size: 0.75rem;
+        padding: 0.2rem 0.8rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
     }
 
     .badge.-primary {
@@ -234,12 +234,12 @@
     .button {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
+        gap: 0.6rem;
     }
 
     .btn-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 

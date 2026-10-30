@@ -71,6 +71,7 @@
   let disclaimerExpanded = $state(false);
   let messagesContainer = $state<HTMLElement>();
   let textareaRef: HTMLTextAreaElement | undefined = $state();
+  // shortcut: px sidebar width, convert when resize logic moves to rem
   let sidebarWidth = $state(400);
   let isResizing = $state(false);
 
@@ -646,7 +647,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 4px;
+    width: 0.4rem;
     height: 100%;
     background: transparent;
     cursor: col-resize;
@@ -661,64 +662,64 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
+    padding: 1.6rem;
     border-bottom: 1px solid var(--color-gray-400);
     background: var(--color-gray-300);
   }
 
   .chat-title h3 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
+    margin: 0 0 0.4rem 0;
+    font-size: 1.6rem;
     color: var(--color-black);
   }
 
   .chat-subtitle {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.8rem;
     flex-wrap: wrap;
   }
 
   .chat-profile {
-    font-size: 13px;
+    font-size: 1.4rem;
     font-weight: 500;
     color: var(--color-blue);
   }
 
   .chat-mode {
-    font-size: 12px;
+    font-size: 1.2rem;
     color: var(--color-gray-800);
     background: var(--color-gray-400);
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 0.2rem 0.8rem;
+    border-radius: 1.2rem;
   }
 
   .chat-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.8rem;
   }
 
   .chat-model-select {
-    height: 32px;
-    max-width: 160px;
+    height: 3.2rem;
+    max-width: 16rem;
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     color: var(--color-text-primary);
     border-radius: var(--ui-radius-small);
-    padding: 0 0.4rem;
-    font-size: 0.8rem;
+    padding: 0 0.6rem;
+    font-size: 1.2rem;
     cursor: pointer;
   }
 
   .chat-action-btn {
-    width: 32px;
-    height: 32px;
+    width: 3.2rem;
+    height: 3.2rem;
     border: none;
     background: transparent;
     color: var(--color-gray-800);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 0.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -730,19 +731,19 @@
   }
 
   .chat-action-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 1.6rem;
+    height: 1.6rem;
   }
 
   .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 1.6rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.6rem;
     background: var(--color-background);
-    padding-bottom: 2rem;
+    padding-bottom: 3.2rem;
   }
 
   .message {
@@ -765,7 +766,7 @@
   .message-content {
     max-width: 80%;
     background: var(--color-gray-300);
-    padding: 12px;
+    padding: 1.2rem;
     border-radius: var(--radius-8);
     position: relative;
     font-weight: 400;
@@ -775,7 +776,7 @@
   .message.user .message-content {
     background: var(--color-blue);
     color: var(--color-white);
-    border-bottom-right-radius: 4px;
+    border-bottom-right-radius: 0.4rem;
     font-weight: 500;
   }
 
@@ -785,17 +786,17 @@
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 10px solid var(--color-blue);
-    border-right: 10px solid transparent;
-    border-left: 10px solid transparent;
-    bottom: -10px;
-    right: 10px;
+    border-top: 1rem solid var(--color-blue);
+    border-right: 1rem solid transparent;
+    border-left: 1rem solid transparent;
+    bottom: -1rem;
+    right: 1rem;
   }
 
   .message.assistant .message-content {
     background: var(--color-gray-500);
     color: var(--color-black);
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 0.4rem;
     font-weight: 300;
     width: 100%;
   }
@@ -806,24 +807,24 @@
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 10px solid var(--color-gray-500);
-    border-right: 10px solid transparent;
-    border-left: 10px solid transparent;
-    bottom: -10px;
-    left: 10px;
+    border-top: 1rem solid var(--color-gray-500);
+    border-right: 1rem solid transparent;
+    border-left: 1rem solid transparent;
+    bottom: -1rem;
+    left: 1rem;
   }
 
   .message.system .message-content {
     background: var(--color-info);
     color: var(--color-info-text);
-    font-size: 12px;
+    font-size: 1.2rem;
     max-width: 100%;
     text-align: center;
     font-weight: 500;
   }
 
   .message-text {
-    margin-bottom: 8px;
+    margin-bottom: 0.8rem;
     line-height: 1.4;
     white-space: pre-wrap;
     user-select: text;
@@ -881,14 +882,14 @@
   .message-widgets {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
     max-width: 100%;
     overflow: hidden;
   }
 
   .message-time {
-    font-size: 11px;
+    font-size: 1.2rem;
     color: var(--color-gray-800);
     text-align: right;
   }
@@ -897,19 +898,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 8px 10px;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+    padding: 0.8rem 1rem;
     border: 1px solid var(--color-border);
     border-radius: var(--ui-radius-medium);
     background: var(--color-surface);
   }
   .suggested-action .sa-label {
-    font-size: 13px;
+    font-size: 1.4rem;
     color: var(--color-text-primary);
   }
   .suggested-action .sa-done {
-    font-size: 13px;
+    font-size: 1.4rem;
     color: var(--color-positive);
     font-weight: 600;
   }
@@ -917,18 +918,18 @@
   .anatomy-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
   }
 
   .anatomy-btn {
     background: var(--color-highlight);
     color: var(--color-highlight-text);
     border: none;
-    padding: 6px;
+    padding: 0.6rem;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 3.2rem;
+    height: 3.2rem;
     cursor: pointer;
     transition: background 0.2s;
     display: flex;
@@ -937,8 +938,8 @@
   }
 
   .anatomy-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 1.8rem;
+    height: 1.8rem;
   }
 
   .anatomy-btn:hover {
@@ -946,31 +947,31 @@
   }
 
   .document-prompt {
-    margin-top: 8px;
-    padding: 12px;
+    margin-top: 0.8rem;
+    padding: 1.2rem;
     background: var(--color-gray-300);
-    border-radius: 8px;
+    border-radius: 0.8rem;
     border: 1px solid var(--color-gray-400);
   }
 
   .document-prompt-text {
-    margin: 0 0 12px 0;
-    font-size: 14px;
+    margin: 0 0 1.2rem 0;
+    font-size: 1.4rem;
     color: var(--color-black);
     line-height: 1.4;
   }
 
   .document-actions {
     display: flex;
-    gap: 8px;
+    gap: 0.8rem;
   }
 
   .document-btn {
     flex: 1;
-    padding: 8px 16px;
+    padding: 0.8rem 1.6rem;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 0.6rem;
+    font-size: 1.4rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -996,13 +997,13 @@
 
   .typing-indicator {
     display: flex;
-    gap: 4px;
+    gap: 0.4rem;
     align-items: center;
   }
 
   .typing-indicator span {
-    width: 8px;
-    height: 8px;
+    width: 0.8rem;
+    height: 0.8rem;
     border-radius: 50%;
     background: var(--color-gray-800);
     animation: typing 1.4s infinite;
@@ -1030,11 +1031,11 @@
   }
 
   .ai-disclaimer {
-    padding: 0.5rem 1rem;
+    padding: 0.8rem 1.6rem;
     background: var(--color-warning);
     border-top-left-radius: var(--radius-8);
     border-top-right-radius: var(--radius-8);
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     line-height: 1.4;
     color: var(--color-warning-text);
   }
@@ -1045,15 +1046,15 @@
   }
 
   .ai-disclaimer-details {
-    margin: 6px 0 0;
+    margin: 0.6rem 0 0;
   }
 
   .ai-disclaimer-toggle {
     background: none;
     border: none;
     padding: 0;
-    margin-top: 4px;
-    font-size: 11px;
+    margin-top: 0.4rem;
+    font-size: 1.2rem;
     color: var(--color-blue);
     cursor: pointer;
     text-decoration: underline;
@@ -1061,13 +1062,13 @@
 
   .input-area {
     border-top: 1px solid var(--color-gray-400);
-    padding: 16px;
+    padding: 1.6rem;
     background: var(--color-gray-300);
   }
 
   .input-container {
     display: flex;
-    gap: 8px;
+    gap: 0.8rem;
     align-items: flex-end;
   }
 
@@ -1076,10 +1077,10 @@
     border: 1px solid var(--color-gray-400);
     border-bottom-left-radius: var(--radius-8);
     border-bottom-right-radius: var(--radius-8);
-    padding: 12px;
+    padding: 1.2rem;
     resize: none;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 1.4rem;
     line-height: 1.4;
     background: var(--color-white);
     color: var(--color-black);
@@ -1096,8 +1097,8 @@
   }
 
   .send-btn {
-    width: 40px;
-    height: 40px;
+    width: 4rem;
+    height: 4rem;
     background: var(--color-blue);
     color: var(--color-white);
     border: none;
@@ -1119,8 +1120,8 @@
   }
 
   .send-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 1.6rem;
+    height: 1.6rem;
   }
 
   /* Mobile responsive */
@@ -1139,7 +1140,7 @@
     }
 
     .input-container textarea {
-      font-size: 16px;
+      font-size: 1.6rem;
     }
   }
 </style>

@@ -55,13 +55,13 @@
   }
   .placeholder-stack {
     width: 100%;
-    max-width: 28rem;
+    max-width: 44.8rem;
     display: flex;
     flex-direction: column;
     gap: var(--ui-pad-small);
   }
   .ph-bar {
-    height: 1.25rem;
+    height: 2rem;
     border-radius: var(--ui-radius-small);
     background: linear-gradient(
       90deg,
@@ -74,7 +74,7 @@
     opacity: 0.6;
   }
   .ph-condition {
-    height: 1.75rem;
+    height: 2.8rem;
     width: 70%;
   }
   .ph-task {
@@ -84,7 +84,7 @@
     width: 60%;
   }
   .ph-goal {
-    height: 1.5rem;
+    height: 2.4rem;
     width: 80%;
   }
   @keyframes cp-pulse {
@@ -99,14 +99,14 @@
     }
   }
   .potential-title {
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     font-weight: 600;
     color: var(--color-text-primary);
-    max-width: 28rem;
+    max-width: 44.8rem;
   }
   .potential-share,
   .potential-nudge {
     color: var(--color-text-secondary);
-    max-width: 28rem;
+    max-width: 44.8rem;
   }
 </style>

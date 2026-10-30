@@ -146,7 +146,7 @@
 
 <style>
     .section-session {
-        min-height: 600px;
+        min-height: 60rem;
         display: flex;
         flex-direction: column;
         background: var(--color-surface, #fff);
@@ -156,7 +156,7 @@
         flex: 1;
         position: relative;
         overflow: hidden;
-        min-height: 500px;
+        min-height: 50rem;
     }
     
     .loading-visualization {
@@ -169,14 +169,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1rem;
-        padding: 3rem;
+        gap: 1.6rem;
+        padding: 4.8rem;
         text-align: center;
     }
     
     .loading-spinner {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         border: 2px solid var(--color-border, #e2e8f0);
         border-top: 2px solid var(--color-interactivity, #3b82f6);
         border-radius: 50%;
@@ -186,7 +186,7 @@
     .loading-text {
         margin: 0;
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
     
     @keyframes spin {
@@ -195,7 +195,7 @@
     }
     
     .no-session-data {
-        padding: 3rem;
+        padding: 4.8rem;
         text-align: center;
         color: var(--color-text-secondary, #6b7280);
     }
@@ -203,7 +203,7 @@
     /* Mobile responsive */
     @media (max-width: 768px) {
         .session-visualization {
-            min-height: 400px;
+            min-height: 40rem;
         }
     }
 </style>

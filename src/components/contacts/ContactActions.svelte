@@ -56,7 +56,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: .5rem;
+        padding: 0.8rem;
     }
 
     .actions a svg {

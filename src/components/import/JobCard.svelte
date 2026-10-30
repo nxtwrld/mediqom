@@ -88,8 +88,8 @@
     .job-card {
         display: flex;
         align-items: center;
-        gap: .75rem;
-        padding: .75rem;
+        gap: 1.2rem;
+        padding: 1.2rem;
         background-color: var(--color-background);
         border: 2px solid var(--color-gray-300);
         border-radius: var(--radius-8);
@@ -109,8 +109,8 @@
 
     .preview {
         position: relative;
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         flex-shrink: 0;
         display: flex;
         align-items: center;
@@ -120,8 +120,8 @@
         background: var(--color-gray-200);
     }
     .preview svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: var(--color-interactivity);
     }
     .thumbnail {
@@ -135,7 +135,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 3px;
+        height: 0.3rem;
         background: var(--color-gray-300);
     }
     .progress-fill {
@@ -150,21 +150,21 @@
     }
     .title {
         font-weight: 600;
-        font-size: .85rem;
+        font-size: 1.4rem;
     }
     .status-label {
-        font-size: .75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
     .message {
-        font-size: .7rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
     .error-message {
-        font-size: .7rem;
+        font-size: 1.2rem;
         color: var(--color-negative);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -173,12 +173,12 @@
 
     .actions {
         display: flex;
-        gap: .25rem;
+        gap: 0.4rem;
         align-items: center;
         flex-shrink: 0;
     }
     .actions .button.-ghost {
-        padding: .25rem;
+        padding: 0.4rem;
         min-width: unset;
     }
     .actions .button.-ghost svg {

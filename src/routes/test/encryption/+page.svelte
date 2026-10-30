@@ -1030,7 +1030,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.encryption-test-container {
 		margin: 0 auto;
 		padding: var(--ui-pad-large);
-		max-width: 900px
+		max-width: 90rem
 	}
 
 	header {
@@ -1038,7 +1038,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	}
 
 	header h1 {
-		margin: 0 0 0.25rem;
+		margin: 0 0 0.4rem;
 	}
 
 	header p {
@@ -1065,7 +1065,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.layer-desc {
 		font-weight: 400;
 		color: var(--color-text-secondary);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 	}
 
 	.panel {
@@ -1078,12 +1078,12 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.4rem;
 	}
 
 	.field label,
 	.field .field-label {
-		font-size: 0.8125rem;
+		font-size: 1.4rem;
 		font-weight: 500;
 		color: var(--color-text-secondary);
 		display: flex;
@@ -1093,7 +1093,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 
 	.mono {
 		font-family: var(--font-face-values);
-		font-size: 0.8125rem;
+		font-size: 1.4rem;
 	}
 
 	textarea.input {
@@ -1133,39 +1133,39 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	}
 
 	.timing {
-		font-size: 0.75rem;
+		font-size: 1.2rem;
 		color: var(--color-text-secondary);
 		font-weight: 400;
 		background: var(--color-surface);
-		padding: 0.1rem 0.4rem;
+		padding: 0.2rem 0.6rem;
 		border-radius: var(--ui-radius-small);
 	}
 
 	.badge {
-		font-size: 0.75rem;
+		font-size: 1.2rem;
 		font-weight: 500;
 		background: var(--color-interactivity);
 		color: white;
-		padding: 0.1rem 0.4rem;
+		padding: 0.2rem 0.6rem;
 		border-radius: var(--ui-radius-small);
 	}
 
 	.error {
 		color: var(--color-negative);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		margin: 0;
 	}
 
 	.success {
 		color: var(--color-positive);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		margin: 0;
 		font-weight: 600;
 	}
 
 	.warning {
 		color: var(--color-warning);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		margin: 0;
 		padding: var(--ui-pad-small);
 		background: color-mix(in srgb, var(--color-warning) 10%, transparent);
@@ -1175,23 +1175,23 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.support-grid {
 		display: flex;
 		gap: var(--ui-pad-large);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 	}
 
 	/* Pipeline */
 	.pipeline-log {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.4rem;
 	}
 
 	.pipeline-step {
 		display: grid;
-		grid-template-columns: 1.5rem 1fr auto;
-		gap: 0.25rem var(--ui-pad-small);
-		padding: 0.375rem var(--ui-pad-small);
+		grid-template-columns: 2.4rem 1fr auto;
+		gap: 0.4rem var(--ui-pad-small);
+		padding: 0.6rem var(--ui-pad-small);
 		border-radius: var(--ui-radius-small);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		color: var(--color-text-secondary);
 		align-items: start;
 	}
@@ -1220,7 +1220,7 @@ Salt: {passkey.credential.prfSalt}</textarea>
 	.step-output {
 		grid-column: 2 / -1;
 		font-family: var(--font-face-values);
-		font-size: 0.75rem;
+		font-size: 1.2rem;
 		color: var(--color-text-secondary);
 		word-break: break-all;
 	}

@@ -58,18 +58,18 @@
 <style>
 	.widget-lab-trend {
 		padding: 0;
-		min-height: 60px;
+		min-height: 6rem;
 	}
 
 	.single-value {
-		padding: 8px 12px;
+		padding: 0.8rem 1.2rem;
 	}
 
 	.no-data {
-		font-size: 12px;
+		font-size: 1.2rem;
 		color: var(--color-gray-800);
 		text-align: center;
-		padding: 20px 10px;
+		padding: 2rem 1rem;
 		margin: 0;
 	}
 </style>

@@ -77,7 +77,7 @@
     .modal-content {
         --radius: var(--radius-16);
         position: relative;
-        min-width: 10rem;
+        min-width: 16rem;
         max-width: 80vw;
         max-height: 100vh;
         overflow: hidden;
@@ -128,7 +128,7 @@
     .modal {
 
         position: relative;
-        padding: 1rem;
+        padding: 1.6rem;
         width: 100%;
         max-width: 100vw;
         height: 100%;
@@ -141,7 +141,7 @@
         position: absolute;
         top: 0;
         right: 0;
-        padding: .5rem;
+        padding: 0.8rem;
         font-weight: bold;
         background-color: transparent;
         border-top-right-radius: var(--radius-16);
@@ -161,7 +161,7 @@
     }
     .close svg {
         fill: currentColor;
-        height: 1.5rem;
-        width: 1.5rem;
+        height: 2.4rem;
+        width: 2.4rem;
     }
 </style>

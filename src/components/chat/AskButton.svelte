@@ -42,6 +42,6 @@
     .ask-btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 </style>

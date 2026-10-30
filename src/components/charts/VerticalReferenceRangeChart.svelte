@@ -646,7 +646,7 @@
                                     select(this)
                                         .attr('r', dotRadius(d))
                                         .attr('opacity', dotOpacity(d))
-                                        .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                        .style('filter', 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.2))');
                                 }
                             }),
                         update => update,
@@ -661,7 +661,7 @@
                         if (isHighlighted(currentSeries, d)) return 2;
                         return isContinuousSource(d) ? 0 : 1.5;
                     })
-                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.2))');
 
                 // Outlier dots — distinct styling, severity-based size
                 function outlierRadius(d: typeof outlierDotData[number]): number {
@@ -688,7 +688,7 @@
                                     select(this)
                                         .attr('r', outlierRadius(d))
                                         .attr('opacity', 0.9)
-                                        .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.3))');
+                                        .style('filter', 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.3))');
                                 }
                             }),
                         update => update,
@@ -700,7 +700,7 @@
                     .attr('opacity', 0.9)
                     .attr('stroke', 'white')
                     .attr('stroke-width', 1.5)
-                    .style('filter', 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.3))');
+                    .style('filter', 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.3))');
 
                 // Ensure dots render above bands/lines
                 g.selectAll('.dot').raise();
@@ -755,7 +755,7 @@
                                     select(this)
                                         .attr('r', dotRadius(d))
                                         .attr('opacity', dotOpacity(d))
-                                        .style('filter', isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                                        .style('filter', isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.2))');
                                 }
                             }),
                         update => update,
@@ -770,7 +770,7 @@
                         if (isHighlighted(currentSeries, d)) return 2;
                         return isContinuousSource(d) ? 0 : 1.5;
                     })
-                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2))');
+                    .style('filter', d => isContinuousSource(d) ? 'none' : 'drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.2))');
 
                 // Ensure dots render above the line
                 g.selectAll('.dot').raise();
@@ -1333,7 +1333,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        min-height: 16rem;
+        min-height: 25.6rem;
     }
 
     .chart-wrap svg {
@@ -1379,7 +1379,7 @@
     }
 
     .chart-wrap svg :global(.dot) {
-        filter: drop-shadow(0 0.1rem 0.2rem rgba(0,0,0,0.2));
+        filter: drop-shadow(0 0.2rem 0.3rem rgba(0,0,0,0.2));
         cursor: pointer;
         transition: r 0.15s ease, opacity 0.15s ease;
     }
@@ -1419,7 +1419,7 @@
     }
 
     .chart-wrap svg :global(.tick-year) {
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         font-weight: 700;
         fill: var(--color-white);
     }
@@ -1433,7 +1433,7 @@
     }
 
     .chart-wrap svg :global(.tick-month) {
-        font-size: 0.6rem;
+        font-size: 1rem;
         fill: var(--color-gray-900);
     }
 
@@ -1442,7 +1442,7 @@
     }
 
     .chart-wrap svg :global(.tick-day) {
-        font-size: 0.6rem;
+        font-size: 1rem;
         fill: var(--color-gray-900);
     }
 
@@ -1458,7 +1458,7 @@
 
     .chart-wrap svg :global(.rangeLabelText) {
         fill: #fff;
-        font-size: 0.6rem;
+        font-size: 1rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -1468,48 +1468,48 @@
     .dot-menu-content {
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
-        padding: 0.7rem;
-        min-width: 14rem;
+        gap: 0.2rem;
+        padding: 1.2rem;
+        min-width: 22.4rem;
     }
 
     .dot-menu-header {
-        padding: 0 0 .5rem 0;
+        padding: 0 0 0.8rem 0;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
     .dot-menu-header  > .h4 {
         margin: 0;
     }
 
     .dot-menu-value {
-        font-size: 2rem;
+        font-size: 3.2rem;
         font-weight: 600;
         color: var(--color-text-primary);
     }
 
     .dot-menu-date {
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 
     .dot-menu-divider {
         border: none;
         border-top: 1px solid var(--color-border);
-        margin: 0.1rem 0;
+        margin: 0.2rem 0;
     }
 
     .dot-menu-content :global(.range) {
         min-width: unset;
-        margin: 0.1rem 0;
+        margin: 0.2rem 0;
     }
 
 
     .dot-menu-source {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
-        padding: 0.2rem 0;
+        padding: 0.3rem 0;
     }
 
     .dot-menu-source .source-label {
@@ -1524,40 +1524,40 @@
     .bucket-summary {
         display: flex;
         flex-direction: column;
-        gap: 0.3rem;
-        padding: 0.25rem 0;
+        gap: 0.4rem;
+        padding: 0.4rem 0;
     }
 
     .bucket-median {
         display: flex;
         align-items: baseline;
-        gap: 0.3rem;
+        gap: 0.4rem;
     }
 
     .bucket-median-value {
-        font-size: 1.8rem;
+        font-size: 2.8rem;
         font-weight: 600;
         color: var(--color-text-primary);
     }
 
     .bucket-median-unit {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 
     .bucket-range {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 
     .bucket-range-unit {
-        font-size: 0.7rem;
+        font-size: 1.2rem;
     }
 
     .bucket-count {
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
-        margin-top: 0.15rem;
+        margin-top: 0.2rem;
     }
 
     /* Medication zone */

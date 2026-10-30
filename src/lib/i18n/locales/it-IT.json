@@ -450,6 +450,12 @@
       "new-here-title": "",
       "new-here-message": "",
       "or": "",
+      "tabs": {
+        "label": "",
+        "sign-in": "",
+        "invite": "",
+        "waitlist": ""
+      },
       "invite": {
         "title": "",
         "instruction": "",
@@ -635,6 +641,7 @@
     "settings": {
       "title": "Impostazioni",
       "redirect": "Reindirizzamento alle impostazioni...",
+      "back": "",
       "tabs": {
         "general": "Generale",
         "profile": "Profilo",

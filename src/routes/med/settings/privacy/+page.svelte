@@ -220,12 +220,12 @@
 
 	.status-icon {
 		color: var(--color-positive);
-		font-size: 1.25rem;
+		font-size: 2rem;
 		font-weight: bold;
 	}
 
 	.status-icon.-small {
-		font-size: 1rem;
+		font-size: 1.6rem;
 	}
 
 	.status-text {
@@ -250,7 +250,7 @@
 	.note {
 		margin-top: var(--ui-pad-small);
 		color: var(--color-text-secondary);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		font-style: italic;
 	}
 

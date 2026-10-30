@@ -38,11 +38,11 @@
 
 <style>
 	.login-button {
-		padding: 0.45rem 1rem;
-		border-radius: 0.375rem;
+		padding: 0.8rem 1.6rem;
+		border-radius: 0.6rem;
 		text-decoration: none;
 		font-weight: 500;
-		font-size: 0.85rem;
+		font-size: 1.4rem;
 		transition: all 0.2s;
 		white-space: nowrap;
 		background: transparent;
@@ -63,9 +63,9 @@
 	.user-link {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem 0.75rem;
-		border-radius: 0.375rem;
+		gap: 0.8rem;
+		padding: 0.4rem 1.2rem;
+		border-radius: 0.6rem;
 		text-decoration: none;
 		color: var(--www-text, #1a1a2e);
 		transition: all 0.2s;
@@ -78,8 +78,8 @@
 	}
 
 	.user-avatar {
-		width: 1.75rem;
-		height: 1.75rem;
+		width: 2.8rem;
+		height: 2.8rem;
 		border-radius: 50%;
 		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
@@ -87,13 +87,13 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 600;
-		font-size: 0.8rem;
+		font-size: 1.2rem;
 	}
 
 	.user-name {
 		font-weight: 500;
-		font-size: 0.85rem;
-		max-width: 120px;
+		font-size: 1.4rem;
+		max-width: 12rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -104,7 +104,7 @@
 		.user-link {
 			width: 100%;
 			text-align: center;
-			padding: 0.75rem 1.25rem;
+			padding: 1.2rem 2rem;
 		}
 	}
 </style>

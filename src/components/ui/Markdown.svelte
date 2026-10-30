@@ -85,7 +85,7 @@
         margin: 1em 0;
         padding: 1em;
         background-color: var(--color-surface);
-        border-left: 4px solid var(--color-interactivity);
+        border-left: 0.4rem solid var(--color-interactivity);
     }
     .markdown :global(pre) {
         margin: 1em 0;

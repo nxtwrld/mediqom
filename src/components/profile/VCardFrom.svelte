@@ -60,7 +60,7 @@
     </div>
 
     {#if reconstructedName && data.fn !== reconstructedName}
-        <div class="hint" style="margin-top: -0.5rem; margin-bottom: 1rem; color: var(--color-text-secondary); font-size: 0.875rem;">
+        <div class="hint" style="margin-top: -0.8rem; margin-bottom: 1.6rem; color: var(--color-text-secondary); font-size: 1.4rem;">
             {$t('profile.vcard.willUpdateTo')}: <strong>{reconstructedName}</strong>
         </div>
     {/if}
@@ -147,7 +147,7 @@
     .inputs-row {
         display: flex;
         justify-content: stretch;
-        gap: 1rem;
+        gap: 1.6rem;
     }
     .inputs-row .input {
         flex-shrink: 1  ;

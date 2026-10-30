@@ -128,9 +128,9 @@
 
 <style>
   .context-prompt {
-    margin-top: 8px;
-    padding: 12px;
-    border-radius: 8px;
+    margin-top: 0.8rem;
+    padding: 1.2rem;
+    border-radius: 0.8rem;
     border: 1px solid;
   }
 
@@ -152,8 +152,8 @@
   .tool-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
   }
 
   .tool-icon {
@@ -163,14 +163,14 @@
 
   .tool-title {
     margin: 0;
-    font-size: 16px;
+    font-size: 1.6rem;
     font-weight: 600;
     color: var(--color-info-dark);
   }
 
   .context-prompt-text {
-    margin: 0 0 12px 0;
-    font-size: 14px;
+    margin: 0 0 1.2rem 0;
+    font-size: 1.4rem;
     line-height: 1.4;
   }
 
@@ -187,22 +187,22 @@
   }
 
   .data-access-list {
-    margin: 12px 0;
-    padding-left: 20px;
-    font-size: 13px;
+    margin: 1.2rem 0;
+    padding-left: 2rem;
+    font-size: 1.4rem;
     color: var(--color-info-dark);
   }
 
   .data-access-list li {
-    margin: 4px 0;
+    margin: 0.4rem 0;
   }
 
   .security-badge {
     display: inline-block;
-    padding: 4px 12px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 0.4rem 1.2rem;
+    margin-bottom: 1.2rem;
+    border-radius: 1.2rem;
+    font-size: 1.2rem;
     font-weight: 500;
   }
 
@@ -223,15 +223,15 @@
 
   .context-actions {
     display: flex;
-    gap: 8px;
+    gap: 0.8rem;
   }
 
   .context-btn {
     flex: 1;
-    padding: 8px 16px;
+    padding: 0.8rem 1.6rem;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 0.6rem;
+    font-size: 1.4rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -283,17 +283,17 @@
   .question-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
   }
 
   .option-btn {
-    padding: 8px 16px;
+    padding: 0.8rem 1.6rem;
     border: 2px solid var(--color-gray-600);
-    border-radius: 20px;
+    border-radius: 2rem;
     background: var(--color-white);
     color: var(--color-black);
-    font-size: 14px;
+    font-size: 1.4rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -312,11 +312,11 @@
 
   .custom-answer {
     width: 100%;
-    padding: 10px 14px;
+    padding: 1rem 1.4rem;
     border: 1px solid var(--color-gray-500);
     border-radius: var(--radius-8);
-    font-size: 14px;
-    margin-bottom: 12px;
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
     box-sizing: border-box;
     background: var(--color-white);
   }
@@ -332,20 +332,20 @@
   }
 
   .question-context {
-    margin: 0 0 12px 0;
-    font-size: 13px;
+    margin: 0 0 1.2rem 0;
+    font-size: 1.4rem;
     color: var(--color-gray-800);
     font-style: italic;
   }
 
   .submit-btn {
     width: 100%;
-    padding: 10px 20px;
+    padding: 1rem 2rem;
     background: var(--color-blue);
     color: var(--color-white);
     border: none;
     border-radius: var(--radius-8);
-    font-size: 14px;
+    font-size: 1.4rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;

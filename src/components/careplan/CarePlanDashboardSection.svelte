@@ -128,19 +128,19 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 6rem;
-    height: 6rem;
+    width: 9.6rem;
+    height: 9.6rem;
     border-radius: 50%;
-    border: 4px solid var(--color-positive);
+    border: 0.4rem solid var(--color-positive);
     flex-shrink: 0;
   }
   .dial-count {
-    font-size: 1.4rem;
+    font-size: 2.2rem;
     font-weight: 700;
     color: var(--color-text-primary);
   }
   .dial-label {
-    font-size: 0.65rem;
+    font-size: 1rem;
     color: var(--color-text-secondary);
     text-align: center;
   }
@@ -152,7 +152,7 @@
     flex-direction: column;
     gap: var(--ui-pad-small);
     flex: 1;
-    min-width: 12rem;
+    min-width: 19.2rem;
   }
   .top-tasks li {
     padding: var(--ui-pad-small);

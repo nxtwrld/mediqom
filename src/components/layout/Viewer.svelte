@@ -241,11 +241,11 @@
     }
     .model-tools,
     .model-layers {
-        --size: 3.5rem;
+        --size: 5.6rem;
         --radius: var(--radius-16);
         position: absolute;
-        top: 1rem;
-        left: 1rem;
+        top: 1.6rem;
+        left: 1.6rem;
         width: var(--size);
         display: flex;
         flex-direction: column;
@@ -261,17 +261,17 @@
 
 
     .model-layers {
-        max-height: 2rem;
+        max-height: 3.2rem;
         transition: max-height .2s ease-in-out ;
     }
     .model-layers.-active {
-        max-height: 100rem;
+        max-height: 160rem;
     }
     .model-tools {
-        right: 1rem;
+        right: 1.6rem;
         left: auto;
         flex-direction: column;
-        bottom: 1rem;
+        bottom: 1.6rem;
         top: auto;
     }
 
@@ -283,21 +283,21 @@
 
         .model-tools {
             left: auto;
-            right: 1rem;
+            right: 1.6rem;
         }
 
         /* In fullscreen anatomy mode, escape overflow:hidden by going fixed */
         .model.-fullscreen .model-layers {
             position: fixed;
-            top: calc(env(safe-area-inset-top) + var(--toolbar-height) + 7rem);
-            left: 1rem;
+            top: calc(env(safe-area-inset-top) + var(--toolbar-height) + 11.2rem);
+            left: 1.6rem;
             z-index: 999;
         }
 
         .model.-fullscreen .model-tools {
             position: fixed;
-            right: 1rem;
-            bottom: 1rem;
+            right: 1.6rem;
+            bottom: 1.6rem;
             top: auto;
             left: auto;
             z-index: 999;
@@ -313,10 +313,10 @@
 
     .model-layers em {
         position: absolute;
-        top: -.6rem;
-        right: -.6rem;
-        width: 1.5rem;
-        height: 1.5rem;
+        top: -1rem;
+        right: -1rem;
+        width: 2.4rem;
+        height: 2.4rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -352,7 +352,7 @@
     .model-layers button.-active {
         background-color: var(--color-highlight);
         color: var(--color-highlight-text);
-        box-shadow: inset 0 0 0 .1rem var(--color-interactivity);
+        box-shadow: inset 0 0 0 0.2rem var(--color-interactivity);
         z-index: 2;
     }
 
@@ -365,14 +365,14 @@
         aspect-ratio: 1/1;
     }
     .model-layers button.toggle {
-        height: 2rem;
+        height: 3.2rem;
         color: #333;
-        padding: .3rem 0;
+        padding: 0.4rem 0;
     }
     .model-layers button.toggle svg {
         top: 50%;
         width: 30%;
-        height: 1rem;
+        height: 1.6rem;
         fill: currentColor;
     }
     .model-tools button:last-child,
@@ -395,7 +395,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         fill: currentColor;
-        stroke-width: 0.2rem;
+        stroke-width: 0.3rem;
         stroke: currentColor;
         filter: drop-shadow(1px 1px 1px rgb(255 255 255/ 0.7));
     }
@@ -412,18 +412,18 @@
         left: 0;
         right: 0;
         text-align: center;
-        font-size: .6rem;
-        padding: .2rem;
+        font-size: 1rem;
+        padding: 0.3rem;
     }
 
 
 
     .model-profile-name {
         position: absolute;
-        bottom: 1rem;
-        left: 1rem;
-        padding: .3rem .8rem;
-        font-size: .8rem;
+        bottom: 1.6rem;
+        left: 1.6rem;
+        padding: 0.4rem 1.2rem;
+        font-size: 1.2rem;
         color: #FFF;
         background-color: rgba(0, 0, 0, .3);
         backdrop-filter: blur(4px);

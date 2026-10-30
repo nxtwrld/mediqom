@@ -450,6 +450,12 @@
       "new-here-title": "",
       "new-here-message": "",
       "or": "",
+      "tabs": {
+        "label": "",
+        "sign-in": "",
+        "invite": "",
+        "waitlist": ""
+      },
       "invite": {
         "title": "",
         "instruction": "",
@@ -635,6 +641,7 @@
     "settings": {
       "title": "Ayarlar",
       "redirect": "Ayarlara yönlendiriliyor...",
+      "back": "",
       "tabs": {
         "general": "Genel",
         "profile": "Profil",

@@ -189,11 +189,11 @@
     }
     .input-field input.viewable,
     .input-field input.copyable {
-        padding-right: 2rem;
+        padding-right: 3.2rem;
 
     }
     .input-field input.copyable.viewable {
-        padding-right: 4rem;
+        padding-right: 6.4rem;
     }
 
     .input-tool {
@@ -202,12 +202,12 @@
         top: 0;
         bottom: 0;
         aspect-ratio: 1/1;
-        padding: 0.5rem;
+        padding: 0.8rem;
         border: none;
         pointer-events: all;
         background-color: transparent;
         color: var(--color-text-primary);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         cursor: pointer;
         z-index: 1;
         opacity: 0.5;
@@ -222,6 +222,6 @@
         fill: currentColor;
     }
     .input-tool:nth-last-child(2) {
-        right: 2rem;
+        right: 3.2rem;
     }
 </style>

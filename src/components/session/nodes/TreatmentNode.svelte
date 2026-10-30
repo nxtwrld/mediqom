@@ -98,7 +98,7 @@
         height: 100%;
         /*min-height: 3rem;
         border-radius: 6px;*/
-        padding: 6px;
+        padding: 0.6rem;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -109,7 +109,7 @@
         background-color: rgba(var(--base-color-rgb), var(--color-opacity));
         
         border: 0px solid transparent;
-        border-left-width: .5rem;
+        border-left-width: 0.8rem;
         /*border: 2px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(4px);*/
     }
@@ -133,23 +133,23 @@
   
     .node-indicators {
         display: flex;
-        gap: 3px;
+        gap: 0.3rem;
         align-items: center;
     }
     
     .type-icon {
-        font-size: 12px;
+        font-size: 1.2rem;
         line-height: 1;
         filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
     }
     
     .urgency-badge {
-        font-size: 8px;
+        font-size: 0.8rem;
         font-weight: 700;
         color: white;
-        width: 14px;
-        height: 14px;
-        border-radius: 3px;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 0.3rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -159,11 +159,11 @@
     }
     
     .effectiveness-score {
-        font-size: 9px;
+        font-size: 1rem;
         font-weight: 700;
         color: white;
-        padding: 2px 5px;
-        border-radius: 4px;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
         line-height: 1;
         text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -192,8 +192,8 @@
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        gap: 2px;
-        margin-top: 14px;
+        gap: 0.2rem;
+        margin-top: 1.4rem;
     }
     
     .treatment-name {
@@ -214,10 +214,10 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         background: rgba(255, 255, 255, 0.6);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
-        margin-bottom: 2px;
+        margin-bottom: 0.2rem;
     }
     
     .treatment-meta {
@@ -227,9 +227,9 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 3px;
+        gap: 0.3rem;
         align-items: center;
-        margin-bottom: 2px;
+        margin-bottom: 0.2rem;
     }
     
     .dosage,
@@ -238,8 +238,8 @@
         color: #374151;
         font-weight: 500;
         background: rgba(255, 255, 255, 0.8);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
         border: 1px solid rgba(107, 114, 128, 0.2);
     }
@@ -261,8 +261,8 @@
         color: #3b82f6;
         font-weight: 600;
         background: rgba(59, 130, 246, 0.1);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
         border: 1px solid rgba(59, 130, 246, 0.2);
     }
@@ -272,22 +272,22 @@
         color: #dc2626;
         font-weight: 600;
         background: rgba(220, 38, 38, 0.1);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
         border: 1px solid rgba(220, 38, 38, 0.2);
         position: absolute;
-        bottom: 2px;
-        right: 2px;
+        bottom: 0.2rem;
+        right: 0.2rem;
     }
     
     /* Mobile responsive adjustments */
     .treatment-node.mobile {
-        padding: 4px;
+        padding: 0.4rem;
     }
     
     .treatment-node.mobile .treatment-name {
-        font-size: 9px;
+        font-size: 1rem;
     }
     
     .treatment-node.mobile .treatment-type-label {
@@ -295,18 +295,18 @@
     }
     
     .treatment-node.mobile .effectiveness-score {
-        font-size: 8px;
-        padding: 1px 3px;
+        font-size: 0.8rem;
+        padding: 1px 0.3rem;
     }
     
     .treatment-node.mobile .urgency-badge {
-        width: 12px;
-        height: 12px;
-        font-size: 7px;
+        width: 1.2rem;
+        height: 1.2rem;
+        font-size: 0.8rem;
     }
     
     .treatment-node.mobile .type-icon {
-        font-size: 10px;
+        font-size: 1rem;
     }
     
     .treatment-node.mobile .dosage,
@@ -321,10 +321,10 @@
     
     /* Desktop styling */
     .treatment-node:not(.mobile) .treatment-name {
-        font-size: 11px;
+        font-size: 1.2rem;
     }
     
     .treatment-node:not(.mobile) .effectiveness-score {
-        font-size: 10px;
+        font-size: 1rem;
     }
 </style>

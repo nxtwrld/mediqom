@@ -167,7 +167,7 @@
     flex-direction: column;
     gap: var(--ui-pad-large);
     padding: var(--ui-pad-large);
-    max-width: 40rem;
+    max-width: 64rem;
     margin: 0 auto;
   }
   .headline {
@@ -193,13 +193,13 @@
     border-color: var(--color-warning);
   }
   .delta-card .quote {
-    margin: 0.25rem 0 0;
+    margin: 0.4rem 0 0;
     font-style: italic;
     color: var(--color-text-secondary);
   }
   .muted {
     color: var(--color-text-secondary);
-    font-size: 0.85rem;
+    font-size: 1.4rem;
   }
   .update-actions {
     display: flex;

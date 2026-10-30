@@ -423,21 +423,21 @@
 
 <style>
   .beta-form {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
+    max-width: 60rem;
+    margin: 3.2rem auto;
+    padding: 3.2rem;
     background: var(--color-surface, #ffffff);
-    border-radius: 8px;
+    border-radius: 0.8rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2.4rem;
   }
   
   label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     font-weight: 500;
     color: var(--color-text-primary, #333);
   }
@@ -448,9 +448,9 @@
   }
   
   .help-text {
-    font-size: 0.875rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary, #666);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     font-style: italic;
   }
   
@@ -460,10 +460,10 @@
   select,
   textarea {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.8rem;
     border: 1px solid var(--color-border, #ddd);
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 0.4rem;
+    font-size: 1.6rem;
     font-family: inherit;
   }
   
@@ -475,7 +475,7 @@
   .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.8rem;
   }
   
   .radio-group label,
@@ -488,35 +488,35 @@
   
   .radio-group input,
   .checkbox-group input {
-    margin-right: 0.5rem;
+    margin-right: 0.8rem;
   }
   
   h3 {
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    margin-top: 3.2rem;
+    margin-bottom: 1.6rem;
     color: var(--color-text-primary, #333);
   }
   
   .error {
     display: block;
     color: var(--color-negative, #dc3545);
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
+    font-size: 1.4rem;
+    margin-top: 0.4rem;
   }
   
   .error-message {
     background-color: #f8d7da;
     color: #721c24;
-    padding: 0.75rem 1.25rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    padding: 1.2rem 2rem;
+    border-radius: 0.4rem;
+    margin-bottom: 1.6rem;
   }
   
   .success-message {
     background-color: #d4edda;
     color: #155724;
-    padding: 1.5rem;
-    border-radius: 4px;
+    padding: 2.4rem;
+    border-radius: 0.4rem;
     text-align: center;
   }
   
@@ -526,12 +526,12 @@
   
   .submit-button {
     width: 100%;
-    padding: 0.75rem 1.5rem;
+    padding: 1.2rem 2.4rem;
     background-color: var(--color-interactivity, #007bff);
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1.125rem;
+    border-radius: 0.4rem;
+    font-size: 1.8rem;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -557,8 +557,8 @@
   
   @media (max-width: 768px) {
     .beta-form {
-      padding: 1rem;
-      margin: 1rem;
+      padding: 1.6rem;
+      margin: 1.6rem;
     }
   }
 </style>

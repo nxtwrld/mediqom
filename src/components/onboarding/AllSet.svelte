@@ -30,11 +30,11 @@
         justify-content: center;
         align-items: center;
         flex-grow: 1;
-        margin: 5rem 0;
+        margin: 8rem 0;
     }
     .result-icon svg {
-        width: 11rem;
-        height: 11rem;
+        width: 17.6rem;
+        height: 17.6rem;
         fill: var(--color-interactivity);
         animation: pulsate 2s infinite;
     }

@@ -36,7 +36,7 @@
 
 <style>
 	.widget-symptom {
-		padding: 4px;
+		padding: 0.4rem;
 	}
 
 	.widget-symptom :global(.symptom-card) {

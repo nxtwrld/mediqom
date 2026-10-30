@@ -55,7 +55,7 @@
         height: 100%;
         color: var(--color-text-secondary, #6b7280);
         text-align: center;
-        padding: 2rem;
+        padding: 3.2rem;
     }
 
     .empty-state p {

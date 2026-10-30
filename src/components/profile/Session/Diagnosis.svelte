@@ -537,14 +537,14 @@
     .block {
         display: flex;
         flex-direction: column;
-        margin: 0 1rem 1rem 1rem;
+        margin: 0 1.6rem 1.6rem 1.6rem;
         break-inside: avoid;   
     }
 
     .block-grid {
         display: grid;
         grid-template-columns: auto auto auto;
-        gap: 1rem;
+        gap: 1.6rem;
     }
     
     .block-complaint {
@@ -553,23 +553,23 @@
         grid-column-start: 1;
         grid-column-end: 3;
         border-radius: var(--radius-8);
-        padding: 1rem;
+        padding: 1.6rem;
         font-weight: 700;
     }
     
     .block-complaint p {
-        font-size: 1.4rem;
+        font-size: 2.2rem;
     }
 
     .list-item {
         display: flex;
         flex-direction: row;
-        gap: .5rem;
-        padding: 1rem;
+        gap: 0.8rem;
+        padding: 1.6rem;
         border-radius: var(--radius-8);
         margin-bottom: var(--gap);
         background-color: var(--color-white);
-        border-left: 4px solid transparent;
+        border-left: 0.4rem solid transparent;
     }
     
     .list-item.-pinned {
@@ -585,30 +585,30 @@
     .diagnosis-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.6rem;
     }
     
     .diagnosis-code {
         font-family: monospace;
         background: var(--color-gray-100);
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
     }
     
     .confidence-badge {
         color: white;
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: bold;
     }
     
     .diagnosis-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
+        gap: 0.8rem;
+        margin-top: 0.8rem;
     }
     
     .rationale {
@@ -617,57 +617,57 @@
     }
     
     .supporting-symptoms {
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
     }
     
     .symptom-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-top: 0.25rem;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
     }
     
     .symptom-tag {
         background: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.2rem 0.4rem;
+        padding: 0.3rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
     }
 
     /* Recommendations Styles */
     .block-recommendations {
         background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
         border-radius: var(--radius-8);
-        padding: 1rem;
+        padding: 1.6rem;
     }
     
     .recommendation-item {
         background: white;
         border-radius: var(--radius-8);
-        padding: 1rem;
-        margin-bottom: 0.5rem;
-        border-left: 4px solid var(--color-interactivity);
+        padding: 1.6rem;
+        margin-bottom: 0.8rem;
+        border-left: 0.4rem solid var(--color-interactivity);
     }
     
     .recommendation-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 0.5rem;
+        gap: 1.6rem;
+        margin-bottom: 0.8rem;
     }
     
     .recommendation-type {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: var(--color-interactivity);
     }
     
     .priority-badge, .timeframe-badge {
         color: white;
-        padding: 0.2rem 0.4rem;
+        padding: 0.3rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         font-weight: bold;
     }
     
@@ -678,7 +678,7 @@
     .recommendation-content {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .recommendation-text {
@@ -687,14 +687,14 @@
     
     .recommendation-rationale {
         color: var(--color-gray-600);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
 
     /* Questions Styles */
     .block-questions {
         background: linear-gradient(135deg, #fffbf0 0%, #fff4e6 100%);
         border-radius: var(--radius-8);
-        padding: 1rem;
+        padding: 1.6rem;
     }
     
     .clarifying-question {
@@ -702,7 +702,7 @@
         border-radius: var(--radius-8);
         padding: var(--ui-pad-medium);
         border: 1px solid var(--color-border);
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
@@ -722,7 +722,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
 
     .question-actions {
@@ -743,7 +743,7 @@
         gap: var(--ui-pad-xsmall);
         padding: var(--ui-pad-xsmall) var(--ui-pad-small);
         border-radius: var(--ui-radius-small);
-        font-size: 12px;
+        font-size: 1.2rem;
         font-weight: 500;
         border: 1px solid;
         cursor: pointer;
@@ -811,9 +811,9 @@
     .category-badge {
         background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
         color: white;
-        padding: 0.125rem var(--ui-pad-small);
+        padding: 0.2rem var(--ui-pad-small);
         border-radius: var(--radius-12);
-        font-size: 11px;
+        font-size: 1.2rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -822,14 +822,14 @@
     .intent-badge {
         background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
-        padding: 0.125rem var(--ui-pad-small);
+        padding: 0.2rem var(--ui-pad-small);
         border-radius: var(--radius-12);
-        font-size: 11px;
+        font-size: 1.2rem;
         font-weight: 500;
     }
 
     .question-text {
-        font-size: 14px;
+        font-size: 1.4rem;
         font-weight: 600;
         color: var(--color-text-primary);
         margin: 0 0 var(--ui-pad-small) 0;
@@ -837,7 +837,7 @@
     }
 
     .question-rationale {
-        font-size: 13px;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         font-style: italic;
         margin: 0;
@@ -853,13 +853,13 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1rem;
+        gap: 1.6rem;
     }
     
     .effectiveness-badge {
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: bold;
     }
     
@@ -879,16 +879,16 @@
     }
     
     .target-diagnosis {
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
     }
     
     .target-tag {
         background: var(--color-positive-light);
         color: var(--color-positive-dark);
-        padding: 0.2rem 0.4rem;
+        padding: 0.3rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
-        margin-right: 0.25rem;
+        font-size: 1.2rem;
+        margin-right: 0.4rem;
     }
 
     /* Follow-up Styles */
@@ -899,19 +899,19 @@
     .followup-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.6rem;
     }
     
     .followup-type {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: var(--color-info-dark);
     }
     
     .urgency-badge {
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: bold;
     }
     
@@ -946,22 +946,22 @@
     }
     
     .medication-alternatives {
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
     }
     
     .alternative-tag {
         background: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.2rem 0.4rem;
+        padding: 0.3rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
-        margin-right: 0.25rem;
+        font-size: 1.2rem;
+        margin-right: 0.4rem;
     }
 
     /* General Styles */
     .list-item .actions {
         display: flex;
-        gap: .5rem;
+        gap: 0.8rem;
         flex-wrap: nowrap;
         color: var(--color-gray-800-alpha);
         mix-blend-mode: multiply;
@@ -983,8 +983,8 @@
     }
     
     .list-action {
-        width: 1.3rem;
-        height: 1.3rem;
+        width: 2rem;
+        height: 2rem;
     }
     
     .list-action svg {
@@ -994,7 +994,7 @@
     }
 
     .sub {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-weight: 200;
     }
 </style>

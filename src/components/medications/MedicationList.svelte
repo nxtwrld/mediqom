@@ -42,12 +42,12 @@
 <style>
     .medication-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(28.8rem, 1fr));
         gap: var(--ui-pad-medium);
     }
     .section-heading {
         margin: var(--ui-pad-large) 0 var(--ui-pad-medium);
-        font-size: 0.9375rem;
+        font-size: 1.6rem;
         font-weight: 600;
         color: var(--color-text-secondary);
     }
@@ -61,8 +61,8 @@
         color: var(--color-text-secondary);
     }
     .empty-icon {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         fill: currentColor;
         opacity: 0.4;
     }

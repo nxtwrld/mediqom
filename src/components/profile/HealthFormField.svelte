@@ -57,13 +57,13 @@
         width: 100%;
     }
     .field:has(:global(.unit)) input {
-        padding-right: 4rem;
+        padding-right: 6.4rem;
     }
     .field .unit {
         position: absolute;
         right: 0;
         top: 50%;
         transform: translateY(-50%);
-        padding: 1rem;
+        padding: 1.6rem;
     }   
 </style>

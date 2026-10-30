@@ -23,13 +23,13 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 2rem;
         color: var(--color-text-secondary);
-        border: .3rem solid var(--color);
+        border: 0.4rem solid var(--color);
     }
 
     .date-vertical__month {
-        padding: .3rem;
+        padding: 0.4rem;
         text-align: center;
         font-weight: 700;
         color: var(--color);
@@ -37,9 +37,9 @@
 
     .date-vertical__year {
         width: 100%;
-        padding: .2rem;
+        padding: 0.3rem;
         text-align: center;
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: 700;
         background-color: var(--color);
         color: var(--color-text-primary);

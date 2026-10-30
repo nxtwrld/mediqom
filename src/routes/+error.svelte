@@ -16,17 +16,17 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 2rem;
+    padding: 3.2rem;
     text-align: center;
   }
 
   h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
+    font-size: 3.2rem;
+    margin-bottom: 1.6rem;
   }
 
   p {
-    margin-bottom: 2rem;
+    margin-bottom: 3.2rem;
     color: #666;
   }
 

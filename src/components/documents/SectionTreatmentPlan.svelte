@@ -589,19 +589,19 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .goal-main {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
         flex: 1;
     }
     
     .goal-title {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
@@ -616,14 +616,14 @@
     .goal-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .goal-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .achievability-score {
@@ -639,26 +639,26 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .therapy-main {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex: 1;
     }
     
     .therapy-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
     }
     
     .therapy-type {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         font-weight: 500;
     }
@@ -666,24 +666,24 @@
     .therapy-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .therapy-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .therapy-instructions {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid var(--color-border);
     }
     
     .instructions-text {
-        margin: 0.25rem 0 0 0;
+        margin: 0.4rem 0 0 0;
         color: var(--color-text-secondary);
         line-height: 1.5;
         font-style: italic;
@@ -697,26 +697,26 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .medication-main {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex: 1;
     }
     
     .medication-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
     }
     
     .medication-dosage {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         font-weight: 500;
     }
@@ -724,14 +724,14 @@
     .medication-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .medication-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .procedure-item {
@@ -742,26 +742,26 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .procedure-main {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex: 1;
     }
     
     .procedure-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
     }
     
     .procedure-type {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         font-weight: 500;
     }
@@ -769,46 +769,46 @@
     .procedure-badges {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: flex-end;
     }
     
     .procedure-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .timeline-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .milestones-section {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
     
     .milestones-list {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
+        gap: 0.8rem;
+        margin-top: 0.8rem;
     }
     
     .milestone-item {
         display: flex;
-        gap: 0.75rem;
+        gap: 1.2rem;
         align-items: center;
-        padding: 0.5rem;
+        padding: 0.8rem;
         background-color: var(--color-surface);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
     }
     
     .milestone-date {
         font-weight: 600;
         color: var(--color-interactivity);
-        min-width: 100px;
+        min-width: 10rem;
     }
     
     .milestone-description {
@@ -819,25 +819,25 @@
     .prognosis-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .prognosis-overall {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-        padding: 0.5rem 1rem;
+        gap: 0.8rem;
+        margin-bottom: 1.2rem;
+        padding: 0.8rem 1.6rem;
         background-color: var(--color-surface);
-        border-radius: 0.5rem;
+        border-radius: 0.8rem;
     }
     
     .prognosis-value {
         font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
         text-transform: uppercase;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
     
     .prognosis-excellent {
@@ -868,40 +868,40 @@
     .monitoring-info {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .parameters-section {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
     
     .parameters-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-top: 0.5rem;
+        gap: 0.4rem;
+        margin-top: 0.8rem;
     }
     
     .parameter-tag {
         background-color: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
     .alert-criteria-section {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
     
     .alert-criteria-list {
-        margin: 0.5rem 0 0 1.5rem;
+        margin: 0.8rem 0 0 2.4rem;
         padding: 0;
     }
     
     .alert-criteria-list li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
         color: var(--color-text-secondary);
     }
     
@@ -913,8 +913,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .complication-name {
@@ -926,20 +926,20 @@
     .probability-badge {
         background-color: var(--color-warning-light);
         color: var(--color-warning-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
     .complication-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .complication-description {
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
         line-height: 1.5;
     }
@@ -952,8 +952,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .alternative-name {
@@ -965,20 +965,20 @@
     .effectiveness-badge {
         background-color: var(--color-positive-light);
         color: var(--color-positive-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
     .alternative-details {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .alternative-description {
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
         line-height: 1.5;
     }
@@ -987,14 +987,14 @@
     .disadvantages-section,
     .contraindications-section,
     .risks-section {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
     
     .advantages-list,
     .disadvantages-list,
     .contraindications-list,
     .risks-list {
-        margin: 0.5rem 0 0 1.5rem;
+        margin: 0.8rem 0 0 2.4rem;
         padding: 0;
     }
     
@@ -1002,16 +1002,16 @@
     .disadvantages-list li,
     .contraindications-list li,
     .risks-list li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
         color: var(--color-text-secondary);
     }
     
     .priority-badge,
     .status-badge,
     .complexity-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
         white-space: nowrap;
@@ -1084,14 +1084,14 @@
     
     .detail-item {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: flex-start;
     }
     
     .label {
         font-weight: 500;
         color: var(--color-text-secondary);
-        min-width: 150px;
+        min-width: 15rem;
         flex-shrink: 0;
     }
     
@@ -1104,7 +1104,7 @@
     /* Priority-based panel coloring */
     .priority-immediate {
         border-left-color: var(--color-negative);
-        border-left-width: 4px;
+        border-left-width: 0.4rem;
     }
     
     .priority-urgent {

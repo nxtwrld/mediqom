@@ -163,81 +163,81 @@
     .treatment-card {
         display: flex;
         flex-direction: column;
-        padding: 1rem;
+        padding: 1.6rem;
         background: white;
         border: 1px solid var(--color-border, #e2e8f0);
-        border-left: 4px solid var(--priority-color);
-        border-radius: 8px;
+        border-left: 0.4rem solid var(--priority-color);
+        border-radius: 0.8rem;
         cursor: pointer;
         transition: all 0.2s ease;
         text-align: left;
         width: 100%;
-        min-height: 180px;
+        min-height: 18rem;
     }
 
     .treatment-card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
+        transform: translateY(-0.2rem);
     }
 
     .card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
 
     .priority-badge {
         background: var(--priority-color);
         color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 1.2rem;
+        font-size: 1.2rem;
         font-weight: 700;
     }
 
     .badges {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         align-items: center;
     }
 
     .urgency-badge {
         background: var(--urgency-color);
         color: white;
-        padding: 0.125rem 0.375rem;
-        border-radius: 8px;
-        font-size: 0.625rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.8rem;
+        font-size: 1rem;
         font-weight: 700;
         text-transform: uppercase;
     }
 
     .confidence {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #6b7280);
         font-weight: 600;
     }
 
     .card-content {
         flex: 1;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
 
     .treatment-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
     }
 
     .type-icon {
-        font-size: 1.25rem;
+        font-size: 2rem;
         line-height: 1;
     }
 
     .treatment-name {
         margin: 0;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
@@ -245,53 +245,53 @@
     }
 
     .type-indicator {
-        font-size: 0.625rem;
+        font-size: 1rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .meta-info {
         display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
+        gap: 0.8rem;
+        margin-bottom: 0.4rem;
     }
 
     .dosage,
     .duration {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
+        gap: 0.4rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #6b7280);
     }
 
     .description {
-        margin: 0.5rem 0 0 0;
-        font-size: 0.75rem;
+        margin: 0.8rem 0 0 0;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #6b7280);
         line-height: 1.3;
     }
 
     .effectiveness {
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .effectiveness-label {
-        font-size: 0.625rem;
+        font-size: 1rem;
         color: var(--color-text-secondary, #6b7280);
         font-weight: 600;
     }
 
     .effectiveness-bar {
         flex: 1;
-        height: 6px;
+        height: 0.6rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 3px;
+        border-radius: 0.3rem;
         overflow: hidden;
     }
 
@@ -305,26 +305,26 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 0.5rem;
+        padding-top: 0.8rem;
         border-top: 1px solid var(--color-border, #e2e8f0);
     }
 
     .status-indicators {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex-wrap: wrap;
     }
 
     .status-tag {
-        font-size: 0.625rem;
-        padding: 0.125rem 0.375rem;
-        border-radius: 4px;
+        font-size: 1rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         display: flex;
         align-items: center;
-        gap: 0.125rem;
+        gap: 0.2rem;
     }
 
     .status-tag.followup {
@@ -342,8 +342,8 @@
     .relationship-count {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
+        gap: 0.4rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #6b7280);
     }
 

@@ -98,10 +98,10 @@
 	}
 
 	.nav-inner {
-		max-width: 1200px;
+		max-width: 120rem;
 		margin: 0 auto;
-		padding: 0 2rem;
-		height: 3.5rem;
+		padding: 0 3.2rem;
+		height: 5.6rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -113,36 +113,36 @@
 		z-index: 101;
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.6rem;
 	}
 
 	.brand-logo {
-		width: 1.75rem;
-		height: 1.75rem;
+		width: 2.8rem;
+		height: 2.8rem;
 		color: gray;
 	}
 
 	.brand-name {
 		font-family: 'Baloo Thambi 2';
-		font-size: 1.35rem;
+		font-size: 2.2rem;
 		font-weight: 600;
 	}
 
 	.nav-right {
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
+		gap: 2rem;
 	}
 
 	.lang-switcher {
 		display: flex;
-		gap: 0.25rem;
+		gap: 0.4rem;
 	}
 
 	.lang-link {
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
-		font-size: 0.75rem;
+		padding: 0.4rem 0.8rem;
+		border-radius: 0.4rem;
+		font-size: 1.2rem;
 		font-weight: 500;
 		color: rgba(0, 0, 0, 0.4);
 		text-decoration: none;
@@ -160,13 +160,13 @@
 	}
 
 	.nav-cta {
-		padding: 0.45rem 1.25rem;
+		padding: 0.8rem 2rem;
 		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
-		border-radius: 1.5rem;
+		border-radius: 2.4rem;
 		text-decoration: none;
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: 1.4rem;
 		transition: all 0.2s;
 		white-space: nowrap;
 	}
@@ -179,8 +179,8 @@
 	.nav-cta.-full {
 		width: 100%;
 		text-align: center;
-		padding: 0.75rem;
-		border-radius: 0.75rem;
+		padding: 1.2rem;
+		border-radius: 1.2rem;
 	}
 
 	.nav-hamburger {
@@ -188,22 +188,22 @@
 		background: none;
 		border: none;
 		cursor: pointer;
-		padding: 0.5rem;
+		padding: 0.8rem;
 		z-index: 101;
 	}
 
 	.bar {
 		display: block;
-		width: 20px;
-		height: 2px;
+		width: 2rem;
+		height: 0.2rem;
 		background: var(--www-text, #1a1a2e);
-		margin: 4px 0;
+		margin: 0.4rem 0;
 		transition: all 0.3s ease;
 		border-radius: 1px;
 	}
 
 	.bar.-open:nth-child(1) {
-		transform: rotate(45deg) translate(4px, 4px);
+		transform: rotate(45deg) translate(0.4rem, 0.4rem);
 	}
 
 	.bar.-open:nth-child(2) {
@@ -211,7 +211,7 @@
 	}
 
 	.bar.-open:nth-child(3) {
-		transform: rotate(-45deg) translate(4px, -4px);
+		transform: rotate(-45deg) translate(0.4rem, -0.4rem);
 	}
 
 	.mobile-menu {
@@ -236,21 +236,21 @@
 		.mobile-menu {
 			display: flex;
 			flex-direction: column;
-			gap: 1rem;
-			padding: 1.5rem 2rem 2rem;
+			gap: 1.6rem;
+			padding: 2.4rem 3.2rem 3.2rem;
 			background: rgba(255, 255, 255, 0.95);
 			border-top: 1px solid rgba(0, 0, 0, 0.06);
 		}
 
 		.mobile-lang {
 			display: flex;
-			gap: 0.5rem;
+			gap: 0.8rem;
 			justify-content: center;
 		}
 
 		.mobile-lang .lang-link {
-			font-size: 0.9rem;
-			padding: 0.5rem 1rem;
+			font-size: 1.4rem;
+			padding: 0.8rem 1.6rem;
 		}
 	}
 </style>

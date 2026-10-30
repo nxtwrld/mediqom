@@ -181,33 +181,33 @@
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 12rem;
-        height: 12rem;
+        width: 19.2rem;
+        height: 19.2rem;
         border-radius: 50%;
         transform: translate(-50%, -50%);
         transition: width .5s, height .5s;
         transition-timing-function: ease-in;
     }
     .record-audio.-has-results :global(> *) {
-        width: 6rem;
-        height: 6rem;
+        width: 9.6rem;
+        height: 9.6rem;
     }
     .record-audio .control {
         background-color: var(--sound-color);
-        border: .2rem solid var(--sound-color);
+        border: 0.3rem solid var(--sound-color);
         color: var(--sound-color-text);
         font-weight: var(--text-bold);
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         z-index: 1001;
         pointer-events: all;
-        padding: 1rem;
-        box-shadow: 0 .6rem .6rem -.2rem rgba(0,0,0,.5);
+        padding: 1.6rem;
+        box-shadow: 0 1rem 1rem -0.3rem rgba(0,0,0,.5);
         transition: all .5s;
     }   
     .record-audio .control:hover,
     .record-audio .control:active {
-        transform: translate(-50%, calc(-50% + .2rem)) scale(1.05);
-        box-shadow: 0 1rem .8rem -.5rem rgba(0,0,0,.4)
+        transform: translate(-50%, calc(-50% + 0.3rem)) scale(1.05);
+        box-shadow: 0 1.6rem 1.2rem -0.8rem rgba(0,0,0,.4)
     }
     .record-audio .control.-running {
         background-color: var(--color-white);

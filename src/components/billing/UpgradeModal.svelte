@@ -258,7 +258,7 @@
     });
 </script>
 
-<Modal onclose={handleClose} style="width: 900px; max-width: 95vw;">
+<Modal onclose={handleClose} style="width: 90rem; max-width: 95vw;">
     <div class="upgrade-modal">
         {#if viewState === 'select'}
             <!-- Plan Selection View -->
@@ -398,7 +398,7 @@
 <style>
     .upgrade-modal {
         position: relative;
-        min-height: 400px;
+        min-height: 40rem;
     }
 
     .modal-header {
@@ -407,9 +407,9 @@
     }
 
     .modal-header h2 {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
     }
 
@@ -421,12 +421,12 @@
     .tabs {
         display: flex;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         margin-bottom: var(--ui-pad-large);
     }
 
     .tab {
-        padding: 0.75rem 1.5rem;
+        padding: 1.2rem 2.4rem;
         border: none;
         background: transparent;
         color: var(--color-text-secondary);
@@ -453,12 +453,12 @@
 
     .plans-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
         gap: var(--ui-pad-medium);
     }
 
     .credits-section {
-        max-width: 600px;
+        max-width: 60rem;
         margin: 0 auto;
     }
 
@@ -468,9 +468,9 @@
     }
 
     .credits-info h3 {
-        font-size: 1.25rem;
+        font-size: 2rem;
         font-weight: 600;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
     }
 
     .credits-info p {
@@ -488,7 +488,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         margin-top: var(--ui-pad-large);
         padding: var(--ui-pad-medium);
         background-color: var(--color-surface);
@@ -497,8 +497,8 @@
     }
 
     .current-credits svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
@@ -511,10 +511,10 @@
         background: none;
         border: none;
         color: var(--color-text-secondary);
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
         cursor: pointer;
         text-decoration: underline;
-        padding: 0.25rem;
+        padding: 0.4rem;
     }
 
     .restore-button:hover {
@@ -535,8 +535,8 @@
     }
 
     .loader {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity);
         border-radius: 50%;
@@ -545,7 +545,7 @@
 
     /* Checkout View */
     .checkout-view {
-        min-height: 500px;
+        min-height: 50rem;
     }
 
     .checkout-header {
@@ -555,9 +555,9 @@
     }
 
     .checkout-header h2 {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
     }
 
@@ -572,12 +572,12 @@
         top: 0;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem;
+        gap: 0.4rem;
+        padding: 0.8rem;
         border: none;
         background: transparent;
         color: var(--color-text-secondary);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         cursor: pointer;
         transition: color 0.2s ease;
     }
@@ -587,8 +587,8 @@
     }
 
     .back-button svg {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 
@@ -600,7 +600,7 @@
         justify-content: center;
         text-align: center;
         padding: var(--ui-pad-xlarge);
-        min-height: 400px;
+        min-height: 40rem;
     }
 
     .success-icon {
@@ -608,15 +608,15 @@
     }
 
     .success-icon svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         fill: var(--color-positive);
     }
 
     .success-view h2 {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
     }
 
@@ -633,7 +633,7 @@
         justify-content: center;
         text-align: center;
         padding: var(--ui-pad-xlarge);
-        min-height: 400px;
+        min-height: 40rem;
     }
 
     .error-icon {
@@ -641,22 +641,22 @@
     }
 
     .error-icon svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         fill: var(--color-negative);
     }
 
     .error-view h2 {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
     }
 
     .error-view p {
         color: var(--color-text-secondary);
         margin: 0 0 var(--ui-pad-large) 0;
-        max-width: 400px;
+        max-width: 40rem;
     }
 
     .error-actions {

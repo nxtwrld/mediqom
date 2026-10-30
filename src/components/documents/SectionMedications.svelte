@@ -463,20 +463,20 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .medication-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
     }
     
     .medication-status {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -499,29 +499,29 @@
     .prescription-badge {
         background-color: var(--color-positive);
         color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
     .medication-header-actions {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     /* medication-details now uses global .item-details styles */
     
     .detail-item {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
     .label {
         font-weight: 500;
         color: var(--color-text-secondary);
-        min-width: 80px;
+        min-width: 8rem;
     }
     
     .value {
@@ -554,28 +554,28 @@
     }
     
     .side-effects {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .side-effects-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-top: 0.25rem;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
     }
     
     .side-effect-tag {
         background-color: var(--color-warning-light);
         color: var(--color-warning-dark);
-        padding: 0.125rem 0.375rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
     }
     
     .change-header-actions {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     /* medication-notes and medication-instructions now use global .item-notes styles */
@@ -585,11 +585,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .change-type {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
         color: var(--color-text-secondary);
@@ -598,8 +598,8 @@
     .dose-change {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
     }
     
     .arrow {
@@ -613,24 +613,24 @@
     
     /* Discontinued medications */
     .date-discontinued {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
-        margin-left: 0.5rem;
+        margin-left: 0.8rem;
     }
     
     .reason {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         font-style: italic;
-        margin-left: 0.5rem;
+        margin-left: 0.8rem;
     }
     
     /* Drug Interactions */
     .interaction-drugs {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 0.8rem;
+        margin-bottom: 0.8rem;
         font-weight: 600;
     }
     
@@ -640,45 +640,45 @@
     
     .interaction-details {
         display: flex;
-        gap: 1rem;
-        font-size: 0.9rem;
+        gap: 1.6rem;
+        font-size: 1.4rem;
     }
     
     .severity {
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.8rem;
+        font-size: 1.2rem;
     }
     
     /* Allergies */
     .allergy-item .medication {
         font-weight: 600;
-        margin-right: 0.5rem;
+        margin-right: 0.8rem;
     }
     
     .allergy-item .reaction {
-        margin-right: 0.5rem;
+        margin-right: 0.8rem;
     }
     
     /* Adherence Assessment */
     .overall-adherence {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
+        gap: 0.8rem;
+        margin-bottom: 1.6rem;
     }
     
     .barriers, .interventions {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .barriers ul, .interventions ul {
-        margin: 0.5rem 0 0 1.5rem;
+        margin: 0.8rem 0 0 2.4rem;
         padding: 0;
     }
     
     .barriers li, .interventions li {
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
     }
     
     /* Uses global .no-data styles */

@@ -43,12 +43,12 @@
         display: inline-flex;
         background-color: var(--color-surface);
         border-radius: var(--ui-radius-medium);
-        padding: 0.25rem;
-        gap: 0.25rem;
+        padding: 0.4rem;
+        gap: 0.4rem;
     }
 
     .toggle-option {
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1.6rem;
         border: none;
         background: transparent;
         border-radius: var(--ui-radius-small);
@@ -58,7 +58,7 @@
         transition: all 0.2s ease;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .toggle-option.-active {
@@ -74,9 +74,9 @@
     .savings-badge {
         background-color: var(--color-positive);
         color: var(--color-positive-text);
-        padding: 0.125rem 0.375rem;
+        padding: 0.2rem 0.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 600;
     }
 </style>

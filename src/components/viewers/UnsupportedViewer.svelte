@@ -83,74 +83,74 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 3rem 2rem;
+        padding: 4.8rem 3.2rem;
         text-align: center;
         background: var(--color-background, #f8f9fa);
-        border-radius: 8px;
+        border-radius: 0.8rem;
         border: 2px dashed var(--color-border, #dee2e6);
-        min-height: 200px;
+        min-height: 20rem;
     }
 
     .file-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
+        font-size: 6.4rem;
+        margin-bottom: 1.6rem;
         opacity: 0.7;
     }
 
     .file-info {
-        margin-bottom: 2rem;
+        margin-bottom: 3.2rem;
     }
 
     .file-name {
-        font-size: 1.2rem;
+        font-size: 2rem;
         font-weight: 600;
         color: var(--color-text-primary, #333);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
         word-break: break-all;
     }
 
     .file-details {
         color: var(--color-text-secondary, #666);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
 
     .file-type {
         background: var(--color-surface, #fff);
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
         border: 1px solid var(--color-border, #dee2e6);
         font-family: monospace;
-        margin: 0.5rem 0;
+        margin: 0.8rem 0;
         display: inline-block;
     }
 
     .preview-message {
         color: var(--color-text-secondary, #666);
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-        max-width: 400px;
+        font-size: 1.4rem;
+        margin-bottom: 2.4rem;
+        max-width: 40rem;
     }
 
     .actions {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         flex-wrap: wrap;
         justify-content: center;
     }
 
     .btn {
-        padding: 0.75rem 1.5rem;
+        padding: 1.2rem 2.4rem;
         border: 1px solid var(--color-border, #ddd);
         background: var(--color-surface, #fff);
         color: var(--color-text-primary, #333);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         transition: all 0.2s ease;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .btn:hover {
@@ -170,13 +170,13 @@
     }
 
     .future-support {
-        margin-top: 2rem;
-        padding: 1rem;
+        margin-top: 3.2rem;
+        padding: 1.6rem;
         background: var(--color-info-light, #e7f3ff);
         border: 1px solid var(--color-info, #b3d9ff);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         color: var(--color-info-text, #0066cc);
-        font-size: 0.85rem;
+        font-size: 1.4rem;
     }
 </style>
 

@@ -112,7 +112,7 @@
 
 	.links-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
 		gap: var(--ui-pad-medium);
 	}
 
@@ -132,12 +132,12 @@
 	.link-card:hover {
 		background: var(--color-gray-300);
 		border-color: var(--color-interactivity);
-		transform: translateY(-2px);
+		transform: translateY(-0.2rem);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	.link-icon {
-		font-size: 1.5rem;
+		font-size: 2.4rem;
 	}
 
 	.link-text {

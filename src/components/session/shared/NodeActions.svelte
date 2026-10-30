@@ -28,8 +28,8 @@
 <style>
     .session-details-actions {
         display: flex;
-        gap: 0.5rem;
-        padding: 1rem;
+        gap: 0.8rem;
+        padding: 1.6rem;
         border-top: 1px solid var(--color-border, #e2e8f0);
         margin-top: auto;
     }

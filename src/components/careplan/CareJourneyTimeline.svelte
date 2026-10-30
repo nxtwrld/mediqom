@@ -121,14 +121,14 @@
 <style>
   .journey-events {
     position: relative;
-    height: 1.5rem;
+    height: 2.4rem;
     margin-right: 2.5em;
   }
   .journey-marker {
     position: absolute;
     top: 50%;
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 1.4rem;
+    height: 1.4rem;
     transform: translate(-50%, -50%);
     border-radius: 50%;
     display: inline-flex;
@@ -144,8 +144,8 @@
     background: var(--color-warning);
   }
   .journey-marker.-session svg {
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 1rem;
+    height: 1rem;
     fill: var(--color-primary-contrast, #fff);
   }
   /* task done: green check ✓ */
@@ -154,8 +154,8 @@
   }
   .journey-marker.-done::after {
     content: "";
-    width: 0.28rem;
-    height: 0.48rem;
+    width: 0.4rem;
+    height: 0.8rem;
     border: solid var(--color-positive-text, #fff);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg) translateY(-1px);
@@ -201,7 +201,7 @@
   .milestone-row {
     position: relative;
     height: 2em;
-    padding: 0.1rem 0.2rem;
+    padding: 0.2rem 0.3rem;
     margin: var(--ui-pad-small) 0;
     color: var(--color-text-primary);
     background-color: var(--color-surface);
@@ -215,10 +215,10 @@
   }
   .milestone {
     position: absolute;
-    top: 0.1rem;
+    top: 0.2rem;
     height: 1.5em;
     border-radius: var(--ui-radius-small);
-    min-width: 0.5rem;
+    min-width: 0.8rem;
     border: none;
     cursor: pointer;
     --cp-done: var(--color-positive);
@@ -230,7 +230,7 @@
   .milestone-title {
     position: absolute;
     inset: 0;
-    padding: 0.2rem 0.5rem;
+    padding: 0.3rem 0.8rem;
     display: flex;
     align-items: center;
     font-size: 0.85em;

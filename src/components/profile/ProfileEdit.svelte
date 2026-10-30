@@ -65,18 +65,18 @@
 
 <style>
     .profile-image-section {
-        margin-bottom: 2rem;
+        margin-bottom: 3.2rem;
         text-align: center;
     }
 
     .profile-edit :global(.tab-body) {
-        padding: 1rem;
+        padding: 1.6rem;
         background-color: var(--color-background);
     }
 
     .danger-zone {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
+        margin-top: 3.2rem;
+        padding-top: 2.4rem;
         border-top: 1px solid var(--color-border);
         display: flex;
         justify-content: flex-end;

@@ -91,12 +91,12 @@
         margin-bottom: var(--gap);
     }
     .links:has(:global(> .empty)) {
-        min-height: 4rem;
+        min-height: 6.4rem;
     }
 
     .links.-rows .linked-item {
         width: calc(50% - var(--gap));
-        min-width: 12rem; 
+        min-width: 19.2rem; 
         position: relative;
     }
 
@@ -120,7 +120,7 @@
 
     .links.-icons .linked-item {
         width: calc(50% - var(--gap) / 2);
-        min-width: 10rem; 
+        min-width: 16rem; 
         position: relative;
     }
     @container links (inline-size < 15rem) {
@@ -147,7 +147,7 @@
         height: 100%;
     }
     .links.-removable :global(.item)   {
-        padding-right: 2.5rem;
+        padding-right: 4rem;
     }
 
     .linked-item {
@@ -161,8 +161,8 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         background-color: var(--color-negative);
         border-bottom-left-radius: var(--radius-16);
         border-top-right-radius: var(--radius-16);
@@ -170,7 +170,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: .5rem;
+        padding: 0.8rem;
         border: 0;
         cursor: pointer;
     }

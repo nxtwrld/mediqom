@@ -10,7 +10,7 @@
 .tab-heads > a {
   position: relative;
   flex-grow: 1;
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background-color: var(--color-white);
   border-top: 3px solid var(--color-interactivity);
   height: var(--toolbar-height);

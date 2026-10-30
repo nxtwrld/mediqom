@@ -162,28 +162,28 @@
     }
 
     .sync-badge svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
     }
 
     .doc-count {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        font-size: 0.75rem;
+        gap: 0.4rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 
     .doc-count svg {
-        width: 0.9rem;
-        height: 0.9rem;
+        width: 1.4rem;
+        height: 1.4rem;
         fill: currentColor;
     }
 
     .btn-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
 </style>

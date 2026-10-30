@@ -116,35 +116,35 @@
 <style>
   .serenity-form-results {
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
+    border-radius: 0.8rem;
+    padding: 2.4rem;
+    margin-top: 2.4rem;
   }
 
   h3 {
     margin-top: 0;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
+    margin-bottom: 2.4rem;
+    font-size: 2.4rem;
   }
 
   h4 {
     margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.125rem;
+    margin-bottom: 1.6rem;
+    font-size: 1.8rem;
   }
 
   .overall-score {
     background: var(--color-surface, #f9f9f9);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
+    padding: 2.4rem;
+    border-radius: 0.8rem;
+    margin-bottom: 3.2rem;
   }
 
   .score-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.6rem;
   }
 
   .score-header h4 {
@@ -152,17 +152,17 @@
   }
 
   .interpretation {
-    font-size: 1.25rem;
+    font-size: 2rem;
     font-weight: bold;
   }
 
   .score-bar {
     width: 100%;
-    height: 24px;
+    height: 2.4rem;
     background: var(--color-border);
-    border-radius: 12px;
+    border-radius: 1.2rem;
     overflow: hidden;
-    margin-bottom: 1rem;
+    margin-bottom: 1.6rem;
   }
 
   .score-fill {
@@ -171,20 +171,20 @@
   }
 
   .guidance {
-    font-size: 0.875rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary, #666);
     margin: 0;
   }
 
   .questions {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2.4rem;
   }
 
   .question {
     border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
+    border-radius: 0.4rem;
+    padding: 1.6rem;
+    margin-bottom: 1.2rem;
   }
 
   .question.unanswered {
@@ -196,7 +196,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
   }
 
   .question-text {
@@ -214,7 +214,7 @@
 
   .question-response {
     margin: 0;
-    font-size: 0.875rem;
+    font-size: 1.4rem;
   }
 
   .question-response.muted {
@@ -223,19 +223,19 @@
   }
 
   .metadata {
-    padding-top: 1rem;
+    padding-top: 1.6rem;
     border-top: 1px solid var(--color-border);
   }
 
   .confidence,
   .unanswered-count {
-    font-size: 0.875rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary, #666);
-    margin: 0.25rem 0;
+    margin: 0.4rem 0;
   }
 
   .reasoning {
-    margin-top: 1rem;
+    margin-top: 1.6rem;
   }
 
   .reasoning summary {
@@ -245,9 +245,9 @@
   }
 
   .reasoning p {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    padding-left: 1rem;
+    margin-top: 0.8rem;
+    font-size: 1.4rem;
+    padding-left: 1.6rem;
     border-left: 2px solid var(--color-border);
   }
 </style>

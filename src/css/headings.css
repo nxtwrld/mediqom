@@ -1,5 +1,5 @@
 .heading {
-  padding: 0 1rem;
+  padding: 0 1.6rem;
   display: flex;
   align-items: center;
   position: relative;
@@ -34,7 +34,7 @@
 .heading > h2,
 .heading > h3 {
   margin: 0;
-  padding: 0 1rem;
+  padding: 0 1.6rem;
   background-color: var(--color-background);
   flex-grow: 2;
   height: 100%;
@@ -47,13 +47,13 @@
   align-items: flex-start;
 }
 .heading .-date {
-  font-size: 1rem;
+  font-size: 1.6rem;
   /*position: absolute;
   right: 1rem;
   bottom: 0.5rem;*/
   /*margin-top: -1.3rem;
     */
-  margin: -1rem 0 0.5rem 0;
+  margin: -1.6rem 0 0.8rem 0;
 }
 .heading:has(.h1),
 .h1.heading {
@@ -70,7 +70,7 @@
 .heading .heading-icon svg {
   height: 65%;
   aspect-ratio: 1;
-  padding: 1rem;
+  padding: 1.6rem;
   background-color: var(--color);
   border-radius: var(--radius-16);
   color: var(--color-text-primary);
@@ -98,7 +98,7 @@
   }
 
   .heading .heading-icon svg {
-    padding: 0.5rem;
+    padding: 0.8rem;
   }
 
   /* Make main headings much smaller on mobile */
@@ -106,20 +106,20 @@
   .heading .heading-icon + .h2,
   .heading .heading-icon + .h3,
   .heading .heading-icon + .h4 {
-    font-size: 1.1rem !important;
+    font-size: 1.8rem !important;
     line-height: 1.2;
   }
 
   /* Also target headings without icons */
   .heading > .h1,
   .heading > .h2 {
-    font-size: 1.1rem !important;
+    font-size: 1.8rem !important;
     line-height: 1.2;
   }
 
   /* Make date labels smaller on mobile */
   .heading .-date {
-    font-size: 0.8rem !important;
+    font-size: 1.2rem !important;
   }
   /*
   .heading .-date {
@@ -178,7 +178,7 @@
 .heading > .actions > a {
   background-color: var(--color-background);
   border: 0;
-  padding: 0 1rem;
+  padding: 0 1.6rem;
   font-weight: 700;
   margin: 0;
   cursor: pointer;
@@ -191,8 +191,8 @@
 }
 
 .heading > .actions svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
   fill: currentColor;
 }
 
@@ -260,8 +260,8 @@
 
 .heading > .toolbar > button svg,
 .heading > .toolbar > a svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
   fill: currentColor;
 }
 /*

@@ -42,7 +42,7 @@
     .unified-tooltip {
         background: rgba(255, 255, 255, 0.3);
         border-radius: var(--radius-16);
-        padding: .2rem;;
+        padding: 0.3rem;;
         backdrop-filter: blur(4px);
         font-family: system-ui, sans-serif;
         overflow-y: auto;
@@ -54,7 +54,7 @@
 
     .relationship-header.with-actions {
         border-bottom: 1px solid #e2e8f0;
-        margin-bottom: 8px;
+        margin-bottom: 0.8rem;
     }
 
     .relationship-label {
@@ -63,26 +63,26 @@
     }
 
     .actions-section {
-        margin-top: 8px;
+        margin-top: 0.8rem;
     }
 
     .actions-title {
-        font-size: 10px;
+        font-size: 1rem;
         font-weight: 600;
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 6px;
+        margin-bottom: 0.6rem;
     }
 
     .action-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 6px;
-        margin-bottom: 4px;
-        border-radius: 3px;
-        font-size: 11px;
+        padding: 0.4rem 0.6rem;
+        margin-bottom: 0.4rem;
+        border-radius: 0.3rem;
+        font-size: 1.2rem;
         line-height: 1.3;
     }
 
@@ -107,20 +107,20 @@
     .action-text {
         flex: 1;
         color: #374151;
-        margin-right: 8px;
+        margin-right: 0.8rem;
     }
 
     .action-meta {
         display: flex;
-        gap: 4px;
+        gap: 0.4rem;
         flex-shrink: 0;
     }
 
     .action-type, .action-priority {
-        font-size: 9px;
+        font-size: 1rem;
         font-weight: 600;
-        padding: 1px 4px;
-        border-radius: 2px;
+        padding: 1px 0.4rem;
+        border-radius: 0.2rem;
         background: rgba(0, 0, 0, 0.05);
         color: #6b7280;
         text-transform: uppercase;
@@ -134,26 +134,26 @@
     /* Mobile adjustments */
     @media (max-width: 768px) {
         .unified-tooltip {
-            padding: 6px;
-            max-height: 180px;
+            padding: 0.6rem;
+            max-height: 18rem;
         }
 
         .relationship-label {
-            font-size: 11px;
+            font-size: 1.2rem;
         }
 
         .actions-title {
-            font-size: 9px;
-            margin-bottom: 4px;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
         }
 
         .action-item {
-            font-size: 10px;
-            padding: 3px 4px;
+            font-size: 1rem;
+            padding: 0.3rem 0.4rem;
         }
 
         .action-type, .action-priority {
-            font-size: 8px;
+            font-size: 0.8rem;
         }
     }
 </style>

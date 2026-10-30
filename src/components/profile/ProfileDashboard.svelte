@@ -338,11 +338,11 @@
 <style>
     .profile-header {
         display: grid;
-        grid-template-columns: 10rem 1fr;
+        grid-template-columns: 16rem 1fr;
         margin-bottom: var(--gap);
         background-color: var(--color-gray-300);
-        padding: 1rem;
-        grid-gap: 1rem;
+        padding: 1.6rem;
+        grid-gap: 1.6rem;
     }
 
     .profile-header > * {
@@ -353,8 +353,8 @@
     
     .profile-header .rest {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+        gap: 1.6rem;
     }
     .profile-header .rest > * {
         display: flex;
@@ -366,16 +366,16 @@
         width: 100%;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .edit-profile-btn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 0.25rem;
+        padding: 0.4rem;
         color: var(--color-text-secondary, #666);
-        border-radius: var(--ui-radius-small, 4px);
+        border-radius: var(--ui-radius-small, 0.4rem);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -388,8 +388,8 @@
     }
 
     .edit-profile-btn svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
     }
 
@@ -398,8 +398,8 @@
     
 
     .profile-avatar {
-        width: 10rem;
-        height: 10rem;
+        width: 16rem;
+        height: 16rem;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -429,7 +429,7 @@
         --button-text-color: var(--color-highlight-text);
         --button-text-color-hover: var(--color-black);
         color: var(--color-highlight-text);
-        padding: 1rem;
+        padding: 1.6rem;
     }
     .tile:last-child:first-child {
         grid-column: 1 / -1;
@@ -437,10 +437,10 @@
     @media screen and (max-width: 768px) {
         .tiles {
             grid-template-rows: auto;
-            grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(12.8rem, 1fr));
         }
         .tiles :global(.value) {
-            font-size: 1.4rem;
+            font-size: 2.2rem;
         
         }
     }

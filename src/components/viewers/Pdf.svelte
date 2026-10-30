@@ -125,7 +125,7 @@
         border: 1px solid #ff0000;
         padding: 1em;
         margin: 1em 0;
-        border-radius: 4px;
+        border-radius: 0.4rem;
     }
 </style>
   

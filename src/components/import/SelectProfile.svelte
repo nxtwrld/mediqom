@@ -76,8 +76,8 @@ class="button selected-profile link-{linkFrom}"
 <style>
     .selected-profile {
         position: relative;
-        width: calc(100% - .4rem);
-        margin: .2rem;
+        width: calc(100% - 0.6rem);
+        margin: 0.3rem;
         --color-border:  var(--button-border-color);
         border-color: var(--color-border);
     }
@@ -91,10 +91,10 @@ class="button selected-profile link-{linkFrom}"
         position: absolute;
         content: '';
         left: 50%;
-        top: -1rem;
+        top: -1.6rem;
         transform: translate(-50%, 0);
         width: 1px;
-        height: 1rem;
+        height: 1.6rem;
 
         background-color: var(--color-border);
         z-index: -1;
@@ -102,10 +102,10 @@ class="button selected-profile link-{linkFrom}"
 
 
     .link-top {
-        margin-top: 1rem;
+        margin-top: 1.6rem;
     }
     .link-top:after {
-        top: -1rem;
+        top: -1.6rem;
     }
 
     .list {
@@ -120,7 +120,7 @@ class="button selected-profile link-{linkFrom}"
     .list button {
         width: 100%;
         text-align: left;
-        padding: 0.5rem;
+        padding: 0.8rem;
         border: none;
         background-color: var(--background);
     }

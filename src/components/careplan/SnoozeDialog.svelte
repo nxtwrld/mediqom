@@ -100,8 +100,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--ui-pad-medium);
-    min-width: 18rem;
-    max-width: 26rem;
+    min-width: 28.8rem;
+    max-width: 41.6rem;
   }
   .snooze-task {
     color: var(--color-text-secondary);
@@ -116,22 +116,22 @@
     gap: var(--ui-pad-small);
   }
   .snooze-group legend {
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     color: var(--color-text-secondary);
     padding: 0;
   }
   .option-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .option {
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     border-radius: var(--ui-radius-small);
-    padding: 0.35rem 0.75rem;
+    padding: 0.6rem 1.2rem;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 1.4rem;
   }
   .option.-active {
     background: var(--color-primary);
@@ -141,12 +141,12 @@
   .snooze-note {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    font-size: 0.85rem;
+    gap: 0.4rem;
+    font-size: 1.4rem;
     color: var(--color-text-secondary);
   }
   .snooze-note textarea {
-    font-size: 16px;
+    font-size: 1.6rem;
     padding: var(--ui-pad-small);
     border: 1px solid var(--color-border);
     border-radius: var(--ui-radius-small);

@@ -43,18 +43,18 @@
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		padding: 4rem 2rem;
+		padding: 6.4rem 3.2rem;
 		position: relative;
 	}
 
 	.story-inner {
-		max-width: 640px;
+		max-width: 64rem;
 		z-index: 1;
 	}
 
 	.story-inner > * {
 		opacity: 0;
-		transform: translateY(24px);
+		transform: translateY(2.4rem);
 		transition: opacity 0.7s ease, transform 0.7s ease;
 	}
 
@@ -72,44 +72,44 @@
 	.-visible .story-inner > :nth-child(8) { transition-delay: 1.05s; }
 
 	.story-logo {
-		width: clamp(3.5rem, 8vw, 5rem);
-		height: clamp(3.5rem, 8vw, 5rem);
-		margin-bottom: 1rem;
+		width: clamp(5.6rem, 8vw, 8rem);
+		height: clamp(5.6rem, 8vw, 8rem);
+		margin-bottom: 1.6rem;
 	}
 
 	.story-title {
 		font-family: 'Baloo Thambi 2';
-		font-size: clamp(1.75rem, 4vw, 2.5rem);
+		font-size: clamp(2.8rem, 4vw, 4rem);
 		color: var(--www-text, #1a1a2e);
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.8rem;
 		line-height: 1.2;
 	}
 
 	.story-symbol {
-		font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+		font-size: clamp(1.6rem, 1.8vw, 2rem);
 		font-style: italic;
 		color: var(--www-text, #1a1a2e);
-		margin: 0 0 2rem;
+		margin: 0 0 3.2rem;
 	}
 
 	.story-text {
-		font-size: clamp(1rem, 1.5vw, 1.15rem);
+		font-size: clamp(1.6rem, 1.5vw, 1.8rem);
 		color: var(--www-text-secondary, #555);
 		line-height: 1.7;
-		margin: 0 0 1.25rem;
+		margin: 0 0 2rem;
 	}
 
 	.story-tagline {
 		font-family: 'Baloo Thambi 2';
-		font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+		font-size: clamp(2rem, 2.5vw, 2.6rem);
 		color: var(--www-text, #1a1a2e);
-		margin: 1.5rem 0 0;
+		margin: 2.4rem 0 0;
 		line-height: 1.3;
 	}
 
 	@media (max-width: 768px) {
 		.section-story {
-			padding: 3rem 1.5rem;
+			padding: 4.8rem 2.4rem;
 			min-height: auto;
 		}
 	}

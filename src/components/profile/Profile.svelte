@@ -10,7 +10,7 @@
 <style>
     .photo {
         width: 100%;
-        max-width: 200px;
+        max-width: 20rem;
         aspect-ratio: 1/1;
         background-color: #f0f0f0;
         border-radius: 50%;

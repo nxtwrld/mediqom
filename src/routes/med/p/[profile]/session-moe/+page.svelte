@@ -20,7 +20,7 @@
     let centerButtonEl = $state<HTMLButtonElement>();
     let isAnimating = $state(false);
     let hasAnimated = $state(false); // Prevent multiple animations
-    let animationTarget = $state({ left: '50%', top: '50%', width: '12rem', height: '12rem' });
+    let animationTarget = $state({ left: '50%', top: '50%', width: '19.2rem', height: '19.2rem' });
     let animationTimeoutId: NodeJS.Timeout | null = null;
 
     // Animation logic - watch for session state changes
@@ -68,8 +68,8 @@
         animationTarget = { 
             left: `${targetLeft}px`, 
             top: `${targetTop}px`,
-            width: '2.5rem', // Header button size
-            height: '2.5rem'
+            width: '4rem', // Header button size
+            height: '4rem'
         };
         
         logger.audio.debug('Animation target calculated', { 
@@ -103,8 +103,8 @@
         animationTarget = {
             left: '50%',
             top: '50%',
-            width: '12rem',
-            height: '12rem'
+            width: '19.2rem',
+            height: '19.2rem'
         };
         
         logger.audio.debug('Button restored to center position - inline styles removed');
@@ -341,40 +341,40 @@
         align-items: center;
         justify-content: center;
         height: 100%;
-        padding: 2rem;
+        padding: 3.2rem;
         background: linear-gradient(135deg, var(--color-background, #f8fafc) 0%, var(--color-surface, #fff) 100%);
     }
 
     .empty-content {
         text-align: center;
-        max-width: 600px;
+        max-width: 60rem;
         width: 100%;
     }
 
     .empty-content h2 {
-        font-size: 2rem;
+        font-size: 3.2rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
-        margin: 0 0 1rem 0;
+        margin: 0 0 1.6rem 0;
     }
 
     .empty-content > p {
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         color: var(--color-text-secondary, #6b7280);
-        margin: 0 0 3rem 0;
+        margin: 0 0 4.8rem 0;
         line-height: 1.6;
     }
 
     .session-button-container {
         position: relative;
-        margin: 0 0 3rem 0;
+        margin: 0 0 4.8rem 0;
         background: transparent !important;
         border: none !important;
     }
     
     .button-space-shim {
-        width: 12rem;
-        height: 12rem;
+        width: 19.2rem;
+        height: 19.2rem;
         margin: 0 auto;
         /* This creates the space for the fixed position button */
     }
@@ -391,8 +391,8 @@
         /* Default values, will be overridden by inline styles */
         top: 50%;
         left: 50%;
-        width: 12rem;
-        height: 12rem;
+        width: 19.2rem;
+        height: 19.2rem;
     }
     
     .session-trigger-button:disabled {
@@ -427,15 +427,15 @@
     }
 
     .instructions {
-        padding: 1.5rem;
+        padding: 2.4rem;
         background: var(--color-surface, #fff);
         border: 1px solid var(--color-border, #e2e8f0);
-        border-radius: 12px;
+        border-radius: 1.2rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .instruction-text {
-        font-size: 0.95rem;
+        font-size: 1.6rem;
         color: var(--color-text-secondary, #6b7280);
         margin: 0;
         line-height: 1.5;
@@ -445,21 +445,21 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin: 2rem 0;
+        margin: 3.2rem 0;
     }
 
     .analysis-progress .spinner {
-        width: 32px;
-        height: 32px;
+        width: 3.2rem;
+        height: 3.2rem;
         border: 3px solid var(--color-border, #e2e8f0);
         border-top: 3px solid var(--color-interactivity, #3b82f6);
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
     }
 
     .analysis-progress p {
-        font-size: 0.95rem;
+        font-size: 1.6rem;
         color: var(--color-text-secondary, #6b7280);
         margin: 0;
     }
@@ -470,22 +470,22 @@
     }
 
     .transcript-preview {
-        margin-top: 2rem;
-        padding: 1rem;
+        margin-top: 3.2rem;
+        padding: 1.6rem;
         background: var(--color-surface, #f1f5f9);
-        border-radius: 8px;
-        border-left: 4px solid var(--color-interactivity, #3b82f6);
+        border-radius: 0.8rem;
+        border-left: 0.4rem solid var(--color-interactivity, #3b82f6);
     }
 
     .preview-label {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-secondary, #6b7280);
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
     }
 
     .preview-text {
-        font-size: 0.95rem;
+        font-size: 1.6rem;
         color: var(--color-text-primary, #1f2937);
         margin: 0;
         font-style: italic;

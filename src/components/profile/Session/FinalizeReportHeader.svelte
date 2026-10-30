@@ -27,7 +27,7 @@
 <style>
 
     .report-header {
-        margin-bottom: 2rem;
+        margin-bottom: 3.2rem;
         font-family: var(--font-face-print);
     }
     strong {
@@ -35,8 +35,8 @@
     }
 
     h1 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
+        font-size: 3.2rem;
+        margin-bottom: 1.6rem;
 
     }
 </style>

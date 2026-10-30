@@ -27,11 +27,11 @@
         align-items: center;
         justify-content: center;
         color: var(--color-text-secondary);
-        letter-spacing: .05rem;
+        letter-spacing: 0.1rem;
         overflow: hidden;
         width: 100%;
         height: 100%;
-        padding: .5rem 1rem;
+        padding: 0.8rem 1.6rem;
         transition: letter-spacing .2s ease-in-out;
 
     }

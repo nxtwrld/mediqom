@@ -305,8 +305,8 @@
     /* Component-specific styles (most styles now shared via session-* classes) */
     .session-details-actions {
         display: flex;
-        gap: 0.5rem;
-        padding: 1rem;
+        gap: 0.8rem;
+        padding: 1.6rem;
         border-top: 1px solid var(--color-border, #e2e8f0);
         margin-top: auto;
     }
@@ -318,17 +318,17 @@
     .connection-flow {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .connection-node {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .node-label {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-secondary, #6b7280);
     }
@@ -337,21 +337,21 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.5rem;
+        gap: 0.4rem;
+        padding: 0.8rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         border: 1px solid var(--color-border, #e2e8f0);
     }
 
     .arrow-icon {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         color: var(--color-interactivity, #3b82f6);
         font-weight: bold;
     }
 
     .relationship-label {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 600;
         color: var(--color-interactivity, #3b82f6);
         text-align: center;
@@ -359,23 +359,23 @@
 
     .connection-fallback {
         font-family: monospace;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #6b7280);
-        padding: 0.5rem;
+        padding: 0.8rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 4px;
+        border-radius: 0.4rem;
         border: 1px dashed var(--color-border, #e2e8f0);
     }
 
     .related-actions {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 1.2rem;
     }
 
     .action-item {
-        padding: 0.75rem;
-        border-radius: 6px;
+        padding: 1.2rem;
+        border-radius: 0.6rem;
         border: 1px solid var(--color-border, #e2e8f0);
     }
 
@@ -401,28 +401,28 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
 
     .action-text {
         flex: 1;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
     }
 
     .action-meta {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex-shrink: 0;
     }
 
     .action-type,
     .action-priority {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        padding: 0.125rem 0.375rem;
-        border-radius: 12px;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1.2rem;
         text-transform: uppercase;
     }
 
@@ -437,7 +437,7 @@
     }
 
     .action-category {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary, #6b7280);
         font-style: italic;
     }
@@ -445,13 +445,13 @@
     /* Mobile responsive adjustments */
     @media (max-width: 768px) {
         .connection-flow {
-            gap: 0.75rem;
+            gap: 1.2rem;
         }
 
         .action-header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
         .action-meta {

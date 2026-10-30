@@ -99,19 +99,19 @@
 <style>
     .zoom-controls {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        top: 1.2rem;
+        right: 1.2rem;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 0.8rem;
         z-index: 10;
         pointer-events: none;
     }
 
     .zoom-controls.mobile {
-        top: 8px;
-        right: 8px;
-        gap: 4px;
+        top: 0.8rem;
+        right: 0.8rem;
+        gap: 0.4rem;
     }
 
     .zoom-buttons,
@@ -120,7 +120,7 @@
         align-items: center;
         background: var(--color-surface, #ffffff);
         border: 1px solid var(--color-border, #e2e8f0);
-        border-radius: 6px;
+        border-radius: 0.6rem;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         pointer-events: auto;
@@ -139,24 +139,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 8px;
+        gap: 0.4rem;
+        padding: 0.8rem;
         border: none;
         background: transparent;
         color: var(--color-text-primary, #1f2937);
         cursor: pointer;
         transition: all 0.2s ease;
-        font-size: 12px;
+        font-size: 1.2rem;
         font-weight: 500;
-        min-width: 36px;
-        min-height: 36px;
+        min-width: 3.6rem;
+        min-height: 3.6rem;
     }
 
     .mobile .zoom-btn {
-        padding: 6px;
-        min-width: 32px;
-        min-height: 32px;
-        font-size: 11px;
+        padding: 0.6rem;
+        min-width: 3.2rem;
+        min-height: 3.2rem;
+        font-size: 1.2rem;
     }
 
     .zoom-btn:hover:not(:disabled) {
@@ -178,20 +178,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0 12px;
-        font-size: 12px;
+        padding: 0 1.2rem;
+        font-size: 1.2rem;
         font-weight: 600;
         color: var(--color-text-secondary, #6b7280);
         border-left: 1px solid var(--color-border, #e2e8f0);
         border-right: 1px solid var(--color-border, #e2e8f0);
-        min-width: 50px;
+        min-width: 5rem;
         user-select: none;
     }
 
     .mobile .zoom-level {
-        padding: 0 8px;
-        font-size: 11px;
-        min-width: 40px;
+        padding: 0 0.8rem;
+        font-size: 1.2rem;
+        min-width: 4rem;
     }
 
     .zoom-actions .zoom-btn + .zoom-btn {
@@ -216,7 +216,7 @@
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-1rem);
         }
         to {
             opacity: 1;

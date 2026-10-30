@@ -560,8 +560,14 @@
       "beta-status": "Application Status",
       "beta-not-approved": "Your beta application was not approved. If you believe this is an error, please contact us at",
       "new-here-title": "New here?",
-      "new-here-message": "Mediqom is invite-only right now. Use an invite code or join the waiting list below.",
+      "new-here-message": "Mediqom is invite-only right now. Use an invite code or join the waiting list.",
       "or": "or",
+      "tabs": {
+        "label": "Sign-in options",
+        "sign-in": "Sign in",
+        "invite": "Invite code",
+        "waitlist": "Waiting list"
+      },
       "invite": {
         "title": "Have an invite code?",
         "instruction": "Enter your invite code and email to create your account.",
@@ -750,6 +756,7 @@
     "settings": {
       "title": "Settings",
       "redirect": "Redirecting to settings...",
+      "back": "Back",
       "tabs": {
         "general": "General",
         "profile": "Profile",

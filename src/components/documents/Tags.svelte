@@ -70,13 +70,13 @@
     .tags {
         display: inline-flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 0.8rem;
 	}
 
 	.tag {
 		display: inline-block;
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
+		padding: 0.4rem 0.8rem;
+		border-radius: 0.4rem;
 		background-color: var(--color-gray-800);
 		color: var(--color-white);
 		cursor: pointer;

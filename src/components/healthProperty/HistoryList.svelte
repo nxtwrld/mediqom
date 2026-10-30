@@ -192,7 +192,7 @@
 
 	.date {
 		flex: 0 0 auto;
-		min-width: 7rem;
+		min-width: 11.2rem;
 		color: var(--color-text-secondary);
 		font-size: var(--font-size-sm);
 	}
@@ -205,19 +205,19 @@
 	.unit {
 		font-weight: 400;
 		color: var(--color-text-secondary);
-		margin-left: 0.25rem;
+		margin-left: 0.4rem;
 	}
 
 	.actions {
 		display: flex;
-		gap: 0.5rem;
+		gap: 0.8rem;
 		align-items: center;
 	}
 
 	.action-btn {
 		background: none;
 		border: none;
-		padding: 0.25rem;
+		padding: 0.4rem;
 		cursor: pointer;
 		color: var(--color-text-secondary);
 		border-radius: var(--ui-radius-small);
@@ -241,16 +241,16 @@
 	}
 
 	.action-btn svg {
-		width: 1rem;
-		height: 1rem;
+		width: 1.6rem;
+		height: 1.6rem;
 		fill: currentColor;
 	}
 
 	.badge {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.125rem 0.5rem;
+		gap: 0.4rem;
+		padding: 0.2rem 0.8rem;
 		background: var(--color-gray-200);
 		border-radius: var(--ui-radius-small);
 		font-size: var(--font-size-sm);
@@ -258,8 +258,8 @@
 	}
 
 	.badge svg {
-		width: 0.875rem;
-		height: 0.875rem;
+		width: 1.4rem;
+		height: 1.4rem;
 		fill: currentColor;
 	}
 
@@ -275,7 +275,7 @@
 
 		.date {
 			flex: 0 0 100%;
-			margin-bottom: 0.25rem;
+			margin-bottom: 0.4rem;
 		}
 
 		.value {

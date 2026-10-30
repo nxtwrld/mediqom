@@ -83,8 +83,8 @@
         font-size: 0.7em;
         font-weight: 600;
         background: rgba(255, 255, 255, 0.9);
-        padding: 1px 4px;
-        border-radius: 3px;
+        padding: 1px 0.4rem;
+        border-radius: 0.3rem;
         line-height: 1;
         text-shadow: none;
     }
@@ -97,7 +97,7 @@
         color: #4b5563;
         font-weight: 500;
         background: rgba(255, 255, 255, 0.7);
-        padding: 1px 3px;
+        padding: 1px 0.3rem;
         line-height: 1;
     }
     

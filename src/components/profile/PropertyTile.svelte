@@ -196,9 +196,9 @@
         position: absolute;
         display: flex;
         flex-direction: column;
-        gap: .5rem;
-        padding: .3rem .5rem .5rem;
-        margin-top: .4rem;
+        gap: 0.8rem;
+        padding: 0.4rem 0.8rem 0.8rem;
+        margin-top: 0.6rem;
         top: 0;
         left: 0;
         width: 100%;
@@ -219,9 +219,9 @@
         text-align: right;
     }
     .grid-tile-wrapper .icon {
-        width: 3rem;
-        height: 3rem;
-        margin: 2rem 1rem 2rem 0.5rem;
+        width: 4.8rem;
+        height: 4.8rem;
+        margin: 3.2rem 1.6rem 3.2rem 0.8rem;
         fill: var(--color-gray-500);
     }
 
@@ -231,10 +231,10 @@
         justify-content: flex-end;
         align-items: flex-end;
         flex-grow: 1;
-        gap: .2rem;
-        font-size: 2rem;
+        gap: 0.3rem;
+        font-size: 3.2rem;
         font-weight: 700;
-        padding: .3rem;
+        padding: 0.4rem;
         transition: opacity 0.3s;
     }
     .grid-tile .unit {
@@ -246,7 +246,7 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: .4rem;
+        height: 0.6rem;
         background-color: var(--color-gray-800);
         transition: opacity 0.3s;
     }
@@ -270,10 +270,10 @@
 
     .icon.-text {
         display: inline-block;
-        width: .8rem;
-        height: .8rem;
+        width: 1.2rem;
+        height: 1.2rem;
         color: var(--color-negative);
         fill: currentColor;
-        margin: 0 .2rem;
+        margin: 0 0.3rem;
     }
 </style>

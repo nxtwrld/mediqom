@@ -5,7 +5,7 @@
         height?: string;
     }
 
-    let { country = 'us', height = "1rem" }: Props = $props();
+    let { country = 'us', height = "1.6rem" }: Props = $props();
 
     const flagMapping: Record<string, string> = {
         en: 'us',

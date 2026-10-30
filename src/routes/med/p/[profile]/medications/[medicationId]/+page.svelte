@@ -142,7 +142,7 @@
 		gap: var(--ui-pad-large);
 	}
 	.detail-section h2 {
-		font-size: 1rem;
+		font-size: 1.6rem;
 		font-weight: 600;
 		margin-bottom: var(--ui-pad-small);
 		color: var(--color-text-secondary);
@@ -161,9 +161,9 @@
 	}
 	.status-badge {
 		display: inline-block;
-		padding: 0.25rem 0.75rem;
+		padding: 0.4rem 1.2rem;
 		border-radius: var(--ui-radius-small);
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		font-weight: 500;
 	}
 	.status-badge.-active {

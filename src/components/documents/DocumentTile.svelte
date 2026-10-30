@@ -94,7 +94,7 @@
 
     .tile .tile-body {
         flex-grow: 1;
-        padding: .5rem;
+        padding: 0.8rem;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
@@ -105,8 +105,8 @@
     .tile .tile-header {
         display: flex;
         justify-content: flex-end;
-        font-size: 1rem;
-        padding: .5rem;
+        font-size: 1.6rem;
+        padding: 0.8rem;
     }
     .tile .tile-footer {
         width: 100%;
@@ -127,9 +127,9 @@
     }
 
     .tile  svg.category {
-        margin: .5rem;
-        width: 1.6rem;
-        height: 1.6rem;
+        margin: 0.8rem;
+        width: 2.6rem;
+        height: 2.6rem;
         fill: currentColor;
     }
     .tile:hover  svg.category {
@@ -137,22 +137,22 @@
     }
 
     .tile .people {
-        margin: .5rem;
+        margin: 0.8rem;
     }
 
     .share-badge {
         display: flex;
         align-items: center;
-        gap: 0.2rem;
-        margin: 0.3rem 0.5rem;
-        font-size: 0.75rem;
+        gap: 0.3rem;
+        margin: 0.4rem 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         text-decoration: none;
     }
 
     .share-badge svg {
-        width: 0.9rem;
-        height: 0.9rem;
+        width: 1.4rem;
+        height: 1.4rem;
         fill: currentColor;
     }
 

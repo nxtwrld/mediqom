@@ -436,23 +436,23 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
+        padding: 1.6rem;
         background: var(--color-surface, #fff);
         border-bottom: 1px solid var(--color-border, #e2e8f0);
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .header-info h2 {
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         font-weight: 600;
-        margin: 0 0 0.25rem;
+        margin: 0 0 0.4rem;
         color: var(--color-text-primary, #1f2937);
     }
 
     .stats {
         display: flex;
-        gap: 1rem;
-        font-size: 0.875rem;
+        gap: 1.6rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #6b7280);
     }
 
@@ -467,18 +467,18 @@
 
     .header-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: center;
     }
 
     .sidebar-toggle {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.4rem;
         border: 1px solid var(--color-border, #e2e8f0);
         background: var(--color-surface, #fff);
         color: var(--color-text-secondary, #6b7280);
         cursor: pointer;
-        border-radius: 6px;
+        border-radius: 0.6rem;
         transition: all 0.2s ease;
     }
 
@@ -519,7 +519,7 @@
     }
 
     .mobile .diagram-area {
-        margin: 0.5rem;
+        margin: 0.8rem;
     }
 
     /* Responsive breakpoints 

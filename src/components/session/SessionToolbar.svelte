@@ -127,7 +127,7 @@
     .session-toolbar-tabs {
         display: flex;
         align-items: stretch;
-        height: var(--toolbar-height, 48px);
+        height: var(--toolbar-height, 4.8rem);
         border-bottom: 1px solid var(--color-border, #e2e8f0);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         z-index: 1;
@@ -141,7 +141,7 @@
     
     .tab-spacer {
         flex: 1;
-        min-width: 1rem;
+        min-width: 1.6rem;
         background: var(--color-surface, #fff);
     }
     
@@ -164,14 +164,14 @@
     .tab-head {
         position: relative;
         flex-grow: 0;
-        padding: 0.5rem 1rem;
+        padding: 0.8rem 1.6rem;
         background-color: var(--color-white);
         border: none;
         border-top: 3px solid var(--color-border);
         border-right: 1px solid var(--color-border);
         height: 100%;
         color: var(--color-text-secondary);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         cursor: pointer;
         transition:
@@ -179,7 +179,7 @@
             color 0.3s,
             border-color 0.3s;
         white-space: nowrap;
-        min-width: 100px;
+        min-width: 10rem;
     }
     
     .tab-head:first-child {
@@ -204,15 +204,15 @@
     
     .badge {
         position: absolute;
-        top: 0.25rem;
-        right: 0.25rem;
+        top: 0.4rem;
+        right: 0.4rem;
         background: var(--color-negative, #dc2626);
         color: white;
-        font-size: 0.625rem;
+        font-size: 1rem;
         font-weight: 700;
-        padding: 0.125rem 0.25rem;
-        border-radius: 10px;
-        min-width: 1rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 1rem;
+        min-width: 1.6rem;
         text-align: center;
         line-height: 1;
     }
@@ -222,19 +222,19 @@
     @media (max-width: 768px) {
         .tab-head {
             min-width: auto;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.8125rem;
+            padding: 0.8rem 1.2rem;
+            font-size: 1.4rem;
         }
         
         .session-toolbar-tabs {
-            padding-right: 0.25rem;
+            padding-right: 0.4rem;
         }
     }
     
     /* Very small screens - show only active tabs */
     @media (max-width: 480px) {
         .tab-spacer {
-            min-width: 0.5rem;
+            min-width: 0.8rem;
         }
     
         

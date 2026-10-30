@@ -9,8 +9,8 @@
 
 export const NODE_SIZE = {
   // Minimum height for all nodes (in rem for consistency)
-  MIN_HEIGHT_REM: 3, // 3rem minimum height
-  MIN_HEIGHT_PX: 48, // ~3rem in pixels (assuming 16px base)
+  MIN_HEIGHT_REM: 4.8, // 4.8rem minimum height
+  MIN_HEIGHT_PX: 48, // shortcut: fixed SVG px (4.8rem at default font size), derive from root font-size if Sankey nodes should scale
 
   // Maximum heights by node type
   MAX_HEIGHT_PX: 150, // Maximum height for any node

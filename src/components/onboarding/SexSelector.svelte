@@ -55,7 +55,7 @@
     }
 
     .label {
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         margin-bottom: var(--ui-pad-small);
         display: block;
@@ -92,12 +92,12 @@
     }
 
     .sex-icon {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
     }
 
     .sex-label {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-weight: 500;
     }
 </style>

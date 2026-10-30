@@ -1,20 +1,20 @@
 .app-icon {
   display: block;
-  margin: 0.3rem auto 0.5rem;
-  width: min(4rem, 60px);
-  height: min(4rem, 60px);
+  margin: 0.4rem auto 0.8rem;
+  width: 6rem;
+  height: 6rem;
   fill: #fff;
 }
 
 svg.app-icon {
-  padding: 0.5rem;
+  padding: 0.8rem;
 }
 img.app-icon {
   border-radius: 25%;
   background-color: var(--color-surface);
-  box-shadow: 0rem 0.3rem 0.3rem -0.1rem rgba(0, 0, 0, 0.4);
+  box-shadow: 0rem 0.4rem 0.4rem -0.2rem rgba(0, 0, 0, 0.4);
 }
 .app-icon.-full {
-  width: 7rem;
-  height: 7rem;
+  width: 11.2rem;
+  height: 11.2rem;
 }

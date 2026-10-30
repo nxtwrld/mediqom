@@ -90,54 +90,54 @@
     }
 
     .alerts-section.compact {
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        gap: 1.6rem;
+        margin-bottom: 1.6rem;
     }
 
     .alerts-section.compact .section-header {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
 
     .section-title {
         position: relative;
         margin: 0;
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .badge {
         background: var(--color-negative, #dc2626);
         color: white;
-        font-size: 0.75rem;
-        padding: 0.125rem 0.375rem;
-        border-radius: 10px;
-        min-width: 16px;
+        font-size: 1.2rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 1rem;
+        min-width: 1.6rem;
         text-align: center;
         font-weight: 500;
     }
 
     .filters {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .filter-select {
-        padding: 0.375rem 0.75rem;
+        padding: 0.6rem 1.2rem;
         border: 1px solid var(--color-border, #e2e8f0);
-        border-radius: 4px;
+        border-radius: 0.4rem;
         background: var(--color-surface, #fff);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
     }
 
@@ -150,18 +150,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 120px;
+        height: 12rem;
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         text-align: center;
         background: var(--color-surface, #f8fafc);
         border: 1px dashed var(--color-border, #e2e8f0);
-        border-radius: 8px;
+        border-radius: 0.8rem;
     }
 
     .alerts-section.compact .empty-state {
-        height: 80px;
-        font-size: 0.8125rem;
+        height: 8rem;
+        font-size: 1.4rem;
     }
 
     /* Mobile optimizations */
@@ -169,7 +169,7 @@
         .section-header {
             flex-direction: column;
             align-items: stretch;
-            gap: 0.75rem;
+            gap: 1.2rem;
         }
 
         .filters {

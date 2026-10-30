@@ -28,31 +28,31 @@
 
 <style>
 	.widget-progress {
-		padding: 12px;
+		padding: 1.2rem;
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 1.2rem;
 	}
 
 	.progress-chart {
-		width: 64px;
-		height: 64px;
+		width: 6.4rem;
+		height: 6.4rem;
 		flex-shrink: 0;
 	}
 
 	.progress-label {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 0.2rem;
 	}
 
 	.label-text {
-		font-size: 12px;
+		font-size: 1.2rem;
 		color: var(--color-gray-800);
 	}
 
 	.label-value {
-		font-size: 16px;
+		font-size: 1.6rem;
 		font-weight: 600;
 		color: var(--color-black);
 	}

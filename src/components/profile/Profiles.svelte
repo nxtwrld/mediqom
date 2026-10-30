@@ -101,7 +101,7 @@
 
     .list-items-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
         gap: var(--gap);
         margin-top: var(--gap);
     }
@@ -112,7 +112,7 @@
         align-items: stretch;
         justify-content: space-between;
         gap: var(--gap);
-        height: 20rem;
+        height: 32rem;
     }
 
     .list-items-grid .list-item .content {
@@ -129,7 +129,7 @@
     }
 
     .list-items-grid .list-item .image {
-        padding: 1rem;
+        padding: 1.6rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -179,28 +179,28 @@
 
         cursor: pointer;
         flex-grow: 1;
-        padding: .5rem;
+        padding: 0.8rem;
     }
     .list-items-list .list-item .image {
-        margin-right: 1rem;
+        margin-right: 1.6rem;
     }
 
     .list-items-list .list-item .content > * {
         white-space: nowrap;
-        padding: .5rem;
+        padding: 0.8rem;
     }
 
     .list-items-list .list-item .content .title {
         flex-grow: 1;
         text-align: left;
         font-weight: 500;
-        font-size: 1.2rem;
+        font-size: 2rem;
     }
     .list-items-list .list-item .actions {
         display: flex;
         flex-direction: column;
         gap: var(--gap);
-        padding: 0 1rem;
+        padding: 0 1.6rem;
         justify-content: center;
         align-items: stretch;
     }

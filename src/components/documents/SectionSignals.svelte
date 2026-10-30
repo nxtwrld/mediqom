@@ -74,17 +74,17 @@
     /* Responsive table adjustments */
     @container (max-width: 600px) {
         .table-list {
-            font-size: 0.9rem;
+            font-size: 1.4rem;
         }
     }
     
     @container (max-width: 400px) {
         .table-list {
-            font-size: 0.8rem;
+            font-size: 1.2rem;
         }
         
         .h3.heading {
-            font-size: 1.1rem;
+            font-size: 1.8rem;
         }
     }
 </style>

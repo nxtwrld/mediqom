@@ -108,18 +108,18 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100vh;
-		padding: 2rem;
+		padding: 3.2rem;
 		text-align: center;
 	}
 	
 	.loading-spinner {
-		width: 3rem;
-		height: 3rem;
+		width: 4.8rem;
+		height: 4.8rem;
 		border: 3px solid #f3f3f3;
 		border-top: 3px solid #3498db;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
-		margin-bottom: 1.5rem;
+		margin-bottom: 2.4rem;
 	}
 	
 	@keyframes spin {
@@ -133,12 +133,12 @@
 	
 	.button {
 		display: inline-block;
-		padding: 0.75rem 1.5rem;
+		padding: 1.2rem 2.4rem;
 		background-color: #3498db;
 		color: white;
 		text-decoration: none;
-		border-radius: 5px;
-		margin-top: 1rem;
+		border-radius: 0.6rem;
+		margin-top: 1.6rem;
 	}
 	
 	.button:hover {
@@ -146,12 +146,12 @@
 	}
 	
 	h1 {
-		margin-bottom: 1rem;
-		font-size: 1.5rem;
+		margin-bottom: 1.6rem;
+		font-size: 2.4rem;
 	}
 	
 	p {
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.8rem;
 		color: #666;
 	}
 </style> 

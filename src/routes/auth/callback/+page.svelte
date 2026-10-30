@@ -114,17 +114,17 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100vh;
-		padding: 2rem;
+		padding: 3.2rem;
 		text-align: center;
 	}
 
 	h2 {
 		color: var(--color-negative, #e53e3e);
-		margin-bottom: 1rem;
+		margin-bottom: 1.6rem;
 	}
 
 	a {
-		margin-top: 1rem;
+		margin-top: 1.6rem;
 		color: var(--color-interactivity, #3182ce);
 	}
 </style>

@@ -199,7 +199,7 @@
     }
 
     .section-header h3 {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-secondary);
         text-transform: uppercase;
@@ -208,9 +208,9 @@
     }
 
     .status-badge {
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 600;
         text-transform: capitalize;
     }
@@ -233,22 +233,22 @@
     .plan-info {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .tier-name {
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: 700;
         color: var(--color-text-primary);
     }
 
     .next-billing {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 
     .status-section h4 {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 500;
         color: var(--color-text-secondary);
         margin: 0 0 var(--ui-pad-small) 0;
@@ -261,8 +261,8 @@
     .usage-label {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.25rem;
-        font-size: 0.875rem;
+        margin-bottom: 0.4rem;
+        font-size: 1.4rem;
     }
 
     .usage-count {
@@ -273,20 +273,20 @@
     .usage-info {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
+        gap: 0.8rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
-        padding: 0.25rem 0;
+        padding: 0.4rem 0;
     }
 
     .usage-info.-muted {
         color: var(--color-text-secondary);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
 
     .info-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
         flex-shrink: 0;
     }
@@ -299,13 +299,13 @@
 
     .status-actions .button {
         flex: 1;
-        min-width: 150px;
+        min-width: 15rem;
     }
 
     .status-actions .button svg {
-        width: 1rem;
-        height: 1rem;
-        margin-right: 0.5rem;
+        width: 1.6rem;
+        height: 1.6rem;
+        margin-right: 0.8rem;
         fill: currentColor;
     }
 

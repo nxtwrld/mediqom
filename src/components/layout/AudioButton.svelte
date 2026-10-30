@@ -288,7 +288,7 @@
         --listen-color: var(--color-interactivity);
         --sound-color: var(--idle-color);
         --sound-color-text: var(--idle-color-text);
-        --button-size: 3rem;
+        --button-size: 4.8rem;
         --animation-duration: 2s; /* Default animation duration */
         
         /* Simple container that inherits parent positioning */
@@ -313,7 +313,7 @@
         width: var(--button-size);
         height: var(--button-size);
         border-radius: 50%;
-        border: 0.2rem solid var(--sound-color);
+        border: 0.3rem solid var(--sound-color);
         background-color: var(--sound-color);
         color: var(--sound-color-text);
         cursor: pointer;
@@ -321,7 +321,7 @@
         align-items: center;
         justify-content: center;
         font-weight: var(--text-bold);
-        box-shadow: 0 0.6rem 0.6rem -0.2rem rgba(0, 0, 0, 0.5);
+        box-shadow: 0 1rem 1rem -0.3rem rgba(0, 0, 0, 0.5);
         transition: all 0.3s ease;
         overflow: hidden;
         /* Ensure button is above animations */
@@ -330,7 +330,7 @@
 
     .audio-button:hover {
         transform: scale(1.05);
-        box-shadow: 0 1rem 0.8rem -0.5rem rgba(0, 0, 0, 0.4);
+        box-shadow: 0 1.6rem 1.2rem -0.8rem rgba(0, 0, 0, 0.4);
         /* Ensure base hover state maintains button colors */
         background-color: var(--sound-color);
         border-color: var(--sound-color);
@@ -370,7 +370,7 @@
         border-color: var(--idle-color);
         color: var(--idle-color-text);
         transform: scale(1.05);
-        box-shadow: 0 1rem 0.8rem -0.5rem rgba(0, 0, 0, 0.4);
+        box-shadow: 0 1.6rem 1.2rem -0.8rem rgba(0, 0, 0, 0.4);
     }
 
 
@@ -395,12 +395,12 @@
     /* Loading animation */
     .loading-dots {
         display: flex;
-        gap: 0.3rem;
+        gap: 0.4rem;
     }
 
     .loading-dots span {
-        width: 0.4rem;
-        height: 0.4rem;
+        width: 0.6rem;
+        height: 0.6rem;
         background-color: currentColor;
         border-radius: 50%;
         animation: loading-bounce 1.4s infinite ease-in-out;
@@ -463,13 +463,13 @@
     /* Responsive adjustments */
     @media screen and (max-width: 768px) {
         .audio-button-container.position-center {
-            --button-size: 10rem;
+            --button-size: 16rem;
         }
     }
 
     @media screen and (max-width: 480px) {
         .audio-button-container.position-center {
-            --button-size: 8rem;
+            --button-size: 12.8rem;
         }
     }
 </style>

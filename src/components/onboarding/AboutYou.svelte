@@ -164,8 +164,8 @@
     }
 
     .story-logo {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         margin-bottom: var(--ui-pad-small);
     }
 
@@ -175,7 +175,7 @@
     }
 
     .story-text {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         line-height: 1.5;
         margin-bottom: var(--ui-pad-small);
@@ -186,7 +186,7 @@
     }
 
     .subtitle {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         margin-bottom: var(--ui-pad-large);
         text-align: center;
@@ -199,8 +199,8 @@
     }
 
     .capability {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
-        margin-top: 0.35rem;
+        margin-top: 0.6rem;
     }
 </style>

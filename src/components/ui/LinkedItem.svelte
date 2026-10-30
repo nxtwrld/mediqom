@@ -98,7 +98,7 @@
         background: var(--color-gray-300);
         padding: 0;
         width: 100%;
-        min-height: 14rem;
+        min-height: 22.4rem;
         height: 100%;
         cursor: pointer;
     }
@@ -123,10 +123,10 @@
 
     .link-icon {
         position: absolute;
-        width: 3rem;
-        height: 3rem;
-        top: -3.5rem;
-        right: .5rem;
+        width: 4.8rem;
+        height: 4.8rem;
+        top: -5.6rem;
+        right: 0.8rem;
         fill: #FFF;
     }
     .link-icon :global(svg) {
@@ -162,10 +162,10 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        min-height: 4rem;
+        min-height: 6.4rem;
         border: 0;
-        font-size: 1.1rem;
-        padding: .5rem;
+        font-size: 1.8rem;
+        padding: 0.8rem;
         text-overflow: ellipsis;
         font-weight: bold;
         text-align: center;

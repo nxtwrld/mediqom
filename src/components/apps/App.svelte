@@ -71,17 +71,17 @@
         z-index: 100000000;
         background: none;
         border: none;
-        padding: .5rem;
+        padding: 0.8rem;
         cursor: pointer;
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         fill: #FFF;
         background-color: rgba(0,0,0,.7);
         pointer-events: all;
     }
     .close svg {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
     }
     @media (hover: hover) {
         .close:hover {

@@ -585,28 +585,28 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        padding: 3.2rem;
         background-color: var(--color-surface, #f5f5f5);
     }
 
     .recover-container {
         background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        max-width: 500px;
+        border-radius: 1.6rem;
+        padding: 3.2rem;
+        max-width: 50rem;
         width: 100%;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .h1 {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 3.2rem;
     }
 
     .step-content {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .step-content.-center {
@@ -616,20 +616,20 @@
 
     .recovery-key-input {
         font-family: monospace;
-        font-size: 1rem;
+        font-size: 1.6rem;
         letter-spacing: 0.05em;
     }
 
     .method-options {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .method-option {
         border: 2px solid var(--color-border);
-        border-radius: 0.5rem;
-        padding: 1rem;
+        border-radius: 0.8rem;
+        padding: 1.6rem;
         cursor: pointer;
         transition: border-color 0.2s;
     }
@@ -645,36 +645,36 @@
 
     .method-option label {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         cursor: pointer;
     }
 
     .method-content {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         align-items: flex-start;
         flex: 1;
     }
 
     .method-content .icon {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         flex-shrink: 0;
     }
 
     .setup-illustration {
-        padding: 2rem;
+        padding: 3.2rem;
     }
 
     .setup-illustration .icon.-large {
-        width: 6rem;
-        height: 6rem;
+        width: 9.6rem;
+        height: 9.6rem;
         color: var(--color-interactivity);
     }
 
     .passphrase-actions {
         display: flex;
-        gap: 1rem;
+        gap: 1.6rem;
         justify-content: center;
         flex-wrap: wrap;
     }
@@ -682,25 +682,25 @@
     .recovery-key-box {
         background-color: var(--color-surface, #f5f5f5);
         border: 1px solid var(--color-border);
-        border-radius: 0.5rem;
-        padding: 1rem;
+        border-radius: 0.8rem;
+        padding: 1.6rem;
         text-align: center;
         font-family: monospace;
-        font-size: 1rem;
+        font-size: 1.6rem;
         word-break: break-all;
     }
 
     .checkbox {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: center;
         cursor: pointer;
     }
 
     .success-icon svg,
     .error-icon svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
     }
 
     .success-icon svg {
@@ -713,13 +713,13 @@
 
     .help-text {
         text-align: center;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 
     .loading-spinner {
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity);
         border-radius: 50%;
@@ -731,16 +731,16 @@
     }
 
     .flex.-gap {
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .button.-large {
         width: 100%;
-        max-width: 300px;
+        max-width: 30rem;
     }
 
     .loading {
         text-align: center;
-        padding: 2rem;
+        padding: 3.2rem;
     }
 </style>

@@ -85,7 +85,7 @@
         height: 100%;
         /*min-height: 3rem;
         border-radius: 6px;*/
-        padding: 6px;
+        padding: 0.6rem;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -98,7 +98,7 @@
         background-color: rgba(var(--base-color-rgb), var(--color-opacity));
         
         border-left-color: #ffffff;
-        border-left-width: .5rem;
+        border-left-width: 0.8rem;
         /*border: 2px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(4px);*/
     }
@@ -120,25 +120,25 @@
     
     .node-indicators {
         display: flex;
-        gap: 3px;
+        gap: 0.3rem;
         align-items: center;
     }
     
     .priority-indicator {
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
         border-radius: 50%;
         border: 2px solid rgba(255, 255, 255, 0.8);
         flex-shrink: 0;
     }
     
     .investigation-flag {
-        width: 14px;
-        height: 14px;
-        border-radius: 3px;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 0.3rem;
         background: rgba(245, 158, 11, 0.9);
         color: white;
-        font-size: 10px;
+        font-size: 1rem;
         font-weight: 700;
         display: flex;
         align-items: center;
@@ -148,11 +148,11 @@
     }
     
     .probability-badge {
-        font-size: 9px;
+        font-size: 1rem;
         font-weight: 700;
         color: white;
-        padding: 2px 5px;
-        border-radius: 4px;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
         line-height: 1;
         text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -180,8 +180,8 @@
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        gap: 3px;
-        margin-top: .2rem;
+        gap: 0.3rem;
+        margin-top: 0.3rem;
     }
     
     .diagnosis-name {
@@ -199,7 +199,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 3px;
+        gap: 0.3rem;
         align-items: center;
     }
     
@@ -208,8 +208,8 @@
         color: #4338ca;
         font-weight: 600;
         background: rgba(67, 56, 202, 0.1);
-        padding: 1px 4px;
-        border-radius: 2px;
+        padding: 1px 0.4rem;
+        border-radius: 0.2rem;
         line-height: 1;
         border: 1px solid rgba(67, 56, 202, 0.2);
     }
@@ -219,8 +219,8 @@
         color: #6b7280;
         font-style: italic;
         background: rgba(255, 255, 255, 0.7);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
     }
     
@@ -229,49 +229,49 @@
         color: #dc2626;
         font-weight: 600;
         background: rgba(220, 38, 38, 0.1);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
         border: 1px solid rgba(220, 38, 38, 0.2);
     }
     
     .suppressed-indicator {
         position: absolute;
-        bottom: 2px;
-        right: 2px;
+        bottom: 0.2rem;
+        right: 0.2rem;
         font-size: 0.55em;
         color: #6b7280;
         font-weight: 600;
         background: rgba(107, 114, 128, 0.1);
-        padding: 1px 3px;
-        border-radius: 2px;
+        padding: 1px 0.3rem;
+        border-radius: 0.2rem;
         line-height: 1;
         opacity: 0.8;
     }
     
     /* Mobile responsive adjustments */
     .diagnosis-node.mobile {
-        padding: 4px;
+        padding: 0.4rem;
     }
     
     .diagnosis-node.mobile .diagnosis-name {
-        font-size: 9px;
+        font-size: 1rem;
     }
     
     .diagnosis-node.mobile .probability-badge {
-        font-size: 8px;
-        padding: 1px 3px;
+        font-size: 0.8rem;
+        padding: 1px 0.3rem;
     }
     
     .diagnosis-node.mobile .investigation-flag {
-        width: 12px;
-        height: 12px;
-        font-size: 9px;
+        width: 1.2rem;
+        height: 1.2rem;
+        font-size: 1rem;
     }
     
     .diagnosis-node.mobile .priority-indicator {
-        width: 8px;
-        height: 8px;
+        width: 0.8rem;
+        height: 0.8rem;
     }
     
     .diagnosis-node.mobile .icd10-code,
@@ -286,10 +286,10 @@
     
     /* Desktop styling */
     .diagnosis-node:not(.mobile) .diagnosis-name {
-        font-size: 11px;
+        font-size: 1.2rem;
     }
     
     .diagnosis-node:not(.mobile) .probability-badge {
-        font-size: 10px;
+        font-size: 1rem;
     }
 </style>

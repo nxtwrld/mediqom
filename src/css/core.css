@@ -5,11 +5,11 @@
 }
 
 :root {
-  --ui-height-unit: min(3rem, 50px);
+  --ui-height-unit: 4.8rem;
   --toolbar-height: var(--ui-height-unit);
   --heading-height: var(--ui-height-unit);
   --action-height: var(--ui-height-unit);
-  --action-height-icon: calc(var(--ui-height-unit) - 1.5rem);
+  --action-height-icon: calc(var(--ui-height-unit) - 2.4rem);
   --font-face-print: "Verdana", sans-serif;
   --font-face: "Mulish", sans-serif;
   --font-face-system:
@@ -115,11 +115,11 @@
   --background: var(--color-gray-500);
   --text: var(--color-black);
   --text-bold: 700;
-  --text-padding: min(1rem, 20px);
+  --text-padding: 1.6rem;
 
-  --radius-24: min(2rem, 40px);
-  --radius-16: min(1rem, 20px);
-  --radius-8: min(0.5rem, 10px);
+  --radius-24: 3.2rem;
+  --radius-16: 1.6rem;
+  --radius-8: 0.8rem;
 
   --button-color: transparent; /* var(--color-gray-300); */
   --button-border-color: var(--color-gray-800);
@@ -131,14 +131,14 @@
   --button-border-color-primary-hover: var(--color-blue);
   --button-text-color-primary: var(--color-white);
 
-  --input-height: 2.5rem;
+  --input-height: 4rem;
   --input-color: var(--color-white);
 
   --gap: 2px;
 
-  --shadow-interactivity: 0 0.3rem 0.2rem -0.2rem rgba(0, 0, 0, 0.1);
+  --shadow-interactivity: 0 0.4rem 0.3rem -0.3rem rgba(0, 0, 0, 0.1);
 
-  --shadow-modal: 0 2rem 2rem -0.75rem rgba(0, 0, 0, 0.2);
+  --shadow-modal: 0 3.2rem 3.2rem -1.2rem rgba(0, 0, 0, 0.2);
   --sticky-top: 0;
   --sticky-z-index: 10;
 
@@ -149,15 +149,15 @@
   --safe-area-left: env(safe-area-inset-left, 0px);
 
   /* Spacing - UI Padding (consistent scale) */
-  --ui-pad-small: 0.5rem; /* 8px */
-  --ui-pad-medium: 1rem; /* 16px */
-  --ui-pad-large: 1.5rem; /* 24px */
-  --ui-pad-xlarge: 2rem; /* 32px */
+  --ui-pad-small: 0.8rem; /* 8px */
+  --ui-pad-medium: 1.6rem; /* 16px */
+  --ui-pad-large: 2.4rem; /* 24px */
+  --ui-pad-xlarge: 3.2rem; /* 32px */
 
   /* Border Radius - UI */
-  --ui-radius-small: 0.25rem; /* 4px */
-  --ui-radius-medium: 0.5rem; /* 8px */
-  --ui-radius-large: 1rem; /* 16px */
+  --ui-radius-small: 0.4rem; /* 4px */
+  --ui-radius-medium: 0.8rem; /* 8px */
+  --ui-radius-large: 1.6rem; /* 16px */
 
   /* Surface Colors */
   --color-surface: var(--color-white);
@@ -193,16 +193,16 @@
   --color-gray-200: #e9eaed;
   --color-gray-700: #6b6e7d;
 
-  /* Spacing — 4px step (scale: 4 / 8 / 16 / 24 / 32) */
-  --ui-pad-xsmall: 0.25rem;
+  /* Spacing — 1rem = 10px at default font size (scale: 4 / 8 / 16 / 24 / 32px) */
+  --ui-pad-xsmall: 0.4rem;
 
   /* Type scale */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.4rem;
-  --font-size-2xl: 1.6rem;
+  --font-size-xs: 1.2rem;
+  --font-size-sm: 1.4rem;
+  --font-size-base: 1.6rem;
+  --font-size-lg: 2rem;
+  --font-size-xl: 2.2rem;
+  --font-size-2xl: 2.6rem;
 
   /* Motion */
   --transition-fast: 0.15s;
@@ -210,7 +210,7 @@
   --transition-slow: 0.3s;
 
   /* Radius alias */
-  --radius-12: min(0.75rem, 15px);
+  --radius-12: 1.2rem;
 
   /* Z-index scale — named layers (values mirror the live hierarchy) */
   --z-base: 1;
@@ -303,8 +303,8 @@
   --text: var(--color-black);
 
   /* Shadows — stronger for depth on dark bg */
-  --shadow-interactivity: 0 0.3rem 0.4rem -0.2rem rgba(0, 0, 0, 0.3);
-  --shadow-modal: 0 2rem 3rem -0.75rem rgba(0, 0, 0, 0.5);
+  --shadow-interactivity: 0 0.4rem 0.6rem -0.3rem rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 3.2rem 4.8rem -1.2rem rgba(0, 0, 0, 0.5);
 }
 
 html,
@@ -320,6 +320,17 @@ body {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   overflow: hidden;
+}
+
+/* 1rem = 10px at the user's default font size; --text-zoom carries the native OS scale */
+html {
+  font-size: calc(62.5% * var(--text-zoom, 1));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--font-size-base);
 }
 
 @media print {

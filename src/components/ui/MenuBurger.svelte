@@ -31,10 +31,10 @@
     .menu-burger__line {
         position: absolute;
         width: 100%;
-        height: 4px;
+        height: 0.4rem;
         left: 50%;
         top: 50%;
-        border-radius: 10px;
+        border-radius: 1rem;
         background: #000;
         transition: all .5s;
         transform: translate(-50%, -50%);

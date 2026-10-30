@@ -158,8 +158,8 @@
     .session-status-btn {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
+        gap: 0.8rem;
+        padding: 0.8rem 1.6rem;
         color: var(--color-black);
         border-radius: var(--radius-16);
         font-weight: var(--text-bold);
@@ -211,18 +211,18 @@
     
     /* Normal text mode - natural sizing */
     .button-text {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         white-space: nowrap;
     }
     
     /* When button has audio, adjust layout */
     .session-status-btn.has-audio {
-        padding-left: 0.5rem;
+        padding-left: 0.8rem;
     }
 
     .audio-button-header-container {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 4rem;
+        height: 4rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -238,8 +238,8 @@
         background: var(--color-negative, #dc2626);
         color: var(--color-negative-text, #fff);
         border: none;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+        padding: 0.8rem 1.6rem;
+        font-size: 1.4rem;
         border-radius: var(--radius-16);
         cursor: pointer;
         transition: all 0.2s ease;
@@ -262,7 +262,7 @@
 
     /* Ensure AudioButton inherits container size and animation timing */
     .session-status-btn :global(.audio-button-container) {
-        --button-size: 2.5rem;
+        --button-size: 4rem;
         --animation-duration: 0.8s; /* Faster animation for smaller header button */
     }
 </style>

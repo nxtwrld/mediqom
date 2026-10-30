@@ -43,32 +43,32 @@
 
 <style>
 	.widget-anatomy {
-		padding: 8px;
+		padding: 0.8rem;
 	}
 
 	.description {
-		font-size: 12px;
+		font-size: 1.2rem;
 		color: var(--color-black);
-		margin: 0 0 8px;
+		margin: 0 0 0.8rem;
 		line-height: 1.4;
 	}
 
 	.body-parts {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px;
+		gap: 0.6rem;
 	}
 
 	.body-part-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 4px;
-		padding: 4px 10px;
+		gap: 0.4rem;
+		padding: 0.4rem 1rem;
 		border: 1px solid var(--color-gray-400);
-		border-radius: 16px;
+		border-radius: 1.6rem;
 		background: var(--color-gray-300);
 		color: var(--color-black);
-		font-size: 12px;
+		font-size: 1.2rem;
 		cursor: pointer;
 		transition: all 0.15s ease;
 	}

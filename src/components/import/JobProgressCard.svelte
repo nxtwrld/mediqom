@@ -86,17 +86,17 @@
 
     .file-count {
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 1.4rem;
     }
 
     .status-label {
         flex: 1;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
     }
 
     .delete-btn {
-        padding: 0.25rem;
+        padding: 0.4rem;
         background: none;
         border: none;
         cursor: pointer;
@@ -112,16 +112,16 @@
 
     .progress-bar {
         width: 100%;
-        height: 0.5rem;
+        height: 0.8rem;
         background: var(--color-gray-300);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
         overflow: hidden;
     }
 
     .progress-fill {
         height: 100%;
         background: var(--color-blue);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
         transition: width 0.3s;
     }
 
@@ -141,14 +141,14 @@
     }
 
     .progress-label {
-        font-size: 0.7rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
-        margin-top: 0.2rem;
+        margin-top: 0.3rem;
         text-align: right;
     }
 
     .message {
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         margin-top: var(--ui-pad-small);
         overflow: hidden;
@@ -165,7 +165,7 @@
 
     .error-message {
         flex: 1;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         color: var(--color-negative);
     }
 </style>

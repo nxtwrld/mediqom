@@ -695,7 +695,7 @@
     .encryption-switch-modal {
         background: var(--color-surface);
         border-radius: var(--ui-radius-large);
-        max-width: 500px;
+        max-width: 50rem;
         width: 100%;
         max-height: 90vh;
         overflow-y: auto;
@@ -732,8 +732,8 @@
     }
 
     .close-button svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
     }
 
     .modal-content {
@@ -807,8 +807,8 @@
     }
 
     .method-option .icon {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         flex-shrink: 0;
     }
 
@@ -823,17 +823,17 @@
 
     .method-info p {
         margin: 0;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 
     .badge {
         display: inline-block;
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
+        padding: 0.2rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 600;
-        margin-left: 0.5rem;
+        margin-left: 0.8rem;
         vertical-align: middle;
     }
 
@@ -849,8 +849,8 @@
     }
 
     .setup-illustration .icon.-large {
-        width: 5rem;
-        height: 5rem;
+        width: 8rem;
+        height: 8rem;
         color: var(--color-interactivity);
     }
 
@@ -882,7 +882,7 @@
         padding: var(--ui-pad-medium);
         text-align: center;
         font-family: monospace;
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         letter-spacing: 0.05em;
         word-break: break-all;
     }
@@ -894,9 +894,9 @@
     }
 
     .recovery-actions button svg {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-right: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+        margin-right: 0.8rem;
     }
 
     .recovery-confirmations {
@@ -913,18 +913,18 @@
     }
 
     .checkbox input[type="checkbox"] {
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .warning-text {
         color: var(--color-warning, #e65100);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         margin: 0;
     }
 
     .error-message {
         color: var(--color-negative);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         margin: 0;
         padding: var(--ui-pad-small) var(--ui-pad-medium);
         background: var(--color-negative-light, rgba(255, 0, 0, 0.05));
@@ -948,13 +948,13 @@
     }
 
     .success-icon svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         color: var(--color-positive);
     }
 
     .success-message {
-        font-size: 1.25rem;
+        font-size: 2rem;
         font-weight: 600;
         margin: 0;
     }

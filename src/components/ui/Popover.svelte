@@ -207,17 +207,17 @@
         border-radius: var(--ui-radius-medium);
         backdrop-filter: blur(4px);
         box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.2);
-        padding: 0.3rem;
+        padding: 0.4rem;
         z-index: 1000;
-        min-width: 13rem;
+        min-width: 20.8rem;
         overflow: visible;
     }
 
     .popover-inner {
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
-        max-height: calc(100vh - 2rem);
+        gap: 0.2rem;
+        max-height: calc(100vh - 3.2rem);
         overflow-y: auto;
     }
 
@@ -232,11 +232,11 @@
     }
 
     .popover.-absolute.-top {
-        transform: translate(-50%, calc(-100% - 20px));
+        transform: translate(-50%, calc(-100% - 2rem));
     }
 
     .popover.-absolute.-bottom {
-        transform: translate(-50%, 20px);
+        transform: translate(-50%, 2rem);
     }
 
     /* Arrow — two pseudo-elements for border + fill */
@@ -245,7 +245,7 @@
         content: '';
         position: absolute;
         transform: translateX(-50%);
-        border: 9px solid transparent;
+        border: 1rem solid transparent;
         pointer-events: none;
     }
 
@@ -269,8 +269,8 @@
 
     .popover.-top::after {
         top: 100%;
-        margin-top: -2px;
-        border: 8px solid transparent;
+        margin-top: -0.2rem;
+        border: 0.8rem solid transparent;
         border-top-color: rgba(230, 231, 234, 0.95);
     }
 
@@ -282,8 +282,8 @@
 
     .popover.-bottom::after {
         bottom: 100%;
-        margin-bottom: -2px;
-        border: 8px solid transparent;
+        margin-bottom: -0.2rem;
+        border: 0.8rem solid transparent;
         border-bottom-color: rgba(230, 231, 234, 0.95);
     }
 </style>

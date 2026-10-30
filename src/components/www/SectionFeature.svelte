@@ -58,19 +58,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 4rem 2rem;
+		padding: 6.4rem 3.2rem;
 		position: relative;
 	}
 
 	.feature-inner {
-		max-width: 1100px;
+		max-width: 110rem;
 		width: 100%;
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 4rem;
+		gap: 6.4rem;
 		align-items: center;
 		opacity: 0;
-		transform: translateY(40px);
+		transform: translateY(4rem);
 		transition: opacity 0.7s ease, transform 0.7s ease;
 	}
 
@@ -81,7 +81,7 @@
 
 	.feature-text {
 		z-index: 1;
-		max-width: 480px;
+		max-width: 48rem;
 	}
 
 	/* Position text on the side opposite the 3D bodies */
@@ -91,14 +91,14 @@
 
 	.feature-title {
 		font-family: 'Baloo Thambi 2';
-		font-size: clamp(1.75rem, 4vw, 2.5rem);
+		font-size: clamp(2.8rem, 4vw, 4rem);
 		color: var(--www-text, #1a1a2e);
-		margin: 0 0 1rem;
+		margin: 0 0 1.6rem;
 		line-height: 1.2;
 	}
 
 	.feature-description {
-		font-size: clamp(1rem, 1.5vw, 1.15rem);
+		font-size: clamp(1.6rem, 1.5vw, 1.8rem);
 		color: var(--www-text-secondary, #555);
 		line-height: 1.7;
 		margin: 0;
@@ -106,8 +106,8 @@
 
 	.feature-link {
 		display: inline-block;
-		margin-top: 1rem;
-		font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+		margin-top: 1.6rem;
+		font-size: clamp(1.6rem, 1.3vw, 1.6rem);
 		color: var(--www-accent, #16d3dd);
 		text-decoration: none;
 		font-weight: 600;
@@ -126,8 +126,8 @@
 	.screenshot-frame {
 		background: #fff;
 		border: 1px solid rgba(0, 0, 0, 0.08);
-		border-radius: 1rem;
-		padding: 0.5rem;
+		border-radius: 1.6rem;
+		padding: 0.8rem;
 		overflow: hidden;
 		max-width: 100%;
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
@@ -136,19 +136,19 @@
 	.screenshot-frame img {
 		width: 100%;
 		height: auto;
-		border-radius: 0.75rem;
+		border-radius: 1.2rem;
 		display: block;
 	}
 
 	@media (max-width: 768px) {
 		.section-feature {
-			padding: 3rem 1.5rem;
+			padding: 4.8rem 2.4rem;
 			min-height: auto;
 		}
 
 		.feature-inner {
 			grid-template-columns: 1fr;
-			gap: 2rem;
+			gap: 3.2rem;
 			text-align: center;
 		}
 
@@ -163,7 +163,7 @@
 		}
 
 		.screenshot-frame {
-			max-width: 320px;
+			max-width: 32rem;
 		}
 	}
 </style>

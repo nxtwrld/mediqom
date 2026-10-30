@@ -121,8 +121,8 @@
 
     /* Firefox */
     .input-range::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
+        width: 2rem;
+        height: 2rem;
         background: var(--color-blue);
         border-radius: 50%;
         cursor: pointer;
@@ -137,8 +137,8 @@
     }
 
     .input-range::-moz-range-track {
-        height: 6px;
-        border-radius: 3px;
+        height: 0.6rem;
+        border-radius: 0.3rem;
         background: transparent;
     }
 

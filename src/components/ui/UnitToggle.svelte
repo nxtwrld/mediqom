@@ -34,17 +34,17 @@
         display: inline-flex;
         background-color: var(--color-surface);
         border-radius: var(--ui-radius-medium);
-        padding: 0.2rem;
-        gap: 0.2rem;
+        padding: 0.3rem;
+        gap: 0.3rem;
     }
 
     .toggle-option {
-        padding: 0.35rem 0.75rem;
+        padding: 0.6rem 1.2rem;
         border: none;
         background: transparent;
         border-radius: var(--ui-radius-small);
         font-weight: 500;
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         cursor: pointer;
         transition: all 0.2s ease;

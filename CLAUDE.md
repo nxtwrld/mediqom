@@ -590,13 +590,13 @@ For session development context, use the `@session` command.
 
 #### CSS Variables
 
-**Always use these variables instead of hard-coded values:**
+**Always use these variables instead of hard-coded values.** Root is 62.5% (1rem = 10px, follows the user's font setting) — size in `rem`; see "Sizing policy" in `DESIGN.md`.
 
 ```css
 /* Spacing */
---ui-pad-small: 0.5rem --ui-pad-medium: 1rem --ui-pad-large: 1.5rem
-  --ui-pad-xlarge: 2rem /* Radius */ --ui-radius-small: 0.25rem
-  --ui-radius-medium: 0.5rem --ui-radius-large: 1rem /* Colors */
+--ui-pad-small: 0.8rem --ui-pad-medium: 1.6rem --ui-pad-large: 2.4rem
+  --ui-pad-xlarge: 3.2rem /* Radius */ --ui-radius-small: 0.4rem
+  --ui-radius-medium: 0.8rem --ui-radius-large: 1.6rem /* Colors */
   --color-surface: /* Light background */ --color-border: /* Border color */
   --color-text-primary: /* Main text */ --color-text-secondary: /* Muted text */
   --color-positive: /* Success */ --color-negative: /* Error */

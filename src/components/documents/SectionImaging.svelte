@@ -310,7 +310,7 @@
     }
 
     .thumbnail-item {
-        height: 15rem;
+        height: 24rem;
         border-radius: var(--ui-radius-medium);
         overflow: hidden;
         background: #000;
@@ -334,14 +334,14 @@
 
     .dicom-badge {
         position: absolute;
-        bottom: 0.375rem;
-        right: 0.375rem;
+        bottom: 0.6rem;
+        right: 0.6rem;
         background: rgba(0, 0, 0, 0.75);
         color: #4a9eff;
-        font-size: 0.65rem;
+        font-size: 1rem;
         font-weight: 600;
-        padding: 0.125rem 0.375rem;
-        border-radius: 3px;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.3rem;
         letter-spacing: 0.05em;
     }
 
@@ -376,13 +376,13 @@
     }
 
     .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #333;
-        border-top: 4px solid #aaa;
+        width: 4rem;
+        height: 4rem;
+        border: 0.4rem solid #333;
+        border-top: 0.4rem solid #aaa;
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+        margin-bottom: 1.6rem;
     }
 
     @keyframes spin {
@@ -396,7 +396,7 @@
         justify-content: center;
         flex: 1;
         color: #f66;
-        padding: 2rem;
+        padding: 3.2rem;
         text-align: center;
     }
 
@@ -409,13 +409,13 @@
     .study-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.375rem;
+        gap: 0.6rem;
     }
 
     .badge {
-        padding: 0.125rem 0.5rem;
+        padding: 0.2rem 0.8rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
     }
@@ -442,7 +442,7 @@
 
     .badge.-severity {
         text-transform: uppercase;
-        font-size: 0.7rem;
+        font-size: 1.2rem;
     }
 
     .badge.-severity.-critical,
@@ -466,7 +466,7 @@
         color: #fff;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.7rem;
+        font-size: 1.2rem;
     }
 
     .visual-description {
@@ -475,7 +475,7 @@
     }
 
     .subsection-title {
-        font-size: 0.95rem;
+        font-size: 1.6rem;
         font-weight: 600;
         margin: var(--ui-pad-small) 0 0;
         color: var(--color-text-primary);
@@ -484,13 +484,13 @@
     .anomaly-item {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .anomaly-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         flex-wrap: wrap;
     }
 
@@ -507,8 +507,8 @@
 
     .anomaly-detail {
         display: flex;
-        gap: 0.5rem;
-        font-size: 0.9rem;
+        gap: 0.8rem;
+        font-size: 1.4rem;
     }
 
     .label {
@@ -531,12 +531,12 @@
     .findings-list {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .findings-list ul {
         margin: 0;
-        padding-left: 1.25rem;
+        padding-left: 2rem;
     }
 
     .findings-list li {
@@ -557,7 +557,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        padding: 0.125rem;
+        padding: 0.2rem;
         color: var(--color-text-secondary);
         flex-shrink: 0;
     }
@@ -567,7 +567,7 @@
     }
 
     .anatomy-btn svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
     }
 </style>

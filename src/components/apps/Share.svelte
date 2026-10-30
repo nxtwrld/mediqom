@@ -291,7 +291,7 @@
     .share-docs {
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 0.6rem;
         margin-bottom: var(--ui-pad-medium);
         max-height: 40vh;
         overflow-y: auto;
@@ -301,7 +301,7 @@
         display: flex;
         align-items: center;
         gap: var(--ui-pad-small);
-        padding: 0.4rem var(--ui-pad-small);
+        padding: 0.6rem var(--ui-pad-small);
         border-radius: var(--ui-radius-small);
         border: 1px solid var(--color-border);
         cursor: pointer;
@@ -320,16 +320,16 @@
 
     .share-doc input[type="checkbox"] {
         flex-shrink: 0;
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         accent-color: var(--color, var(--color-interactivity, #3182ce));
         cursor: pointer;
     }
 
     .share-doc-icon-wrap {
         flex-shrink: 0;
-        width: 1.6rem;
-        height: 1.6rem;
+        width: 2.6rem;
+        height: 2.6rem;
         border-radius: 50%;
         background-color: var(--color, #546e7a);
         color: var(--color-text-primary, #fff);
@@ -382,8 +382,8 @@
     }
 
     .spinner {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 4rem;
+        height: 4rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity, #3182ce);
         border-radius: 50%;

@@ -143,7 +143,7 @@
 
 <style>
     .subscription-page {
-        max-width: 700px;
+        max-width: 70rem;
     }
 
     .alert {
@@ -156,8 +156,8 @@
     }
 
     .alert svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
         flex-shrink: 0;
     }
@@ -188,8 +188,8 @@
     }
 
     .loader {
-        width: 2rem;
-        height: 2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         border: 3px solid var(--color-border);
         border-top-color: var(--color-interactivity);
         border-radius: 50%;
@@ -213,8 +213,8 @@
     }
 
     .empty-state svg {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         fill: var(--color-text-secondary);
         margin-bottom: var(--ui-pad-medium);
     }
@@ -230,7 +230,7 @@
     }
 
     .faq-section h3 {
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: 600;
         margin: 0 0 var(--ui-pad-medium) 0;
         color: var(--color-text-primary);
@@ -241,14 +241,14 @@
     }
 
     .faq-item h4 {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         font-weight: 600;
-        margin: 0 0 0.25rem 0;
+        margin: 0 0 0.4rem 0;
         color: var(--color-text-primary);
     }
 
     .faq-item p {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
         margin: 0;
         line-height: 1.5;

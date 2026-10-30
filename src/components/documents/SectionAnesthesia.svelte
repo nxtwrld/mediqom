@@ -486,14 +486,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
-        gap: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1.6rem;
     }
     
     .anesthesia-type-badge {
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.9rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.8rem;
+        font-size: 1.4rem;
         font-weight: 600;
         text-transform: uppercase;
         color: white;
@@ -519,22 +519,22 @@
     }
     
     .airway-section {
-        margin-bottom: 0.75rem;
-        padding: 0.75rem;
+        margin-bottom: 1.2rem;
+        padding: 1.2rem;
         background-color: var(--color-surface);
-        border-radius: 0.5rem;
+        border-radius: 0.8rem;
     }
     
     .airway-details {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin-top: 0.5rem;
+        gap: 1.6rem;
+        margin-top: 0.8rem;
     }
     
     .airway-method {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
         font-weight: 500;
         background-color: var(--color-interactivity-light);
         color: var(--color-interactivity-dark);
@@ -542,7 +542,7 @@
     
     .tube-size {
         color: var(--color-text-secondary);
-        font-size: 0.9rem;
+        font-size: 1.4rem;
     }
     
     .difficulty-value.difficulty-easy {
@@ -561,28 +561,28 @@
     /* Patient status grid */
     .patient-status-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-bottom: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+        gap: 1.6rem;
+        margin-bottom: 1.2rem;
     }
     
     .status-item {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         text-align: center;
     }
     
     .status-label {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: var(--color-text-secondary);
         text-transform: uppercase;
     }
     
     .asa-badge {
-        padding: 0.5rem;
-        border-radius: 0.5rem;
+        padding: 0.8rem;
+        border-radius: 0.8rem;
         font-weight: 600;
         color: white;
     }
@@ -607,30 +607,30 @@
     }
     
     .mallampati-badge {
-        padding: 0.5rem;
-        border-radius: 0.5rem;
+        padding: 0.8rem;
+        border-radius: 0.8rem;
         font-weight: 600;
         background-color: var(--color-info);
         color: white;
     }
     
     .allergies-section {
-        margin-top: 0.75rem;
+        margin-top: 1.2rem;
     }
     
     .allergies-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.25rem;
+        gap: 0.8rem;
+        margin-top: 0.4rem;
     }
     
     .allergy-tag {
         background-color: var(--color-negative-light);
         color: var(--color-negative-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
@@ -639,11 +639,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
     }
     
     .medication-name {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         margin: 0;
         color: var(--color-text-primary);
@@ -652,9 +652,9 @@
     .purpose-badge {
         background-color: var(--color-info-light);
         color: var(--color-info-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
     }
@@ -667,21 +667,21 @@
     /* Fluid management */
     .fluid-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        gap: 1.6rem;
+        margin-bottom: 1.2rem;
     }
     
     .fluid-section {
-        padding: 0.75rem;
+        padding: 1.2rem;
         background-color: var(--color-surface);
-        border-radius: 0.5rem;
+        border-radius: 0.8rem;
     }
     
     .fluid-title {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         font-weight: 600;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
         text-transform: uppercase;
     }
@@ -689,7 +689,7 @@
     .fluid-details {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
     
     .fluid-type {
@@ -708,24 +708,24 @@
     
     .blood-products-section {
         border-top: 1px solid var(--color-border);
-        padding-top: 0.75rem;
-        margin-top: 0.75rem;
+        padding-top: 1.2rem;
+        margin-top: 1.2rem;
     }
     
     .blood-products-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
+        gap: 0.8rem;
+        margin-top: 0.8rem;
     }
     
     .blood-product-item {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.8rem;
         align-items: center;
-        padding: 0.5rem;
+        padding: 0.8rem;
         background-color: var(--color-negative-light);
-        border-radius: 0.25rem;
+        border-radius: 0.4rem;
     }
     
     .product-type {
@@ -742,8 +742,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
-        gap: 1rem;
+        margin-bottom: 0.8rem;
+        gap: 1.6rem;
     }
     
     .complication-text {
@@ -752,9 +752,9 @@
     }
     
     .resolved-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -772,29 +772,29 @@
     /* Post-anesthesia */
     .post-anesthesia-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+        gap: 1.6rem;
     }
     
     .post-item {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.75rem;
+        gap: 0.4rem;
+        padding: 1.2rem;
         background-color: var(--color-surface);
-        border-radius: 0.5rem;
+        border-radius: 0.8rem;
         text-align: center;
     }
     
     .post-label {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         font-weight: 500;
         color: var(--color-text-secondary);
         text-transform: uppercase;
     }
     
     .post-value {
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         color: var(--color-text-primary);
     }
@@ -812,9 +812,9 @@
     }
     
     .disposition-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: uppercase;
     }
@@ -838,9 +838,9 @@
     .nausea-badge {
         background-color: var(--color-warning-light);
         color: var(--color-warning-dark);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
     }
     
@@ -849,7 +849,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
     }
     
     .member-name {
@@ -860,15 +860,15 @@
     .member-role {
         background-color: var(--color-surface);
         color: var(--color-text-secondary);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.4rem;
+        font-size: 1.2rem;
         font-weight: 500;
         text-transform: capitalize;
     }
     
     .member-credentials {
-        font-size: 0.9rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
     

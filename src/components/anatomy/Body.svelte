@@ -701,14 +701,14 @@
     }
     .selected {
         position: absolute;
-        top: 1rem;
-        right: 1rem;
-        padding: 0 0 0 1rem;
+        top: 1.6rem;
+        right: 1.6rem;
+        padding: 0 0 0 1.6rem;
         pointer-events: none;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         background-color: rgba(0,0,0,.3);
         color: #FFF;
         border-radius: var(--radius-16);
@@ -722,7 +722,7 @@
         overflow: hidden;
     }
     .selected button {
-        margin-left: .5rem;
+        margin-left: 0.8rem;
         transition: background-color .2s ease-in-out;
     }
     @media (hover: hover) {
@@ -731,9 +731,9 @@
         }
     }
     .selected button svg {
-        width: 2rem;
-        height: 2rem;
-        padding: .2rem;
+        width: 3.2rem;
+        height: 3.2rem;
+        padding: 0.3rem;
         fill: currentColor;
     }
     @media only screen and (max-width: 768px) {
@@ -742,9 +742,9 @@
         }
         :global(.focus) .selected {
             display: flex;
-            top: calc(var(--top-offset) + 1rem);
+            top: calc(var(--top-offset) + 1.6rem);
             left: auto;
-            right: 1rem;
+            right: 1.6rem;
 
         }
     }
@@ -758,7 +758,7 @@
         top: 0;
         width: 1px;
         height: 1px;
-        --radius: 2rem;
+        --radius: 3.2rem;
         position: relative;
         z-index: 1;
     }
@@ -770,9 +770,9 @@
     .model :global(.label-name) {
         display: none;
         text-align: center;
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: #FFF;
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         white-space: nowrap;
         text-transform: uppercase;
     }
@@ -781,7 +781,7 @@
     }
 
     .model :global(.label.-open .highlight) {
-        width: 13rem;
+        width: 20.8rem;
         height: auto;
         border-radius: var(--radius-16);
     }
@@ -790,7 +790,7 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        gap: .5rem;
+        gap: 0.8rem;
         height: auto;
         max-height: 0;
         transition: all .2s ease-in-out;
@@ -799,15 +799,15 @@
 
     }
     .model :global(.label.-open .label-menu) {
-        max-height: 20rem;
+        max-height: 32rem;
         overflow-y: auto;
-        padding: .5rem 1rem;
+        padding: 0.8rem 1.6rem;
     }
     .model :global(.action.-doc) {
         display: flex;
         justify-content: space-between;
-        gap: 0.5rem;
-        font-size: 0.8rem;
+        gap: 0.8rem;
+        font-size: 1.2rem;
     }
     .model :global(.action.-doc .doc-title) {
         overflow: hidden;
@@ -819,19 +819,19 @@
     .model :global(.action.-doc .doc-date) {
         flex-shrink: 0;
         opacity: 0.7;
-        font-size: 0.75rem;
+        font-size: 1.2rem;
     }
     .model :global(.highlight) {
         display: block;
         transform: translate(-50%, -50%);
-        width: 3rem;
-        height: 3rem;
+        width: 4.8rem;
+        height: 4.8rem;
         border-radius: var(--radius-16);
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         background: transparent;
-        padding: .7rem;
+        padding: 1.2rem;
         transition: all .2s ease-in-out;
     }
     .model :global(.highlight .icon) {
@@ -853,7 +853,7 @@
         display: flex;
         color: inherit;
         text-align: center;
-        padding: .3rem .5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: var(--radius-16);
         border: 1px solid var(--color-white);
         font-size: inherit;
@@ -861,7 +861,7 @@
     .model :global(.highlight .icon svg) {
         width: 100%;
         height: 100%;
-        max-height: 3rem;
+        max-height: 4.8rem;
         transform: scale(.6);
         opacity: 0;
         transition: opacity .2s ease-in-out;
@@ -871,11 +871,11 @@
 
     .model :global(.highlight:hover),
     .model :global(.-open .highlight) {
-        padding: .5rem;
+        padding: 0.8rem;
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
     }
     .model :global(.highlight:hover .icon),
     .model :global(.-open .highlight .icon) {
@@ -893,12 +893,12 @@
     .context-info {
         position: absolute;
 
-        left: 3rem;
-        max-width: calc(var(--width) - 6rem);
-        min-width: 2.5rem;
-        max-height: calc(var(--height) - 2rem);
-        min-height: 2.5rem;;
-        bottom: 1rem;
+        left: 4.8rem;
+        max-width: calc(var(--width) - 9.6rem);
+        min-width: 4rem;
+        max-height: calc(var(--height) - 3.2rem);
+        min-height: 4rem;;
+        bottom: 1.6rem;
         background-color: rgba(230, 231, 234, .6);
         text-align: left;
         backdrop-filter: blur(2px);
@@ -914,17 +914,17 @@
         position: absolute;
         top: 0;
         right: 0;
-        padding: .5rem;
-        width: 2.5rem;
-        height: 2.5rem;
+        padding: 0.8rem;
+        width: 4rem;
+        height: 4rem;
         cursor: pointer;
     }
     .context-info :global(.h2) {
-        padding: 1rem .5rem .5rem;
+        padding: 1.6rem 0.8rem 0.8rem;
     }
     .context-info :global(.p) {
         background-color: var(--color-background);
-        padding: 1rem;
+        padding: 1.6rem;
         margin: 0;
         text-align: justify;
     }
@@ -934,8 +934,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 5.6rem;
+        height: 5.6rem;
         border-radius: 50%;
         border: 1px solid #FFF;
         backdrop-filter: blur(4px);
@@ -956,7 +956,7 @@
     }
     .model :global(.cluster-count) {
         color: #FFF;
-        font-size: 1.1rem;
+        font-size: 1.8rem;
         font-weight: 600;
         pointer-events: none;
     }

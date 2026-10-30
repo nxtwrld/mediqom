@@ -188,9 +188,9 @@
     /* Supporting Symptoms Styling */
     .supporting-symptoms {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 0.75rem;
-        margin-top: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+        gap: 1.2rem;
+        margin-top: 1.2rem;
     }
 
     /* supporting-symptom-wrapper now uses session-relationship-wrapper class */
@@ -199,7 +199,7 @@
     @media (max-width: 768px) {
         .supporting-symptoms {
             grid-template-columns: 1fr;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
         
         .supporting-symptom-wrapper {

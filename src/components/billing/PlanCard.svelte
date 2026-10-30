@@ -111,14 +111,14 @@
 
     .recommended-badge {
         position: absolute;
-        top: -0.75rem;
+        top: -1.2rem;
         left: 50%;
         transform: translateX(-50%);
         background-color: var(--color-interactivity);
         color: var(--color-interactivity-text);
-        padding: 0.25rem 0.75rem;
+        padding: 0.4rem 1.2rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-weight: 600;
         text-transform: uppercase;
     }
@@ -129,9 +129,9 @@
     }
 
     .plan-name {
-        font-size: 1.25rem;
+        font-size: 2rem;
         font-weight: 600;
-        margin: 0 0 0.5rem 0;
+        margin: 0 0 0.8rem 0;
         color: var(--color-text-primary);
     }
 
@@ -139,30 +139,30 @@
         display: flex;
         align-items: baseline;
         justify-content: center;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
 
     .price {
-        font-size: 2rem;
+        font-size: 3.2rem;
         font-weight: 700;
         color: var(--color-text-primary);
     }
 
     .period {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 
     .yearly-total {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .plan-limits {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
         padding: var(--ui-pad-medium) 0;
         border-top: 1px solid var(--color-border);
         border-bottom: 1px solid var(--color-border);
@@ -172,13 +172,13 @@
     .limit {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
         color: var(--color-text-secondary);
     }
 
     .limit-icon {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
     }
 
@@ -192,18 +192,18 @@
     .features li {
         display: flex;
         align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.375rem 0;
+        gap: 0.8rem;
+        padding: 0.6rem 0;
         color: var(--color-text-secondary);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
 
     .check-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: var(--color-positive);
         flex-shrink: 0;
-        margin-top: 0.125rem;
+        margin-top: 0.2rem;
     }
 
     .plan-action {

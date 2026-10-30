@@ -309,7 +309,7 @@
     .search-panel.-open {
 
         max-height: 100%;
-        box-shadow: 0 2rem 2rem -1rem var(--color-black);
+        box-shadow: 0 3.2rem 3.2rem -1.6rem var(--color-black);
     }
     .search-input-box {
         position: relative;
@@ -326,8 +326,8 @@
         top: 0;
         width: 100%;
         height: 100%;
-        padding: .5rem;
-        font-size: 1.5rem;
+        padding: 0.8rem;
+        font-size: 2.4rem;
         background-color: transparent;
         outline: 0;
         border: none;
@@ -338,8 +338,8 @@
         unicode-bidi: normal;
         width: 100%;
         height: 100%;
-        padding: .5rem;
-        font-size: 1.5rem;
+        padding: 0.8rem;
+        font-size: 2.4rem;
     }
     .search-input-box .hint .value {
         color: transparent;
@@ -361,12 +361,12 @@
         width: 100%;
         height: 25vh;
         background-color: var(--color-gray-300);
-        font-size: 2rem;
+        font-size: 3.2rem;
     }
     .search-results {
         display: flex;
         flex-direction: column;
-        gap: .5rem;
+        gap: 0.8rem;
         width: 100%;
         background-color: var(--color-gray-300);
     }
@@ -374,7 +374,7 @@
     .search-result {
         display: flex;
         justify-content: space-between;
-        padding: 1rem;
+        padding: 1.6rem;
         background-color: var(--color-gray-200);
         cursor: pointer;
     }

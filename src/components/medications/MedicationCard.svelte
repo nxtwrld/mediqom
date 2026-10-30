@@ -76,7 +76,7 @@
     .medication-card {
         display: flex;
         flex-direction: column;
-        gap: 0.375rem;
+        gap: 0.6rem;
         padding: var(--ui-pad-medium);
         background: var(--color-surface, var(--color-white));
         border: 1px solid var(--color-border);
@@ -97,13 +97,13 @@
         align-items: center;
     }
     .card-title {
-        font-size: 1rem;
+        font-size: 1.6rem;
         font-weight: 600;
         margin: 0;
     }
     .status-dot {
-        width: 0.5rem;
-        height: 0.5rem;
+        width: 0.8rem;
+        height: 0.8rem;
         border-radius: 50%;
         flex-shrink: 0;
     }
@@ -117,18 +117,18 @@
         color: var(--color-text-secondary);
     }
     .badge-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
     }
     .card-dosage {
-        font-size: 0.9375rem;
+        font-size: 1.6rem;
         color: var(--color-text-primary);
     }
     .card-meta {
         display: flex;
         gap: var(--ui-pad-small);
-        font-size: 0.8125rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
     .card-date {
@@ -137,26 +137,26 @@
     .card-form, .card-schedule {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.4rem;
     }
     .meta-icon {
-        width: 1rem;
-        height: 1rem;
+        width: 1.6rem;
+        height: 1.6rem;
         fill: currentColor;
         flex-shrink: 0;
     }
     .card-times {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         flex-wrap: wrap;
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
     .time-badge {
         display: inline-block;
-        padding: 0.125rem 0.5rem;
+        padding: 0.2rem 0.8rem;
         background: var(--color-gray-200, #f0f0f0);
         border-radius: var(--ui-radius-small);
-        font-size: 0.75rem;
+        font-size: 1.2rem;
         font-family: monospace;
     }
 </style>

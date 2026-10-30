@@ -26,20 +26,20 @@
 
 <style>
 	.unknown-widget {
-		padding: 10px;
-		font-size: 12px;
+		padding: 1rem;
+		font-size: 1.2rem;
 		color: var(--color-gray-800);
 	}
 
 	.label {
-		margin: 0 0 4px;
+		margin: 0 0 0.4rem;
 	}
 
 	code {
 		background: var(--color-gray-400);
-		padding: 1px 4px;
-		border-radius: 3px;
-		font-size: 11px;
+		padding: 1px 0.4rem;
+		border-radius: 0.3rem;
+		font-size: 1.2rem;
 	}
 
 	.toggle {
@@ -48,18 +48,18 @@
 		color: var(--color-blue);
 		cursor: pointer;
 		padding: 0;
-		font-size: 11px;
+		font-size: 1.2rem;
 		text-decoration: underline;
 	}
 
 	.data {
-		margin: 8px 0 0;
-		padding: 8px;
+		margin: 0.8rem 0 0;
+		padding: 0.8rem;
 		background: var(--color-gray-300);
-		border-radius: 4px;
-		font-size: 10px;
+		border-radius: 0.4rem;
+		font-size: 1rem;
 		overflow-x: auto;
-		max-height: 200px;
+		max-height: 20rem;
 		overflow-y: auto;
 		white-space: pre-wrap;
 		word-break: break-all;

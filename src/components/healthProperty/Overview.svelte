@@ -154,7 +154,7 @@
 	}
 
 	.property-overview {
-		min-width: 350px;
+		min-width: 35rem;
 		width: 50vw;
 		max-width: 100vw;
 		max-height: 80vh;

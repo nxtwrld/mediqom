@@ -457,6 +457,12 @@
       "new-here-title": "",
       "new-here-message": "",
       "or": "",
+      "tabs": {
+        "label": "",
+        "sign-in": "",
+        "invite": "",
+        "waitlist": ""
+      },
       "invite": {
         "title": "",
         "instruction": "",
@@ -641,6 +647,7 @@
     "settings": {
       "title": "Nastavení",
       "redirect": "Přesměrování na nastavení...",
+      "back": "",
       "tabs": {
         "general": "Obecné",
         "profile": "Profil",

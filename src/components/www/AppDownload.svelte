@@ -23,35 +23,35 @@
 <style>
 	.app-download {
 		position: fixed;
-		bottom: 1.5rem;
-		right: 1.5rem;
+		bottom: 2.4rem;
+		right: 2.4rem;
 		z-index: 10;
 		transition: opacity 0.4s ease, transform 0.4s ease;
 	}
 
 	.app-download.-hidden {
 		opacity: 0;
-		transform: translateY(1rem);
+		transform: translateY(1.6rem);
 		pointer-events: none;
 	}
 
 	.download-pill {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.5rem;
+		gap: 0.8rem;
+		padding: 1.2rem 2.4rem;
 		background: var(--color-interactivity, #16d3dd);
 		color: #0a0e1a;
-		border-radius: 2rem;
+		border-radius: 3.2rem;
 		text-decoration: none;
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: 1.4rem;
 		transition: all 0.3s ease;
 		box-shadow: 0 4px 16px rgba(22, 211, 221, 0.3);
 	}
 
 	.download-pill:hover {
-		transform: translateY(-2px);
+		transform: translateY(-0.2rem);
 		box-shadow: 0 8px 24px rgba(22, 211, 221, 0.4);
 	}
 
@@ -64,7 +64,7 @@
 			bottom: 0;
 			right: 0;
 			left: 0;
-			padding: 0.75rem 1rem;
+			padding: 1.2rem 1.6rem;
 			background: rgba(255, 255, 255, 0.92);
 			backdrop-filter: blur(12px);
 			-webkit-backdrop-filter: blur(12px);
@@ -74,7 +74,7 @@
 		.download-pill {
 			width: 100%;
 			justify-content: center;
-			border-radius: 0.75rem;
+			border-radius: 1.2rem;
 		}
 	}
 </style>

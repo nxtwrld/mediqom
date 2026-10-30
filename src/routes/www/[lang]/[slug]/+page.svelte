@@ -161,9 +161,9 @@
 
 <style>
 	.content-page {
-		max-width: 800px;
+		max-width: 80rem;
 		margin: 0 auto;
-		padding: 2rem;
+		padding: 3.2rem;
 		line-height: 1.6;
 	}
 
@@ -186,10 +186,10 @@
 
 	/* Used dynamically in JavaScript for mermaid rendering errors */
 	:global(.error) {
-		padding: 1rem;
+		padding: 1.6rem;
 		background-color: #fee;
 		border: 1px solid #fcc;
-		border-radius: 0.25rem;
+		border-radius: 0.4rem;
 		color: #c00;
 	}
 
@@ -202,42 +202,42 @@
 	*/
 
 	:global(.content-page h2) {
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		font-size: 1.8rem;
+		margin-top: 3.2rem;
+		margin-bottom: 1.6rem;
+		font-size: 2.8rem;
 		color: var(--color-text-primary, #1a1a1a);
 	}
 
 	:global(.content-page h3) {
-		margin-top: 1.5rem;
-		margin-bottom: 0.75rem;
-		font-size: 1.4rem;
+		margin-top: 2.4rem;
+		margin-bottom: 1.2rem;
+		font-size: 2.2rem;
 		color: var(--color-text-primary, #1a1a1a);
 	}
 
 	:global(.content-page p) {
-		margin-bottom: 1rem;
+		margin-bottom: 1.6rem;
 	}
 
 	:global(.content-page ul, .content-page ol) {
-		margin-bottom: 1rem;
-		padding-left: 2rem;
+		margin-bottom: 1.6rem;
+		padding-left: 3.2rem;
 	}
 
 	:global(.content-page code) {
 		background-color: var(--color-gray-400, #f4f4f4);
-		padding: 0.125rem 0.25rem;
-		border-radius: 0.25rem;
+		padding: 0.2rem 0.4rem;
+		border-radius: 0.4rem;
 		font-family: monospace;
 		font-size: 0.9em;
 	}
 
 	:global(.content-page pre) {
 		background-color: var(--color-gray-400, #f4f4f4);
-		padding: 1rem;
-		border-radius: 0.5rem;
+		padding: 1.6rem;
+		border-radius: 0.8rem;
 		overflow-x: auto;
-		margin-bottom: 1rem;
+		margin-bottom: 1.6rem;
 	}
 
 	:global(.content-page pre code) {
@@ -246,9 +246,9 @@
 	}
 
 	:global(.content-page blockquote) {
-		border-left: 4px solid var(--color-interactivity, #007bff);
-		padding-left: 1rem;
-		margin: 1rem 0;
+		border-left: 0.4rem solid var(--color-interactivity, #007bff);
+		padding-left: 1.6rem;
+		margin: 1.6rem 0;
 		font-style: italic;
 		color: var(--color-text-secondary, #666);
 	}
@@ -256,7 +256,7 @@
 	:global(.mermaid-diagram) {
 		display: flex;
 		justify-content: center;
-		margin: 2rem 0;
+		margin: 3.2rem 0;
 		overflow-x: auto;
 	}
 
@@ -273,19 +273,19 @@
 	:global(.mermaid-placeholder) {
 		background-color: #f8f9fa;
 		border: 1px dashed #dee2e6;
-		padding: 1rem;
-		margin: 1rem 0;
-		border-radius: 0.25rem;
+		padding: 1.6rem;
+		margin: 1.6rem 0;
+		border-radius: 0.4rem;
 		color: #6c757d;
 		font-family: monospace;
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		white-space: pre-wrap;
 	}
 
 	:global(.mermaid-placeholder::before) {
 		content: "Rendering diagram...";
 		display: block;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.8rem;
 		font-weight: 500;
 		color: #495057;
 	}

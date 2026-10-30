@@ -142,24 +142,24 @@
 
 <style>
     .report {
-        padding: 5rem 3rem;
+        padding: 8rem 4.8rem;
     }
     .block {
         position: relative;
         border: 1px dotted var(--color-gray-300);
     }
     .add {
-        margin: 1rem;
+        margin: 1.6rem;
     }
     .title {
         position: absolute;
-        top: -1.2rem;
+        top: -2rem;
         right: 0;
-        height: 1.2rem;
-        font-size: .8rem;
+        height: 2rem;
+        font-size: 1.2rem;
         background-color: var(--color-gray-300);
         color: var(--color-gray-800);
-        padding: .2rem .5rem;
+        padding: 0.3rem 0.8rem;
         font-weight: 700;
     }
     .block:hover .title {
@@ -173,7 +173,7 @@
         left: 100%;
         z-index: 2;
         height: auto;
-        padding: .2rem;
+        padding: 0.3rem;
         display: none;
         flex-direction: column;
     }
@@ -193,15 +193,15 @@
         color: var(--color-negative);
     }
     svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         color: inherit;
         fill: currentColor;
     }
 
     @media print {
         .report {
-            padding: 1rem;
+            padding: 1.6rem;
         }
         .block {
             border: none;

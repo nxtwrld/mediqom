@@ -615,17 +615,17 @@
     }
 
     .btn-icon {
-        width: 1.1rem;
-        height: 1.1rem;
+        width: 1.8rem;
+        height: 1.8rem;
         fill: currentColor;
-        margin-right: 0.2rem;
+        margin-right: 0.3rem;
     }
 
     /* Error banners */
     .error-banners {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.4rem;
         padding: 0 var(--ui-pad-medium);
     }
 
@@ -633,16 +633,16 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.5rem 0.75rem;
+        padding: 0.8rem 1.2rem;
         background-color: color-mix(in srgb, var(--color-negative) 12%, transparent);
         border: 1px solid var(--color-negative);
         border-radius: var(--ui-radius-small);
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         color: var(--color-negative);
     }
 
     .dismiss-btn {
-        padding: 0.2rem;
+        padding: 0.3rem;
         background: none;
         border: none;
         cursor: pointer;
@@ -655,9 +655,9 @@
 
     .alert {
         margin: 0 var(--ui-pad-medium) var(--ui-pad-small);
-        padding: 0.75rem 1rem;
+        padding: 1.2rem 1.6rem;
         border-radius: var(--ui-radius-small);
-        font-size: 0.85rem;
+        font-size: 1.4rem;
     }
     .alert.-info {
         background-color: var(--color-interactivity-light, #e0f0ff);
@@ -677,7 +677,7 @@
     .jobs-section {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
         margin-bottom: var(--ui-pad-large);
     }
 
@@ -687,7 +687,7 @@
     }
 
     .section-heading {
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         font-weight: 600;
         color: var(--color-text-secondary);
         text-transform: uppercase;
@@ -700,25 +700,25 @@
         flex-wrap: wrap;
         align-items: flex-start;
         justify-content: center;
-        gap: 1rem;
-        --border-width: 0.2rem;
+        gap: 1.6rem;
+        --border-width: 0.3rem;
         --radius: var(--radius-8);
-        --tile-height: 13rem;
+        --tile-height: 20.8rem;
     }
 
     .report-import {
-        width: 8rem;
-        min-height: 20rem;
+        width: 12.8rem;
+        min-height: 32rem;
     }
 
     .report-done {
-        width: 12rem;
+        width: 19.2rem;
         background-color: var(--color-gray-300);
     }
 
     .save-doc-btn {
         width: 100%;
-        margin-top: 0.25rem;
+        margin-top: 0.4rem;
     }
 
     .save-doc-btn :global(.loader) {
@@ -737,7 +737,7 @@
     }
 
     .scans-info {
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         margin: 0;
     }
@@ -754,8 +754,8 @@
     }
 
     .empty-icon {
-        width: 4rem;
-        height: 4rem;
+        width: 6.4rem;
+        height: 6.4rem;
         fill: var(--color-gray-500);
         margin-bottom: var(--ui-pad-medium);
     }

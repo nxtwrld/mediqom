@@ -50,7 +50,7 @@
     .models {
         display: flex;
         gap: var(--gap);
-        height: 4rem;
+        height: 6.4rem;
         margin-top: var(--gap);
         align-items: stretch;
         justify-content: stretch;
@@ -60,10 +60,10 @@
 
     .model {
         position: relative;
-        padding: 1rem;
+        padding: 1.6rem;
         font-weight: var(--text-bold);
-        box-shadow: inset 0 0 1rem 0 var(--color-gray-800);
-        min-width: 15rem;
+        box-shadow: inset 0 0 1.6rem 0 var(--color-gray-800);
+        min-width: 24rem;
         display: flex;
         align-items: center;
         transition: background-color .5s, box-shadow .5s;
@@ -79,10 +79,10 @@
         opacity: .3;
     }
     .model svg {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: currentColor;
-        margin-right: .5rem;
+        margin-right: 0.8rem;
     }
     .model .overlay {
         position: absolute;
@@ -94,7 +94,7 @@
         align-items: center;
         justify-content: center;
         color: var(--color-black);
-        font-size: 1.5rem;
+        font-size: 2.4rem;
         font-weight: var(--text-bold);
     }
     .model .name {
@@ -102,6 +102,6 @@
     }
     .model .loader {
         --color: var(--color-neutral);
-        height: 1.5rem;
+        height: 2.4rem;
     }
 </style>

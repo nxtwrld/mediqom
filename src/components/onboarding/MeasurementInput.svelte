@@ -180,7 +180,7 @@
     }
 
     .measurement-label {
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary);
     }
 
@@ -196,7 +196,7 @@
 
     .input input {
         width: 100%;
-        padding-right: 3rem;
+        padding-right: 4.8rem;
     }
 
     .input-unit {
@@ -204,7 +204,7 @@
         right: var(--ui-pad-medium);
         top: 50%;
         transform: translateY(-50%);
-        font-size: 0.8rem;
+        font-size: 1.2rem;
         color: var(--color-text-secondary);
         pointer-events: none;
     }

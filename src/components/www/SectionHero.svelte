@@ -38,44 +38,44 @@
 		align-items: center;
 		justify-content: center;
 		text-align: center;
-		padding: 2rem;
+		padding: 3.2rem;
 		position: relative;
 	}
 
 	.hero-content {
-		max-width: 700px;
+		max-width: 70rem;
 		z-index: 1;
 	}
 
 	.hero-logo {
-		width: clamp(4rem, 12vw, 7rem);
-		height: clamp(4rem, 12vw, 7rem);
-		margin-bottom: 1rem;
+		width: clamp(6.4rem, 12vw, 11.2rem);
+		height: clamp(6.4rem, 12vw, 11.2rem);
+		margin-bottom: 1.6rem;
 		color: gray;
 	}
 
 	.hero-title {
 		font-family: 'Baloo Thambi 2';
-		font-size: clamp(3rem, 8vw, 5.5rem);
+		font-size: clamp(4.8rem, 8vw, 8.8rem);
 		font-weight: 600;
 		color: var(--www-text, #1a1a2e);
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.8rem;
 		line-height: 1.1;
 		letter-spacing: -0.02em;
 	}
 
 	.hero-motto {
-		font-size: clamp(1.25rem, 3vw, 1.75rem);
+		font-size: clamp(2rem, 3vw, 2.8rem);
 		color: var(--www-text, #1a1a2e);
-		margin: 0 0 0.75rem;
+		margin: 0 0 1.2rem;
 		font-weight: 400;
 		line-height: 1.3;
 	}
 
 	.hero-sub {
-		font-size: clamp(1rem, 2vw, 1.2rem);
+		font-size: clamp(1.6rem, 2vw, 2rem);
 		color: var(--www-text-secondary, #555);
-		margin: 0 0 2.5rem;
+		margin: 0 0 4rem;
 		line-height: 1.4;
 	}
 
@@ -83,14 +83,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 1.5rem;
+		gap: 2.4rem;
 	}
 
 	.cta-button {
 		display: inline-block;
-		padding: 0.875rem 2.5rem;
-		border-radius: 2rem;
-		font-size: 1.1rem;
+		padding: 1.4rem 4rem;
+		border-radius: 3.2rem;
+		font-size: 1.8rem;
 		font-weight: 600;
 		text-decoration: none;
 		transition: all 0.3s ease;
@@ -102,18 +102,18 @@
 	}
 
 	.cta-button.-primary:hover {
-		transform: translateY(-2px);
+		transform: translateY(-0.2rem);
 		box-shadow: 0 8px 24px rgba(22, 211, 221, 0.3);
 	}
 
 	.store-badges {
 		display: flex;
-		gap: 1rem;
+		gap: 1.6rem;
 		align-items: center;
 	}
 
 	.store-badge img {
-		height: 40px;
+		height: 4rem;
 		opacity: 0.8;
 		transition: opacity 0.2s;
 	}
@@ -124,7 +124,7 @@
 
 	@media (max-width: 768px) {
 		.section-hero {
-			padding: 1.5rem;
+			padding: 2.4rem;
 		}
 	}
 </style>

@@ -203,7 +203,7 @@
         justify-content: flex-start;
         width: 100%;
         overflow-x: auto;
-        height: 7rem;
+        height: 11.2rem;
         margin-bottom: var(--gap);
         background-color: rgba(21, 21, 21, 0.7);
          }
@@ -211,9 +211,9 @@
     .apps :global(> button),
     .apps :global(> .popover-wrapper > button) {
         display: inline-block;
-        width: 7rem;
+        width: 11.2rem;
         height: 100%;
-        padding: 0.5rem;
+        padding: 0.8rem;
         text-align: center;
         color: #FFF;
         transition: all .2s ease-in-out;
@@ -223,11 +223,11 @@
     .app-credits {
         position: absolute;
         border-radius: var(--radius-16);
-        top: .5rem;
-        right: .5rem;
-        font-size: .8rem;
+        top: 0.8rem;
+        right: 0.8rem;
+        font-size: 1.2rem;
         background-color: var(--color-highlight);
-        padding: .2rem .5rem
+        padding: 0.3rem 0.8rem
     }
     @media (hover: hover) {
         .apps :global(> button:hover),
@@ -239,22 +239,22 @@
 
 
     .window {
-        min-width: 20rem;
-        max-width: calc(100vw - 2rem);
+        min-width: 32rem;
+        max-width: calc(100vw - 3.2rem);
     }
 
     .download-item {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 1rem;
         width: 100%;
-        padding: 0.55rem 1rem;
+        padding: 0.8rem 1.6rem;
         text-align: left;
         color: var(--color-text-primary);
         background: none;
         border: none;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 1.4rem;
         white-space: nowrap;
         border-radius: var(--ui-radius-small);
     }
@@ -264,7 +264,7 @@
     }
 
     .download-item-icon {
-        width: 1.2rem;
+        width: 2rem;
         text-align: center;
         flex-shrink: 0;
     }

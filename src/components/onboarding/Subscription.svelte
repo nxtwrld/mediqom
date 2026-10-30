@@ -67,7 +67,7 @@
 
 <style>
     .cards {
-        gap: 1rem;
+        gap: 1.6rem;
         align-items: stretch;
         justify-content: stretch;
         flex-wrap: wrap;
@@ -76,7 +76,7 @@
     .card {
         background-color: var(--color-white);
         border-radius: var(--radius-16);
-        padding: 1rem;
+        padding: 1.6rem;
         width: 100%;
         height: 100%;
         align-items: space-between;
@@ -87,7 +87,7 @@
     }
 
     .card .h3 {
-        margin: 0 0 1rem;
+        margin: 0 0 1.6rem;
     }
 
     .details {

@@ -209,7 +209,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: .5rem;
+        gap: 0.8rem;
     }
     /* Unused - no .flex class in template
     .flex > select {
@@ -227,7 +227,7 @@
     .contact-item > button {
         width: var(--input-height);
         height: var(--input-height);
-        padding: .5rem;
+        padding: 0.8rem;
     }
 
     svg {
@@ -236,7 +236,7 @@
     }
 
     .form-block {
-        margin: 1rem 0;
+        margin: 1.6rem 0;
     }
 
     /* Unused - no .tabs-head class in template

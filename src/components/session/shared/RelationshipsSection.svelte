@@ -119,12 +119,12 @@
 
 <style>
     .info-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.4rem;
     }
 
     .info-section h4 {
-        margin: 0 0 0.75rem;
-        font-size: 1rem;
+        margin: 0 0 1.2rem;
+        font-size: 1.6rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
     }
@@ -132,7 +132,7 @@
     .relationships {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.6rem;
     }
 
     .relationship-item {
@@ -145,8 +145,8 @@
     .relationship-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem;
+        gap: 0.8rem;
+        padding: 0.8rem;
         background: var(--color-surface, #f8fafc);
     }
 
@@ -156,30 +156,30 @@
     }
 
     .relationship-strength {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-positive, #10b981);
         font-weight: 500;
     }
 
     .relationship-direction {
-        font-size: 0.75rem;
-        padding: 0.125rem 0.375rem;
+        font-size: 1.2rem;
+        padding: 0.2rem 0.6rem;
         background: var(--color-info-light, #dbeafe);
         color: var(--color-info, #3b82f6);
-        border-radius: 10px;
+        border-radius: 1rem;
     }
 
 
     .relationship-node-wrapper {
         cursor: pointer;
         transition: all 0.2s ease;
-        border-radius: 6px;
-        padding: 2px;
+        border-radius: 0.6rem;
+        padding: 0.2rem;
     }
 
     .relationship-node-wrapper:hover {
         background-color: var(--color-interactivity-light, #dbeafe);
-        transform: translateX(2px);
+        transform: translateX(0.2rem);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
@@ -190,18 +190,18 @@
 
     .relationship-fallback {
         font-family: monospace;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #6b7280);
-        padding: 0.5rem;
+        padding: 0.8rem;
         background: var(--color-surface, #f8fafc);
-        border-radius: 4px;
+        border-radius: 0.4rem;
         border: 1px dashed var(--color-border, #e2e8f0);
     }
 
     .relationship-reasoning {
         background: var(--color-surface, #f8fafc);
-        padding: .5rem;
-        font-size: 0.875rem;
+        padding: 0.8rem;
+        font-size: 1.4rem;
         color: var(--color-text-primary, #1f2937);
         line-height: 1.4;
     }

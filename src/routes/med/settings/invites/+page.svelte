@@ -297,7 +297,7 @@
 	}
 
 	.invite-status {
-		font-size: 0.875rem;
+		font-size: 1.4rem;
 		color: var(--color-text-secondary);
 	}
 

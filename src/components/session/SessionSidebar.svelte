@@ -130,7 +130,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 4px;
+        width: 0.4rem;
         height: 100%;
         background: transparent;
         cursor: col-resize;
@@ -149,10 +149,10 @@
         right: 0;
         left: 0;
         height: 60vh;
-        max-height: 400px;
+        max-height: 40rem;
         background: var(--color-surface, #fff);
         border-top: 1px solid var(--color-border, #e2e8f0);
-        border-radius: 12px 12px 0 0;
+        border-radius: 1.2rem 1.2rem 0 0;
         z-index: 50;
         display: flex;
         flex-direction: column;
@@ -172,19 +172,19 @@
     .mobile-sidebar-header {
         display: flex;
         justify-content: flex-end;
-        padding: 0.75rem 1rem;
+        padding: 1.2rem 1.6rem;
         border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
     .close-btn {
-        padding: 0.5rem;
+        padding: 0.8rem;
         border: none;
         background: transparent;
         color: var(--color-text-secondary, #6b7280);
         cursor: pointer;
-        border-radius: 4px;
+        border-radius: 0.4rem;
         transition: background-color 0.2s ease;
-        font-size: 1.25rem;
+        font-size: 2rem;
         line-height: 1;
         display: flex;
         align-items: center;
@@ -192,8 +192,8 @@
     }
 
     .close-btn svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 2rem;
+        height: 2rem;
         fill: currentColor;
     }
 

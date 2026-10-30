@@ -77,42 +77,42 @@
     .list-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 1rem;
+        gap: 0.8rem;
+        padding: 1.6rem;
         border-bottom: 1px solid var(--color-border, #e2e8f0);
     }
 
     .list-header h3 {
         margin: 0;
-        font-size: 1.125rem;
+        font-size: 1.8rem;
         font-weight: 600;
         color: var(--color-text-primary, #1f2937);
     }
 
     .count {
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         color: var(--color-text-secondary, #6b7280);
     }
 
     .list-content {
         flex: 1;
         overflow-y: auto;
-        padding: 1rem;
+        padding: 1.6rem;
     }
 
     .cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+        gap: 1.6rem;
     }
 
     .empty-state {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 200px;
+        height: 20rem;
         color: var(--color-text-secondary, #6b7280);
-        font-size: 0.875rem;
+        font-size: 1.4rem;
     }
 
     @media (max-width: 768px) {

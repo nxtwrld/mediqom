@@ -6,34 +6,34 @@
 }
 
 .h1 {
-  font-size: 1.8rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  margin: 1rem 0;
+  margin: 1.6rem 0;
 }
 .h2 {
-  font-size: 1.6rem;
+  font-size: 2.6rem;
   font-weight: 700;
-  margin: 1rem 0;
+  margin: 1.6rem 0;
 }
 .h3 {
-  font-size: 1.4rem;
+  font-size: 2.2rem;
   font-weight: 600;
-  margin: 1rem 0;
+  margin: 1.6rem 0;
 }
 .h4 {
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin: 0.75rem 0;
+  margin: 1.2rem 0;
 }
 .p {
-  line-height: 1.3rem;
-  margin: 0.5rem 0;
+  line-height: 2rem;
+  margin: 0.8rem 0;
 }
 
 .p > svg {
-  margin-right: 1rem;
-  width: 4rem;
-  height: 4rem;
+  margin-right: 1.6rem;
+  width: 6.4rem;
+  height: 6.4rem;
   float: left;
 }
 
@@ -55,19 +55,19 @@ strong {
 }
 @media screen and (max-width: 768px) {
   .h1 {
-    font-size: 1.5rem;
-    margin: 0.75rem 0;
+    font-size: 2.4rem;
+    margin: 1.2rem 0;
   }
   .h2 {
-    font-size: 1.5rem;
-    margin: 0.75rem 0;
+    font-size: 2.4rem;
+    margin: 1.2rem 0;
   }
   .h3 {
-    font-size: 1.25rem;
-    margin: 0.5rem 0;
+    font-size: 2rem;
+    margin: 0.8rem 0;
   }
   .h4 {
-    font-size: 1.1rem;
-    margin: 0.25rem 0;
+    font-size: 1.8rem;
+    margin: 0.4rem 0;
   }
 }
